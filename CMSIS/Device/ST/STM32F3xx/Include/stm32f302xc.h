@@ -2227,40 +2227,6 @@ typedef struct {
 } OB_TypeDef;
 
 
-typedef struct {
-    struct {
-        __IO uint32_t RDP[8];                    /*!< Read protection option byte */
-        __IO uint32_t nRDP[8];                   /*!< Read protection complemented option byte */
-    } RDP;                                   /*!<FLASH option byte Read protection,             Address offset: 0x00 */
-    struct {
-             uint32_t __RESERVED0[16];
-        __IO uint32_t USER[8];                   /*!< User option byte */
-        __IO uint32_t nUSER[8];                  /*!< User complemented option byte */
-    } USER;                                  /*!<FLASH option byte user options,                Address offset: 0x02 */
-         uint32_t __RESERVED0[16];           /*!< Reserved,                                                     0x04 */
-         uint32_t __RESERVED1[16];           /*!< Reserved,                                                     0x06 */
-    struct {
-        __IO uint32_t WRP0[8];                   /*!< Flash memory write protection option bytes */
-        __IO uint32_t nWRP0[8];                  /*!< Flash memory write protection complemented option bytes */
-    } WRP0;                                  /*!<FLASH option byte write protection 0,          Address offset: 0x08 */
-    struct {
-             uint32_t __RESERVED0[16];
-        __IO uint32_t WRP1[8];                   /*!< Flash memory write protection option bytes */
-        __IO uint32_t nWRP1[8];                  /*!< Flash memory write protection complemented option bytes */
-    } WRP1;                                  /*!<FLASH option byte write protection 1,          Address offset: 0x0C */
-    struct {
-        __IO uint32_t WRP2[8];                   /*!< Flash memory write protection option bytes */
-        __IO uint32_t nWRP2[8];                  /*!< Flash memory write protection complemented option bytes */
-    } WRP2;                                  /*!<FLASH option byte write protection 2,          Address offset: 0x10 */
-    struct {
-             uint32_t __RESERVED0[16];
-        __IO uint32_t WRP3[8];                   /*!< Flash memory write protection option bytes */
-        __IO uint32_t nWRP3[8];                  /*!< Flash memory write protection complemented option bytes */
-    } WRP3;                                  /*!<FLASH option byte write protection 3,          Address offset: 0x12 */
-} OB_BitBand_TypeDef;
-
-
-
 /**
   * @brief General Purpose I/O
   */
@@ -5763,32 +5729,27 @@ typedef struct {
 #define ADC1_2_COMMON       ((ADC_Common_TypeDef *) ADC1_2_COMMON_BASE)
 #define USB                 ((USB_TypeDef *) USB_BASE)
 
-#define ADC1_2_COMMON_BB     ((ADC_Common_BitBand_TypeDef *) PERIPH_BB(ADC1_2_COMMON_BASE))
-#define ADC_BB(inst)         ((ADC_BitBand_TypeDef *) PERIPH_BB(inst))
-#define CAN_BB(inst)         ((CAN_BitBand_TypeDef *) PERIPH_BB(inst))
-#define COMP_BB(inst)        ((COMP_BitBand_TypeDef *) PERIPH_BB(inst))
-#define CRC_BB               ((CRC_BitBand_TypeDef *) PERIPH_BB(CRC_BASE))
-#define DAC_BB(inst)         ((DAC_BitBand_TypeDef *) PERIPH_BB(inst))
-#define DBGMCU_BB            ((DBGMCU_BitBand_TypeDef *) PERIPH_BB(DBGMCU_BASE))
-#define DMA_Channel_BB(inst) ((DMA_Channel_BitBand_TypeDef *) PERIPH_BB(inst))
-#define DMA_BB(inst)         ((DMA_BitBand_TypeDef *) PERIPH_BB(inst))
-#define EXTI_BB              ((EXTI_BitBand_TypeDef *) PERIPH_BB(EXTI_BASE))
-#define FLASH_BB             ((FLASH_BitBand_TypeDef *) PERIPH_BB(FLASH_R_BASE))
-#define GPIO_BB(inst)        ((GPIO_BitBand_TypeDef *) PERIPH_BB(inst))
-#define I2C_BB(inst)         ((I2C_BitBand_TypeDef *) PERIPH_BB(inst))
-#define IWDG_BB              ((IWDG_BitBand_TypeDef *) PERIPH_BB(IWDG_BASE))
-#define OB_BB                ((OB_BitBand_TypeDef *) PERIPH_BB(OB_BASE))
-#define OPAMP_BB(inst)       ((OPAMP_BitBand_TypeDef *) PERIPH_BB(inst))
-#define PWR_BB               ((PWR_BitBand_TypeDef *) PERIPH_BB(PWR_BASE))
-#define RCC_BB               ((RCC_BitBand_TypeDef *) PERIPH_BB(RCC_BASE))
-#define RTC_BB               ((RTC_BitBand_TypeDef *) PERIPH_BB(RTC_BASE))
-#define SPI_BB(inst)         ((SPI_BitBand_TypeDef *) PERIPH_BB(inst))
-#define SYSCFG_BB            ((SYSCFG_BitBand_TypeDef *) PERIPH_BB(SYSCFG_BASE))
-#define TIM_BB(inst)         ((TIM_BitBand_TypeDef *) PERIPH_BB(inst))
-#define TSC_BB               ((TSC_BitBand_TypeDef *) PERIPH_BB(TSC_BASE))
-#define USART_BB(inst)       ((USART_BitBand_TypeDef *) PERIPH_BB(inst))
-#define USB_BB               ((USB_BitBand_TypeDef *) PERIPH_BB(USB_BASE))
-#define WWDG_BB              ((WWDG_BitBand_TypeDef *) PERIPH_BB(WWDG_BASE))
+#define CAN_BB(inst)              ((CAN_BitBand_TypeDef *) PERIPH_BB(inst))
+#define COMP_BB(inst)             ((COMP_BitBand_TypeDef *) PERIPH_BB(inst))
+#define CRC_BB                    ((CRC_BitBand_TypeDef *) PERIPH_BB(CRC_BASE))
+#define DAC_BB(inst)              ((DAC_BitBand_TypeDef *) PERIPH_BB(inst))
+#define DMA_Channel_BB(inst)      ((DMA_Channel_BitBand_TypeDef *) PERIPH_BB(inst))
+#define DMA_BB(inst)              ((DMA_BitBand_TypeDef *) PERIPH_BB(inst))
+#define EXTI_BB                   ((EXTI_BitBand_TypeDef *) PERIPH_BB(EXTI_BASE))
+#define FLASH_BB                  ((FLASH_BitBand_TypeDef *) PERIPH_BB(FLASH_R_BASE))
+#define I2C_BB(inst)              ((I2C_BitBand_TypeDef *) PERIPH_BB(inst))
+#define IWDG_BB                   ((IWDG_BitBand_TypeDef *) PERIPH_BB(IWDG_BASE))
+#define OPAMP_BB(inst)            ((OPAMP_BitBand_TypeDef *) PERIPH_BB(inst))
+#define PWR_BB                    ((PWR_BitBand_TypeDef *) PERIPH_BB(PWR_BASE))
+#define RCC_BB                    ((RCC_BitBand_TypeDef *) PERIPH_BB(RCC_BASE))
+#define RTC_BB                    ((RTC_BitBand_TypeDef *) PERIPH_BB(RTC_BASE))
+#define SPI_BB(inst)              ((SPI_BitBand_TypeDef *) PERIPH_BB(inst))
+#define SYSCFG_BB                 ((SYSCFG_BitBand_TypeDef *) PERIPH_BB(SYSCFG_BASE))
+#define TIM_BB(inst)              ((TIM_BitBand_TypeDef *) PERIPH_BB(inst))
+#define TSC_BB                    ((TSC_BitBand_TypeDef *) PERIPH_BB(TSC_BASE))
+#define USART_BB(inst)            ((USART_BitBand_TypeDef *) PERIPH_BB(inst))
+#define USB_BB                    ((USB_BitBand_TypeDef *) PERIPH_BB(USB_BASE))
+#define WWDG_BB                   ((WWDG_BitBand_TypeDef *) PERIPH_BB(WWDG_BASE))
 /**
   * @}
   */
