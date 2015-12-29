@@ -1096,21 +1096,21 @@ typedef struct {
 typedef struct {
     union {
         struct {
-            __IO uint32_t COMPxEN : 1;               /*!< COMPx enable */
-            __IO uint32_t COMPxSW1 : 1;              /*!< COMP1 SW1 switch control */
-            __IO uint32_t COMPxMODE : 2;             /*!< COMPx power mode */
-            __IO uint32_t COMPxINSEL : 3;            /*!< COMPx inverting input select */
-            __IO uint32_t COMPxNONINSEL : 1;         /*!< COMPx non inverting input select */
+            __IO uint32_t EN : 1;               /*!< COMPx enable */
+            __IO uint32_t SW1 : 1;              /*!< COMP1 SW1 switch control */
+            __IO uint32_t MODE : 2;             /*!< COMPx power mode */
+            __IO uint32_t INSEL : 3;            /*!< COMPx inverting input select */
+            __IO uint32_t NONINSEL : 1;         /*!< COMPx non inverting input select */
                  uint32_t __RESERVED0 : 1;
-            __IO uint32_t COMPxWNDWEN : 1;           /*!< COMPx window mode enable */
-            __IO uint32_t COMPxOUTSEL : 4;           /*!< COMPx output select */
+            __IO uint32_t WNDWEN : 1;           /*!< COMPx window mode enable */
+            __IO uint32_t OUTSEL : 4;           /*!< COMPx output select */
                  uint32_t __RESERVED1 : 1;
-            __IO uint32_t COMPxPOL : 1;              /*!< COMPx output polarity */
-            __IO uint32_t COMPxHYST : 2;             /*!< COMPx hysteresis */
-            __IO uint32_t COMPxBLANKING : 2;         /*!< COMPx blanking */
+            __IO uint32_t POL : 1;              /*!< COMPx output polarity */
+            __IO uint32_t HYST : 2;             /*!< COMPx hysteresis */
+            __IO uint32_t BLANKING : 2;         /*!< COMPx blanking */
                  uint32_t __RESERVED2 : 10;
-            __IO uint32_t COMPxOUT : 1;              /*!< COMPx output level */
-            __IO uint32_t COMPxLOCK : 1;             /*!< COMPx lock */
+            __IO uint32_t OUT : 1;              /*!< COMPx output level */
+            __IO uint32_t LOCK : 1;             /*!< COMPx lock */
         } b;
         __IO uint32_t w;
     } CSR;                                   /*!< Comparator control Status register, Address offset: 0x00 */
@@ -1119,21 +1119,21 @@ typedef struct {
 
 typedef struct {
     struct {
-        __IO uint32_t COMPxEN;                   /*!< COMPx enable */
-        __IO uint32_t COMPxSW1;                  /*!< COMP1 SW1 switch control */
-        __IO uint32_t COMPxMODE[2];              /*!< COMPx power mode */
-        __IO uint32_t COMPxINSEL[3];             /*!< COMPx inverting input select */
-        __IO uint32_t COMPxNONINSEL;             /*!< COMPx non inverting input select */
+        __IO uint32_t EN;                   /*!< COMPx enable */
+        __IO uint32_t SW1;                  /*!< COMP1 SW1 switch control */
+        __IO uint32_t MODE[2];              /*!< COMPx power mode */
+        __IO uint32_t INSEL[3];             /*!< COMPx inverting input select */
+        __IO uint32_t NONINSEL;             /*!< COMPx non inverting input select */
              uint32_t __RESERVED0;
-        __IO uint32_t COMPxWNDWEN;               /*!< COMPx window mode enable */
-        __IO uint32_t COMPxOUTSEL[4];            /*!< COMPx output select */
+        __IO uint32_t WNDWEN;               /*!< COMPx window mode enable */
+        __IO uint32_t OUTSEL[4];            /*!< COMPx output select */
              uint32_t __RESERVED1;
-        __IO uint32_t COMPxPOL;                  /*!< COMPx output polarity */
-        __IO uint32_t COMPxHYST[2];              /*!< COMPx hysteresis */
-        __IO uint32_t COMPxBLANKING[2];          /*!< COMPx blanking */
+        __IO uint32_t POL;                  /*!< COMPx output polarity */
+        __IO uint32_t HYST[2];              /*!< COMPx hysteresis */
+        __IO uint32_t BLANKING[2];          /*!< COMPx blanking */
              uint32_t __RESERVED2[10];
-        __IO uint32_t COMPxOUT;                  /*!< COMPx output level */
-        __IO uint32_t COMPxLOCK;                 /*!< COMPx lock */
+        __IO uint32_t OUT;                  /*!< COMPx output level */
+        __IO uint32_t LOCK;                 /*!< COMPx lock */
     } CSR;                                   /*!< Comparator control Status register, Address offset: 0x00 */
 } COMP_BitBand_TypeDef;
 

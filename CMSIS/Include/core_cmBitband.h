@@ -73,7 +73,7 @@ extern "C"
  \note		The input address must be within the valid peripheral bit-band memory range:
  0x40000000 - 0x400FFFFF
  */
-#define PERIPH_BB(Address)		((uint32_t *)(0x42000000 | (((uint32_t)(Address) & 0x000FFFFF) << 5)))
+#define PERIPH_BB(Address)		((void *)(0x42000000 | (((uint32_t)(Address) & 0x000FFFFF) << 5)))
 
 /** \brief  SRAM bit-band alias address generation function
 
