@@ -3104,7 +3104,9 @@ typedef struct {
     } APB1ENR;                               /*!< RCC APB1 peripheral clock enable register,                   Address offset: 0x1C */
     union {
         struct {
-            __IO uint32_t LSE : 3;                   /*!< External Low Speed oscillator [2:0] bits */
+            __IO uint32_t LSEON : 1;                 /*!< External Low Speed oscillator enable */
+            __IO uint32_t LSERDY : 1;                /*!< External Low Speed oscillator Ready */
+            __IO uint32_t LSEBYP : 1;                /*!< External Low Speed oscillator Bypass */
             __IO uint32_t LSEDRV : 2;                /*!< LSEDRV[1:0] bits (LSE Osc. drive capability) */
                  uint32_t __RESERVED0 : 3;
             __IO uint32_t RTCSEL : 2;                /*!< RTCSEL[1:0] bits (RTC clock source selection) */
@@ -3334,7 +3336,9 @@ typedef struct {
              uint32_t __RESERVED6[2];
     } APB1ENR;                               /*!< RCC APB1 peripheral clock enable register,                   Address offset: 0x1C */
     struct {
-        __IO uint32_t LSE[3];                    /*!< External Low Speed oscillator [2:0] bits */
+        __IO uint32_t LSEON;                     /*!< External Low Speed oscillator enable */
+        __IO uint32_t LSERDY;                    /*!< External Low Speed oscillator Ready */
+        __IO uint32_t LSEBYP;                    /*!< External Low Speed oscillator Bypass */
         __IO uint32_t LSEDRV[2];                 /*!< LSEDRV[1:0] bits (LSE Osc. drive capability) */
              uint32_t __RESERVED0[3];
         __IO uint32_t RTCSEL[2];                 /*!< RTCSEL[1:0] bits (RTC clock source selection) */
