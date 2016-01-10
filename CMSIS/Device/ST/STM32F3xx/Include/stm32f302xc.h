@@ -1104,7 +1104,7 @@ typedef struct {
     union {
         struct {
             __IO uint32_t EN : 1;               /*!< COMPx enable */
-            __IO uint32_t SW1 : 1;              /*!< COMP1 SW1 switch control */
+            __IO uint32_t SW1 : 1;              /*!< COMPx SW1 switch control */
             __IO uint32_t MODE : 2;             /*!< COMPx power mode */
             __IO uint32_t INSEL : 3;            /*!< COMPx inverting input select */
             __IO uint32_t NONINSEL : 1;         /*!< COMPx non inverting input select */
@@ -1126,21 +1126,21 @@ typedef struct {
 
 typedef struct {
     struct {
-        __IO uint32_t EN;                   /*!< COMPx enable */
-        __IO uint32_t SW1;                  /*!< COMP1 SW1 switch control */
-        __IO uint32_t MODE[2];              /*!< COMPx power mode */
-        __IO uint32_t INSEL[3];             /*!< COMPx inverting input select */
-        __IO uint32_t NONINSEL;             /*!< COMPx non inverting input select */
+        __IO uint32_t EN;                       /*!< COMPx enable */
+        __IO uint32_t SW1;                      /*!< COMPx SW1 switch control */
+        __IO uint32_t MODE[2];                  /*!< COMPx power mode */
+        __IO uint32_t INSEL[3];                 /*!< COMPx inverting input select */
+        __IO uint32_t NONINSEL;                 /*!< COMPx non inverting input select */
              uint32_t __RESERVED0;
-        __IO uint32_t WNDWEN;               /*!< COMPx window mode enable */
-        __IO uint32_t OUTSEL[4];            /*!< COMPx output select */
+        __IO uint32_t WNDWEN;                   /*!< COMPx window mode enable */
+        __IO uint32_t OUTSEL[4];                /*!< COMPx output select */
              uint32_t __RESERVED1;
-        __IO uint32_t POL;                  /*!< COMPx output polarity */
-        __IO uint32_t HYST[2];              /*!< COMPx hysteresis */
-        __IO uint32_t BLANKING[2];          /*!< COMPx blanking */
+        __IO uint32_t POL;                      /*!< COMPx output polarity */
+        __IO uint32_t HYST[2];                  /*!< COMPx hysteresis */
+        __IO uint32_t BLANKING[2];              /*!< COMPx blanking */
              uint32_t __RESERVED2[10];
-        __IO uint32_t OUT;                  /*!< COMPx output level */
-        __IO uint32_t LOCK;                 /*!< COMPx lock */
+        __IO uint32_t OUT;                      /*!< COMPx output level */
+        __IO uint32_t LOCK;                     /*!< COMPx lock */
     } CSR;                                   /*!< Comparator control Status register, Address offset: 0x00 */
 } COMP_BitBand_TypeDef;
 
@@ -2957,8 +2957,7 @@ typedef struct {
             __IO uint32_t MCO : 3;                   /*!< MCO[2:0] bits (Microcontroller Clock Output) */
                  uint32_t __RESERVED1 : 1;
             __IO uint32_t MCOF : 1;                  /*!< Microcontroller Clock Output Flag */
-                 uint32_t __RESERVED2 : 2;
-            __IO uint32_t PLLNODIV : 1;              /*!< Do not divide PLL to MCO */
+                 uint32_t __RESERVED2 : 3;
         } b;
         __IO uint32_t w;
     } CFGR;                                  /*!< RCC clock configuration register,                            Address offset: 0x04 */
@@ -3210,8 +3209,7 @@ typedef struct {
         __IO uint32_t MCO[3];                    /*!< MCO[2:0] bits (Microcontroller Clock Output) */
              uint32_t __RESERVED1;
         __IO uint32_t MCOF;                      /*!< Microcontroller Clock Output Flag */
-             uint32_t __RESERVED2[2];
-        __IO uint32_t PLLNODIV;                  /*!< Do not divide PLL to MCO */
+             uint32_t __RESERVED2[3];
     } CFGR;                                  /*!< RCC clock configuration register,                            Address offset: 0x04 */
     struct {
         __IO uint32_t LSIRDYF;                   /*!< LSI Ready Interrupt flag */
@@ -4090,7 +4088,7 @@ typedef struct {
     } CR2;                                   /*!< TIM control register 2,              Address offset: 0x04 */
     union {
         struct {
-            __IO uint32_t SMS : 17;                  /*!<SMS[2:0] bits (Slave mode selection) */
+            __IO uint32_t SMS : 3;                   /*!<SMS[2:0] bits (Slave mode selection) */
             __IO uint32_t OCCS : 1;                  /*!< OCREF clear selection */
             __IO uint32_t TS : 3;                    /*!<TS[2:0] bits (Trigger selection) */
             __IO uint32_t MSM : 1;                   /*!<Master/slave mode */
@@ -4162,63 +4160,53 @@ typedef struct {
     } EGR;                                   /*!< TIM event generation register,       Address offset: 0x14 */
     union {
         union {
-            struct {
-                __IO uint32_t C1S : 2;                   /*!< CC1S[1:0] bits (Capture/Compare 1 Selection) */
-                __IO uint32_t C1FE : 1;                  /*!< Output Compare 1 Fast enable */
-                __IO uint32_t C1PE : 1;                  /*!< Output Compare 1 Preload enable */
-                __IO uint32_t C1M : 3;                   /*!< OC1M[2:0] bits (Output Compare 1 Mode) */
-                __IO uint32_t C1CE : 1;                  /*!< Output Compare 1 Clear Enable */
-                __IO uint32_t C2S : 2;                   /*!< CC2S[1:0] bits (Capture/Compare 2 Selection) */
-                __IO uint32_t C2FE : 1;                  /*!< Output Compare 2 Fast enable */
-                __IO uint32_t C2PE : 1;                  /*!< Output Compare 2 Preload enable */
-                __IO uint32_t C2M : 3;                   /*!< OC2M[2:0] bits (Output Compare 2 Mode) */
-                __IO uint32_t C2CE : 1;                  /*!< Output Compare 2 Clear Enable */
-                     uint32_t __RESERVED0 : 16;
-            } b;
-            __IO uint32_t w;
+			__IO uint32_t C1S : 2;                   /*!< CC1S[1:0] bits (Capture/Compare 1 Selection) */
+			__IO uint32_t C1FE : 1;                  /*!< Output Compare 1 Fast enable */
+			__IO uint32_t C1PE : 1;                  /*!< Output Compare 1 Preload enable */
+			__IO uint32_t C1M : 3;                   /*!< OC1M[2:0] bits (Output Compare 1 Mode) */
+			__IO uint32_t C1CE : 1;                  /*!< Output Compare 1 Clear Enable */
+			__IO uint32_t C2S : 2;                   /*!< CC2S[1:0] bits (Capture/Compare 2 Selection) */
+			__IO uint32_t C2FE : 1;                  /*!< Output Compare 2 Fast enable */
+			__IO uint32_t C2PE : 1;                  /*!< Output Compare 2 Preload enable */
+			__IO uint32_t C2M : 3;                   /*!< OC2M[2:0] bits (Output Compare 2 Mode) */
+			__IO uint32_t C2CE : 1;                  /*!< Output Compare 2 Clear Enable */
+				 uint32_t __RESERVED0 : 16;
         } OC;                                    /*!< TIM CCMR register Output Compare configuration mode */
         union {
-            struct {
-                __IO uint32_t C1S : 2;                   /*!< CC1S[1:0] bits (Capture/Compare 1 Selection) */
-                __IO uint32_t C1PSC : 2;                 /*!< IC1PSC[1:0] bits (Input Capture 1 Prescaler) */
-                __IO uint32_t C1F : 4;                   /*!< IC1F[3:0] bits (Input Capture 1 Filter) */
-                __IO uint32_t C2S : 2;                   /*!< CC2S[1:0] bits (Capture/Compare 2 Selection) */
-                __IO uint32_t C2PSC : 2;                 /*!< IC2PSC[1:0] bits (Input Capture 2 Prescaler) */
-                __IO uint32_t C2F : 4;                   /*!< IC2F[3:0] bits (Input Capture 2 Filter) */
-                     uint32_t __RESERVED0 : 16;
-            } b;
-            __IO uint32_t w;
+			__IO uint32_t C1S : 2;                   /*!< CC1S[1:0] bits (Capture/Compare 1 Selection) */
+			__IO uint32_t C1PSC : 2;                 /*!< IC1PSC[1:0] bits (Input Capture 1 Prescaler) */
+			__IO uint32_t C1F : 4;                   /*!< IC1F[3:0] bits (Input Capture 1 Filter) */
+			__IO uint32_t C2S : 2;                   /*!< CC2S[1:0] bits (Capture/Compare 2 Selection) */
+			__IO uint32_t C2PSC : 2;                 /*!< IC2PSC[1:0] bits (Input Capture 2 Prescaler) */
+			__IO uint32_t C2F : 4;                   /*!< IC2F[3:0] bits (Input Capture 2 Filter) */
+				 uint32_t __RESERVED0 : 16;
         } IC;                                    /*!< TIM CCMR register Input Capture configuration mode */
+        __IO uint32_t w;
     } CCMR1;                                 /*!< TIM capture/compare mode register 1, Address offset: 0x18 */
     union {
         union {
-            struct {
-                __IO uint32_t C3S : 2;                   /*!< CC3S[1:0] bits (Capture/Compare 3 Selection) */
-                __IO uint32_t C3FE : 1;                  /*!< Output Compare 3 Fast enable */
-                __IO uint32_t C3PE : 1;                  /*!< Output Compare 3 Preload enable */
-                __IO uint32_t C3M : 3;                   /*!< OC3M[2:0] bits (Output Compare 3 Mode) */
-                __IO uint32_t C3CE : 1;                  /*!< Output Compare 3 Clear Enable */
-                __IO uint32_t C4S : 2;                   /*!< CC4S[1:0] bits (Capture/Compare 4 Selection) */
-                __IO uint32_t C4FE : 1;                  /*!< Output Compare 4 Fast enable */
-                __IO uint32_t C4PE : 1;                  /*!< Output Compare 4 Preload enable */
-                __IO uint32_t C4M : 3;                   /*!< OC4M[2:0] bits (Output Compare 4 Mode) */
-                __IO uint32_t C4CE : 1;                  /*!< Output Compare 4 Clear Enable */
-                     uint32_t __RESERVED0 : 16;
-            } b;
-            __IO uint32_t w;
+			__IO uint32_t C3S : 2;                   /*!< CC3S[1:0] bits (Capture/Compare 3 Selection) */
+			__IO uint32_t C3FE : 1;                  /*!< Output Compare 3 Fast enable */
+			__IO uint32_t C3PE : 1;                  /*!< Output Compare 3 Preload enable */
+			__IO uint32_t C3M : 3;                   /*!< OC3M[2:0] bits (Output Compare 3 Mode) */
+			__IO uint32_t C3CE : 1;                  /*!< Output Compare 3 Clear Enable */
+			__IO uint32_t C4S : 2;                   /*!< CC4S[1:0] bits (Capture/Compare 4 Selection) */
+			__IO uint32_t C4FE : 1;                  /*!< Output Compare 4 Fast enable */
+			__IO uint32_t C4PE : 1;                  /*!< Output Compare 4 Preload enable */
+			__IO uint32_t C4M : 3;                   /*!< OC4M[2:0] bits (Output Compare 4 Mode) */
+			__IO uint32_t C4CE : 1;                  /*!< Output Compare 4 Clear Enable */
+				 uint32_t __RESERVED0 : 16;
         } OC;                                    /*!< TIM CCMR register Output Compare configuration mode */
         union {
-            struct {
-                __IO uint32_t C3S : 2;                   /*!< CC3S[1:0] bits (Capture/Compare 3 Selection) */
-                __IO uint32_t C3PSC : 2;                 /*!< IC3PSC[1:0] bits (Input Capture 3 Prescaler) */
-                __IO uint32_t C3F : 4;                   /*!< IC3F[3:0] bits (Input Capture 3 Filter) */
-                __IO uint32_t C4S : 2;                   /*!< CC4S[1:0] bits (Capture/Compare 4 Selection) */
-                __IO uint32_t C4PSC : 2;                 /*!< IC4PSC[1:0] bits (Input Capture 4 Prescaler) */
-                __IO uint32_t C4F : 4;                   /*!< IC4F[3:0] bits (Input Capture 4 Filter) */
-                     uint32_t __RESERVED0 : 16;
-            } b;
-            __IO uint32_t w;
+			__IO uint32_t C3S : 2;                   /*!< CC3S[1:0] bits (Capture/Compare 3 Selection) */
+			__IO uint32_t C3PSC : 2;                 /*!< IC3PSC[1:0] bits (Input Capture 3 Prescaler) */
+			__IO uint32_t C3F : 4;                   /*!< IC3F[3:0] bits (Input Capture 3 Filter) */
+			__IO uint32_t C4S : 2;                   /*!< CC4S[1:0] bits (Capture/Compare 4 Selection) */
+			__IO uint32_t C4PSC : 2;                 /*!< IC4PSC[1:0] bits (Input Capture 4 Prescaler) */
+			__IO uint32_t C4F : 4;                   /*!< IC4F[3:0] bits (Input Capture 4 Filter) */
+				 uint32_t __RESERVED0 : 16;
         } IC;                                    /*!< TIM CCMR register Input Capture configuration mode */
+        __IO uint32_t w;
     } CCMR2;                                 /*!< TIM capture/compare mode register 2, Address offset: 0x1C */
     union {
         struct {
@@ -4331,12 +4319,12 @@ typedef struct {
                  uint32_t __RESERVED0 : 2;
             __IO uint32_t OC5FE : 1;                 /*!<Output Compare 5 Fast enable */
             __IO uint32_t OC5PE : 1;                 /*!<Output Compare 5 Preload enable */
-            __IO uint32_t OC5M : 13;                 /*!<OC5M[2:0] bits (Output Compare 5 Mode) */
+            __IO uint32_t OC5M : 3;                  /*!<OC5M[2:0] bits (Output Compare 5 Mode) */
             __IO uint32_t OC5CE : 1;                 /*!<Output Compare 5 Clear Enable */
                  uint32_t __RESERVED1 : 2;
             __IO uint32_t OC6FE : 1;                 /*!<Output Compare 6 Fast enable */
             __IO uint32_t OC6PE : 1;                 /*!<Output Compare 6 Preload enable */
-            __IO uint32_t OC6M : 13;                 /*!<OC6M[2:0] bits (Output Compare 6 Mode) */
+            __IO uint32_t OC6M : 3;                  /*!<OC6M[2:0] bits (Output Compare 6 Mode) */
             __IO uint32_t OC6CE : 1;                 /*!<Output Compare 6 Clear Enable */
                  uint32_t __RESERVED2 : 16;
         } b;
@@ -4399,7 +4387,7 @@ typedef struct {
              uint32_t __RESERVED4[8];
     } CR2;                                   /*!< TIM control register 2,              Address offset: 0x04 */
     struct {
-        __IO uint32_t SMS[17];                   /*!<SMS[2:0] bits (Slave mode selection) */
+        __IO uint32_t SMS[3];                    /*!<SMS[2:0] bits (Slave mode selection) */
         __IO uint32_t OCCS;                      /*!< OCREF clear selection */
         __IO uint32_t TS[3];                     /*!<TS[2:0] bits (Trigger selection) */
         __IO uint32_t MSM;                       /*!<Master/slave mode */
@@ -4586,12 +4574,12 @@ typedef struct {
              uint32_t __RESERVED0[2];
         __IO uint32_t OC5FE;                     /*!<Output Compare 5 Fast enable */
         __IO uint32_t OC5PE;                     /*!<Output Compare 5 Preload enable */
-        __IO uint32_t OC5M[13];                  /*!<OC5M[2:0] bits (Output Compare 5 Mode) */
+        __IO uint32_t OC5M[3];                   /*!<OC5M[2:0] bits (Output Compare 5 Mode) */
         __IO uint32_t OC5CE;                     /*!<Output Compare 5 Clear Enable */
              uint32_t __RESERVED1[2];
         __IO uint32_t OC6FE;                     /*!<Output Compare 6 Fast enable */
         __IO uint32_t OC6PE;                     /*!<Output Compare 6 Preload enable */
-        __IO uint32_t OC6M[13];                  /*!<OC6M[2:0] bits (Output Compare 6 Mode) */
+        __IO uint32_t OC6M[3];                   /*!<OC6M[2:0] bits (Output Compare 6 Mode) */
         __IO uint32_t OC6CE;                     /*!<Output Compare 6 Clear Enable */
              uint32_t __RESERVED2[16];
     } CCMR3;                                 /*!< TIM capture/compare mode register 3, Address offset: 0x54 */
