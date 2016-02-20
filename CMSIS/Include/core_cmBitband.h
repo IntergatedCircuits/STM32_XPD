@@ -3,7 +3,7 @@
   * @file    core_cmBitband.h
   * @author  Benedek Kupper
   * @version V1.1
-  * @date    17-November-2015
+  * @date    2015-11-17
   * @brief   Cortex M cores Bit-Band Memory Region Access Header File.
   *
   *          This file provides macros and inline functions to
