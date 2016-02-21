@@ -29,7 +29,7 @@
 /** @addtogroup RCC
  * @{ */
 
-/** @addtogroup RCC_Core_Clocks RCC Core
+/** @defgroup RCC_Core_Clocks RCC Core
  * @{ */
 
 /** @defgroup RCC_Core_Exported_Types RCC Core Exported Types

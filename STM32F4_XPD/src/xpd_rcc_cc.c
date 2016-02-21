@@ -30,7 +30,7 @@
 /** @addtogroup RCC
  * @{ */
 
-/** @defgroup RCC_Core_Clocks RCC Core
+/** @addtogroup RCC_Core_Clocks RCC Core
  * @{ */
 
 /* converts the general clock divider to the selected clock type's format */
