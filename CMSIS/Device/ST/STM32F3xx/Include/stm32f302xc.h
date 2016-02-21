@@ -377,13 +377,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } SQR4;                                  /*!< ADC regular sequence register 4,                   Address offset: 0x3C */
-    union {
-        struct {
-            __IO uint32_t RDATA : 16;                /*!< ADC regular Data converted */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } DR;                                    /*!< ADC regular data register,                         Address offset: 0x40 */
+    __IO uint32_t DR;                        /*!< ADC regular data register,                         Address offset: 0x40 */
          uint32_t __RESERVED3;               /*!< Reserved, 0x044                                                         */
          uint32_t __RESERVED4;               /*!< Reserved, 0x048                                                         */
     union {
@@ -440,34 +434,10 @@ typedef struct {
         __IO uint32_t w;
     } OFR4;                                  /*!< ADC offset register 4,                             Address offset: 0x6C */
          uint32_t __RESERVED6[4];               /*!< Reserved, 0x070 - 0x07C                                                 */
-    union {
-        struct {
-            __IO uint32_t JDATA : 16;                /*!< ADC Injected DATA */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } JDR1;                                  /*!< ADC injected data register 1,                      Address offset: 0x80 */
-    union {
-        struct {
-            __IO uint32_t JDATA : 16;                /*!< ADC Injected DATA */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } JDR2;                                  /*!< ADC injected data register 2,                      Address offset: 0x84 */
-    union {
-        struct {
-            __IO uint32_t JDATA : 16;                /*!< ADC Injected DATA */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } JDR3;                                  /*!< ADC injected data register 3,                      Address offset: 0x88 */
-    union {
-        struct {
-            __IO uint32_t JDATA : 16;                /*!< ADC Injected DATA */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } JDR4;                                  /*!< ADC injected data register 4,                      Address offset: 0x8C */
+    __IO uint32_t JDR1;                      /*!< ADC injected data register 1,                      Address offset: 0x80 */
+    __IO uint32_t JDR2;                      /*!< ADC injected data register 2,                      Address offset: 0x84 */
+    __IO uint32_t JDR3;                      /*!< ADC injected data register 3,                      Address offset: 0x88 */
+    __IO uint32_t JDR4;                      /*!< ADC injected data register 4,                      Address offset: 0x8C */
          uint32_t __RESERVED7[4];               /*!< Reserved, 0x090 - 0x09C                                                 */
     union {
         struct {
@@ -1117,13 +1087,7 @@ typedef struct {
         __IO uint32_t D12L;                      /*!< DAC channel 12-bit left-aligned data holding register */
         __IO uint32_t D8R;                       /*!< DAC channel 8-bit right-aligned data holding register */
     } DHRD;                                  /*!< DAC dual channel data holding registers */
-    union {
-        struct {
-            __IO uint32_t DACC1DOR : 12;             /*!< DAC channel1 data output */
-                 uint32_t __RESERVED0 : 20;
-        } b;
-        __IO uint32_t w;
-    } DOR1;                                  /*!< DAC channel1 data output register,                       Address offset: 0x2C */
+    __IO uint32_t DOR1;                      /*!< DAC channel1 data output register,                       Address offset: 0x2C */
     __IO uint32_t RESERVED3;                 /*!< Reserved,                                                                0x30 */
     union {
         struct {
@@ -1165,10 +1129,7 @@ typedef struct {
         __IO uint32_t D12L[32];                  /*!< DAC channel 12-bit left-aligned data holding register */
         __IO uint32_t D8R[32];                   /*!< DAC channel 8-bit right-aligned data holding register */
     } DHRD;                                  /*!< DAC dual channel data holding registers */
-    struct {
-        __IO uint32_t DACC1DOR[12];              /*!< DAC channel1 data output */
-             uint32_t __RESERVED0[20];
-    } DOR1;                                  /*!< DAC channel1 data output register,                       Address offset: 0x2C */
+    __IO uint32_t DOR1[32];                  /*!< DAC channel1 data output register,                       Address offset: 0x2C */
     __IO uint32_t RESERVED3[32];             /*!< Reserved,                                                                0x30 */
     struct {
              uint32_t __RESERVED0[13];
@@ -1263,13 +1224,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } CCR;                                   /*!< DMA channel x configuration register                                           */
-    union {
-        struct {
-            __IO uint32_t NDT : 16;                  /*!< Number of data to Transfer          */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } CNDTR;                                 /*!< DMA channel x number of data register                                          */
+    __IO uint32_t CNDTR;                     /*!< DMA channel x number of data register                                          */
     __IO uint32_t CPAR;                      /*!< DMA channel x peripheral address register                                      */
     __IO uint32_t CMAR;                      /*!< DMA channel x memory address register                                          */
 } DMA_Channel_TypeDef;
@@ -1291,10 +1246,7 @@ typedef struct {
         __IO uint32_t MEM2MEM;                   /*!< Memory to memory mode               */
              uint32_t __RESERVED0[17];
     } CCR;                                   /*!< DMA channel x configuration register                                           */
-    struct {
-        __IO uint32_t NDT[16];                   /*!< Number of data to Transfer          */
-             uint32_t __RESERVED0[16];
-    } CNDTR;                                 /*!< DMA channel x number of data register                                          */
+    __IO uint32_t CNDTR[32];                 /*!< DMA channel x number of data register                                          */
     __IO uint32_t CPAR[32];                  /*!< DMA channel x peripheral address register                                      */
     __IO uint32_t CMAR[32];                  /*!< DMA channel x memory address register                                          */
 } DMA_Channel_BitBand_TypeDef;
@@ -1447,486 +1399,38 @@ typedef struct {
 
 
 typedef struct {
-    union {
-        struct {
-            __IO uint32_t MR0 : 1;                   /*!< Interrupt Mask on line 0 */
-            __IO uint32_t MR1 : 1;                   /*!< Interrupt Mask on line 1 */
-            __IO uint32_t MR2 : 1;                   /*!< Interrupt Mask on line 2 */
-            __IO uint32_t MR3 : 1;                   /*!< Interrupt Mask on line 3 */
-            __IO uint32_t MR4 : 1;                   /*!< Interrupt Mask on line 4 */
-            __IO uint32_t MR5 : 1;                   /*!< Interrupt Mask on line 5 */
-            __IO uint32_t MR6 : 1;                   /*!< Interrupt Mask on line 6 */
-            __IO uint32_t MR7 : 1;                   /*!< Interrupt Mask on line 7 */
-            __IO uint32_t MR8 : 1;                   /*!< Interrupt Mask on line 8 */
-            __IO uint32_t MR9 : 1;                   /*!< Interrupt Mask on line 9 */
-            __IO uint32_t MR10 : 1;                  /*!< Interrupt Mask on line 10 */
-            __IO uint32_t MR11 : 1;                  /*!< Interrupt Mask on line 11 */
-            __IO uint32_t MR12 : 1;                  /*!< Interrupt Mask on line 12 */
-            __IO uint32_t MR13 : 1;                  /*!< Interrupt Mask on line 13 */
-            __IO uint32_t MR14 : 1;                  /*!< Interrupt Mask on line 14 */
-            __IO uint32_t MR15 : 1;                  /*!< Interrupt Mask on line 15 */
-            __IO uint32_t MR16 : 1;                  /*!< Interrupt Mask on line 16 */
-            __IO uint32_t MR17 : 1;                  /*!< Interrupt Mask on line 17 */
-            __IO uint32_t MR18 : 1;                  /*!< Interrupt Mask on line 18 */
-            __IO uint32_t MR19 : 1;                  /*!< Interrupt Mask on line 19 */
-            __IO uint32_t MR20 : 1;                  /*!< Interrupt Mask on line 20 */
-            __IO uint32_t MR21 : 1;                  /*!< Interrupt Mask on line 21 */
-            __IO uint32_t MR22 : 1;                  /*!< Interrupt Mask on line 22 */
-            __IO uint32_t MR23 : 1;                  /*!< Interrupt Mask on line 23 */
-            __IO uint32_t MR24 : 1;                  /*!< Interrupt Mask on line 24 */
-            __IO uint32_t MR25 : 1;                  /*!< Interrupt Mask on line 25 */
-            __IO uint32_t MR26 : 1;                  /*!< Interrupt Mask on line 26 */
-            __IO uint32_t MR27 : 1;                  /*!< Interrupt Mask on line 27 */
-            __IO uint32_t MR28 : 1;                  /*!< Interrupt Mask on line 28 */
-            __IO uint32_t MR29 : 1;                  /*!< Interrupt Mask on line 29 */
-            __IO uint32_t MR30 : 1;                  /*!< Interrupt Mask on line 30 */
-            __IO uint32_t MR31 : 1;                  /*!< Interrupt Mask on line 31 */
-        } b;
-        __IO uint32_t w;
-    } IMR;                                   /*!<EXTI Interrupt mask register,                             Address offset: 0x00 */
-    union {
-        struct {
-            __IO uint32_t MR0 : 1;                   /*!< Event Mask on line 0 */
-            __IO uint32_t MR1 : 1;                   /*!< Event Mask on line 1 */
-            __IO uint32_t MR2 : 1;                   /*!< Event Mask on line 2 */
-            __IO uint32_t MR3 : 1;                   /*!< Event Mask on line 3 */
-            __IO uint32_t MR4 : 1;                   /*!< Event Mask on line 4 */
-            __IO uint32_t MR5 : 1;                   /*!< Event Mask on line 5 */
-            __IO uint32_t MR6 : 1;                   /*!< Event Mask on line 6 */
-            __IO uint32_t MR7 : 1;                   /*!< Event Mask on line 7 */
-            __IO uint32_t MR8 : 1;                   /*!< Event Mask on line 8 */
-            __IO uint32_t MR9 : 1;                   /*!< Event Mask on line 9 */
-            __IO uint32_t MR10 : 1;                  /*!< Event Mask on line 10 */
-            __IO uint32_t MR11 : 1;                  /*!< Event Mask on line 11 */
-            __IO uint32_t MR12 : 1;                  /*!< Event Mask on line 12 */
-            __IO uint32_t MR13 : 1;                  /*!< Event Mask on line 13 */
-            __IO uint32_t MR14 : 1;                  /*!< Event Mask on line 14 */
-            __IO uint32_t MR15 : 1;                  /*!< Event Mask on line 15 */
-            __IO uint32_t MR16 : 1;                  /*!< Event Mask on line 16 */
-            __IO uint32_t MR17 : 1;                  /*!< Event Mask on line 17 */
-            __IO uint32_t MR18 : 1;                  /*!< Event Mask on line 18 */
-            __IO uint32_t MR19 : 1;                  /*!< Event Mask on line 19 */
-            __IO uint32_t MR20 : 1;                  /*!< Event Mask on line 20 */
-            __IO uint32_t MR21 : 1;                  /*!< Event Mask on line 21 */
-            __IO uint32_t MR22 : 1;                  /*!< Event Mask on line 22 */
-            __IO uint32_t MR23 : 1;                  /*!< Event Mask on line 23 */
-            __IO uint32_t MR24 : 1;                  /*!< Event Mask on line 24 */
-            __IO uint32_t MR25 : 1;                  /*!< Event Mask on line 25 */
-            __IO uint32_t MR26 : 1;                  /*!< Event Mask on line 26 */
-            __IO uint32_t MR27 : 1;                  /*!< Event Mask on line 27 */
-            __IO uint32_t MR28 : 1;                  /*!< Event Mask on line 28 */
-            __IO uint32_t MR29 : 1;                  /*!< Event Mask on line 29 */
-            __IO uint32_t MR30 : 1;                  /*!< Event Mask on line 30 */
-            __IO uint32_t MR31 : 1;                  /*!< Event Mask on line 31 */
-        } b;
-        __IO uint32_t w;
-    } EMR;                                   /*!<EXTI Event mask register,                                 Address offset: 0x04 */
-    union {
-        struct {
-            __IO uint32_t TR0 : 1;                   /*!< Rising trigger event configuration bit of line 0 */
-            __IO uint32_t TR1 : 1;                   /*!< Rising trigger event configuration bit of line 1 */
-            __IO uint32_t TR2 : 1;                   /*!< Rising trigger event configuration bit of line 2 */
-            __IO uint32_t TR3 : 1;                   /*!< Rising trigger event configuration bit of line 3 */
-            __IO uint32_t TR4 : 1;                   /*!< Rising trigger event configuration bit of line 4 */
-            __IO uint32_t TR5 : 1;                   /*!< Rising trigger event configuration bit of line 5 */
-            __IO uint32_t TR6 : 1;                   /*!< Rising trigger event configuration bit of line 6 */
-            __IO uint32_t TR7 : 1;                   /*!< Rising trigger event configuration bit of line 7 */
-            __IO uint32_t TR8 : 1;                   /*!< Rising trigger event configuration bit of line 8 */
-            __IO uint32_t TR9 : 1;                   /*!< Rising trigger event configuration bit of line 9 */
-            __IO uint32_t TR10 : 1;                  /*!< Rising trigger event configuration bit of line 10 */
-            __IO uint32_t TR11 : 1;                  /*!< Rising trigger event configuration bit of line 11 */
-            __IO uint32_t TR12 : 1;                  /*!< Rising trigger event configuration bit of line 12 */
-            __IO uint32_t TR13 : 1;                  /*!< Rising trigger event configuration bit of line 13 */
-            __IO uint32_t TR14 : 1;                  /*!< Rising trigger event configuration bit of line 14 */
-            __IO uint32_t TR15 : 1;                  /*!< Rising trigger event configuration bit of line 15 */
-            __IO uint32_t TR16 : 1;                  /*!< Rising trigger event configuration bit of line 16 */
-            __IO uint32_t TR17 : 1;                  /*!< Rising trigger event configuration bit of line 17 */
-            __IO uint32_t TR18 : 1;                  /*!< Rising trigger event configuration bit of line 18 */
-            __IO uint32_t TR19 : 1;                  /*!< Rising trigger event configuration bit of line 19 */
-            __IO uint32_t TR20 : 1;                  /*!< Rising trigger event configuration bit of line 20 */
-            __IO uint32_t TR21 : 1;                  /*!< Rising trigger event configuration bit of line 21 */
-            __IO uint32_t TR22 : 1;                  /*!< Rising trigger event configuration bit of line 22 */
-                 uint32_t __RESERVED0 : 6;
-            __IO uint32_t TR29 : 1;                  /*!< Rising trigger event configuration bit of line 29 */
-            __IO uint32_t TR30 : 1;                  /*!< Rising trigger event configuration bit of line 30 */
-            __IO uint32_t TR31 : 1;                  /*!< Rising trigger event configuration bit of line 31 */
-        } b;
-        __IO uint32_t w;
-    } RTSR;                                  /*!<EXTI Rising trigger selection register ,                  Address offset: 0x08 */
-    union {
-        struct {
-            __IO uint32_t TR0 : 1;                   /*!< Falling trigger event configuration bit of line 0 */
-            __IO uint32_t TR1 : 1;                   /*!< Falling trigger event configuration bit of line 1 */
-            __IO uint32_t TR2 : 1;                   /*!< Falling trigger event configuration bit of line 2 */
-            __IO uint32_t TR3 : 1;                   /*!< Falling trigger event configuration bit of line 3 */
-            __IO uint32_t TR4 : 1;                   /*!< Falling trigger event configuration bit of line 4 */
-            __IO uint32_t TR5 : 1;                   /*!< Falling trigger event configuration bit of line 5 */
-            __IO uint32_t TR6 : 1;                   /*!< Falling trigger event configuration bit of line 6 */
-            __IO uint32_t TR7 : 1;                   /*!< Falling trigger event configuration bit of line 7 */
-            __IO uint32_t TR8 : 1;                   /*!< Falling trigger event configuration bit of line 8 */
-            __IO uint32_t TR9 : 1;                   /*!< Falling trigger event configuration bit of line 9 */
-            __IO uint32_t TR10 : 1;                  /*!< Falling trigger event configuration bit of line 10 */
-            __IO uint32_t TR11 : 1;                  /*!< Falling trigger event configuration bit of line 11 */
-            __IO uint32_t TR12 : 1;                  /*!< Falling trigger event configuration bit of line 12 */
-            __IO uint32_t TR13 : 1;                  /*!< Falling trigger event configuration bit of line 13 */
-            __IO uint32_t TR14 : 1;                  /*!< Falling trigger event configuration bit of line 14 */
-            __IO uint32_t TR15 : 1;                  /*!< Falling trigger event configuration bit of line 15 */
-            __IO uint32_t TR16 : 1;                  /*!< Falling trigger event configuration bit of line 16 */
-            __IO uint32_t TR17 : 1;                  /*!< Falling trigger event configuration bit of line 17 */
-            __IO uint32_t TR18 : 1;                  /*!< Falling trigger event configuration bit of line 18 */
-            __IO uint32_t TR19 : 1;                  /*!< Falling trigger event configuration bit of line 19 */
-            __IO uint32_t TR20 : 1;                  /*!< Falling trigger event configuration bit of line 20 */
-            __IO uint32_t TR21 : 1;                  /*!< Falling trigger event configuration bit of line 21 */
-            __IO uint32_t TR22 : 1;                  /*!< Falling trigger event configuration bit of line 22 */
-                 uint32_t __RESERVED0 : 6;
-            __IO uint32_t TR29 : 1;                  /*!< Falling trigger event configuration bit of line 29 */
-            __IO uint32_t TR30 : 1;                  /*!< Falling trigger event configuration bit of line 30 */
-            __IO uint32_t TR31 : 1;                  /*!< Falling trigger event configuration bit of line 31 */
-        } b;
-        __IO uint32_t w;
-    } FTSR;                                  /*!<EXTI Falling trigger selection register,                  Address offset: 0x0C */
-    union {
-        struct {
-            __IO uint32_t SWIER0 : 1;                /*!< Software Interrupt on line 0 */
-            __IO uint32_t SWIER1 : 1;                /*!< Software Interrupt on line 1 */
-            __IO uint32_t SWIER2 : 1;                /*!< Software Interrupt on line 2 */
-            __IO uint32_t SWIER3 : 1;                /*!< Software Interrupt on line 3 */
-            __IO uint32_t SWIER4 : 1;                /*!< Software Interrupt on line 4 */
-            __IO uint32_t SWIER5 : 1;                /*!< Software Interrupt on line 5 */
-            __IO uint32_t SWIER6 : 1;                /*!< Software Interrupt on line 6 */
-            __IO uint32_t SWIER7 : 1;                /*!< Software Interrupt on line 7 */
-            __IO uint32_t SWIER8 : 1;                /*!< Software Interrupt on line 8 */
-            __IO uint32_t SWIER9 : 1;                /*!< Software Interrupt on line 9 */
-            __IO uint32_t SWIER10 : 1;               /*!< Software Interrupt on line 10 */
-            __IO uint32_t SWIER11 : 1;               /*!< Software Interrupt on line 11 */
-            __IO uint32_t SWIER12 : 1;               /*!< Software Interrupt on line 12 */
-            __IO uint32_t SWIER13 : 1;               /*!< Software Interrupt on line 13 */
-            __IO uint32_t SWIER14 : 1;               /*!< Software Interrupt on line 14 */
-            __IO uint32_t SWIER15 : 1;               /*!< Software Interrupt on line 15 */
-            __IO uint32_t SWIER16 : 1;               /*!< Software Interrupt on line 16 */
-            __IO uint32_t SWIER17 : 1;               /*!< Software Interrupt on line 17 */
-            __IO uint32_t SWIER18 : 1;               /*!< Software Interrupt on line 18 */
-            __IO uint32_t SWIER19 : 1;               /*!< Software Interrupt on line 19 */
-            __IO uint32_t SWIER20 : 1;               /*!< Software Interrupt on line 20 */
-            __IO uint32_t SWIER21 : 1;               /*!< Software Interrupt on line 21 */
-            __IO uint32_t SWIER22 : 1;               /*!< Software Interrupt on line 22 */
-                 uint32_t __RESERVED0 : 6;
-            __IO uint32_t SWIER29 : 1;               /*!< Software Interrupt on line 29 */
-            __IO uint32_t SWIER30 : 1;               /*!< Software Interrupt on line 30 */
-            __IO uint32_t SWIER31 : 1;               /*!< Software Interrupt on line 31 */
-        } b;
-        __IO uint32_t w;
-    } SWIER;                                 /*!<EXTI Software interrupt event register,                   Address offset: 0x10 */
-    union {
-        struct {
-            __IO uint32_t PR0 : 1;                   /*!< Pending bit for line 0 */
-            __IO uint32_t PR1 : 1;                   /*!< Pending bit for line 1 */
-            __IO uint32_t PR2 : 1;                   /*!< Pending bit for line 2 */
-            __IO uint32_t PR3 : 1;                   /*!< Pending bit for line 3 */
-            __IO uint32_t PR4 : 1;                   /*!< Pending bit for line 4 */
-            __IO uint32_t PR5 : 1;                   /*!< Pending bit for line 5 */
-            __IO uint32_t PR6 : 1;                   /*!< Pending bit for line 6 */
-            __IO uint32_t PR7 : 1;                   /*!< Pending bit for line 7 */
-            __IO uint32_t PR8 : 1;                   /*!< Pending bit for line 8 */
-            __IO uint32_t PR9 : 1;                   /*!< Pending bit for line 9 */
-            __IO uint32_t PR10 : 1;                  /*!< Pending bit for line 10 */
-            __IO uint32_t PR11 : 1;                  /*!< Pending bit for line 11 */
-            __IO uint32_t PR12 : 1;                  /*!< Pending bit for line 12 */
-            __IO uint32_t PR13 : 1;                  /*!< Pending bit for line 13 */
-            __IO uint32_t PR14 : 1;                  /*!< Pending bit for line 14 */
-            __IO uint32_t PR15 : 1;                  /*!< Pending bit for line 15 */
-            __IO uint32_t PR16 : 1;                  /*!< Pending bit for line 16 */
-            __IO uint32_t PR17 : 1;                  /*!< Pending bit for line 17 */
-            __IO uint32_t PR18 : 1;                  /*!< Pending bit for line 18 */
-            __IO uint32_t PR19 : 1;                  /*!< Pending bit for line 19 */
-            __IO uint32_t PR20 : 1;                  /*!< Pending bit for line 20 */
-            __IO uint32_t PR21 : 1;                  /*!< Pending bit for line 21 */
-            __IO uint32_t PR22 : 1;                  /*!< Pending bit for line 22 */
-                 uint32_t __RESERVED0 : 6;
-            __IO uint32_t PR29 : 1;                  /*!< Pending bit for line 29 */
-            __IO uint32_t PR30 : 1;                  /*!< Pending bit for line 30 */
-            __IO uint32_t PR31 : 1;                  /*!< Pending bit for line 31 */
-        } b;
-        __IO uint32_t w;
-    } PR;                                    /*!<EXTI Pending register,                                    Address offset: 0x14 */
+    __IO uint32_t IMR;                       /*!<EXTI Interrupt mask register,                             Address offset: 0x00 */
+    __IO uint32_t EMR;                       /*!<EXTI Event mask register,                                 Address offset: 0x04 */
+    __IO uint32_t RTSR;                      /*!<EXTI Rising trigger selection register ,                  Address offset: 0x08 */
+    __IO uint32_t FTSR;                      /*!<EXTI Falling trigger selection register,                  Address offset: 0x0C */
+    __IO uint32_t SWIER;                     /*!<EXTI Software interrupt event register,                   Address offset: 0x10 */
+    __IO uint32_t PR;                        /*!<EXTI Pending register,                                    Address offset: 0x14 */
          uint32_t __RESERVED0;               /*!< Reserved, 0x18                                                                */
          uint32_t __RESERVED1;               /*!< Reserved, 0x1C                                                                */
-    union {
-        struct {
-            __IO uint32_t MR32 : 1;                  /*!< Interrupt Mask on line 32 */
-            __IO uint32_t MR33 : 1;                  /*!< Interrupt Mask on line 33 */
-            __IO uint32_t MR34 : 1;                  /*!< Interrupt Mask on line 34 */
-            __IO uint32_t MR35 : 1;                  /*!< Interrupt Mask on line 35 */
-                 uint32_t __RESERVED0 : 28;
-        } b;
-        __IO uint32_t w;
-    } IMR2;                                  /*!< EXTI Interrupt mask register,                            Address offset: 0x20 */
-    union {
-        struct {
-            __IO uint32_t MR32 : 1;                  /*!< Event Mask on line 32 */
-            __IO uint32_t MR33 : 1;                  /*!< Event Mask on line 33 */
-            __IO uint32_t MR34 : 1;                  /*!< Event Mask on line 34 */
-            __IO uint32_t MR35 : 1;                  /*!< Event Mask on line 34 */
-                 uint32_t __RESERVED0 : 28;
-        } b;
-        __IO uint32_t w;
-    } EMR2;                                  /*!< EXTI Event mask register,                                Address offset: 0x24 */
-    union {
-        struct {
-            __IO uint32_t TR32 : 1;                  /*!< Rising trigger event configuration bit of line 32 */
-            __IO uint32_t TR33 : 1;                  /*!< Rising trigger event configuration bit of line 33 */
-                 uint32_t __RESERVED0 : 30;
-        } b;
-        __IO uint32_t w;
-    } RTSR2;                                 /*!< EXTI Rising trigger selection register,                  Address offset: 0x28 */
-    union {
-        struct {
-            __IO uint32_t TR32 : 1;                  /*!< Falling trigger event configuration bit of line 32 */
-            __IO uint32_t TR33 : 1;                  /*!< Falling trigger event configuration bit of line 33 */
-                 uint32_t __RESERVED0 : 30;
-        } b;
-        __IO uint32_t w;
-    } FTSR2;                                 /*!< EXTI Falling trigger selection register,                 Address offset: 0x2C */
-    union {
-        struct {
-            __IO uint32_t SWIER32 : 1;               /*!< Software Interrupt on line 32 */
-            __IO uint32_t SWIER33 : 1;               /*!< Software Interrupt on line 33 */
-                 uint32_t __RESERVED0 : 30;
-        } b;
-        __IO uint32_t w;
-    } SWIER2;                                /*!< EXTI Software interrupt event register,                  Address offset: 0x30 */
-    union {
-        struct {
-            __IO uint32_t PR32 : 1;                  /*!< Pending bit for line 32 */
-            __IO uint32_t PR33 : 1;                  /*!< Pending bit for line 33 */
-                 uint32_t __RESERVED0 : 30;
-        } b;
-        __IO uint32_t w;
-    } PR2;                                   /*!< EXTI Pending register,                                   Address offset: 0x34 */
+    __IO uint32_t IMR2;                      /*!< EXTI Interrupt mask register,                            Address offset: 0x20 */
+    __IO uint32_t EMR2;                      /*!< EXTI Event mask register,                                Address offset: 0x24 */
+    __IO uint32_t RTSR2;                     /*!< EXTI Rising trigger selection register,                  Address offset: 0x28 */
+    __IO uint32_t FTSR2;                     /*!< EXTI Falling trigger selection register,                 Address offset: 0x2C */
+    __IO uint32_t SWIER2;                    /*!< EXTI Software interrupt event register,                  Address offset: 0x30 */
+    __IO uint32_t PR2;                       /*!< EXTI Pending register,                                   Address offset: 0x34 */
 } EXTI_TypeDef;
 
 
 typedef struct {
-    struct {
-        __IO uint32_t MR0;                       /*!< Interrupt Mask on line 0 */
-        __IO uint32_t MR1;                       /*!< Interrupt Mask on line 1 */
-        __IO uint32_t MR2;                       /*!< Interrupt Mask on line 2 */
-        __IO uint32_t MR3;                       /*!< Interrupt Mask on line 3 */
-        __IO uint32_t MR4;                       /*!< Interrupt Mask on line 4 */
-        __IO uint32_t MR5;                       /*!< Interrupt Mask on line 5 */
-        __IO uint32_t MR6;                       /*!< Interrupt Mask on line 6 */
-        __IO uint32_t MR7;                       /*!< Interrupt Mask on line 7 */
-        __IO uint32_t MR8;                       /*!< Interrupt Mask on line 8 */
-        __IO uint32_t MR9;                       /*!< Interrupt Mask on line 9 */
-        __IO uint32_t MR10;                      /*!< Interrupt Mask on line 10 */
-        __IO uint32_t MR11;                      /*!< Interrupt Mask on line 11 */
-        __IO uint32_t MR12;                      /*!< Interrupt Mask on line 12 */
-        __IO uint32_t MR13;                      /*!< Interrupt Mask on line 13 */
-        __IO uint32_t MR14;                      /*!< Interrupt Mask on line 14 */
-        __IO uint32_t MR15;                      /*!< Interrupt Mask on line 15 */
-        __IO uint32_t MR16;                      /*!< Interrupt Mask on line 16 */
-        __IO uint32_t MR17;                      /*!< Interrupt Mask on line 17 */
-        __IO uint32_t MR18;                      /*!< Interrupt Mask on line 18 */
-        __IO uint32_t MR19;                      /*!< Interrupt Mask on line 19 */
-        __IO uint32_t MR20;                      /*!< Interrupt Mask on line 20 */
-        __IO uint32_t MR21;                      /*!< Interrupt Mask on line 21 */
-        __IO uint32_t MR22;                      /*!< Interrupt Mask on line 22 */
-        __IO uint32_t MR23;                      /*!< Interrupt Mask on line 23 */
-        __IO uint32_t MR24;                      /*!< Interrupt Mask on line 24 */
-        __IO uint32_t MR25;                      /*!< Interrupt Mask on line 25 */
-        __IO uint32_t MR26;                      /*!< Interrupt Mask on line 26 */
-        __IO uint32_t MR27;                      /*!< Interrupt Mask on line 27 */
-        __IO uint32_t MR28;                      /*!< Interrupt Mask on line 28 */
-        __IO uint32_t MR29;                      /*!< Interrupt Mask on line 29 */
-        __IO uint32_t MR30;                      /*!< Interrupt Mask on line 30 */
-        __IO uint32_t MR31;                      /*!< Interrupt Mask on line 31 */
-    } IMR;                                   /*!<EXTI Interrupt mask register,                             Address offset: 0x00 */
-    struct {
-        __IO uint32_t MR0;                       /*!< Event Mask on line 0 */
-        __IO uint32_t MR1;                       /*!< Event Mask on line 1 */
-        __IO uint32_t MR2;                       /*!< Event Mask on line 2 */
-        __IO uint32_t MR3;                       /*!< Event Mask on line 3 */
-        __IO uint32_t MR4;                       /*!< Event Mask on line 4 */
-        __IO uint32_t MR5;                       /*!< Event Mask on line 5 */
-        __IO uint32_t MR6;                       /*!< Event Mask on line 6 */
-        __IO uint32_t MR7;                       /*!< Event Mask on line 7 */
-        __IO uint32_t MR8;                       /*!< Event Mask on line 8 */
-        __IO uint32_t MR9;                       /*!< Event Mask on line 9 */
-        __IO uint32_t MR10;                      /*!< Event Mask on line 10 */
-        __IO uint32_t MR11;                      /*!< Event Mask on line 11 */
-        __IO uint32_t MR12;                      /*!< Event Mask on line 12 */
-        __IO uint32_t MR13;                      /*!< Event Mask on line 13 */
-        __IO uint32_t MR14;                      /*!< Event Mask on line 14 */
-        __IO uint32_t MR15;                      /*!< Event Mask on line 15 */
-        __IO uint32_t MR16;                      /*!< Event Mask on line 16 */
-        __IO uint32_t MR17;                      /*!< Event Mask on line 17 */
-        __IO uint32_t MR18;                      /*!< Event Mask on line 18 */
-        __IO uint32_t MR19;                      /*!< Event Mask on line 19 */
-        __IO uint32_t MR20;                      /*!< Event Mask on line 20 */
-        __IO uint32_t MR21;                      /*!< Event Mask on line 21 */
-        __IO uint32_t MR22;                      /*!< Event Mask on line 22 */
-        __IO uint32_t MR23;                      /*!< Event Mask on line 23 */
-        __IO uint32_t MR24;                      /*!< Event Mask on line 24 */
-        __IO uint32_t MR25;                      /*!< Event Mask on line 25 */
-        __IO uint32_t MR26;                      /*!< Event Mask on line 26 */
-        __IO uint32_t MR27;                      /*!< Event Mask on line 27 */
-        __IO uint32_t MR28;                      /*!< Event Mask on line 28 */
-        __IO uint32_t MR29;                      /*!< Event Mask on line 29 */
-        __IO uint32_t MR30;                      /*!< Event Mask on line 30 */
-        __IO uint32_t MR31;                      /*!< Event Mask on line 31 */
-    } EMR;                                   /*!<EXTI Event mask register,                                 Address offset: 0x04 */
-    struct {
-        __IO uint32_t TR0;                       /*!< Rising trigger event configuration bit of line 0 */
-        __IO uint32_t TR1;                       /*!< Rising trigger event configuration bit of line 1 */
-        __IO uint32_t TR2;                       /*!< Rising trigger event configuration bit of line 2 */
-        __IO uint32_t TR3;                       /*!< Rising trigger event configuration bit of line 3 */
-        __IO uint32_t TR4;                       /*!< Rising trigger event configuration bit of line 4 */
-        __IO uint32_t TR5;                       /*!< Rising trigger event configuration bit of line 5 */
-        __IO uint32_t TR6;                       /*!< Rising trigger event configuration bit of line 6 */
-        __IO uint32_t TR7;                       /*!< Rising trigger event configuration bit of line 7 */
-        __IO uint32_t TR8;                       /*!< Rising trigger event configuration bit of line 8 */
-        __IO uint32_t TR9;                       /*!< Rising trigger event configuration bit of line 9 */
-        __IO uint32_t TR10;                      /*!< Rising trigger event configuration bit of line 10 */
-        __IO uint32_t TR11;                      /*!< Rising trigger event configuration bit of line 11 */
-        __IO uint32_t TR12;                      /*!< Rising trigger event configuration bit of line 12 */
-        __IO uint32_t TR13;                      /*!< Rising trigger event configuration bit of line 13 */
-        __IO uint32_t TR14;                      /*!< Rising trigger event configuration bit of line 14 */
-        __IO uint32_t TR15;                      /*!< Rising trigger event configuration bit of line 15 */
-        __IO uint32_t TR16;                      /*!< Rising trigger event configuration bit of line 16 */
-        __IO uint32_t TR17;                      /*!< Rising trigger event configuration bit of line 17 */
-        __IO uint32_t TR18;                      /*!< Rising trigger event configuration bit of line 18 */
-        __IO uint32_t TR19;                      /*!< Rising trigger event configuration bit of line 19 */
-        __IO uint32_t TR20;                      /*!< Rising trigger event configuration bit of line 20 */
-        __IO uint32_t TR21;                      /*!< Rising trigger event configuration bit of line 21 */
-        __IO uint32_t TR22;                      /*!< Rising trigger event configuration bit of line 22 */
-             uint32_t __RESERVED0[6];
-        __IO uint32_t TR29;                      /*!< Rising trigger event configuration bit of line 29 */
-        __IO uint32_t TR30;                      /*!< Rising trigger event configuration bit of line 30 */
-        __IO uint32_t TR31;                      /*!< Rising trigger event configuration bit of line 31 */
-    } RTSR;                                  /*!<EXTI Rising trigger selection register ,                  Address offset: 0x08 */
-    struct {
-        __IO uint32_t TR0;                       /*!< Falling trigger event configuration bit of line 0 */
-        __IO uint32_t TR1;                       /*!< Falling trigger event configuration bit of line 1 */
-        __IO uint32_t TR2;                       /*!< Falling trigger event configuration bit of line 2 */
-        __IO uint32_t TR3;                       /*!< Falling trigger event configuration bit of line 3 */
-        __IO uint32_t TR4;                       /*!< Falling trigger event configuration bit of line 4 */
-        __IO uint32_t TR5;                       /*!< Falling trigger event configuration bit of line 5 */
-        __IO uint32_t TR6;                       /*!< Falling trigger event configuration bit of line 6 */
-        __IO uint32_t TR7;                       /*!< Falling trigger event configuration bit of line 7 */
-        __IO uint32_t TR8;                       /*!< Falling trigger event configuration bit of line 8 */
-        __IO uint32_t TR9;                       /*!< Falling trigger event configuration bit of line 9 */
-        __IO uint32_t TR10;                      /*!< Falling trigger event configuration bit of line 10 */
-        __IO uint32_t TR11;                      /*!< Falling trigger event configuration bit of line 11 */
-        __IO uint32_t TR12;                      /*!< Falling trigger event configuration bit of line 12 */
-        __IO uint32_t TR13;                      /*!< Falling trigger event configuration bit of line 13 */
-        __IO uint32_t TR14;                      /*!< Falling trigger event configuration bit of line 14 */
-        __IO uint32_t TR15;                      /*!< Falling trigger event configuration bit of line 15 */
-        __IO uint32_t TR16;                      /*!< Falling trigger event configuration bit of line 16 */
-        __IO uint32_t TR17;                      /*!< Falling trigger event configuration bit of line 17 */
-        __IO uint32_t TR18;                      /*!< Falling trigger event configuration bit of line 18 */
-        __IO uint32_t TR19;                      /*!< Falling trigger event configuration bit of line 19 */
-        __IO uint32_t TR20;                      /*!< Falling trigger event configuration bit of line 20 */
-        __IO uint32_t TR21;                      /*!< Falling trigger event configuration bit of line 21 */
-        __IO uint32_t TR22;                      /*!< Falling trigger event configuration bit of line 22 */
-             uint32_t __RESERVED0[6];
-        __IO uint32_t TR29;                      /*!< Falling trigger event configuration bit of line 29 */
-        __IO uint32_t TR30;                      /*!< Falling trigger event configuration bit of line 30 */
-        __IO uint32_t TR31;                      /*!< Falling trigger event configuration bit of line 31 */
-    } FTSR;                                  /*!<EXTI Falling trigger selection register,                  Address offset: 0x0C */
-    struct {
-        __IO uint32_t SWIER0;                    /*!< Software Interrupt on line 0 */
-        __IO uint32_t SWIER1;                    /*!< Software Interrupt on line 1 */
-        __IO uint32_t SWIER2;                    /*!< Software Interrupt on line 2 */
-        __IO uint32_t SWIER3;                    /*!< Software Interrupt on line 3 */
-        __IO uint32_t SWIER4;                    /*!< Software Interrupt on line 4 */
-        __IO uint32_t SWIER5;                    /*!< Software Interrupt on line 5 */
-        __IO uint32_t SWIER6;                    /*!< Software Interrupt on line 6 */
-        __IO uint32_t SWIER7;                    /*!< Software Interrupt on line 7 */
-        __IO uint32_t SWIER8;                    /*!< Software Interrupt on line 8 */
-        __IO uint32_t SWIER9;                    /*!< Software Interrupt on line 9 */
-        __IO uint32_t SWIER10;                   /*!< Software Interrupt on line 10 */
-        __IO uint32_t SWIER11;                   /*!< Software Interrupt on line 11 */
-        __IO uint32_t SWIER12;                   /*!< Software Interrupt on line 12 */
-        __IO uint32_t SWIER13;                   /*!< Software Interrupt on line 13 */
-        __IO uint32_t SWIER14;                   /*!< Software Interrupt on line 14 */
-        __IO uint32_t SWIER15;                   /*!< Software Interrupt on line 15 */
-        __IO uint32_t SWIER16;                   /*!< Software Interrupt on line 16 */
-        __IO uint32_t SWIER17;                   /*!< Software Interrupt on line 17 */
-        __IO uint32_t SWIER18;                   /*!< Software Interrupt on line 18 */
-        __IO uint32_t SWIER19;                   /*!< Software Interrupt on line 19 */
-        __IO uint32_t SWIER20;                   /*!< Software Interrupt on line 20 */
-        __IO uint32_t SWIER21;                   /*!< Software Interrupt on line 21 */
-        __IO uint32_t SWIER22;                   /*!< Software Interrupt on line 22 */
-             uint32_t __RESERVED0[6];
-        __IO uint32_t SWIER29;                   /*!< Software Interrupt on line 29 */
-        __IO uint32_t SWIER30;                   /*!< Software Interrupt on line 30 */
-        __IO uint32_t SWIER31;                   /*!< Software Interrupt on line 31 */
-    } SWIER;                                 /*!<EXTI Software interrupt event register,                   Address offset: 0x10 */
-    struct {
-        __IO uint32_t PR0;                       /*!< Pending bit for line 0 */
-        __IO uint32_t PR1;                       /*!< Pending bit for line 1 */
-        __IO uint32_t PR2;                       /*!< Pending bit for line 2 */
-        __IO uint32_t PR3;                       /*!< Pending bit for line 3 */
-        __IO uint32_t PR4;                       /*!< Pending bit for line 4 */
-        __IO uint32_t PR5;                       /*!< Pending bit for line 5 */
-        __IO uint32_t PR6;                       /*!< Pending bit for line 6 */
-        __IO uint32_t PR7;                       /*!< Pending bit for line 7 */
-        __IO uint32_t PR8;                       /*!< Pending bit for line 8 */
-        __IO uint32_t PR9;                       /*!< Pending bit for line 9 */
-        __IO uint32_t PR10;                      /*!< Pending bit for line 10 */
-        __IO uint32_t PR11;                      /*!< Pending bit for line 11 */
-        __IO uint32_t PR12;                      /*!< Pending bit for line 12 */
-        __IO uint32_t PR13;                      /*!< Pending bit for line 13 */
-        __IO uint32_t PR14;                      /*!< Pending bit for line 14 */
-        __IO uint32_t PR15;                      /*!< Pending bit for line 15 */
-        __IO uint32_t PR16;                      /*!< Pending bit for line 16 */
-        __IO uint32_t PR17;                      /*!< Pending bit for line 17 */
-        __IO uint32_t PR18;                      /*!< Pending bit for line 18 */
-        __IO uint32_t PR19;                      /*!< Pending bit for line 19 */
-        __IO uint32_t PR20;                      /*!< Pending bit for line 20 */
-        __IO uint32_t PR21;                      /*!< Pending bit for line 21 */
-        __IO uint32_t PR22;                      /*!< Pending bit for line 22 */
-             uint32_t __RESERVED0[6];
-        __IO uint32_t PR29;                      /*!< Pending bit for line 29 */
-        __IO uint32_t PR30;                      /*!< Pending bit for line 30 */
-        __IO uint32_t PR31;                      /*!< Pending bit for line 31 */
-    } PR;                                    /*!<EXTI Pending register,                                    Address offset: 0x14 */
+    __IO uint32_t IMR[32];                   /*!<EXTI Interrupt mask register,                             Address offset: 0x00 */
+    __IO uint32_t EMR[32];                   /*!<EXTI Event mask register,                                 Address offset: 0x04 */
+    __IO uint32_t RTSR[32];                  /*!<EXTI Rising trigger selection register ,                  Address offset: 0x08 */
+    __IO uint32_t FTSR[32];                  /*!<EXTI Falling trigger selection register,                  Address offset: 0x0C */
+    __IO uint32_t SWIER[32];                 /*!<EXTI Software interrupt event register,                   Address offset: 0x10 */
+    __IO uint32_t PR[32];                    /*!<EXTI Pending register,                                    Address offset: 0x14 */
          uint32_t __RESERVED0[32];           /*!< Reserved, 0x18                                                                */
          uint32_t __RESERVED1[32];           /*!< Reserved, 0x1C                                                                */
-    struct {
-        __IO uint32_t MR32;                      /*!< Interrupt Mask on line 32 */
-        __IO uint32_t MR33;                      /*!< Interrupt Mask on line 33 */
-        __IO uint32_t MR34;                      /*!< Interrupt Mask on line 34 */
-        __IO uint32_t MR35;                      /*!< Interrupt Mask on line 35 */
-             uint32_t __RESERVED0[28];
-    } IMR2;                                  /*!< EXTI Interrupt mask register,                            Address offset: 0x20 */
-    struct {
-        __IO uint32_t MR32;                      /*!< Event Mask on line 32 */
-        __IO uint32_t MR33;                      /*!< Event Mask on line 33 */
-        __IO uint32_t MR34;                      /*!< Event Mask on line 34 */
-        __IO uint32_t MR35;                      /*!< Event Mask on line 34 */
-             uint32_t __RESERVED0[28];
-    } EMR2;                                  /*!< EXTI Event mask register,                                Address offset: 0x24 */
-    struct {
-        __IO uint32_t TR32;                      /*!< Rising trigger event configuration bit of line 32 */
-        __IO uint32_t TR33;                      /*!< Rising trigger event configuration bit of line 33 */
-             uint32_t __RESERVED0[30];
-    } RTSR2;                                 /*!< EXTI Rising trigger selection register,                  Address offset: 0x28 */
-    struct {
-        __IO uint32_t TR32;                      /*!< Falling trigger event configuration bit of line 32 */
-        __IO uint32_t TR33;                      /*!< Falling trigger event configuration bit of line 33 */
-             uint32_t __RESERVED0[30];
-    } FTSR2;                                 /*!< EXTI Falling trigger selection register,                 Address offset: 0x2C */
-    struct {
-        __IO uint32_t SWIER32;                   /*!< Software Interrupt on line 32 */
-        __IO uint32_t SWIER33;                   /*!< Software Interrupt on line 33 */
-             uint32_t __RESERVED0[30];
-    } SWIER2;                                /*!< EXTI Software interrupt event register,                  Address offset: 0x30 */
-    struct {
-        __IO uint32_t PR32;                      /*!< Pending bit for line 32 */
-        __IO uint32_t PR33;                      /*!< Pending bit for line 33 */
-             uint32_t __RESERVED0[30];
-    } PR2;                                   /*!< EXTI Pending register,                                   Address offset: 0x34 */
+    __IO uint32_t IMR2[32];                  /*!< EXTI Interrupt mask register,                            Address offset: 0x20 */
+    __IO uint32_t EMR2[32];                  /*!< EXTI Event mask register,                                Address offset: 0x24 */
+    __IO uint32_t RTSR2[32];                 /*!< EXTI Rising trigger selection register,                  Address offset: 0x28 */
+    __IO uint32_t FTSR2[32];                 /*!< EXTI Falling trigger selection register,                 Address offset: 0x2C */
+    __IO uint32_t SWIER2[32];                /*!< EXTI Software interrupt event register,                  Address offset: 0x30 */
+    __IO uint32_t PR2[32];                   /*!< EXTI Pending register,                                   Address offset: 0x34 */
 } EXTI_BitBand_TypeDef;
 
 
@@ -2437,27 +1941,9 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } ICR;                                   /*!< I2C Interrupt clear register,      Address offset: 0x1C */
-    union {
-        struct {
-            __IO uint32_t PEC : 8;                   /*!< PEC register */
-                 uint32_t __RESERVED0 : 24;
-        } b;
-        __IO uint32_t w;
-    } PECR;                                  /*!< I2C PEC register,                  Address offset: 0x20 */
-    union {
-        struct {
-            __IO uint32_t RXDATA : 8;                /*!< 8-bit receive data */
-                 uint32_t __RESERVED0 : 24;
-        } b;
-        __IO uint32_t w;
-    } RXDR;                                  /*!< I2C Receive data register,         Address offset: 0x24 */
-    union {
-        struct {
-            __IO uint32_t TXDATA : 8;                /*!< 8-bit transmit data */
-                 uint32_t __RESERVED0 : 24;
-        } b;
-        __IO uint32_t w;
-    } TXDR;                                  /*!< I2C Transmit data register,        Address offset: 0x28 */
+    __IO uint32_t PECR;                      /*!< I2C PEC register,                  Address offset: 0x20 */
+    __IO uint32_t RXDR;                      /*!< I2C Receive data register,         Address offset: 0x24 */
+    __IO uint32_t TXDR;                      /*!< I2C Transmit data register,        Address offset: 0x28 */
 } I2C_TypeDef;
 
 
@@ -2567,18 +2053,9 @@ typedef struct {
         __IO uint32_t ALERTCF;                   /*!< Alert clear flag */
              uint32_t __RESERVED2[18];
     } ICR;                                   /*!< I2C Interrupt clear register,      Address offset: 0x1C */
-    struct {
-        __IO uint32_t PEC[8];                    /*!< PEC register */
-             uint32_t __RESERVED0[24];
-    } PECR;                                  /*!< I2C PEC register,                  Address offset: 0x20 */
-    struct {
-        __IO uint32_t RXDATA[8];                 /*!< 8-bit receive data */
-             uint32_t __RESERVED0[24];
-    } RXDR;                                  /*!< I2C Receive data register,         Address offset: 0x24 */
-    struct {
-        __IO uint32_t TXDATA[8];                 /*!< 8-bit transmit data */
-             uint32_t __RESERVED0[24];
-    } TXDR;                                  /*!< I2C Transmit data register,        Address offset: 0x28 */
+    __IO uint32_t PECR[32];                  /*!< I2C PEC register,                  Address offset: 0x20 */
+    __IO uint32_t RXDR[32];                  /*!< I2C Receive data register,         Address offset: 0x24 */
+    __IO uint32_t TXDR[32];                  /*!< I2C Transmit data register,        Address offset: 0x28 */
 } I2C_BitBand_TypeDef;
 
 
@@ -2589,13 +2066,7 @@ typedef struct {
 
 
 typedef struct {
-    union {
-        struct {
-            __IO uint32_t KEY : 16;                  /*!< Key value (write only, read 0000h) */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } KR;                                    /*!< IWDG Key register,       Address offset: 0x00 */
+    __IO uint32_t KR;                        /*!< IWDG Key register,       Address offset: 0x00 */
     union {
         struct {
             __IO uint32_t PR : 3;                    /*!< PR[2:0] (Prescaler divider) */
@@ -2603,13 +2074,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } PR;                                    /*!< IWDG Prescaler register, Address offset: 0x04 */
-    union {
-        struct {
-            __IO uint32_t RL : 12;                   /*!< Watchdog counter reload value */
-                 uint32_t __RESERVED0 : 20;
-        } b;
-        __IO uint32_t w;
-    } RLR;                                   /*!< IWDG Reload register,    Address offset: 0x08 */
+    __IO uint32_t RLR;                       /*!< IWDG Reload register,    Address offset: 0x08 */
     union {
         struct {
             __IO uint32_t PVU : 1;                   /*!< Watchdog prescaler value update */
@@ -2619,39 +2084,24 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } SR;                                    /*!< IWDG Status register,    Address offset: 0x0C */
-    union {
-        struct {
-            __IO uint32_t WIN : 12;                  /*!< Watchdog counter window value */
-                 uint32_t __RESERVED0 : 20;
-        } b;
-        __IO uint32_t w;
-    } WINR;                                  /*!< IWDG Window register,    Address offset: 0x10 */
+    __IO uint32_t WINR;                      /*!< IWDG Window register,    Address offset: 0x10 */
 } IWDG_TypeDef;
 
 
 typedef struct {
-    struct {
-        __IO uint32_t KEY[16];                   /*!< Key value (write only, read 0000h) */
-             uint32_t __RESERVED0[16];
-    } KR;                                    /*!< IWDG Key register,       Address offset: 0x00 */
+    __IO uint32_t KR[32];                    /*!< IWDG Key register,       Address offset: 0x00 */
     struct {
         __IO uint32_t PR[3];                     /*!< PR[2:0] (Prescaler divider) */
              uint32_t __RESERVED0[29];
     } PR;                                    /*!< IWDG Prescaler register, Address offset: 0x04 */
-    struct {
-        __IO uint32_t RL[12];                    /*!< Watchdog counter reload value */
-             uint32_t __RESERVED0[20];
-    } RLR;                                   /*!< IWDG Reload register,    Address offset: 0x08 */
+    __IO uint32_t RLR[32];                   /*!< IWDG Reload register,    Address offset: 0x08 */
     struct {
         __IO uint32_t PVU;                       /*!< Watchdog prescaler value update */
         __IO uint32_t RVU;                       /*!< Watchdog counter reload value update */
         __IO uint32_t WVU;                       /*!< Watchdog counter window value update */
              uint32_t __RESERVED0[29];
     } SR;                                    /*!< IWDG Status register,    Address offset: 0x0C */
-    struct {
-        __IO uint32_t WIN[12];                   /*!< Watchdog counter window value */
-             uint32_t __RESERVED0[20];
-    } WINR;                                  /*!< IWDG Window register,    Address offset: 0x10 */
+    __IO uint32_t WINR[32];                  /*!< IWDG Window register,    Address offset: 0x10 */
 } IWDG_BitBand_TypeDef;
 
 
@@ -3290,13 +2740,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } PRER;                                  /*!< RTC prescaler register,                                   Address offset: 0x10 */
-    union {
-        struct {
-            __IO uint32_t WUT : 16;
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } WUTR;                                  /*!< RTC wakeup timer register,                                Address offset: 0x14 */
+    __IO uint32_t WUTR;                      /*!< RTC wakeup timer register,                                Address offset: 0x14 */
          uint32_t __RESERVED0;               /*!< Reserved, 0x18                                                                 */
     union {
         struct {
@@ -3336,20 +2780,8 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } ALRMBR;                                /*!< RTC alarm B register,                                     Address offset: 0x20 */
-    union {
-        struct {
-            __IO uint32_t KEY : 8;
-                 uint32_t __RESERVED0 : 24;
-        } b;
-        __IO uint32_t w;
-    } WPR;                                   /*!< RTC write protection register,                            Address offset: 0x24 */
-    union {
-        struct {
-            __IO uint32_t SS : 16;
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } SSR;                                   /*!< RTC sub second register,                                  Address offset: 0x28 */
+    __IO uint32_t WPR;                       /*!< RTC write protection register,                            Address offset: 0x24 */
+    __IO uint32_t SSR;                       /*!< RTC sub second register,                                  Address offset: 0x28 */
     union {
         struct {
             __IO uint32_t SUBFS : 15;
@@ -3385,13 +2817,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } TSDR;                                  /*!< RTC time stamp date register,                             Address offset: 0x34 */
-    union {
-        struct {
-            __IO uint32_t SS : 16;
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } TSSSR;                                 /*!< RTC time-stamp sub second register,                       Address offset: 0x38 */
+    __IO uint32_t TSSSR;                     /*!< RTC time-stamp sub second register,                       Address offset: 0x38 */
     union {
         struct {
             __IO uint32_t CALM : 9;
@@ -3520,10 +2946,7 @@ typedef struct {
         __IO uint32_t PREDIV_A[7];
              uint32_t __RESERVED1[9];
     } PRER;                                  /*!< RTC prescaler register,                                   Address offset: 0x10 */
-    struct {
-        __IO uint32_t WUT[16];
-             uint32_t __RESERVED0[16];
-    } WUTR;                                  /*!< RTC wakeup timer register,                                Address offset: 0x14 */
+    __IO uint32_t WUTR[32];                  /*!< RTC wakeup timer register,                                Address offset: 0x14 */
          uint32_t __RESERVED0[32];           /*!< Reserved, 0x18                                                                 */
     struct {
         __IO uint32_t SU[4];
@@ -3557,14 +2980,8 @@ typedef struct {
         __IO uint32_t WDSEL;
         __IO uint32_t MSK4;
     } ALRMBR;                                /*!< RTC alarm B register,                                     Address offset: 0x20 */
-    struct {
-        __IO uint32_t KEY[8];
-             uint32_t __RESERVED0[24];
-    } WPR;                                   /*!< RTC write protection register,                            Address offset: 0x24 */
-    struct {
-        __IO uint32_t SS[16];
-             uint32_t __RESERVED0[16];
-    } SSR;                                   /*!< RTC sub second register,                                  Address offset: 0x28 */
+    __IO uint32_t WPR[32];                   /*!< RTC write protection register,                            Address offset: 0x24 */
+    __IO uint32_t SSR[32];                   /*!< RTC sub second register,                                  Address offset: 0x28 */
     struct {
         __IO uint32_t SUBFS[15];
              uint32_t __RESERVED0[16];
@@ -3591,10 +3008,7 @@ typedef struct {
         __IO uint32_t WDU[3];
              uint32_t __RESERVED1[16];
     } TSDR;                                  /*!< RTC time stamp date register,                             Address offset: 0x34 */
-    struct {
-        __IO uint32_t SS[16];
-             uint32_t __RESERVED0[16];
-    } TSSSR;                                 /*!< RTC time-stamp sub second register,                       Address offset: 0x38 */
+    __IO uint32_t TSSSR[32];                 /*!< RTC time-stamp sub second register,                       Address offset: 0x38 */
     struct {
         __IO uint32_t CALM[9];
              uint32_t __RESERVED0[4];
@@ -3700,34 +3114,10 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } SR;                                    /*!< SPI Status register,                                 Address offset: 0x08 */
-    union {
-        struct {
-            __IO uint32_t DR : 16;                   /*!< Data Register */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } DR;                                    /*!< SPI data register,                                   Address offset: 0x0C */
-    union {
-        struct {
-            __IO uint32_t CRCPOLY : 16;              /*!< CRC polynomial register */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } CRCPR;                                 /*!< SPI CRC polynomial register,                         Address offset: 0x10 */
-    union {
-        struct {
-            __IO uint32_t RXCRC : 16;                /*!< Rx CRC Register */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } RXCRCR;                                /*!< SPI Rx CRC register,                                 Address offset: 0x14 */
-    union {
-        struct {
-            __IO uint32_t TXCRC : 16;                /*!< Tx CRC Register */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } TXCRCR;                                /*!< SPI Tx CRC register,                                 Address offset: 0x18 */
+    __IO uint32_t DR;                        /*!< SPI data register,                                   Address offset: 0x0C */
+    __IO uint32_t CRCPR;                     /*!< SPI CRC polynomial register,                         Address offset: 0x10 */
+    __IO uint32_t RXCRCR;                    /*!< SPI Rx CRC register,                                 Address offset: 0x14 */
+    __IO uint32_t TXCRCR;                    /*!< SPI Tx CRC register,                                 Address offset: 0x18 */
     union {
         struct {
             __IO uint32_t CHLEN : 1;                 /*!<Channel length (number of bits per audio channel) */
@@ -3802,22 +3192,10 @@ typedef struct {
         __IO uint32_t FTLVL[2];                  /*!< FIFO Transmission Level */
              uint32_t __RESERVED0[19];
     } SR;                                    /*!< SPI Status register,                                 Address offset: 0x08 */
-    struct {
-        __IO uint32_t DR[16];                    /*!< Data Register */
-             uint32_t __RESERVED0[16];
-    } DR;                                    /*!< SPI data register,                                   Address offset: 0x0C */
-    struct {
-        __IO uint32_t CRCPOLY[16];               /*!< CRC polynomial register */
-             uint32_t __RESERVED0[16];
-    } CRCPR;                                 /*!< SPI CRC polynomial register,                         Address offset: 0x10 */
-    struct {
-        __IO uint32_t RXCRC[16];                 /*!< Rx CRC Register */
-             uint32_t __RESERVED0[16];
-    } RXCRCR;                                /*!< SPI Rx CRC register,                                 Address offset: 0x14 */
-    struct {
-        __IO uint32_t TXCRC[16];                 /*!< Tx CRC Register */
-             uint32_t __RESERVED0[16];
-    } TXCRCR;                                /*!< SPI Tx CRC register,                                 Address offset: 0x18 */
+    __IO uint32_t DR[32];                    /*!< SPI data register,                                   Address offset: 0x0C */
+    __IO uint32_t CRCPR[32];                 /*!< SPI CRC polynomial register,                         Address offset: 0x10 */
+    __IO uint32_t RXCRCR[32];                /*!< SPI Rx CRC register,                                 Address offset: 0x14 */
+    __IO uint32_t TXCRCR[32];                /*!< SPI Tx CRC register,                                 Address offset: 0x18 */
     struct {
         __IO uint32_t CHLEN;                     /*!<Channel length (number of bits per audio channel) */
         __IO uint32_t DATLEN[2];                 /*!<DATLEN[1:0] bits (Data length to be transferred) */
@@ -4557,13 +3935,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } IOGCSR;                                /*!< TSC I/O group control status register,                    Address offset: 0x30 */
-    union {
-        struct {
-            __IO uint32_t CNT : 14;                  /*!<CNT[13:0] bits (Counter value) */
-                 uint32_t __RESERVED0 : 18;
-        } b;
-        __IO uint32_t w;
-    } IOGXCR[8];                                /*!< TSC I/O group x counter register,                         Address offset: 0x34-50 */
+    __IO uint32_t IOGXCR[8];                    /*!< TSC I/O group x counter register,                         Address offset: 0x34-50 */
 } TSC_TypeDef;
 
 
@@ -4758,10 +4130,7 @@ typedef struct {
         __IO uint32_t G8S;                       /*!<Analog IO GROUP8 status */
              uint32_t __RESERVED1[8];
     } IOGCSR;                                /*!< TSC I/O group control status register,                    Address offset: 0x30 */
-    struct {
-        __IO uint32_t CNT[14];                   /*!<CNT[13:0] bits (Counter value) */
-             uint32_t __RESERVED0[18];
-    } IOGXCR[8];                                /*!< TSC I/O group x counter register,                         Address offset: 0x34-50 */
+    __IO uint32_t IOGXCR[8][32];                /*!< TSC I/O group x counter register,                         Address offset: 0x34-50 */
 } TSC_BitBand_TypeDef;
 
 
@@ -4935,21 +4304,9 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } ICR;                                   /*!< USART Interrupt flag Clear register,      Address offset: 0x20 */
-    union {
-        struct {
-            __IO uint32_t RDR : 9;                   /*!< RDR[8:0] bits (Receive Data value) */
-                 uint32_t __RESERVED0 : 7;
-        } b;
-        __IO uint16_t w;
-    } RDR;                                   /*!< USART Receive Data register,              Address offset: 0x24 */
+    __IO uint16_t RDR;                       /*!< USART Receive Data register,              Address offset: 0x24 */
          uint16_t __RESERVED0;               /*!< Reserved, 0x26                                                 */
-    union {
-        struct {
-            __IO uint32_t TDR : 9;                   /*!< TDR[8:0] bits (Transmit Data value) */
-                 uint32_t __RESERVED0 : 7;
-        } b;
-        __IO uint16_t w;
-    } TDR;                                   /*!< USART Transmit Data register,             Address offset: 0x28 */
+    __IO uint16_t TDR;                       /*!< USART Transmit Data register,             Address offset: 0x28 */
          uint16_t __RESERVED1;               /*!< Reserved, 0x2A                                                 */
 } USART_TypeDef;
 
@@ -5091,15 +4448,9 @@ typedef struct {
         __IO uint32_t WUCF;                      /*!< Wake Up from stop mode Clear Flag */
              uint32_t __RESERVED5[11];
     } ICR;                                   /*!< USART Interrupt flag Clear register,      Address offset: 0x20 */
-    struct {
-        __IO uint32_t RDR[9];                    /*!< RDR[8:0] bits (Receive Data value) */
-             uint32_t __RESERVED0[7];
-    } RDR;                                   /*!< USART Receive Data register,              Address offset: 0x24 */
+    __IO uint32_t RDR[16];                   /*!< USART Receive Data register,              Address offset: 0x24 */
          uint32_t __RESERVED0[16];           /*!< Reserved, 0x26                                                 */
-    struct {
-        __IO uint32_t TDR[9];                    /*!< TDR[8:0] bits (Transmit Data value) */
-             uint32_t __RESERVED0[7];
-    } TDR;                                   /*!< USART Transmit Data register,             Address offset: 0x28 */
+    __IO uint32_t TDR[16];                   /*!< USART Transmit Data register,             Address offset: 0x28 */
          uint32_t __RESERVED1[16];           /*!< Reserved, 0x2A                                                 */
 } USART_BitBand_TypeDef;
 
@@ -5137,7 +4488,9 @@ typedef struct {
             __IO uint32_t LPMODE : 1;                /*!< Low-power MODE */
             __IO uint32_t FSUSP : 1;                 /*!< Force SUSPend */
             __IO uint32_t RESUME : 1;                /*!< RESUME request */
-                 uint32_t __RESERVED0 : 3;
+            __IO uint32_t L1RESUME : 1;              /*!< LPM L1 Resume request */
+                 uint32_t __RESERVED0 : 1;
+            __IO uint32_t L1REQM : 1;                /*!< LPM L1 state request interrupt mask */
             __IO uint32_t ESOFM : 1;                 /*!< Expected Start Of Frame Mask */
             __IO uint32_t SOFM : 1;                  /*!< Start Of Frame Mask */
             __IO uint32_t RESETM : 1;                /*!< RESET Mask   */
@@ -5154,7 +4507,8 @@ typedef struct {
         struct {
             __IO uint32_t EP_ID : 4;                 /*!< EndPoint IDentifier (read-only bit)  */
             __IO uint32_t DIR : 1;                   /*!< DIRection of transaction (read-only bit)  */
-                 uint32_t __RESERVED0 : 3;
+                 uint32_t __RESERVED0 : 2;
+            __IO uint32_t L1REQ : 1;                 /*!< LPM L1 state request  */
             __IO uint32_t ESOF : 1;                  /*!< Expected Start Of Frame (clear-only bit) */
             __IO uint32_t SOF : 1;                   /*!< Start Of Frame (clear-only bit) */
             __IO uint32_t RESET : 1;                 /*!< RESET (clear-only bit) */
@@ -5215,7 +4569,9 @@ typedef struct {
         __IO uint32_t LPMODE;                    /*!< Low-power MODE */
         __IO uint32_t FSUSP;                     /*!< Force SUSPend */
         __IO uint32_t RESUME;                    /*!< RESUME request */
-             uint32_t __RESERVED0[3];
+        __IO uint32_t L1RESUME;                  /*!< LPM L1 Resume request */
+             uint32_t __RESERVED0;
+        __IO uint32_t L1REQM;                    /*!< LPM L1 state request interrupt mask */
         __IO uint32_t ESOFM;                     /*!< Expected Start Of Frame Mask */
         __IO uint32_t SOFM;                      /*!< Start Of Frame Mask */
         __IO uint32_t RESETM;                    /*!< RESET Mask   */
@@ -5229,7 +4585,8 @@ typedef struct {
     struct {
         __IO uint32_t EP_ID[4];                  /*!< EndPoint IDentifier (read-only bit)  */
         __IO uint32_t DIR;                       /*!< DIRection of transaction (read-only bit)  */
-             uint32_t __RESERVED0[3];
+             uint32_t __RESERVED0[2];
+        __IO uint32_t L1REQ;                     /*!< LPM L1 state request  */
         __IO uint32_t ESOF;                      /*!< Expected Start Of Frame (clear-only bit) */
         __IO uint32_t SOF;                       /*!< Start Of Frame (clear-only bit) */
         __IO uint32_t RESET;                     /*!< RESET (clear-only bit) */
@@ -11278,6 +10635,18 @@ typedef struct {
 #define CAN_TX_IRQHandler     USB_HP_CAN_TX_IRQHandler
 #define CAN_RX0_IRQHandler    USB_LP_CAN_RX0_IRQHandler
 
+/**
+  * @}
+  */
+
+/** @defgroup ADC_Internal_Channels ADC Internal Channels
+  * @{
+  */
+#define ADC_VOPAMP1_CHANNEL     15
+#define ADC_TEMPSENSOR_CHANNEL  16
+#define ADC_VBAT_CHANNEL        17
+#define ADC_VOPAMP2_CHANNEL     17
+#define ADC_VREFINT_CHANNEL     18
 /**
   * @}
   */

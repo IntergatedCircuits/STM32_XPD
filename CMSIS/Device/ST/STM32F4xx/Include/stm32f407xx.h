@@ -296,48 +296,12 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } SMPR2;                                 /*!< ADC sample time register 2,                  Address offset: 0x10 */
-    union {
-        struct {
-            __IO uint32_t JOFFSET1 : 12;             /*!<Data offset for injected channel 1 */
-                 uint32_t __RESERVED0 : 20;
-        } b;
-        __IO uint32_t w;
-    } JOFR1;                                 /*!< ADC injected channel data offset register 1, Address offset: 0x14 */
-    union {
-        struct {
-            __IO uint32_t JOFFSET2 : 12;             /*!<Data offset for injected channel 2 */
-                 uint32_t __RESERVED0 : 20;
-        } b;
-        __IO uint32_t w;
-    } JOFR2;                                 /*!< ADC injected channel data offset register 2, Address offset: 0x18 */
-    union {
-        struct {
-            __IO uint32_t JOFFSET3 : 12;             /*!<Data offset for injected channel 3 */
-                 uint32_t __RESERVED0 : 20;
-        } b;
-        __IO uint32_t w;
-    } JOFR3;                                 /*!< ADC injected channel data offset register 3, Address offset: 0x1C */
-    union {
-        struct {
-            __IO uint32_t JOFFSET4 : 12;             /*!<Data offset for injected channel 4 */
-                 uint32_t __RESERVED0 : 20;
-        } b;
-        __IO uint32_t w;
-    } JOFR4;                                 /*!< ADC injected channel data offset register 4, Address offset: 0x20 */
-    union {
-        struct {
-            __IO uint32_t HT : 12;                   /*!<Analog watchdog high threshold */
-                 uint32_t __RESERVED0 : 20;
-        } b;
-        __IO uint32_t w;
-    } HTR;                                   /*!< ADC watchdog higher threshold register,      Address offset: 0x24 */
-    union {
-        struct {
-            __IO uint32_t LT : 12;                   /*!<Analog watchdog low threshold */
-                 uint32_t __RESERVED0 : 20;
-        } b;
-        __IO uint32_t w;
-    } LTR;                                   /*!< ADC watchdog lower threshold register,       Address offset: 0x28 */
+    __IO uint32_t JOFR1;                     /*!< ADC injected channel data offset register 1, Address offset: 0x14 */
+    __IO uint32_t JOFR2;                     /*!< ADC injected channel data offset register 2, Address offset: 0x18 */
+    __IO uint32_t JOFR3;                     /*!< ADC injected channel data offset register 3, Address offset: 0x1C */
+    __IO uint32_t JOFR4;                     /*!< ADC injected channel data offset register 4, Address offset: 0x20 */
+    __IO uint32_t HTR;                       /*!< ADC watchdog higher threshold register,      Address offset: 0x24 */
+    __IO uint32_t LTR;                       /*!< ADC watchdog lower threshold register,       Address offset: 0x28 */
     union {
         struct {
             __IO uint32_t SQ13 : 5;                  /*!<SQ13[4:0] bits (13th conversion in regular sequence) */
@@ -384,38 +348,14 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } JSQR;                                  /*!< ADC injected sequence register,              Address offset: 0x38*/
+    __IO uint32_t JDR1;                      /*!< ADC injected data register 1,                Address offset: 0x3C */
+    __IO uint32_t JDR2;                      /*!< ADC injected data register 2,                Address offset: 0x40 */
+    __IO uint32_t JDR3;                      /*!< ADC injected data register 3,                Address offset: 0x44 */
+    __IO uint32_t JDR4;                      /*!< ADC injected data register 4,                Address offset: 0x48 */
     union {
         struct {
-            __IO uint32_t JDATA : 16;                /*!<Injected data */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } JDR1;                                  /*!< ADC injected data register 1,                Address offset: 0x3C */
-    union {
-        struct {
-            __IO uint32_t JDATA : 16;                /*!<Injected data */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } JDR2;                                  /*!< ADC injected data register 2,                Address offset: 0x40 */
-    union {
-        struct {
-            __IO uint32_t JDATA : 16;                /*!<Injected data */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } JDR3;                                  /*!< ADC injected data register 3,                Address offset: 0x44 */
-    union {
-        struct {
-            __IO uint32_t JDATA : 16;                /*!<Injected data */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } JDR4;                                  /*!< ADC injected data register 4,                Address offset: 0x48 */
-    union {
-        struct {
-            __IO uint32_t DATA : 16;                 /*!<Regular data */
-            __IO uint32_t ADC2DATA : 16;             /*!<ADC2 data */
+            __IO uint16_t DATA;                 /*!<Regular data */
+            __IO uint16_t ADC2DATA;             /*!<ADC2 data */
         } b;
         __IO uint32_t w;
     } DR;                                    /*!< ADC regular data register,                   Address offset: 0x4C */
@@ -493,30 +433,12 @@ typedef struct {
         __IO uint32_t SMP9[3];                   /*!<SMP9[2:0] bits (Channel 9 Sample time selection) */
              uint32_t __RESERVED0[2];
     } SMPR2;                                 /*!< ADC sample time register 2,                  Address offset: 0x10 */
-    struct {
-        __IO uint32_t JOFFSET1[12];              /*!<Data offset for injected channel 1 */
-             uint32_t __RESERVED0[20];
-    } JOFR1;                                 /*!< ADC injected channel data offset register 1, Address offset: 0x14 */
-    struct {
-        __IO uint32_t JOFFSET2[12];              /*!<Data offset for injected channel 2 */
-             uint32_t __RESERVED0[20];
-    } JOFR2;                                 /*!< ADC injected channel data offset register 2, Address offset: 0x18 */
-    struct {
-        __IO uint32_t JOFFSET3[12];              /*!<Data offset for injected channel 3 */
-             uint32_t __RESERVED0[20];
-    } JOFR3;                                 /*!< ADC injected channel data offset register 3, Address offset: 0x1C */
-    struct {
-        __IO uint32_t JOFFSET4[12];              /*!<Data offset for injected channel 4 */
-             uint32_t __RESERVED0[20];
-    } JOFR4;                                 /*!< ADC injected channel data offset register 4, Address offset: 0x20 */
-    struct {
-        __IO uint32_t HT[12];                    /*!<Analog watchdog high threshold */
-             uint32_t __RESERVED0[20];
-    } HTR;                                   /*!< ADC watchdog higher threshold register,      Address offset: 0x24 */
-    struct {
-        __IO uint32_t LT[12];                    /*!<Analog watchdog low threshold */
-             uint32_t __RESERVED0[20];
-    } LTR;                                   /*!< ADC watchdog lower threshold register,       Address offset: 0x28 */
+    __IO uint32_t JOFR1[32];                 /*!< ADC injected channel data offset register 1, Address offset: 0x14 */
+    __IO uint32_t JOFR2[32];                 /*!< ADC injected channel data offset register 2, Address offset: 0x18 */
+    __IO uint32_t JOFR3[32];                 /*!< ADC injected channel data offset register 3, Address offset: 0x1C */
+    __IO uint32_t JOFR4[32];                 /*!< ADC injected channel data offset register 4, Address offset: 0x20 */
+    __IO uint32_t HTR[32];                   /*!< ADC watchdog higher threshold register,      Address offset: 0x24 */
+    __IO uint32_t LTR[32];                   /*!< ADC watchdog lower threshold register,       Address offset: 0x28 */
     struct {
         __IO uint32_t SQ13[5];                   /*!<SQ13[4:0] bits (13th conversion in regular sequence) */
         __IO uint32_t SQ14[5];                   /*!<SQ14[4:0] bits (14th conversion in regular sequence) */
@@ -551,22 +473,10 @@ typedef struct {
         __IO uint32_t JL[2];                     /*!<JL[1:0] bits (Injected Sequence length) */
              uint32_t __RESERVED0[10];
     } JSQR;                                  /*!< ADC injected sequence register,              Address offset: 0x38*/
-    struct {
-        __IO uint32_t JDATA[16];                 /*!<Injected data */
-             uint32_t __RESERVED0[16];
-    } JDR1;                                  /*!< ADC injected data register 1,                Address offset: 0x3C */
-    struct {
-        __IO uint32_t JDATA[16];                 /*!<Injected data */
-             uint32_t __RESERVED0[16];
-    } JDR2;                                  /*!< ADC injected data register 2,                Address offset: 0x40 */
-    struct {
-        __IO uint32_t JDATA[16];                 /*!<Injected data */
-             uint32_t __RESERVED0[16];
-    } JDR3;                                  /*!< ADC injected data register 3,                Address offset: 0x44 */
-    struct {
-        __IO uint32_t JDATA[16];                 /*!<Injected data */
-             uint32_t __RESERVED0[16];
-    } JDR4;                                  /*!< ADC injected data register 4,                Address offset: 0x48 */
+    __IO uint32_t JDR1[32];                  /*!< ADC injected data register 1,                Address offset: 0x3C */
+    __IO uint32_t JDR2[32];                  /*!< ADC injected data register 2,                Address offset: 0x40 */
+    __IO uint32_t JDR3[32];                  /*!< ADC injected data register 3,                Address offset: 0x44 */
+    __IO uint32_t JDR4[32];                  /*!< ADC injected data register 4,                Address offset: 0x48 */
     struct {
         __IO uint32_t DATA[16];                  /*!<Regular data */
         __IO uint32_t ADC2DATA[16];              /*!<ADC2 data */
@@ -1182,20 +1092,8 @@ typedef struct {
         __IO uint32_t D12L;                      /*!< DAC channel 12-bit left-aligned data holding register */
         __IO uint32_t D8R;                       /*!< DAC channel 8-bit right-aligned data holding register */
     } DHRD;                                  /*!< DAC dual channel data holding registers */
-    union {
-        struct {
-            __IO uint32_t DACC1DOR : 12;             /*!<DAC channel1 data output */
-                 uint32_t __RESERVED0 : 20;
-        } b;
-        __IO uint32_t w;
-    } DOR1;                                  /*!< DAC channel1 data output register,                       Address offset: 0x2C */
-    union {
-        struct {
-            __IO uint32_t DACC2DOR : 12;             /*!<DAC channel2 data output */
-                 uint32_t __RESERVED0 : 20;
-        } b;
-        __IO uint32_t w;
-    } DOR2;                                  /*!< DAC channel2 data output register,                       Address offset: 0x30 */
+    __IO uint32_t DOR1;                      /*!< DAC channel1 data output register,                       Address offset: 0x2C */
+    __IO uint32_t DOR2;                      /*!< DAC channel2 data output register,                       Address offset: 0x30 */
     union {
         struct {
                  uint32_t __RESERVED0 : 13;
@@ -1248,14 +1146,8 @@ typedef struct {
         __IO uint32_t D12L[32];                  /*!< DAC channel 12-bit left-aligned data holding register */
         __IO uint32_t D8R[32];                   /*!< DAC channel 8-bit right-aligned data holding register */
     } DHRD;                                  /*!< DAC dual channel data holding registers */
-    struct {
-        __IO uint32_t DACC1DOR[12];              /*!<DAC channel1 data output */
-             uint32_t __RESERVED0[20];
-    } DOR1;                                  /*!< DAC channel1 data output register,                       Address offset: 0x2C */
-    struct {
-        __IO uint32_t DACC2DOR[12];              /*!<DAC channel2 data output */
-             uint32_t __RESERVED0[20];
-    } DOR2;                                  /*!< DAC channel2 data output register,                       Address offset: 0x30 */
+    __IO uint32_t DOR1[32];                  /*!< DAC channel1 data output register,                       Address offset: 0x2C */
+    __IO uint32_t DOR2[32];                  /*!< DAC channel2 data output register,                       Address offset: 0x30 */
     struct {
              uint32_t __RESERVED0[13];
         __IO uint32_t DMAUDR1;                   /*!<DAC channel1 DMA underrun flag */
@@ -1820,13 +1712,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } MACMIIAR;
-    union {
-        struct {
-            __IO uint32_t MD : 16;                   /* MII data: read/write data from/to PHY */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } MACMIIDR;
+    __IO uint32_t MACMIIDR;
     union {
         struct {
             __IO uint32_t FCBBPA : 1;                /* Flow control busy/backpressure activate */
@@ -1890,13 +1776,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } MACIMR;
-    union {
-        struct {
-            __IO uint32_t MACA0H : 16;               /* MAC address0 high */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } MACA0HR;
+    __IO uint32_t MACA0HR;
     __IO uint32_t MACA0LR;
     union {
         struct {
@@ -2013,13 +1893,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } PTPTSCR;
-    union {
-        struct {
-            __IO uint32_t STSSI : 8;                 /* System time Sub-second increment value */
-                 uint32_t __RESERVED0 : 24;
-        } b;
-        __IO uint32_t w;
-    } PTPSSIR;
+    __IO uint32_t PTPSSIR;
     __IO uint32_t PTPTSHR;
     union {
         struct {
@@ -2222,10 +2096,7 @@ typedef struct {
         __IO uint32_t PA[5];                     /* Physical layer address */
              uint32_t __RESERVED1[16];
     } MACMIIAR;
-    struct {
-        __IO uint32_t MD[16];                    /* MII data: read/write data from/to PHY */
-             uint32_t __RESERVED0[16];
-    } MACMIIDR;
+    __IO uint32_t MACMIIDR[32];
     struct {
         __IO uint32_t FCBBPA;                    /* Flow control busy/backpressure activate */
         __IO uint32_t TFCE;                      /* Transmit flow control enable */
@@ -2274,10 +2145,7 @@ typedef struct {
         __IO uint32_t TSTIM;                     /* Time stamp trigger interrupt mask */
              uint32_t __RESERVED2[22];
     } MACIMR;
-    struct {
-        __IO uint32_t MACA0H[16];                /* MAC address0 high */
-             uint32_t __RESERVED0[16];
-    } MACA0HR;
+    __IO uint32_t MACA0HR[32];
     __IO uint32_t MACA0LR[32];
     struct {
         __IO uint32_t MACA1H[16];                /* MAC address1 high */
@@ -2367,10 +2235,7 @@ typedef struct {
         __IO uint32_t TSCNT[2];                  /* Time stamp clock node type */
              uint32_t __RESERVED1[14];
     } PTPTSCR;
-    struct {
-        __IO uint32_t STSSI[8];                  /* System time Sub-second increment value */
-             uint32_t __RESERVED0[24];
-    } PTPSSIR;
+    __IO uint32_t PTPSSIR[32];
     __IO uint32_t PTPTSHR[32];
     struct {
         __IO uint32_t STSS[31];                  /* System Time sub-seconds */
@@ -3091,13 +2956,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } OAR2;                                  /*!< I2C Own address register 2, Address offset: 0x0C */
-    union {
-        struct {
-            __IO uint32_t DR : 8;                    /*!<8-bit Data Register         */
-                 uint32_t __RESERVED0 : 24;
-        } b;
-        __IO uint32_t w;
-    } DR;                                    /*!< I2C Data register,          Address offset: 0x10 */
+    __IO uint32_t DR;                        /*!< I2C Data register,          Address offset: 0x10 */
     union {
         struct {
             __IO uint32_t SB : 1;                    /*!<Start Bit (Master mode)                  */
@@ -3213,10 +3072,7 @@ typedef struct {
         __IO uint32_t ADD2[7];                   /*!<Interface address           */
              uint32_t __RESERVED0[24];
     } OAR2;                                  /*!< I2C Own address register 2, Address offset: 0x0C */
-    struct {
-        __IO uint32_t DR[8];                     /*!<8-bit Data Register         */
-             uint32_t __RESERVED0[24];
-    } DR;                                    /*!< I2C Data register,          Address offset: 0x10 */
+    __IO uint32_t DR[32];                    /*!< I2C Data register,          Address offset: 0x10 */
     struct {
         __IO uint32_t SB;                        /*!<Start Bit (Master mode)                  */
         __IO uint32_t ADDR;                      /*!<Address sent (master mode)/matched (slave mode) */
@@ -3274,13 +3130,7 @@ typedef struct {
 
 
 typedef struct {
-    union {
-        struct {
-            __IO uint32_t KEY : 16;                  /*!<Key value (write only, read 0000h)  */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } KR;                                    /*!< IWDG Key register,       Address offset: 0x00 */
+    __IO uint32_t KR;                        /*!< IWDG Key register,       Address offset: 0x00 */
     union {
         struct {
             __IO uint32_t PR : 3;                    /*!<PR[2:0] (Prescaler divider)         */
@@ -3288,13 +3138,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } PR;                                    /*!< IWDG Prescaler register, Address offset: 0x04 */
-    union {
-        struct {
-            __IO uint32_t RL : 12;                   /*!<Watchdog counter reload value        */
-                 uint32_t __RESERVED0 : 20;
-        } b;
-        __IO uint32_t w;
-    } RLR;                                   /*!< IWDG Reload register,    Address offset: 0x08 */
+    __IO uint32_t RLR;                       /*!< IWDG Reload register,    Address offset: 0x08 */
     union {
         struct {
             __IO uint32_t PVU : 1;                   /*!<Watchdog prescaler value update      */
@@ -3307,18 +3151,12 @@ typedef struct {
 
 
 typedef struct {
-    struct {
-        __IO uint32_t KEY[16];                   /*!<Key value (write only, read 0000h)  */
-             uint32_t __RESERVED0[16];
-    } KR;                                    /*!< IWDG Key register,       Address offset: 0x00 */
+    __IO uint32_t KR[32];                    /*!< IWDG Key register,       Address offset: 0x00 */
     struct {
         __IO uint32_t PR[3];                     /*!<PR[2:0] (Prescaler divider)         */
              uint32_t __RESERVED0[29];
     } PR;                                    /*!< IWDG Prescaler register, Address offset: 0x04 */
-    struct {
-        __IO uint32_t RL[12];                    /*!<Watchdog counter reload value        */
-             uint32_t __RESERVED0[20];
-    } RLR;                                   /*!< IWDG Reload register,    Address offset: 0x08 */
+    __IO uint32_t RLR[32];                   /*!< IWDG Reload register,    Address offset: 0x08 */
     struct {
         __IO uint32_t PVU;                       /*!<Watchdog prescaler value update      */
         __IO uint32_t RVU;                       /*!<Watchdog counter reload value update */
@@ -4331,13 +4169,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } PRER;                                  /*!< RTC prescaler register,                                   Address offset: 0x10 */
-    union {
-        struct {
-            __IO uint32_t WUT : 16;
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } WUTR;                                  /*!< RTC wakeup timer register,                                Address offset: 0x14 */
+    __IO uint32_t WUTR;                      /*!< RTC wakeup timer register,                                Address offset: 0x14 */
     union {
         struct {
             __IO uint32_t DC : 5;
@@ -4385,20 +4217,8 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } ALRMBR;                                /*!< RTC alarm B register,                                     Address offset: 0x20 */
-    union {
-        struct {
-            __IO uint32_t KEY : 8;
-                 uint32_t __RESERVED0 : 24;
-        } b;
-        __IO uint32_t w;
-    } WPR;                                   /*!< RTC write protection register,                            Address offset: 0x24 */
-    union {
-        struct {
-            __IO uint32_t SS : 16;
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } SSR;                                   /*!< RTC sub second register,                                  Address offset: 0x28 */
+    __IO uint32_t WPR;                       /*!< RTC write protection register,                            Address offset: 0x24 */
+    __IO uint32_t SSR;                       /*!< RTC sub second register,                                  Address offset: 0x28 */
     union {
         struct {
             __IO uint32_t SUBFS : 15;
@@ -4434,13 +4254,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } TSDR;                                  /*!< RTC time stamp date register,                             Address offset: 0x34 */
-    union {
-        struct {
-            __IO uint32_t SS : 16;
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } TSSSR;                                 /*!< RTC time-stamp sub second register,                       Address offset: 0x38 */
+    __IO uint32_t TSSSR;                     /*!< RTC time-stamp sub second register,                       Address offset: 0x38 */
     union {
         struct {
             __IO uint32_t CALM : 9;
@@ -4569,10 +4383,7 @@ typedef struct {
         __IO uint32_t PREDIV_A[7];
              uint32_t __RESERVED1[9];
     } PRER;                                  /*!< RTC prescaler register,                                   Address offset: 0x10 */
-    struct {
-        __IO uint32_t WUT[16];
-             uint32_t __RESERVED0[16];
-    } WUTR;                                  /*!< RTC wakeup timer register,                                Address offset: 0x14 */
+    __IO uint32_t WUTR[32];                  /*!< RTC wakeup timer register,                                Address offset: 0x14 */
     struct {
         __IO uint32_t DC[5];
              uint32_t __RESERVED0[2];
@@ -4611,14 +4422,8 @@ typedef struct {
         __IO uint32_t WDSEL;
         __IO uint32_t MSK4;
     } ALRMBR;                                /*!< RTC alarm B register,                                     Address offset: 0x20 */
-    struct {
-        __IO uint32_t KEY[8];
-             uint32_t __RESERVED0[24];
-    } WPR;                                   /*!< RTC write protection register,                            Address offset: 0x24 */
-    struct {
-        __IO uint32_t SS[16];
-             uint32_t __RESERVED0[16];
-    } SSR;                                   /*!< RTC sub second register,                                  Address offset: 0x28 */
+    __IO uint32_t WPR[32];                   /*!< RTC write protection register,                            Address offset: 0x24 */
+    __IO uint32_t SSR[32];                   /*!< RTC sub second register,                                  Address offset: 0x28 */
     struct {
         __IO uint32_t SUBFS[15];
              uint32_t __RESERVED0[16];
@@ -4645,10 +4450,7 @@ typedef struct {
         __IO uint32_t WDU[3];
              uint32_t __RESERVED1[16];
     } TSDR;                                  /*!< RTC time stamp date register,                             Address offset: 0x34 */
-    struct {
-        __IO uint32_t SS[16];
-             uint32_t __RESERVED0[16];
-    } TSSSR;                                 /*!< RTC time-stamp sub second register,                       Address offset: 0x38 */
+    __IO uint32_t TSSSR[32];                 /*!< RTC time-stamp sub second register,                       Address offset: 0x38 */
     struct {
         __IO uint32_t CALM[9];
              uint32_t __RESERVED0[4];
@@ -4747,13 +4549,7 @@ typedef struct {
     __I  uint32_t RESP3;                     /*!< SDIO response 3 register,       Address offset: 0x1C */
     __I  uint32_t RESP4;                     /*!< SDIO response 4 register,       Address offset: 0x20 */
     __IO uint32_t DTIMER;                    /*!< SDIO data timer register,       Address offset: 0x24 */
-    union {
-        struct {
-            __IO uint32_t DATALENGTH : 25;           /*!<Data length value    */
-                 uint32_t __RESERVED0 : 7;
-        } b;
-        __IO uint32_t w;
-    } DLEN;                                  /*!< SDIO data length register,      Address offset: 0x28 */
+    __IO uint32_t DLEN;                      /*!< SDIO data length register,      Address offset: 0x28 */
     union {
         struct {
             __IO uint32_t DTEN : 1;                  /*!<Data transfer enabled bit         */
@@ -4769,13 +4565,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } DCTRL;                                 /*!< SDIO data control register,     Address offset: 0x2C */
-    union {
-        struct {
-            __I  uint32_t DATACOUNT : 25;            /*!<Data count value */
-                 uint32_t __RESERVED0 : 7;
-        } b;
-        __I  uint32_t w;
-    } DCOUNT;                                /*!< SDIO data counter register,     Address offset: 0x30 */
+    __I  uint32_t DCOUNT;                    /*!< SDIO data counter register,     Address offset: 0x30 */
     union {
         struct {
             __I  uint32_t CCRCFAIL : 1;              /*!<Command response received (CRC check failed)  */
@@ -4857,13 +4647,7 @@ typedef struct {
         __IO uint32_t w;
     } MASK;                                  /*!< SDIO mask register,             Address offset: 0x3C */
          uint32_t __RESERVED0[2];               /*!< Reserved, 0x40-0x44                                  */
-    union {
-        struct {
-            __I  uint32_t FIFOCOUNT : 24;            /*!<Remaining number of words to be written to or read from the FIFO */
-                 uint32_t __RESERVED0 : 8;
-        } b;
-        __I  uint32_t w;
-    } FIFOCNT;                               /*!< SDIO FIFO counter register,     Address offset: 0x48 */
+    __I  uint32_t FIFOCNT;                   /*!< SDIO FIFO counter register,     Address offset: 0x48 */
          uint32_t __RESERVED1[13];               /*!< Reserved, 0x4C-0x7C                                  */
     __IO uint32_t FIFO;                      /*!< SDIO data FIFO register,        Address offset: 0x80 */
 } SDIO_TypeDef;
@@ -4906,10 +4690,7 @@ typedef struct {
     __I  uint32_t RESP3[32];                 /*!< SDIO response 3 register,       Address offset: 0x1C */
     __I  uint32_t RESP4[32];                 /*!< SDIO response 4 register,       Address offset: 0x20 */
     __IO uint32_t DTIMER[32];                /*!< SDIO data timer register,       Address offset: 0x24 */
-    struct {
-        __IO uint32_t DATALENGTH[25];            /*!<Data length value    */
-             uint32_t __RESERVED0[7];
-    } DLEN;                                  /*!< SDIO data length register,      Address offset: 0x28 */
+    __IO uint32_t DLEN[32];                  /*!< SDIO data length register,      Address offset: 0x28 */
     struct {
         __IO uint32_t DTEN;                      /*!<Data transfer enabled bit         */
         __IO uint32_t DTDIR;                     /*!<Data transfer direction selection */
@@ -4922,10 +4703,7 @@ typedef struct {
         __IO uint32_t SDIOEN;                    /*!<SD I/O enable functions */
              uint32_t __RESERVED0[20];
     } DCTRL;                                 /*!< SDIO data control register,     Address offset: 0x2C */
-    struct {
-        __I  uint32_t DATACOUNT[25];             /*!<Data count value */
-             uint32_t __RESERVED0[7];
-    } DCOUNT;                                /*!< SDIO data counter register,     Address offset: 0x30 */
+    __I  uint32_t DCOUNT[32];                /*!< SDIO data counter register,     Address offset: 0x30 */
     struct {
         __I  uint32_t CCRCFAIL;                  /*!<Command response received (CRC check failed)  */
         __I  uint32_t DCRCFAIL;                  /*!<Data block sent/received (CRC check failed)   */
@@ -4998,10 +4776,7 @@ typedef struct {
              uint32_t __RESERVED0[8];
     } MASK;                                  /*!< SDIO mask register,             Address offset: 0x3C */
          uint32_t __RESERVED0[2][32];           /*!< Reserved, 0x40-0x44                                  */
-    struct {
-        __I  uint32_t FIFOCOUNT[24];             /*!<Remaining number of words to be written to or read from the FIFO */
-             uint32_t __RESERVED0[8];
-    } FIFOCNT;                               /*!< SDIO FIFO counter register,     Address offset: 0x48 */
+    __I  uint32_t FIFOCNT[32];               /*!< SDIO FIFO counter register,     Address offset: 0x48 */
          uint32_t __RESERVED1[13][32];           /*!< Reserved, 0x4C-0x7C                                  */
     __IO uint32_t FIFO[32];                  /*!< SDIO data FIFO register,        Address offset: 0x80 */
 } SDIO_BitBand_TypeDef;
@@ -5063,34 +4838,10 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } SR;                                    /*!< SPI status register,                                Address offset: 0x08 */
-    union {
-        struct {
-            __IO uint32_t DR : 16;                   /*!<Data Register           */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } DR;                                    /*!< SPI data register,                                  Address offset: 0x0C */
-    union {
-        struct {
-            __IO uint32_t CRCPOLY : 16;              /*!<CRC polynomial register */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } CRCPR;                                 /*!< SPI CRC polynomial register (not used in I2S mode), Address offset: 0x10 */
-    union {
-        struct {
-            __IO uint32_t RXCRC : 16;                /*!<Rx CRC Register         */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } RXCRCR;                                /*!< SPI RX CRC register (not used in I2S mode),         Address offset: 0x14 */
-    union {
-        struct {
-            __IO uint32_t TXCRC : 16;                /*!<Tx CRC Register         */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } TXCRCR;                                /*!< SPI TX CRC register (not used in I2S mode),         Address offset: 0x18 */
+    __IO uint32_t DR;                        /*!< SPI data register,                                  Address offset: 0x0C */
+    __IO uint32_t CRCPR;                     /*!< SPI CRC polynomial register (not used in I2S mode), Address offset: 0x10 */
+    __IO uint32_t RXCRCR;                    /*!< SPI RX CRC register (not used in I2S mode),         Address offset: 0x14 */
+    __IO uint32_t TXCRCR;                    /*!< SPI TX CRC register (not used in I2S mode),         Address offset: 0x18 */
     union {
         struct {
             __IO uint32_t CHLEN : 1;                 /*!<Channel length (number of bits per audio channel) */
@@ -5159,22 +4910,10 @@ typedef struct {
         __IO uint32_t FRE;                       /*!<Frame format error flag  */
              uint32_t __RESERVED0[23];
     } SR;                                    /*!< SPI status register,                                Address offset: 0x08 */
-    struct {
-        __IO uint32_t DR[16];                    /*!<Data Register           */
-             uint32_t __RESERVED0[16];
-    } DR;                                    /*!< SPI data register,                                  Address offset: 0x0C */
-    struct {
-        __IO uint32_t CRCPOLY[16];               /*!<CRC polynomial register */
-             uint32_t __RESERVED0[16];
-    } CRCPR;                                 /*!< SPI CRC polynomial register (not used in I2S mode), Address offset: 0x10 */
-    struct {
-        __IO uint32_t RXCRC[16];                 /*!<Rx CRC Register         */
-             uint32_t __RESERVED0[16];
-    } RXCRCR;                                /*!< SPI RX CRC register (not used in I2S mode),         Address offset: 0x14 */
-    struct {
-        __IO uint32_t TXCRC[16];                 /*!<Tx CRC Register         */
-             uint32_t __RESERVED0[16];
-    } TXCRCR;                                /*!< SPI TX CRC register (not used in I2S mode),         Address offset: 0x18 */
+    __IO uint32_t DR[32];                    /*!< SPI data register,                                  Address offset: 0x0C */
+    __IO uint32_t CRCPR[32];                 /*!< SPI CRC polynomial register (not used in I2S mode), Address offset: 0x10 */
+    __IO uint32_t RXCRCR[32];                /*!< SPI RX CRC register (not used in I2S mode),         Address offset: 0x14 */
+    __IO uint32_t TXCRCR[32];                /*!< SPI TX CRC register (not used in I2S mode),         Address offset: 0x18 */
     struct {
         __IO uint32_t CHLEN;                     /*!<Channel length (number of bits per audio channel) */
         __IO uint32_t DATLEN[2];                 /*!<DATLEN[1:0] bits (Data length to be transferred)  */
@@ -5631,13 +5370,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } SR;                                    /*!< USART Status register,                   Address offset: 0x00 */
-    union {
-        struct {
-            __IO uint32_t DR : 9;                    /*!<Data value */
-                 uint32_t __RESERVED0 : 23;
-        } b;
-        __IO uint32_t w;
-    } DR;                                    /*!< USART Data register,                     Address offset: 0x04 */
+    __IO uint32_t DR;                        /*!< USART Data register,                     Address offset: 0x04 */
     union {
         struct {
             __IO uint32_t DIV_Fraction : 4;          /*!<Fraction of USARTDIV */
@@ -5728,10 +5461,7 @@ typedef struct {
         __IO uint32_t CTS;                       /*!<CTS Flag                     */
              uint32_t __RESERVED0[22];
     } SR;                                    /*!< USART Status register,                   Address offset: 0x00 */
-    struct {
-        __IO uint32_t DR[9];                     /*!<Data value */
-             uint32_t __RESERVED0[23];
-    } DR;                                    /*!< USART Data register,                     Address offset: 0x04 */
+    __IO uint32_t DR[32];                    /*!< USART Data register,                     Address offset: 0x04 */
     struct {
         __IO uint32_t DIV_Fraction[4];           /*!<Fraction of USARTDIV */
         __IO uint32_t DIV_Mantissa[12];          /*!<Mantissa of USARTDIV */
@@ -6065,13 +5795,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } GRXSTSP;                               /*!<  Receive Sts Q Read & POP Register  020h*/
-    union {
-        struct {
-            __IO uint32_t RXFD : 16;                 /*!< RxFIFO depth */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } GRXFSIZ;                               /* Receive FIFO Size Register         024h*/
+    __IO uint32_t GRXFSIZ;                   /* Receive FIFO Size Register         024h*/
     __IO uint32_t DIEPTXF0_HNPTXFSIZ;        /*!<  EP0 / Non Periodic Tx FIFO Size Register 028h*/
     __IO uint32_t HNPTXSTS;                  /*!<  Non Periodic Tx FIFO/Queue Sts reg 02Ch*/
          uint32_t __RESERVED0[2];               /* Reserved                           030h*/
@@ -6202,20 +5926,8 @@ typedef struct {
     } DAINTMSK;                              /* dev All Endpoints Itr Mask   81Ch*/
          uint32_t __RESERVED1;               /* Reserved                     820h*/
          uint32_t __RESERVED2;               /* Reserved                     824h*/
-    union {
-        struct {
-            __IO uint32_t VBUSDT : 16;               /*!< Device VBUS discharge time */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } DVBUSDIS;                              /* dev VBUS discharge Register  828h*/
-    union {
-        struct {
-            __IO uint32_t DVBUSP : 12;               /*!< Device VBUS pulsing time */
-                 uint32_t __RESERVED0 : 20;
-        } b;
-        __IO uint32_t w;
-    } DVBUSPULSE;                            /* dev VBUS Pulse Register      82Ch*/
+    __IO uint32_t DVBUSDIS;                  /* dev VBUS discharge Register  828h*/
+    __IO uint32_t DVBUSPULSE;                /* dev VBUS Pulse Register      82Ch*/
     union {
         struct {
             __IO uint32_t NONISOTHREN : 1;           /*!< Nonisochronous IN endpoints threshold enable */
@@ -6230,13 +5942,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } DTHRCTL;                               /* dev thr                      830h*/
-    union {
-        struct {
-            __IO uint32_t INEPTXFEM : 16;            /*!< IN EP Tx FIFO empty interrupt mask bits */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } DIEPEMPMSK;                            /* dev empty msk             834h*/
+    __IO uint32_t DIEPEMPMSK;                /* dev empty msk             834h*/
     union {
         struct {
                  uint32_t __RESERVED0 : 1;
@@ -6313,13 +6019,7 @@ typedef struct {
         __IO uint32_t w;
     } DIEPTSIZ;                              /* IN Endpoint Txfer Size   900h + (ep_num * 20h) + 10h*/
     __IO uint32_t DIEPDMA;                   /* IN Endpoint DMA Address Reg    900h + (ep_num * 20h) + 14h*/
-    union {
-        struct {
-            __IO uint32_t INEPTFSAV : 16;            /*!< IN endpoint TxFIFO space avail */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } DTXFSTS;                               /*IN Endpoint Tx FIFO Status Reg 900h + (ep_num * 20h) + 18h*/
+    __IO uint32_t DTXFSTS;                   /*IN Endpoint Tx FIFO Status Reg 900h + (ep_num * 20h) + 18h*/
          uint32_t __RESERVED2;               /* Reserved  900h+(ep_num*20h)+1Ch-900h+ (ep_num * 20h) + 1Ch*/
 } USB_OTG_INEndpointTypeDef;
 
@@ -6395,13 +6095,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } HCFG;                                  /* Host Configuration Register    400h*/
-    union {
-        struct {
-            __IO uint32_t FRIVL : 16;                /*!< Frame interval */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } HFIR;                                  /* Host Frame Interval Register   404h*/
+    __IO uint32_t HFIR;                      /* Host Frame Interval Register   404h*/
     union {
         struct {
             __IO uint32_t FRNUM : 16;                /*!< Frame number */
@@ -6418,20 +6112,8 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } HPTXSTS;                               /* Host Periodic Tx FIFO/ Queue Status 410h*/
-    union {
-        struct {
-            __IO uint32_t HAINT : 16;                /*!< Channel interrupts */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } HAINT;                                 /* Host All Channels Interrupt Register 414h*/
-    union {
-        struct {
-            __IO uint32_t HAINTM : 16;               /*!< Channel interrupt mask */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } HAINTMSK;                              /* Host All Channels Interrupt Mask 418h*/
+    __IO uint32_t HAINT;                     /* Host All Channels Interrupt Register 414h*/
+    __IO uint32_t HAINTMSK;                  /* Host All Channels Interrupt Mask 418h*/
 } USB_OTG_HostTypeDef;
 
 
@@ -13699,6 +13381,18 @@ typedef struct {
 
 /* Aliases for __IRQHandler */
 #define FMC_IRQHandler        FSMC_IRQHandler
+
+/**
+  * @}
+  */
+
+/** @defgroup ADC_Internal_Channels ADC Internal Channels
+  * @{
+  */
+
+#define ADC_TEMPSENSOR_CHANNEL  16
+#define ADC_VREFINT_CHANNEL     17
+#define ADC_VBAT_CHANNEL        18
 
 /**
   * @}
