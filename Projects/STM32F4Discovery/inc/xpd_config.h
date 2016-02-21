@@ -51,26 +51,17 @@
 #endif
 
 
-#ifndef HSI_VALUE
-#define HSI_VALUE 8000000 /* Value of the internal high speed oscillator in Hz */
-#endif
-
 #ifndef HSI_STARTUP_TIMEOUT
 #define HSI_STARTUP_TIMEOUT 5000 /* Timeout for HSI startup in ms */
 #endif
 
 
-#ifndef LSI_VALUE
-#define LSI_VALUE 40000 /* Value of the Internal low speed oscillator in Hz */
+#ifndef LSE_VALUE
+#define LSE_VALUE 32768 /* Value of the External low speed oscillator in Hz */
 #endif
-
 
 #ifndef LSE_STARTUP_TIMEOUT
 #define LSE_STARTUP_TIMEOUT 5000 /* Timeout for LSE startup in ms */
-#endif
-
-#ifndef LSE_VALUE
-#define LSE_VALUE 32768 /* Value of the External low speed oscillator in Hz */
 #endif
 
 

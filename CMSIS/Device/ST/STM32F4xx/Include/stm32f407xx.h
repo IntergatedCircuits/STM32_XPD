@@ -13780,10 +13780,21 @@ typedef struct {
 /* AF 15 selection */
 #define GPIO_EVENTOUT_AF15      ((uint8_t)0x0F)  /* EVENTOUT Alternate Function mapping */
 
+/**
+  * @}
+  */
+
+/** @defgroup RCC_Internal_Oscillators RCC Internal Oscillators
+  * @{
+  */
+
+#define HSI_VALUE 16000000 /* Value of the internal high speed oscillator in Hz */
+
+#define LSI_VALUE 32000    /* Approximate value of the internal low speed oscillator in Hz */
 
 /**
   * @}
-  */ 
+  */
 
 /**
   * @}

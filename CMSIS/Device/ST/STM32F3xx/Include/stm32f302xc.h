@@ -11377,6 +11377,18 @@ typedef struct {
   * @}
   */ 
 
+/** @defgroup RCC_Internal_Oscillators RCC Internal Oscillators
+  * @{
+  */
+
+#define HSI_VALUE 8000000  /* Value of the internal high speed oscillator in Hz */
+
+#define LSI_VALUE 40000    /* Approximate value of the internal low speed oscillator in Hz */
+
+/**
+  * @}
+  */
+
 /**
   * @}
   */
