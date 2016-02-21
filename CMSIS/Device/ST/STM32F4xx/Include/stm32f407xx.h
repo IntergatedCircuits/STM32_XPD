@@ -5572,38 +5572,14 @@ typedef struct {
         __IO uint32_t CC4NP;                     /*!<Capture/Compare 4 Complementary output Polarity */
              uint32_t __RESERVED1[16];
     } CCER;                                  /*!< TIM capture/compare enable register, Address offset: 0x20 */
-    struct {
-        __IO uint32_t CNT[16];                   /*!<Counter Value            */
-             uint32_t __RESERVED0[16];
-    } CNT;                                   /*!< TIM counter register,                Address offset: 0x24 */
-    struct {
-        __IO uint32_t PSC[16];                   /*!<Prescaler Value          */
-             uint32_t __RESERVED0[16];
-    } PSC;                                   /*!< TIM prescaler,                       Address offset: 0x28 */
-    struct {
-        __IO uint32_t ARR[16];                   /*!<actual auto-reload Value */
-             uint32_t __RESERVED0[16];
-    } ARR;                                   /*!< TIM auto-reload register,            Address offset: 0x2C */
-    struct {
-        __IO uint32_t REP[8];                    /*!<Repetition Counter Value */
-             uint32_t __RESERVED0[24];
-    } RCR;                                   /*!< TIM repetition counter register,     Address offset: 0x30 */
-    struct {
-        __IO uint32_t CCR1[16];                  /*!<Capture/Compare 1 Value  */
-             uint32_t __RESERVED0[16];
-    } CCR1;                                  /*!< TIM capture/compare register 1,      Address offset: 0x34 */
-    struct {
-        __IO uint32_t CCR2[16];                  /*!<Capture/Compare 2 Value  */
-             uint32_t __RESERVED0[16];
-    } CCR2;                                  /*!< TIM capture/compare register 2,      Address offset: 0x38 */
-    struct {
-        __IO uint32_t CCR3[16];                  /*!<Capture/Compare 3 Value  */
-             uint32_t __RESERVED0[16];
-    } CCR3;                                  /*!< TIM capture/compare register 3,      Address offset: 0x3C */
-    struct {
-        __IO uint32_t CCR4[16];                  /*!<Capture/Compare 4 Value  */
-             uint32_t __RESERVED0[16];
-    } CCR4;                                  /*!< TIM capture/compare register 4,      Address offset: 0x40 */
+    __IO uint32_t CNT[32];                   /*!< TIM counter register,                Address offset: 0x24 */
+    __IO uint32_t PSC[32];                   /*!< TIM prescaler,                       Address offset: 0x28 */
+    __IO uint32_t ARR[32];                   /*!< TIM auto-reload register,            Address offset: 0x2C */
+    __IO uint32_t RCR[32];                   /*!< TIM repetition counter register,     Address offset: 0x30 */
+    __IO uint32_t CCR1[32];                  /*!< TIM capture/compare register 1,      Address offset: 0x34 */
+    __IO uint32_t CCR2[32];                  /*!< TIM capture/compare register 2,      Address offset: 0x38 */
+    __IO uint32_t CCR3[32];                  /*!< TIM capture/compare register 3,      Address offset: 0x3C */
+    __IO uint32_t CCR4[32];                  /*!< TIM capture/compare register 4,      Address offset: 0x40 */
     struct {
         __IO uint32_t DTG[8];                    /*!<DTG[0:7] bits (Dead-Time Generator set-up) */
         __IO uint32_t LOCK[2];                   /*!<LOCK[1:0] bits (Lock Configuration) */
@@ -5621,10 +5597,7 @@ typedef struct {
         __IO uint32_t DBL[5];                    /*!<DBL[4:0] bits (DMA Burst Length) */
              uint32_t __RESERVED1[19];
     } DCR;                                   /*!< TIM DMA control register,            Address offset: 0x48 */
-    struct {
-        __IO uint32_t DMAB[16];                  /*!<DMA register for burst accesses                    */
-             uint32_t __RESERVED0[16];
-    } DMAR;                                  /*!< TIM DMA address for full transfer,   Address offset: 0x4C */
+    __IO uint32_t DMAR[32];                  /*!< TIM DMA address for full transfer,   Address offset: 0x4C */
     struct {
              uint32_t __RESERVED0[6];
         __IO uint32_t TI4_RMP[2];                /*!<TI4_RMP[1:0] bits (TIM5 Input 4 remap)             */

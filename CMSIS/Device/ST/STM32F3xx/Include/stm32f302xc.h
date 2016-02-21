@@ -3,7 +3,7 @@
   * @file    stm32f302xc.h
   * @author  Benedek Kupper
   * @version V0.1
-  * @date    28-December-2015
+  * @date    2015-12-28
   * @brief   CMSIS STM32F302xC Devices Peripheral Access Layer Header File.
   *
   *          This file contains:
@@ -174,7 +174,6 @@ typedef enum
   */
 
 #include "core_cm4.h"            /* Cortex-M4 processor and core peripherals */
-#include "core_cmBitband.h"
 #include "system_stm32f3xx.h"    /* STM32F3xx System Header */
 #include <stdint.h>
 
@@ -746,12 +745,12 @@ typedef struct {
     union {
         struct {
             __IO uint32_t TMEIE : 1;                 /*!<Transmit Mailbox Empty Interrupt Enable */
-            __IO uint32_t FMPIE0 : 1;                /*!<FIFO Message Pending Interrupt Enable */
-            __IO uint32_t FFIE0 : 1;                 /*!<FIFO Full Interrupt Enable */
-            __IO uint32_t FOVIE0 : 1;                /*!<FIFO Overrun Interrupt Enable */
-            __IO uint32_t FMPIE1 : 1;                /*!<FIFO Message Pending Interrupt Enable */
-            __IO uint32_t FFIE1 : 1;                 /*!<FIFO Full Interrupt Enable */
-            __IO uint32_t FOVIE1 : 1;                /*!<FIFO Overrun Interrupt Enable */
+            __IO uint32_t FMP0IE : 1;                /*!<FIFO 0 Message Pending Interrupt Enable */
+            __IO uint32_t FF0IE : 1;                 /*!<FIFO 0 Full Interrupt Enable */
+            __IO uint32_t FOV0IE : 1;                /*!<FIFO 0 Overrun Interrupt Enable */
+            __IO uint32_t FMP1IE : 1;                /*!<FIFO 1 Message Pending Interrupt Enable */
+            __IO uint32_t FF1IE : 1;                 /*!<FIFO 1 Full Interrupt Enable */
+            __IO uint32_t FOV1IE : 1;                /*!<FIFO 1 Overrun Interrupt Enable */
                  uint32_t __RESERVED0 : 1;
             __IO uint32_t EWGIE : 1;                 /*!<Error Warning Interrupt Enable */
             __IO uint32_t EPVIE : 1;                 /*!<Error Passive Interrupt Enable */
@@ -793,85 +792,8 @@ typedef struct {
         __IO uint32_t w;
     } BTR;                                   /*!< CAN bit timing register,             Address offset: 0x1C          */
          uint32_t __RESERVED0[88];               /*!< Reserved, 0x020 - 0x17F                                            */
-    struct {
-        union {
-            struct {
-                __IO uint32_t TXRQ : 1;                  /*!<Transmit Mailbox Request */
-                __IO uint32_t RTR : 1;                   /*!<Remote Transmission Request */
-                __IO uint32_t IDE : 1;                   /*!<Identifier Extension */
-                __IO uint32_t EXID : 18;                 /*!<Extended Identifier */
-                __IO uint32_t STID : 11;                 /*!<Standard Identifier or Extended Identifier */
-            } b;
-            __IO uint32_t w;
-        } TIR;                                   /*!< CAN TX mailbox identifier register */
-        union {
-            struct {
-                __IO uint32_t DLC : 4;                   /*!<Data Length Code */
-                     uint32_t __RESERVED0 : 4;
-                __IO uint32_t TGT : 1;                   /*!<Transmit Global Time */
-                     uint32_t __RESERVED1 : 7;
-                __IO uint32_t TIME : 16;                 /*!<Message Time Stamp */
-            } b;
-            __IO uint32_t w;
-        } TDTR;                                  /*!< CAN mailbox data length control and time stamp register */
-        union {
-            struct {
-                __IO uint32_t DATA0 : 8;                 /*!<Data byte 0 */
-                __IO uint32_t DATA1 : 8;                 /*!<Data byte 1 */
-                __IO uint32_t DATA2 : 8;                 /*!<Data byte 2 */
-                __IO uint32_t DATA3 : 8;                 /*!<Data byte 3 */
-            } b;
-            __IO uint32_t w;
-        } TDLR;                                  /*!< CAN mailbox data low register */
-        union {
-            struct {
-                __IO uint32_t DATA4 : 8;                 /*!<Data byte 4 */
-                __IO uint32_t DATA5 : 8;                 /*!<Data byte 5 */
-                __IO uint32_t DATA6 : 8;                 /*!<Data byte 6 */
-                __IO uint32_t DATA7 : 8;                 /*!<Data byte 7 */
-            } b;
-            __IO uint32_t w;
-        } TDHR;                                  /*!< CAN mailbox data high register */
-    } sTxMailBox[3];                            /*!< CAN Tx MailBox,                      Address offset: 0x180 - 0x1AC */
-    struct {
-        union {
-            struct {
-                     uint32_t __RESERVED0 : 1;
-                __IO uint32_t RTR : 1;                   /*!<Remote Transmission Request */
-                __IO uint32_t IDE : 1;                   /*!<Identifier Extension */
-                __IO uint32_t EXID : 18;                 /*!<Extended Identifier */
-                __IO uint32_t STID : 11;                 /*!<Standard Identifier or Extended Identifier */
-            } b;
-            __IO uint32_t w;
-        } RIR;                                   /*!< CAN receive FIFO mailbox identifier register */
-        union {
-            struct {
-                __IO uint32_t DLC : 4;                   /*!<Data Length Code */
-                     uint32_t __RESERVED0 : 4;
-                __IO uint32_t FMI : 8;                   /*!<Filter Match Index */
-                __IO uint32_t TIME : 16;                 /*!<Message Time Stamp */
-            } b;
-            __IO uint32_t w;
-        } RDTR;                                  /*!< CAN receive FIFO mailbox data length control and time stamp register */
-        union {
-            struct {
-                __IO uint32_t DATA0 : 8;                 /*!<Data byte 0 */
-                __IO uint32_t DATA1 : 8;                 /*!<Data byte 1 */
-                __IO uint32_t DATA2 : 8;                 /*!<Data byte 2 */
-                __IO uint32_t DATA3 : 8;                 /*!<Data byte 3 */
-            } b;
-            __IO uint32_t w;
-        } RDLR;                                  /*!< CAN receive FIFO mailbox data low register */
-        union {
-            struct {
-                __IO uint32_t DATA4 : 8;                 /*!<Data byte 4 */
-                __IO uint32_t DATA5 : 8;                 /*!<Data byte 5 */
-                __IO uint32_t DATA6 : 8;                 /*!<Data byte 6 */
-                __IO uint32_t DATA7 : 8;                 /*!<Data byte 7 */
-            } b;
-            __IO uint32_t w;
-        } RDHR;                                  /*!< CAN receive FIFO mailbox data high register */
-    } sFIFOMailBox[2];                          /*!< CAN FIFO MailBox,                    Address offset: 0x1B0 - 0x1CC */
+    CAN_TxMailBox_TypeDef sTxMailBox[3];     /*!< CAN Tx MailBox,                      Address offset: 0x180 - 0x1AC */
+    CAN_FIFOMailBox_TypeDef sFIFOMailBox[2]; /*!< CAN FIFO MailBox,                    Address offset: 0x1B0 - 0x1CC */
          uint32_t __RESERVED1[12];               /*!< Reserved, 0x1D0 - 0x1FF                                            */
     union {
         struct {
@@ -880,42 +802,15 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } FMR;                                   /*!< CAN filter master register,          Address offset: 0x200         */
-    union {
-        struct {
-            __IO uint32_t FBM : 14;                  /*!<Filter Mode */
-                 uint32_t __RESERVED0 : 18;
-        } b;
-        __IO uint32_t w;
-    } FM1R;                                  /*!< CAN filter mode register,            Address offset: 0x204         */
+    __IO uint32_t FM1R;                      /*!< CAN filter mode register,            Address offset: 0x204         */
          uint32_t __RESERVED2;               /*!< Reserved, 0x208                                                    */
-    union {
-        struct {
-            __IO uint32_t FSC : 14;                  /*!<Filter Scale Configuration */
-                 uint32_t __RESERVED0 : 18;
-        } b;
-        __IO uint32_t w;
-    } FS1R;                                  /*!< CAN filter scale register,           Address offset: 0x20C         */
+    __IO uint32_t FS1R;                      /*!< CAN filter scale register,           Address offset: 0x20C         */
          uint32_t __RESERVED3;               /*!< Reserved, 0x210                                                    */
-    union {
-        struct {
-            __IO uint32_t FFA : 14;                  /*!<Filter FIFO Assignment */
-                 uint32_t __RESERVED0 : 18;
-        } b;
-        __IO uint32_t w;
-    } FFA1R;                                 /*!< CAN filter FIFO assignment register, Address offset: 0x214         */
+    __IO uint32_t FFA1R;                     /*!< CAN filter FIFO assignment register, Address offset: 0x214         */
          uint32_t __RESERVED4;               /*!< Reserved, 0x218                                                    */
-    union {
-        struct {
-            __IO uint32_t FACT : 14;                 /*!<Filter Active */
-                 uint32_t __RESERVED0 : 18;
-        } b;
-        __IO uint32_t w;
-    } FA1R;                                  /*!< CAN filter activation register,      Address offset: 0x21C         */
+    __IO uint32_t FA1R;                      /*!< CAN filter activation register,      Address offset: 0x21C         */
          uint32_t __RESERVED5[8];               /*!< Reserved, 0x220-0x23F                                              */
-    struct {
-        __IO uint32_t FR1;                       /*!< CAN Filter bank register 1 */
-        __IO uint32_t FR2;                       /*!< CAN Filter bank register 1 */
-    } sFilterRegister[14];                       /*!< CAN Filter Register,                 Address offset: 0x240-0x31C   */
+    CAN_FilterRegister_TypeDef sFilterRegister[28];/*!< CAN Filter Register,           Address offset: 0x240-0x31C   */
 } CAN_TypeDef;
 
 
@@ -969,11 +864,12 @@ typedef struct {
     } RFR[2];
     struct {
         __IO uint32_t TMEIE;                     /*!<Transmit Mailbox Empty Interrupt Enable */
-        struct {
-            __IO uint32_t MPIE;                      /*!<FIFO Message Pending Interrupt Enable */
-            __IO uint32_t FIE;                       /*!<FIFO Full Interrupt Enable */
-            __IO uint32_t OVIE;                      /*!<FIFO Overrun Interrupt Enable */
-        } RF[2];                                 /*!<FIFO Interrupts */
+        __IO uint32_t FMP0IE;                    /*!<FIFO 0 Message Pending Interrupt Enable */
+        __IO uint32_t FF0IE;                     /*!<FIFO 0 Full Interrupt Enable */
+        __IO uint32_t FOV0IE;                    /*!<FIFO 0 Overrun Interrupt Enable */
+        __IO uint32_t FMP1IE;                    /*!<FIFO 1 Message Pending Interrupt Enable */
+        __IO uint32_t FF1IE;                     /*!<FIFO 1 Full Interrupt Enable */
+        __IO uint32_t FOV1IE;                    /*!<FIFO 1 Overrun Interrupt Enable */
              uint32_t __RESERVED0;
         __IO uint32_t EWGIE;                     /*!<Error Warning Interrupt Enable */
         __IO uint32_t EPVIE;                     /*!<Error Passive Interrupt Enable */
@@ -1067,25 +963,13 @@ typedef struct {
         __IO uint32_t FINIT;                     /*!<Filter Init Mode */
              uint32_t __RESERVED0[31];
     } FMR;                                   /*!< CAN filter master register,          Address offset: 0x200         */
-    struct {
-        __IO uint32_t FBM[14];                   /*!<Filter Mode */
-             uint32_t __RESERVED0[18];
-    } FM1R;                                  /*!< CAN filter mode register,            Address offset: 0x204         */
+    __IO uint32_t FM1R[32];                  /*!< CAN filter mode register,            Address offset: 0x204         */
          uint32_t __RESERVED2[32];           /*!< Reserved, 0x208                                                    */
-    struct {
-        __IO uint32_t FSC[14];                   /*!<Filter Scale Configuration */
-             uint32_t __RESERVED0[18];
-    } FS1R;                                  /*!< CAN filter scale register,           Address offset: 0x20C         */
+    __IO uint32_t FS1R[32];                  /*!< CAN filter scale register,           Address offset: 0x20C         */
          uint32_t __RESERVED3[32];           /*!< Reserved, 0x210                                                    */
-    struct {
-        __IO uint32_t FFA[14];                   /*!<Filter FIFO Assignment */
-             uint32_t __RESERVED0[18];
-    } FFA1R;                                 /*!< CAN filter FIFO assignment register, Address offset: 0x214         */
+    __IO uint32_t FFA1R[32];                 /*!< CAN filter FIFO assignment register, Address offset: 0x214         */
          uint32_t __RESERVED4[32];           /*!< Reserved, 0x218                                                    */
-    struct {
-        __IO uint32_t FACT[14];                  /*!<Filter Active */
-             uint32_t __RESERVED0[18];
-    } FA1R;                                  /*!< CAN filter activation register,      Address offset: 0x21C         */
+    __IO uint32_t FA1R[32];                  /*!< CAN filter activation register,      Address offset: 0x21C         */
          uint32_t __RESERVED5[8][32];           /*!< Reserved, 0x220-0x23F                                              */
     struct {
         __IO uint32_t FR1[32];                   /*!< CAN Filter bank register 1 */
@@ -2240,91 +2124,13 @@ typedef struct {
 
 
 typedef struct {
-    union {
-        struct {
-            __IO uint32_t MODER0 : 2;
-            __IO uint32_t MODER1 : 2;
-            __IO uint32_t MODER2 : 2;
-            __IO uint32_t MODER3 : 2;
-            __IO uint32_t MODER4 : 2;
-            __IO uint32_t MODER5 : 2;
-            __IO uint32_t MODER6 : 2;
-            __IO uint32_t MODER7 : 2;
-            __IO uint32_t MODER8 : 2;
-            __IO uint32_t MODER9 : 2;
-            __IO uint32_t MODER10 : 2;
-            __IO uint32_t MODER11 : 2;
-            __IO uint32_t MODER12 : 2;
-            __IO uint32_t MODER13 : 2;
-            __IO uint32_t MODER14 : 2;
-            __IO uint32_t MODER15 : 2;
-        } b;
-        __IO uint32_t w;
-    } MODER;                                 /*!< GPIO port mode register,               Address offset: 0x00      */
+    __IO uint32_t MODER;                     /*!< GPIO port mode register,               Address offset: 0x00      */
     __IO uint32_t OTYPER;                    /*!< GPIO port output type register,        Address offset: 0x04      */
-    union {
-        struct {
-            __IO uint32_t OSPEEDR0 : 2;
-            __IO uint32_t OSPEEDR1 : 2;
-            __IO uint32_t OSPEEDR2 : 2;
-            __IO uint32_t OSPEEDR3 : 2;
-            __IO uint32_t OSPEEDR4 : 2;
-            __IO uint32_t OSPEEDR5 : 2;
-            __IO uint32_t OSPEEDR6 : 2;
-            __IO uint32_t OSPEEDR7 : 2;
-            __IO uint32_t OSPEEDR8 : 2;
-            __IO uint32_t OSPEEDR9 : 2;
-            __IO uint32_t OSPEEDR10 : 2;
-            __IO uint32_t OSPEEDR11 : 2;
-            __IO uint32_t OSPEEDR12 : 2;
-            __IO uint32_t OSPEEDR13 : 2;
-            __IO uint32_t OSPEEDR14 : 2;
-            __IO uint32_t OSPEEDR15 : 2;
-        } b;
-        __IO uint32_t w;
-    } OSPEEDR;                               /*!< GPIO port output speed register,       Address offset: 0x08      */
-    union {
-        struct {
-            __IO uint32_t PUPDR0 : 2;
-            __IO uint32_t PUPDR1 : 2;
-            __IO uint32_t PUPDR2 : 2;
-            __IO uint32_t PUPDR3 : 2;
-            __IO uint32_t PUPDR4 : 2;
-            __IO uint32_t PUPDR5 : 2;
-            __IO uint32_t PUPDR6 : 2;
-            __IO uint32_t PUPDR7 : 2;
-            __IO uint32_t PUPDR8 : 2;
-            __IO uint32_t PUPDR9 : 2;
-            __IO uint32_t PUPDR10 : 2;
-            __IO uint32_t PUPDR11 : 2;
-            __IO uint32_t PUPDR12 : 2;
-            __IO uint32_t PUPDR13 : 2;
-            __IO uint32_t PUPDR14 : 2;
-            __IO uint32_t PUPDR15 : 2;
-        } b;
-        __IO uint32_t w;
-    } PUPDR;                                 /*!< GPIO port pull-up/pull-down register,  Address offset: 0x0C      */
-    union {
-        struct {
-            __IO uint32_t ID : 16;
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } IDR;                                   /*!< GPIO port input data register,         Address offset: 0x10      */
-    union {
-        struct {
-            __IO uint32_t OD : 16;
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } ODR;                                   /*!< GPIO port output data register,        Address offset: 0x14      */
-    union {
-        struct {
-            __IO uint32_t BS : 16;
-            __IO uint32_t BR : 16;
-        } b;
-        __IO uint32_t w;
-    } BSRR;                                  /*!< GPIO port bit set/reset register,      Address offset: 0x1A */
+    __IO uint32_t OSPEEDR;                   /*!< GPIO port output speed register,       Address offset: 0x08      */
+    __IO uint32_t PUPDR;                     /*!< GPIO port pull-up/pull-down register,  Address offset: 0x0C      */
+    __I  uint32_t IDR;                       /*!< GPIO port input data register,         Address offset: 0x10      */
+    __IO uint32_t ODR;                       /*!< GPIO port output data register,        Address offset: 0x14      */
+    __IO uint32_t BSRR;                      /*!< GPIO port bit set/reset register,      Address offset: 0x18      */
     union {
         struct {
             __IO uint32_t LCK0 : 1;
@@ -2348,14 +2154,8 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } LCKR;                                  /*!< GPIO port configuration lock register, Address offset: 0x1C      */
-    __IO uint32_t AFR[2];                       /*!< GPIO alternate function registers,     Address offset: 0x20-0x24 */
-    union {
-        struct {
-            __IO uint32_t BR : 16;
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } BRR;                                   /*!< GPIO bit reset register,               Address offset: 0x28 */
+    __IO uint32_t AFR[2];                    /*!< GPIO alternate function registers,     Address offset: 0x20-0x24 */
+    __IO uint32_t BRR;                       /*!< GPIO bit reset register,               Address offset: 0x28 */
 } GPIO_TypeDef;
 
 
@@ -4159,7 +3959,7 @@ typedef struct {
         __IO uint32_t w;
     } EGR;                                   /*!< TIM event generation register,       Address offset: 0x14 */
     union {
-        union {
+        struct {
 			__IO uint32_t C1S : 2;                   /*!< CC1S[1:0] bits (Capture/Compare 1 Selection) */
 			__IO uint32_t C1FE : 1;                  /*!< Output Compare 1 Fast enable */
 			__IO uint32_t C1PE : 1;                  /*!< Output Compare 1 Preload enable */
@@ -4172,7 +3972,7 @@ typedef struct {
 			__IO uint32_t C2CE : 1;                  /*!< Output Compare 2 Clear Enable */
 				 uint32_t __RESERVED0 : 16;
         } OC;                                    /*!< TIM CCMR register Output Compare configuration mode */
-        union {
+        struct {
 			__IO uint32_t C1S : 2;                   /*!< CC1S[1:0] bits (Capture/Compare 1 Selection) */
 			__IO uint32_t C1PSC : 2;                 /*!< IC1PSC[1:0] bits (Input Capture 1 Prescaler) */
 			__IO uint32_t C1F : 4;                   /*!< IC1F[3:0] bits (Input Capture 1 Filter) */
@@ -4184,7 +3984,7 @@ typedef struct {
         __IO uint32_t w;
     } CCMR1;                                 /*!< TIM capture/compare mode register 1, Address offset: 0x18 */
     union {
-        union {
+        struct {
 			__IO uint32_t C3S : 2;                   /*!< CC3S[1:0] bits (Capture/Compare 3 Selection) */
 			__IO uint32_t C3FE : 1;                  /*!< Output Compare 3 Fast enable */
 			__IO uint32_t C3PE : 1;                  /*!< Output Compare 3 Preload enable */
@@ -4197,7 +3997,7 @@ typedef struct {
 			__IO uint32_t C4CE : 1;                  /*!< Output Compare 4 Clear Enable */
 				 uint32_t __RESERVED0 : 16;
         } OC;                                    /*!< TIM CCMR register Output Compare configuration mode */
-        union {
+        struct {
 			__IO uint32_t C3S : 2;                   /*!< CC3S[1:0] bits (Capture/Compare 3 Selection) */
 			__IO uint32_t C3PSC : 2;                 /*!< IC3PSC[1:0] bits (Input Capture 3 Prescaler) */
 			__IO uint32_t C3F : 4;                   /*!< IC3F[3:0] bits (Input Capture 3 Filter) */
@@ -4236,49 +4036,13 @@ typedef struct {
         __IO uint32_t w;
     } CCER;                                  /*!< TIM capture/compare enable register, Address offset: 0x20 */
     __IO uint32_t CNT;                       /*!< TIM counter register,                Address offset: 0x24 */
-    union {
-        struct {
-            __IO uint32_t PSC : 16;                  /*!<Prescaler Value */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } PSC;                                   /*!< TIM prescaler,                       Address offset: 0x28 */
+    __IO uint32_t PSC;                       /*!< TIM prescaler,                       Address offset: 0x28 */
     __IO uint32_t ARR;                       /*!< TIM auto-reload register,            Address offset: 0x2C */
-    union {
-        struct {
-            __IO uint32_t REP : 16;                  /*!<Repetition Counter Value */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } RCR;                                   /*!< TIM repetition counter register,     Address offset: 0x30 */
-    union {
-        struct {
-            __IO uint32_t CCR1 : 16;                 /*!<Capture/Compare 1 Value */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } CCR1;                                  /*!< TIM capture/compare register 1,      Address offset: 0x34 */
-    union {
-        struct {
-            __IO uint32_t CCR2 : 16;                 /*!<Capture/Compare 2 Value */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } CCR2;                                  /*!< TIM capture/compare register 2,      Address offset: 0x38 */
-    union {
-        struct {
-            __IO uint32_t CCR3 : 16;                 /*!<Capture/Compare 3 Value */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } CCR3;                                  /*!< TIM capture/compare register 3,      Address offset: 0x3C */
-    union {
-        struct {
-            __IO uint32_t CCR4 : 16;                 /*!<Capture/Compare 4 Value */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } CCR4;                                  /*!< TIM capture/compare register 4,      Address offset: 0x40 */
+    __IO uint32_t RCR;                       /*!< TIM repetition counter register,     Address offset: 0x30 */
+    __IO uint32_t CCR1;                      /*!< TIM capture/compare register 1,      Address offset: 0x34 */
+    __IO uint32_t CCR2;                      /*!< TIM capture/compare register 2,      Address offset: 0x38 */
+    __IO uint32_t CCR3;                      /*!< TIM capture/compare register 3,      Address offset: 0x3C */
+    __IO uint32_t CCR4;                      /*!< TIM capture/compare register 4,      Address offset: 0x40 */
     union {
         struct {
             __IO uint32_t DTG : 8;                   /*!<DTG[0:7] bits (Dead-Time Generator set-up) */
@@ -4306,13 +4070,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } DCR;                                   /*!< TIM DMA control register,            Address offset: 0x48 */
-    union {
-        struct {
-            __IO uint32_t DMAB : 16;                 /*!<DMA register for burst accesses */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } DMAR;                                  /*!< TIM DMA address for full transfer,   Address offset: 0x4C */
+    __IO uint32_t DMAR;                      /*!< TIM DMA address for full transfer,   Address offset: 0x4C */
     __IO uint32_t OR;                        /*!< TIM option register,                 Address offset: 0x50 */
     union {
         struct {
@@ -4519,31 +4277,13 @@ typedef struct {
              uint32_t __RESERVED2[10];
     } CCER;                                  /*!< TIM capture/compare enable register, Address offset: 0x20 */
     __IO uint32_t CNT[32];                   /*!< TIM counter register,                Address offset: 0x24 */
-    struct {
-        __IO uint32_t PSC[16];                   /*!<Prescaler Value */
-             uint32_t __RESERVED0[16];
-    } PSC;                                   /*!< TIM prescaler,                       Address offset: 0x28 */
+    __IO uint32_t PSC[32];                   /*!< TIM prescaler,                       Address offset: 0x28 */
     __IO uint32_t ARR[32];                   /*!< TIM auto-reload register,            Address offset: 0x2C */
-    struct {
-        __IO uint32_t REP[16];                   /*!<Repetition Counter Value */
-             uint32_t __RESERVED0[16];
-    } RCR;                                   /*!< TIM repetition counter register,     Address offset: 0x30 */
-    struct {
-        __IO uint32_t CCR1[16];                  /*!<Capture/Compare 1 Value */
-             uint32_t __RESERVED0[16];
-    } CCR1;                                  /*!< TIM capture/compare register 1,      Address offset: 0x34 */
-    struct {
-        __IO uint32_t CCR2[16];                  /*!<Capture/Compare 2 Value */
-             uint32_t __RESERVED0[16];
-    } CCR2;                                  /*!< TIM capture/compare register 2,      Address offset: 0x38 */
-    struct {
-        __IO uint32_t CCR3[16];                  /*!<Capture/Compare 3 Value */
-             uint32_t __RESERVED0[16];
-    } CCR3;                                  /*!< TIM capture/compare register 3,      Address offset: 0x3C */
-    struct {
-        __IO uint32_t CCR4[16];                  /*!<Capture/Compare 4 Value */
-             uint32_t __RESERVED0[16];
-    } CCR4;                                  /*!< TIM capture/compare register 4,      Address offset: 0x40 */
+    __IO uint32_t RCR[32];                   /*!< TIM repetition counter register,     Address offset: 0x30 */
+    __IO uint32_t CCR1[32];                  /*!< TIM capture/compare register 1,      Address offset: 0x34 */
+    __IO uint32_t CCR2[32];                  /*!< TIM capture/compare register 2,      Address offset: 0x38 */
+    __IO uint32_t CCR3[32];                  /*!< TIM capture/compare register 3,      Address offset: 0x3C */
+    __IO uint32_t CCR4[32];                  /*!< TIM capture/compare register 4,      Address offset: 0x40 */
     struct {
         __IO uint32_t DTG[8];                    /*!<DTG[0:7] bits (Dead-Time Generator set-up) */
         __IO uint32_t LOCK[2];                   /*!<LOCK[1:0] bits (Lock Configuration) */
@@ -4565,10 +4305,7 @@ typedef struct {
         __IO uint32_t DBL[5];                    /*!<DBL[4:0] bits (DMA Burst Length) */
              uint32_t __RESERVED1[19];
     } DCR;                                   /*!< TIM DMA control register,            Address offset: 0x48 */
-    struct {
-        __IO uint32_t DMAB[16];                  /*!<DMA register for burst accesses */
-             uint32_t __RESERVED0[16];
-    } DMAR;                                  /*!< TIM DMA address for full transfer,   Address offset: 0x4C */
+    __IO uint32_t DMAR[32];                  /*!< TIM DMA address for full transfer,   Address offset: 0x4C */
     __IO uint32_t OR[32];                    /*!< TIM option register,                 Address offset: 0x50 */
     struct {
              uint32_t __RESERVED0[2];
@@ -11542,49 +11279,48 @@ typedef struct {
 #define CAN_RX0_IRQHandler    USB_LP_CAN_RX0_IRQHandler
 
 /**
-  * @brief   AF 0 selection
+  * @}
   */
+
+/** @defgroup GPIO_Alternate_function_map GPIO Alternate function map
+  * @{
+  */
+
+/* AF 1 selection */
 #define GPIO_RTC_50Hz_AF0      ((uint8_t)0x00)  /* RTC_50Hz Alternate Function mapping                       */
 #define GPIO_MCO_AF0           ((uint8_t)0x00)  /* MCO (MCO1 and MCO2) Alternate Function mapping            */
 #define GPIO_TAMPER_AF0        ((uint8_t)0x00)  /* TAMPER (TAMPER_1 and TAMPER_2) Alternate Function mapping */
 #define GPIO_SWJ_AF0           ((uint8_t)0x00)  /* SWJ (SWD and JTAG) Alternate Function mapping             */
 #define GPIO_TRACE_AF0         ((uint8_t)0x00)  /* TRACE Alternate Function mapping                          */
 
-/**
-  * @brief   AF 1 selection
-  */
+
+/* AF 1 selection */
 #define GPIO_TIM2_AF1           ((uint8_t)0x01)  /* TIM2 Alternate Function mapping */
 #define GPIO_TIM15_AF1          ((uint8_t)0x01)  /* TIM15 Alternate Function mapping */
 #define GPIO_TIM16_AF1          ((uint8_t)0x01)  /* TIM16 Alternate Function mapping */
 #define GPIO_TIM17_AF1          ((uint8_t)0x01)  /* TIM17 Alternate Function mapping */
 #define GPIO_EVENTOUT_AF1       ((uint8_t)0x01)  /* EVENTOUT Alternate Function mapping */
-/**
-  * @brief   AF 2 selection
-  */
+
+/* AF 2 selection */
 #define GPIO_TIM1_AF2           ((uint8_t)0x02)  /* TIM1 Alternate Function mapping */
 #define GPIO_TIM2_AF2           ((uint8_t)0x02)  /* TIM2 Alternate Function mapping */
 #define GPIO_TIM3_AF2           ((uint8_t)0x02)  /* TIM3 Alternate Function mapping */
 #define GPIO_TIM4_AF2           ((uint8_t)0x02)  /* TIM4 Alternate Function mapping */
 #define GPIO_TIM15_AF2          ((uint8_t)0x02)  /* TIM15 Alternate Function mapping */
 #define GPIO_COMP1_AF2          ((uint8_t)0x02)  /* COMP1 Alternate Function mapping */
-/**
-  * @brief   AF 3 selection
-  */
+
+/* AF 3 selection */
 #define GPIO_TSC_AF3           ((uint8_t)0x03)  /* TSC Alternate Function mapping  */
 #define GPIO_TIM15_AF3         ((uint8_t)0x03)  /* TIM15 Alternate Function mapping */
 
-/**
-  * @brief   AF 4 selection
-  */
+/* AF 4 selection */
 #define GPIO_TIM1_AF4          ((uint8_t)0x04)  /* TIM1 Alternate Function mapping */
 #define GPIO_TIM16_AF4         ((uint8_t)0x04)  /* TIM16 Alternate Function mapping */
 #define GPIO_TIM17_AF4         ((uint8_t)0x04)  /* TIM17 Alternate Function mapping */
 #define GPIO_I2C1_AF4          ((uint8_t)0x04)  /* I2C1 Alternate Function mapping */
 #define GPIO_I2C2_AF4          ((uint8_t)0x04)  /* I2C2 Alternate Function mapping */
 
-/**
-  * @brief   AF 5 selection
-  */
+/* AF 5 selection */
 #define GPIO_SPI1_AF5          ((uint8_t)0x05)  /* SPI1/I2S1 Alternate Function mapping */
 #define GPIO_SPI2_AF5          ((uint8_t)0x05)  /* SPI2/I2S2 Alternate Function mapping */
 #define GPIO_SPI3_AF5          ((uint8_t)0x05)  /* SPI3/I2S3 Alternate Function mapping */
@@ -11593,64 +11329,48 @@ typedef struct {
 #define GPIO_IR_AF5            ((uint8_t)0x05)  /* IR Alternate Function mapping */
 #define GPIO_UART4_AF5         ((uint8_t)0x05)  /* UART4 Alternate Function mapping */
 #define GPIO_UART5_AF5         ((uint8_t)0x05)  /* UART5 Alternate Function mapping */
-/**
-  * @brief   AF 6 selection
-  */
+
+/* AF 6 selection */
 #define GPIO_SPI2_AF6          ((uint8_t)0x06)  /* SPI2/I2S2 Alternate Function mapping */
 #define GPIO_SPI3_AF6          ((uint8_t)0x06)  /* SPI3/I2S3 Alternate Function mapping */
 #define GPIO_I2S3ext_AF6       ((uint8_t)0x06)  /* I2S3ext Alternate Function mapping */
 #define GPIO_TIM1_AF6          ((uint8_t)0x06)  /* TIM1 Alternate Function mapping */
 #define GPIO_IR_AF6            ((uint8_t)0x06)  /* IR Alternate Function mapping */
 
-/**
-  * @brief   AF 7 selection
-  */
+/* AF 7 selection */
 #define GPIO_USART1_AF7        ((uint8_t)0x07)  /* USART1 Alternate Function mapping  */
 #define GPIO_USART2_AF7        ((uint8_t)0x07)  /* USART2 Alternate Function mapping  */
 #define GPIO_USART3_AF7        ((uint8_t)0x07)  /* USART3 Alternate Function mapping  */
 #define GPIO_COMP6_AF7         ((uint8_t)0x07)  /* COMP6 Alternate Function mapping  */
 #define GPIO_CAN_AF7           ((uint8_t)0x07)  /* CAN Alternate Function mapping  */
 
-/**
-  * @brief   AF 8 selection
-  */
+/* AF 8 selection */
 #define GPIO_COMP1_AF8         ((uint8_t)0x08)  /* COMP1 Alternate Function mapping  */
 #define GPIO_COMP2_AF8         ((uint8_t)0x08)  /* COMP2 Alternate Function mapping  */
 #define GPIO_COMP4_AF8         ((uint8_t)0x08)  /* COMP4 Alternate Function mapping  */
 #define GPIO_COMP6_AF8         ((uint8_t)0x08)  /* COMP6 Alternate Function mapping  */
 
-/**
-  * @brief   AF 9 selection
-  */
+/* AF 9 selection */
 #define GPIO_CAN_AF9           ((uint8_t)0x09)  /* CAN Alternate Function mapping  */
 #define GPIO_TIM1_AF9          ((uint8_t)0x09)  /* TIM1 Alternate Function mapping */
 #define GPIO_TIM15_AF9         ((uint8_t)0x09)  /* TIM15 Alternate Function mapping */
 
-/**
-  * @brief   AF 10 selection
-  */
+/* AF 10 selection */
 #define GPIO_TIM2_AF10           ((uint8_t)0xA)  /* TIM2 Alternate Function mapping */
 #define GPIO_TIM3_AF10           ((uint8_t)0xA)  /* TIM3 Alternate Function mapping */
 #define GPIO_TIM4_AF10           ((uint8_t)0xA)  /* TIM4 Alternate Function mapping */
 #define GPIO_TIM17_AF10          ((uint8_t)0xA)  /* TIM17 Alternate Function mapping */
-/**
-  * @brief   AF 11 selection
-  */
+
+/* AF 11 selection */
 #define GPIO_TIM1_AF11           ((uint8_t)0xB)  /* TIM1 Alternate Function mapping */
 
-/**
-  * @brief   AF 12 selection
-  */
+/* AF 12 selection */
 #define GPIO_TIM1_AF12           ((uint8_t)0xC)  /* TIM1 Alternate Function mapping */
 
-/**
-  * @brief   AF 14 selection
-  */
-
+/* AF 14 selection */
 #define GPIO_USB_AF14            ((uint8_t)0xE)  /* USB Alternate Function mapping */
-/**
-  * @brief   AF 15 selection
-  */
+
+/* AF 15 selection */
 #define GPIO_EVENTOUT_AF15       ((uint8_t)0xF)  /* EVENTOUT Alternate Function mapping */
 
 /**
