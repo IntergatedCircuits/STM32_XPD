@@ -57,7 +57,8 @@ void            XPD_IncTimer            (void);
 uint32_t        XPD_GetTimer            (void);
 void            XPD_SuspendTimer        (void);
 void            XPD_ResumeTimer         (void);
-void            XPD_Delay               (uint32_t milliseconds);
+void            XPD_Delay_ms            (uint32_t milliseconds);
+void            XPD_Delay_us            (uint32_t microseconds);
 XPD_ReturnType  XPD_WaitForMatch        (volatile uint32_t * varAddress, uint32_t bitSelector,
                                          uint32_t            match,      uint32_t mstimeout);
 XPD_ReturnType  XPD_WaitForDiff         (volatile uint32_t * varAddress, uint32_t bitSelector,

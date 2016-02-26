@@ -204,7 +204,7 @@ typedef void ( *XPD_HandleCallbackType )    ( void * Handle );
 
 #define CLEAR_BIT(REG, BIT)   ((REG) &= ~(BIT))
 
-#define MODIFY_REG(REG, CLEARMASK, SETMASK)  ((REG) = (((REG) & (~(CLEARMASK))) | (SETMASK)))
+#define MODIFY_REG(REG, CLEARMASK, SETMASK)  ((REG) = (((REG) & (~(CLEARMASK))) | ((SETMASK) & (CLEARMASK))))
 
 #define POSITION_VAL(VAL)     (__CLZ(__RBIT(VAL)))
 

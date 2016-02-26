@@ -27,6 +27,7 @@
 #include "xpd_core.h"
 #include "xpd_flash.h"
 
+extern uint32_t SystemCoreClock;
 
 static volatile uint32_t msTick = 0;
 
@@ -91,13 +92,26 @@ __weak void XPD_InitTimer(void)
 }
 
 /**
- * @brief Inserts code delay of the specified time.
+ * @brief Inserts code delay of the specified time in milliseconds.
  * @param milliseconds: the desired delay in ms
  */
-__weak void XPD_Delay(uint32_t milliseconds)
+__weak void XPD_Delay_ms(uint32_t milliseconds)
 {
     uint32_t starttime = XPD_GetTimer();
     while ((XPD_GetTimer() - starttime) < milliseconds);
+}
+
+/**
+ * @brief Inserts code delay of the specified time in microseconds.
+ * @param microseconds: the desired delay in us
+ */
+__weak void XPD_Delay_us(uint32_t microseconds)
+{
+    microseconds *= SystemCoreClock / 1000000;
+    while (microseconds != 0)
+    {
+        microseconds--;
+    }
 }
 
 /**

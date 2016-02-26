@@ -986,7 +986,7 @@ XPD_ReturnType XPD_CAN_FilterIndexUpdate(CAN_HandleType * hcan, uint8_t FIFONumb
                 if (fplace == (*MatchIndex - offset))
                 {
                     *MatchIndex = offset;
-                    MODIFY_REG(FilterInfo[fbank].configuredFields, (1 << fplace), 1);
+                    FilterInfo[fbank].configuredFields = (FilterInfo[fbank].configuredFields & ~(1 << fplace)) | 1;
                 }
                 result = XPD_OK;
                 break;

@@ -222,14 +222,14 @@ void XPD_GPIO_InitPin(GPIO_TypeDef * GPIOx, uint8_t Pin, GPIO_InitType * Config)
          || (Config->Mode == GPIO_MODE_ALTERNATE))
     {
         /* speed */
-        MODIFY_REG(GPIOx->OSPEEDR, 0x0003 << shifter, (Config->Output.Speed & 0x0003) << shifter);
+        MODIFY_REG(GPIOx->OSPEEDR, 0x0003 << shifter, Config->Output.Speed << shifter);
 
         /* type */
-        MODIFY_REG(GPIOx->OTYPER, 0x0001 << Pin, (Config->Output.Type & 0x0001) << Pin);
+        MODIFY_REG(GPIOx->OTYPER, 0x0001 << Pin, Config->Output.Type << Pin);
     }
 
     /* Activate the Pull-up or Pull down resistor for the current IO */
-    MODIFY_REG(GPIOx->PUPDR, 0x0003 << shifter, (Config->Pull & 0x0003) << shifter);
+    MODIFY_REG(GPIOx->PUPDR, 0x0003 << shifter, Config->Pull << shifter);
 
     /* EXTI configuration */
     if (Config->Mode == GPIO_MODE_EXTI)
@@ -239,7 +239,7 @@ void XPD_GPIO_InitPin(GPIO_TypeDef * GPIOx, uint8_t Pin, GPIO_InitType * Config)
 
         /* set EXTI source */
         shifter = (Pin & 0x03) * 4;
-        MODIFY_REG(SYSCFG->EXTICR[Pin >> 2], ((uint32_t) 0x0F) << shifter, (uint32_t) (GET_GPIO_SOURCE(GPIOx)) << shifter);
+        MODIFY_REG(SYSCFG->EXTICR[Pin >> 2], ((uint32_t) 0x0F) << shifter, GET_GPIO_SOURCE(GPIOx) << shifter);
 
         /* hand over EXTI configuration */
         XPD_EXTI_Init(Pin, &Config->ExtI);
