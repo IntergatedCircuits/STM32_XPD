@@ -91,7 +91,7 @@ void tim1_test(void)
     tim1.Callbacks.Update = tim_updated;
     XPD_TIM_CounterStart_IT(&tim1);
 
-    XPD_Delay(1500);
+    XPD_Delay_ms(1500);
 
     XPD_TIM_CounterStop_IT(&tim1);
 
