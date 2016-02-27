@@ -206,7 +206,6 @@ void XPD_TIM_CounterStop_IT(TIM_HandleType * htim)
  */
 void XPD_TIM_CounterStart_DMA(TIM_HandleType * htim, void * Address, uint16_t Length)
 {
-
     /* set the DMA complete callback */
     htim->DMA.Update->Callbacks.Complete = tim_dmaUpdateRedirect;
 
@@ -216,9 +215,9 @@ void XPD_TIM_CounterStart_DMA(TIM_HandleType * htim, void * Address, uint16_t Le
     /* configure the DMA channel */
     {
         DMA_TransferType trf;
-        trf.DataCount  = Length;
-        trf.Memory     = Address;
-        trf.Peripheral = &htim->Inst->ARR;
+        trf.DataCount     = Length;
+        trf.SourceAddress = Address;
+        trf.DestAddress   = (void *)&htim->Inst->ARR;
 
         XPD_DMA_Start_IT(htim->DMA.Update, &trf);
     }
@@ -236,10 +235,12 @@ void XPD_TIM_CounterStart_DMA(TIM_HandleType * htim, void * Address, uint16_t Le
  */
 void XPD_TIM_CounterStop_DMA(TIM_HandleType * htim)
 {
-    /* Disable the TIM Update DMA request */
+    /* disable the update DMA request */
     TIM_REG_BIT(htim, DIER, UDE) = 0;
 
-    /* Disable the Peripheral */
+    XPD_DMA_Stop_IT(htim->DMA.Update);
+
+    /* disable the counter */
     XPD_TIM_CounterStop(htim);
 }
 
@@ -653,17 +654,19 @@ void XPD_TIM_OutputStop_IT(TIM_HandleType * htim, TIM_ChannelType Channel)
  */
 void XPD_TIM_OutputStart_DMA(TIM_HandleType * htim, TIM_ChannelType Channel, void * Address, uint16_t Length)
 {
-    DMA_TransferType trf;
-
+    /* callbacks subscription */
     htim->DMA.Channel[Channel]->Callbacks.Complete = tim_dmaChannelEventRedirects[Channel];
 
     htim->DMA.Channel[Channel]->Callbacks.Error = tim_dmaErrorRedirect;
 
-    trf.DataCount  = Length;
-    trf.Memory     = Address;
-    trf.Peripheral = (void *)&((&htim->Inst->CCR1)[Channel]);
+    {
+        DMA_TransferType trf;
+        trf.DataCount     = Length;
+        trf.SourceAddress = Address;
+        trf.DestAddress   = (void *)&((&htim->Inst->CCR1)[Channel]);
 
-    XPD_DMA_Start_IT(htim->DMA.Channel[Channel], &trf);
+        XPD_DMA_Start_IT(htim->DMA.Channel[Channel], &trf);
+    }
 
     XPD_TIM_ChannelEnableDMA(htim, Channel);
 
@@ -679,6 +682,8 @@ void XPD_TIM_OutputStart_DMA(TIM_HandleType * htim, TIM_ChannelType Channel, voi
 void XPD_TIM_OutputStop_DMA(TIM_HandleType * htim, TIM_ChannelType Channel)
 {
     XPD_TIM_ChannelDisableDMA(htim, Channel);
+
+    XPD_DMA_Stop_IT(htim->DMA.Channel[Channel]);
 
     XPD_TIM_OutputStop(htim, Channel);
 }

@@ -38,7 +38,8 @@ typedef enum
 {
     DMA_PERIPH2MEMORY = 0, /*!< Data is transferred from peripheral to memory */
     DMA_MEMORY2PERIPH = 1, /*!< Data is transferred from memory to peripheral */
-    DMA_MEMORY2MEMORY = 2  /*!< Data is transferred from memory to memory */
+    DMA_MEMORY2MEMORY = 2  /*!< Data is transferred from memory to memory
+                                @note Must use normal mode with FIFO for this direction */
 }DMA_DirectionType;
 
 /** @brief DMA data alignment types */
@@ -54,7 +55,7 @@ typedef enum
 {
     DMA_MODE_NORMAL    = 0, /*!< Normal DMA transfer */
     DMA_MODE_CIRCULAR  = 1, /*!< Circular DMA transfer */
-    DMA_MODE_PERIPH_FC = 2, /*!< DMA transfer with peripheral flow control */
+    DMA_MODE_PERIPH_FC = 2, /*!< DMA transfer with peripheral flow control (completion is indicated by peripheral) */
     DMA_MODE_DBUFFER   = 5  /*!< Double-buffered DMA transfer (which is inherently circular) */
 }DMA_ModeType;
 
@@ -109,9 +110,8 @@ typedef struct
 /** @brief DMA transfer setup structure */
 typedef struct
 {
-    void * Peripheral;        /*!< Start address of the peripheral */
-    void * Memory;            /*!< Start address of the memory */
-    void * SwapMemory;        /*!< Start address of the swap memory (only used in double-buffered mode) */
+    void *   SourceAddress;   /*!< Source start address */
+    void *   DestAddress;     /*!< Destination start address */
     uint16_t DataCount;       /*!< The amount of data to transfer */
 }DMA_TransferType;
 
@@ -148,7 +148,8 @@ void            XPD_DMA_Disable         (DMA_HandleType * hdma);
 
 void            XPD_DMA_Start           (DMA_HandleType * hdma, DMA_TransferType * Config);
 void            XPD_DMA_Start_IT        (DMA_HandleType * hdma, DMA_TransferType * Config);
-XPD_ReturnType  XPD_DMA_Abort           (DMA_HandleType * hdma);
+XPD_ReturnType  XPD_DMA_Stop            (DMA_HandleType * hdma);
+void            XPD_DMA_Stop_IT         (DMA_HandleType *hdma);
 
 XPD_ReturnType  XPD_DMA_PollStatus      (DMA_HandleType * hdma, DMA_OperationType Operation, uint32_t Timeout);
 DMA_ErrorType   XPD_DMA_GetError        (DMA_HandleType * hdma);

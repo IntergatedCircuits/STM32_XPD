@@ -43,20 +43,29 @@ static void dma_calcBase(DMA_HandleType * hdma)
 
 static void dma_config(DMA_HandleType * hdma, DMA_TransferType * Config)
 {
-    /* Change DMA peripheral state */
-    hdma->Errors = DMA_ERROR_NONE;
-
-    /* Configure DMA Stream data length */
+    /* DMA Stream data length */
     hdma->Inst->NDTR = Config->DataCount;
 
-    /* Configure DMA Stream destination address */
-    hdma->Inst->PAR = (uint32_t)Config->Peripheral;
+    /* if direction is mem2periph, M0 is source, P is destination */
+    if (hdma->Inst->CR.b.DIR == DMA_MEMORY2PERIPH)
+    {
+        /* DMA Stream source address */
+        hdma->Inst->M0AR = (uint32_t)Config->SourceAddress;
 
-    /* Configure DMA Stream source address */
-    hdma->Inst->M0AR = (uint32_t)Config->Memory;
+        /* DMA Stream destination address */
+        hdma->Inst->PAR = (uint32_t)Config->DestAddress;
+    }
+    else
+    {
+        /* DMA Stream source address */
+        hdma->Inst->PAR = (uint32_t)Config->SourceAddress;
 
-    /* Configure DMA Stream source address */
-    hdma->Inst->M1AR = (uint32_t)Config->SwapMemory;
+        /* DMA Stream destination address */
+        hdma->Inst->M0AR = (uint32_t)Config->DestAddress;
+    }
+
+    /* reset error state */
+    hdma->Errors = DMA_ERROR_NONE;
 }
 
 /** @defgroup DMA_Exported_Functions DMA Exported Functions
@@ -147,9 +156,6 @@ XPD_ReturnType XPD_DMA_Deinit(DMA_HandleType * hdma)
     regs->LIFCR.CTCIF0 = 0;
     regs->LIFCR.CTEIF0 = 0;
 
-    /* reset the error code */
-    hdma->Errors = DMA_ERROR_NONE;
-
     return XPD_OK;
 }
 
@@ -161,7 +167,6 @@ void XPD_DMA_Enable(DMA_HandleType * hdma)
 {
     DMA_REG_BIT(hdma, CR, EN) = 1;
 }
-
 
 /**
  * @brief Disables the DMA stream.
@@ -185,9 +190,6 @@ void XPD_DMA_Start(DMA_HandleType * hdma, DMA_TransferType * Config)
     dma_config(hdma, Config);
 
     XPD_DMA_Enable(hdma);
-
-    /* reset error state */
-    hdma->Errors = DMA_ERROR_NONE;
 }
 
 /**
@@ -207,17 +209,14 @@ void XPD_DMA_Start_IT(DMA_HandleType * hdma, DMA_TransferType * Config)
     DMA_REG_BIT(hdma,FCR,FEIE) = 1;
 
     XPD_DMA_Enable(hdma);
-
-    /* reset error state */
-    hdma->Errors = DMA_ERROR_NONE;
 }
 
 /**
- * @brief Aborts a DMA transfer.
+ * @brief Stops a DMA transfer.
  * @param hdma: pointer to the DMA stream handle structure
  * @return TIMEOUT if abort timed out, OK if successful
  */
-XPD_ReturnType XPD_DMA_Abort(DMA_HandleType *hdma)
+XPD_ReturnType XPD_DMA_Stop(DMA_HandleType *hdma)
 {
     XPD_ReturnType result;
 
@@ -228,6 +227,20 @@ XPD_ReturnType XPD_DMA_Abort(DMA_HandleType *hdma)
     result = XPD_WaitForMatch(&hdma->Inst->CR.w, DMA_SxCR_EN, 0, DMA_ABORT_TIMEOUT);
 
     return result;
+}
+
+/**
+ * @brief Stops a DMA transfer and disables all interrupt sources.
+ * @param hdma: pointer to the DMA stream handle structure
+ */
+void XPD_DMA_Stop_IT(DMA_HandleType *hdma)
+{
+    /* disable the stream */
+    XPD_DMA_Disable(hdma);
+
+    /* disable interrupts */
+    CLEAR_BIT(hdma->Inst->CR.w, (DMA_SxCR_TCIE | DMA_SxCR_HTIE | DMA_SxCR_TEIE | DMA_SxCR_DMEIE));
+    DMA_REG_BIT(hdma,FCR,FEIE) = 0;
 }
 
 /**
