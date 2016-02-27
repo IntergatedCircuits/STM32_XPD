@@ -352,13 +352,7 @@ typedef struct {
     __IO uint32_t JDR2;                      /*!< ADC injected data register 2,                Address offset: 0x40 */
     __IO uint32_t JDR3;                      /*!< ADC injected data register 3,                Address offset: 0x44 */
     __IO uint32_t JDR4;                      /*!< ADC injected data register 4,                Address offset: 0x48 */
-    union {
-        struct {
-            __IO uint16_t DATA;                 /*!<Regular data */
-            __IO uint16_t ADC2DATA;             /*!<ADC2 data */
-        } b;
-        __IO uint32_t w;
-    } DR;                                    /*!< ADC regular data register,                   Address offset: 0x4C */
+    __IO uint32_t DR;                        /*!< ADC regular data register,                   Address offset: 0x4C */
 } ADC_TypeDef;
 
 
@@ -477,10 +471,7 @@ typedef struct {
     __IO uint32_t JDR2[32];                  /*!< ADC injected data register 2,                Address offset: 0x40 */
     __IO uint32_t JDR3[32];                  /*!< ADC injected data register 3,                Address offset: 0x44 */
     __IO uint32_t JDR4[32];                  /*!< ADC injected data register 4,                Address offset: 0x48 */
-    struct {
-        __IO uint32_t DATA[16];                  /*!<Regular data */
-        __IO uint32_t ADC2DATA[16];              /*!<ADC2 data */
-    } DR;                                    /*!< ADC regular data register,                   Address offset: 0x4C */
+    __IO uint32_t DR[32];                    /*!< ADC regular data register,                   Address offset: 0x4C */
 } ADC_BitBand_TypeDef;
 
 
