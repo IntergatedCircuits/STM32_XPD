@@ -105,46 +105,6 @@ void XPD_EXTI_Init(uint8_t Line, EXTI_InitType * Config)
 }
 
 /**
- * @brief Gets the pending flag for the line.
- * @param Line: the selected EXTI line
- * @return The EXTI line flag status
- */
-FlagStatus XPD_EXTI_GetFlag(uint8_t Line)
-{
-#ifdef EXTI_BB
-    return EXTI_BB->PR[Line];
-#else
-    return (EXTI->PR >> (uint32_t)Line) & 1;
-#endif
-}
-
-/**
- * @brief Clears the pending flag for the line.
- * @param Line: the selected EXTI line to clear
- */
-void XPD_EXTI_ClearFlag(uint8_t Line)
-{
-#ifdef EXTI_BB
-    EXTI_BB->PR[Line] = 1;
-#else
-    SET_BIT(EXTI->PR, 1 << (uint32_t)Line);
-#endif
-}
-
-/**
- * @brief Generates a software triggered interrupt.
- * @param Line: the selected EXTI line to trigger
- */
-void XPD_EXTI_GenerateIT(uint8_t Line)
-{
-#ifdef EXTI_BB
-    EXTI_BB->SWIER[Line] = 1;
-#else
-    SET_BIT(EXTI->SWIER, 1 << (uint32_t)Line);
-#endif
-}
-
-/**
  * @brief EXTI interrupt handler.
  * @param Line: an interrupt line which may be responsible for the interrupt generation.
  */

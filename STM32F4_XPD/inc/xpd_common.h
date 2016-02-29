@@ -27,53 +27,15 @@
 #include <stdint.h>
 
 /**
- * @mainpage STM32 eXtensible Peripheral Drivers
+ * @mainpage STM32 eXtensible Peripheral Drivers for STM32F4 device family
  *
- * @section introduction Introduction
+ * This documentation is part of the STM32_XPD peripheral driver package, available
+ * <a href="http://github.com/IntergatedCircuits/STM32_XPD">here</a>.
  *
- * This peripheral driver package was created as a functional upgrade and simplification of
- * the CMSIS and STM32 HAL Drivers, as they were not prepared to handle register bit operations
- * effectively.
- * Below is a short overview of the changes.
- *
- * @section features Features
- *
- * @subsection feat1 Peripheral structures with bit fields
- *
- * All peripheral mapping structures are expanded with the bit maps of each register
- * using a custom-made code generator. The new core and device headers are incompatible with the
- * old drivers, hence the necessity for new peripheral driver layer development.
- *
- * Keep in mind that there are not enough resources available to review the product of the generator
- * (namely the bits of all peripheral registers) so please precaution is required when using peripherals.
- * This is especially applicable for peripherals which don't have their driver code published yet.
- *
- * @subsection feat2 Native support of bit-band alias peripheral memory access
- *
- * In addition to the regular bit field mapping, the code generator creates peripheral
- * access structures for their bit-band alias access (if any peripheral instance of that type
- * is located in the bit-band mappable memory region).
- *
- * For single instance peripheral types a single bit-band access macro is defined.
- * For peripheral types with multiple instances a parametric macro is created.
- * The drivers add a separate pointer for the alias address to the peripheral handles, making the
- * alias address computation a single-time effort.
- *
- * @subsection feat3 Handle-specific callback architecture
- *
- * In the HAL drivers the callback functions were single instance functions that had to
- * be overwritten to use them. The biggest drawback was that it needed routing when multiple
- * peripherals were used from the same kind. In this driver all callback functions are contained
- * by the handles, thus giving the opportunity to create unique functions for each instance.
- * For compatibility and design flexibility the handle pointers are still provided as input
- * parameters for the callback functions.
- *
- * @subsection feat4 Greatly reduced code symbols amount
- *
- * Due to the creation of the register bit fields it is possible to use universal enumerations
- * for all configurations, as the bit shifting is either provided by the compiler, or it is
- * unnecessary (if bit-banding is used). This results in simpler API usage.
- *
+ * STM32_XPD is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  */
 
 /** @defgroup Common

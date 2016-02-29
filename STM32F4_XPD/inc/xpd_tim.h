@@ -95,7 +95,6 @@ typedef struct
         DMA_HandleType * Trigger;            /*!< DMA handle for trigger transfer */
     }DMA;                                    /*   DMA handle references */
     volatile TIM_ChannelType ActiveChannel;  /*!< The currently active timer channel */
-    volatile uint8_t EnabledChannels;        /*!< The enabled timer channels */
 }TIM_HandleType;
 
 /** @} */

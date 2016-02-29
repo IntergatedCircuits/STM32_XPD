@@ -544,6 +544,9 @@ void XPD_NMI_IRQHandler(void)
  * @{
  */
 
+static const uint8_t AHBPrescTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9};
+#define APBPrescTable (&AHBPrescTable[4])
+
 /**
  * @brief Sets the new configuration for the selected clocks and the new matching flash latency.
  * @param Clocks: the set of clocks which should be configured
@@ -607,16 +610,13 @@ XPD_ReturnType XPD_RCC_ClockConfig(RCC_ClockType Clocks, RCC_ClockInitType * Con
     }
 
     /* Update SystemCoreClock variable */
-    XPD_RCC_GetClockFreq(HCLK);
+    SystemCoreClock = XPD_RCC_GetOscFreq(XPD_RCC_GetSYSCLKSource()) >> AHBPrescTable[RCC->CFGR.b.HPRE];
 
     /* Configure the source of time base considering new system clocks settings*/
     XPD_InitTimer();
 
     return XPD_OK;
 }
-
-static const uint8_t AHBPrescTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9};
-#define APBPrescTable (&AHBPrescTable[4])
 
 /**
  * @brief Gets the selected core clock frequency.
@@ -631,7 +631,6 @@ uint32_t XPD_RCC_GetClockFreq(RCC_ClockType SelectedClock)
         return XPD_RCC_GetOscFreq(XPD_RCC_GetSYSCLKSource());
 
     case HCLK:
-        SystemCoreClock = XPD_RCC_GetOscFreq(XPD_RCC_GetSYSCLKSource()) >> AHBPrescTable[RCC->CFGR.b.HPRE];
         return SystemCoreClock;
 
     case PCLK1:

@@ -27,7 +27,6 @@
 #include "xpd_common.h"
 #include "xpd_config.h"
 
-
 /** @defgroup EXTI
  * @{ */
 
@@ -44,6 +43,14 @@ typedef struct
 
 /** @} */
 
+/** @defgroup EXTI_Exported_Variables EXTI Exported Variables
+ * @{ */
+
+/** @brief EXTI callbacks container array */
+extern XPD_ValueCallbackType XPD_EXTI_Callbacks[32];
+
+/** @} */
+
 /** @addtogroup EXTI_Exported_Functions
  * @{ */
 void            XPD_EXTI_Init           (uint8_t Line, EXTI_InitType * Config);
@@ -54,14 +61,46 @@ void            XPD_EXTI_ClearFlag      (uint8_t Line);
 void            XPD_EXTI_GenerateIT     (uint8_t Line);
 
 void            XPD_EXTI_IRQHandler     (uint8_t Line);
-/** @} */
 
-/** @defgroup EXTI_Exported_Variables EXTI Exported Variables
- * @{ */
+/**
+ * @brief Gets the pending flag for the line.
+ * @param Line: the selected EXTI line
+ * @return The EXTI line flag status
+ */
+__STATIC_INLINE FlagStatus XPD_EXTI_GetFlag(uint8_t Line)
+{
+#ifdef EXTI_BB
+    return EXTI_BB->PR[Line];
+#else
+    return (EXTI->PR >> (uint32_t)Line) & 1;
+#endif
+}
 
-/** @brief EXTI callbacks container array */
-extern XPD_ValueCallbackType XPD_EXTI_Callbacks[32];
+/**
+ * @brief Clears the pending flag for the line.
+ * @param Line: the selected EXTI line to clear
+ */
+__STATIC_INLINE void XPD_EXTI_ClearFlag(uint8_t Line)
+{
+#ifdef EXTI_BB
+    EXTI_BB->PR[Line] = 1;
+#else
+    EXTI->PR = 1 << (uint32_t)Line;
+#endif
+}
 
+/**
+ * @brief Generates a software triggered interrupt.
+ * @param Line: the selected EXTI line to trigger
+ */
+__STATIC_INLINE void XPD_EXTI_GenerateIT(uint8_t Line)
+{
+#ifdef EXTI_BB
+    EXTI_BB->SWIER[Line] = 1;
+#else
+    SET_BIT(EXTI->SWIER, 1 << (uint32_t)Line);
+#endif
+}
 /** @} */
 
 /** @} */
