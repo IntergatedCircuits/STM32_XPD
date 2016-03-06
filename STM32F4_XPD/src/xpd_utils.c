@@ -33,7 +33,7 @@ static volatile uint32_t msTick = 0;
 
 XPD_CallbacksType XPD_Callbacks = { NULL };
 
-/** @defgroup XPD_Utils XPD Utilities
+/** @addtogroup XPD_Utils
  * @{ */
 
 /** @defgroup XPD_Exported_Functions XPD Exported Functions
@@ -87,7 +87,7 @@ __weak void XPD_InitTimer(void)
     XPD_NVIC_EnableIRQ(SysTick_IRQn);
 
     /* enable systick and configure 1ms tick */
-    XPD_SysTick_Init(XPD_RCC_GetClockFreq(HCLK) / 1000, SYSTICK_CLOCKSOURCE_HCLK);
+    XPD_SysTick_Init(SystemCoreClock / 1000, SYSTICK_CLOCKSOURCE_HCLK);
     XPD_SysTick_Start_IT();
 }
 
@@ -176,53 +176,6 @@ void XPD_SysTick_IRQHandler(void)
     XPD_IncTimer();
 
     XPD_SAFE_CALLBACK(XPD_Callbacks.Tick,);
-}
-
-/** @} */
-
-static uint8_t criticalLockLevel = 0;
-
-/** @defgroup XPD_Exported_Functions_Critical XPD Critical Section Functions
- *  @brief    XPD Utilities critical section provider functions
- * @{
- */
-
-/**
- * @brief Enters a critical section if not already entered. [overrideable]
- * @param lockObject: unique pointer that references the requester
- */
-__weak void XPD_EnterCritical(void * lockObject)
-{
-    /* unused parameter */
-    (void)lockObject;
-
-    if (criticalLockLevel == 0)
-    {
-        __disable_irq();
-    }
-    if(criticalLockLevel <= 255)
-    {
-        criticalLockLevel++;
-    }
-}
-
-/**
- * @brief Leaves a critical section if it was entered with the same parameter. [overrideable]
- * @param lockObject: unique pointer that references the requester
- */
-__weak void XPD_ExitCritical(void * lockObject)
-{
-    /* unused parameter */
-    (void)lockObject;
-
-    if (criticalLockLevel == 1)
-    {
-        __enable_irq();
-    }
-    if(criticalLockLevel > 0)
-    {
-        criticalLockLevel--;
-    }
 }
 
 /** @} */

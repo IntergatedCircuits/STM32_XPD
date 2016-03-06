@@ -24,7 +24,8 @@
 #ifndef XPD_RCC_CC_H_
 #define XPD_RCC_CC_H_
 
-#include "xpd_rcc.h"
+#include "xpd_common.h"
+#include "xpd_config.h"
 
 /** @addtogroup RCC
  * @{ */
@@ -202,6 +203,7 @@ void                XPD_RCC_ResetAPB2           (void);
 /** @} */
 
 /** @} */
+
 /** @defgroup RCC_Core_Exported_Variables RCC Core Exported Variables
  * @{ */
 
@@ -210,19 +212,74 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
 
 /** @} */
 
-#define             XPD_RCC_ClearFlag(FLAG_NAME)     \
-    do{ RCC_REG_BIT(CIR,FLAG_NAME##C) = 1; }while(0)
+/** @defgroup RCC_Core_Exported_Macros RCC Core Exported Macros
+ * @{ */
 
-#define             XPD_RCC_GetFlag(FLAG_NAME)       \
-    (RCC_REG_BIT(CIR,FLAG_NAME##F))
-
+/**
+ * @brief  Enable the specified RCC interrupt.
+ * @param  IT_NAME: specifies the interrupt to enable.
+ *         This parameter can be one of the following values:
+ *            @arg LSIRDY:     Low Speed Internal oscillator ready
+ *            @arg LSERDY:     Low Speed Internal oscillator ready
+ *            @arg HSIRDY:     Low Speed Internal oscillator ready
+ *            @arg HSERDY:     Low Speed Internal oscillator ready
+ *            @arg PLLRDY:     Phase Locked Loop ready
+ *            @arg PLLI2SRDY:  Phase Locked Loop for I2S ready
+ *            @arg PLLSAIRDY:  Phase Locked Loop for SAI ready
+ *            @arg CSS:        Clock Security System
+ */
 #define             XPD_RCC_EnableIT(IT_NAME)        \
     do{ RCC_REG_BIT(CIR,IT_NAME##IE) = 1; }while(0)
 
+/**
+ * @brief  Enable the specified RCC interrupt.
+ * @param  IT_NAME: specifies the interrupt to enable.
+ *         This parameter can be one of the following values:
+ *            @arg LSIRDY:     Low Speed Internal oscillator ready
+ *            @arg LSERDY:     Low Speed Internal oscillator ready
+ *            @arg HSIRDY:     Low Speed Internal oscillator ready
+ *            @arg HSERDY:     Low Speed Internal oscillator ready
+ *            @arg PLLRDY:     Phase Locked Loop ready
+ *            @arg PLLI2SRDY:  Phase Locked Loop for I2S ready
+ *            @arg PLLSAIRDY:  Phase Locked Loop for SAI ready
+ *            @arg CSS:        Clock Security System
+ */
 #define             XPD_RCC_DisableIT(IT_NAME)       \
     do{ RCC_REG_BIT(CIR,IT_NAME##IE) = 0; }while(0)
 
+/**
+ * @brief  Get the specified RCC flag.
+ * @param  FLAG_NAME: specifies the flag to return.
+ *         This parameter can be one of the following values:
+ *            @arg LSIRDY:     Low Speed Internal oscillator ready
+ *            @arg LSERDY:     Low Speed Internal oscillator ready
+ *            @arg HSIRDY:     Low Speed Internal oscillator ready
+ *            @arg HSERDY:     Low Speed Internal oscillator ready
+ *            @arg PLLRDY:     Phase Locked Loop ready
+ *            @arg PLLI2SRDY:  Phase Locked Loop for I2S ready
+ *            @arg PLLSAIRDY:  Phase Locked Loop for SAI ready
+ *            @arg CSS:        Clock Security System
+ */
+#define             XPD_RCC_GetFlag(FLAG_NAME)       \
+    (RCC_REG_BIT(CIR,FLAG_NAME##F))
 
+/**
+ * @brief  Clear the specified RCC flag.
+ * @param  FLAG_NAME: specifies the flag to clear.
+ *         This parameter can be one of the following values:
+ *            @arg LSIRDY:     Low Speed Internal oscillator ready
+ *            @arg LSERDY:     Low Speed Internal oscillator ready
+ *            @arg HSIRDY:     Low Speed Internal oscillator ready
+ *            @arg HSERDY:     Low Speed Internal oscillator ready
+ *            @arg PLLRDY:     Phase Locked Loop ready
+ *            @arg PLLI2SRDY:  Phase Locked Loop for I2S ready
+ *            @arg PLLSAIRDY:  Phase Locked Loop for SAI ready
+ *            @arg CSS:        Clock Security System
+ */
+#define             XPD_RCC_ClearFlag(FLAG_NAME)     \
+    do{ RCC_REG_BIT(CIR,FLAG_NAME##C) = 1; }while(0)
+
+/** @} */
 
 /** @} */
 

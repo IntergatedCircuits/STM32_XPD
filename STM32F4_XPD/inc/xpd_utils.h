@@ -27,7 +27,7 @@
 #include "xpd_common.h"
 #include "xpd_config.h"
 
-/** @defgroup XPD_Utils
+/** @defgroup XPD_Utils XPD Utilities
  * @{ */
 
 /** @defgroup XPD_Utils_Exported_Types XPD Exported Types
@@ -44,14 +44,12 @@ typedef struct {
  * @{ */
 
 /** @addtogroup XPD_Exported_Functions_Init
- * @{
- */
+ * @{ */
 void            XPD_Init                (void);
 void            XPD_Deinit              (void);
 /** @} */
 /** @addtogroup XPD_Exported_Functions_Timer
- * @{
- */
+ * @{ */
 void            XPD_InitTimer           (void);
 void            XPD_IncTimer            (void);
 uint32_t        XPD_GetTimer            (void);
@@ -65,20 +63,35 @@ XPD_ReturnType  XPD_WaitForDiff         (volatile uint32_t * varAddress, uint32_
                                          uint32_t            match,      uint32_t mstimeout);
 /** @} */
 /** @addtogroup XPD_Exported_Functions_IRQ
- * @{
- */
+ * @{ */
 void            XPD_SysTick_IRQHandler  (void);
 /** @} */
-/** @addtogroup XPD_Exported_Functions_Critical
- * @{
+
+/** @} */
+
+/** @defgroup XPD_Exported_Macros XPD Exported Macros
+ * @{ */
+
+#ifndef XPD_CRITICAL_OVERRIDE
+/**
+ * @brief Enters a critical section by disabling interrupts. [overrideable]
+ * @param HANDLE: pointer to the requester handle
  */
-void            XPD_EnterCritical       (void * lockObject);
-void            XPD_ExitCritical        (void * lockObject);
-/** @} */
+#define XPD_EnterCritical(HANDLE)       \
+    __disable_irq()
 
-/** @} */
+/**
+ * @brief Leaves a critical section by enabling interrupts. [overrideable]
+ * @param HANDLE: pointer to the requester handle
+ */
+#define XPD_ExitCritical(HANDLE)        \
+    __enable_irq()
+#endif /* XPD_CRITICAL_OVERRIDE */
 
+/** @brief Timeout value for indefinite waiting */
 #define XPD_NO_TIMEOUT      0xFFFFFFFF
+
+/** @} */
 
 /** @defgroup XPD_Exported_Variables XPD Exported Variables
  * @{ */

@@ -47,6 +47,7 @@
 
 #include "xpd_rcc_cc.h"
 #include "xpd_rcc_gen.h"
+#include "xpd_rcc_pc.h"
 
 /** @} */
 

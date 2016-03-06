@@ -21,7 +21,7 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#include "xpd_rcc_cc.h"
+#include "xpd_rcc.h"
 #include "xpd_gpio.h"
 #include "xpd_pwr.h"
 #include "xpd_utils.h"
@@ -132,7 +132,11 @@ XPD_ReturnType XPD_RCC_HSIConfig(RCC_HSI_InitType * Config)
 
     /* Check if HSI is used as system clock or as PLL source when PLL is selected as system clock */
     if (     (sysclock == HSI)
-         || ((sysclock == PLL) && (XPD_RCC_GetPLLSource() == HSI)))
+         || ((sysclock == PLL) && (XPD_RCC_GetPLLSource() == HSI))
+#ifdef RCC_PLLCFGR_PLLR
+         || ((sysclock == PLLR) && (XPD_RCC_GetPLLSource() == HSI))
+#endif
+    )
     {
         /* When HSI is used as system clock it will not disabled */
         if ((RCC_REG_BIT(CR,HSIRDY) != 0) && (Config->State != OSC_ON))
@@ -184,7 +188,11 @@ XPD_ReturnType XPD_RCC_HSEConfig(RCC_HSE_InitType * Config)
 
     /* When the HSE is used as system clock or clock source for PLL in these cases it is not allowed to be disabled */
     if (     (sysclock == HSE)
-         || ((sysclock == PLL) && (XPD_RCC_GetPLLSource() == HSE)))
+         || ((sysclock == PLL) && (XPD_RCC_GetPLLSource() == HSE))
+#ifdef RCC_PLLCFGR_PLLR
+         || ((sysclock == PLLR) && (XPD_RCC_GetPLLSource() == HSE))
+#endif
+    )
     {
         if ((RCC_REG_BIT(CR,HSERDY) != 0) && (Config->State == OSC_OFF))
         {
@@ -347,7 +355,6 @@ XPD_ReturnType XPD_RCC_LSEConfig(RCC_OscStateType NewState)
     }
     return result;
 }
-
 
 /**
  * @brief Gets the input oscillator of the PLL.
@@ -628,7 +635,7 @@ uint32_t XPD_RCC_GetClockFreq(RCC_ClockType SelectedClock)
     switch (SelectedClock)
     {
     case SYSCLK:
-        return XPD_RCC_GetOscFreq(XPD_RCC_GetSYSCLKSource());
+        return SystemCoreClock << AHBPrescTable[RCC->CFGR.b.HPRE];
 
     case HCLK:
         return SystemCoreClock;

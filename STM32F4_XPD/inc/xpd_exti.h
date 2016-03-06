@@ -55,13 +55,6 @@ extern XPD_ValueCallbackType XPD_EXTI_Callbacks[32];
  * @{ */
 void            XPD_EXTI_Init           (uint8_t Line, EXTI_InitType * Config);
 
-FlagStatus      XPD_EXTI_GetFlag        (uint8_t Line);
-void            XPD_EXTI_ClearFlag      (uint8_t Line);
-
-void            XPD_EXTI_GenerateIT     (uint8_t Line);
-
-void            XPD_EXTI_IRQHandler     (uint8_t Line);
-
 /**
  * @brief Gets the pending flag for the line.
  * @param Line: the selected EXTI line
@@ -101,6 +94,21 @@ __STATIC_INLINE void XPD_EXTI_GenerateIT(uint8_t Line)
     SET_BIT(EXTI->SWIER, 1 << (uint32_t)Line);
 #endif
 }
+
+/**
+ * @brief EXTI interrupt handler.
+ * @param Line: an interrupt line which may be responsible for the interrupt generation.
+ */
+__STATIC_INLINE void XPD_EXTI_IRQHandler(uint8_t Line)
+{
+    if (XPD_EXTI_GetFlag(Line))
+    {
+        XPD_EXTI_ClearFlag(Line);
+
+        XPD_SAFE_CALLBACK(XPD_EXTI_Callbacks[Line], Line);
+    }
+}
+
 /** @} */
 
 /** @} */

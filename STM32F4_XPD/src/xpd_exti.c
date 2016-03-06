@@ -104,20 +104,6 @@ void XPD_EXTI_Init(uint8_t Line, EXTI_InitType * Config)
     }
 }
 
-/**
- * @brief EXTI interrupt handler.
- * @param Line: an interrupt line which may be responsible for the interrupt generation.
- */
-void XPD_EXTI_IRQHandler(uint8_t Line)
-{
-    if (XPD_EXTI_GetFlag(Line))
-    {
-        XPD_EXTI_ClearFlag(Line);
-
-        XPD_SAFE_CALLBACK(XPD_EXTI_Callbacks[Line], Line);
-    }
-}
-
 /** @} */
 
 /** @} */

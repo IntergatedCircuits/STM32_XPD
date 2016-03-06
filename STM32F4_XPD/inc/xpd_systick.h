@@ -42,19 +42,84 @@ typedef enum
 
 /** @} */
 
-/** @addtogroup SysTick_Exported_Functions
+/** @defgroup SysTick_Exported_Functions SysTick Exported Functions
  * @{ */
 
-XPD_ReturnType  XPD_SysTick_Init        (uint32_t Period, SysTick_ClockSourceType ClockSource);
+/**
+ * @brief Configures the SysTick timer and interrupt generation
+ * @param Period: the amount of timer counts until the counter reset
+ * @param ClockSource: clock source of the timer
+ * @return ERROR if the Period is too large to fit in the 24 bit register, OK if successful
+ */
+__STATIC_INLINE XPD_ReturnType XPD_SysTick_Init(uint32_t Period, SysTick_ClockSourceType ClockSource)
+{
+    /* check against counter size (24 bits) */
+    if ((--Period) > SysTick_LOAD_RELOAD_Msk)
+    {
+        return XPD_ERROR;                        /* Reload value impossible */
+    }
+    else
+    {
+        SysTick->LOAD.w = Period;                /* set reload register */
+        SysTick->VAL.w  = 0;                     /* reset the SysTick Counter Value */
+        SysTick->CTRL.b.CLKSOURCE = ClockSource; /* set clock source */
 
-void            XPD_SysTick_Enable      (void);
-void            XPD_SysTick_Disable     (void);
+        return XPD_OK;
+    }
+}
 
-void            XPD_SysTick_EnableIT    (void);
-void            XPD_SysTick_DisableIT   (void);
+/**
+ * @brief Enables the SysTick timer
+ */
+__STATIC_INLINE void XPD_SysTick_Enable(void)
+{
+    SysTick->CTRL.b.ENABLE = 1;
+}
 
-void            XPD_SysTick_Start_IT    (void);
-void            XPD_SysTick_Stop_IT     (void);
+/**
+ * @brief Disables the SysTick timer
+ */
+__STATIC_INLINE void XPD_SysTick_Disable(void)
+{
+    SysTick->CTRL.b.ENABLE = 0;
+}
+
+/**
+ * @brief Enables the SysTick interrupt request
+ */
+__STATIC_INLINE void XPD_SysTick_EnableIT(void)
+{
+    SysTick->CTRL.b.TICKINT = 1;
+}
+
+/**
+ * @brief Disables the SysTick interrupt request
+ */
+__STATIC_INLINE void XPD_SysTick_DisableIT(void)
+{
+    SysTick->CTRL.b.TICKINT = 0;
+}
+
+/**
+ * @brief Starts the SysTick timer with interrupt generation
+ */
+__STATIC_INLINE void XPD_SysTick_Start_IT(void)
+{
+    SysTick->VAL.w  = 0;                     /* reset the SysTick Counter Value */
+    SysTick->CTRL.b.TICKINT = 1;             /* enable interrupt generation */
+    SysTick->CTRL.b.ENABLE = 1;              /* enable counter */
+}
+
+/**
+ * @brief Stops the SysTick timer with interrupt generation
+ */
+__STATIC_INLINE void XPD_SysTick_Stop_IT(void)
+{
+    SysTick->CTRL.b.TICKINT = 0;
+}
+
+/** @} */
+
 /** @} */
 
 /** @} */
