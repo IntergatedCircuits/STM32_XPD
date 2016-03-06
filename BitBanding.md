@@ -74,7 +74,6 @@ typedef struct {
     __IO uint32_t POL;
 } CRC_TypeDef;
 
-
 typedef struct {
     __IO uint32_t DR[32];
     __IO uint32_t IDR[8];
@@ -95,7 +94,7 @@ typedef struct {
 
 #define CRC_BB(inst)      ((CRC_BitBand_TypeDef *) PERIPH_BB(inst))
 
-#define CRC_RESET(inst)   CRC_BB(inst)->CR.RESET = 1;
+#define CRC_RESET(inst)   (CRC_BB(inst)->CR.RESET = 1)
 ```
 
 Each register bit is interpreted as a 32 bit variable. Multiple bit fields and registers with no bit fields are defined as arrays, where the lowest index corresponds to the least significant bit. When writing the alias mapped bits, the least significant bit of the assignment is stored in the bit. Reading these bits can only result in 0 or 1. As the peripherals usually use a peripheral bus with slower transfer rate than the core bus, a simple store operation instead of a read-modify-write cycle is the biggest run-time boosting effect of bit-banding.
