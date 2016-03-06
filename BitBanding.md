@@ -11,7 +11,7 @@ Bit-banding does not mean that the selected regions have a special memory interf
 
 ## Why it is useful
 
-There are two main benefits to using bit-banding, **reduced number of operations** and **atomicity** of bit manipulation. 
+There are two main benefits to using bit-banding, **reduced number of operations** and **atomicity** of bit manipulation.
 
 * All masking operations normally associated with bit manipulation on word values can be excluded due to direct bit-accessibility. It takes only one operation (instead of 3) to modify a bit of a memory word, and two operations (read and compare, no masking AND) to determine if a bit field is set or not.
 * As bit-band load/store operations are atomic, the bit fields of memory words can be modified by several concurrent threads without race condition, which can happen with normal READ-MODIFY-WRITE operations.
@@ -35,10 +35,11 @@ As SRAM memory objects are only given address at link-time (unless it is fixed b
  */
 uint32_t BitCount(uint32_t Variable, uint8_t BitRange)
 {
-	// variable is on stack (in RAM), bit-band accessible
+	/* variable is on stack (in RAM), bit-band accessible */
 	uint32_t i, count = 0, *var_alias;
 	var_alias = SRAM_BB(&Variable);
 
+	/* bit range input check */
 	if(BitRange > 32) BitRange = 32;
 
 	for(i = 0; i < BitRange; i++)
@@ -48,35 +49,53 @@ uint32_t BitCount(uint32_t Variable, uint8_t BitRange)
 ```
 
 ### For peripheral addresses
-In the case of peripheral addresses the alias address can be calculated by the compiler (using the macro), saving both program memory size and run time. A dummy GPIO peripheral is illustrated in the example, with some common bit manipulation uses. Observe the toggle function: the bit-band read operation can only return 0 or 1, and the bit-band write operation only stores the least significant bit.
+In the case of peripheral addresses (which are predefined, unlike variable addresses) the alias address can be calculated in compile-time (using the macro), saving both program memory size and run time. The device peripheral headers in the CMSIS/Device folder contain bit-band alias remapped structures for the peripherals which are located in the peripheral bit-band region. A simple example is given below.
 
 ```C
-/* pseudo GPIO structure, every bit position corresponds to a GPIO pin */
+/* CRC peripheral */
 typedef struct {
-    __IO uint32 IDR; /* input data register */
-    __IO uint32 ODR; /* output data register */
-} GPIO_TypeDef;
+    __IO uint32_t DR;
+    __IO uint8_t IDR;
+         uint8_t __RESERVED0;
+         uint16_t __RESERVED1;
+    union {
+        struct {
+            __IO uint32_t RESET : 1;
+                 uint32_t __RESERVED0 : 2;
+            __IO uint32_t POLYSIZE : 2;
+            __IO uint32_t REV_IN : 2;
+            __IO uint32_t REV_OUT : 1;
+                 uint32_t __RESERVED1 : 24;
+        } b;
+        __IO uint32_t w;
+    } CR;
+         uint32_t __RESERVED2;
+    __IO uint32_t INIT;
+    __IO uint32_t POL;
+} CRC_TypeDef;
+
 
 typedef struct {
-    __IO uint32 IDR[32]; /* input data register */
-    __IO uint32 ODR[32]; /* output data register */
-} GPIO_BitBand_TypeDef;
+    __IO uint32_t DR[32];
+    __IO uint32_t IDR[8];
+         uint32_t __RESERVED0[8];
+         uint32_t __RESERVED1[16];
+    struct {
+        __IO uint32_t RESET;
+             uint32_t __RESERVED0[2];
+        __IO uint32_t POLYSIZE[2];
+        __IO uint32_t REV_IN[2];
+        __IO uint32_t REV_OUT;
+             uint32_t __RESERVED1[24];
+    } CR;
+         uint32_t __RESERVED2[32];
+    __IO uint32_t INIT[32];
+    __IO uint32_t POL[32];
+} CRC_BitBand_TypeDef;
 
-#define GPIO_BB(inst)             ((GPIO_BitBand_TypeDef *) PERIPH_BB(inst))
+#define CRC_BB(inst)      ((CRC_BitBand_TypeDef *) PERIPH_BB(inst))
 
-/* read bit at given register bit location */
-inline uint32_t gpio_read_pin(GPIO_TypeDef * gpio, uint8_t pin)
-{
-	return GPIO_BB(gpio)->IDR[pin];
-}
-/* write bit at given register bit location */
-inline void gpio_write_pin(GPIO_TypeDef * gpio, uint8_t pin, uint32_t value)
-{
-	GPIO_BB(gpio)->ODR[pin] = value;
-}
-/* toggle (invert) bit at given register bit location */
-inline void gpio_toggle_pin(GPIO_TypeDef * gpio, uint8_t pin)
-{
-	GPIO_BB(gpio)->ODR[pin]++;
-}
+#define CRC_RESET(inst)   CRC_BB(inst)->CR.RESET = 1;
 ```
+
+Each register bit is interpreted as a 32 bit variable. Multiple bit fields and registers with no bit fields are defined as arrays, where the lowest index corresponds to the least significant bit. When writing the alias mapped bits, the least significant bit of the assignment is stored in the bit. Reading these bits can only result in 0 or 1. As the peripherals usually use a peripheral bus with slower transfer rate than the core bus, a simple store operation instead of a read-modify-write cycle is the biggest run-time boosting effect of bit-banding.
