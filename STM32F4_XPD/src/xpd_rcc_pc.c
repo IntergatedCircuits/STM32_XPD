@@ -47,7 +47,7 @@ XPD_ReturnType XPD_RTC_ClockConfig(RTC_ClockSourceType ClockSource)
     XPD_ReturnType result;
 
     /* enable power clock*/
-    XPD_PWR_EnableClock();
+    XPD_PWR_ClockCtrl(ENABLE);
 
     /* enable write access to backup domain */
     PWR_REG_BIT(CR,DBP) = 1;

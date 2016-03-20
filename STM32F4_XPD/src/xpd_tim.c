@@ -111,6 +111,9 @@ static void tim_dmaCommutationCallbackRedirect(void *hdma)
  */
 XPD_ReturnType XPD_TIM_Init(TIM_HandleType * htim, TIM_CounterInitType * Config)
 {
+    /* enable clock */
+    htim->ClockCtrl(ENABLE);
+
 #ifdef TIM_BB
     htim->Inst_BB = TIM_BB(htim->Inst);
 #endif
@@ -148,6 +151,9 @@ XPD_ReturnType XPD_TIM_Deinit(TIM_HandleType * htim)
 
     /* disable the TIM Peripheral Clock */
     XPD_TIM_CounterStop(htim);
+
+    /* disable clock */
+    htim->ClockCtrl(DISABLE);
 
     /* Deinitialize peripheral dependencies */
     XPD_SAFE_CALLBACK(htim->Callbacks.DepDeinit,htim);

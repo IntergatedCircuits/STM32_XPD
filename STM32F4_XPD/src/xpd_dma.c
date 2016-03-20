@@ -21,8 +21,8 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-
 #include "xpd_dma.h"
+#include "xpd_rcc.h"
 #include "xpd_utils.h"
 
 /** @addtogroup DMA
@@ -30,18 +30,33 @@
 
 #define DMA_ABORT_TIMEOUT   1000
 
+#define DMA_BASE(STREAM)            ((uint32_t)(STREAM) & (~(uint32_t)0x3FF))
+#define DMA_BASE_OFFSET(STREAM)     (((uint32_t)(STREAM) < (uint32_t)DMA2) ? 0 : 1)
+#define DMA_STREAM_NUMBER(STREAM)   ((((uint32_t)(STREAM) & 0xFF) - 16) / 24)
+
 static const uint8_t dma_streamBitOffset[8] = {0, 24, 64, 88, 128, 152, 192, 216};
+
+static const XPD_CtrlFnType dma_clkCtrl[] = {
+        XPD_DMA1_ClockCtrl,
+#ifdef DMA2
+        XPD_DMA2_ClockCtrl
+#endif
+};
+static uint8_t dma_users[] = {
+        0,
+#ifdef DMA2
+        0
+#endif
+};
 
 static void dma_calcBase(DMA_HandleType * hdma)
 {
-    uint8_t stream_number = (((uint32_t) hdma->Inst & 0xFF) - 16) / 24;
-
     /* base points to the FEIF bit of the current stream (in BB alias) */
-    hdma->Base_BB = DMA_BB((uint32_t) hdma->Inst & (~0x3FF));
-    hdma->Base_BB += dma_streamBitOffset[stream_number];
+    hdma->Base_BB = DMA_BB(DMA_BASE(hdma->Inst));
+    hdma->Base_BB += dma_streamBitOffset[DMA_STREAM_NUMBER(hdma->Inst)];
 }
 
-static void dma_config(DMA_HandleType * hdma, DMA_TransferType * Config)
+static void dma_setConfig(DMA_HandleType * hdma, DMA_TransferType * Config)
 {
     /* DMA Stream data length */
     hdma->Inst->NDTR = Config->DataCount;
@@ -68,6 +83,30 @@ static void dma_config(DMA_HandleType * hdma, DMA_TransferType * Config)
     hdma->Errors = DMA_ERROR_NONE;
 }
 
+void dma_getConfig(DMA_HandleType * hdma, DMA_TransferType * Config)
+{
+    /* DMA Stream data length */
+    Config->DataCount = hdma->Inst->NDTR;
+
+    /* if direction is mem2periph, M0 is source, P is destination */
+    if (hdma->Inst->CR.b.DIR == DMA_MEMORY2PERIPH)
+    {
+        /* DMA Stream source address */
+        Config->SourceAddress = (void*)hdma->Inst->M0AR;
+
+        /* DMA Stream destination address */
+        Config->DestAddress = (void*)hdma->Inst->PAR;
+    }
+    else
+    {
+        /* DMA Stream source address */
+        Config->SourceAddress = (void*)hdma->Inst->PAR;
+
+        /* DMA Stream destination address */
+        Config->DestAddress = (void*)hdma->Inst->M0AR;
+    }
+}
+
 /** @defgroup DMA_Exported_Functions DMA Exported Functions
  * @{ */
 
@@ -79,7 +118,15 @@ static void dma_config(DMA_HandleType * hdma, DMA_TransferType * Config)
  */
 XPD_ReturnType XPD_DMA_Init(DMA_HandleType * hdma, DMA_InitType * Config)
 {
-    uint32_t tmp;
+
+    /* enable DMA clock */
+    {
+        uint32_t bo = DMA_BASE_OFFSET(hdma->Inst);
+
+        SET_BIT(dma_users[bo], 1 << DMA_STREAM_NUMBER(hdma->Inst));
+
+        dma_clkCtrl[bo](ENABLE);
+    }
 
 #ifdef DMA_Stream_BB
     hdma->Inst_BB = DMA_Stream_BB(hdma->Inst);
@@ -156,6 +203,17 @@ XPD_ReturnType XPD_DMA_Deinit(DMA_HandleType * hdma)
     regs->LIFCR.CTCIF0 = 0;
     regs->LIFCR.CTEIF0 = 0;
 
+    /* disable DMA clock */
+    {
+        uint32_t bo = DMA_BASE_OFFSET(hdma->Inst);
+        CLEAR_BIT(dma_users[bo], 1 << DMA_STREAM_NUMBER(hdma->Inst));
+
+        if (dma_users[bo] == 0)
+        {
+            dma_clkCtrl[bo](DISABLE);
+        }
+    }
+
     return XPD_OK;
 }
 
@@ -187,7 +245,7 @@ void XPD_DMA_Start(DMA_HandleType * hdma, DMA_TransferType * Config)
     XPD_DMA_Disable(hdma);
 
     /* Configure the source, destination address and the data length */
-    dma_config(hdma, Config);
+    dma_setConfig(hdma, Config);
 
     XPD_DMA_Enable(hdma);
 }
@@ -202,7 +260,7 @@ void XPD_DMA_Start_IT(DMA_HandleType * hdma, DMA_TransferType * Config)
     XPD_DMA_Disable(hdma);
 
     /* Configure the source, destination address and the data length */
-    dma_config(hdma, Config);
+    dma_setConfig(hdma, Config);
 
     /* enable interrupts */
     SET_BIT(hdma->Inst->CR.w, (DMA_SxCR_TCIE | DMA_SxCR_HTIE | DMA_SxCR_TEIE | DMA_SxCR_DMEIE));

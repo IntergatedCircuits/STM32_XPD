@@ -74,10 +74,11 @@ typedef enum
 /** @brief TIM Handle structure */
 typedef struct
 {
-    TIM_TypeDef * Inst;                     /*!< The address of the peripheral instance used by the handle */
+    TIM_TypeDef * Inst;                      /*!< The address of the peripheral instance used by the handle */
 #ifdef TIM_BB
-    TIM_BitBand_TypeDef * Inst_BB;          /*!< The address of the peripheral instance in the bit-band region */
+    TIM_BitBand_TypeDef * Inst_BB;           /*!< The address of the peripheral instance in the bit-band region */
 #endif
+    XPD_CtrlFnType ClockCtrl;                /*!< Function pointer for RCC clock control */
     struct {
         XPD_HandleCallbackType DepInit;      /*!< Callback to initialize module dependencies (GPIOs, IRQs, DMAs) */
         XPD_HandleCallbackType DepDeinit;    /*!< Callback to restore module dependencies (GPIOs, IRQs, DMAs) */
@@ -142,9 +143,10 @@ void            XPD_TIM_IRQHandler          (TIM_HandleType * htim);
  * @param  INIT_FN: specifies the dependency initialization function to call back.
  * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
  */
-#define         NEW_TIM_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)              \
-    {.Inst      = (INSTANCE),                                           \
-     .Callbacks = {(INIT_FN),(DEINIT_FN),NULL,NULL,NULL,NULL,NULL,NULL}}
+#define         NEW_TIM_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)               \
+    {.Inst      = (INSTANCE),                                            \
+     .Callbacks = {(INIT_FN),(DEINIT_FN),NULL,NULL,NULL,NULL,NULL,NULL}, \
+     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl}
 
 /**
  * @brief  Enable the specified TIM interrupt.

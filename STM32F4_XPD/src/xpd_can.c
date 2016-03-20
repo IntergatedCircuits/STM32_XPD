@@ -41,9 +41,13 @@
 #define SLAK_TIMEOUT      (10)
 
 #define CAN_ERROR_INTERRUPTS    (CAN_IER_BOFIE | CAN_IER_EPVIE | CAN_IER_EWGIE | CAN_IER_LECIE)
-#define CAN_RECEIVE0_INTERRUPTS	CAN_IER_FMPIE0
-#define CAN_RECEIVE1_INTERRUPTS	CAN_IER_FMPIE1
-#define CAN_TRANSMIT_INTERRUPTS	CAN_IER_TMEIE
+#define CAN_RECEIVE0_INTERRUPTS  CAN_IER_FMPIE0
+#define CAN_RECEIVE1_INTERRUPTS  CAN_IER_FMPIE1
+#define CAN_TRANSMIT_INTERRUPTS  CAN_IER_TMEIE
+
+#ifdef __DUAL_CAN_DEVICE
+static bool can_slaveFiltersUnused();
+#endif
 
 /** @defgroup CAN_Private_Functions CAN Private Functions
  * @{ */
@@ -172,36 +176,50 @@ XPD_ReturnType XPD_CAN_Init(CAN_HandleType* hcan, CAN_InitType* Config)
 {
     XPD_ReturnType result = XPD_OK;
 
+    /* enable peripheral clock */
+#ifdef __DUAL_CAN_DEVICE
+    if (hcan->Inst == CAN1)
+    {
+        XPD_CAN1_ClockCtrl(ENABLE);
+    }
+    else
+    {
+        XPD_CAN2_ClockCtrl(ENABLE);
+    }
+#else
+    XPD_CAN_ClockCtrl(ENABLE);
+#endif
+
 #ifdef CAN_BB
-	hcan->Inst_BB = CAN_BB(hcan->Inst);
+    hcan->Inst_BB = CAN_BB(hcan->Inst);
 #endif
 
     /* Dependencies initialization */
-	XPD_SAFE_CALLBACK(hcan->Callbacks.DepInit, hcan);
+    XPD_SAFE_CALLBACK(hcan->Callbacks.DepInit, hcan);
 
-	/* exit from sleep mode */
+    /* exit from sleep mode */
     CAN_REG_BIT(hcan, MCR, SLEEP) = 0;
 
-	/* request initialization */
+    /* request initialization */
     CAN_REG_BIT(hcan, MCR, INRQ) = 1;
 
-	result = XPD_WaitForMatch(&hcan->Inst->MSR.w, CAN_MSR_INAK, CAN_MSR_INAK, INAK_TIMEOUT);
+    result = XPD_WaitForMatch(&hcan->Inst->MSR.w, CAN_MSR_INAK, CAN_MSR_INAK, INAK_TIMEOUT);
     if(result != XPD_OK)
     {
         return result;
     }
 
     /* set the features (except for mode) */
-	MODIFY_REG(hcan->Inst->MCR.w, 0xFC, Config->Features.All);
+    MODIFY_REG(hcan->Inst->MCR.w, 0xFC, Config->Features.All);
 
-	/* set the bit timing register (with test mode) */
-	hcan->Inst->BTR.w = (uint32_t)Config->Features.All << 30;
-	hcan->Inst->BTR.b.SJW = (uint32_t)Config->Timing.SJW - 1;
+    /* set the bit timing register (with test mode) */
+    hcan->Inst->BTR.w = (uint32_t)Config->Features.All << 30;
+    hcan->Inst->BTR.b.SJW = (uint32_t)Config->Timing.SJW - 1;
     hcan->Inst->BTR.b.TS1 = (uint32_t)Config->Timing.BS1 - 1;
     hcan->Inst->BTR.b.TS2 = (uint32_t)Config->Timing.BS2 - 1;
     hcan->Inst->BTR.b.BRP = (uint32_t)Config->Timing.Prescaler - 1;
 
-	/* request leave initialization */
+    /* request leave initialization */
     CAN_REG_BIT(hcan, MCR, INRQ) = 0;
 
     result = XPD_WaitForMatch(&hcan->Inst->MSR.w, CAN_MSR_INAK, 0, INAK_TIMEOUT);
@@ -216,7 +234,7 @@ XPD_ReturnType XPD_CAN_Init(CAN_HandleType* hcan, CAN_InitType* Config)
     /* reset filter banks */
     XPD_CAN_FilterBankReset(hcan);
 
-	return result;
+    return result;
 }
 
 /**
@@ -232,10 +250,24 @@ XPD_ReturnType XPD_CAN_Deinit(CAN_HandleType* hcan)
     /* disable filters */
     XPD_CAN_FilterBankReset(hcan);
 
-	/* Deinitialize peripheral dependencies */
+    /* disable peripheral clock */
+#ifdef __DUAL_CAN_DEVICE
+    if (hcan->Inst == CAN2)
+    {
+        XPD_CAN2_ClockCtrl(DISABLE);
+    }
+    else if(can_slaveFiltersUnused)
+    {
+        XPD_CAN1_ClockCtrl(DISABLE);
+    }
+#else
+    XPD_CAN_ClockCtrl(DISABLE);
+#endif
+
+    /* Deinitialize peripheral dependencies */
     XPD_SAFE_CALLBACK(hcan->Callbacks.DepDeinit, hcan);
 
-	return XPD_OK;
+    return XPD_OK;
 }
 
 /**
@@ -345,14 +377,14 @@ void XPD_CAN_TxAbort(CAN_HandleType * hcan, uint8_t Mailbox)
  */
 uint8_t XPD_CAN_TxEmptyMailbox(CAN_HandleType * hcan)
 {
-	uint32_t reg = hcan->Inst->TSR.w;
-	uint8_t mailbox = 3;
-	/* if at least one mailbox is empty */
-	if ((reg & CAN_TSR_TME) != 0)
-	{
-		mailbox = ((reg & CAN_TSR_CODE) >> 24) & 0x3;
-	}
-	return mailbox;
+    uint32_t reg = hcan->Inst->TSR.w;
+    uint8_t mailbox = 3;
+    /* if at least one mailbox is empty */
+    if ((reg & CAN_TSR_TME) != 0)
+    {
+        mailbox = ((reg & CAN_TSR_CODE) >> 24) & 0x3;
+    }
+    return mailbox;
 }
 
 /**
@@ -364,8 +396,8 @@ uint8_t XPD_CAN_TxEmptyMailbox(CAN_HandleType * hcan)
  */
 XPD_ReturnType XPD_CAN_Transmit(CAN_HandleType * hcan, CAN_FrameType * Frame, uint32_t Timeout)
 {
-	uint32_t temp;
-	XPD_ReturnType result;
+    uint32_t temp;
+    XPD_ReturnType result;
     uint32_t starttime = XPD_GetTimer();
 
     /* no timeout, no wait for success */
@@ -424,20 +456,20 @@ XPD_ReturnType XPD_CAN_Transmit(CAN_HandleType * hcan, CAN_FrameType * Frame, ui
  */
 XPD_ReturnType XPD_CAN_Transmit_IT(CAN_HandleType * hcan, CAN_FrameType * Frame)
 {
-	uint32_t transmitmailbox;
+    uint32_t transmitmailbox;
     XPD_ReturnType result;
 
     result = can_frameTransmit(hcan, Frame);
 
-	if (result == XPD_OK)
-	{
-		SET_BIT(hcan->Inst->IER.w, CAN_ERROR_INTERRUPTS | CAN_TRANSMIT_INTERRUPTS);
+    if (result == XPD_OK)
+    {
+        SET_BIT(hcan->Inst->IER.w, CAN_ERROR_INTERRUPTS | CAN_TRANSMIT_INTERRUPTS);
 
-		/* state bit is set for the transmit mailbox */
-		SET_BIT(hcan->State, 1 << Frame->Index);
-	}
+        /* state bit is set for the transmit mailbox */
+        SET_BIT(hcan->State, 1 << Frame->Index);
+    }
 
-	return result;
+    return result;
 }
 
 /** @} */
@@ -741,6 +773,13 @@ typedef union
     uint32_t u32[2];
 }FilterRegister;
 
+#ifdef __DUAL_CAN_DEVICE
+static bool can_slaveFiltersUnused()
+{
+    return FilterInfo[CAN_MASTER->FMR.b.CAN2SB].type == FILTERTYPE_INVALID;
+}
+#endif
+
 /**
  * @brief Resets the receive filter bank configurations for the CAN peripheral.
  * @param hcan: pointer to the CAN handle structure
@@ -752,7 +791,7 @@ void XPD_CAN_FilterBankReset(CAN_HandleType * hcan)
     XPD_EnterCritical(hcan);
 
 #ifdef __DUAL_CAN_DEVICE
-    XPD_CAN1_EnableClock();
+    XPD_CAN1_ClockCtrl(ENABLE);
 #endif
 
     filterbankoffset = getFilterBankOffset(hcan);
@@ -788,7 +827,7 @@ XPD_ReturnType XPD_CAN_FilterInit(CAN_HandleType * hcan, uint8_t FIFONumber, CAN
     XPD_EnterCritical(hcan);
 
 #ifdef __DUAL_CAN_DEVICE
-    XPD_CAN1_EnableClock();
+    XPD_CAN1_ClockCtrl(ENABLE);
 #endif
 
     fFifoReg = CAN_MASTER->FFA1R;

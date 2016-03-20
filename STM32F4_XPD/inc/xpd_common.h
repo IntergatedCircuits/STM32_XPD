@@ -123,6 +123,12 @@ typedef enum
 }ClockDividerType;
 
 /**
+ * @brief Function pointer type for binary control function reference
+ * @param NewState: the state to set
+ */
+typedef void ( *XPD_CtrlFnType )            ( FunctionalState NewState );
+
+/**
  * @brief Callback function pointer type with no parameters
  */
 typedef void ( *XPD_SimpleCallbackType )    ( void );

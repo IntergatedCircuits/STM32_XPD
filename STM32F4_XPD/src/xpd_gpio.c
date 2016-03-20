@@ -25,7 +25,57 @@
 #include "xpd_rcc.h"
 #include "xpd_utils.h"
 
-#define GET_GPIO_SOURCE(__GPIOx__) (((uint32_t)(__GPIOx__) - (uint32_t)GPIOA_BASE) >> 10)
+#define GPIO_PORT_OFFSET(__GPIOx__) (((uint32_t)(__GPIOx__) - (uint32_t)GPIOA_BASE) >> 10)
+
+static const XPD_CtrlFnType gpio_clockCtrl[] = {
+#ifdef GPIOA
+        XPD_GPIOA_ClockCtrl,
+#else
+        NULL,
+#endif
+#ifdef GPIOB
+        XPD_GPIOB_ClockCtrl,
+#else
+        NULL,
+#endif
+#ifdef GPIOC
+        XPD_GPIOC_ClockCtrl,
+#else
+        NULL,
+#endif
+#ifdef GPIOD
+        XPD_GPIOD_ClockCtrl,
+#else
+        NULL,
+#endif
+#ifdef GPIOE
+        XPD_GPIOE_ClockCtrl,
+#else
+        NULL,
+#endif
+#ifdef GPIOF
+        XPD_GPIOF_ClockCtrl,
+#else
+        NULL,
+#endif
+#ifdef GPIOG
+        XPD_GPIOG_ClockCtrl,
+#else
+        NULL,
+#endif
+#ifdef GPIOH
+        XPD_GPIOH_ClockCtrl,
+#endif
+#ifdef GPIOI
+        XPD_GPIOI_ClockCtrl,
+#endif
+#ifdef GPIOJ
+        XPD_GPIOJ_ClockCtrl,
+#endif
+#ifdef GPIOK
+        XPD_GPIOK_ClockCtrl,
+#endif
+};
 
 /** @defgroup GPIO
  * @{ */
@@ -48,9 +98,10 @@ void XPD_GPIO_InitPort(GPIO_TypeDef *GPIOx, GPIO_InitType *Config)
     uint32_t temp = 0;
     uint32_t reg;
 
+    /* enable GPIO clock */
+    gpio_clockCtrl[GPIO_PORT_OFFSET(GPIOx)](ENABLE);
+
     /* alternate function mapping */
-    GPIOx->AFR[0] = 0;
-    GPIOx->AFR[1] = 0;
     if ((Config->Mode == GPIO_MODE_ALTERNATE) && (Config->AlternateMap != 0))
     {
         for (temp = Config->AlternateMap; temp != 0; temp <<= 4)
@@ -59,6 +110,11 @@ void XPD_GPIO_InitPort(GPIO_TypeDef *GPIOx, GPIO_InitType *Config)
         }
         GPIOx->AFR[0] = reg;
         GPIOx->AFR[1] = reg;
+    }
+    else
+    {
+        GPIOx->AFR[0] = 0;
+        GPIOx->AFR[1] = 0;
     }
 
     /* IO direction setup */
@@ -123,65 +179,7 @@ void XPD_GPIO_InitPort(GPIO_TypeDef *GPIOx, GPIO_InitType *Config)
             break;
     }
 
-    /* EXTI mode configuration */
-    if (Config->Mode == GPIO_MODE_EXTI)
-    {
-        /* enable SYSCFG clock */
-        XPD_SYSCFG_EnableClock();
-
-        /* bind callbacks */
-        for (temp = 0; temp < 16; temp++)
-        {
-            XPD_EXTI_Callbacks[temp] = Config->ExtI.ITCallback;
-        }
-
-        /* set EXTI source */
-        temp = GET_GPIO_SOURCE(GPIOx);
-        temp |= temp << 4;
-        temp |= temp << 4;
-        temp |= temp << 4;
-        SYSCFG->EXTICR[0] = temp;
-        SYSCFG->EXTICR[1] = temp;
-        SYSCFG->EXTICR[2] = temp;
-        SYSCFG->EXTICR[3] = temp;
-
-        /* set reaction and edge */
-        if (Config->ExtI.Reaction & REACTION_IT)
-        {
-            SET_BIT(EXTI->IMR, 0xFFFF);
-        }
-        else
-        {
-            CLEAR_BIT(EXTI->IMR, 0xFFFF);
-        }
-
-        if (Config->ExtI.Reaction & REACTION_EVENT)
-        {
-            SET_BIT(EXTI->EMR, 0xFFFF);
-        }
-        else
-        {
-            CLEAR_BIT(EXTI->EMR, 0xFFFF);
-        }
-
-        if (Config->ExtI.Edge & EDGE_RISING)
-        {
-            SET_BIT(EXTI->RTSR, 0xFFFF);
-        }
-        else
-        {
-            CLEAR_BIT(EXTI->RTSR, 0xFFFF);
-        }
-
-        if (Config->ExtI.Edge & EDGE_FALLING)
-        {
-            SET_BIT(EXTI->FTSR, 0xFFFF);
-        }
-        else
-        {
-            CLEAR_BIT(EXTI->FTSR, 0xFFFF);
-        }
-    }
+    /* EXTI mode configuration is left out */
 }
 
 /** @} */
@@ -203,6 +201,9 @@ void XPD_GPIO_InitPin(GPIO_TypeDef * GPIOx, uint8_t Pin, GPIO_InitType * Config)
     uint32_t shifter;
 
     (uint32_t) Pin;
+
+    /* enable GPIO clock */
+    gpio_clockCtrl[GPIO_PORT_OFFSET(GPIOx)](ENABLE);
 
     /* alternate mapping */
     if (Config->Mode == GPIO_MODE_ALTERNATE)
@@ -235,11 +236,11 @@ void XPD_GPIO_InitPin(GPIO_TypeDef * GPIOx, uint8_t Pin, GPIO_InitType * Config)
     if (Config->Mode == GPIO_MODE_EXTI)
     {
         /* enable SYSCFG clock */
-        XPD_SYSCFG_EnableClock();
+        XPD_SYSCFG_ClockCtrl(ENABLE);
 
         /* set EXTI source */
         shifter = (Pin & 0x03) * 4;
-        MODIFY_REG(SYSCFG->EXTICR[Pin >> 2], ((uint32_t) 0x0F) << shifter, GET_GPIO_SOURCE(GPIOx) << shifter);
+        MODIFY_REG(SYSCFG->EXTICR[Pin >> 2], ((uint32_t) 0x0F) << shifter, GPIO_PORT_OFFSET(GPIOx) << shifter);
 
         /* hand over EXTI configuration */
         XPD_EXTI_Init(Pin, &Config->ExtI);

@@ -315,7 +315,7 @@ XPD_ReturnType XPD_RCC_LSEConfig(RCC_OscStateType NewState)
     XPD_ReturnType result = XPD_OK;
 
     /* Enable Power Clock*/
-    XPD_PWR_EnableClock();
+    XPD_PWR_ClockCtrl(ENABLE);
 
     /* Enable write access to Backup domain */
     PWR_REG_BIT(CR,DBP) = 1;
@@ -681,7 +681,7 @@ void XPD_RCC_MCOConfig(uint8_t MCOx, uint8_t MCOSource, ClockDividerType MCODiv)
     {
     case 1:
         /* MCO1 map: PA8 */
-        XPD_GPIOA_EnableClock();
+        XPD_GPIOA_ClockCtrl(ENABLE);
 
         XPD_GPIO_InitPin(GPIOA, 8, &gpio);
 
@@ -695,7 +695,7 @@ void XPD_RCC_MCOConfig(uint8_t MCOx, uint8_t MCOSource, ClockDividerType MCODiv)
 
     case 2:
         /* MCO2 map: PC9 */
-        XPD_GPIOC_EnableClock();
+        XPD_GPIOC_ClockCtrl(ENABLE);
 
         XPD_GPIO_InitPin(GPIOC, 9, &gpio);
 

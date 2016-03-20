@@ -44,6 +44,9 @@ XPD_ValueCallbackType XPD_EXTI_Callbacks[32] = {
  */
 void XPD_EXTI_Init(uint8_t Line, EXTI_InitType * Config)
 {
+#ifdef RCC_APB2ENR_EXTITEN
+    XPD_EXTI_ClockCtrl(ENABLE);
+#endif
 #ifdef EXTI_BB
     EXTI_BB->IMR[Line] = Config->Reaction;
 
