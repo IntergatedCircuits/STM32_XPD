@@ -1,10 +1,10 @@
 /**
   ******************************************************************************
-  * @file    stm32f407xx.h
+  * @file    stm32f417xx.h
   * @author  Benedek Kupper
   * @version V0.1
   * @date    2016-03-20
-  * @brief   CMSIS STM32F407xx Device Peripheral Access Layer Header File.
+  * @brief   CMSIS STM32F417xx Device Peripheral Access Layer Header File.
   *
   *          This file contains:
   *           - Data structures and the address mapping for all peripherals
@@ -61,12 +61,12 @@
   * @{
   */
 
-/** @addtogroup stm32f407xx
+/** @addtogroup stm32f417xx
   * @{
   */
     
-#ifndef __STM32F407xx_H
-#define __STM32F407xx_H
+#ifndef __STM32F417xx_H
+#define __STM32F417xx_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -189,7 +189,8 @@ typedef enum
   OTG_HS_WKUP_IRQn            = 76,     /*!< USB OTG HS Wakeup through EXTI interrupt                          */
   OTG_HS_IRQn                 = 77,     /*!< USB OTG HS global interrupt                                       */
   DCMI_IRQn                   = 78,     /*!< DCMI global interrupt                                             */
-  HASH_RNG_IRQn               = 80,     /*!< Hash and RNG global interrupt                                     */
+  CRYP_IRQn                   = 79,     /*!< CRYP crypto global interrupt                                      */
+  HASH_RNG_IRQn               = 80,     /*!< Hash and Rng global interrupt                                     */
   FPU_IRQn                    = 81      /*!< FPU global interrupt                                              */
 } IRQn_Type;
 
@@ -2579,10 +2580,9 @@ typedef struct {
             __IO uint32_t ADDHLD : 4;                /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
             __IO uint32_t DATAST : 8;                /*!<DATAST [7:0] bits (Data-phase duration) */
             __IO uint32_t BUSTURN : 4;               /*!<BUSTURN[3:0] bits (Bus turnaround duration) */
-            __IO uint32_t CLKDIV : 4;                /*!<CLKDIV[3:0] bits (Clock divide ratio) */
-            __IO uint32_t DATLAT : 4;                /*!<DATLA[3:0] bits (Data latency) */
+                 uint32_t __RESERVED0 : 8;
             __IO uint32_t ACCMOD : 2;                /*!<ACCMOD[1:0] bits (Access mode) */
-                 uint32_t __RESERVED0 : 2;
+                 uint32_t __RESERVED1 : 2;
         } b;
         __IO uint32_t w;
     } BWTR[7];                                  /*!< NOR/PSRAM write timing registers, Address offset: 0x104-0x11C */
@@ -3340,7 +3340,9 @@ typedef struct {
     union {
         struct {
             __IO uint32_t DCMIRST : 1;
-                 uint32_t __RESERVED0 : 5;
+                 uint32_t __RESERVED0 : 3;
+            __IO uint32_t CRYPRST : 1;
+            __IO uint32_t HASHRST : 1;
             __IO uint32_t RNGRST : 1;
             __IO uint32_t OTGFSRST : 1;
                  uint32_t __RESERVED1 : 24;
@@ -3445,7 +3447,9 @@ typedef struct {
     union {
         struct {
             __IO uint32_t DCMIEN : 1;
-                 uint32_t __RESERVED0 : 5;
+                 uint32_t __RESERVED0 : 3;
+            __IO uint32_t CRYPEN : 1;
+            __IO uint32_t HASHEN : 1;
             __IO uint32_t RNGEN : 1;
             __IO uint32_t OTGFSEN : 1;
                  uint32_t __RESERVED1 : 24;
@@ -3556,7 +3560,9 @@ typedef struct {
     union {
         struct {
             __IO uint32_t DCMILPEN : 1;
-                 uint32_t __RESERVED0 : 5;
+                 uint32_t __RESERVED0 : 3;
+            __IO uint32_t CRYPLPEN : 1;
+            __IO uint32_t HASHLPEN : 1;
             __IO uint32_t RNGLPEN : 1;
             __IO uint32_t OTGFSLPEN : 1;
                  uint32_t __RESERVED1 : 24;
@@ -3775,7 +3781,9 @@ typedef struct {
     } AHB1RSTR;                              /*!< RCC AHB1 peripheral reset register,                          Address offset: 0x10 */
     struct {
         __IO uint32_t DCMIRST;
-             uint32_t __RESERVED0[5];
+             uint32_t __RESERVED0[3];
+        __IO uint32_t CRYPRST;
+        __IO uint32_t HASHRST;
         __IO uint32_t RNGRST;
         __IO uint32_t OTGFSRST;
              uint32_t __RESERVED1[24];
@@ -3865,7 +3873,9 @@ typedef struct {
     } AHB1ENR;                               /*!< RCC AHB1 peripheral clock register,                          Address offset: 0x30 */
     struct {
         __IO uint32_t DCMIEN;
-             uint32_t __RESERVED0[5];
+             uint32_t __RESERVED0[3];
+        __IO uint32_t CRYPEN;
+        __IO uint32_t HASHEN;
         __IO uint32_t RNGEN;
         __IO uint32_t OTGFSEN;
              uint32_t __RESERVED1[24];
@@ -3961,7 +3971,9 @@ typedef struct {
     } AHB1LPENR;                             /*!< RCC AHB1 peripheral clock enable in low power mode register, Address offset: 0x50 */
     struct {
         __IO uint32_t DCMILPEN;
-             uint32_t __RESERVED0[5];
+             uint32_t __RESERVED0[3];
+        __IO uint32_t CRYPLPEN;
+        __IO uint32_t HASHLPEN;
         __IO uint32_t RNGLPEN;
         __IO uint32_t OTGFSLPEN;
              uint32_t __RESERVED1[24];
@@ -5569,6 +5581,170 @@ typedef struct {
 
 
 /** 
+  * @brief Crypto Processor
+  */
+
+
+typedef struct {
+    union {
+        struct {
+                 uint32_t __RESERVED0 : 2;
+            __IO uint32_t ALGODIR : 1;
+            __IO uint32_t ALGOMODE_AES_KEY : 3;
+            __IO uint32_t DATATYPE : 2;
+            __IO uint32_t KEYSIZE : 2;
+                 uint32_t __RESERVED1 : 4;
+            __IO uint32_t FFLUSH : 1;
+            __IO uint32_t CRYPEN : 1;
+            __IO uint32_t GCM_CCMPH : 2;
+                 uint32_t __RESERVED2 : 14;
+        } b;
+        __IO uint32_t w;
+    } CR;                                    /*!< CRYP control register,                                    Address offset: 0x00 */
+    union {
+        struct {
+            __IO uint32_t IFEM : 1;
+            __IO uint32_t IFNF : 1;
+            __IO uint32_t OFNE : 1;
+            __IO uint32_t OFFU : 1;
+            __IO uint32_t BUSY : 1;
+                 uint32_t __RESERVED0 : 27;
+        } b;
+        __IO uint32_t w;
+    } SR;                                    /*!< CRYP status register,                                     Address offset: 0x04 */
+    __IO uint32_t DR;                        /*!< CRYP data input register,                                 Address offset: 0x08 */
+    __IO uint32_t DOUT;                      /*!< CRYP data output register,                                Address offset: 0x0C */
+    union {
+        struct {
+            __IO uint32_t DIEN : 1;
+            __IO uint32_t DOEN : 1;
+                 uint32_t __RESERVED0 : 30;
+        } b;
+        __IO uint32_t w;
+    } DMACR;                                 /*!< CRYP DMA control register,                                Address offset: 0x10 */
+    union {
+        struct {
+            __IO uint32_t INIM : 1;
+            __IO uint32_t OUTIM : 1;
+                 uint32_t __RESERVED0 : 30;
+        } b;
+        __IO uint32_t w;
+    } IMSCR;                                 /*!< CRYP interrupt mask set/clear register,                   Address offset: 0x14 */
+    union {
+        struct {
+            __IO uint32_t OUTRIS : 1;
+            __IO uint32_t INRIS : 1;
+                 uint32_t __RESERVED0 : 30;
+        } b;
+        __IO uint32_t w;
+    } RISR;                                  /*!< CRYP raw interrupt status register,                       Address offset: 0x18 */
+    union {
+        struct {
+            __IO uint32_t INMIS : 1;
+            __IO uint32_t OUTMIS : 1;
+                 uint32_t __RESERVED0 : 30;
+        } b;
+        __IO uint32_t w;
+    } MISR;                                  /*!< CRYP masked interrupt status register,                    Address offset: 0x1C */
+    __IO uint32_t K0LR;                      /*!< CRYP key left  register 0,                                Address offset: 0x20 */
+    __IO uint32_t K0RR;                      /*!< CRYP key right register 0,                                Address offset: 0x24 */
+    __IO uint32_t K1LR;                      /*!< CRYP key left  register 1,                                Address offset: 0x28 */
+    __IO uint32_t K1RR;                      /*!< CRYP key right register 1,                                Address offset: 0x2C */
+    __IO uint32_t K2LR;                      /*!< CRYP key left  register 2,                                Address offset: 0x30 */
+    __IO uint32_t K2RR;                      /*!< CRYP key right register 2,                                Address offset: 0x34 */
+    __IO uint32_t K3LR;                      /*!< CRYP key left  register 3,                                Address offset: 0x38 */
+    __IO uint32_t K3RR;                      /*!< CRYP key right register 3,                                Address offset: 0x3C */
+    __IO uint32_t IV0LR;                     /*!< CRYP initialization vector left-word  register 0,         Address offset: 0x40 */
+    __IO uint32_t IV0RR;                     /*!< CRYP initialization vector right-word register 0,         Address offset: 0x44 */
+    __IO uint32_t IV1LR;                     /*!< CRYP initialization vector left-word  register 1,         Address offset: 0x48 */
+    __IO uint32_t IV1RR;                     /*!< CRYP initialization vector right-word register 1,         Address offset: 0x4C */
+    __IO uint32_t CSGCMCCM0R;                /*!< CRYP GCM/GMAC or CCM/CMAC context swap register 0,        Address offset: 0x50 */
+    __IO uint32_t CSGCMCCM1R;                /*!< CRYP GCM/GMAC or CCM/CMAC context swap register 1,        Address offset: 0x54 */
+    __IO uint32_t CSGCMCCM2R;                /*!< CRYP GCM/GMAC or CCM/CMAC context swap register 2,        Address offset: 0x58 */
+    __IO uint32_t CSGCMCCM3R;                /*!< CRYP GCM/GMAC or CCM/CMAC context swap register 3,        Address offset: 0x5C */
+    __IO uint32_t CSGCMCCM4R;                /*!< CRYP GCM/GMAC or CCM/CMAC context swap register 4,        Address offset: 0x60 */
+    __IO uint32_t CSGCMCCM5R;                /*!< CRYP GCM/GMAC or CCM/CMAC context swap register 5,        Address offset: 0x64 */
+    __IO uint32_t CSGCMCCM6R;                /*!< CRYP GCM/GMAC or CCM/CMAC context swap register 6,        Address offset: 0x68 */
+    __IO uint32_t CSGCMCCM7R;                /*!< CRYP GCM/GMAC or CCM/CMAC context swap register 7,        Address offset: 0x6C */
+    __IO uint32_t CSGCM0R;                   /*!< CRYP GCM/GMAC context swap register 0,                    Address offset: 0x70 */
+    __IO uint32_t CSGCM1R;                   /*!< CRYP GCM/GMAC context swap register 1,                    Address offset: 0x74 */
+    __IO uint32_t CSGCM2R;                   /*!< CRYP GCM/GMAC context swap register 2,                    Address offset: 0x78 */
+    __IO uint32_t CSGCM3R;                   /*!< CRYP GCM/GMAC context swap register 3,                    Address offset: 0x7C */
+    __IO uint32_t CSGCM4R;                   /*!< CRYP GCM/GMAC context swap register 4,                    Address offset: 0x80 */
+    __IO uint32_t CSGCM5R;                   /*!< CRYP GCM/GMAC context swap register 5,                    Address offset: 0x84 */
+    __IO uint32_t CSGCM6R;                   /*!< CRYP GCM/GMAC context swap register 6,                    Address offset: 0x88 */
+    __IO uint32_t CSGCM7R;                   /*!< CRYP GCM/GMAC context swap register 7,                    Address offset: 0x8C */
+} CRYP_TypeDef;
+
+
+/** 
+  * @brief HASH
+  */
+  
+
+typedef struct {
+    union {
+        struct {
+                 uint32_t __RESERVED0 : 2;
+            __IO uint32_t INIT : 1;
+            __IO uint32_t DMAE : 1;
+            __IO uint32_t DATATYPE : 2;
+            __IO uint32_t MODE : 1;
+                 uint32_t __RESERVED1 : 1;
+            __IO uint32_t NBW : 4;
+            __IO uint32_t DINNE : 1;
+            __IO uint32_t MDMAT : 1;
+                 uint32_t __RESERVED2 : 2;
+            __IO uint32_t LKEY : 1;
+                 uint32_t __RESERVED3 : 15;
+        } b;
+        __IO uint32_t w;
+    } CR;                                    /*!< HASH control register,          Address offset: 0x00        */
+    __IO uint32_t DIN;                       /*!< HASH data input register,       Address offset: 0x04        */
+    union {
+        struct {
+            __IO uint32_t NBLW : 5;
+                 uint32_t __RESERVED0 : 3;
+            __IO uint32_t DCAL : 1;
+                 uint32_t __RESERVED1 : 23;
+        } b;
+        __IO uint32_t w;
+    } STR;                                   /*!< HASH start register,            Address offset: 0x08        */
+    __IO uint32_t HR[5];                        /*!< HASH digest registers,          Address offset: 0x0C-0x1C   */
+    union {
+        struct {
+            __IO uint32_t DINIE : 1;
+            __IO uint32_t DCIE : 1;
+                 uint32_t __RESERVED0 : 30;
+        } b;
+        __IO uint32_t w;
+    } IMR;                                   /*!< HASH interrupt enable register, Address offset: 0x20        */
+    union {
+        struct {
+            __IO uint32_t DINIS : 1;
+            __IO uint32_t DCIS : 1;
+            __IO uint32_t DMAS : 1;
+            __IO uint32_t BUSY : 1;
+                 uint32_t __RESERVED0 : 28;
+        } b;
+        __IO uint32_t w;
+    } SR;                                    /*!< HASH status register,           Address offset: 0x24        */
+         uint32_t __RESERVED0[52];               /*!< Reserved, 0x28-0xF4                                         */
+    __IO uint32_t CSR[54];                       /*!< HASH context swap registers,    Address offset: 0x0F8-0x1CC */
+} HASH_TypeDef;
+
+
+/** 
+  * @brief HASH_DIGEST
+  */
+  
+
+typedef struct {
+    __IO uint32_t HR[8];                        /*!< HASH digest registers,          Address offset: 0x310-0x32C */
+} HASH_DIGEST_TypeDef;
+
+
+/** 
   * @brief RNG
   */
   
@@ -6303,6 +6479,9 @@ typedef struct {
 
 /*!< AHB2 peripherals */
 #define DCMI_BASE             (AHB2PERIPH_BASE + 0x50000)
+#define CRYP_BASE             (AHB2PERIPH_BASE + 0x60000)
+#define HASH_BASE             (AHB2PERIPH_BASE + 0x60400)
+#define HASH_DIGEST_BASE      (AHB2PERIPH_BASE + 0x60710)
 #define RNG_BASE              (AHB2PERIPH_BASE + 0x60800)
 
 /*!< FSMC Bankx registers base address */
@@ -6412,6 +6591,9 @@ typedef struct {
 #define DMA2_Stream7        ((DMA_Stream_TypeDef *) DMA2_Stream7_BASE)
 #define ETH                 ((ETH_TypeDef *) ETH_BASE)  
 #define DCMI                ((DCMI_TypeDef *) DCMI_BASE)
+#define CRYP                ((CRYP_TypeDef *) CRYP_BASE)
+#define HASH                ((HASH_TypeDef *) HASH_BASE)
+#define HASH_DIGEST         ((HASH_DIGEST_TypeDef *) HASH_DIGEST_BASE)
 #define RNG                 ((RNG_TypeDef *) RNG_BASE)
 #define FSMC_Bank1          ((FSMC_Bank1_TypeDef *) FSMC_Bank1_R_BASE)
 #define FSMC_Bank1E         ((FSMC_Bank1E_TypeDef *) FSMC_Bank1E_R_BASE)
@@ -8159,6 +8341,59 @@ typedef struct {
 /********************  Bit definition for CRC_CR register  ********************/
 #define  CRC_CR_RESET                        ((uint32_t)0x01)        /*!< RESET bit */
 
+/******************************************************************************/
+/*                                                                            */
+/*                            Crypto Processor                                */
+/*                                                                            */
+/******************************************************************************/
+/******************* Bits definition for CRYP_CR register  ********************/
+#define CRYP_CR_ALGODIR                      ((uint32_t)0x00000004)
+
+#define CRYP_CR_ALGOMODE                     ((uint32_t)0x00080038)
+#define CRYP_CR_ALGOMODE_0                   ((uint32_t)0x00000008)
+#define CRYP_CR_ALGOMODE_1                   ((uint32_t)0x00000010)
+#define CRYP_CR_ALGOMODE_2                   ((uint32_t)0x00000020)
+#define CRYP_CR_ALGOMODE_TDES_ECB            ((uint32_t)0x00000000)
+#define CRYP_CR_ALGOMODE_TDES_CBC            ((uint32_t)0x00000008)
+#define CRYP_CR_ALGOMODE_DES_ECB             ((uint32_t)0x00000010)
+#define CRYP_CR_ALGOMODE_DES_CBC             ((uint32_t)0x00000018)
+#define CRYP_CR_ALGOMODE_AES_ECB             ((uint32_t)0x00000020)
+#define CRYP_CR_ALGOMODE_AES_CBC             ((uint32_t)0x00000028)
+#define CRYP_CR_ALGOMODE_AES_CTR             ((uint32_t)0x00000030)
+#define CRYP_CR_ALGOMODE_AES_KEY             ((uint32_t)0x00000038)
+
+#define CRYP_CR_DATATYPE                     ((uint32_t)0x000000C0)
+#define CRYP_CR_DATATYPE_0                   ((uint32_t)0x00000040)
+#define CRYP_CR_DATATYPE_1                   ((uint32_t)0x00000080)
+#define CRYP_CR_KEYSIZE                      ((uint32_t)0x00000300)
+#define CRYP_CR_KEYSIZE_0                    ((uint32_t)0x00000100)
+#define CRYP_CR_KEYSIZE_1                    ((uint32_t)0x00000200)
+#define CRYP_CR_FFLUSH                       ((uint32_t)0x00004000)
+#define CRYP_CR_CRYPEN                       ((uint32_t)0x00008000)
+
+#define CRYP_CR_GCM_CCMPH                    ((uint32_t)0x00030000)
+#define CRYP_CR_GCM_CCMPH_0                  ((uint32_t)0x00010000)
+#define CRYP_CR_GCM_CCMPH_1                  ((uint32_t)0x00020000)
+#define CRYP_CR_ALGOMODE_3                   ((uint32_t)0x00080000) 
+
+/****************** Bits definition for CRYP_SR register  *********************/
+#define CRYP_SR_IFEM                         ((uint32_t)0x00000001)
+#define CRYP_SR_IFNF                         ((uint32_t)0x00000002)
+#define CRYP_SR_OFNE                         ((uint32_t)0x00000004)
+#define CRYP_SR_OFFU                         ((uint32_t)0x00000008)
+#define CRYP_SR_BUSY                         ((uint32_t)0x00000010)
+/****************** Bits definition for CRYP_DMACR register  ******************/
+#define CRYP_DMACR_DIEN                      ((uint32_t)0x00000001)
+#define CRYP_DMACR_DOEN                      ((uint32_t)0x00000002)
+/*****************  Bits definition for CRYP_IMSCR register  ******************/
+#define CRYP_IMSCR_INIM                      ((uint32_t)0x00000001)
+#define CRYP_IMSCR_OUTIM                     ((uint32_t)0x00000002)
+/****************** Bits definition for CRYP_RISR register  *******************/
+#define CRYP_RISR_OUTRIS                     ((uint32_t)0x00000001)
+#define CRYP_RISR_INRIS                      ((uint32_t)0x00000002)
+/****************** Bits definition for CRYP_MISR register  *******************/
+#define CRYP_MISR_INMIS                      ((uint32_t)0x00000001)
+#define CRYP_MISR_OUTMIS                     ((uint32_t)0x00000002)
 
 /******************************************************************************/
 /*                                                                            */
@@ -8986,7 +9221,7 @@ typedef struct {
 #define  FSMC_BTR4_ADDHLD_2                  ((uint32_t)0x00000040)        /*!<Bit 2 */
 #define  FSMC_BTR4_ADDHLD_3                  ((uint32_t)0x00000080)        /*!<Bit 3 */
 
-#define  FSMC_BTR4_DATAST                    ((uint32_t)0x0000FF00)        /*!<DATAST [3:0] bits (Data-phase duration) */
+#define  FSMC_BTR4_DATAST                    ((uint32_t)0x0000FF00)        /*!<DATAST [7:0] bits (Data-phase duration) */
 #define  FSMC_BTR4_DATAST_0                  ((uint32_t)0x00000100)        /*!<Bit 0 */
 #define  FSMC_BTR4_DATAST_1                  ((uint32_t)0x00000200)        /*!<Bit 1 */
 #define  FSMC_BTR4_DATAST_2                  ((uint32_t)0x00000400)        /*!<Bit 2 */
@@ -9047,18 +9282,6 @@ typedef struct {
 #define  FSMC_BWTR1_BUSTURN_2                ((uint32_t)0x00040000)        /*!<Bit 2 */
 #define  FSMC_BWTR1_BUSTURN_3                ((uint32_t)0x00080000)        /*!<Bit 3 */
 
-#define  FSMC_BWTR1_CLKDIV                   ((uint32_t)0x00F00000)        /*!<CLKDIV[3:0] bits (Clock divide ratio) */
-#define  FSMC_BWTR1_CLKDIV_0                 ((uint32_t)0x00100000)        /*!<Bit 0 */
-#define  FSMC_BWTR1_CLKDIV_1                 ((uint32_t)0x00200000)        /*!<Bit 1 */
-#define  FSMC_BWTR1_CLKDIV_2                 ((uint32_t)0x00400000)        /*!<Bit 2 */
-#define  FSMC_BWTR1_CLKDIV_3                 ((uint32_t)0x00800000)        /*!<Bit 3 */
-
-#define  FSMC_BWTR1_DATLAT                   ((uint32_t)0x0F000000)        /*!<DATLA[3:0] bits (Data latency) */
-#define  FSMC_BWTR1_DATLAT_0                 ((uint32_t)0x01000000)        /*!<Bit 0 */
-#define  FSMC_BWTR1_DATLAT_1                 ((uint32_t)0x02000000)        /*!<Bit 1 */
-#define  FSMC_BWTR1_DATLAT_2                 ((uint32_t)0x04000000)        /*!<Bit 2 */
-#define  FSMC_BWTR1_DATLAT_3                 ((uint32_t)0x08000000)        /*!<Bit 3 */
-
 #define  FSMC_BWTR1_ACCMOD                   ((uint32_t)0x30000000)        /*!<ACCMOD[1:0] bits (Access mode) */
 #define  FSMC_BWTR1_ACCMOD_0                 ((uint32_t)0x10000000)        /*!<Bit 0 */
 #define  FSMC_BWTR1_ACCMOD_1                 ((uint32_t)0x20000000)        /*!<Bit 1 */
@@ -9091,18 +9314,6 @@ typedef struct {
 #define  FSMC_BWTR2_BUSTURN_1                ((uint32_t)0x00020000)        /*!<Bit 1 */
 #define  FSMC_BWTR2_BUSTURN_2                ((uint32_t)0x00040000)        /*!<Bit 2 */
 #define  FSMC_BWTR2_BUSTURN_3                ((uint32_t)0x00080000)        /*!<Bit 3 */
-
-#define  FSMC_BWTR2_CLKDIV                   ((uint32_t)0x00F00000)        /*!<CLKDIV[3:0] bits (Clock divide ratio) */
-#define  FSMC_BWTR2_CLKDIV_0                 ((uint32_t)0x00100000)        /*!<Bit 0 */
-#define  FSMC_BWTR2_CLKDIV_1                 ((uint32_t)0x00200000)        /*!<Bit 1*/
-#define  FSMC_BWTR2_CLKDIV_2                 ((uint32_t)0x00400000)        /*!<Bit 2 */
-#define  FSMC_BWTR2_CLKDIV_3                 ((uint32_t)0x00800000)        /*!<Bit 3 */
-
-#define  FSMC_BWTR2_DATLAT                   ((uint32_t)0x0F000000)        /*!<DATLA[3:0] bits (Data latency) */
-#define  FSMC_BWTR2_DATLAT_0                 ((uint32_t)0x01000000)        /*!<Bit 0 */
-#define  FSMC_BWTR2_DATLAT_1                 ((uint32_t)0x02000000)        /*!<Bit 1 */
-#define  FSMC_BWTR2_DATLAT_2                 ((uint32_t)0x04000000)        /*!<Bit 2 */
-#define  FSMC_BWTR2_DATLAT_3                 ((uint32_t)0x08000000)        /*!<Bit 3 */
 
 #define  FSMC_BWTR2_ACCMOD                   ((uint32_t)0x30000000)        /*!<ACCMOD[1:0] bits (Access mode) */
 #define  FSMC_BWTR2_ACCMOD_0                 ((uint32_t)0x10000000)        /*!<Bit 0 */
@@ -9137,18 +9348,6 @@ typedef struct {
 #define  FSMC_BWTR3_BUSTURN_2                ((uint32_t)0x00040000)        /*!<Bit 2 */
 #define  FSMC_BWTR3_BUSTURN_3                ((uint32_t)0x00080000)        /*!<Bit 3 */
 
-#define  FSMC_BWTR3_CLKDIV                   ((uint32_t)0x00F00000)        /*!<CLKDIV[3:0] bits (Clock divide ratio) */
-#define  FSMC_BWTR3_CLKDIV_0                 ((uint32_t)0x00100000)        /*!<Bit 0 */
-#define  FSMC_BWTR3_CLKDIV_1                 ((uint32_t)0x00200000)        /*!<Bit 1 */
-#define  FSMC_BWTR3_CLKDIV_2                 ((uint32_t)0x00400000)        /*!<Bit 2 */
-#define  FSMC_BWTR3_CLKDIV_3                 ((uint32_t)0x00800000)        /*!<Bit 3 */
-
-#define  FSMC_BWTR3_DATLAT                   ((uint32_t)0x0F000000)        /*!<DATLA[3:0] bits (Data latency) */
-#define  FSMC_BWTR3_DATLAT_0                 ((uint32_t)0x01000000)        /*!<Bit 0 */
-#define  FSMC_BWTR3_DATLAT_1                 ((uint32_t)0x02000000)        /*!<Bit 1 */
-#define  FSMC_BWTR3_DATLAT_2                 ((uint32_t)0x04000000)        /*!<Bit 2 */
-#define  FSMC_BWTR3_DATLAT_3                 ((uint32_t)0x08000000)        /*!<Bit 3 */
-
 #define  FSMC_BWTR3_ACCMOD                   ((uint32_t)0x30000000)        /*!<ACCMOD[1:0] bits (Access mode) */
 #define  FSMC_BWTR3_ACCMOD_0                 ((uint32_t)0x10000000)        /*!<Bit 0 */
 #define  FSMC_BWTR3_ACCMOD_1                 ((uint32_t)0x20000000)        /*!<Bit 1 */
@@ -9166,7 +9365,7 @@ typedef struct {
 #define  FSMC_BWTR4_ADDHLD_2                 ((uint32_t)0x00000040)        /*!<Bit 2 */
 #define  FSMC_BWTR4_ADDHLD_3                 ((uint32_t)0x00000080)        /*!<Bit 3 */
 
-#define  FSMC_BWTR4_DATAST                   ((uint32_t)0x0000FF00)        /*!<DATAST [3:0] bits (Data-phase duration) */
+#define  FSMC_BWTR4_DATAST                   ((uint32_t)0x0000FF00)        /*!<DATAST [7:0] bits (Data-phase duration) */
 #define  FSMC_BWTR4_DATAST_0                 ((uint32_t)0x00000100)        /*!<Bit 0 */
 #define  FSMC_BWTR4_DATAST_1                 ((uint32_t)0x00000200)        /*!<Bit 1 */
 #define  FSMC_BWTR4_DATAST_2                 ((uint32_t)0x00000400)        /*!<Bit 2 */
@@ -9181,18 +9380,6 @@ typedef struct {
 #define  FSMC_BWTR4_BUSTURN_1                ((uint32_t)0x00020000)        /*!<Bit 1 */
 #define  FSMC_BWTR4_BUSTURN_2                ((uint32_t)0x00040000)        /*!<Bit 2 */
 #define  FSMC_BWTR4_BUSTURN_3                ((uint32_t)0x00080000)        /*!<Bit 3 */
-
-#define  FSMC_BWTR4_CLKDIV                   ((uint32_t)0x00F00000)        /*!<CLKDIV[3:0] bits (Clock divide ratio) */
-#define  FSMC_BWTR4_CLKDIV_0                 ((uint32_t)0x00100000)        /*!<Bit 0 */
-#define  FSMC_BWTR4_CLKDIV_1                 ((uint32_t)0x00200000)        /*!<Bit 1 */
-#define  FSMC_BWTR4_CLKDIV_2                 ((uint32_t)0x00400000)        /*!<Bit 2 */
-#define  FSMC_BWTR4_CLKDIV_3                 ((uint32_t)0x00800000)        /*!<Bit 3 */
-
-#define  FSMC_BWTR4_DATLAT                   ((uint32_t)0x0F000000)        /*!<DATLA[3:0] bits (Data latency) */
-#define  FSMC_BWTR4_DATLAT_0                 ((uint32_t)0x01000000)        /*!<Bit 0 */
-#define  FSMC_BWTR4_DATLAT_1                 ((uint32_t)0x02000000)        /*!<Bit 1 */
-#define  FSMC_BWTR4_DATLAT_2                 ((uint32_t)0x04000000)        /*!<Bit 2 */
-#define  FSMC_BWTR4_DATLAT_3                 ((uint32_t)0x08000000)        /*!<Bit 3 */
 
 #define  FSMC_BWTR4_ACCMOD                   ((uint32_t)0x30000000)        /*!<ACCMOD[1:0] bits (Access mode) */
 #define  FSMC_BWTR4_ACCMOD_0                 ((uint32_t)0x10000000)        /*!<Bit 0 */
@@ -9945,6 +10132,59 @@ typedef struct {
 
 /******************************************************************************/
 /*                                                                            */
+/*                                    HASH                                    */
+/*                                                                            */
+/******************************************************************************/
+/******************  Bits definition for HASH_CR register  ********************/
+#define HASH_CR_INIT                         ((uint32_t)0x00000004)
+#define HASH_CR_DMAE                         ((uint32_t)0x00000008)
+#define HASH_CR_DATATYPE                     ((uint32_t)0x00000030)
+#define HASH_CR_DATATYPE_0                   ((uint32_t)0x00000010)
+#define HASH_CR_DATATYPE_1                   ((uint32_t)0x00000020)
+#define HASH_CR_MODE                         ((uint32_t)0x00000040)
+#define HASH_CR_ALGO                         ((uint32_t)0x00040080)
+#define HASH_CR_ALGO_0                       ((uint32_t)0x00000080)
+#define HASH_CR_ALGO_1                       ((uint32_t)0x00040000)
+#define HASH_CR_NBW                          ((uint32_t)0x00000F00)
+#define HASH_CR_NBW_0                        ((uint32_t)0x00000100)
+#define HASH_CR_NBW_1                        ((uint32_t)0x00000200)
+#define HASH_CR_NBW_2                        ((uint32_t)0x00000400)
+#define HASH_CR_NBW_3                        ((uint32_t)0x00000800)
+#define HASH_CR_DINNE                        ((uint32_t)0x00001000)
+#define HASH_CR_MDMAT                        ((uint32_t)0x00002000)
+#define HASH_CR_LKEY                         ((uint32_t)0x00010000)
+
+/******************  Bits definition for HASH_STR register  *******************/
+#define HASH_STR_NBLW                        ((uint32_t)0x0000001F)
+#define HASH_STR_NBLW_0                      ((uint32_t)0x00000001)
+#define HASH_STR_NBLW_1                      ((uint32_t)0x00000002)
+#define HASH_STR_NBLW_2                      ((uint32_t)0x00000004)
+#define HASH_STR_NBLW_3                      ((uint32_t)0x00000008)
+#define HASH_STR_NBLW_4                      ((uint32_t)0x00000010)
+#define HASH_STR_DCAL                        ((uint32_t)0x00000100)
+/* Aliases for HASH_STR register */
+#define HASH_STR_NBW                         HASH_STR_NBLW
+#define HASH_STR_NBW_0                       HASH_STR_NBLW_0
+#define HASH_STR_NBW_1                       HASH_STR_NBLW_1
+#define HASH_STR_NBW_2                       HASH_STR_NBLW_2
+#define HASH_STR_NBW_3                       HASH_STR_NBLW_3
+#define HASH_STR_NBW_4                       HASH_STR_NBLW_4
+
+/******************  Bits definition for HASH_IMR register  *******************/
+#define HASH_IMR_DINIE                       ((uint32_t)0x00000001)
+#define HASH_IMR_DCIE                        ((uint32_t)0x00000002)
+/* Aliases for HASH_IMR register */
+#define HASH_IMR_DINIM                       HASH_IMR_DINIE
+#define HASH_IMR_DCIM                        HASH_IMR_DCIE
+
+/******************  Bits definition for HASH_SR register  ********************/
+#define HASH_SR_DINIS                        ((uint32_t)0x00000001)
+#define HASH_SR_DCIS                         ((uint32_t)0x00000002)
+#define HASH_SR_DMAS                         ((uint32_t)0x00000004)
+#define HASH_SR_BUSY                         ((uint32_t)0x00000008)
+
+/******************************************************************************/
+/*                                                                            */
 /*                      Inter-integrated Circuit Interface                    */
 /*                                                                            */
 /******************************************************************************/
@@ -10310,6 +10550,10 @@ typedef struct {
 
 /********************  Bit definition for RCC_AHB2RSTR register  **************/
 #define  RCC_AHB2RSTR_DCMIRST                ((uint32_t)0x00000001)
+#define  RCC_AHB2RSTR_CRYPRST                ((uint32_t)0x00000010)
+#define  RCC_AHB2RSTR_HASHRST                ((uint32_t)0x00000020)
+ /* maintained for legacy purpose */
+ #define  RCC_AHB2RSTR_HSAHRST                RCC_AHB2RSTR_HASHRST
 #define  RCC_AHB2RSTR_RNGRST                 ((uint32_t)0x00000040)
 #define  RCC_AHB2RSTR_OTGFSRST               ((uint32_t)0x00000080)
 
@@ -10383,6 +10627,8 @@ typedef struct {
 
 /********************  Bit definition for RCC_AHB2ENR register  ***************/
 #define  RCC_AHB2ENR_DCMIEN                  ((uint32_t)0x00000001)
+#define  RCC_AHB2ENR_CRYPEN                  ((uint32_t)0x00000010)
+#define  RCC_AHB2ENR_HASHEN                  ((uint32_t)0x00000020)
 #define  RCC_AHB2ENR_RNGEN                   ((uint32_t)0x00000040)
 #define  RCC_AHB2ENR_OTGFSEN                 ((uint32_t)0x00000080)
 
@@ -10458,6 +10704,8 @@ typedef struct {
 
 /********************  Bit definition for RCC_AHB2LPENR register  *************/
 #define  RCC_AHB2LPENR_DCMILPEN              ((uint32_t)0x00000001)
+#define  RCC_AHB2LPENR_CRYPLPEN              ((uint32_t)0x00000010)
+#define  RCC_AHB2LPENR_HASHLPEN              ((uint32_t)0x00000020)
 #define  RCC_AHB2LPENR_RNGLPEN               ((uint32_t)0x00000040)
 #define  RCC_AHB2LPENR_OTGFSLPEN             ((uint32_t)0x00000080)
 
@@ -11206,8 +11454,6 @@ typedef struct {
 
 /******************  Bit definition for SYSCFG_PMC register  ******************/
 #define SYSCFG_PMC_MII_RMII_SEL         ((uint32_t)0x00800000) /*!<Ethernet PHY interface selection */
-/* Old MII_RMII_SEL bit definition, maintained for legacy purpose */
-#define SYSCFG_PMC_MII_RMII             SYSCFG_PMC_MII_RMII_SEL
 
 /*****************  Bit definition for SYSCFG_EXTICR1 register  ***************/
 #define SYSCFG_EXTICR1_EXTI0            ((uint32_t)0x000F) /*!<EXTI 0 configuration */
@@ -13532,7 +13778,7 @@ typedef struct
 }
 #endif /* __cplusplus */
 
-#endif /* __STM32F407xx_H */
+#endif /* __STM32F417xx_H */
 
 
 
