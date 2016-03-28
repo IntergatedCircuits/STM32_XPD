@@ -34,6 +34,7 @@
 #define PREFETCH_ENABLE             1
 #define INSTRUCTION_CACHE_ENABLE    1
 #define DATA_CACHE_ENABLE           1
+#define VDD_VALUE                   3300 /* Value of VDD in mV */
 
 
 /* TODO step 3: specify used XPD modules */

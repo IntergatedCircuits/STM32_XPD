@@ -86,13 +86,6 @@ int main(void)
 {
     ClockConfiguration();
 
-    /* enable all GPIOs */
-    RCC->AHB1ENR.w |= RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN
-                    | RCC_AHB1ENR_GPIOCEN | RCC_AHB1ENR_GPIODEN
-                    | RCC_AHB1ENR_GPIODEN | RCC_AHB1ENR_GPIOEEN
-                    | RCC_AHB1ENR_GPIOFEN | RCC_AHB1ENR_GPIOGEN
-                    | RCC_AHB1ENR_GPIOHEN | RCC_AHB1ENR_GPIOIEN;
-
     /* SysTick callback test */
     XPD_Callbacks.Tick = millisecCallback;
 

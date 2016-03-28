@@ -30,7 +30,6 @@ extern volatile uint8_t passedtests;
 static void tim1_init(TIM_HandleType * tim)
 {
     GPIO_InitType gpio;
-    XPD_TIM1_EnableClock();
 
     gpio.AlternateMap = GPIO_TIM1_AF1;
     gpio.Mode = GPIO_MODE_ALTERNATE;

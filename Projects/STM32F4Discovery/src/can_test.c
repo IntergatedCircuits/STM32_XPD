@@ -30,7 +30,6 @@ extern volatile uint8_t passedtests;
 static void can_init(CAN_HandleType *hcan)
 {
     GPIO_InitType gpio;
-    XPD_CAN2_EnableClock();
 
     gpio.AlternateMap = GPIO_CAN2_AF9;
     gpio.Mode = GPIO_MODE_ALTERNATE;

@@ -36,10 +36,6 @@ static void timx_init(TIM_HandleType * tim)
 {
     DMA_InitType idma;
 
-    XPD_TIM3_EnableClock();
-
-    XPD_DMA1_EnableClock();
-
     idma.Channel   = 5;
     idma.Direction = DMA_MEMORY2PERIPH;
     idma.Priority  = MEDIUM;
