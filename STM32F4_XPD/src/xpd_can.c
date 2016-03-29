@@ -256,7 +256,8 @@ XPD_ReturnType XPD_CAN_Deinit(CAN_HandleType* hcan)
     {
         XPD_CAN2_ClockCtrl(DISABLE);
     }
-    else if(can_slaveFiltersUnused)
+    /* master clock is only off when no filters are used */
+    else if(can_slaveFiltersUnused())
     {
         XPD_CAN1_ClockCtrl(DISABLE);
     }
@@ -1145,7 +1146,7 @@ XPD_ReturnType XPD_CAN_FilterBankSizeConfig(CAN_HandleType * hcan, uint8_t NewSi
     uint8_t prevBanks, i;
     XPD_ReturnType result = XPD_OK;
 
-    XPD_CAN1_EnableClock();
+    XPD_CAN1_ClockCtrl(ENABLE);
 
     if(NewSize > CAN_FILTERBANK_NUMBER)
     {

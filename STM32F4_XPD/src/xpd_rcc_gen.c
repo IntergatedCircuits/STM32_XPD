@@ -44,6 +44,7 @@ void XPD_ADC_Reset(void)
 void XPD_ADC1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,ADC1EN) = NewState;
+    NewState = (FunctionalState)RCC->APB2ENR;
 }
 #endif
 #ifdef RCC_APB2LPENR_ADC1LPEN
@@ -58,6 +59,7 @@ void XPD_ADC1_ClockCtrlInSleep(FunctionalState NewState)
 void XPD_ADC2_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,ADC2EN) = NewState;
+    NewState = (FunctionalState)RCC->APB2ENR;
 }
 #endif
 #ifdef RCC_APB2LPENR_ADC2LPEN
@@ -72,6 +74,7 @@ void XPD_ADC2_ClockCtrlInSleep(FunctionalState NewState)
 void XPD_ADC3_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,ADC3EN) = NewState;
+    NewState = (FunctionalState)RCC->APB2ENR;
 }
 #endif
 #ifdef RCC_APB2LPENR_ADC3LPEN
@@ -86,6 +89,7 @@ void XPD_ADC3_ClockCtrlInSleep(FunctionalState NewState)
 void XPD_CAN1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,CAN1EN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_CAN1LPEN
@@ -108,6 +112,7 @@ void XPD_CAN1_Reset(void)
 void XPD_CAN2_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,CAN2EN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_CAN2LPEN
@@ -130,6 +135,7 @@ void XPD_CAN2_Reset(void)
 void XPD_CCMDATARAM_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,CCMDATARAMEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB1ENR;
 }
 #endif
 #ifdef RCC_APB1ENR_CECEN
@@ -137,6 +143,7 @@ void XPD_CCMDATARAM_ClockCtrl(FunctionalState NewState)
 void XPD_CEC_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,CECEN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_CECLPEN
@@ -159,6 +166,7 @@ void XPD_CEC_Reset(void)
 void XPD_CRC_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,CRCEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB1ENR;
 }
 #endif
 #ifdef RCC_AHB1LPENR_CRCLPEN
@@ -181,6 +189,7 @@ void XPD_CRC_Reset(void)
 void XPD_CRYP_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB2ENR,CRYPEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB2ENR;
 }
 #endif
 #ifdef RCC_AHB2LPENR_CRYPLPEN
@@ -203,6 +212,7 @@ void XPD_CRYP_Reset(void)
 void XPD_DAC_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,DACEN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_DACLPEN
@@ -225,6 +235,7 @@ void XPD_DAC_Reset(void)
 void XPD_DCMI_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB2ENR,DCMIEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB2ENR;
 }
 #endif
 #ifdef RCC_AHB2LPENR_DCMILPEN
@@ -247,6 +258,7 @@ void XPD_DCMI_Reset(void)
 void XPD_DMA1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,DMA1EN) = NewState;
+    NewState = (FunctionalState)RCC->AHB1ENR;
 }
 #endif
 #ifdef RCC_AHB1LPENR_DMA1LPEN
@@ -269,6 +281,7 @@ void XPD_DMA1_Reset(void)
 void XPD_DMA2_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,DMA2EN) = NewState;
+    NewState = (FunctionalState)RCC->AHB1ENR;
 }
 #endif
 #ifdef RCC_AHB1LPENR_DMA2LPEN
@@ -291,6 +304,7 @@ void XPD_DMA2_Reset(void)
 void XPD_DMA2D_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,DMA2DEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB1ENR;
 }
 #endif
 #ifdef RCC_AHB1LPENR_DMA2DLPEN
@@ -313,6 +327,7 @@ void XPD_DMA2D_Reset(void)
 void XPD_DSI_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,DSIEN) = NewState;
+    NewState = (FunctionalState)RCC->APB2ENR;
 }
 #endif
 #ifdef RCC_APB2LPENR_DSILPEN
@@ -335,6 +350,7 @@ void XPD_DSI_Reset(void)
 void XPD_ETHMAC_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,ETHMACEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB1ENR;
 }
 #endif
 #ifdef RCC_AHB1LPENR_ETHMACLPEN
@@ -357,6 +373,7 @@ void XPD_ETHMAC_Reset(void)
 void XPD_ETHMAC_PTP_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,ETHMACPTPEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB1ENR;
 }
 #endif
 #ifdef RCC_AHB1LPENR_ETHMACPTPLPEN
@@ -371,6 +388,7 @@ void XPD_ETHMAC_PTP_ClockCtrlInSleep(FunctionalState NewState)
 void XPD_ETHMAC_RX_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,ETHMACRXEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB1ENR;
 }
 #endif
 #ifdef RCC_AHB1LPENR_ETHMACRXLPEN
@@ -385,6 +403,7 @@ void XPD_ETHMAC_RX_ClockCtrlInSleep(FunctionalState NewState)
 void XPD_ETHMAC_TX_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,ETHMACTXEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB1ENR;
 }
 #endif
 #ifdef RCC_AHB1LPENR_ETHMACTXLPEN
@@ -399,6 +418,7 @@ void XPD_ETHMAC_TX_ClockCtrlInSleep(FunctionalState NewState)
 void XPD_EXTI_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,EXTITEN) = NewState;
+    NewState = (FunctionalState)RCC->APB2ENR;
 }
 #endif
 #ifdef RCC_APB2LPENR_EXTITLPEN
@@ -413,6 +433,7 @@ void XPD_EXTI_ClockCtrlInSleep(FunctionalState NewState)
 void XPD_FMC_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB3ENR,FMCEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB3ENR;
 }
 #endif
 #ifdef RCC_AHB3LPENR_FMCLPEN
@@ -435,6 +456,7 @@ void XPD_FMC_Reset(void)
 void XPD_FMP_I2C1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,FMPI2C1EN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_FMPI2C1LPEN
@@ -457,6 +479,7 @@ void XPD_FMP_I2C1_Reset(void)
 void XPD_FSMC_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB3ENR,FSMCEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB3ENR;
 }
 #endif
 #ifdef RCC_AHB3LPENR_FSMCLPEN
@@ -479,6 +502,7 @@ void XPD_FSMC_Reset(void)
 void XPD_GPIOA_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,GPIOAEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB1ENR;
 }
 #endif
 #ifdef RCC_AHB1LPENR_GPIOALPEN
@@ -501,6 +525,7 @@ void XPD_GPIOA_Reset(void)
 void XPD_GPIOB_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,GPIOBEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB1ENR;
 }
 #endif
 #ifdef RCC_AHB1LPENR_GPIOBLPEN
@@ -523,6 +548,7 @@ void XPD_GPIOB_Reset(void)
 void XPD_GPIOC_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,GPIOCEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB1ENR;
 }
 #endif
 #ifdef RCC_AHB1LPENR_GPIOCLPEN
@@ -545,6 +571,7 @@ void XPD_GPIOC_Reset(void)
 void XPD_GPIOD_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,GPIODEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB1ENR;
 }
 #endif
 #ifdef RCC_AHB1LPENR_GPIODLPEN
@@ -567,6 +594,7 @@ void XPD_GPIOD_Reset(void)
 void XPD_GPIOE_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,GPIOEEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB1ENR;
 }
 #endif
 #ifdef RCC_AHB1LPENR_GPIOELPEN
@@ -589,6 +617,7 @@ void XPD_GPIOE_Reset(void)
 void XPD_GPIOF_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,GPIOFEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB1ENR;
 }
 #endif
 #ifdef RCC_AHB1LPENR_GPIOFLPEN
@@ -611,6 +640,7 @@ void XPD_GPIOF_Reset(void)
 void XPD_GPIOG_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,GPIOGEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB1ENR;
 }
 #endif
 #ifdef RCC_AHB1LPENR_GPIOGLPEN
@@ -633,6 +663,7 @@ void XPD_GPIOG_Reset(void)
 void XPD_GPIOH_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,GPIOHEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB1ENR;
 }
 #endif
 #ifdef RCC_AHB1LPENR_GPIOHLPEN
@@ -655,6 +686,7 @@ void XPD_GPIOH_Reset(void)
 void XPD_GPIOI_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,GPIOIEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB1ENR;
 }
 #endif
 #ifdef RCC_AHB1LPENR_GPIOILPEN
@@ -677,6 +709,7 @@ void XPD_GPIOI_Reset(void)
 void XPD_GPIOJ_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,GPIOJEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB1ENR;
 }
 #endif
 #ifdef RCC_AHB1LPENR_GPIOJLPEN
@@ -699,6 +732,7 @@ void XPD_GPIOJ_Reset(void)
 void XPD_GPIOK_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,GPIOKEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB1ENR;
 }
 #endif
 #ifdef RCC_AHB1LPENR_GPIOKLPEN
@@ -721,6 +755,7 @@ void XPD_GPIOK_Reset(void)
 void XPD_HASH_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB2ENR,HASHEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB2ENR;
 }
 #endif
 #ifdef RCC_AHB2LPENR_HASHLPEN
@@ -743,6 +778,7 @@ void XPD_HASH_Reset(void)
 void XPD_I2C1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,I2C1EN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_I2C1LPEN
@@ -765,6 +801,7 @@ void XPD_I2C1_Reset(void)
 void XPD_I2C2_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,I2C2EN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_I2C2LPEN
@@ -787,6 +824,7 @@ void XPD_I2C2_Reset(void)
 void XPD_I2C3_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,I2C3EN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_I2C3LPEN
@@ -809,6 +847,7 @@ void XPD_I2C3_Reset(void)
 void XPD_LPTIM1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,LPTIM1EN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_LPTIM1LPEN
@@ -831,6 +870,7 @@ void XPD_LPTIM1_Reset(void)
 void XPD_LTDC_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,LTDCEN) = NewState;
+    NewState = (FunctionalState)RCC->APB2ENR;
 }
 #endif
 #ifdef RCC_APB2LPENR_LTDCLPEN
@@ -853,6 +893,7 @@ void XPD_LTDC_Reset(void)
 void XPD_OTG_FS_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB2ENR,OTGFSEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB2ENR;
 }
 #endif
 #ifdef RCC_AHB2LPENR_OTGFSLPEN
@@ -883,6 +924,7 @@ void XPD_OTG_HS_Reset(void)
 void XPD_OTG_HS_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,OTGHSEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB1ENR;
 }
 #endif
 #ifdef RCC_AHB1LPENR_OTGHSLPEN
@@ -897,6 +939,7 @@ void XPD_OTG_HS_ClockCtrlInSleep(FunctionalState NewState)
 void XPD_OTG_HS_ULPI_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,OTGHSULPIEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB1ENR;
 }
 #endif
 #ifdef RCC_AHB1LPENR_OTGHSULPILPEN
@@ -911,6 +954,7 @@ void XPD_OTG_HS_ULPI_ClockCtrlInSleep(FunctionalState NewState)
 void XPD_PWR_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,PWREN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_PWRLPEN
@@ -933,6 +977,7 @@ void XPD_PWR_Reset(void)
 void XPD_QSPI_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB3ENR,QSPIEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB3ENR;
 }
 #endif
 #ifdef RCC_AHB3LPENR_QSPILPEN
@@ -955,6 +1000,7 @@ void XPD_QSPI_Reset(void)
 void XPD_RNG_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB2ENR,RNGEN) = NewState;
+    NewState = (FunctionalState)RCC->AHB2ENR;
 }
 #endif
 #ifdef RCC_AHB2LPENR_RNGLPEN
@@ -977,6 +1023,7 @@ void XPD_RNG_Reset(void)
 void XPD_RTC_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,RTCAPBEN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_RTCAPBLPEN
@@ -991,6 +1038,7 @@ void XPD_RTC_ClockCtrlInSleep(FunctionalState NewState)
 void XPD_SAI1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,SAI1EN) = NewState;
+    NewState = (FunctionalState)RCC->APB2ENR;
 }
 #endif
 #ifdef RCC_APB2LPENR_SAI1LPEN
@@ -1013,6 +1061,7 @@ void XPD_SAI1_Reset(void)
 void XPD_SAI2_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,SAI2EN) = NewState;
+    NewState = (FunctionalState)RCC->APB2ENR;
 }
 #endif
 #ifdef RCC_APB2LPENR_SAI2LPEN
@@ -1035,6 +1084,7 @@ void XPD_SAI2_Reset(void)
 void XPD_SDIO_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,SDIOEN) = NewState;
+    NewState = (FunctionalState)RCC->APB2ENR;
 }
 #endif
 #ifdef RCC_APB2LPENR_SDIOLPEN
@@ -1057,6 +1107,7 @@ void XPD_SDIO_Reset(void)
 void XPD_SPDIF_RX_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,SPDIFRXEN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_SPDIFRXLPEN
@@ -1079,6 +1130,7 @@ void XPD_SPDIF_RX_Reset(void)
 void XPD_SPI1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,SPI1EN) = NewState;
+    NewState = (FunctionalState)RCC->APB2ENR;
 }
 #endif
 #ifdef RCC_APB2LPENR_SPI1LPEN
@@ -1101,6 +1153,7 @@ void XPD_SPI1_Reset(void)
 void XPD_SPI2_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,SPI2EN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_SPI2LPEN
@@ -1123,6 +1176,7 @@ void XPD_SPI2_Reset(void)
 void XPD_SPI3_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,SPI3EN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_SPI3LPEN
@@ -1145,6 +1199,7 @@ void XPD_SPI3_Reset(void)
 void XPD_SPI4_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,SPI4EN) = NewState;
+    NewState = (FunctionalState)RCC->APB2ENR;
 }
 #endif
 #ifdef RCC_APB2LPENR_SPI4LPEN
@@ -1167,6 +1222,7 @@ void XPD_SPI4_Reset(void)
 void XPD_SPI5_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,SPI5EN) = NewState;
+    NewState = (FunctionalState)RCC->APB2ENR;
 }
 #endif
 #ifdef RCC_APB2LPENR_SPI5LPEN
@@ -1189,6 +1245,7 @@ void XPD_SPI5_Reset(void)
 void XPD_SPI6_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,SPI6EN) = NewState;
+    NewState = (FunctionalState)RCC->APB2ENR;
 }
 #endif
 #ifdef RCC_APB2LPENR_SPI6LPEN
@@ -1211,6 +1268,7 @@ void XPD_SPI6_Reset(void)
 void XPD_SYSCFG_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,SYSCFGEN) = NewState;
+    NewState = (FunctionalState)RCC->APB2ENR;
 }
 #endif
 #ifdef RCC_APB2LPENR_SYSCFGLPEN
@@ -1233,6 +1291,7 @@ void XPD_SYSCFG_Reset(void)
 void XPD_TIM1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,TIM1EN) = NewState;
+    NewState = (FunctionalState)RCC->APB2ENR;
 }
 #endif
 #ifdef RCC_APB2LPENR_TIM1LPEN
@@ -1255,6 +1314,7 @@ void XPD_TIM1_Reset(void)
 void XPD_TIM10_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,TIM10EN) = NewState;
+    NewState = (FunctionalState)RCC->APB2ENR;
 }
 #endif
 #ifdef RCC_APB2LPENR_TIM10LPEN
@@ -1277,6 +1337,7 @@ void XPD_TIM10_Reset(void)
 void XPD_TIM11_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,TIM11EN) = NewState;
+    NewState = (FunctionalState)RCC->APB2ENR;
 }
 #endif
 #ifdef RCC_APB2LPENR_TIM11LPEN
@@ -1299,6 +1360,7 @@ void XPD_TIM11_Reset(void)
 void XPD_TIM12_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM12EN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_TIM12LPEN
@@ -1321,6 +1383,7 @@ void XPD_TIM12_Reset(void)
 void XPD_TIM13_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM13EN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_TIM13LPEN
@@ -1343,6 +1406,7 @@ void XPD_TIM13_Reset(void)
 void XPD_TIM14_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM14EN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_TIM14LPEN
@@ -1365,6 +1429,7 @@ void XPD_TIM14_Reset(void)
 void XPD_TIM2_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM2EN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_TIM2LPEN
@@ -1387,6 +1452,7 @@ void XPD_TIM2_Reset(void)
 void XPD_TIM3_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM3EN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_TIM3LPEN
@@ -1409,6 +1475,7 @@ void XPD_TIM3_Reset(void)
 void XPD_TIM4_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM4EN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_TIM4LPEN
@@ -1431,6 +1498,7 @@ void XPD_TIM4_Reset(void)
 void XPD_TIM5_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM5EN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_TIM5LPEN
@@ -1453,6 +1521,7 @@ void XPD_TIM5_Reset(void)
 void XPD_TIM6_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM6EN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_TIM6LPEN
@@ -1475,6 +1544,7 @@ void XPD_TIM6_Reset(void)
 void XPD_TIM7_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM7EN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_TIM7LPEN
@@ -1497,6 +1567,7 @@ void XPD_TIM7_Reset(void)
 void XPD_TIM8_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,TIM8EN) = NewState;
+    NewState = (FunctionalState)RCC->APB2ENR;
 }
 #endif
 #ifdef RCC_APB2LPENR_TIM8LPEN
@@ -1519,6 +1590,7 @@ void XPD_TIM8_Reset(void)
 void XPD_TIM9_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,TIM9EN) = NewState;
+    NewState = (FunctionalState)RCC->APB2ENR;
 }
 #endif
 #ifdef RCC_APB2LPENR_TIM9LPEN
@@ -1541,6 +1613,7 @@ void XPD_TIM9_Reset(void)
 void XPD_UART4_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,UART4EN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_UART4LPEN
@@ -1563,6 +1636,7 @@ void XPD_UART4_Reset(void)
 void XPD_UART5_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,UART5EN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_UART5LPEN
@@ -1585,6 +1659,7 @@ void XPD_UART5_Reset(void)
 void XPD_UART7_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,UART7EN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_UART7LPEN
@@ -1607,6 +1682,7 @@ void XPD_UART7_Reset(void)
 void XPD_UART8_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,UART8EN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_UART8LPEN
@@ -1629,6 +1705,7 @@ void XPD_UART8_Reset(void)
 void XPD_USART1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,USART1EN) = NewState;
+    NewState = (FunctionalState)RCC->APB2ENR;
 }
 #endif
 #ifdef RCC_APB2LPENR_USART1LPEN
@@ -1651,6 +1728,7 @@ void XPD_USART1_Reset(void)
 void XPD_USART2_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,USART2EN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_USART2LPEN
@@ -1673,6 +1751,7 @@ void XPD_USART2_Reset(void)
 void XPD_USART3_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,USART3EN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_USART3LPEN
@@ -1695,6 +1774,7 @@ void XPD_USART3_Reset(void)
 void XPD_USART6_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,USART6EN) = NewState;
+    NewState = (FunctionalState)RCC->APB2ENR;
 }
 #endif
 #ifdef RCC_APB2LPENR_USART6LPEN
@@ -1717,6 +1797,7 @@ void XPD_USART6_Reset(void)
 void XPD_WWDG_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,WWDGEN) = NewState;
+    NewState = (FunctionalState)RCC->APB1ENR;
 }
 #endif
 #ifdef RCC_APB1LPENR_WWDGLPEN
