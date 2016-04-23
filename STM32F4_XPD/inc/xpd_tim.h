@@ -100,40 +100,6 @@ typedef struct
 
 /** @} */
 
-/** @addtogroup TIM_Common_Exported_Functions
- * @{ */
-XPD_ReturnType  XPD_TIM_Init                (TIM_HandleType * htim, TIM_CounterInitType * Config);
-XPD_ReturnType  XPD_TIM_Deinit              (TIM_HandleType * htim);
-
-void            XPD_TIM_CounterStart        (TIM_HandleType * htim);
-void            XPD_TIM_CounterStop         (TIM_HandleType * htim);
-void            XPD_TIM_CounterStart_IT     (TIM_HandleType * htim);
-void            XPD_TIM_CounterStop_IT      (TIM_HandleType * htim);
-void            XPD_TIM_CounterStart_DMA    (TIM_HandleType * htim, void * Address, uint16_t Length);
-void            XPD_TIM_CounterStop_DMA     (TIM_HandleType * htim);
-
-TIM_CounterType XPD_TIM_CounterDirection    (TIM_HandleType * htim);
-
-uint32_t        XPD_TIM_GetCounter          (TIM_HandleType * htim);
-void            XPD_TIM_SetCounter          (TIM_HandleType * htim, uint32_t Value);
-
-TIM_ChannelType XPD_TIM_GetCurrentChannel   (TIM_HandleType * htim);
-
-void            XPD_TIM_ChannelEnable       (TIM_HandleType * htim, TIM_ChannelType Channel);
-void            XPD_TIM_ChannelDisable      (TIM_HandleType * htim, TIM_ChannelType Channel);
-void            XPD_TIM_ChannelSetPulse     (TIM_HandleType * htim, TIM_ChannelType Channel, uint32_t Pulse);
-uint32_t        XPD_TIM_ChannelGetPulse     (TIM_HandleType * htim, TIM_ChannelType Channel);
-
-void            XPD_TIM_CompChannelEnable   (TIM_HandleType * htim, TIM_ChannelType Channel);
-void            XPD_TIM_CompChannelDisable  (TIM_HandleType * htim, TIM_ChannelType Channel);
-
-void            XPD_TIM_UP_IRQHandler       (TIM_HandleType * htim);
-void            XPD_TIM_CC_IRQHandler       (TIM_HandleType * htim);
-void            XPD_TIM_TRG_COM_IRQHandler  (TIM_HandleType * htim);
-void            XPD_TIM_BRK_IRQHandler      (TIM_HandleType * htim);
-void            XPD_TIM_IRQHandler          (TIM_HandleType * htim);
-/** @} */
-
 /** @defgroup TIM_Common_Exported_Macros TIM Common Exported Macros
  * @{ */
 
@@ -241,6 +207,40 @@ void            XPD_TIM_IRQHandler          (TIM_HandleType * htim);
 #define TIM_REG_BIT(HANDLE, REG_NAME, BIT_NAME) ((HANDLE)->Inst->REG_NAME.b.BIT_NAME)
 #endif
 
+/** @} */
+
+/** @addtogroup TIM_Common_Exported_Functions
+ * @{ */
+XPD_ReturnType  XPD_TIM_Init                (TIM_HandleType * htim, TIM_CounterInitType * Config);
+XPD_ReturnType  XPD_TIM_Deinit              (TIM_HandleType * htim);
+
+void            XPD_TIM_CounterStart        (TIM_HandleType * htim);
+void            XPD_TIM_CounterStop         (TIM_HandleType * htim);
+void            XPD_TIM_CounterStart_IT     (TIM_HandleType * htim);
+void            XPD_TIM_CounterStop_IT      (TIM_HandleType * htim);
+void            XPD_TIM_CounterStart_DMA    (TIM_HandleType * htim, void * Address, uint16_t Length);
+void            XPD_TIM_CounterStop_DMA     (TIM_HandleType * htim);
+
+TIM_CounterType XPD_TIM_CounterDirection    (TIM_HandleType * htim);
+
+uint32_t        XPD_TIM_GetCounter          (TIM_HandleType * htim);
+void            XPD_TIM_SetCounter          (TIM_HandleType * htim, uint32_t Value);
+
+TIM_ChannelType XPD_TIM_GetCurrentChannel   (TIM_HandleType * htim);
+
+void            XPD_TIM_ChannelEnable       (TIM_HandleType * htim, TIM_ChannelType Channel);
+void            XPD_TIM_ChannelDisable      (TIM_HandleType * htim, TIM_ChannelType Channel);
+void            XPD_TIM_ChannelSetPulse     (TIM_HandleType * htim, TIM_ChannelType Channel, uint32_t Pulse);
+uint32_t        XPD_TIM_ChannelGetPulse     (TIM_HandleType * htim, TIM_ChannelType Channel);
+
+void            XPD_TIM_CompChannelEnable   (TIM_HandleType * htim, TIM_ChannelType Channel);
+void            XPD_TIM_CompChannelDisable  (TIM_HandleType * htim, TIM_ChannelType Channel);
+
+void            XPD_TIM_UP_IRQHandler       (TIM_HandleType * htim);
+void            XPD_TIM_CC_IRQHandler       (TIM_HandleType * htim);
+void            XPD_TIM_TRG_COM_IRQHandler  (TIM_HandleType * htim);
+void            XPD_TIM_BRK_IRQHandler      (TIM_HandleType * htim);
+void            XPD_TIM_IRQHandler          (TIM_HandleType * htim);
 /** @} */
 
 /** @} */

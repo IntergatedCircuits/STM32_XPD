@@ -40,32 +40,11 @@ typedef struct {
 
 /** @} */
 
-/** @addtogroup XPD_Exported_Functions
+/** @defgroup XPD_Exported_Variables XPD Exported Variables
  * @{ */
 
-/** @addtogroup XPD_Exported_Functions_Init
- * @{ */
-void            XPD_Init                (void);
-void            XPD_Deinit              (void);
-/** @} */
-/** @addtogroup XPD_Exported_Functions_Timer
- * @{ */
-void            XPD_InitTimer           (void);
-void            XPD_IncTimer            (void);
-uint32_t        XPD_GetTimer            (void);
-void            XPD_SuspendTimer        (void);
-void            XPD_ResumeTimer         (void);
-void            XPD_Delay_ms            (uint32_t milliseconds);
-void            XPD_Delay_us            (uint32_t microseconds);
-XPD_ReturnType  XPD_WaitForMatch        (volatile uint32_t * varAddress, uint32_t bitSelector,
-                                         uint32_t            match,      uint32_t mstimeout);
-XPD_ReturnType  XPD_WaitForDiff         (volatile uint32_t * varAddress, uint32_t bitSelector,
-                                         uint32_t            match,      uint32_t mstimeout);
-/** @} */
-/** @addtogroup XPD_Exported_Functions_IRQ
- * @{ */
-void            XPD_SysTick_IRQHandler  (void);
-/** @} */
+/** @brief XPD utilities callbacks container */
+extern XPD_CallbacksType XPD_Callbacks;
 
 /** @} */
 
@@ -93,11 +72,32 @@ void            XPD_SysTick_IRQHandler  (void);
 
 /** @} */
 
-/** @defgroup XPD_Exported_Variables XPD Exported Variables
+/** @addtogroup XPD_Exported_Functions
  * @{ */
 
-/** @brief XPD utilities callbacks container */
-extern XPD_CallbacksType XPD_Callbacks;
+/** @addtogroup XPD_Exported_Functions_Init
+ * @{ */
+void            XPD_Init                (void);
+void            XPD_Deinit              (void);
+/** @} */
+/** @addtogroup XPD_Exported_Functions_Timer
+ * @{ */
+void            XPD_InitTimer           (void);
+void            XPD_IncTimer            (void);
+uint32_t        XPD_GetTimer            (void);
+void            XPD_SuspendTimer        (void);
+void            XPD_ResumeTimer         (void);
+void            XPD_Delay_ms            (uint32_t milliseconds);
+void            XPD_Delay_us            (uint32_t microseconds);
+XPD_ReturnType  XPD_WaitForMatch        (volatile uint32_t * varAddress, uint32_t bitSelector,
+                                         uint32_t            match,      uint32_t mstimeout);
+XPD_ReturnType  XPD_WaitForDiff         (volatile uint32_t * varAddress, uint32_t bitSelector,
+                                         uint32_t            match,      uint32_t mstimeout);
+/** @} */
+/** @addtogroup XPD_Exported_Functions_IRQ
+ * @{ */
+void            XPD_SysTick_IRQHandler  (void);
+/** @} */
 
 /** @} */
 

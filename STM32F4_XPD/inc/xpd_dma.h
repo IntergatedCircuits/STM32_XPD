@@ -138,28 +138,6 @@ typedef struct
 
 /** @} */
 
-/** @addtogroup DMA_Exported_Functions
- * @{ */
-XPD_ReturnType  XPD_DMA_Init            (DMA_HandleType * hdma, DMA_InitType * Config);
-XPD_ReturnType  XPD_DMA_Deinit          (DMA_HandleType * hdma);
-
-void            XPD_DMA_Enable          (DMA_HandleType * hdma);
-void            XPD_DMA_Disable         (DMA_HandleType * hdma);
-
-void            XPD_DMA_Start           (DMA_HandleType * hdma, DMA_TransferType * Config);
-void            XPD_DMA_Start_IT        (DMA_HandleType * hdma, DMA_TransferType * Config);
-XPD_ReturnType  XPD_DMA_Stop            (DMA_HandleType * hdma);
-void            XPD_DMA_Stop_IT         (DMA_HandleType *hdma);
-
-XPD_ReturnType  XPD_DMA_PollStatus      (DMA_HandleType * hdma, DMA_OperationType Operation, uint32_t Timeout);
-DMA_ErrorType   XPD_DMA_GetError        (DMA_HandleType * hdma);
-
-void            XPD_DMA_IRQHandler      (DMA_HandleType * hdma);
-
-uint32_t        XPD_DMA_GetActiveMemory (DMA_HandleType * hdma);
-void            XPD_DMA_SetSwapMemory   (DMA_HandleType * hdma, void * Address);
-/** @} */
-
 /** @defgroup DMA_Exported_Macros DMA Exported Macros
  * @{ */
 
@@ -256,6 +234,28 @@ void            XPD_DMA_SetSwapMemory   (DMA_HandleType * hdma, void * Address);
     (DMA_REG_BIT((HANDLE),CR,DMEIE) = (_VALUE_))
 #define         __XPD_DMA_ITConfig_FE(HANDLE,_VALUE_)         \
     (DMA_REG_BIT((HANDLE),FCR,FEIE) = (_VALUE_))
+
+/** @addtogroup DMA_Exported_Functions
+ * @{ */
+XPD_ReturnType  XPD_DMA_Init            (DMA_HandleType * hdma, DMA_InitType * Config);
+XPD_ReturnType  XPD_DMA_Deinit          (DMA_HandleType * hdma);
+
+void            XPD_DMA_Enable          (DMA_HandleType * hdma);
+void            XPD_DMA_Disable         (DMA_HandleType * hdma);
+
+void            XPD_DMA_Start           (DMA_HandleType * hdma, DMA_TransferType * Config);
+void            XPD_DMA_Start_IT        (DMA_HandleType * hdma, DMA_TransferType * Config);
+XPD_ReturnType  XPD_DMA_Stop            (DMA_HandleType * hdma);
+void            XPD_DMA_Stop_IT         (DMA_HandleType * hdma);
+
+XPD_ReturnType  XPD_DMA_PollStatus      (DMA_HandleType * hdma, DMA_OperationType Operation, uint32_t Timeout);
+DMA_ErrorType   XPD_DMA_GetError        (DMA_HandleType * hdma);
+
+void            XPD_DMA_IRQHandler      (DMA_HandleType * hdma);
+
+uint32_t        XPD_DMA_GetActiveMemory (DMA_HandleType * hdma);
+void            XPD_DMA_SetSwapMemory   (DMA_HandleType * hdma, void * Address);
+/** @} */
 
 /** @} */
 

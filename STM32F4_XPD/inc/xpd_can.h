@@ -162,59 +162,6 @@ typedef struct
 
 /** @} */
 
-/** @addtogroup CAN_Exported_Functions
- * @{ */
-
-/** @addtogroup CAN_Exported_Functions_IRQ
- * @{ */
-void            XPD_CAN_TX_IRQHandler       (CAN_HandleType * hcan);
-void            XPD_CAN_RX0_IRQHandler      (CAN_HandleType * hcan);
-void            XPD_CAN_RX1_IRQHandler      (CAN_HandleType * hcan);
-void            XPD_CAN_SCE_IRQHandler      (CAN_HandleType * hcan);
-/** @} */
-
-/** @addtogroup CAN_Exported_Functions_State
- * @{ */
-XPD_ReturnType 	XPD_CAN_Init			    (CAN_HandleType * hcan, CAN_InitType * Config);
-XPD_ReturnType 	XPD_CAN_Deinit			    (CAN_HandleType * hcan);
-
-XPD_ReturnType  XPD_CAN_Sleep               (CAN_HandleType * hcan);
-XPD_ReturnType  XPD_CAN_WakeUp              (CAN_HandleType * hcan);
-
-CAN_ErrorType   XPD_CAN_GetErrorState       (CAN_HandleType * hcan);
-/** @} */
-
-/** @addtogroup CAN_Exported_Functions_Filter
- * @{ */
-XPD_ReturnType  XPD_CAN_FilterInit          (CAN_HandleType * hcan, uint8_t FIFONumber, CAN_FilterType * Filter);
-XPD_ReturnType  XPD_CAN_FilterDeinit        (CAN_HandleType * hcan, uint8_t FIFONumber, uint8_t * MatchIndex);
-XPD_ReturnType  XPD_CAN_FilterIndexUpdate   (CAN_HandleType * hcan, uint8_t FIFONumber, uint8_t * MatchIndex);
-void            XPD_CAN_FilterBankReset     (CAN_HandleType * hcan);
-#ifdef __DUAL_CAN_DEVICE
-XPD_ReturnType  XPD_CAN_FilterBankSizeConfig(CAN_HandleType* hcan, uint8_t NewSize);
-#endif
-/** @} */
-
-/** @addtogroup CAN_Exported_Functions_Transmit
- * @{ */
-void            XPD_CAN_TxRequest           (CAN_HandleType * hcan, uint8_t Mailbox);
-void            XPD_CAN_TxAbort             (CAN_HandleType * hcan, uint8_t Mailbox);
-XPD_ReturnType  XPD_CAN_TxResult            (CAN_HandleType * hcan, uint8_t Mailbox);
-bool            XPD_CAN_TxEmpty             (CAN_HandleType * hcan, uint8_t Mailbox);
-uint8_t         XPD_CAN_TxEmptyMailbox      (CAN_HandleType * hcan);
-XPD_ReturnType 	XPD_CAN_Transmit		    (CAN_HandleType * hcan, CAN_FrameType * Frame, uint32_t Timeout);
-XPD_ReturnType 	XPD_CAN_Transmit_IT		    (CAN_HandleType * hcan, CAN_FrameType * Frame);
-/** @} */
-
-/** @addtogroup CAN_Exported_Functions_Receive
- * @{ */
-void            XPD_CAN_RxRelease           (CAN_HandleType * hcan, uint8_t FIFONumber);
-XPD_ReturnType 	XPD_CAN_Receive			    (CAN_HandleType * hcan, CAN_FrameType * Frame, uint8_t FIFONumber, uint32_t Timeout);
-XPD_ReturnType  XPD_CAN_Receive_IT		    (CAN_HandleType * hcan, CAN_FrameType * Frame, uint8_t FIFONumber);
-/** @} */
-
-/** @} */
-
 /** @defgroup CAN_Exported_Macros CAN Exported Macros
  * @{ */
 
@@ -393,7 +340,7 @@ XPD_ReturnType  XPD_CAN_Receive_IT		    (CAN_HandleType * hcan, CAN_FrameType * 
 
 #else
 #define CAN_REG_BIT(HANDLE, REG_NAME, BIT_NAME) ((HANDLE)->Inst->REG_NAME.b.BIT_NAME)
-#define CAN_MASTER_REG_BIT(REG_NAME, BIT_NAME)    (CAN_MASTER->Inst->REG_NAME.b.BIT_NAME)
+#define CAN_MASTER_REG_BIT(REG_NAME, BIT_NAME)  (CAN_MASTER->Inst->REG_NAME.b.BIT_NAME)
 
 /**
  * @brief  Clear the specified CAN transmit flag.
@@ -427,6 +374,59 @@ XPD_ReturnType  XPD_CAN_Receive_IT		    (CAN_HandleType * hcan, CAN_FrameType * 
         (((HANDLE)->Inst->TSR.w & (CAN_TSR_##FLAG_NAME##0 << (8 * (MB)))) != 0 ? 1 : 0)
 
 #endif
+
+/** @} */
+
+/** @addtogroup CAN_Exported_Functions
+ * @{ */
+
+/** @addtogroup CAN_Exported_Functions_IRQ
+ * @{ */
+void            XPD_CAN_TX_IRQHandler       (CAN_HandleType * hcan);
+void            XPD_CAN_RX0_IRQHandler      (CAN_HandleType * hcan);
+void            XPD_CAN_RX1_IRQHandler      (CAN_HandleType * hcan);
+void            XPD_CAN_SCE_IRQHandler      (CAN_HandleType * hcan);
+/** @} */
+
+/** @addtogroup CAN_Exported_Functions_State
+ * @{ */
+XPD_ReturnType  XPD_CAN_Init                (CAN_HandleType * hcan, CAN_InitType * Config);
+XPD_ReturnType  XPD_CAN_Deinit              (CAN_HandleType * hcan);
+
+XPD_ReturnType  XPD_CAN_Sleep               (CAN_HandleType * hcan);
+XPD_ReturnType  XPD_CAN_WakeUp              (CAN_HandleType * hcan);
+
+CAN_ErrorType   XPD_CAN_GetErrorState       (CAN_HandleType * hcan);
+/** @} */
+
+/** @addtogroup CAN_Exported_Functions_Filter
+ * @{ */
+XPD_ReturnType  XPD_CAN_FilterInit          (CAN_HandleType * hcan, uint8_t FIFONumber, CAN_FilterType * Filter);
+XPD_ReturnType  XPD_CAN_FilterDeinit        (CAN_HandleType * hcan, uint8_t FIFONumber, uint8_t * MatchIndex);
+XPD_ReturnType  XPD_CAN_FilterIndexUpdate   (CAN_HandleType * hcan, uint8_t FIFONumber, uint8_t * MatchIndex);
+void            XPD_CAN_FilterBankReset     (CAN_HandleType * hcan);
+#ifdef __DUAL_CAN_DEVICE
+XPD_ReturnType  XPD_CAN_FilterBankSizeConfig(CAN_HandleType* hcan, uint8_t NewSize);
+#endif
+/** @} */
+
+/** @addtogroup CAN_Exported_Functions_Transmit
+ * @{ */
+void            XPD_CAN_TxRequest           (CAN_HandleType * hcan, uint8_t Mailbox);
+void            XPD_CAN_TxAbort             (CAN_HandleType * hcan, uint8_t Mailbox);
+XPD_ReturnType  XPD_CAN_TxResult            (CAN_HandleType * hcan, uint8_t Mailbox);
+bool            XPD_CAN_TxEmpty             (CAN_HandleType * hcan, uint8_t Mailbox);
+uint8_t         XPD_CAN_TxEmptyMailbox      (CAN_HandleType * hcan);
+XPD_ReturnType  XPD_CAN_Transmit            (CAN_HandleType * hcan, CAN_FrameType * Frame, uint32_t Timeout);
+XPD_ReturnType  XPD_CAN_Transmit_IT         (CAN_HandleType * hcan, CAN_FrameType * Frame);
+/** @} */
+
+/** @addtogroup CAN_Exported_Functions_Receive
+ * @{ */
+void            XPD_CAN_RxRelease           (CAN_HandleType * hcan, uint8_t FIFONumber);
+XPD_ReturnType  XPD_CAN_Receive             (CAN_HandleType * hcan, CAN_FrameType * Frame, uint8_t FIFONumber, uint32_t Timeout);
+XPD_ReturnType  XPD_CAN_Receive_IT          (CAN_HandleType * hcan, CAN_FrameType * Frame, uint8_t FIFONumber);
+/** @} */
 
 /** @} */
 

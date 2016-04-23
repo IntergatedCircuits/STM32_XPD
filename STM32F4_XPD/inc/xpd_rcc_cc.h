@@ -149,61 +149,6 @@ typedef struct {
 } XPD_RCC_CallbacksType;
 /** @} */
 
-/** @addtogroup RCC_Core_Clocks_Exported_Functions
- * @{ */
-
-/** @addtogroup RCC_Core_Clocks_Exported_Functions_Oscillators
- * @{ */
-XPD_ReturnType      XPD_RCC_HSIConfig           (RCC_HSI_InitType * Config);
-XPD_ReturnType      XPD_RCC_HSEConfig           (RCC_HSE_InitType * Config);
-XPD_ReturnType      XPD_RCC_PLLConfig           (RCC_PLL_InitType * Config);
-XPD_ReturnType      XPD_RCC_LSIConfig           (RCC_OscStateType NewState);
-XPD_ReturnType      XPD_RCC_LSEConfig           (RCC_OscStateType NewState);
-
-uint32_t            XPD_RCC_GetOscFreq          (RCC_OscType Oscillator);
-
-RCC_OscType         XPD_RCC_GetSYSCLKSource     (void);
-RCC_OscType         XPD_RCC_GetPLLSource        (void);
-
-void                XPD_RCC_IRQHandler          (void);
-RCC_OscType         XPD_RCC_GetReadyOsc         (void);
-/** @} */
-
-/** @addtogroup RCC_Core_Clocks_Exported_Functions_CSS
- * @{ */
-void                XPD_RCC_EnableCSS           (void);
-void                XPD_RCC_DisableCSS          (void);
-
-void                XPD_NMI_IRQHandler          (void);
-/** @} */
-
-/** @addtogroup RCC_Core_Clocks_Exported_Functions_Clocks
- * @{ */
-XPD_ReturnType      XPD_RCC_ClockConfig         (RCC_ClockType Clocks, RCC_ClockInitType * Config, uint8_t FlashLatency);
-uint32_t            XPD_RCC_GetClockFreq        (RCC_ClockType SelectedClock);
-/** @} */
-
-/** @addtogroup RCC_Core_Clocks_Exported_Functions_MCO
- * @{ */
-void                XPD_RCC_MCOConfig           (uint8_t MCOx, uint8_t MCOSource, ClockDividerType MCODiv);
-#ifdef RCC_CFGR_MCO1EN
-void                XPD_RCC_EnableMCO           (uint8_t MCOx);
-void                XPD_RCC_DisableMCO          (uint8_t MCOx);
-#endif
-/** @} */
-/** @addtogroup RCC_Core_Clocks_Exported_Functions_Reset
- * @{ */
-void                XPD_RCC_Deinit              (void);
-
-void                XPD_RCC_ResetAHB1           (void);
-void                XPD_RCC_ResetAHB2           (void);
-void                XPD_RCC_ResetAHB3           (void);
-void                XPD_RCC_ResetAPB1           (void);
-void                XPD_RCC_ResetAPB2           (void);
-/** @} */
-
-/** @} */
-
 /** @defgroup RCC_Core_Exported_Variables RCC Core Exported Variables
  * @{ */
 
@@ -278,6 +223,61 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
  */
 #define             XPD_RCC_ClearFlag(FLAG_NAME)     \
     do{ RCC_REG_BIT(CIR,FLAG_NAME##C) = 1; }while(0)
+
+/** @} */
+
+/** @addtogroup RCC_Core_Clocks_Exported_Functions
+ * @{ */
+
+/** @addtogroup RCC_Core_Clocks_Exported_Functions_Oscillators
+ * @{ */
+XPD_ReturnType      XPD_RCC_HSIConfig           (RCC_HSI_InitType * Config);
+XPD_ReturnType      XPD_RCC_HSEConfig           (RCC_HSE_InitType * Config);
+XPD_ReturnType      XPD_RCC_PLLConfig           (RCC_PLL_InitType * Config);
+XPD_ReturnType      XPD_RCC_LSIConfig           (RCC_OscStateType NewState);
+XPD_ReturnType      XPD_RCC_LSEConfig           (RCC_OscStateType NewState);
+
+uint32_t            XPD_RCC_GetOscFreq          (RCC_OscType Oscillator);
+
+RCC_OscType         XPD_RCC_GetSYSCLKSource     (void);
+RCC_OscType         XPD_RCC_GetPLLSource        (void);
+
+void                XPD_RCC_IRQHandler          (void);
+RCC_OscType         XPD_RCC_GetReadyOsc         (void);
+/** @} */
+
+/** @addtogroup RCC_Core_Clocks_Exported_Functions_CSS
+ * @{ */
+void                XPD_RCC_EnableCSS           (void);
+void                XPD_RCC_DisableCSS          (void);
+
+void                XPD_NMI_IRQHandler          (void);
+/** @} */
+
+/** @addtogroup RCC_Core_Clocks_Exported_Functions_Clocks
+ * @{ */
+XPD_ReturnType      XPD_RCC_ClockConfig         (RCC_ClockType Clocks, RCC_ClockInitType * Config, uint8_t FlashLatency);
+uint32_t            XPD_RCC_GetClockFreq        (RCC_ClockType SelectedClock);
+/** @} */
+
+/** @addtogroup RCC_Core_Clocks_Exported_Functions_MCO
+ * @{ */
+void                XPD_RCC_MCOConfig           (uint8_t MCOx, uint8_t MCOSource, ClockDividerType MCODiv);
+#ifdef RCC_CFGR_MCO1EN
+void                XPD_RCC_EnableMCO           (uint8_t MCOx);
+void                XPD_RCC_DisableMCO          (uint8_t MCOx);
+#endif
+/** @} */
+/** @addtogroup RCC_Core_Clocks_Exported_Functions_Reset
+ * @{ */
+void                XPD_RCC_Deinit              (void);
+
+void                XPD_RCC_ResetAHB1           (void);
+void                XPD_RCC_ResetAHB2           (void);
+void                XPD_RCC_ResetAHB3           (void);
+void                XPD_RCC_ResetAPB1           (void);
+void                XPD_RCC_ResetAPB2           (void);
+/** @} */
 
 /** @} */
 

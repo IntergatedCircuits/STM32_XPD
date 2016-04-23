@@ -195,15 +195,15 @@ void XPD_SysTick_IRQHandler(void)
 void XPD_Init(void)
 {
 #if (INSTRUCTION_CACHE_ENABLE != 0)
-    XPD_FLASH_InstCacheEnable();
+    XPD_FLASH_InstCacheCtrl(ENABLE);
 #endif
 
 #if (DATA_CACHE_ENABLE != 0)
-   XPD_FLASH_DataCacheEnable();
+   XPD_FLASH_DataCacheCtrl(ENABLE);
 #endif
 
 #if (PREFETCH_ENABLE != 0)
-   XPD_FLASH_PrefetchBufferEnable();
+   XPD_FLASH_PrefetchBufferCtrl(ENABLE);
 #endif
 
     /* Set Interrupt Group Priority */

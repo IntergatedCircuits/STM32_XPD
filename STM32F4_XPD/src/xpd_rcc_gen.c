@@ -40,61 +40,69 @@ void XPD_ADC_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_ADC1EN
-/** @brief Sets the new clock state of the ADC1 peripheral. */
+/** @brief Sets the new clock state of the ADC1 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_ADC1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,ADC1EN) = NewState;
-    NewState = (FunctionalState)RCC->APB2ENR;
+    NewState = (FunctionalState)RCC->APB2ENR.w;
 }
 #endif
 #ifdef RCC_APB2LPENR_ADC1LPEN
-/** @brief Sets the clock state of the ADC1 peripheral during sleep mode. */
-void XPD_ADC1_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the ADC1 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_ADC1_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2LPENR,ADC1LPEN) = NewState;
 }
 #endif
 #ifdef RCC_APB2ENR_ADC2EN
-/** @brief Sets the new clock state of the ADC2 peripheral. */
+/** @brief Sets the new clock state of the ADC2 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_ADC2_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,ADC2EN) = NewState;
-    NewState = (FunctionalState)RCC->APB2ENR;
+    NewState = (FunctionalState)RCC->APB2ENR.w;
 }
 #endif
 #ifdef RCC_APB2LPENR_ADC2LPEN
-/** @brief Sets the clock state of the ADC2 peripheral during sleep mode. */
-void XPD_ADC2_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the ADC2 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_ADC2_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2LPENR,ADC2LPEN) = NewState;
 }
 #endif
 #ifdef RCC_APB2ENR_ADC3EN
-/** @brief Sets the new clock state of the ADC3 peripheral. */
+/** @brief Sets the new clock state of the ADC3 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_ADC3_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,ADC3EN) = NewState;
-    NewState = (FunctionalState)RCC->APB2ENR;
+    NewState = (FunctionalState)RCC->APB2ENR.w;
 }
 #endif
 #ifdef RCC_APB2LPENR_ADC3LPEN
-/** @brief Sets the clock state of the ADC3 peripheral during sleep mode. */
-void XPD_ADC3_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the ADC3 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_ADC3_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2LPENR,ADC3LPEN) = NewState;
 }
 #endif
 #ifdef RCC_APB1ENR_CAN1EN
-/** @brief Sets the new clock state of the CAN1 peripheral. */
+/** @brief Sets the new clock state of the CAN1 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_CAN1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,CAN1EN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_CAN1LPEN
-/** @brief Sets the clock state of the CAN1 peripheral during sleep mode. */
-void XPD_CAN1_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the CAN1 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_CAN1_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,CAN1LPEN) = NewState;
 }
@@ -108,16 +116,18 @@ void XPD_CAN1_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_CAN2EN
-/** @brief Sets the new clock state of the CAN2 peripheral. */
+/** @brief Sets the new clock state of the CAN2 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_CAN2_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,CAN2EN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_CAN2LPEN
-/** @brief Sets the clock state of the CAN2 peripheral during sleep mode. */
-void XPD_CAN2_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the CAN2 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_CAN2_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,CAN2LPEN) = NewState;
 }
@@ -130,25 +140,19 @@ void XPD_CAN2_Reset(void)
     RCC_REG_BIT(APB1RSTR,CAN2RST) = 0;
 }
 #endif
-#ifdef RCC_AHB1ENR_CCMDATARAMEN
-/** @brief Sets the new clock state of the CCMDATARAM peripheral. */
-void XPD_CCMDATARAM_ClockCtrl(FunctionalState NewState)
-{
-    RCC_REG_BIT(AHB1ENR,CCMDATARAMEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB1ENR;
-}
-#endif
 #ifdef RCC_APB1ENR_CECEN
-/** @brief Sets the new clock state of the CEC peripheral. */
+/** @brief Sets the new clock state of the CEC peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_CEC_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,CECEN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_CECLPEN
-/** @brief Sets the clock state of the CEC peripheral during sleep mode. */
-void XPD_CEC_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the CEC peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_CEC_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,CECLPEN) = NewState;
 }
@@ -162,16 +166,18 @@ void XPD_CEC_Reset(void)
 }
 #endif
 #ifdef RCC_AHB1ENR_CRCEN
-/** @brief Sets the new clock state of the CRC peripheral. */
+/** @brief Sets the new clock state of the CRC peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_CRC_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,CRCEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB1ENR;
+    NewState = (FunctionalState)RCC->AHB1ENR.w;
 }
 #endif
 #ifdef RCC_AHB1LPENR_CRCLPEN
-/** @brief Sets the clock state of the CRC peripheral during sleep mode. */
-void XPD_CRC_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the CRC peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_CRC_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1LPENR,CRCLPEN) = NewState;
 }
@@ -185,16 +191,18 @@ void XPD_CRC_Reset(void)
 }
 #endif
 #ifdef RCC_AHB2ENR_CRYPEN
-/** @brief Sets the new clock state of the CRYP peripheral. */
+/** @brief Sets the new clock state of the CRYP peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_CRYP_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB2ENR,CRYPEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB2ENR;
+    NewState = (FunctionalState)RCC->AHB2ENR.w;
 }
 #endif
 #ifdef RCC_AHB2LPENR_CRYPLPEN
-/** @brief Sets the clock state of the CRYP peripheral during sleep mode. */
-void XPD_CRYP_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the CRYP peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_CRYP_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB2LPENR,CRYPLPEN) = NewState;
 }
@@ -208,16 +216,18 @@ void XPD_CRYP_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_DACEN
-/** @brief Sets the new clock state of the DAC peripheral. */
+/** @brief Sets the new clock state of the DAC peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_DAC_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,DACEN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_DACLPEN
-/** @brief Sets the clock state of the DAC peripheral during sleep mode. */
-void XPD_DAC_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the DAC peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_DAC_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,DACLPEN) = NewState;
 }
@@ -231,16 +241,18 @@ void XPD_DAC_Reset(void)
 }
 #endif
 #ifdef RCC_AHB2ENR_DCMIEN
-/** @brief Sets the new clock state of the DCMI peripheral. */
+/** @brief Sets the new clock state of the DCMI peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_DCMI_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB2ENR,DCMIEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB2ENR;
+    NewState = (FunctionalState)RCC->AHB2ENR.w;
 }
 #endif
 #ifdef RCC_AHB2LPENR_DCMILPEN
-/** @brief Sets the clock state of the DCMI peripheral during sleep mode. */
-void XPD_DCMI_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the DCMI peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_DCMI_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB2LPENR,DCMILPEN) = NewState;
 }
@@ -254,16 +266,18 @@ void XPD_DCMI_Reset(void)
 }
 #endif
 #ifdef RCC_AHB1ENR_DMA1EN
-/** @brief Sets the new clock state of the DMA1 peripheral. */
+/** @brief Sets the new clock state of the DMA1 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_DMA1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,DMA1EN) = NewState;
-    NewState = (FunctionalState)RCC->AHB1ENR;
+    NewState = (FunctionalState)RCC->AHB1ENR.w;
 }
 #endif
 #ifdef RCC_AHB1LPENR_DMA1LPEN
-/** @brief Sets the clock state of the DMA1 peripheral during sleep mode. */
-void XPD_DMA1_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the DMA1 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_DMA1_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1LPENR,DMA1LPEN) = NewState;
 }
@@ -277,16 +291,18 @@ void XPD_DMA1_Reset(void)
 }
 #endif
 #ifdef RCC_AHB1ENR_DMA2EN
-/** @brief Sets the new clock state of the DMA2 peripheral. */
+/** @brief Sets the new clock state of the DMA2 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_DMA2_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,DMA2EN) = NewState;
-    NewState = (FunctionalState)RCC->AHB1ENR;
+    NewState = (FunctionalState)RCC->AHB1ENR.w;
 }
 #endif
 #ifdef RCC_AHB1LPENR_DMA2LPEN
-/** @brief Sets the clock state of the DMA2 peripheral during sleep mode. */
-void XPD_DMA2_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the DMA2 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_DMA2_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1LPENR,DMA2LPEN) = NewState;
 }
@@ -300,16 +316,18 @@ void XPD_DMA2_Reset(void)
 }
 #endif
 #ifdef RCC_AHB1ENR_DMA2DEN
-/** @brief Sets the new clock state of the DMA2D peripheral. */
+/** @brief Sets the new clock state of the DMA2D peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_DMA2D_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,DMA2DEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB1ENR;
+    NewState = (FunctionalState)RCC->AHB1ENR.w;
 }
 #endif
 #ifdef RCC_AHB1LPENR_DMA2DLPEN
-/** @brief Sets the clock state of the DMA2D peripheral during sleep mode. */
-void XPD_DMA2D_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the DMA2D peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_DMA2D_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1LPENR,DMA2DLPEN) = NewState;
 }
@@ -323,16 +341,18 @@ void XPD_DMA2D_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_DSIEN
-/** @brief Sets the new clock state of the DSI peripheral. */
+/** @brief Sets the new clock state of the DSI peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_DSI_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,DSIEN) = NewState;
-    NewState = (FunctionalState)RCC->APB2ENR;
+    NewState = (FunctionalState)RCC->APB2ENR.w;
 }
 #endif
 #ifdef RCC_APB2LPENR_DSILPEN
-/** @brief Sets the clock state of the DSI peripheral during sleep mode. */
-void XPD_DSI_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the DSI peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_DSI_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2LPENR,DSILPEN) = NewState;
 }
@@ -346,16 +366,18 @@ void XPD_DSI_Reset(void)
 }
 #endif
 #ifdef RCC_AHB1ENR_ETHMACEN
-/** @brief Sets the new clock state of the ETHMAC peripheral. */
+/** @brief Sets the new clock state of the ETHMAC peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_ETHMAC_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,ETHMACEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB1ENR;
+    NewState = (FunctionalState)RCC->AHB1ENR.w;
 }
 #endif
 #ifdef RCC_AHB1LPENR_ETHMACLPEN
-/** @brief Sets the clock state of the ETHMAC peripheral during sleep mode. */
-void XPD_ETHMAC_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the ETHMAC peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_ETHMAC_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1LPENR,ETHMACLPEN) = NewState;
 }
@@ -369,76 +391,86 @@ void XPD_ETHMAC_Reset(void)
 }
 #endif
 #ifdef RCC_AHB1ENR_ETHMACPTPEN
-/** @brief Sets the new clock state of the ETHMAC_PTP peripheral. */
+/** @brief Sets the new clock state of the ETHMAC_PTP peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_ETHMAC_PTP_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,ETHMACPTPEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB1ENR;
+    NewState = (FunctionalState)RCC->AHB1ENR.w;
 }
 #endif
 #ifdef RCC_AHB1LPENR_ETHMACPTPLPEN
-/** @brief Sets the clock state of the ETHMAC_PTP peripheral during sleep mode. */
-void XPD_ETHMAC_PTP_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the ETHMAC_PTP peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_ETHMAC_PTP_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1LPENR,ETHMACPTPLPEN) = NewState;
 }
 #endif
 #ifdef RCC_AHB1ENR_ETHMACRXEN
-/** @brief Sets the new clock state of the ETHMAC_RX peripheral. */
+/** @brief Sets the new clock state of the ETHMAC_RX peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_ETHMAC_RX_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,ETHMACRXEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB1ENR;
+    NewState = (FunctionalState)RCC->AHB1ENR.w;
 }
 #endif
 #ifdef RCC_AHB1LPENR_ETHMACRXLPEN
-/** @brief Sets the clock state of the ETHMAC_RX peripheral during sleep mode. */
-void XPD_ETHMAC_RX_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the ETHMAC_RX peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_ETHMAC_RX_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1LPENR,ETHMACRXLPEN) = NewState;
 }
 #endif
 #ifdef RCC_AHB1ENR_ETHMACTXEN
-/** @brief Sets the new clock state of the ETHMAC_TX peripheral. */
+/** @brief Sets the new clock state of the ETHMAC_TX peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_ETHMAC_TX_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,ETHMACTXEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB1ENR;
+    NewState = (FunctionalState)RCC->AHB1ENR.w;
 }
 #endif
 #ifdef RCC_AHB1LPENR_ETHMACTXLPEN
-/** @brief Sets the clock state of the ETHMAC_TX peripheral during sleep mode. */
-void XPD_ETHMAC_TX_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the ETHMAC_TX peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_ETHMAC_TX_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1LPENR,ETHMACTXLPEN) = NewState;
 }
 #endif
 #ifdef RCC_APB2ENR_EXTITEN
-/** @brief Sets the new clock state of the EXTI peripheral. */
+/** @brief Sets the new clock state of the EXTI peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_EXTI_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,EXTITEN) = NewState;
-    NewState = (FunctionalState)RCC->APB2ENR;
+    NewState = (FunctionalState)RCC->APB2ENR.w;
 }
 #endif
 #ifdef RCC_APB2LPENR_EXTITLPEN
-/** @brief Sets the clock state of the EXTI peripheral during sleep mode. */
-void XPD_EXTI_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the EXTI peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_EXTI_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2LPENR,EXTITLPEN) = NewState;
 }
 #endif
 #ifdef RCC_AHB3ENR_FMCEN
-/** @brief Sets the new clock state of the FMC peripheral. */
+/** @brief Sets the new clock state of the FMC peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_FMC_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB3ENR,FMCEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB3ENR;
+    NewState = (FunctionalState)RCC->AHB3ENR.w;
 }
 #endif
 #ifdef RCC_AHB3LPENR_FMCLPEN
-/** @brief Sets the clock state of the FMC peripheral during sleep mode. */
-void XPD_FMC_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the FMC peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_FMC_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB3LPENR,FMCLPEN) = NewState;
 }
@@ -452,16 +484,18 @@ void XPD_FMC_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_FMPI2C1EN
-/** @brief Sets the new clock state of the FMP_I2C1 peripheral. */
+/** @brief Sets the new clock state of the FMP_I2C1 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_FMP_I2C1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,FMPI2C1EN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_FMPI2C1LPEN
-/** @brief Sets the clock state of the FMP_I2C1 peripheral during sleep mode. */
-void XPD_FMP_I2C1_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the FMP_I2C1 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_FMP_I2C1_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,FMPI2C1LPEN) = NewState;
 }
@@ -475,16 +509,18 @@ void XPD_FMP_I2C1_Reset(void)
 }
 #endif
 #ifdef RCC_AHB3ENR_FSMCEN
-/** @brief Sets the new clock state of the FSMC peripheral. */
+/** @brief Sets the new clock state of the FSMC peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_FSMC_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB3ENR,FSMCEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB3ENR;
+    NewState = (FunctionalState)RCC->AHB3ENR.w;
 }
 #endif
 #ifdef RCC_AHB3LPENR_FSMCLPEN
-/** @brief Sets the clock state of the FSMC peripheral during sleep mode. */
-void XPD_FSMC_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the FSMC peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_FSMC_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB3LPENR,FSMCLPEN) = NewState;
 }
@@ -498,16 +534,18 @@ void XPD_FSMC_Reset(void)
 }
 #endif
 #ifdef RCC_AHB1ENR_GPIOAEN
-/** @brief Sets the new clock state of the GPIOA peripheral. */
+/** @brief Sets the new clock state of the GPIOA peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_GPIOA_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,GPIOAEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB1ENR;
+    NewState = (FunctionalState)RCC->AHB1ENR.w;
 }
 #endif
 #ifdef RCC_AHB1LPENR_GPIOALPEN
-/** @brief Sets the clock state of the GPIOA peripheral during sleep mode. */
-void XPD_GPIOA_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the GPIOA peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_GPIOA_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1LPENR,GPIOALPEN) = NewState;
 }
@@ -521,16 +559,18 @@ void XPD_GPIOA_Reset(void)
 }
 #endif
 #ifdef RCC_AHB1ENR_GPIOBEN
-/** @brief Sets the new clock state of the GPIOB peripheral. */
+/** @brief Sets the new clock state of the GPIOB peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_GPIOB_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,GPIOBEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB1ENR;
+    NewState = (FunctionalState)RCC->AHB1ENR.w;
 }
 #endif
 #ifdef RCC_AHB1LPENR_GPIOBLPEN
-/** @brief Sets the clock state of the GPIOB peripheral during sleep mode. */
-void XPD_GPIOB_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the GPIOB peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_GPIOB_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1LPENR,GPIOBLPEN) = NewState;
 }
@@ -544,16 +584,18 @@ void XPD_GPIOB_Reset(void)
 }
 #endif
 #ifdef RCC_AHB1ENR_GPIOCEN
-/** @brief Sets the new clock state of the GPIOC peripheral. */
+/** @brief Sets the new clock state of the GPIOC peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_GPIOC_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,GPIOCEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB1ENR;
+    NewState = (FunctionalState)RCC->AHB1ENR.w;
 }
 #endif
 #ifdef RCC_AHB1LPENR_GPIOCLPEN
-/** @brief Sets the clock state of the GPIOC peripheral during sleep mode. */
-void XPD_GPIOC_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the GPIOC peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_GPIOC_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1LPENR,GPIOCLPEN) = NewState;
 }
@@ -567,16 +609,18 @@ void XPD_GPIOC_Reset(void)
 }
 #endif
 #ifdef RCC_AHB1ENR_GPIODEN
-/** @brief Sets the new clock state of the GPIOD peripheral. */
+/** @brief Sets the new clock state of the GPIOD peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_GPIOD_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,GPIODEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB1ENR;
+    NewState = (FunctionalState)RCC->AHB1ENR.w;
 }
 #endif
 #ifdef RCC_AHB1LPENR_GPIODLPEN
-/** @brief Sets the clock state of the GPIOD peripheral during sleep mode. */
-void XPD_GPIOD_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the GPIOD peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_GPIOD_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1LPENR,GPIODLPEN) = NewState;
 }
@@ -590,16 +634,18 @@ void XPD_GPIOD_Reset(void)
 }
 #endif
 #ifdef RCC_AHB1ENR_GPIOEEN
-/** @brief Sets the new clock state of the GPIOE peripheral. */
+/** @brief Sets the new clock state of the GPIOE peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_GPIOE_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,GPIOEEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB1ENR;
+    NewState = (FunctionalState)RCC->AHB1ENR.w;
 }
 #endif
 #ifdef RCC_AHB1LPENR_GPIOELPEN
-/** @brief Sets the clock state of the GPIOE peripheral during sleep mode. */
-void XPD_GPIOE_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the GPIOE peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_GPIOE_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1LPENR,GPIOELPEN) = NewState;
 }
@@ -613,16 +659,18 @@ void XPD_GPIOE_Reset(void)
 }
 #endif
 #ifdef RCC_AHB1ENR_GPIOFEN
-/** @brief Sets the new clock state of the GPIOF peripheral. */
+/** @brief Sets the new clock state of the GPIOF peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_GPIOF_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,GPIOFEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB1ENR;
+    NewState = (FunctionalState)RCC->AHB1ENR.w;
 }
 #endif
 #ifdef RCC_AHB1LPENR_GPIOFLPEN
-/** @brief Sets the clock state of the GPIOF peripheral during sleep mode. */
-void XPD_GPIOF_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the GPIOF peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_GPIOF_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1LPENR,GPIOFLPEN) = NewState;
 }
@@ -636,16 +684,18 @@ void XPD_GPIOF_Reset(void)
 }
 #endif
 #ifdef RCC_AHB1ENR_GPIOGEN
-/** @brief Sets the new clock state of the GPIOG peripheral. */
+/** @brief Sets the new clock state of the GPIOG peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_GPIOG_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,GPIOGEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB1ENR;
+    NewState = (FunctionalState)RCC->AHB1ENR.w;
 }
 #endif
 #ifdef RCC_AHB1LPENR_GPIOGLPEN
-/** @brief Sets the clock state of the GPIOG peripheral during sleep mode. */
-void XPD_GPIOG_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the GPIOG peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_GPIOG_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1LPENR,GPIOGLPEN) = NewState;
 }
@@ -659,16 +709,18 @@ void XPD_GPIOG_Reset(void)
 }
 #endif
 #ifdef RCC_AHB1ENR_GPIOHEN
-/** @brief Sets the new clock state of the GPIOH peripheral. */
+/** @brief Sets the new clock state of the GPIOH peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_GPIOH_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,GPIOHEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB1ENR;
+    NewState = (FunctionalState)RCC->AHB1ENR.w;
 }
 #endif
 #ifdef RCC_AHB1LPENR_GPIOHLPEN
-/** @brief Sets the clock state of the GPIOH peripheral during sleep mode. */
-void XPD_GPIOH_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the GPIOH peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_GPIOH_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1LPENR,GPIOHLPEN) = NewState;
 }
@@ -682,16 +734,18 @@ void XPD_GPIOH_Reset(void)
 }
 #endif
 #ifdef RCC_AHB1ENR_GPIOIEN
-/** @brief Sets the new clock state of the GPIOI peripheral. */
+/** @brief Sets the new clock state of the GPIOI peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_GPIOI_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,GPIOIEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB1ENR;
+    NewState = (FunctionalState)RCC->AHB1ENR.w;
 }
 #endif
 #ifdef RCC_AHB1LPENR_GPIOILPEN
-/** @brief Sets the clock state of the GPIOI peripheral during sleep mode. */
-void XPD_GPIOI_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the GPIOI peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_GPIOI_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1LPENR,GPIOILPEN) = NewState;
 }
@@ -705,16 +759,18 @@ void XPD_GPIOI_Reset(void)
 }
 #endif
 #ifdef RCC_AHB1ENR_GPIOJEN
-/** @brief Sets the new clock state of the GPIOJ peripheral. */
+/** @brief Sets the new clock state of the GPIOJ peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_GPIOJ_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,GPIOJEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB1ENR;
+    NewState = (FunctionalState)RCC->AHB1ENR.w;
 }
 #endif
 #ifdef RCC_AHB1LPENR_GPIOJLPEN
-/** @brief Sets the clock state of the GPIOJ peripheral during sleep mode. */
-void XPD_GPIOJ_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the GPIOJ peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_GPIOJ_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1LPENR,GPIOJLPEN) = NewState;
 }
@@ -728,16 +784,18 @@ void XPD_GPIOJ_Reset(void)
 }
 #endif
 #ifdef RCC_AHB1ENR_GPIOKEN
-/** @brief Sets the new clock state of the GPIOK peripheral. */
+/** @brief Sets the new clock state of the GPIOK peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_GPIOK_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,GPIOKEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB1ENR;
+    NewState = (FunctionalState)RCC->AHB1ENR.w;
 }
 #endif
 #ifdef RCC_AHB1LPENR_GPIOKLPEN
-/** @brief Sets the clock state of the GPIOK peripheral during sleep mode. */
-void XPD_GPIOK_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the GPIOK peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_GPIOK_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1LPENR,GPIOKLPEN) = NewState;
 }
@@ -751,16 +809,18 @@ void XPD_GPIOK_Reset(void)
 }
 #endif
 #ifdef RCC_AHB2ENR_HASHEN
-/** @brief Sets the new clock state of the HASH peripheral. */
+/** @brief Sets the new clock state of the HASH peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_HASH_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB2ENR,HASHEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB2ENR;
+    NewState = (FunctionalState)RCC->AHB2ENR.w;
 }
 #endif
 #ifdef RCC_AHB2LPENR_HASHLPEN
-/** @brief Sets the clock state of the HASH peripheral during sleep mode. */
-void XPD_HASH_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the HASH peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_HASH_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB2LPENR,HASHLPEN) = NewState;
 }
@@ -774,16 +834,18 @@ void XPD_HASH_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_I2C1EN
-/** @brief Sets the new clock state of the I2C1 peripheral. */
+/** @brief Sets the new clock state of the I2C1 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_I2C1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,I2C1EN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_I2C1LPEN
-/** @brief Sets the clock state of the I2C1 peripheral during sleep mode. */
-void XPD_I2C1_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the I2C1 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_I2C1_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,I2C1LPEN) = NewState;
 }
@@ -797,16 +859,18 @@ void XPD_I2C1_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_I2C2EN
-/** @brief Sets the new clock state of the I2C2 peripheral. */
+/** @brief Sets the new clock state of the I2C2 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_I2C2_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,I2C2EN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_I2C2LPEN
-/** @brief Sets the clock state of the I2C2 peripheral during sleep mode. */
-void XPD_I2C2_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the I2C2 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_I2C2_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,I2C2LPEN) = NewState;
 }
@@ -820,16 +884,18 @@ void XPD_I2C2_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_I2C3EN
-/** @brief Sets the new clock state of the I2C3 peripheral. */
+/** @brief Sets the new clock state of the I2C3 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_I2C3_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,I2C3EN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_I2C3LPEN
-/** @brief Sets the clock state of the I2C3 peripheral during sleep mode. */
-void XPD_I2C3_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the I2C3 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_I2C3_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,I2C3LPEN) = NewState;
 }
@@ -843,16 +909,18 @@ void XPD_I2C3_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_LPTIM1EN
-/** @brief Sets the new clock state of the LPTIM1 peripheral. */
+/** @brief Sets the new clock state of the LPTIM1 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_LPTIM1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,LPTIM1EN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_LPTIM1LPEN
-/** @brief Sets the clock state of the LPTIM1 peripheral during sleep mode. */
-void XPD_LPTIM1_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the LPTIM1 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_LPTIM1_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,LPTIM1LPEN) = NewState;
 }
@@ -866,16 +934,18 @@ void XPD_LPTIM1_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_LTDCEN
-/** @brief Sets the new clock state of the LTDC peripheral. */
+/** @brief Sets the new clock state of the LTDC peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_LTDC_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,LTDCEN) = NewState;
-    NewState = (FunctionalState)RCC->APB2ENR;
+    NewState = (FunctionalState)RCC->APB2ENR.w;
 }
 #endif
 #ifdef RCC_APB2LPENR_LTDCLPEN
-/** @brief Sets the clock state of the LTDC peripheral during sleep mode. */
-void XPD_LTDC_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the LTDC peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_LTDC_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2LPENR,LTDCLPEN) = NewState;
 }
@@ -889,16 +959,18 @@ void XPD_LTDC_Reset(void)
 }
 #endif
 #ifdef RCC_AHB2ENR_OTGFSEN
-/** @brief Sets the new clock state of the OTG_FS peripheral. */
+/** @brief Sets the new clock state of the OTG_FS peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_OTG_FS_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB2ENR,OTGFSEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB2ENR;
+    NewState = (FunctionalState)RCC->AHB2ENR.w;
 }
 #endif
 #ifdef RCC_AHB2LPENR_OTGFSLPEN
-/** @brief Sets the clock state of the OTG_FS peripheral during sleep mode. */
-void XPD_OTG_FS_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the OTG_FS peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_OTG_FS_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB2LPENR,OTGFSLPEN) = NewState;
 }
@@ -920,46 +992,52 @@ void XPD_OTG_HS_Reset(void)
 }
 #endif
 #ifdef RCC_AHB1ENR_OTGHSEN
-/** @brief Sets the new clock state of the OTG_HS peripheral. */
+/** @brief Sets the new clock state of the OTG_HS peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_OTG_HS_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,OTGHSEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB1ENR;
+    NewState = (FunctionalState)RCC->AHB1ENR.w;
 }
 #endif
 #ifdef RCC_AHB1LPENR_OTGHSLPEN
-/** @brief Sets the clock state of the OTG_HS peripheral during sleep mode. */
-void XPD_OTG_HS_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the OTG_HS peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_OTG_HS_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1LPENR,OTGHSLPEN) = NewState;
 }
 #endif
 #ifdef RCC_AHB1ENR_OTGHSULPIEN
-/** @brief Sets the new clock state of the OTG_HS_ULPI peripheral. */
+/** @brief Sets the new clock state of the OTG_HS_ULPI peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_OTG_HS_ULPI_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1ENR,OTGHSULPIEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB1ENR;
+    NewState = (FunctionalState)RCC->AHB1ENR.w;
 }
 #endif
 #ifdef RCC_AHB1LPENR_OTGHSULPILPEN
-/** @brief Sets the clock state of the OTG_HS_ULPI peripheral during sleep mode. */
-void XPD_OTG_HS_ULPI_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the OTG_HS_ULPI peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_OTG_HS_ULPI_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB1LPENR,OTGHSULPILPEN) = NewState;
 }
 #endif
 #ifdef RCC_APB1ENR_PWREN
-/** @brief Sets the new clock state of the PWR peripheral. */
+/** @brief Sets the new clock state of the PWR peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_PWR_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,PWREN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_PWRLPEN
-/** @brief Sets the clock state of the PWR peripheral during sleep mode. */
-void XPD_PWR_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the PWR peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_PWR_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,PWRLPEN) = NewState;
 }
@@ -973,16 +1051,18 @@ void XPD_PWR_Reset(void)
 }
 #endif
 #ifdef RCC_AHB3ENR_QSPIEN
-/** @brief Sets the new clock state of the QSPI peripheral. */
+/** @brief Sets the new clock state of the QSPI peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_QSPI_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB3ENR,QSPIEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB3ENR;
+    NewState = (FunctionalState)RCC->AHB3ENR.w;
 }
 #endif
 #ifdef RCC_AHB3LPENR_QSPILPEN
-/** @brief Sets the clock state of the QSPI peripheral during sleep mode. */
-void XPD_QSPI_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the QSPI peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_QSPI_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB3LPENR,QSPILPEN) = NewState;
 }
@@ -996,16 +1076,18 @@ void XPD_QSPI_Reset(void)
 }
 #endif
 #ifdef RCC_AHB2ENR_RNGEN
-/** @brief Sets the new clock state of the RNG peripheral. */
+/** @brief Sets the new clock state of the RNG peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_RNG_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB2ENR,RNGEN) = NewState;
-    NewState = (FunctionalState)RCC->AHB2ENR;
+    NewState = (FunctionalState)RCC->AHB2ENR.w;
 }
 #endif
 #ifdef RCC_AHB2LPENR_RNGLPEN
-/** @brief Sets the clock state of the RNG peripheral during sleep mode. */
-void XPD_RNG_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the RNG peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_RNG_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB2LPENR,RNGLPEN) = NewState;
 }
@@ -1019,31 +1101,35 @@ void XPD_RNG_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_RTCAPBEN
-/** @brief Sets the new clock state of the RTC peripheral. */
+/** @brief Sets the new clock state of the RTC peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_RTC_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,RTCAPBEN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_RTCAPBLPEN
-/** @brief Sets the clock state of the RTC peripheral during sleep mode. */
-void XPD_RTC_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the RTC peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_RTC_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,RTCAPBLPEN) = NewState;
 }
 #endif
 #ifdef RCC_APB2ENR_SAI1EN
-/** @brief Sets the new clock state of the SAI1 peripheral. */
+/** @brief Sets the new clock state of the SAI1 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_SAI1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,SAI1EN) = NewState;
-    NewState = (FunctionalState)RCC->APB2ENR;
+    NewState = (FunctionalState)RCC->APB2ENR.w;
 }
 #endif
 #ifdef RCC_APB2LPENR_SAI1LPEN
-/** @brief Sets the clock state of the SAI1 peripheral during sleep mode. */
-void XPD_SAI1_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the SAI1 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_SAI1_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2LPENR,SAI1LPEN) = NewState;
 }
@@ -1057,16 +1143,18 @@ void XPD_SAI1_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_SAI2EN
-/** @brief Sets the new clock state of the SAI2 peripheral. */
+/** @brief Sets the new clock state of the SAI2 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_SAI2_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,SAI2EN) = NewState;
-    NewState = (FunctionalState)RCC->APB2ENR;
+    NewState = (FunctionalState)RCC->APB2ENR.w;
 }
 #endif
 #ifdef RCC_APB2LPENR_SAI2LPEN
-/** @brief Sets the clock state of the SAI2 peripheral during sleep mode. */
-void XPD_SAI2_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the SAI2 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_SAI2_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2LPENR,SAI2LPEN) = NewState;
 }
@@ -1080,16 +1168,18 @@ void XPD_SAI2_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_SDIOEN
-/** @brief Sets the new clock state of the SDIO peripheral. */
+/** @brief Sets the new clock state of the SDIO peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_SDIO_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,SDIOEN) = NewState;
-    NewState = (FunctionalState)RCC->APB2ENR;
+    NewState = (FunctionalState)RCC->APB2ENR.w;
 }
 #endif
 #ifdef RCC_APB2LPENR_SDIOLPEN
-/** @brief Sets the clock state of the SDIO peripheral during sleep mode. */
-void XPD_SDIO_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the SDIO peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_SDIO_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2LPENR,SDIOLPEN) = NewState;
 }
@@ -1103,16 +1193,18 @@ void XPD_SDIO_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_SPDIFRXEN
-/** @brief Sets the new clock state of the SPDIF_RX peripheral. */
+/** @brief Sets the new clock state of the SPDIF_RX peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_SPDIF_RX_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,SPDIFRXEN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_SPDIFRXLPEN
-/** @brief Sets the clock state of the SPDIF_RX peripheral during sleep mode. */
-void XPD_SPDIF_RX_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the SPDIF_RX peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_SPDIF_RX_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,SPDIFRXLPEN) = NewState;
 }
@@ -1126,16 +1218,18 @@ void XPD_SPDIF_RX_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_SPI1EN
-/** @brief Sets the new clock state of the SPI1 peripheral. */
+/** @brief Sets the new clock state of the SPI1 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_SPI1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,SPI1EN) = NewState;
-    NewState = (FunctionalState)RCC->APB2ENR;
+    NewState = (FunctionalState)RCC->APB2ENR.w;
 }
 #endif
 #ifdef RCC_APB2LPENR_SPI1LPEN
-/** @brief Sets the clock state of the SPI1 peripheral during sleep mode. */
-void XPD_SPI1_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the SPI1 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_SPI1_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2LPENR,SPI1LPEN) = NewState;
 }
@@ -1149,16 +1243,18 @@ void XPD_SPI1_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_SPI2EN
-/** @brief Sets the new clock state of the SPI2 peripheral. */
+/** @brief Sets the new clock state of the SPI2 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_SPI2_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,SPI2EN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_SPI2LPEN
-/** @brief Sets the clock state of the SPI2 peripheral during sleep mode. */
-void XPD_SPI2_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the SPI2 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_SPI2_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,SPI2LPEN) = NewState;
 }
@@ -1172,16 +1268,18 @@ void XPD_SPI2_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_SPI3EN
-/** @brief Sets the new clock state of the SPI3 peripheral. */
+/** @brief Sets the new clock state of the SPI3 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_SPI3_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,SPI3EN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_SPI3LPEN
-/** @brief Sets the clock state of the SPI3 peripheral during sleep mode. */
-void XPD_SPI3_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the SPI3 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_SPI3_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,SPI3LPEN) = NewState;
 }
@@ -1195,16 +1293,18 @@ void XPD_SPI3_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_SPI4EN
-/** @brief Sets the new clock state of the SPI4 peripheral. */
+/** @brief Sets the new clock state of the SPI4 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_SPI4_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,SPI4EN) = NewState;
-    NewState = (FunctionalState)RCC->APB2ENR;
+    NewState = (FunctionalState)RCC->APB2ENR.w;
 }
 #endif
 #ifdef RCC_APB2LPENR_SPI4LPEN
-/** @brief Sets the clock state of the SPI4 peripheral during sleep mode. */
-void XPD_SPI4_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the SPI4 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_SPI4_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2LPENR,SPI4LPEN) = NewState;
 }
@@ -1218,16 +1318,18 @@ void XPD_SPI4_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_SPI5EN
-/** @brief Sets the new clock state of the SPI5 peripheral. */
+/** @brief Sets the new clock state of the SPI5 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_SPI5_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,SPI5EN) = NewState;
-    NewState = (FunctionalState)RCC->APB2ENR;
+    NewState = (FunctionalState)RCC->APB2ENR.w;
 }
 #endif
 #ifdef RCC_APB2LPENR_SPI5LPEN
-/** @brief Sets the clock state of the SPI5 peripheral during sleep mode. */
-void XPD_SPI5_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the SPI5 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_SPI5_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2LPENR,SPI5LPEN) = NewState;
 }
@@ -1241,16 +1343,18 @@ void XPD_SPI5_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_SPI6EN
-/** @brief Sets the new clock state of the SPI6 peripheral. */
+/** @brief Sets the new clock state of the SPI6 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_SPI6_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,SPI6EN) = NewState;
-    NewState = (FunctionalState)RCC->APB2ENR;
+    NewState = (FunctionalState)RCC->APB2ENR.w;
 }
 #endif
 #ifdef RCC_APB2LPENR_SPI6LPEN
-/** @brief Sets the clock state of the SPI6 peripheral during sleep mode. */
-void XPD_SPI6_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the SPI6 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_SPI6_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2LPENR,SPI6LPEN) = NewState;
 }
@@ -1264,16 +1368,18 @@ void XPD_SPI6_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_SYSCFGEN
-/** @brief Sets the new clock state of the SYSCFG peripheral. */
+/** @brief Sets the new clock state of the SYSCFG peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_SYSCFG_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,SYSCFGEN) = NewState;
-    NewState = (FunctionalState)RCC->APB2ENR;
+    NewState = (FunctionalState)RCC->APB2ENR.w;
 }
 #endif
 #ifdef RCC_APB2LPENR_SYSCFGLPEN
-/** @brief Sets the clock state of the SYSCFG peripheral during sleep mode. */
-void XPD_SYSCFG_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the SYSCFG peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_SYSCFG_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2LPENR,SYSCFGLPEN) = NewState;
 }
@@ -1287,16 +1393,18 @@ void XPD_SYSCFG_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_TIM1EN
-/** @brief Sets the new clock state of the TIM1 peripheral. */
+/** @brief Sets the new clock state of the TIM1 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,TIM1EN) = NewState;
-    NewState = (FunctionalState)RCC->APB2ENR;
+    NewState = (FunctionalState)RCC->APB2ENR.w;
 }
 #endif
 #ifdef RCC_APB2LPENR_TIM1LPEN
-/** @brief Sets the clock state of the TIM1 peripheral during sleep mode. */
-void XPD_TIM1_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the TIM1 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_TIM1_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2LPENR,TIM1LPEN) = NewState;
 }
@@ -1310,16 +1418,18 @@ void XPD_TIM1_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_TIM10EN
-/** @brief Sets the new clock state of the TIM10 peripheral. */
+/** @brief Sets the new clock state of the TIM10 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM10_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,TIM10EN) = NewState;
-    NewState = (FunctionalState)RCC->APB2ENR;
+    NewState = (FunctionalState)RCC->APB2ENR.w;
 }
 #endif
 #ifdef RCC_APB2LPENR_TIM10LPEN
-/** @brief Sets the clock state of the TIM10 peripheral during sleep mode. */
-void XPD_TIM10_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the TIM10 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_TIM10_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2LPENR,TIM10LPEN) = NewState;
 }
@@ -1333,16 +1443,18 @@ void XPD_TIM10_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_TIM11EN
-/** @brief Sets the new clock state of the TIM11 peripheral. */
+/** @brief Sets the new clock state of the TIM11 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM11_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,TIM11EN) = NewState;
-    NewState = (FunctionalState)RCC->APB2ENR;
+    NewState = (FunctionalState)RCC->APB2ENR.w;
 }
 #endif
 #ifdef RCC_APB2LPENR_TIM11LPEN
-/** @brief Sets the clock state of the TIM11 peripheral during sleep mode. */
-void XPD_TIM11_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the TIM11 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_TIM11_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2LPENR,TIM11LPEN) = NewState;
 }
@@ -1356,16 +1468,18 @@ void XPD_TIM11_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_TIM12EN
-/** @brief Sets the new clock state of the TIM12 peripheral. */
+/** @brief Sets the new clock state of the TIM12 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM12_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM12EN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_TIM12LPEN
-/** @brief Sets the clock state of the TIM12 peripheral during sleep mode. */
-void XPD_TIM12_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the TIM12 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_TIM12_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,TIM12LPEN) = NewState;
 }
@@ -1379,16 +1493,18 @@ void XPD_TIM12_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_TIM13EN
-/** @brief Sets the new clock state of the TIM13 peripheral. */
+/** @brief Sets the new clock state of the TIM13 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM13_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM13EN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_TIM13LPEN
-/** @brief Sets the clock state of the TIM13 peripheral during sleep mode. */
-void XPD_TIM13_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the TIM13 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_TIM13_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,TIM13LPEN) = NewState;
 }
@@ -1402,16 +1518,18 @@ void XPD_TIM13_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_TIM14EN
-/** @brief Sets the new clock state of the TIM14 peripheral. */
+/** @brief Sets the new clock state of the TIM14 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM14_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM14EN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_TIM14LPEN
-/** @brief Sets the clock state of the TIM14 peripheral during sleep mode. */
-void XPD_TIM14_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the TIM14 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_TIM14_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,TIM14LPEN) = NewState;
 }
@@ -1425,16 +1543,18 @@ void XPD_TIM14_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_TIM2EN
-/** @brief Sets the new clock state of the TIM2 peripheral. */
+/** @brief Sets the new clock state of the TIM2 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM2_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM2EN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_TIM2LPEN
-/** @brief Sets the clock state of the TIM2 peripheral during sleep mode. */
-void XPD_TIM2_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the TIM2 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_TIM2_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,TIM2LPEN) = NewState;
 }
@@ -1448,16 +1568,18 @@ void XPD_TIM2_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_TIM3EN
-/** @brief Sets the new clock state of the TIM3 peripheral. */
+/** @brief Sets the new clock state of the TIM3 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM3_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM3EN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_TIM3LPEN
-/** @brief Sets the clock state of the TIM3 peripheral during sleep mode. */
-void XPD_TIM3_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the TIM3 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_TIM3_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,TIM3LPEN) = NewState;
 }
@@ -1471,16 +1593,18 @@ void XPD_TIM3_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_TIM4EN
-/** @brief Sets the new clock state of the TIM4 peripheral. */
+/** @brief Sets the new clock state of the TIM4 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM4_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM4EN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_TIM4LPEN
-/** @brief Sets the clock state of the TIM4 peripheral during sleep mode. */
-void XPD_TIM4_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the TIM4 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_TIM4_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,TIM4LPEN) = NewState;
 }
@@ -1494,16 +1618,18 @@ void XPD_TIM4_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_TIM5EN
-/** @brief Sets the new clock state of the TIM5 peripheral. */
+/** @brief Sets the new clock state of the TIM5 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM5_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM5EN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_TIM5LPEN
-/** @brief Sets the clock state of the TIM5 peripheral during sleep mode. */
-void XPD_TIM5_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the TIM5 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_TIM5_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,TIM5LPEN) = NewState;
 }
@@ -1517,16 +1643,18 @@ void XPD_TIM5_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_TIM6EN
-/** @brief Sets the new clock state of the TIM6 peripheral. */
+/** @brief Sets the new clock state of the TIM6 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM6_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM6EN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_TIM6LPEN
-/** @brief Sets the clock state of the TIM6 peripheral during sleep mode. */
-void XPD_TIM6_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the TIM6 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_TIM6_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,TIM6LPEN) = NewState;
 }
@@ -1540,16 +1668,18 @@ void XPD_TIM6_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_TIM7EN
-/** @brief Sets the new clock state of the TIM7 peripheral. */
+/** @brief Sets the new clock state of the TIM7 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM7_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM7EN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_TIM7LPEN
-/** @brief Sets the clock state of the TIM7 peripheral during sleep mode. */
-void XPD_TIM7_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the TIM7 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_TIM7_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,TIM7LPEN) = NewState;
 }
@@ -1563,16 +1693,18 @@ void XPD_TIM7_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_TIM8EN
-/** @brief Sets the new clock state of the TIM8 peripheral. */
+/** @brief Sets the new clock state of the TIM8 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM8_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,TIM8EN) = NewState;
-    NewState = (FunctionalState)RCC->APB2ENR;
+    NewState = (FunctionalState)RCC->APB2ENR.w;
 }
 #endif
 #ifdef RCC_APB2LPENR_TIM8LPEN
-/** @brief Sets the clock state of the TIM8 peripheral during sleep mode. */
-void XPD_TIM8_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the TIM8 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_TIM8_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2LPENR,TIM8LPEN) = NewState;
 }
@@ -1586,16 +1718,18 @@ void XPD_TIM8_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_TIM9EN
-/** @brief Sets the new clock state of the TIM9 peripheral. */
+/** @brief Sets the new clock state of the TIM9 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM9_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,TIM9EN) = NewState;
-    NewState = (FunctionalState)RCC->APB2ENR;
+    NewState = (FunctionalState)RCC->APB2ENR.w;
 }
 #endif
 #ifdef RCC_APB2LPENR_TIM9LPEN
-/** @brief Sets the clock state of the TIM9 peripheral during sleep mode. */
-void XPD_TIM9_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the TIM9 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_TIM9_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2LPENR,TIM9LPEN) = NewState;
 }
@@ -1609,16 +1743,18 @@ void XPD_TIM9_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_UART4EN
-/** @brief Sets the new clock state of the UART4 peripheral. */
+/** @brief Sets the new clock state of the UART4 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_UART4_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,UART4EN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_UART4LPEN
-/** @brief Sets the clock state of the UART4 peripheral during sleep mode. */
-void XPD_UART4_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the UART4 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_UART4_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,UART4LPEN) = NewState;
 }
@@ -1632,16 +1768,18 @@ void XPD_UART4_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_UART5EN
-/** @brief Sets the new clock state of the UART5 peripheral. */
+/** @brief Sets the new clock state of the UART5 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_UART5_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,UART5EN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_UART5LPEN
-/** @brief Sets the clock state of the UART5 peripheral during sleep mode. */
-void XPD_UART5_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the UART5 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_UART5_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,UART5LPEN) = NewState;
 }
@@ -1655,16 +1793,17 @@ void XPD_UART5_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_UART7EN
-/** @brief Sets the new clock state of the UART7 peripheral. */
+/** @brief Sets the new clock state of the UART7 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_UART7_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,UART7EN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_UART7LPEN
 /** @brief Sets the clock state of the UART7 peripheral during sleep mode. */
-void XPD_UART7_ClockCtrlInSleep(FunctionalState NewState)
+void XPD_UART7_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,UART7LPEN) = NewState;
 }
@@ -1678,16 +1817,17 @@ void XPD_UART7_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_UART8EN
-/** @brief Sets the new clock state of the UART8 peripheral. */
+/** @brief Sets the new clock state of the UART8 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_UART8_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,UART8EN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_UART8LPEN
 /** @brief Sets the clock state of the UART8 peripheral during sleep mode. */
-void XPD_UART8_ClockCtrlInSleep(FunctionalState NewState)
+void XPD_UART8_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,UART8LPEN) = NewState;
 }
@@ -1701,16 +1841,18 @@ void XPD_UART8_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_USART1EN
-/** @brief Sets the new clock state of the USART1 peripheral. */
+/** @brief Sets the new clock state of the USART1 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_USART1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,USART1EN) = NewState;
-    NewState = (FunctionalState)RCC->APB2ENR;
+    NewState = (FunctionalState)RCC->APB2ENR.w;
 }
 #endif
 #ifdef RCC_APB2LPENR_USART1LPEN
-/** @brief Sets the clock state of the USART1 peripheral during sleep mode. */
-void XPD_USART1_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the USART1 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_USART1_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2LPENR,USART1LPEN) = NewState;
 }
@@ -1724,16 +1866,18 @@ void XPD_USART1_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_USART2EN
-/** @brief Sets the new clock state of the USART2 peripheral. */
+/** @brief Sets the new clock state of the USART2 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_USART2_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,USART2EN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_USART2LPEN
-/** @brief Sets the clock state of the USART2 peripheral during sleep mode. */
-void XPD_USART2_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the USART2 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_USART2_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,USART2LPEN) = NewState;
 }
@@ -1747,16 +1891,18 @@ void XPD_USART2_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_USART3EN
-/** @brief Sets the new clock state of the USART3 peripheral. */
+/** @brief Sets the new clock state of the USART3 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_USART3_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,USART3EN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_USART3LPEN
-/** @brief Sets the clock state of the USART3 peripheral during sleep mode. */
-void XPD_USART3_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the USART3 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_USART3_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,USART3LPEN) = NewState;
 }
@@ -1770,16 +1916,18 @@ void XPD_USART3_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_USART6EN
-/** @brief Sets the new clock state of the USART6 peripheral. */
+/** @brief Sets the new clock state of the USART6 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_USART6_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,USART6EN) = NewState;
-    NewState = (FunctionalState)RCC->APB2ENR;
+    NewState = (FunctionalState)RCC->APB2ENR.w;
 }
 #endif
 #ifdef RCC_APB2LPENR_USART6LPEN
-/** @brief Sets the clock state of the USART6 peripheral during sleep mode. */
-void XPD_USART6_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the USART6 peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_USART6_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2LPENR,USART6LPEN) = NewState;
 }
@@ -1793,16 +1941,18 @@ void XPD_USART6_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_WWDGEN
-/** @brief Sets the new clock state of the WWDG peripheral. */
+/** @brief Sets the new clock state of the WWDG peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_WWDG_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,WWDGEN) = NewState;
-    NewState = (FunctionalState)RCC->APB1ENR;
+    NewState = (FunctionalState)RCC->APB1ENR.w;
 }
 #endif
 #ifdef RCC_APB1LPENR_WWDGLPEN
-/** @brief Sets the clock state of the WWDG peripheral during sleep mode. */
-void XPD_WWDG_ClockCtrlInSleep(FunctionalState NewState)
+/** @brief Sets the clock state of the WWDG peripheral during sleep mode.
+ *  @param NewState: the new sleep clock state to set */
+void XPD_WWDG_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1LPENR,WWDGLPEN) = NewState;
 }
