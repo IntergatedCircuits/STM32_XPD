@@ -3338,51 +3338,51 @@ typedef struct {
     } EGR;                                   /*!< TIM event generation register,       Address offset: 0x14 */
     union {
         struct {
-			__IO uint32_t C1S : 2;                   /*!< CC1S[1:0] bits (Capture/Compare 1 Selection) */
-			__IO uint32_t C1FE : 1;                  /*!< Output Compare 1 Fast enable */
-			__IO uint32_t C1PE : 1;                  /*!< Output Compare 1 Preload enable */
-			__IO uint32_t C1M : 3;                   /*!< OC1M[2:0] bits (Output Compare 1 Mode) */
-			__IO uint32_t C1CE : 1;                  /*!< Output Compare 1 Clear Enable */
-			__IO uint32_t C2S : 2;                   /*!< CC2S[1:0] bits (Capture/Compare 2 Selection) */
-			__IO uint32_t C2FE : 1;                  /*!< Output Compare 2 Fast enable */
-			__IO uint32_t C2PE : 1;                  /*!< Output Compare 2 Preload enable */
-			__IO uint32_t C2M : 3;                   /*!< OC2M[2:0] bits (Output Compare 2 Mode) */
-			__IO uint32_t C2CE : 1;                  /*!< Output Compare 2 Clear Enable */
-				 uint32_t __RESERVED0 : 16;
+            __IO uint32_t C1S : 2;                   /*!< CC1S[1:0] bits (Capture/Compare 1 Selection) */
+            __IO uint32_t C1FE : 1;                  /*!< Output Compare 1 Fast enable */
+            __IO uint32_t C1PE : 1;                  /*!< Output Compare 1 Preload enable */
+            __IO uint32_t C1M : 3;                   /*!< OC1M[2:0] bits (Output Compare 1 Mode) */
+            __IO uint32_t C1CE : 1;                  /*!< Output Compare 1 Clear Enable */
+            __IO uint32_t C2S : 2;                   /*!< CC2S[1:0] bits (Capture/Compare 2 Selection) */
+            __IO uint32_t C2FE : 1;                  /*!< Output Compare 2 Fast enable */
+            __IO uint32_t C2PE : 1;                  /*!< Output Compare 2 Preload enable */
+            __IO uint32_t C2M : 3;                   /*!< OC2M[2:0] bits (Output Compare 2 Mode) */
+            __IO uint32_t C2CE : 1;                  /*!< Output Compare 2 Clear Enable */
+                 uint32_t __RESERVED0 : 16;
         } OC;                                    /*!< TIM CCMR register Output Compare configuration mode */
         struct {
-			__IO uint32_t C1S : 2;                   /*!< CC1S[1:0] bits (Capture/Compare 1 Selection) */
-			__IO uint32_t C1PSC : 2;                 /*!< IC1PSC[1:0] bits (Input Capture 1 Prescaler) */
-			__IO uint32_t C1F : 4;                   /*!< IC1F[3:0] bits (Input Capture 1 Filter) */
-			__IO uint32_t C2S : 2;                   /*!< CC2S[1:0] bits (Capture/Compare 2 Selection) */
-			__IO uint32_t C2PSC : 2;                 /*!< IC2PSC[1:0] bits (Input Capture 2 Prescaler) */
-			__IO uint32_t C2F : 4;                   /*!< IC2F[3:0] bits (Input Capture 2 Filter) */
-				 uint32_t __RESERVED0 : 16;
+            __IO uint32_t C1S : 2;                   /*!< CC1S[1:0] bits (Capture/Compare 1 Selection) */
+            __IO uint32_t C1PSC : 2;                 /*!< IC1PSC[1:0] bits (Input Capture 1 Prescaler) */
+            __IO uint32_t C1F : 4;                   /*!< IC1F[3:0] bits (Input Capture 1 Filter) */
+            __IO uint32_t C2S : 2;                   /*!< CC2S[1:0] bits (Capture/Compare 2 Selection) */
+            __IO uint32_t C2PSC : 2;                 /*!< IC2PSC[1:0] bits (Input Capture 2 Prescaler) */
+            __IO uint32_t C2F : 4;                   /*!< IC2F[3:0] bits (Input Capture 2 Filter) */
+                 uint32_t __RESERVED0 : 16;
         } IC;                                    /*!< TIM CCMR register Input Capture configuration mode */
         __IO uint32_t w;
     } CCMR1;                                 /*!< TIM capture/compare mode register 1, Address offset: 0x18 */
     union {
         struct {
-			__IO uint32_t C3S : 2;                   /*!< CC3S[1:0] bits (Capture/Compare 3 Selection) */
-			__IO uint32_t C3FE : 1;                  /*!< Output Compare 3 Fast enable */
-			__IO uint32_t C3PE : 1;                  /*!< Output Compare 3 Preload enable */
-			__IO uint32_t C3M : 3;                   /*!< OC3M[2:0] bits (Output Compare 3 Mode) */
-			__IO uint32_t C3CE : 1;                  /*!< Output Compare 3 Clear Enable */
-			__IO uint32_t C4S : 2;                   /*!< CC4S[1:0] bits (Capture/Compare 4 Selection) */
-			__IO uint32_t C4FE : 1;                  /*!< Output Compare 4 Fast enable */
-			__IO uint32_t C4PE : 1;                  /*!< Output Compare 4 Preload enable */
-			__IO uint32_t C4M : 3;                   /*!< OC4M[2:0] bits (Output Compare 4 Mode) */
-			__IO uint32_t C4CE : 1;                  /*!< Output Compare 4 Clear Enable */
-				 uint32_t __RESERVED0 : 16;
+            __IO uint32_t C3S : 2;                   /*!< CC3S[1:0] bits (Capture/Compare 3 Selection) */
+            __IO uint32_t C3FE : 1;                  /*!< Output Compare 3 Fast enable */
+            __IO uint32_t C3PE : 1;                  /*!< Output Compare 3 Preload enable */
+            __IO uint32_t C3M : 3;                   /*!< OC3M[2:0] bits (Output Compare 3 Mode) */
+            __IO uint32_t C3CE : 1;                  /*!< Output Compare 3 Clear Enable */
+            __IO uint32_t C4S : 2;                   /*!< CC4S[1:0] bits (Capture/Compare 4 Selection) */
+            __IO uint32_t C4FE : 1;                  /*!< Output Compare 4 Fast enable */
+            __IO uint32_t C4PE : 1;                  /*!< Output Compare 4 Preload enable */
+            __IO uint32_t C4M : 3;                   /*!< OC4M[2:0] bits (Output Compare 4 Mode) */
+            __IO uint32_t C4CE : 1;                  /*!< Output Compare 4 Clear Enable */
+                 uint32_t __RESERVED0 : 16;
         } OC;                                    /*!< TIM CCMR register Output Compare configuration mode */
         struct {
-			__IO uint32_t C3S : 2;                   /*!< CC3S[1:0] bits (Capture/Compare 3 Selection) */
-			__IO uint32_t C3PSC : 2;                 /*!< IC3PSC[1:0] bits (Input Capture 3 Prescaler) */
-			__IO uint32_t C3F : 4;                   /*!< IC3F[3:0] bits (Input Capture 3 Filter) */
-			__IO uint32_t C4S : 2;                   /*!< CC4S[1:0] bits (Capture/Compare 4 Selection) */
-			__IO uint32_t C4PSC : 2;                 /*!< IC4PSC[1:0] bits (Input Capture 4 Prescaler) */
-			__IO uint32_t C4F : 4;                   /*!< IC4F[3:0] bits (Input Capture 4 Filter) */
-				 uint32_t __RESERVED0 : 16;
+            __IO uint32_t C3S : 2;                   /*!< CC3S[1:0] bits (Capture/Compare 3 Selection) */
+            __IO uint32_t C3PSC : 2;                 /*!< IC3PSC[1:0] bits (Input Capture 3 Prescaler) */
+            __IO uint32_t C3F : 4;                   /*!< IC3F[3:0] bits (Input Capture 3 Filter) */
+            __IO uint32_t C4S : 2;                   /*!< CC4S[1:0] bits (Capture/Compare 4 Selection) */
+            __IO uint32_t C4PSC : 2;                 /*!< IC4PSC[1:0] bits (Input Capture 4 Prescaler) */
+            __IO uint32_t C4F : 4;                   /*!< IC4F[3:0] bits (Input Capture 4 Filter) */
+                 uint32_t __RESERVED0 : 16;
         } IC;                                    /*!< TIM CCMR register Input Capture configuration mode */
         __IO uint32_t w;
     } CCMR2;                                 /*!< TIM capture/compare mode register 2, Address offset: 0x1C */
@@ -3466,23 +3466,8 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } CCMR3;                                 /*!< TIM capture/compare mode register 3, Address offset: 0x54 */
-    union {
-        struct {
-            __IO uint32_t CCR5 : 16;                 /*!<Capture/Compare 5 Value */
-                 uint32_t __RESERVED0 : 13;
-            __IO uint32_t GC5C1 : 1;                 /*!<Group Channel 5 and Channel 1 */
-            __IO uint32_t GC5C2 : 1;                 /*!<Group Channel 5 and Channel 2 */
-            __IO uint32_t GC5C3 : 1;                 /*!<Group Channel 5 and Channel 3 */
-        } b;
-        __IO uint32_t w;
-    } CCR5;                                  /*!< TIM capture/compare register5,       Address offset: 0x58 */
-    union {
-        struct {
-            __IO uint32_t CCR6 : 16;                 /*!<Capture/Compare 6 Value */
-                 uint32_t __RESERVED0 : 16;
-        } b;
-        __IO uint32_t w;
-    } CCR6;                                  /*!< TIM capture/compare register 4,      Address offset: 0x5C */
+    __IO uint32_t CCR5;                      /*!< TIM capture/compare register 5,      Address offset: 0x58 */
+    __IO uint32_t CCR6;                      /*!< TIM capture/compare register 6,      Address offset: 0x5C */
 } TIM_TypeDef;
 
 
@@ -3705,10 +3690,7 @@ typedef struct {
         __IO uint32_t GC5C2;                     /*!<Group Channel 5 and Channel 2 */
         __IO uint32_t GC5C3;                     /*!<Group Channel 5 and Channel 3 */
     } CCR5;                                  /*!< TIM capture/compare register5,       Address offset: 0x58 */
-    struct {
-        __IO uint32_t CCR6[16];                  /*!<Capture/Compare 6 Value */
-             uint32_t __RESERVED0[16];
-    } CCR6;                                  /*!< TIM capture/compare register 4,      Address offset: 0x5C */
+    __IO uint32_t CCR6[32];                  /*!< TIM capture/compare register 4,      Address offset: 0x5C */
 } TIM_BitBand_TypeDef;
 
 
@@ -10635,18 +10617,64 @@ typedef struct {
 #define CAN_TX_IRQHandler     USB_HP_CAN_TX_IRQHandler
 #define CAN_RX0_IRQHandler    USB_LP_CAN_RX0_IRQHandler
 
-/**
-  * @}
-  */
 
 /** @defgroup ADC_Internal_Channels ADC Internal Channels
   * @{
   */
-#define ADC_VOPAMP1_CHANNEL     15
-#define ADC_TEMPSENSOR_CHANNEL  16
-#define ADC_VBAT_CHANNEL        17
-#define ADC_VOPAMP2_CHANNEL     17
-#define ADC_VREFINT_CHANNEL     18
+
+/* Note: Vopamp1, TempSensor and Vbat internal channels available on ADC1 only */
+#define ADC_CHANNEL_VOPAMP1     15
+#define ADC_CHANNEL_TEMPSENSOR  16
+#define ADC_CHANNEL_VBAT        17
+
+/* Note: Vopamp2/3/4 internal channels available on ADC2/3/4 respectively     */
+#define ADC_CHANNEL_VOPAMP2     17
+#define ADC_CHANNEL_VOPAMP3     17
+#define ADC_CHANNEL_VOPAMP4     17
+
+/* Note: VrefInt internal channels available on all ADCs, but only            */
+/*       one ADC is allowed to be connected to VrefInt at the same time.      */
+#define ADC_CHANNEL_VREFINT     18
+
+/**
+  * @}
+  */
+
+/** @defgroup ADC_Calibration_Values ADC Calibration Values
+  * @{
+  */
+
+typedef struct
+{
+    __I uint16_t CAL30;
+    __I uint16_t CAL110;
+}ADC_TempSensorCalibrationTypeDef;
+
+#define ADC_TEMPSENSOR       ((ADC_TempSensorCalibrationTypeDef *)((uint32_t)0x1FFFF7B8))
+
+#define ADC_VREFINT_CAL      (*((__I uint16_t *)((uint32_t)0x1FFFF7BA)))
+
+/**
+  * @}
+  */
+
+/** @defgroup Unique_Device_ID Unique Device ID
+  * @brief    Use the macro as it was defined as: uint32_t DEVICE_ID_REG[3]
+  * @{
+  */
+
+#define DEVICE_ID_REG        ((__I uint32_t *)((uint32_t)0x1FFFF7AC))
+
+/**
+  * @}
+  */
+
+/** @defgroup Device_Flash_Size Device Flash Memory Size in kB
+  * @{
+  */
+
+#define DEVICE_FLASH_SIZE_KB (*((__I uint16_t *)((uint32_t)0x1FFFF7CC)))
+
 /**
   * @}
   */
@@ -10655,13 +10683,12 @@ typedef struct {
   * @{
   */
 
-/* AF 1 selection */
+/* AF 0 selection */
 #define GPIO_RTC_50Hz_AF0      ((uint8_t)0x00)  /* RTC_50Hz Alternate Function mapping                       */
 #define GPIO_MCO_AF0           ((uint8_t)0x00)  /* MCO (MCO1 and MCO2) Alternate Function mapping            */
 #define GPIO_TAMPER_AF0        ((uint8_t)0x00)  /* TAMPER (TAMPER_1 and TAMPER_2) Alternate Function mapping */
 #define GPIO_SWJ_AF0           ((uint8_t)0x00)  /* SWJ (SWD and JTAG) Alternate Function mapping             */
 #define GPIO_TRACE_AF0         ((uint8_t)0x00)  /* TRACE Alternate Function mapping                          */
-
 
 /* AF 1 selection */
 #define GPIO_TIM2_AF1           ((uint8_t)0x01)  /* TIM2 Alternate Function mapping */
@@ -10725,26 +10752,26 @@ typedef struct {
 #define GPIO_TIM15_AF9         ((uint8_t)0x09)  /* TIM15 Alternate Function mapping */
 
 /* AF 10 selection */
-#define GPIO_TIM2_AF10           ((uint8_t)0xA)  /* TIM2 Alternate Function mapping */
-#define GPIO_TIM3_AF10           ((uint8_t)0xA)  /* TIM3 Alternate Function mapping */
-#define GPIO_TIM4_AF10           ((uint8_t)0xA)  /* TIM4 Alternate Function mapping */
-#define GPIO_TIM17_AF10          ((uint8_t)0xA)  /* TIM17 Alternate Function mapping */
+#define GPIO_TIM2_AF10         ((uint8_t)0xA)  /* TIM2 Alternate Function mapping */
+#define GPIO_TIM3_AF10         ((uint8_t)0xA)  /* TIM3 Alternate Function mapping */
+#define GPIO_TIM4_AF10         ((uint8_t)0xA)  /* TIM4 Alternate Function mapping */
+#define GPIO_TIM17_AF10        ((uint8_t)0xA)  /* TIM17 Alternate Function mapping */
 
 /* AF 11 selection */
-#define GPIO_TIM1_AF11           ((uint8_t)0xB)  /* TIM1 Alternate Function mapping */
+#define GPIO_TIM1_AF11         ((uint8_t)0x0B)  /* TIM1 Alternate Function mapping */
 
 /* AF 12 selection */
-#define GPIO_TIM1_AF12           ((uint8_t)0xC)  /* TIM1 Alternate Function mapping */
+#define GPIO_TIM1_AF12         ((uint8_t)0xC)  /* TIM1 Alternate Function mapping */
 
 /* AF 14 selection */
-#define GPIO_USB_AF14            ((uint8_t)0xE)  /* USB Alternate Function mapping */
+#define GPIO_USB_AF14          ((uint8_t)0x0E)  /* USB Alternate Function mapping */
 
 /* AF 15 selection */
-#define GPIO_EVENTOUT_AF15       ((uint8_t)0xF)  /* EVENTOUT Alternate Function mapping */
+#define GPIO_EVENTOUT_AF15     ((uint8_t)0x0F)  /* EVENTOUT Alternate Function mapping */
 
 /**
   * @}
-  */ 
+  */
 
 /** @defgroup RCC_Internal_Oscillators RCC Internal Oscillators
   * @{
