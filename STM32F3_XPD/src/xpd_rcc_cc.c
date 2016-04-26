@@ -90,9 +90,6 @@ static XPD_ReturnType rcc_sysclkConfiguration(RCC_ClockType Clocks, RCC_ClockIni
             break;
 
         case PLL:
-#ifdef RCC_CFGR_SWS_PLLR
-        case PLLR:
-#endif
             /* Check the PLL ready flag */
             if (RCC_REG_BIT(CR,PLLRDY) == 0)
             {
@@ -133,9 +130,6 @@ XPD_ReturnType XPD_RCC_HSIConfig(RCC_HSI_InitType * Config)
     /* Check if HSI is used as system clock or as PLL source when PLL is selected as system clock */
     if (     (sysclock == HSI)
          || ((sysclock == PLL) && (XPD_RCC_GetPLLSource() == HSI))
-#ifdef RCC_PLLCFGR_PLLR
-         || ((sysclock == PLLR) && (XPD_RCC_GetPLLSource() == HSI))
-#endif
     )
     {
         /* When HSI is used as system clock it will not disabled */
@@ -188,11 +182,7 @@ XPD_ReturnType XPD_RCC_HSEConfig(RCC_HSE_InitType * Config)
 
     /* When the HSE is used as system clock or clock source for PLL in these cases it is not allowed to be disabled */
     if (     (sysclock == HSE)
-         || ((sysclock == PLL) && (XPD_RCC_GetPLLSource() == HSE))
-#ifdef RCC_PLLCFGR_PLLR
-         || ((sysclock == PLLR) && (XPD_RCC_GetPLLSource() == HSE))
-#endif
-    )
+         || ((sysclock == PLL) && (XPD_RCC_GetPLLSource() == HSE)))
     {
         if ((RCC_REG_BIT(CR,HSERDY) != 0) && (Config->State == OSC_OFF))
         {
@@ -210,6 +200,10 @@ XPD_ReturnType XPD_RCC_HSEConfig(RCC_HSE_InitType * Config)
 
         if ((result == XPD_OK) && (Config->State != OSC_OFF))
         {
+#if defined(RCC_CFGR_PLLSRC_HSI_DIV2)
+            /* set HSE predivider value */
+            RCC->CFGR2.b.PREDIV = Config->Predivider - 1;
+#endif
             switch(Config->State)
             {
             case OSC_ON:
@@ -256,14 +250,10 @@ XPD_ReturnType XPD_RCC_PLLConfig(RCC_PLL_InitType * Config)
         if ((result == XPD_OK) && (Config->State != OSC_OFF))
         {
             /* Configure the main PLL clock source and multiplication factor. */
-            RCC_REG_BIT(PLLCFGR,PLLSRC) = Config->Source;
-
-            RCC->PLLCFGR.b.PLLM = Config->M;
-            RCC->PLLCFGR.b.PLLN = Config->N;
-            RCC->PLLCFGR.b.PLLP = (Config->P >> 1) - 1;
-            RCC->PLLCFGR.b.PLLQ = Config->Q;
-#ifdef RCC_PLLCFGR_PLLR
-            RCC->PLLCFGR.b.PLLR = Config->R;
+            RCC->CFGR.b.PLLSRC = Config->Source;
+            RCC->CFGR.b.PLLMUL = Config->Multiplier - 2;
+#ifdef RCC_CFGR_PLLSRC_HSI_PREDIV
+            RCC->CFGR2.b.PREDIV = Config->Predivider - 1;
 #endif
 
             /* Enable the main PLL. */
@@ -362,7 +352,7 @@ XPD_ReturnType XPD_RCC_LSEConfig(RCC_OscStateType NewState)
  */
 RCC_OscType XPD_RCC_GetPLLSource(void)
 {
-    return RCC_REG_BIT(PLLCFGR,PLLSRC);
+    return RCC_REG_BIT(CFGR,PLLSRC);
 }
 
 /**
@@ -381,8 +371,6 @@ RCC_OscType XPD_RCC_GetSYSCLKSource(void)
  */
 uint32_t XPD_RCC_GetOscFreq(RCC_OscType Oscillator)
 {
-    uint32_t m, n, p;
-
     switch (Oscillator)
     {
         case HSE:
@@ -393,36 +381,19 @@ uint32_t XPD_RCC_GetOscFreq(RCC_OscType Oscillator)
 
         case PLL:
         {
-            m = RCC->PLLCFGR.b.PLLM;
-            n = RCC->PLLCFGR.b.PLLN;
-            p = (RCC->PLLCFGR.b.PLLP + 1) * 2;
-
             if (XPD_RCC_GetPLLSource() != HSI)
             {
-                return HSE_VALUE / m * n / p;
+                return (HSE_VALUE * (RCC->CFGR.b.PLLMUL + 2)) / (RCC->CFGR2.b.PREDIV + 1);
             }
             else
             {
-                return HSI_VALUE / m * n / p;
-            }
-        }
-#ifdef RCC_CFGR_SWS_PLLR
-        case PLLR:
-        {
-            m = RCC->PLLCFGR.b.PLLM;
-            n = RCC->PLLCFGR.b.PLLN;
-            p = RCC->PLLCFGR.b.PLLR;
-
-            if (XPD_RCC_GetPLLSource() != HSI)
-            {
-                return HSE_VALUE / m * n / p;
-            }
-            else
-            {
-                return HSI_VALUE / m * n / p;
-            }
-        }
+#ifdef RCC_CFGR_PLLSRC_HSI_DIV2
+                return (HSI_VALUE * (RCC->CFGR.b.PLLMUL + 2)) / 2;
+#else
+                return (HSI_VALUE * (RCC->CFGR.b.PLLMUL + 2)) / (RCC->CFGR2.b.PREDIV + 1);
 #endif
+            }
+        }
 
         case LSI:
             return LSI_VALUE;
@@ -677,66 +648,17 @@ void XPD_RCC_MCOConfig(uint8_t MCOx, uint8_t MCOSource, ClockDividerType MCODiv)
     gpio.Output.Type = GPIO_OUTPUT_PUSHPULL;
     gpio.Pull = GPIO_PULL_FLOAT;
 
-    switch (MCOx)
     {
-    case 1:
         /* MCO1 map: PA8 */
         XPD_GPIO_InitPin(GPIOA, 8, &gpio);
 
-        RCC->CFGR.b.MCO1 = MCOSource;
-        RCC->CFGR.b.MCO1PRE = rcc_convertClockDivider(0xFF, MCODiv);
-
-#ifdef RCC_CFGR_MCO1EN
-        RCC_REG_BIT(CFGR,MCO1EN) = 1;
+        RCC->CFGR.b.MCO = MCOSource;
+#ifdef RCC_CFGR_MCOPRE
+        RCC->CFGR.b.MCOPRE = rcc_convertClockDivider(0xFF, MCODiv);
 #endif
-        break;
-
-    case 2:
-        /* MCO2 map: PC9 */
-        XPD_GPIO_InitPin(GPIOC, 9, &gpio);
-
-        RCC->CFGR.b.MCO2 = MCOSource;
-        RCC->CFGR.b.MCO2PRE = rcc_convertClockDivider(0xFF, MCODiv);
-
-#ifdef RCC_CFGR_MCO2EN
-        RCC_REG_BIT(CFGR,MCO2EN) = 1;
-#endif
-        break;
-
-    default:
-        break;
     }
 }
 
-#ifdef RCC_CFGR_MCO1EN
-void XPD_RCC_EnableMCO(uint8_t MCOx)
-{
-    if(MCOx == 1)
-    {
-        RCC_REG_BIT(CFGR,MCO1EN) = 1;
-    }
-#ifdef RCC_CFGR_MCO2EN
-    else
-    {
-        RCC_REG_BIT(CFGR,MCO2EN) = 1;
-    }
-#endif
-}
-
-void XPD_RCC_DisableMCO(uint8_t MCOx)
-{
-    if(MCOx == 1)
-    {
-        RCC_REG_BIT(CFGR,MCO1EN) = 0;
-    }
-#ifdef RCC_CFGR_MCO2EN
-    else
-    {
-        RCC_REG_BIT(CFGR,MCO2EN) = 0;
-    }
-#endif
-}
-#endif /* RCC_CFGR_MCO1EN */
 
 /** @} */
 
@@ -757,49 +679,34 @@ void XPD_RCC_Deinit(void)
     /* Reset CFGR register */
     RCC->CFGR.w = 0;
 
-    /* Reset HSEON, CSSON, PLLON, PLLI2S */
+    /* Reset HSEON, CSSON, PLLON */
     RCC_REG_BIT(CR, HSEON) = 0;
     RCC_REG_BIT(CR, CSSON) = 0;
     RCC_REG_BIT(CR, PLLON) = 0;
-#ifdef RCC_CR_PLLI2SON
-    RCC_REG_BIT(CR, PLLI2SON) = 0;
-#endif
-
-    /* Reset PLLCFGR register */
-    RCC->PLLCFGR.w = 0x24003010;
 
     /* Reset HSEBYP bit */
-    RCC_REG_BIT(CR,HSEBYP) = 0;
+    RCC_REG_BIT(CR, HSEBYP) = 0;
+
+    /* Reset CFGR register */
+    RCC->CFGR.w = 0;
+
+    /* Reset CFGR2 register */
+    RCC->CFGR2.w = 0;
+
+    /* Reset CFGR3 register */
+    RCC->CFGR3.w = 0;
 
     /* Disable all interrupts */
-    RCC->CIR.w = 0x00000000;
+    RCC->CIR.w = 0;
 }
 
 /**
- * @brief Resets the AHB1 peripherals.
+ * @brief Resets the AHB peripherals.
  */
-void XPD_RCC_ResetAHB1(void)
+void XPD_RCC_ResetAHB(void)
 {
-    RCC->AHB1RSTR.w = 0xFFFFFFFF;
-    RCC->AHB1RSTR.w = 0x00000000;
-}
-
-/**
- * @brief Resets the AHB2 peripherals.
- */
-void XPD_RCC_ResetAHB2(void)
-{
-    RCC->AHB2RSTR.w = 0xFFFFFFFF;
-    RCC->AHB2RSTR.w = 0x00000000;
-}
-
-/**
- * @brief Resets the AHB3 peripherals.
- */
-void XPD_RCC_ResetAHB3(void)
-{
-    RCC->AHB3RSTR.w = 0xFFFFFFFF;
-    RCC->AHB3RSTR.w = 0x00000000;
+    RCC->AHBRSTR.w = 0xFFFFFFFF;
+    RCC->AHBRSTR.w = 0x00000000;
 }
 
 /**

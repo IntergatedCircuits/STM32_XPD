@@ -45,6 +45,7 @@ typedef enum
     RTC_CLOCKSOURCE_LSI     = 2, /*!< LSI clock source */
     RTC_CLOCKSOURCE_HSE     = 3, /*!< HSE clock source */
 }RTC_ClockSourceType;
+/** @} */
 
 /** @defgroup RTC_Clock_Source_Exported_Functions RTC Clock Source Exported Functions
  * @{ */

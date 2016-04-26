@@ -224,7 +224,7 @@ void SystemInit(void)
   */
 void SystemCoreClockUpdate(void)
 {
-    XPD_RCC_GetClockFreq(HCLK);
+
 }
 
 #if defined (DATA_IN_ExtSRAM) && defined (DATA_IN_ExtSDRAM)
