@@ -59,59 +59,6 @@ static uint32_t rcc_convertClockDivider(RCC_ClockType clockType, ClockDividerTyp
     }
 }
 
-/* configures HCLK and SYSCLK */
-static XPD_ReturnType rcc_sysclkConfiguration(RCC_ClockType Clocks, RCC_ClockInitType * Config)
-{
-    XPD_ReturnType result = XPD_OK;
-
-    if ((Clocks & HCLK) != 0)
-    {
-        RCC->CFGR.b.HPRE = rcc_convertClockDivider(HCLK, Config->HCLK_Divider);
-    }
-
-    if ((Clocks & SYSCLK) != 0)
-    {
-        switch(Config->SYSCLK_Source)
-        {
-        case HSI:
-            /* Check the HSI ready flag */
-            if (RCC_REG_BIT(CR,HSIRDY) == 0)
-            {
-                return XPD_ERROR;
-            }
-            break;
-
-        case HSE:
-            /* Check the HSE ready flag */
-            if (RCC_REG_BIT(CR,HSERDY) == 0)
-            {
-                return XPD_ERROR;
-            }
-            break;
-
-        case PLL:
-#ifdef RCC_CFGR_SWS_PLLR
-        case PLLR:
-#endif
-            /* Check the PLL ready flag */
-            if (RCC_REG_BIT(CR,PLLRDY) == 0)
-            {
-                return XPD_ERROR;
-            }
-            break;
-
-        default:
-            return XPD_ERROR;
-        }
-
-        RCC->CFGR.b.SW = Config->SYSCLK_Source;
-
-        /* wait until the settings have been processed */
-        result = XPD_WaitForMatch(&RCC->CFGR.w, RCC_CFGR_SWS, Config->SYSCLK_Source << 2, RCC_CLOCKSWITCH_TIMEOUT);
-    }
-    return result;
-}
-
 /** @defgroup RCC_Core_Clocks_Exported_Functions RCC Core Exported Functions
  * @{ */
 
@@ -555,15 +502,18 @@ static const uint8_t AHBPrescTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6,
 #define APBPrescTable (&AHBPrescTable[4])
 
 /**
- * @brief Sets the new configuration for the selected clocks and the new matching flash latency.
- * @param Clocks: the set of clocks which should be configured
- * @param Config: pointer to the configuration to set up
+ * @brief Sets the new configuration for the AHB system clocks and the new matching flash latency.
+ * @param SYSCLK_Source: @ref RCC_ClockType::SYSCLK input source selection. Permitted values:
+             @arg @ref RCC_OscType::HSI
+             @arg @ref RCC_OscType::HSE
+             @arg @ref RCC_OscType::PLL
+ * @param HCLK_Divider: Clock divider of @ref RCC_ClockType::HCLK clock. Must not be CLK_DIV32.
  * @param FlashLatency: the desired amount of flash wait states
  * @return Result of the operation
  * @note To correctly read data from FLASH memory, the number of wait states must be
  * correctly programmed according to the frequency of the CPU clock (HCLK) of the device.
  */
-XPD_ReturnType XPD_RCC_ClockConfig(RCC_ClockType Clocks, RCC_ClockInitType * Config, uint8_t FlashLatency)
+XPD_ReturnType XPD_RCC_HCLKConfig(RCC_OscType SYSCLK_Source, ClockDividerType HCLK_Divider, uint8_t FlashLatency)
 {
     XPD_ReturnType result;
 
@@ -579,22 +529,55 @@ XPD_ReturnType XPD_RCC_ClockConfig(RCC_ClockType Clocks, RCC_ClockInitType * Con
         {
             return XPD_ERROR;
         }
-
-        result = rcc_sysclkConfiguration(Clocks, Config);
-        if (result != XPD_OK)
-        {
-            return result;
-        }
     }
-    /* Decreasing the CPU frequency */
-    else
-    {
-        result = rcc_sysclkConfiguration(Clocks, Config);
-        if (result != XPD_OK)
-        {
-            return result;
-        }
 
+    RCC->CFGR.b.HPRE = rcc_convertClockDivider(HCLK, HCLK_Divider);
+
+    switch (SYSCLK_Source)
+    {
+        case HSI:
+            /* Check the HSI ready flag */
+            if (RCC_REG_BIT(CR,HSIRDY) == 0)
+            {
+                return XPD_ERROR;
+            }
+            break;
+
+        case HSE:
+            /* Check the HSE ready flag */
+            if (RCC_REG_BIT(CR,HSERDY) == 0)
+            {
+                return XPD_ERROR;
+            }
+            break;
+
+        case PLL:
+#ifdef RCC_CFGR_SWS_PLLR
+        case PLLR:
+#endif
+            /* Check the PLL ready flag */
+            if (RCC_REG_BIT(CR,PLLRDY) == 0)
+            {
+                return XPD_ERROR;
+            }
+            break;
+
+        default:
+            return XPD_ERROR;
+    }
+
+    RCC->CFGR.b.SW = SYSCLK_Source;
+
+    /* wait until the settings have been processed */
+    result = XPD_WaitForMatch(&RCC->CFGR.w, RCC_CFGR_SWS, SYSCLK_Source << 2, RCC_CLOCKSWITCH_TIMEOUT);
+    if (result != XPD_OK)
+    {
+        return result;
+    }
+
+    /* Decreasing the CPU frequency */
+    if (FlashLatency != XPD_FLASH_GetLatency())
+    {
         /* Program the new number of wait states to the LATENCY bits in the FLASH_ACR register */
         XPD_FLASH_SetLatency(FlashLatency);
 
@@ -606,23 +589,45 @@ XPD_ReturnType XPD_RCC_ClockConfig(RCC_ClockType Clocks, RCC_ClockInitType * Con
         }
     }
 
-    if ((Clocks & PCLK1) != 0)
-    {
-        RCC->CFGR.b.PPRE1 = rcc_convertClockDivider(PCLK1, Config->PCLK1_Divider);
-    }
-
-    if ((Clocks & PCLK2) != 0)
-    {
-        RCC->CFGR.b.PPRE2 = rcc_convertClockDivider(PCLK2, Config->PCLK2_Divider);
-    }
-
     /* Update SystemCoreClock variable */
-    SystemCoreClock = XPD_RCC_GetOscFreq(XPD_RCC_GetSYSCLKSource()) >> AHBPrescTable[RCC->CFGR.b.HPRE];
+    SystemCoreClock = XPD_RCC_GetOscFreq(SYSCLK_Source) >> AHBPrescTable[RCC->CFGR.b.HPRE];
 
     /* Configure the source of time base considering new system clocks settings*/
     XPD_InitTimer();
 
-    return XPD_OK;
+    return result;
+}
+
+/**
+ * @brief Sets the new configuration for an APB peripheral clock.
+ * @param PCLKx: the selected peripheral clock. Permitted values:
+             @arg @ref RCC_ClockType::PCLK1
+             @arg @ref RCC_ClockType::PCLK2
+ * @param HCLK_Divider: Clock divider of @ref RCC_ClockType::PCLK1 clock. Permitted values:
+             @arg @ref ClockDividerType::CLK_DIV1
+             @arg @ref ClockDividerType::CLK_DIV2
+             @arg @ref ClockDividerType::CLK_DIV4
+             @arg @ref ClockDividerType::CLK_DIV8
+             @arg @ref ClockDividerType::CLK_DIV16
+ * @return Result of the operation
+ */
+void XPD_RCC_PCLKConfig(RCC_ClockType PCLKx, ClockDividerType PCLK_Divider)
+{
+    uint32_t pprex = rcc_convertClockDivider(PCLKx, PCLK_Divider);
+
+    switch (PCLKx)
+    {
+        case PCLK1:
+            RCC->CFGR.b.PPRE1 = pprex;
+            break;
+
+        case PCLK2:
+            RCC->CFGR.b.PPRE2 = pprex;
+            break;
+
+        default:
+            break;
+    }
 }
 
 /**

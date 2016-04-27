@@ -57,32 +57,31 @@ typedef enum
 /** @brief HSE setup structure */
 typedef struct
 {
+    RCC_OscStateType State;      /*!< HSE state */
 #if defined(RCC_CFGR_PLLSRC_HSI_DIV2)
-    uint8_t Predivider;         /*!< HSE predivision value [1..16] */
+    uint8_t          Predivider; /*!< HSE predivision value [1..16] */
 #endif
-    RCC_OscStateType State; /*!< HSE state */
 }RCC_HSE_InitType;
 
 /** @brief HSI setup structure */
 typedef struct
 {
-    uint8_t CalibrationValue; /*!< HSI calibration value [0..31] (default is 16) */
-    RCC_OscStateType State;   /*!< HSI state */
+    uint8_t          CalibrationValue; /*!< HSI calibration value [0..31] (default is 16) */
+    RCC_OscStateType State;            /*!< HSI state */
 }RCC_HSI_InitType;
 
 /** @brief PLL setup structure */
 typedef struct
 {
-    uint8_t Multiplier; /*!< PLL multiplier value [2..16] */
+    uint8_t          Multiplier; /*!< PLL multiplier value [2..16] */
+    RCC_OscStateType State;      /*!< PLL state */
+    RCC_OscType      Source;     /*!< PLL input source selection. Permitted values:
+                                      @arg @ref RCC_OscType::HSI
+                                      @arg @ref RCC_OscType::HSE */
 #ifdef RCC_CFGR_PLLSRC_HSI_PREDIV
-    uint8_t Predivider; /*!< PLL predivider value [1..16] */
+    uint8_t          Predivider; /*!< PLL predivider value [1..16] */
 #endif
-    RCC_OscStateType State; /*!< PLL state */
-    RCC_OscType Source;     /*!< PLL input source selection. Permitted values:
-                                 @arg @ref RCC_OscType::HSI
-                                 @arg @ref RCC_OscType::HSE */
 }RCC_PLL_InitType;
-
 
 /** @brief RCC core clock types */
 typedef enum
@@ -93,28 +92,6 @@ typedef enum
     PCLK1    = 4, /*!< APB1 bus clock */
     PCLK2    = 8  /*!< APB2 bus clock */
 }RCC_ClockType;
-
-/** @brief RCC core clocks setup structure */
-typedef struct
-{
-    ClockDividerType HCLK_Divider;  /*!< Clock divider of @ref RCC_ClockType::HCLK clock. Must not be CLK_DIV32. */
-    ClockDividerType PCLK1_Divider; /*!< Clock divider of @ref RCC_ClockType::PCLK1 clock. Permitted values:
-                                        @arg @ref ClockDividerType::CLK_DIV1
-                                        @arg @ref ClockDividerType::CLK_DIV2
-                                        @arg @ref ClockDividerType::CLK_DIV4
-                                        @arg @ref ClockDividerType::CLK_DIV8
-                                        @arg @ref ClockDividerType::CLK_DIV16 */
-    ClockDividerType PCLK2_Divider; /*!< Clock divider of @ref RCC_ClockType::PCLK2 clock. Permitted values:
-                                        @arg @ref ClockDividerType::CLK_DIV1
-                                        @arg @ref ClockDividerType::CLK_DIV2
-                                        @arg @ref ClockDividerType::CLK_DIV4
-                                        @arg @ref ClockDividerType::CLK_DIV8
-                                        @arg @ref ClockDividerType::CLK_DIV16 */
-    RCC_OscType      SYSCLK_Source; /*!< @ref RCC_ClockType::SYSCLK input source selection. Permitted values:
-                                         @arg @ref RCC_OscType::HSI
-                                         @arg @ref RCC_OscType::HSE
-                                         @arg @ref RCC_OscType::PLL */
-} RCC_ClockInitType;
 
 /** @brief RCC master clock output 1 clock source types */
 typedef enum
@@ -237,7 +214,9 @@ void                XPD_NMI_IRQHandler          (void);
 
 /** @addtogroup RCC_Core_Clocks_Exported_Functions_Clocks
  * @{ */
-XPD_ReturnType      XPD_RCC_ClockConfig         (RCC_ClockType Clocks, RCC_ClockInitType * Config, uint8_t FlashLatency);
+XPD_ReturnType      XPD_RCC_HCLKConfig          (RCC_OscType SYSCLK_Source, ClockDividerType HCLK_Divider,
+                                                 uint8_t FlashLatency);
+void                XPD_RCC_PCLKConfig          (RCC_ClockType PCLKx, ClockDividerType PCLK_Divider);
 uint32_t            XPD_RCC_GetClockFreq        (RCC_ClockType SelectedClock);
 /** @} */
 

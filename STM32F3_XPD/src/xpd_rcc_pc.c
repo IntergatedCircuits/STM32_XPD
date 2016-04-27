@@ -35,14 +35,6 @@
 
 static const uint16_t adc_clkPreTable[] = { 1, 2, 4, 6, 8, 10, 12, 16, 32, 64, 128, 256 };
 
-#elif defined(RCC_CFGR_ADCPRE)
-typedef enum
-{
-    ADC_CLOCKSOURCE_PCLK2_DIV2 = 0,
-    ADC_CLOCKSOURCE_PCLK2_DIV4 = 1,
-    ADC_CLOCKSOURCE_PCLK2_DIV6 = 2,
-    ADC_CLOCKSOURCE_PCLK2_DIV8 = 3
-}ADC_ClockSourceType;
 #endif
 /** @} */
 
@@ -217,20 +209,20 @@ uint32_t XPD_CEC_GetClockFreq(void)
  */
 void XPD_I2C_ClockConfig(I2C_HandleType * hi2c, I2C_ClockSourceType ClockSource)
 {
-    switch (hi2c->Inst)
+    switch ((uint32_t)hi2c->Inst)
     {
 #ifdef RCC_CFGR3_I2C1SW
-        case I2C1:
+        case I2C1_BASE:
             RCC_REG_BIT(CFGR3,I2C1SW) = ClockSource;
             break;
 #endif
 #ifdef RCC_CFGR3_I2C2SW
-        case I2C2:
+        case I2C2_BASE:
             RCC_REG_BIT(CFGR3,I2C2SW) = ClockSource;
             break;
 #endif
 #ifdef RCC_CFGR3_I2C3SW
-        case I2C3:
+        case I2C3_BASE:
             RCC_REG_BIT(CFGR3,I2C3SW) = ClockSource;
             break;
 #endif
@@ -249,20 +241,20 @@ uint32_t XPD_I2C_GetClockFreq(I2C_HandleType * hi2c)
     I2C_ClockSourceType source;
     uint32_t freq;
 
-    switch (hi2c->Inst)
+    switch ((uint32_t)hi2c->Inst)
     {
 #ifdef RCC_CFGR3_I2C1SW
-        case I2C1:
+        case I2C1_BASE:
             source = RCC_REG_BIT(CFGR3,I2C1SW);
             break;
 #endif
 #ifdef RCC_CFGR3_I2C2SW
-        case I2C2:
+        case I2C2_BASE:
             source = RCC_REG_BIT(CFGR3,I2C2SW);
             break;
 #endif
 #ifdef RCC_CFGR3_I2C3SW
-        case I2C3:
+        case I2C3_BASE:
             source = RCC_REG_BIT(CFGR3,I2C3SW);
             break;
 #endif
@@ -504,50 +496,50 @@ uint32_t XPD_SDADC_GetClockFreq(void)
  */
 void XPD_TIM_ClockConfig(TIM_HandleType * htim, TIM_ClockSourceType ClockSource)
 {
-    switch (htim->Inst)
+    switch ((uint32_t)htim->Inst)
     {
 #ifdef RCC_CFGR3_TIM1SW
-        case TIM1:
+        case TIM1_BASE:
             RCC_REG_BIT(CFGR3, TIM1SW) = ClockSource;
             break;
 #endif
 #ifdef RCC_CFGR3_TIM2SW
-        case TIM2:
+        case TIM2_BASE:
             RCC_REG_BIT(CFGR3, TIM2SW) = ClockSource;
             break;
 #endif
 #ifdef RCC_CFGR3_TIM8SW
-        case TIM8:
+        case TIM8_BASE:
             RCC_REG_BIT(CFGR3, TIM8SW) = ClockSource;
             break;
 #endif
 #ifdef RCC_CFGR3_TIM15SW
-        case TIM15:
+        case TIM15_BASE:
             RCC_REG_BIT(CFGR3, TIM15SW) = ClockSource;
             break;
 #endif
 #ifdef RCC_CFGR3_TIM16SW
-        case TIM16:
+        case TIM16_BASE:
             RCC_REG_BIT(CFGR3, TIM16SW) = ClockSource;
             break;
 #endif
 #ifdef RCC_CFGR3_TIM17SW
-        case TIM17:
+        case TIM17_BASE:
             RCC_REG_BIT(CFGR3, TIM17SW) = ClockSource;
             break;
 #endif
 #ifdef RCC_CFGR3_TIM20SW
-        case TIM20:
+        case TIM20_BASE:
             RCC_REG_BIT(CFGR3, TIM20SW) = ClockSource;
             break;
 #endif
 #ifdef RCC_CFGR3_TIM34SW
-        case TIM34:
+        case TIM34_BASE:
             RCC_REG_BIT(CFGR3, TIM34SW) = ClockSource;
             break;
 #endif
 #ifdef RCC_CFGR3_HRTIMSW
-        case HRTIM1:
+        case HRTIM1_BASE:
             RCC_REG_BIT(CFGR3, HRTIMSW) = ClockSource;
             break;
 #endif
@@ -565,10 +557,10 @@ uint32_t XPD_TIM_GetClockFreq(TIM_HandleType * htim)
 {
     uint32_t freq;
 
-    switch (htim->Inst)
+    switch ((uint32_t)htim->Inst)
     {
 #ifdef RCC_CFGR3_TIM1SW
-        case TIM1:
+        case TIM1_BASE:
             if (RCC_REG_BIT(CFGR3, TIM1SW))
             {
                 return XPD_RCC_GetOscFreq(PLL) * 2;
@@ -576,7 +568,7 @@ uint32_t XPD_TIM_GetClockFreq(TIM_HandleType * htim)
             break;
 #endif
 #ifdef RCC_CFGR3_TIM2SW
-        case TIM2:
+        case TIM2_BASE:
             if (RCC_REG_BIT(CFGR3, TIM2SW))
             {
                 return XPD_RCC_GetOscFreq(PLL) * 2;
@@ -584,7 +576,7 @@ uint32_t XPD_TIM_GetClockFreq(TIM_HandleType * htim)
             break;
 #endif
 #ifdef RCC_CFGR3_TIM8SW
-        case TIM8:
+        case TIM8_BASE:
             if (RCC_REG_BIT(CFGR3, TIM8SW))
             {
                 return XPD_RCC_GetOscFreq(PLL) * 2;
@@ -592,7 +584,7 @@ uint32_t XPD_TIM_GetClockFreq(TIM_HandleType * htim)
             break;
 #endif
 #ifdef RCC_CFGR3_TIM15SW
-        case TIM15:
+        case TIM15_BASE:
             if (RCC_REG_BIT(CFGR3, TIM15SW))
             {
                 return XPD_RCC_GetOscFreq(PLL) * 2;
@@ -600,7 +592,7 @@ uint32_t XPD_TIM_GetClockFreq(TIM_HandleType * htim)
             break;
 #endif
 #ifdef RCC_CFGR3_TIM16SW
-        case TIM16:
+        case TIM16_BASE:
             if (RCC_REG_BIT(CFGR3, TIM16SW))
             {
                 return XPD_RCC_GetOscFreq(PLL) * 2;
@@ -608,7 +600,7 @@ uint32_t XPD_TIM_GetClockFreq(TIM_HandleType * htim)
             break;
 #endif
 #ifdef RCC_CFGR3_TIM17SW
-        case TIM17:
+        case TIM17_BASE:
             if (RCC_REG_BIT(CFGR3, TIM17SW))
             {
                 return XPD_RCC_GetOscFreq(PLL) * 2;
@@ -616,7 +608,7 @@ uint32_t XPD_TIM_GetClockFreq(TIM_HandleType * htim)
             break;
 #endif
 #ifdef RCC_CFGR3_TIM20SW
-        case TIM20:
+        case TIM20_BASE:
             if (RCC_REG_BIT(CFGR3, TIM20SW))
             {
                 return XPD_RCC_GetOscFreq(PLL) * 2;
@@ -624,7 +616,7 @@ uint32_t XPD_TIM_GetClockFreq(TIM_HandleType * htim)
             break;
 #endif
 #ifdef RCC_CFGR3_TIM34SW
-        case TIM34:
+        case TIM34_BASE:
             if (RCC_REG_BIT(CFGR3, TIM34SW))
             {
                 return XPD_RCC_GetOscFreq(PLL) * 2;
@@ -632,7 +624,7 @@ uint32_t XPD_TIM_GetClockFreq(TIM_HandleType * htim)
             break;
 #endif
 #ifdef RCC_CFGR3_HRTIMSW
-        case HRTIM1:
+        case HRTIM1_BASE:
             if (RCC_REG_BIT(CFGR3, HRTIMSW))
             {
                 return XPD_RCC_GetOscFreq(PLL) * 2;
@@ -696,30 +688,30 @@ uint32_t XPD_TIM_GetClockFreq(TIM_HandleType * htim)
  */
 void XPD_USART_ClockConfig(USART_HandleType * husart, USART_ClockSourceType ClockSource)
 {
-    switch (husart->Inst)
+    switch ((uint32_t)husart->Inst)
     {
 #ifdef RCC_CFGR3_USART1SW
-        case USART1:
+        case USART1_BASE:
             RCC->CFGR3.b.USART1SW = ClockSource;
             break;
 #endif
 #ifdef RCC_CFGR3_USART2SW
-        case USART2:
+        case USART2_BASE:
             RCC->CFGR3.b.USART2SW = ClockSource;
             break;
 #endif
 #ifdef RCC_CFGR3_USART3SW
-        case USART3:
+        case USART3_BASE:
             RCC->CFGR3.b.USART3SW = ClockSource;
             break;
 #endif
 #ifdef RCC_CFGR3_UART4SW
-        case UART4:
+        case UART4_BASE:
             RCC->CFGR3.b.UART4SW = ClockSource;
             break;
 #endif
 #ifdef RCC_CFGR3_UART5SW
-        case UART5:
+        case UART5_BASE:
             RCC->CFGR3.b.UART5SW = ClockSource;
             break;
 #endif
@@ -738,30 +730,30 @@ uint32_t XPD_USART_GetClockFreq(USART_HandleType * husart)
     USART_ClockSourceType source;
     uint32_t freq;
 
-    switch (husart->Inst)
+    switch ((uint32_t)husart->Inst)
     {
 #ifdef RCC_CFGR3_USART1SW
-        case USART1:
+        case USART1_BASE:
             source = RCC->CFGR3.b.USART1SW;
             break;
 #endif
 #ifdef RCC_CFGR3_USART2SW
-        case USART2:
+        case USART2_BASE:
             source = RCC->CFGR3.b.USART2SW;
             break;
 #endif
 #ifdef RCC_CFGR3_USART3SW
-        case USART3:
+        case USART3_BASE:
             source = RCC->CFGR3.b.USART3SW;
             break;
 #endif
 #ifdef RCC_CFGR3_UART4SW
-        case UART4:
+        case UART4_BASE:
             source = RCC->CFGR3.b.UART4SW;
             break;
 #endif
 #ifdef RCC_CFGR3_UART5SW
-        case UART5:
+        case UART5_BASE:
             source = RCC->CFGR3.b.UART5SW;
             break;
 #endif

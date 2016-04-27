@@ -70,14 +70,10 @@ void ClockConfiguration(void)
 
     /* System clocks configuration */
     {
-        RCC_ClockInitType clocks = {
-            .HCLK_Divider = CLK_DIV1,
-            .PCLK1_Divider = CLK_DIV4,
-            .PCLK2_Divider = CLK_DIV2,
-            .SYSCLK_Source = PLL
-        };
+        XPD_RCC_HCLKConfig(PLL, CLK_DIV1, 5);
 
-        XPD_RCC_ClockConfig(HCLK | SYSCLK | PCLK1 | PCLK2, &clocks, 5);
+        XPD_RCC_PCLKConfig(PCLK1, CLK_DIV4);
+        XPD_RCC_PCLKConfig(PCLK2, CLK_DIV2);
     }
 }
 

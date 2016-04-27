@@ -84,7 +84,6 @@ __weak void XPD_InitTimer(void)
 {
     /* set the SysTick IRQ priority */
     XPD_NVIC_SetPriorityConfig(SysTick_IRQn, 0, 0);
-    XPD_NVIC_EnableIRQ(SysTick_IRQn);
 
     /* enable systick and configure 1ms tick */
     XPD_SysTick_Init(SystemCoreClock / 1000, SYSTICK_CLOCKSOURCE_HCLK);
