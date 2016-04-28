@@ -10687,19 +10687,19 @@ typedef struct
 #define GPIO_TRACE_AF0         ((uint8_t)0x00)  /* TRACE Alternate Function mapping                          */
 
 /* AF 1 selection */
-#define GPIO_TIM2_AF1           ((uint8_t)0x01)  /* TIM2 Alternate Function mapping */
-#define GPIO_TIM15_AF1          ((uint8_t)0x01)  /* TIM15 Alternate Function mapping */
-#define GPIO_TIM16_AF1          ((uint8_t)0x01)  /* TIM16 Alternate Function mapping */
-#define GPIO_TIM17_AF1          ((uint8_t)0x01)  /* TIM17 Alternate Function mapping */
-#define GPIO_EVENTOUT_AF1       ((uint8_t)0x01)  /* EVENTOUT Alternate Function mapping */
+#define GPIO_TIM2_AF1          ((uint8_t)0x01)  /* TIM2 Alternate Function mapping */
+#define GPIO_TIM15_AF1         ((uint8_t)0x01)  /* TIM15 Alternate Function mapping */
+#define GPIO_TIM16_AF1         ((uint8_t)0x01)  /* TIM16 Alternate Function mapping */
+#define GPIO_TIM17_AF1         ((uint8_t)0x01)  /* TIM17 Alternate Function mapping */
+#define GPIO_EVENTOUT_AF1      ((uint8_t)0x01)  /* EVENTOUT Alternate Function mapping */
 
 /* AF 2 selection */
-#define GPIO_TIM1_AF2           ((uint8_t)0x02)  /* TIM1 Alternate Function mapping */
-#define GPIO_TIM2_AF2           ((uint8_t)0x02)  /* TIM2 Alternate Function mapping */
-#define GPIO_TIM3_AF2           ((uint8_t)0x02)  /* TIM3 Alternate Function mapping */
-#define GPIO_TIM4_AF2           ((uint8_t)0x02)  /* TIM4 Alternate Function mapping */
-#define GPIO_TIM15_AF2          ((uint8_t)0x02)  /* TIM15 Alternate Function mapping */
-#define GPIO_COMP1_AF2          ((uint8_t)0x02)  /* COMP1 Alternate Function mapping */
+#define GPIO_TIM1_AF2          ((uint8_t)0x02)  /* TIM1 Alternate Function mapping */
+#define GPIO_TIM2_AF2          ((uint8_t)0x02)  /* TIM2 Alternate Function mapping */
+#define GPIO_TIM3_AF2          ((uint8_t)0x02)  /* TIM3 Alternate Function mapping */
+#define GPIO_TIM4_AF2          ((uint8_t)0x02)  /* TIM4 Alternate Function mapping */
+#define GPIO_TIM15_AF2         ((uint8_t)0x02)  /* TIM15 Alternate Function mapping */
+#define GPIO_COMP1_AF2         ((uint8_t)0x02)  /* COMP1 Alternate Function mapping */
 
 /* AF 3 selection */
 #define GPIO_TSC_AF3           ((uint8_t)0x03)  /* TSC Alternate Function mapping  */
@@ -10748,16 +10748,16 @@ typedef struct
 #define GPIO_TIM15_AF9         ((uint8_t)0x09)  /* TIM15 Alternate Function mapping */
 
 /* AF 10 selection */
-#define GPIO_TIM2_AF10         ((uint8_t)0xA)  /* TIM2 Alternate Function mapping */
-#define GPIO_TIM3_AF10         ((uint8_t)0xA)  /* TIM3 Alternate Function mapping */
-#define GPIO_TIM4_AF10         ((uint8_t)0xA)  /* TIM4 Alternate Function mapping */
-#define GPIO_TIM17_AF10        ((uint8_t)0xA)  /* TIM17 Alternate Function mapping */
+#define GPIO_TIM2_AF10         ((uint8_t)0x0A)  /* TIM2 Alternate Function mapping */
+#define GPIO_TIM3_AF10         ((uint8_t)0x0A)  /* TIM3 Alternate Function mapping */
+#define GPIO_TIM4_AF10         ((uint8_t)0x0A)  /* TIM4 Alternate Function mapping */
+#define GPIO_TIM17_AF10        ((uint8_t)0x0A)  /* TIM17 Alternate Function mapping */
 
 /* AF 11 selection */
 #define GPIO_TIM1_AF11         ((uint8_t)0x0B)  /* TIM1 Alternate Function mapping */
 
 /* AF 12 selection */
-#define GPIO_TIM1_AF12         ((uint8_t)0xC)  /* TIM1 Alternate Function mapping */
+#define GPIO_TIM1_AF12         ((uint8_t)0x0C)  /* TIM1 Alternate Function mapping */
 
 /* AF 14 selection */
 #define GPIO_USB_AF14          ((uint8_t)0x0E)  /* USB Alternate Function mapping */

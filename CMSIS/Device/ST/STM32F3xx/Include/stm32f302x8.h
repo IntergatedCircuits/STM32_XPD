@@ -10414,18 +10414,176 @@ typedef struct {
 #define CAN_RX0_IRQHandler     USB_LP_CAN_RX0_IRQHandler
 
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
+/** @defgroup ADC_Internal_Channels ADC Internal Channels
+  * @{
+  */
 
-#endif /* __STM32F302x8_H */
+/* Note: Vopamp1, TempSensor and Vbat internal channels available on ADC1 only */
+#define ADC_CHANNEL_VOPAMP1     15
+#define ADC_CHANNEL_TEMPSENSOR  16
+#define ADC_CHANNEL_VBAT        17
+
+/* Note: Vopamp2/3/4 internal channels available on ADC2/3/4 respectively     */
+#define ADC_CHANNEL_VOPAMP2     17
+#define ADC_CHANNEL_VOPAMP3     17
+#define ADC_CHANNEL_VOPAMP4     17
+
+/* Note: VrefInt internal channels available on all ADCs, but only            */
+/*       one ADC is allowed to be connected to VrefInt at the same time.      */
+#define ADC_CHANNEL_VREFINT     18
 
 /**
   * @}
   */
 
-  /**
+/** @defgroup ADC_Calibration_Values ADC Calibration Values
+  * @{
+  */
+
+typedef struct
+{
+    __I uint16_t CAL30;
+    __I uint16_t CAL110;
+}ADC_TempSensorCalibrationTypeDef;
+
+#define ADC_TEMPSENSOR       ((ADC_TempSensorCalibrationTypeDef *)((uint32_t)0x1FFFF7B8))
+
+#define ADC_VREFINT_CAL      (*((__I uint16_t *)((uint32_t)0x1FFFF7BA)))
+
+/**
   * @}
   */
+
+/** @defgroup Unique_Device_ID Unique Device ID
+  * @brief    Use the macro as it was defined as: uint32_t DEVICE_ID_REG[3]
+  * @{
+  */
+
+#define DEVICE_ID_REG        ((__I uint32_t *)((uint32_t)0x1FFFF7AC))
+
+/**
+  * @}
+  */
+
+/** @defgroup Device_Flash_Size Device Flash Memory Size in kB
+  * @{
+  */
+
+#define DEVICE_FLASH_SIZE_KB (*((__I uint16_t *)((uint32_t)0x1FFFF7CC)))
+
+/**
+  * @}
+  */
+
+/** @defgroup GPIO_Alternate_function_map GPIO Alternate function map
+  * @{
+  */
+
+/* AF 0 selection */
+#define GPIO_RTC_50Hz_AF0      ((uint8_t)0x00)  /* RTC_50Hz Alternate Function mapping                       */
+#define GPIO_MCO_AF0           ((uint8_t)0x00)  /* MCO (MCO1 and MCO2) Alternate Function mapping            */
+#define GPIO_TAMPER_AF0        ((uint8_t)0x00)  /* TAMPER (TAMPER_1 and TAMPER_2) Alternate Function mapping */
+#define GPIO_SWJ_AF0           ((uint8_t)0x00)  /* SWJ (SWD and JTAG) Alternate Function mapping             */
+#define GPIO_TRACE_AF0         ((uint8_t)0x00)  /* TRACE Alternate Function mapping                          */
+
+/* AF 1 selection */
+#define GPIO_TIM2_AF1          ((uint8_t)0x01)  /* TIM2 Alternate Function mapping */
+#define GPIO_TIM15_AF1         ((uint8_t)0x01)  /* TIM15 Alternate Function mapping */
+#define GPIO_TIM16_AF1         ((uint8_t)0x01)  /* TIM16 Alternate Function mapping */
+#define GPIO_TIM17_AF1         ((uint8_t)0x01)  /* TIM17 Alternate Function mapping */
+#define GPIO_EVENTOUT_AF1      ((uint8_t)0x01)  /* EVENTOUT Alternate Function mapping */
+
+/* AF 2 selection */
+#define GPIO_TIM1_AF2          ((uint8_t)0x02)  /* TIM1 Alternate Function mapping */
+#define GPIO_TIM2_AF2          ((uint8_t)0x02)  /* TIM2 Alternate Function mapping */
+#define GPIO_TIM15_AF2         ((uint8_t)0x02)  /* TIM15 Alternate Function mapping */
+#define GPIO_I2C3_AF2          ((uint8_t)0x02)  /* I2C3 Alternate Function mapping */
+
+/* AF 3 selection */
+#define GPIO_TSC_AF3           ((uint8_t)0x03)  /* TSC Alternate Function mapping  */
+#define GPIO_TIM15_AF3         ((uint8_t)0x03)  /* TIM15 Alternate Function mapping */
+#define GPIO_I2C3_AF3          ((uint8_t)0x03)  /* I2C3 Alternate Function mapping  */
+
+/* AF 4 selection */
+#define GPIO_TIM1_AF4          ((uint8_t)0x04)  /* TIM1 Alternate Function mapping */
+#define GPIO_TIM16_AF4         ((uint8_t)0x04)  /* TIM16 Alternate Function mapping */
+#define GPIO_TIM17_AF4         ((uint8_t)0x04)  /* TIM17 Alternate Function mapping */
+#define GPIO_I2C1_AF4          ((uint8_t)0x04)  /* I2C1 Alternate Function mapping */
+#define GPIO_I2C2_AF4          ((uint8_t)0x04)  /* I2C2 Alternate Function mapping */
+
+/* AF 5 selection */
+#define GPIO_SPI1_AF5          ((uint8_t)0x05)  /* SPI1/I2S1 Alternate Function mapping */
+#define GPIO_SPI2_AF5          ((uint8_t)0x05)  /* SPI2/I2S2 Alternate Function mapping */
+#define GPIO_SPI3_AF5          ((uint8_t)0x05)  /* SPI3/I2S3 Alternate Function mapping */
+#define GPIO_IR_AF5            ((uint8_t)0x05)  /* IR Alternate Function mapping */
+
+/* AF 6 selection */
+#define GPIO_SPI2_AF6          ((uint8_t)0x06)  /* SPI2/I2S2 Alternate Function mapping */
+#define GPIO_SPI3_AF6          ((uint8_t)0x06)  /* SPI3/I2S3 Alternate Function mapping */
+#define GPIO_TIM1_AF6          ((uint8_t)0x06)  /* TIM1 Alternate Function mapping */
+#define GPIO_IR_AF6            ((uint8_t)0x06)  /* IR Alternate Function mapping */
+
+/* AF 7 selection */
+#define GPIO_USART1_AF7        ((uint8_t)0x07)  /* USART1 Alternate Function mapping  */
+#define GPIO_USART2_AF7        ((uint8_t)0x07)  /* USART2 Alternate Function mapping  */
+#define GPIO_USART3_AF7        ((uint8_t)0x07)  /* USART3 Alternate Function mapping  */
+#define GPIO_COMP6_AF7         ((uint8_t)0x07)  /* COMP6 Alternate Function mapping  */
+#define GPIO_CAN_AF7           ((uint8_t)0x07)  /* CAN Alternate Function mapping  */
+
+/* AF 8 selection */
+#define GPIO_I2C3_AF8          ((uint8_t)0x08)  /* I2C3 Alternate Function mapping  */
+#define GPIO_COMP2_AF8         ((uint8_t)0x08)  /* COMP2 Alternate Function mapping  */
+#define GPIO_COMP4_AF8         ((uint8_t)0x08)  /* COMP4 Alternate Function mapping  */
+#define GPIO_COMP6_AF8         ((uint8_t)0x08)  /* COMP6 Alternate Function mapping  */
+
+/* AF 9 selection */
+#define GPIO_CAN_AF9           ((uint8_t)0x09)  /* CAN Alternate Function mapping  */
+#define GPIO_TIM1_AF9          ((uint8_t)0x09)  /* TIM1 Alternate Function mapping */
+#define GPIO_TIM15_AF9         ((uint8_t)0x09)  /* TIM15 Alternate Function mapping */
+
+/* AF 10 selection */
+#define GPIO_TIM2_AF10         ((uint8_t)0x0A)  /* TIM2 Alternate Function mapping */
+#define GPIO_TIM17_AF10        ((uint8_t)0x0A)  /* TIM17 Alternate Function mapping */
+
+/* AF 11 selection */
+#define GPIO_TIM1_AF11         ((uint8_t)0x0B)  /* TIM1 Alternate Function mapping */
+
+/* AF 12 selection */
+#define GPIO_TIM1_AF12         ((uint8_t)0x0C)  /* TIM1 Alternate Function mapping */
+
+/* AF 14 selection */
+#define GPIO_USB_AF14          ((uint8_t)0x0E)  /* USB Alternate Function mapping */
+
+/* AF 15 selection */
+#define GPIO_EVENTOUT_AF15     ((uint8_t)0x0F)  /* EVENTOUT Alternate Function mapping */
+
+/**
+  * @}
+  */
+
+/** @defgroup RCC_Internal_Oscillators RCC Internal Oscillators
+  * @{
+  */
+
+#define HSI_VALUE 8000000  /* Value of the internal high speed oscillator in Hz */
+
+#define LSI_VALUE 40000    /* Approximate value of the internal low speed oscillator in Hz */
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* __STM32F302x8_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
