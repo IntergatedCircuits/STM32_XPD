@@ -106,15 +106,16 @@ typedef struct
     struct {
         XPD_HandleCallbackType Complete;     /*!< DMA transfer complete callback */
         XPD_HandleCallbackType HalfComplete; /*!< DMA transfer half complete callback */
+#ifdef USE_XPD_DMA_ERROR_DETECT
         XPD_HandleCallbackType Error;        /*!< DMA transfer error callback */
+#endif
     } Callbacks;                             /*   Handle Callbacks */
     void * Owner;                            /*!< [Internal] The pointer of the peripheral handle which uses this handle */
-    volatile DMA_ErrorType Errors;           /*!< Transfer errors */
 #ifdef DMA_BB
     void * Base_BB;                          /*!< [Internal] The address of the master DMA bits used by the handle */
-#else
-    /* TODO */
 #endif
+    DMA_TransferType       Transfer;         /*!< Current transfer configuration structure */
+    volatile DMA_ErrorType Errors;           /*!< Transfer errors */
 }DMA_HandleType;
 
 /** @} */
@@ -122,6 +123,7 @@ typedef struct
 /** @defgroup DMA_Exported_Macros DMA Exported Macros
  * @{ */
 
+#ifdef USE_XPD_DMA_ERROR_DETECT
 /**
  * @brief  DMA Handle initializer macro
  * @param  INSTANCE: specifies the DMA stream instance.
@@ -130,6 +132,16 @@ typedef struct
     {.Inst      = (INSTANCE),                               \
      .Callbacks = {NULL,NULL,NULL},                         \
      .Owner     = NULL}
+#else
+/**
+ * @brief  DMA Handle initializer macro
+ * @param  INSTANCE: specifies the DMA stream instance.
+ */
+#define         NEW_DMA_HANDLE(INSTANCE)                    \
+    {.Inst      = (INSTANCE),                               \
+     .Callbacks = {NULL,NULL},                              \
+     .Owner     = NULL}
+#endif
 
 /**
  * @brief  Binds a DMA handle to a peripheral handle in both directions.
@@ -149,8 +161,6 @@ typedef struct
  *            @arg TC:      Transfer Complete Interrupt
  *            @arg HT:      Half Transfer Complete Interrupt
  *            @arg TE:      Transfer Error Interrupt
- *            @arg DME:     Direct Mode Error Interrupt
- *            @arg FE:      FIFO Error Interrupt
  */
 #define         XPD_DMA_EnableIT( HANDLE,  IT_NAME)         \
     (DMA_REG_BIT((HANDLE), CCR, IT_NAME##IE) = 1)
@@ -163,8 +173,6 @@ typedef struct
  *            @arg TC:      Transfer Complete Interrupt
  *            @arg HT:      Half Transfer Complete Interrupt
  *            @arg TE:      Transfer Error Interrupt
- *            @arg DME:     Direct Mode Error Interrupt
- *            @arg FE:      FIFO Error Interrupt
  */
 #define         XPD_DMA_DisableIT(HANDLE,   IT_NAME)        \
         (DMA_REG_BIT((HANDLE), CCR, IT_NAME##IE) = 0)
@@ -209,8 +217,8 @@ XPD_ReturnType  XPD_DMA_Deinit          (DMA_HandleType * hdma);
 void            XPD_DMA_Enable          (DMA_HandleType * hdma);
 void            XPD_DMA_Disable         (DMA_HandleType * hdma);
 
-void            XPD_DMA_Start           (DMA_HandleType * hdma, DMA_TransferType * Config);
-void            XPD_DMA_Start_IT        (DMA_HandleType * hdma, DMA_TransferType * Config);
+void            XPD_DMA_Start           (DMA_HandleType * hdma);
+void            XPD_DMA_Start_IT        (DMA_HandleType * hdma);
 XPD_ReturnType  XPD_DMA_Stop            (DMA_HandleType * hdma);
 void            XPD_DMA_Stop_IT         (DMA_HandleType * hdma);
 

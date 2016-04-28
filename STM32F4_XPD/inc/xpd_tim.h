@@ -87,7 +87,9 @@ typedef struct
         XPD_HandleCallbackType Trigger;      /*!< Trigger callback */
         XPD_HandleCallbackType Break;        /*!< Break callback */
         XPD_HandleCallbackType Commutation;  /*!< Commutation callback */
+#ifdef USE_XPD_DMA_ERROR_DETECT
         XPD_HandleCallbackType Error;        /*!< DMA error callback */
+#endif
     }Callbacks;                              /*   Handle Callbacks */
     struct {
         DMA_HandleType * Update;             /*!< DMA handle for update transfer */
@@ -103,6 +105,7 @@ typedef struct
 /** @defgroup TIM_Common_Exported_Macros TIM Common Exported Macros
  * @{ */
 
+#ifdef USE_XPD_DMA_ERROR_DETECT
 /**
  * @brief  TIM Handle initializer macro
  * @param  INSTANCE: specifies the TIM peripheral instance.
@@ -113,6 +116,18 @@ typedef struct
     {.Inst      = (INSTANCE),                                            \
      .Callbacks = {(INIT_FN),(DEINIT_FN),NULL,NULL,NULL,NULL,NULL,NULL}, \
      .ClockCtrl = XPD_##INSTANCE##_ClockCtrl}
+#else
+/**
+ * @brief  TIM Handle initializer macro
+ * @param  INSTANCE: specifies the TIM peripheral instance.
+ * @param  INIT_FN: specifies the dependency initialization function to call back.
+ * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
+ */
+#define         NEW_TIM_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)               \
+    {.Inst      = (INSTANCE),                                            \
+     .Callbacks = {(INIT_FN),(DEINIT_FN),NULL,NULL,NULL,NULL,NULL},      \
+     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl}
+#endif
 
 /**
  * @brief  Enable the specified TIM interrupt.

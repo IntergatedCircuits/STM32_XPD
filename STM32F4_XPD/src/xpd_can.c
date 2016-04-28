@@ -40,7 +40,11 @@
 /* Timeout for SLAK bit [ms] */
 #define SLAK_TIMEOUT      (10)
 
+#ifdef USE_XPD_CAN_ERROR_DETECT
 #define CAN_ERROR_INTERRUPTS    (CAN_IER_BOFIE | CAN_IER_EPVIE | CAN_IER_EWGIE | CAN_IER_LECIE)
+#else
+#define CAN_ERROR_INTERRUPTS     0
+#endif
 #define CAN_RECEIVE0_INTERRUPTS  CAN_IER_FMPIE0
 #define CAN_RECEIVE1_INTERRUPTS  CAN_IER_FMPIE1
 #define CAN_TRANSMIT_INTERRUPTS  CAN_IER_TMEIE
@@ -683,7 +687,8 @@ void XPD_CAN_RX1_IRQHandler(CAN_HandleType* hcan)
 void XPD_CAN_SCE_IRQHandler(CAN_HandleType* hcan)
 {
     /* check if errors are configured for interrupt and present */
-    if (((hcan->Inst->IER.w & CAN_ERROR_INTERRUPTS) != 0) && ((hcan->Inst->ESR.w & 0x77) != 0))
+    if (    ((hcan->Inst->IER.w & (CAN_IER_BOFIE | CAN_IER_EPVIE | CAN_IER_EWGIE | CAN_IER_LECIE)) != 0)
+         && ((hcan->Inst->ESR.w & 0x77) != 0))
     {
         /* call error callback function if interrupt is not by state change */
         XPD_SAFE_CALLBACK(hcan->Callbacks.Error, hcan);

@@ -40,12 +40,14 @@
 
 #define TIM_ACTIVE_CHANNELS(HANDLE) (HANDLE->Inst->CCER.w & TIM_ALL_CHANNELS)
 
+#ifdef USE_XPD_DMA_ERROR_DETECT
 static void tim_dmaErrorRedirect(void *hdma)
 {
     TIM_HandleType* htim = (TIM_HandleType*) ((DMA_HandleType*) hdma)->Owner;
 
     XPD_SAFE_CALLBACK(htim->Callbacks.Error, htim);
 }
+#endif
 static void tim_dmaUpdateRedirect(void *hdma)
 {
     TIM_HandleType* htim = (TIM_HandleType*) ((DMA_HandleType*) hdma)->Owner;
@@ -215,18 +217,17 @@ void XPD_TIM_CounterStart_DMA(TIM_HandleType * htim, void * Address, uint16_t Le
     /* set the DMA complete callback */
     htim->DMA.Update->Callbacks.Complete = tim_dmaUpdateRedirect;
 
+#ifdef USE_XPD_DMA_ERROR_DETECT
     /* set the DMA error callback */
     htim->DMA.Update->Callbacks.Error = tim_dmaErrorRedirect;
+#endif
 
     /* configure the DMA channel */
-    {
-        DMA_TransferType trf;
-        trf.DataCount     = Length;
-        trf.SourceAddress = Address;
-        trf.DestAddress   = (void *)&htim->Inst->ARR;
+    htim->DMA.Update->Transfer.DataCount     = Length;
+    htim->DMA.Update->Transfer.SourceAddress = Address;
+    htim->DMA.Update->Transfer.DestAddress   = (void *)&htim->Inst->ARR;
 
-        XPD_DMA_Start_IT(htim->DMA.Update, &trf);
-    }
+    XPD_DMA_Start_IT(htim->DMA.Update);
 
     /* enable the TIM Update DMA request */
     TIM_REG_BIT(htim, DIER, UDE) = 1;
@@ -663,16 +664,16 @@ void XPD_TIM_OutputStart_DMA(TIM_HandleType * htim, TIM_ChannelType Channel, voi
     /* callbacks subscription */
     htim->DMA.Channel[Channel]->Callbacks.Complete = tim_dmaChannelEventRedirects[Channel];
 
+#ifdef USE_XPD_DMA_ERROR_DETECT
     htim->DMA.Channel[Channel]->Callbacks.Error = tim_dmaErrorRedirect;
+#endif
 
-    {
-        DMA_TransferType trf;
-        trf.DataCount     = Length;
-        trf.SourceAddress = Address;
-        trf.DestAddress   = (void *)&((&htim->Inst->CCR1)[Channel]);
+    /* configure the DMA channel */
+    htim->DMA.Channel[Channel]->Transfer.DataCount     = Length;
+    htim->DMA.Channel[Channel]->Transfer.SourceAddress = Address;
+    htim->DMA.Channel[Channel]->Transfer.DestAddress   = (void *)&((&htim->Inst->CCR1)[Channel]);
 
-        XPD_DMA_Start_IT(htim->DMA.Channel[Channel], &trf);
-    }
+    XPD_DMA_Start_IT(htim->DMA.Channel[Channel]);
 
     XPD_TIM_ChannelEnableDMA(htim, Channel);
 

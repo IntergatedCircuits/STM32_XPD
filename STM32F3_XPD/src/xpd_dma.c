@@ -54,55 +54,31 @@ static void dma_calcBase(DMA_HandleType * hdma)
     hdma->Base_BB += 16 * DMA_CHANNEL_NUMBER(hdma->Inst);
 }
 
-static void dma_setConfig(DMA_HandleType * hdma, DMA_TransferType * Config)
+static void dma_setConfig(DMA_HandleType * hdma)
 {
     /* DMA Stream data length */
-    hdma->Inst->CNDTR = Config->DataCount;
+    hdma->Inst->CNDTR = hdma->Transfer.DataCount;
 
     /* if direction is mem2periph, M0 is source, P is destination */
     if (hdma->Inst->CCR.b.DIR == DMA_MEMORY2PERIPH)
     {
         /* DMA Stream source address */
-        hdma->Inst->CMAR = (uint32_t)Config->SourceAddress;
+        hdma->Inst->CMAR = (uint32_t)hdma->Transfer.SourceAddress;
 
         /* DMA Stream destination address */
-        hdma->Inst->CPAR = (uint32_t)Config->DestAddress;
+        hdma->Inst->CPAR = (uint32_t)hdma->Transfer.DestAddress;
     }
     else
     {
         /* DMA Stream source address */
-        hdma->Inst->CPAR = (uint32_t)Config->SourceAddress;
+        hdma->Inst->CPAR = (uint32_t)hdma->Transfer.SourceAddress;
 
         /* DMA Stream destination address */
-        hdma->Inst->CMAR = (uint32_t)Config->DestAddress;
+        hdma->Inst->CMAR = (uint32_t)hdma->Transfer.DestAddress;
     }
 
     /* reset error state */
     hdma->Errors = DMA_ERROR_NONE;
-}
-
-void dma_getConfig(DMA_HandleType * hdma, DMA_TransferType * Config)
-{
-    /* DMA Stream data length */
-    Config->DataCount = hdma->Inst->CNDTR;
-
-    /* if direction is mem2periph, M0 is source, P is destination */
-    if (hdma->Inst->CCR.b.DIR == DMA_MEMORY2PERIPH)
-    {
-        /* DMA Stream source address */
-        Config->SourceAddress = (void*)hdma->Inst->CMAR;
-
-        /* DMA Stream destination address */
-        Config->DestAddress = (void*)hdma->Inst->CPAR;
-    }
-    else
-    {
-        /* DMA Stream source address */
-        Config->SourceAddress = (void*)hdma->Inst->CPAR;
-
-        /* DMA Stream destination address */
-        Config->DestAddress = (void*)hdma->Inst->CMAR;
-    }
 }
 
 /** @defgroup DMA_Exported_Functions DMA Exported Functions
@@ -116,7 +92,6 @@ void dma_getConfig(DMA_HandleType * hdma, DMA_TransferType * Config)
  */
 XPD_ReturnType XPD_DMA_Init(DMA_HandleType * hdma, DMA_InitType * Config)
 {
-
     /* enable DMA clock */
     {
         uint32_t bo = DMA_BASE_OFFSET(hdma->Inst);
@@ -209,14 +184,13 @@ void XPD_DMA_Disable(DMA_HandleType * hdma)
 /**
  * @brief Sets up a DMA transfer and starts it.
  * @param hdma: pointer to the DMA stream handle structure
- * @param Config: pointer to the transfer configuration
  */
-void XPD_DMA_Start(DMA_HandleType * hdma, DMA_TransferType * Config)
+void XPD_DMA_Start(DMA_HandleType * hdma)
 {
     XPD_DMA_Disable(hdma);
 
     /* Configure the source, destination address and the data length */
-    dma_setConfig(hdma, Config);
+    dma_setConfig(hdma);
 
     XPD_DMA_Enable(hdma);
 }
@@ -224,17 +198,20 @@ void XPD_DMA_Start(DMA_HandleType * hdma, DMA_TransferType * Config)
 /**
  * @brief Sets up a DMA transfer, starts it and produces completion callback using the interrupt stack.
  * @param hdma: pointer to the DMA stream handle structure
- * @param Config: pointer to the transfer configuration
  */
-void XPD_DMA_Start_IT(DMA_HandleType * hdma, DMA_TransferType * Config)
+void XPD_DMA_Start_IT(DMA_HandleType * hdma)
 {
     XPD_DMA_Disable(hdma);
 
     /* Configure the source, destination address and the data length */
-    dma_setConfig(hdma, Config);
+    dma_setConfig(hdma);
 
     /* enable interrupts */
+#ifdef USE_XPD_DMA_ERROR_DETECT
     SET_BIT(hdma->Inst->CCR.w, (DMA_CCR_TCIE | DMA_CCR_HTIE | DMA_CCR_TEIE));
+#else
+    SET_BIT(hdma->Inst->CCR.w, (DMA_CCR_TCIE | DMA_CCR_HTIE));
+#endif
 
     XPD_DMA_Enable(hdma);
 }
@@ -267,7 +244,11 @@ void XPD_DMA_Stop_IT(DMA_HandleType *hdma)
     XPD_DMA_Disable(hdma);
 
     /* disable interrupts */
+#ifdef USE_XPD_DMA_ERROR_DETECT
     CLEAR_BIT(hdma->Inst->CCR.w, (DMA_CCR_TCIE | DMA_CCR_HTIE | DMA_CCR_TEIE));
+#else
+    CLEAR_BIT(hdma->Inst->CCR.w, (DMA_CCR_TCIE | DMA_CCR_HTIE));
+#endif
 }
 
 /**
@@ -377,6 +358,7 @@ void XPD_DMA_IRQHandler(DMA_HandleType * hdma)
         XPD_SAFE_CALLBACK(hdma->Callbacks.Complete,hdma);
     }
 
+#ifdef USE_XPD_DMA_ERROR_DETECT
     /* Transfer Error interrupt management */
     if (flags->ISR.TEIF1 != 0)
     {
@@ -386,8 +368,9 @@ void XPD_DMA_IRQHandler(DMA_HandleType * hdma)
         hdma->Errors |= DMA_ERROR_TRANSFER;
 
         /* transfer errors callback */
-        XPD_SAFE_CALLBACK(hdma->Callbacks.Error, hdma);
+        XPD_SAFE_CALLBACK(hdma->Callbacks.Error,hdma);
     }
+#endif
 }
 
 /** @} */
