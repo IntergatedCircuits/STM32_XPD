@@ -43,48 +43,40 @@
 #if defined(RCC_CFGR2_ADC1PRES) || defined(RCC_CFGR2_ADCPRE12)
 typedef enum
 {
-    ADC_CLOCKSOURCE_HCLK          = 0x00,
-    ADC_CLOCKSOURCE_PLLCLK_DIV1   = 0x10,
-    ADC_CLOCKSOURCE_PLLCLK_DIV2   = 0x11,
-    ADC_CLOCKSOURCE_PLLCLK_DIV4   = 0x12,
-    ADC_CLOCKSOURCE_PLLCLK_DIV6   = 0x13,
-    ADC_CLOCKSOURCE_PLLCLK_DIV8   = 0x14,
-    ADC_CLOCKSOURCE_PLLCLK_DIV10  = 0x15,
-    ADC_CLOCKSOURCE_PLLCLK_DIV12  = 0x16,
-    ADC_CLOCKSOURCE_PLLCLK_DIV16  = 0x17,
-    ADC_CLOCKSOURCE_PLLCLK_DIV32  = 0x18,
-    ADC_CLOCKSOURCE_PLLCLK_DIV64  = 0x19,
-    ADC_CLOCKSOURCE_PLLCLK_DIV128 = 0x1A,
-    ADC_CLOCKSOURCE_PLLCLK_DIV256 = 0x1B
+    ADC_CLOCKSOURCE_HCLK          = 0x00, /*!< HCLK clock source */
+    ADC_CLOCKSOURCE_PLLCLK_DIV1   = 0x10, /*!< PLLCLK clock source */
+    ADC_CLOCKSOURCE_PLLCLK_DIV2   = 0x11, /*!< PLLCLK / 2 clock source */
+    ADC_CLOCKSOURCE_PLLCLK_DIV4   = 0x12, /*!< PLLCLK / 4 clock source */
+    ADC_CLOCKSOURCE_PLLCLK_DIV6   = 0x13, /*!< PLLCLK / 6 clock source */
+    ADC_CLOCKSOURCE_PLLCLK_DIV8   = 0x14, /*!< PLLCLK / 8 clock source */
+    ADC_CLOCKSOURCE_PLLCLK_DIV10  = 0x15, /*!< PLLCLK / 10 clock source */
+    ADC_CLOCKSOURCE_PLLCLK_DIV12  = 0x16, /*!< PLLCLK / 12 clock source */
+    ADC_CLOCKSOURCE_PLLCLK_DIV16  = 0x17, /*!< PLLCLK / 16 clock source */
+    ADC_CLOCKSOURCE_PLLCLK_DIV32  = 0x18, /*!< PLLCLK / 32 clock source */
+    ADC_CLOCKSOURCE_PLLCLK_DIV64  = 0x19, /*!< PLLCLK / 64 clock source */
+    ADC_CLOCKSOURCE_PLLCLK_DIV128 = 0x1A, /*!< PLLCLK / 128 clock source */
+    ADC_CLOCKSOURCE_PLLCLK_DIV256 = 0x1B  /*!< PLLCLK / 256 clock source */
 }ADC_ClockSourceType;
 #elif defined(RCC_CFGR_ADCPRE)
 typedef enum
 {
-    ADC_CLOCKSOURCE_PCLK2_DIV2 = 0,
-    ADC_CLOCKSOURCE_PCLK2_DIV4 = 1,
-    ADC_CLOCKSOURCE_PCLK2_DIV6 = 2,
-    ADC_CLOCKSOURCE_PCLK2_DIV8 = 3
+    ADC_CLOCKSOURCE_PCLK2_DIV2 = 0, /*!< PCLK2 / 2 clock source */
+    ADC_CLOCKSOURCE_PCLK2_DIV4 = 1, /*!< PCLK2 / 4 clock source */
+    ADC_CLOCKSOURCE_PCLK2_DIV6 = 2, /*!< PCLK2 / 6 clock source */
+    ADC_CLOCKSOURCE_PCLK2_DIV8 = 3  /*!< PCLK2 / 8 clock source */
 }ADC_ClockSourceType;
 #endif
 /** @} */
 
 /** @defgroup ADC_Clock_Source_Exported_Functions ADC Clock Source Exported Functions
  * @{ */
-#ifdef RCC_CFGR2_ADCPRE12
+void            XPD_ADC_ClockConfig         (ADC_ClockSourceType ClockSource);
+uint32_t        XPD_ADC_GetClockFreq        (void);
+
+#if definde(RCC_CFGR2_ADCPRE12) && defined(RCC_CFGR2_ADCPRE34)
 void            XPD_ADC12_ClockConfig       (ADC_ClockSourceType ClockSource);
 uint32_t        XPD_ADC12_GetClockFreq      (void);
-#endif
 
-#ifdef RCC_CFGR2_ADC1PRES
-void            XPD_ADC1_ClockConfig        (ADC_ClockSourceType ClockSource);
-uint32_t        XPD_ADC1_GetClockFreq       (void);
-
-#elif defined(RCC_CFGR_ADCPRE)
-void            XPD_ADC1_ClockConfig        (ADC_ClockSourceType ClockSource);
-uint32_t        XPD_ADC1_GetClockFreq       (void);
-#endif
-
-#ifdef RCC_CFGR2_ADCPRE34
 void            XPD_ADC34_ClockConfig       (ADC_ClockSourceType ClockSource);
 uint32_t        XPD_ADC34_GetClockFreq      (void);
 #endif
@@ -110,8 +102,8 @@ uint32_t        XPD_ADC34_GetClockFreq      (void);
 /** @brief CEC clock source types */
 typedef enum
 {
-    CEC_CLOCKSOURCE_HSI_DIV244 = 0,
-    CEC_CLOCKSOURCE_LSE        = 1
+    CEC_CLOCKSOURCE_HSI_DIV244 = 0, /*!< HSI / 244 clock source */
+    CEC_CLOCKSOURCE_LSE        = 1  /*!< LSE clock source */
 }CEC_ClockSourceType;
 /** @} */
 

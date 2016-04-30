@@ -28,19 +28,60 @@
 /** @addtogroup ADC
  * @{ */
 
-/** @defgroup ADC_Clock_Source ADC Clock Source
+/** @addtogroup ADC_Clock_Source
  * @{ */
 
 #if defined(RCC_CFGR2_ADC1PRES) || defined(RCC_CFGR2_ADCPRE12)
 
+/* gets the clock division value from the prescaler configuration */
 static const uint16_t adc_clkPreTable[] = { 1, 2, 4, 6, 8, 10, 12, 16, 32, 64, 128, 256 };
 
 #endif
 /** @} */
 
-/** @defgroup ADC_Clock_Source_Exported_Functions ADC Clock Source Exported Functions
+/** @addtogroup ADC_Clock_Source_Exported_Functions
  * @{ */
-#ifdef RCC_CFGR2_ADCPRE12
+
+/**
+ * @brief Sets the new source clock for the ADCs.
+ * @param ClockSource: the new source clock which should be configured
+ */
+void XPD_ADC_ClockConfig(ADC_ClockSourceType ClockSource)
+{
+#if defined(RCC_CFGR_ADCPRE)
+    RCC->CFGR.b.ADCPRE    = ClockSource;
+#else
+    MODIFY_REG(RCC->CFGR.w, 0x3FF0, (ClockSource << 9) | (ClockSource << 4));
+#endif
+}
+
+/**
+ * @brief Returns the input clock frequency of the ADCs.
+ * @return The clock frequency of the ADCs in Hz
+ */
+uint32_t XPD_ADC_GetClockFreq(void)
+{
+#if defined(RCC_CFGR_ADCPRE)
+    return XPD_RCC_GetClockFreq(PCLK2) / ((RCC->CFGR2.b.ADCPRE + 1) * 2);
+#else
+#if defined(RCC_CFGR2_ADCPRE12)
+    ADC_ClockSourceType source = RCC->CFGR2.b.ADCPRE12;
+#elif defined(RCC_CFGR2_ADC1PRES)
+    ADC_ClockSourceType source = RCC->CFGR2.b.ADC1PRES;
+#endif
+
+    if (source == ADC_CLOCKSOURCE_HCLK)
+    {
+        return XPD_RCC_GetClockFreq(HCLK);
+    }
+    else
+    {
+        return XPD_RCC_GetOscFreq(PLL) / (uint32_t)adc_clkPreTable[source & 0xF];
+    }
+#endif
+}
+
+#if defined(RCC_CFGR2_ADCPRE12) && defined(RCC_CFGR2_ADCPRE34)
 /**
  * @brief Sets the new source clock for the ADC1 and ADC2.
  * @param ClockSource: the new source clock which should be configured
@@ -56,67 +97,9 @@ void XPD_ADC12_ClockConfig(ADC_ClockSourceType ClockSource)
  */
 uint32_t XPD_ADC12_GetClockFreq(void)
 {
-    ADC_ClockSourceType source = RCC->CFGR2.b.ADCPRE12;
-
-    if (source == ADC_CLOCKSOURCE_HCLK)
-    {
-        return XPD_RCC_GetClockFreq(HCLK);
-    }
-    else
-    {
-        return XPD_RCC_GetOscFreq(PLL) / (uint32_t)adc_clkPreTable[source & 0xF];
-    }
-}
-#endif
-
-#ifdef RCC_CFGR2_ADC1PRES
-/**
- * @brief Sets the new source clock for the ADC1.
- * @param ClockSource: the new source clock which should be configured
- */
-void XPD_ADC1_ClockConfig(ADC_ClockSourceType ClockSource)
-{
-    RCC->CFGR2.b.ADC1PRES = ClockSource;
+    return XPD_ADC_GetClockFreq();
 }
 
-/**
- * @brief Returns the input clock frequency of the ADC1.
- * @return The clock frequency of the ADC1 in Hz
- */
-uint32_t XPD_ADC1_GetClockFreq(void)
-{
-    ADC_ClockSourceType source = RCC->CFGR2.b.ADC1PRES;
-
-    if (source == ADC_CLOCKSOURCE_HCLK)
-    {
-        return XPD_RCC_GetClockFreq(HCLK);
-    }
-    else
-    {
-        return XPD_RCC_GetOscFreq(PLL) / (uint32_t)adc_clkPreTable[source & 0xF];
-    }
-}
-#elif defined(RCC_CFGR_ADCPRE)
-/**
- * @brief Sets the new source clock for the ADC1.
- * @param ClockSource: the new source clock which should be configured
- */
-void XPD_ADC1_ClockConfig(ADC_ClockSourceType ClockSource)
-{
-    RCC->CFGR.b.ADCPRE = ClockSource;
-}
-
-/**
- * @brief Returns the input clock frequency of the ADC1.
- * @return The clock frequency of the ADC1 in Hz
- */
-uint32_t XPD_ADC1_GetClockFreq(void)
-{
-    return XPD_RCC_GetClockFreq(PCLK2) / ((RCC->CFGR2.b.ADCPRE + 1) * 2);
-}
-#endif
-
-#ifdef RCC_CFGR2_ADCPRE34
 /**
  * @brief Sets the new source clock for the ADC3 and ADC4.
  * @param ClockSource: the new source clock which should be configured
