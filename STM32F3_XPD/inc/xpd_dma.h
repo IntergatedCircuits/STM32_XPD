@@ -38,8 +38,7 @@ typedef enum
 {
     DMA_PERIPH2MEMORY = 0, /*!< Data is transferred from peripheral to memory */
     DMA_MEMORY2PERIPH = 1, /*!< Data is transferred from memory to peripheral */
-    DMA_MEMORY2MEMORY = 2  /*!< Data is transferred from memory to memory
-                                @note Must use normal mode with FIFO for this direction */
+    DMA_MEMORY2MEMORY = 2  /*!< Data is transferred from memory to memory */
 }DMA_DirectionType;
 
 /** @brief DMA data alignment types */
@@ -74,8 +73,7 @@ typedef enum
 /** @brief DMA channel setup structure */
 typedef struct
 {
-    uint8_t           Channel;          /*!< Channel selection for the DMA stream [0 .. 7] */
-    DMA_DirectionType Direction;        /*!< DMA stream direction */
+    DMA_DirectionType Direction;        /*!< DMA channel direction */
     DMA_ModeType      Mode;             /*!< DMA operating mode */
     LevelType         Priority;         /*!< DMA bus arbitration priority level */
     struct {
@@ -96,7 +94,7 @@ typedef struct
     uint16_t DataCount;       /*!< The amount of data to transfer */
 }DMA_TransferType;
 
-/** @brief DMA stream handle structure */
+/** @brief DMA channel handle structure */
 typedef struct
 {
     DMA_Channel_TypeDef * Inst;               /*!< The address of the peripheral instance used by the handle */
@@ -226,9 +224,6 @@ XPD_ReturnType  XPD_DMA_PollStatus      (DMA_HandleType * hdma, DMA_OperationTyp
 DMA_ErrorType   XPD_DMA_GetError        (DMA_HandleType * hdma);
 
 void            XPD_DMA_IRQHandler      (DMA_HandleType * hdma);
-
-uint32_t        XPD_DMA_GetActiveMemory (DMA_HandleType * hdma);
-void            XPD_DMA_SetSwapMemory   (DMA_HandleType * hdma, void * Address);
 /** @} */
 
 /** @} */

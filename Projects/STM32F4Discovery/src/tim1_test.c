@@ -76,9 +76,9 @@ void tim_break(void * tim)
 
 void tim1_test(void)
 {
-    TIM_CounterInitType itim;
-    TIM_OutputChannelInitType chinit;
-    TIM_OutputBreakType brk;
+    TIM_Counter_InitType itim;
+    TIM_Output_InitType chinit;
+    TIM_Output_DriveType brk;
 
     itim.Prescaler = 16800; // get counter to 10 kHz
     itim.Period    = 10000; // get update to 1 Hz
@@ -88,41 +88,41 @@ void tim1_test(void)
     XPD_TIM_Init(&tim1, &itim);
 
     tim1.Callbacks.Update = tim_updated;
-    XPD_TIM_CounterStart_IT(&tim1);
+    XPD_TIM_Counter_Start_IT(&tim1);
 
     XPD_Delay_ms(1500);
 
-    XPD_TIM_CounterStop_IT(&tim1);
+    XPD_TIM_Counter_Stop_IT(&tim1);
 
     chinit.Output = TIM_OUTPUT_PWM1;
     chinit.Channel.ActiveLevel = ACTIVE_HIGH;
     chinit.Channel.IdleState = RESET;
     chinit.CompChannel.ActiveLevel = ACTIVE_HIGH;
     chinit.CompChannel.IdleState = RESET;
-    XPD_TIM_OutputInit(&tim1, TIM_CHANNEL_1, &chinit);
+    XPD_TIM_Output_Init(&tim1, TIM_CHANNEL_1, &chinit);
     chinit.Output = TIM_OUTPUT_PWM2;
-    XPD_TIM_OutputInit(&tim1, TIM_CHANNEL_4, &chinit);
+    XPD_TIM_Output_Init(&tim1, TIM_CHANNEL_4, &chinit);
 
-    XPD_TIM_ChannelSetPulse(&tim1, TIM_CHANNEL_1, itim.Period - 4000);
+    XPD_TIM_Channel_SetPulse(&tim1, TIM_CHANNEL_1, itim.Period - 4000);
 
-    XPD_TIM_ChannelSetPulse(&tim1, TIM_CHANNEL_4, itim.Period * 1 / 2);
+    XPD_TIM_Channel_SetPulse(&tim1, TIM_CHANNEL_4, itim.Period * 1 / 2);
 
     brk.AutomaticOutput = ENABLE;
-    brk.BreakState = ENABLE;
-    brk.BreakPolarity = ACTIVE_HIGH;
+    brk.Break.State = ENABLE;
+    brk.Break.Polarity = ACTIVE_HIGH;
     brk.LockLevel = 0;
-    brk.OffStateIdle = ENABLE;
-    brk.OffStateRun = ENABLE;
-    XPD_TIM_OutputBreakConfig(&tim1, &brk);
+    brk.IdleOffState = ENABLE;
+    brk.RunOffState = ENABLE;
+    XPD_TIM_Output_DriveConfig(&tim1, &brk);
 
     tim1.Callbacks.Break = tim_break;
     XPD_TIM_EnableIT(&tim1,B);
 
-    XPD_TIM_OutputSetDeadtime(&tim1, 1008);
+    XPD_TIM_Output_SetDeadtime(&tim1, 1008);
 
-    XPD_TIM_OutputStart(&tim1, TIM_CHANNEL_1);
+    XPD_TIM_Output_Start(&tim1, TIM_CHANNEL_1);
 
-    XPD_TIM_OutputStart(&tim1, TIM_CHANNEL_4);
+    XPD_TIM_Output_Start(&tim1, TIM_CHANNEL_4);
 
 
 }

@@ -55,7 +55,7 @@ static void timx_init(TIM_HandleType * tim)
 
 static void timx_channelcb(TIM_HandleType * tim)
 {
-    if (XPD_TIM_GetCurrentChannel(tim) == TIM_CHANNEL_3)
+    if (XPD_TIM_Channel_GetActive(tim) == TIM_CHANNEL_3)
         passedtests++;
 }
 
@@ -68,9 +68,7 @@ uint32_t values[8] = {0,1250,2500,3750,5000,6250,7500,8750};
 
 void tim_dma_test(void)
 {
-    TIM_CounterInitType itim;
-    TIM_OutputChannelInitType chinit;
-    TIM_OutputBreakType brk;
+    TIM_Counter_InitType itim;
 
     itim.Prescaler = 168;   // get counter to 1 MHz
     itim.Period    = 10000; // get update to 100 Hz
@@ -81,5 +79,5 @@ void tim_dma_test(void)
 
     timx.Callbacks.ChannelEvent = (XPD_HandleCallbackType) timx_channelcb;
 
-    XPD_TIM_OutputStart_DMA(&timx, TIM_CHANNEL_3, &values, 8);
+    XPD_TIM_Output_Start_DMA(&timx, TIM_CHANNEL_3, &values, 8);
 }

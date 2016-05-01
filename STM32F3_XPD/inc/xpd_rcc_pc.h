@@ -68,7 +68,7 @@ typedef enum
 #endif
 /** @} */
 
-/** @defgroup ADC_Clock_Source_Exported_Functions ADC Clock Source Exported Functions
+/** @addtogroup ADC_Clock_Source_Exported_Functions
  * @{ */
 void            XPD_ADC_ClockConfig         (ADC_ClockSourceType ClockSource);
 uint32_t        XPD_ADC_GetClockFreq        (void);
@@ -107,7 +107,7 @@ typedef enum
 }CEC_ClockSourceType;
 /** @} */
 
-/** @defgroup CEC_Clock_Source_Exported_Functions CEC Clock Source Exported Functions
+/** @addtogroup CEC_Clock_Source_Exported_Functions
  * @{ */
 void            XPD_CEC_ClockConfig         (CEC_ClockSourceType ClockSource);
 uint32_t        XPD_CEC_GetClockFreq        (void);
@@ -138,7 +138,7 @@ typedef enum
 }I2C_ClockSourceType;
 /** @} */
 
-/** @defgroup I2C_Clock_Source_Exported_Functions I2C Clock Source Exported Functions
+/** @addtogroup I2C_Clock_Source_Exported_Functions
  * @{ */
 void            XPD_I2C_ClockConfig         (I2C_HandleType * hi2c, I2C_ClockSourceType ClockSource);
 uint32_t        XPD_I2C_GetClockFreq        (I2C_HandleType * hi2c);
@@ -171,7 +171,7 @@ typedef enum
 /** @} */
 #endif
 
-/** @defgroup I2S_Clock_Source_Exported_Functions I2S Clock Source Exported Functions
+/** @addtogroup I2S_Clock_Source_Exported_Functions
  * @{ */
 #if defined(RCC_CFGR_I2SSRC)
 void            XPD_I2S_ClockConfig         (I2S_ClockSourceType ClockSource);
@@ -204,7 +204,7 @@ typedef enum
 }RTC_ClockSourceType;
 /** @} */
 
-/** @defgroup RTC_Clock_Source_Exported_Functions RTC Clock Source Exported Functions
+/** @addtogroup RTC_Clock_Source_Exported_Functions
  * @{ */
 XPD_ReturnType  XPD_RTC_ClockConfig         (RTC_ClockSourceType ClockSource);
 uint32_t        XPD_RTC_GetClockFreq        (void);
@@ -249,7 +249,7 @@ typedef enum
 }SDADC_ClockSourceType;
 /** @} */
 
-/** @defgroup SDADC_Clock_Source_Exported_Functions SDADC Clock Source Exported Functions
+/** @addtogroup SDADC_Clock_Source_Exported_Functions
  * @{ */
 void            XPD_SDADC_ClockConfig       (SDADC_ClockSourceType ClockSource);
 uint32_t        XPD_SDADC_GetClockFreq      (void);
@@ -280,9 +280,8 @@ typedef enum
 }TIM_ClockSourceType;
 /** @} */
 
-/** @defgroup TIM_Clock_Source_Exported_Functions TIM Clock Source Exported Functions
+/** @addtogroup TIM_Clock_Source_Exported_Functions
  * @{ */
-
 void            XPD_TIM_ClockConfig         (TIM_HandleType * htim, TIM_ClockSourceType ClockSource);
 uint32_t        XPD_TIM_GetClockFreq        (TIM_HandleType * htim);
 /** @} */
@@ -314,7 +313,7 @@ typedef enum
 }USART_ClockSourceType;
 /** @} */
 
-/** @defgroup USART_Clock_Source_Exported_Functions USART Clock Source Exported Functions
+/** @addtogroup USART_Clock_Source_Exported_Functions
  * @{ */
 void            XPD_USART_ClockConfig       (USART_ClockSourceType ClockSource);
 uint32_t        XPD_USART_GetClockFreq      (void);
@@ -345,7 +344,7 @@ typedef enum
 }USB_ClockSourceType;
 /** @} */
 
-/** @defgroup USBD_Clock_Source_Exported_Functions USBD Clock Source Exported Functions
+/** @addtogroup USB_Clock_Source_Exported_Functions
  * @{ */
 void            XPD_USB_ClockConfig         (USB_ClockSourceType ClockSource);
 /** @} */

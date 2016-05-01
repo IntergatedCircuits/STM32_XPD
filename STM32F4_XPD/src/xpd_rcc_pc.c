@@ -33,7 +33,7 @@
 /** @addtogroup RTC_Clock_Source
  * @{ */
 
-/** @addtogroup RTC_Clock_Source_Exported_Functions
+/** @defgroup RTC_Clock_Source_Exported_Functions RTC Clock Source Exported Functions
  * @{ */
 
 /**
@@ -152,7 +152,7 @@ uint32_t XPD_RTC_GetClockFreq(void)
 /** @addtogroup TIM_Clock_Source
  * @{ */
 
-/** @addtogroup TIM_Clock_Source_Exported_Functions
+/** @defgroup TIM_Clock_Source_Exported_Functions TIM Clock Source Exported Functions
  * @{ */
 
 #ifdef RCC_DCKCFGR_TIMPRE
@@ -242,3 +242,32 @@ uint32_t XPD_TIM_GetClockFreq(TIM_HandleType * htim)
 /** @} */
 
 #endif /* USE_XPD_TIM */
+
+#if defined(USE_XPD_USART)
+
+/** @addtogroup USART
+ * @{ */
+
+/** @addtogroup USART_Clock_Source
+ * @{ */
+
+/** @defgroup USART_Clock_Source_Exported_Functions USART Clock Source Exported Functions
+ * @{ */
+
+/**
+ * @brief Returns the input clock frequency of the USART.
+ * @param husart: pointer to the USART handle structure
+ * @return The clock frequency of the USART in Hz
+ */
+uint32_t XPD_USART_GetClockFreq(USART_HandleType * husart)
+{
+    return XPD_RCC_GetClockFreq((((uint32_t)husart->Inst) < APB2PERIPH_BASE) ? PCLK1 : PCLK2);
+}
+
+/** @} */
+
+/** @} */
+
+/** @} */
+
+#endif /* USE_XPD_USART */

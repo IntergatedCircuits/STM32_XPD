@@ -222,9 +222,7 @@ void XPD_Deinit(void)
     XPD_SuspendTimer();
 
     /* Reset of all peripherals */
-    XPD_RCC_ResetAHB1();
-    XPD_RCC_ResetAHB2();
-    XPD_RCC_ResetAHB3();
+    XPD_RCC_ResetAHB();
     XPD_RCC_ResetAPB1();
     XPD_RCC_ResetAPB2();
 }

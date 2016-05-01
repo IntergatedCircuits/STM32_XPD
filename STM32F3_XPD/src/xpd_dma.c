@@ -105,8 +105,6 @@ XPD_ReturnType XPD_DMA_Init(DMA_HandleType * hdma, DMA_InitType * Config)
     hdma->Inst_BB = DMA_Channel_BB(hdma->Inst);
 #endif
 
-    DMA_REG_BIT(hdma,CCR,PL) = 0;
-
     hdma->Inst->CCR.b.PL         = Config->Priority;
     hdma->Inst->CCR.b.DIR        = Config->Direction;
     DMA_REG_BIT(hdma,CCR,CIRC)   = Config->Mode;

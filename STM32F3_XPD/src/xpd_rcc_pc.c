@@ -39,7 +39,7 @@ static const uint16_t adc_clkPreTable[] = { 1, 2, 4, 6, 8, 10, 12, 16, 32, 64, 1
 #endif
 /** @} */
 
-/** @addtogroup ADC_Clock_Source_Exported_Functions
+/** @defgroup ADC_Clock_Source_Exported_Functions ADC Clock Source Exported Functions
  * @{ */
 
 /**
@@ -142,7 +142,7 @@ uint32_t XPD_ADC34_GetClockFreq(void)
 /** @addtogroup CEC_Clock_Source
  * @{ */
 
-/** @addtogroup CEC_Clock_Source_Exported_Functions
+/** @defgroup CEC_Clock_Source_Exported_Functions CEC Clock Source Exported Functions
  * @{ */
 
 /**
@@ -182,7 +182,7 @@ uint32_t XPD_CEC_GetClockFreq(void)
 /** @addtogroup I2C_Clock_Source
  * @{ */
 
-/** @addtogroup I2C_Clock_Source_Exported_Functions
+/** @defgroup I2C_Clock_Source_Exported_Functions I2C Clock Source Exported Functions
  * @{ */
 
 /**
@@ -272,7 +272,7 @@ uint32_t XPD_I2C_GetClockFreq(I2C_HandleType * hi2c)
 /** @addtogroup I2S_Clock_Source
  * @{ */
 
-/** @addtogroup I2S_Clock_Source_Exported_Functions
+/** @defgroup I2S_Clock_Source_Exported_Functions I2S Clock Source Exported Functions
  * @{ */
 
 #if defined(RCC_CFGR_I2SSRC)
@@ -318,7 +318,7 @@ uint32_t XPD_I2S_GetClockFreq(void)
 /** @addtogroup RTC_Clock_Source
  * @{ */
 
-/** @addtogroup RTC_Clock_Source_Exported_Functions
+/** @defgroup RTC_Clock_Source_Exported_Functions RTC Clock Source Exported Functions
  * @{ */
 
 /**
@@ -421,7 +421,7 @@ uint32_t XPD_RTC_GetClockFreq(void)
 /** @addtogroup SDADC_Clock_Source
  * @{ */
 
-/** @addtogroup SDADC_Clock_Source_Exported_Functions
+/** @defgroup SDADC_Clock_Source_Exported_Functions SDADC Clock Source Exported Functions
  * @{ */
 
 /**
@@ -469,7 +469,7 @@ uint32_t XPD_SDADC_GetClockFreq(void)
 /** @addtogroup TIM_Clock_Source
  * @{ */
 
-/** @addtogroup TIM_Clock_Source_Exported_Functions
+/** @defgroup TIM_Clock_Source_Exported_Functions TIM Clock Source Exported Functions
  * @{ */
 
 /**
@@ -661,7 +661,7 @@ uint32_t XPD_TIM_GetClockFreq(TIM_HandleType * htim)
 /** @addtogroup USART_Clock_Source
  * @{ */
 
-/** @addtogroup USART_Clock_Source_Exported_Functions
+/** @defgroup USART_Clock_Source_Exported_Functions USART Clock Source Exported Functions
  * @{ */
 
 /**
@@ -777,7 +777,7 @@ uint32_t XPD_USART_GetClockFreq(USART_HandleType * husart)
 /** @addtogroup USB_Clock_Source
  * @{ */
 
-/** @addtogroup USB_Clock_Source_Exported_Functions
+/** @defgroup USB_Clock_Source_Exported_Functions USB Clock Source Exported Functions
  * @{ */
 
 /**

@@ -47,7 +47,7 @@ typedef enum
 }RTC_ClockSourceType;
 /** @} */
 
-/** @defgroup RTC_Clock_Source_Exported_Functions RTC Clock Source Exported Functions
+/** @addtogroup RTC_Clock_Source_Exported_Functions
  * @{ */
 XPD_ReturnType  XPD_RTC_ClockConfig         (RTC_ClockSourceType ClockSource);
 uint32_t        XPD_RTC_GetClockFreq        (void);
@@ -82,7 +82,7 @@ typedef enum
 /** @} */
 #endif
 
-/** @defgroup TIM_Clock_Source_Exported_Functions TIM Clock Source Exported Functions
+/** @addtogroup TIM_Clock_Source_Exported_Functions
  * @{ */
 #ifdef RCC_DCKCFGR_TIMPRE
 void            XPD_TIM_ClockConfig         (TIM_ClockSourceType ClockSource);
@@ -94,5 +94,24 @@ uint32_t        XPD_TIM_GetClockFreq        (TIM_HandleType * htim);
 
 /** @} */
 #endif /* USE_XPD_TIM */
+
+#if defined(USE_XPD_USART)
+#include "xpd_usart.h"
+
+/** @addtogroup USART
+ * @{ */
+
+/** @defgroup USART_Clock_Source USART Clock Source
+ * @{ */
+
+/** @addtogroup USART_Clock_Source_Exported_Functions
+ * @{ */
+uint32_t        XPD_USART_GetClockFreq      (USART_HandleType * husart);
+/** @} */
+
+/** @} */
+
+/** @} */
+#endif /* USE_XPD_USART */
 
 #endif /* XPD_RCC_PC_H_ */
