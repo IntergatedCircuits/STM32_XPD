@@ -518,13 +518,10 @@ typedef struct {
         __IO uint32_t w;
     } CCR;                                   /*!< ADC common control register,                 Address offset: ADC1 base address + 0x304 */
     union {
-        struct {
-            __IO uint32_t DATA1 : 16;                /*!<1st data of a pair of regular conversions */
-            __IO uint32_t DATA2 : 16;                /*!<2nd data of a pair of regular conversions */
-        } b;
+        __IO uint16_t DATA[2];                   /*!< data pair of regular conversions */
         __IO uint32_t w;
     } CDR;                                   /*!< ADC common regular data register for dual
-                                 AND triple modes,                            Address offset: ADC1 base address + 0x308 */
+                                                  AND triple modes,                            Address offset: ADC1 base address + 0x308 */
 } ADC_Common_TypeDef;
 
 
@@ -5772,9 +5769,12 @@ typedef struct {
 } USB_OTG_TypeDef;
 
 
+/**
+  * @}
+  */
 
-/** 
-  * @brief Peripheral_memory_map
+/** @addtogroup Peripheral_memory_map
+  * @{
   */
 #define FLASH_BASE            ((uint32_t)0x08000000) /*!< FLASH(up to 1 MB) base address in the alias region                         */
 #define CCMDATARAM_BASE       ((uint32_t)0x10000000) /*!< CCM(core coupled memory) data RAM(64 KB) base address in the alias region  */
@@ -9309,23 +9309,6 @@ typedef struct {
 #define GPIO_IDR_IDR_13                      ((uint32_t)0x00002000)
 #define GPIO_IDR_IDR_14                      ((uint32_t)0x00004000)
 #define GPIO_IDR_IDR_15                      ((uint32_t)0x00008000)
-/* Old GPIO_IDR register bits definition, maintained for legacy purpose */
-#define GPIO_OTYPER_IDR_0                    GPIO_IDR_IDR_0
-#define GPIO_OTYPER_IDR_1                    GPIO_IDR_IDR_1
-#define GPIO_OTYPER_IDR_2                    GPIO_IDR_IDR_2
-#define GPIO_OTYPER_IDR_3                    GPIO_IDR_IDR_3
-#define GPIO_OTYPER_IDR_4                    GPIO_IDR_IDR_4
-#define GPIO_OTYPER_IDR_5                    GPIO_IDR_IDR_5
-#define GPIO_OTYPER_IDR_6                    GPIO_IDR_IDR_6
-#define GPIO_OTYPER_IDR_7                    GPIO_IDR_IDR_7
-#define GPIO_OTYPER_IDR_8                    GPIO_IDR_IDR_8
-#define GPIO_OTYPER_IDR_9                    GPIO_IDR_IDR_9
-#define GPIO_OTYPER_IDR_10                   GPIO_IDR_IDR_10
-#define GPIO_OTYPER_IDR_11                   GPIO_IDR_IDR_11
-#define GPIO_OTYPER_IDR_12                   GPIO_IDR_IDR_12
-#define GPIO_OTYPER_IDR_13                   GPIO_IDR_IDR_13
-#define GPIO_OTYPER_IDR_14                   GPIO_IDR_IDR_14
-#define GPIO_OTYPER_IDR_15                   GPIO_IDR_IDR_15
 
 /******************  Bits definition for GPIO_ODR register  *******************/
 #define GPIO_ODR_ODR_0                       ((uint32_t)0x00000001)
@@ -9344,23 +9327,6 @@ typedef struct {
 #define GPIO_ODR_ODR_13                      ((uint32_t)0x00002000)
 #define GPIO_ODR_ODR_14                      ((uint32_t)0x00004000)
 #define GPIO_ODR_ODR_15                      ((uint32_t)0x00008000)
-/* Old GPIO_ODR register bits definition, maintained for legacy purpose */
-#define GPIO_OTYPER_ODR_0                    GPIO_ODR_ODR_0
-#define GPIO_OTYPER_ODR_1                    GPIO_ODR_ODR_1
-#define GPIO_OTYPER_ODR_2                    GPIO_ODR_ODR_2
-#define GPIO_OTYPER_ODR_3                    GPIO_ODR_ODR_3
-#define GPIO_OTYPER_ODR_4                    GPIO_ODR_ODR_4
-#define GPIO_OTYPER_ODR_5                    GPIO_ODR_ODR_5
-#define GPIO_OTYPER_ODR_6                    GPIO_ODR_ODR_6
-#define GPIO_OTYPER_ODR_7                    GPIO_ODR_ODR_7
-#define GPIO_OTYPER_ODR_8                    GPIO_ODR_ODR_8
-#define GPIO_OTYPER_ODR_9                    GPIO_ODR_ODR_9
-#define GPIO_OTYPER_ODR_10                   GPIO_ODR_ODR_10
-#define GPIO_OTYPER_ODR_11                   GPIO_ODR_ODR_11
-#define GPIO_OTYPER_ODR_12                   GPIO_ODR_ODR_12
-#define GPIO_OTYPER_ODR_13                   GPIO_ODR_ODR_13
-#define GPIO_OTYPER_ODR_14                   GPIO_ODR_ODR_14
-#define GPIO_OTYPER_ODR_15                   GPIO_ODR_ODR_15
 
 /******************  Bits definition for GPIO_BSRR register  ******************/
 #define GPIO_BSRR_BS_0                       ((uint32_t)0x00000001)
@@ -9566,9 +9532,6 @@ typedef struct {
 #define  PWR_CR_FPDS                         ((uint32_t)0x00000200)     /*!< Flash power down in Stop mode                        */
 #define  PWR_CR_VOS                          ((uint32_t)0x00004000)     /*!< VOS bit (Regulator voltage scaling output selection) */
 
-/* Legacy define */
-#define  PWR_CR_PMODE                        PWR_CR_VOS
-
 /*******************  Bit definition for PWR_CSR register  ********************/
 #define  PWR_CSR_WUF                         ((uint32_t)0x00000001)     /*!< Wakeup Flag                                      */
 #define  PWR_CSR_SBF                         ((uint32_t)0x00000002)     /*!< Standby Flag                                     */
@@ -9577,9 +9540,6 @@ typedef struct {
 #define  PWR_CSR_EWUP                        ((uint32_t)0x00000100)     /*!< Enable WKUP pin                                  */
 #define  PWR_CSR_BRE                         ((uint32_t)0x00000200)     /*!< Backup regulator enable                          */
 #define  PWR_CSR_VOSRDY                      ((uint32_t)0x00004000)     /*!< Regulator voltage scaling output selection ready */
-
-/* Legacy define */
-#define  PWR_CSR_REGRDY                      PWR_CSR_VOSRDY
 
 /******************************************************************************/
 /*                                                                            */
@@ -9824,9 +9784,6 @@ typedef struct {
 #define  RCC_APB2RSTR_TIM9RST                ((uint32_t)0x00010000)
 #define  RCC_APB2RSTR_TIM10RST               ((uint32_t)0x00020000)
 #define  RCC_APB2RSTR_TIM11RST               ((uint32_t)0x00040000)
-
-/* Old SPI1RST bit definition, maintained for legacy purpose */
-#define  RCC_APB2RSTR_SPI1                   RCC_APB2RSTR_SPI1RST
 
 /********************  Bit definition for RCC_AHB1ENR register  ***************/
 #define  RCC_AHB1ENR_GPIOAEN                 ((uint32_t)0x00000001)
@@ -10666,8 +10623,6 @@ typedef struct {
 
 /******************  Bit definition for SYSCFG_PMC register  ******************/
 #define SYSCFG_PMC_MII_RMII_SEL         ((uint32_t)0x00800000) /*!<Ethernet PHY interface selection */
-/* Old MII_RMII_SEL bit definition, maintained for legacy purpose */
-#define SYSCFG_PMC_MII_RMII             SYSCFG_PMC_MII_RMII_SEL
 
 /*****************  Bit definition for SYSCFG_EXTICR1 register  ***************/
 #define SYSCFG_EXTICR1_EXTI0            ((uint32_t)0x000F) /*!<EXTI 0 configuration */
@@ -11356,8 +11311,6 @@ typedef struct {
 #define  DBGMCU_APB1_FZ_DBG_I2C3_SMBUS_TIMEOUT   ((uint32_t)0x00800000)
 #define  DBGMCU_APB1_FZ_DBG_CAN1_STOP            ((uint32_t)0x02000000)
 #define  DBGMCU_APB1_FZ_DBG_CAN2_STOP            ((uint32_t)0x04000000)
-/* Old IWDGSTOP bit definition, maintained for legacy purpose */
-#define  DBGMCU_APB1_FZ_DBG_IWDEG_STOP           DBGMCU_APB1_FZ_DBG_IWDG_STOP
 
 /********************  Bit definition for DBGMCU_APB2_FZ register  ************/
 #define  DBGMCU_APB2_FZ_DBG_TIM1_STOP        ((uint32_t)0x00000001)
@@ -12372,6 +12325,10 @@ typedef struct {
 /****************************** SDIO Instances ********************************/
 #define IS_SDIO_ALL_INSTANCE(INSTANCE) ((INSTANCE) == SDIO)
 
+/**
+  * @}
+  */
+
 /****************************** USB Exported Constants ************************/
 #define USB_OTG_FS_HOST_MAX_CHANNEL_NBR                8
 #define USB_OTG_FS_MAX_IN_ENDPOINTS                    4    /* Including EP0 */
@@ -12397,9 +12354,6 @@ typedef struct {
 /* Aliases for __IRQHandler */
 #define FMC_IRQHandler        FSMC_IRQHandler
 
-/**
-  * @}
-  */
 
 /** @defgroup ADC_Internal_Channels ADC Internal Channels
   * @{
@@ -12511,16 +12465,16 @@ typedef struct
 #define GPIO_TIM14_AF9         ((uint8_t)0x09)  /* TIM14 Alternate Function mapping */
 
 /* AF 10 selection */
-#define GPIO_OTG_FS_AF10        ((uint8_t)0xA)  /* OTG_FS Alternate Function mapping */
-#define GPIO_OTG_HS_AF10        ((uint8_t)0xA)  /* OTG_HS Alternate Function mapping */
+#define GPIO_OTG_FS_AF10       ((uint8_t)0x0A)  /* OTG_FS Alternate Function mapping */
+#define GPIO_OTG_HS_AF10       ((uint8_t)0x0A)  /* OTG_HS Alternate Function mapping */
 
 /* AF 12 selection */
-#define GPIO_FSMC_AF12          ((uint8_t)0xC)  /* FSMC Alternate Function mapping                     */
-#define GPIO_OTG_HS_FS_AF12     ((uint8_t)0xC)  /* OTG HS configured in FS, Alternate Function mapping */
-#define GPIO_SDIO_AF12          ((uint8_t)0xC)  /* SDIO Alternate Function mapping                     */
+#define GPIO_FSMC_AF12         ((uint8_t)0x0C)  /* FSMC Alternate Function mapping                     */
+#define GPIO_OTG_HS_FS_AF12    ((uint8_t)0x0C)  /* OTG HS configured in FS, Alternate Function mapping */
+#define GPIO_SDIO_AF12         ((uint8_t)0x0C)  /* SDIO Alternate Function mapping                     */
 
 /* AF 15 selection */
-#define GPIO_EVENTOUT_AF15      ((uint8_t)0x0F)  /* EVENTOUT Alternate Function mapping */
+#define GPIO_EVENTOUT_AF15     ((uint8_t)0x0F)  /* EVENTOUT Alternate Function mapping */
 
 /**
   * @}

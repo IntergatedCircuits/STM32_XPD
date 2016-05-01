@@ -772,7 +772,7 @@ typedef struct {
          uint32_t __RESERVED4;               /*!< Reserved, 0x218                                                    */
     __IO uint32_t FA1R;                      /*!< CAN filter activation register,      Address offset: 0x21C         */
          uint32_t __RESERVED5[8];               /*!< Reserved, 0x220-0x23F                                              */
-    CAN_FilterRegister_TypeDef sFilterRegister[28];/*!< CAN Filter Register,           Address offset: 0x240-0x31C   */
+    CAN_FilterRegister_TypeDef sFilterRegister[14];/*!< CAN Filter Register,           Address offset: 0x240-0x31C   */
 } CAN_TypeDef;
 
 
@@ -4644,6 +4644,9 @@ typedef struct {
 } WWDG_BitBand_TypeDef;
 
 
+/**
+  * @}
+  */
 
 /** @addtogroup Peripheral_memory_map
   * @{
@@ -7503,9 +7506,6 @@ typedef struct {
 #define  FLASH_OBR_DATA0                     ((uint32_t)0x00FF0000) /*!< Data0 */
 #define  FLASH_OBR_DATA1                     ((uint32_t)0xFF000000) /*!< Data1 */
 
-/* Legacy defines */
-#define FLASH_OBR_WDG_SW FLASH_OBR_IWDG_SW
-
 /******************  Bit definition for FLASH_WRPR register  ******************/
 #define  FLASH_WRPR_WRP                        ((uint32_t)0xFFFFFFFF)      /*!< Write Protect */
 
@@ -7862,9 +7862,6 @@ typedef struct {
 #define  I2C_CR1_SMBDEN                      ((uint32_t)0x00200000)        /*!< SMBus device default address enable */
 #define  I2C_CR1_ALERTEN                     ((uint32_t)0x00400000)        /*!< SMBus alert enable */
 #define  I2C_CR1_PECEN                       ((uint32_t)0x00800000)        /*!< PEC enable */
-
-/* Legacy defines */
-#define I2C_CR1_DFN I2C_CR1_DNF
 
 /******************  Bit definition for I2C_CR2 register  ********************/
 #define  I2C_CR2_SADD                        ((uint32_t)0x000003FF)        /*!< Slave address (master mode) */
@@ -8352,8 +8349,6 @@ typedef struct {
 #define  RCC_CFGR3_USART1SW_SYSCLK           ((uint32_t)0x00000001)        /*!< System clock selected as USART1 clock source */
 #define  RCC_CFGR3_USART1SW_LSE              ((uint32_t)0x00000002)        /*!< LSE oscillator clock used as USART1 clock source */
 #define  RCC_CFGR3_USART1SW_HSI              ((uint32_t)0x00000003)        /*!< HSI oscillator clock used as USART1 clock source */
-/* Legacy defines */
-#define  RCC_CFGR3_USART1SW_PCLK             RCC_CFGR3_USART1SW_PCLK1
 
 #define  RCC_CFGR3_I2CSW                     ((uint32_t)0x00000070)        /*!< I2CSW bits */
 #define  RCC_CFGR3_I2C1SW                    ((uint32_t)0x00000010)        /*!< I2C1SW bits */
@@ -9844,9 +9839,6 @@ typedef struct {
 #define USB_ISTR_DIR                         ((uint16_t)0x0010)             /*!< DIRection of transaction (read-only bit)  */
 #define USB_ISTR_EP_ID                       ((uint16_t)0x000F)             /*!< EndPoint IDentifier (read-only bit)  */
 
-/* Legacy defines */
-#define USB_ISTR_PMAOVRM USB_ISTR_PMAOVR
-
 #define USB_CLR_CTR                          (~USB_ISTR_CTR)             /*!< clear Correct TRansfer bit */
 #define USB_CLR_PMAOVR                       (~USB_ISTR_PMAOVR)          /*!< clear DMA OVeR/underrun bit*/
 #define USB_CLR_ERR                          (~USB_ISTR_ERR)             /*!< clear ERRor bit */
@@ -9856,9 +9848,6 @@ typedef struct {
 #define USB_CLR_SOF                          (~USB_ISTR_SOF)             /*!< clear Start Of Frame bit */
 #define USB_CLR_ESOF                         (~USB_ISTR_ESOF)            /*!< clear Expected Start Of Frame bit */
 #define USB_CLR_L1REQ                        (~USB_ISTR_L1REQ)           /*!< clear LPM L1  bit */
-
-/* Legacy defines */
-#define USB_CLR_PMAOVRM USB_CLR_PMAOVR
 
 /*************************  CNTR control register bits definitions  ***********/
 #define USB_CNTR_CTRM                        ((uint16_t)0x8000)             /*!< Correct TRansfer Mask */
@@ -9876,10 +9865,6 @@ typedef struct {
 #define USB_CNTR_LPMODE                      ((uint16_t)0x0004)             /*!< Low-power MODE */
 #define USB_CNTR_PDWN                        ((uint16_t)0x0002)             /*!< Power DoWN */
 #define USB_CNTR_FRES                        ((uint16_t)0x0001)             /*!< Force USB RESet */
-
-/* Legacy defines */
-#define USB_CNTR_PMAOVRM USB_CNTR_PMAOVR
-#define USB_CNTR_LP_MODE USB_CNTR_LPMODE
 
 /***************************  LPM register bits definitions  ******************/
 #define  USB_LPMCSR_BESL                     ((uint16_t)0x00F0)             /*!< BESL value received with last ACKed LPM Token  */ 
@@ -10443,6 +10428,7 @@ typedef struct {
 typedef struct
 {
     __I uint16_t CAL30;
+    const uint32_t __RESERVED[2];
     __I uint16_t CAL110;
 }ADC_TempSensorCalibrationTypeDef;
 
@@ -10577,9 +10563,6 @@ typedef struct
   * @}
   */
 
-/**
-  * @}
-  */
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
