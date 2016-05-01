@@ -95,19 +95,20 @@ A brief description is provided below to familiarize the user with the concepts 
 
 ### Main concept
 
-The XPD library was created to utilize the new features introduced in the CMSIS layer and to create a library with maximum achievable portability through the STM32 family. This library - much like the *STM32 HAL* drivers - uses handles to manage peripherals. But unlike the HAL drivers, the existence of XPD handles are motivated by different reasons:
+The XPD library was created to utilize the new features introduced in the CMSIS layer and to create a library with maximum achievable compactness and portability through the STM32 family. In order to ease migration from the existing * STM32 HAL drivers *, the XPD library implements a similar API, while it also aims to provide a more optimized and straightforward code. A key concept is taken from the *HAL drivers*, to use handles to manage peripherals. The XPD handles are a step forward from the familiar ones, as they contain:
 
-1. Contain addresses for both word and bit-band access.
-2. Contain the instance-specific function pointers that are called by the drivers to manage external reactions to peripheral events. The user code can subscribe to these callbacks with individual functions in order to handle each event individually.
-3. Contain the necessary interrupt and DMA management information of the peripheral.
+1. Addresses for both word and bit-band access.
+2. Instance-specific function pointers that are called by the drivers to manage external reactions to peripheral events. The user code can subscribe to these callbacks with individual functions in order to handle each event individually.
+3. The necessary interrupt and DMA management information of the peripheral.
+4. A reference to the RCC clock control function of its peripheral, meaning that the XPD peripheral code manages the clock activation and deactivation without any additional user code.
 
 Apart from a core set of peripherals (DMA, GPIO, RCC, etc.), the user can configure which peripheral modules shall be compiled. The driver functions are available in the XPD_[ ] namespace, while the data types are in the peripherals' respective namespaces. The whole library is Doxygen documented, the resulting documentation can be found in each XPD folder.
 
 ### Getting started
 
-The first step is to get a copy of the CMSIS library (preferably from the STM32Cube), and overwrite it with the files of this CMSIS folder. The XPD drivers are standalone and (supposed to be) device dependent, so only a project-specific **xpd_config.h** file has be created. This header specifies - among other things - which device header and XPD modules shall be used and what are the external oscillator values and startup configuration settings.
+For a supported device all necessary files are available within the CMSIS folder of the repository. The XPD drivers are standalone and (supposed to be) device dependent, so only a project-specific **xpd_config.h** file has to be created. This header specifies - among other things - which device header and XPD modules shall be used and what are the external oscillator values and startup configuration settings.
 
-After the XPD configuration, the user code development can begin. The Projects folder contains example codes which demonstrate the basic API usage of the library.
+After the XPD configuration, the user code development can begin. For reference, check the Projects folder, where you can find example code that shows the basic use of the XPD API, and it can be directly compiled and run on the target.
 
 ### Hints
 
