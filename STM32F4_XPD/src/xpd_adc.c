@@ -34,7 +34,7 @@
 /** @addtogroup ADC_Clock_Source
  * @{ */
 
-/** @addtogroup ADC_Clock_Source_Exported_Functions
+/** @defgroup ADC_Clock_Source_Exported_Functions ADC Clock Source Exported Functions
  * @{ */
 
 /**

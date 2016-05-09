@@ -31,10 +31,10 @@
 /** @defgroup ADC
  * @{ */
 
-/** @defgroup ADC_Core ADC Core
+/** @defgroup ADC_Clock_Source ADC Clock Source
  * @{ */
 
-/** @defgroup ADC_Core_Exported_Types ADC Core Exported Types
+/** @defgroup ADC_Clock_Source_Exported_Types ADC Clock Source Exported Types
  * @{ */
 
 /** @brief ADC clock source types */
@@ -46,8 +46,21 @@ typedef enum
     ADC_CLOCKSOURCE_PCLK_DIV8 = 3, /*!< PCLK divided by 8 */
 }ADC_ClockSourceType;
 
+/** @} */
+
+/** @addtogroup ADC_Clock_Source_Exported_Functions
+ * @{ */
 void            XPD_ADC_ClockConfig         (ADC_ClockSourceType ClockSource);
 uint32_t        XPD_ADC_GetClockFreq        (void);
+/** @} */
+
+/** @} */
+
+/** @defgroup ADC_Core ADC Core
+ * @{ */
+
+/** @defgroup ADC_Core_Exported_Types ADC Core Exported Types
+ * @{ */
 
 /** @brief ADC sample times */
 typedef enum
