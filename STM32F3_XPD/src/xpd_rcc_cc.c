@@ -96,12 +96,11 @@ XPD_ReturnType XPD_RCC_HSIConfig(RCC_HSI_InitType * Config)
     }
     else
     {
+        RCC_REG_BIT(CR,HSION) = Config->State;
+
         /* Check the HSI State */
         if (Config->State != OSC_OFF)
         {
-            /* Enable the Internal High Speed oscillator (HSI). */
-            RCC_REG_BIT(CR,HSION) = OSC_ON;
-
             /* Wait until HSI is ready */
             result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_HSIRDY, RCC_CR_HSIRDY, RCC_HSI_TIMEOUT);
 
@@ -110,9 +109,6 @@ XPD_ReturnType XPD_RCC_HSIConfig(RCC_HSI_InitType * Config)
         }
         else
         {
-            /* Disable the Internal High Speed oscillator (HSI). */
-            XPD_RCC_HSIConfig(OSC_OFF);
-
             /* Wait until HSI is disabled */
             result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_HSIRDY, 0, RCC_HSI_TIMEOUT);
         }

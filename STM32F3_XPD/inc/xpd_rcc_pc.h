@@ -73,7 +73,7 @@ typedef enum
 void            XPD_ADC_ClockConfig         (ADC_ClockSourceType ClockSource);
 uint32_t        XPD_ADC_GetClockFreq        (void);
 
-#if definde(RCC_CFGR2_ADCPRE12) && defined(RCC_CFGR2_ADCPRE34)
+#if defined(RCC_CFGR2_ADCPRE12) && defined(RCC_CFGR2_ADCPRE34)
 void            XPD_ADC12_ClockConfig       (ADC_ClockSourceType ClockSource);
 uint32_t        XPD_ADC12_GetClockFreq      (void);
 

@@ -47,6 +47,16 @@ void XPD_EXTI_Init(uint8_t Line, EXTI_InitType * Config)
 #ifdef RCC_APB2ENR_EXTITEN
     XPD_EXTI_ClockCtrl(ENABLE);
 #endif
+
+    if (Config->Reaction & REACTION_IT)
+    {
+        XPD_EXTI_Callbacks[Line] = Config->ITCallback;
+    }
+    else
+    {
+        XPD_EXTI_Callbacks[Line] = NULL;
+    }
+
 #ifdef EXTI_BB
     EXTI_BB->IMR[Line] = Config->Reaction;
 
@@ -96,15 +106,35 @@ void XPD_EXTI_Init(uint8_t Line, EXTI_InitType * Config)
         CLEAR_BIT(EXTI->FTSR, linebit);
     }
 #endif
+}
 
-    if (Config->Reaction & REACTION_IT)
-    {
-        XPD_EXTI_Callbacks[Line] = Config->ITCallback;
-    }
-    else
-    {
-        XPD_EXTI_Callbacks[Line] = NULL;
-    }
+/**
+ * @brief Restores the EXTI line to its default state.
+ * @param Line: the selected EXTI line
+ */
+void XPD_EXTI_Deinit(uint8_t Line)
+{
+    XPD_EXTI_Callbacks[Line] = NULL;
+
+#ifdef EXTI_BB
+    /* Clear EXTI line configuration */
+    EXTI_BB->IMR[Line] = 0;
+    EXTI_BB->EMR[Line] = 0;
+
+    /* Clear Rising Falling edge configuration */
+    EXTI_BB->RTSR[Line] = 0;
+    EXTI_BB->FTSR[Line] = 0;
+#else
+    uint32_t linebit = 1 << Line;
+
+    /* Clear EXTI line configuration */
+    CLEAR_BIT(EXTI->IMR, linebit);
+    CLEAR_BIT(EXTI->EMR, linebit);
+
+    /* Clear Rising Falling edge configuration */
+    CLEAR_BIT(EXTI->RTSR, linebit);
+    CLEAR_BIT(EXTI->FTSR, linebit);
+#endif
 }
 
 /** @} */

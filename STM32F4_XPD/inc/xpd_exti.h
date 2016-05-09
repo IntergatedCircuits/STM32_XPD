@@ -54,6 +54,7 @@ extern XPD_ValueCallbackType XPD_EXTI_Callbacks[32];
 /** @addtogroup EXTI_Exported_Functions
  * @{ */
 void            XPD_EXTI_Init           (uint8_t Line, EXTI_InitType * Config);
+void            XPD_EXTI_Deinit         (uint8_t Line);
 
 /**
  * @brief Gets the pending flag for the line.

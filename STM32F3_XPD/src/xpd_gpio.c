@@ -254,8 +254,6 @@ void XPD_GPIO_InitPin(GPIO_TypeDef * GPIOx, uint8_t Pin, GPIO_InitType * Config)
  */
 void XPD_GPIO_DeinitPin(GPIO_TypeDef * GPIOx, uint8_t Pin)
 {
-    uint32_t temp;
-
     (uint32_t)Pin;
 
     /* GPIO Mode Configuration */
@@ -265,31 +263,10 @@ void XPD_GPIO_DeinitPin(GPIO_TypeDef * GPIOx, uint8_t Pin)
     /* Deactivate the Pull-up and Pull-down resistor for the current IO */
     CLEAR_BIT(GPIOx->PUPDR, (0x0003 << (Pin * 2)));
 
-    /*------------------------- EXTI Mode Configuration --------------------*/
-    XPD_EXTI_Callbacks[Pin] = NULL;
-
     /* Configure the External Interrupt or event for the current IO */
     CLEAR_BIT(SYSCFG->EXTICR[Pin >> 2], ((uint32_t) 0x0F) << (4 * (Pin & 0x03)));
 
-#ifdef EXTI_BB
-    /* Clear EXTI line configuration */
-    EXTI_BB->IMR[Pin] = 0;
-    EXTI_BB->EMR[Pin] = 0;
-
-    /* Clear Rising Falling edge configuration */
-    EXTI_BB->RTSR[Pin] = 0;
-    EXTI_BB->FTSR[Pin] = 0;
-#else
-    temp = 1 << Pin;
-
-    /* Clear EXTI line configuration */
-    CLEAR_BIT(EXTI->IMR, temp);
-    CLEAR_BIT(EXTI->EMR, temp);
-
-    /* Clear Rising Falling edge configuration */
-    CLEAR_BIT(EXTI->RTSR, temp);
-    CLEAR_BIT(EXTI->FTSR, temp);
-#endif
+    XPD_EXTI_Deinit(Pin);
 }
 
 /**
