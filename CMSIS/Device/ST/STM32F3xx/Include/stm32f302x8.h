@@ -4580,7 +4580,6 @@ typedef struct {
          uint32_t __RESERVED4[16];
     __IO uint32_t BTABLE[16];                /*!< Buffer Table address register,          Address offset: 0x50 */
          uint32_t __RESERVED5[16];
-    a
     struct {
         __IO uint32_t LPMEN;                     /*!< LPM support enable */
         __IO uint32_t LPMACK;                    /*!< LPM token acknowledge enable */
@@ -4591,6 +4590,15 @@ typedef struct {
     } LPMCSR;                                /*!< LPM control and status register,        Address offset: 0x54 */
 } USB_BitBand_TypeDef;
 
+
+typedef struct {
+    struct {
+        __IO uint16_t TX_ADDR;
+        __IO uint16_t TX_COUNT;
+        __IO uint16_t RX_ADDR;
+        __IO uint16_t RX_COUNT;
+    }BDT[8];
+}USB_BufferDescriptorTable_TypeDef;
 
 
 /**
