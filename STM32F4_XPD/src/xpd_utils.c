@@ -210,6 +210,9 @@ void XPD_Init(void)
 
     /* Configure systick timer */
     XPD_InitTimer();
+
+    /* enable clock for PWR */
+    XPD_PWR_ClockCtrl(ENABLE);
 }
 
 /**

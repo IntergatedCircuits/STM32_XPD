@@ -24,11 +24,17 @@
 
 #include "xpd_exti.h"
 
-XPD_ValueCallbackType XPD_EXTI_Callbacks[32] = {
+XPD_ValueCallbackType XPD_EXTI_Callbacks[] = {
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+#ifdef EXTI_IMR2_MR32
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+#endif
+#ifdef EXTI_IMR2_MR40
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+#endif
 };
 
 /** @addtogroup EXTI
@@ -54,52 +60,112 @@ void XPD_EXTI_Init(uint8_t Line, EXTI_InitType * Config)
     }
 
 #ifdef EXTI_BB
-    EXTI_BB->IMR[Line] = Config->Reaction;
+    if (Line < 32)
+    {
+        EXTI_BB->IMR[Line] = Config->Reaction;
 
-    EXTI_BB->EMR[Line] = Config->Reaction >> 1;
+        EXTI_BB->EMR[Line] = Config->Reaction >> 1;
 
-    EXTI_BB->RTSR[Line] = Config->Edge;
+        EXTI_BB->RTSR[Line] = Config->Edge;
 
-    EXTI_BB->FTSR[Line] = Config->Edge >> 1;
+        EXTI_BB->FTSR[Line] = Config->Edge >> 1;
+    }
+    else
+    {
+        Line -= 32;
+
+        EXTI_BB->IMR2[Line] = Config->Reaction;
+
+        EXTI_BB->EMR2[Line] = Config->Reaction >> 1;
+
+        EXTI_BB->RTSR2[Line] = Config->Edge;
+
+        EXTI_BB->FTSR2[Line] = Config->Edge >> 1;
+    }
 #else
-    uint32_t linebit = 1 << Line;
-
-    /* set EXTI line configuration */
-    if (Config->Reaction & REACTION_IT)
+    if (Line < 32)
     {
-        SET_BIT(EXTI->IMR, linebit);
+        uint32_t linebit = 1 << Line;
+
+        /* set EXTI line configuration */
+        if (Config->Reaction & REACTION_IT)
+        {
+            SET_BIT(EXTI->IMR, linebit);
+        }
+        else
+        {
+            CLEAR_BIT(EXTI->IMR, linebit);
+        }
+
+        if (Config->Reaction & REACTION_EVENT)
+        {
+            SET_BIT(EXTI->EMR, linebit);
+        }
+        else
+        {
+            CLEAR_BIT(EXTI->EMR, linebit);
+        }
+
+        /* set rising and falling edge configuration */
+        if (Config->Edge & EDGE_RISING)
+        {
+            SET_BIT(EXTI->RTSR, linebit);
+        }
+        else
+        {
+            CLEAR_BIT(EXTI->RTSR, linebit);
+        }
+
+        if (Config->Edge & EDGE_FALLING)
+        {
+            SET_BIT(EXTI->FTSR, linebit);
+        }
+        else
+        {
+            CLEAR_BIT(EXTI->FTSR, linebit);
+        }
     }
     else
     {
-        CLEAR_BIT(EXTI->IMR, linebit);
-    }
+        uint32_t linebit = 1 << (Line - 32);
 
-    if (Config->Reaction & REACTION_EVENT)
-    {
-        SET_BIT(EXTI->EMR, linebit);
-    }
-    else
-    {
-        CLEAR_BIT(EXTI->EMR, linebit);
-    }
+        /* set EXTI line configuration */
+        if (Config->Reaction & REACTION_IT)
+        {
+            SET_BIT(EXTI->IMR2, linebit);
+        }
+        else
+        {
+            CLEAR_BIT(EXTI->IMR2, linebit);
+        }
 
-    /* set rising and falling edge configuration */
-    if (Config->Edge & EDGE_RISING)
-    {
-        SET_BIT(EXTI->RTSR, linebit);
-    }
-    else
-    {
-        CLEAR_BIT(EXTI->RTSR, linebit);
-    }
+        if (Config->Reaction & REACTION_EVENT)
+        {
+            SET_BIT(EXTI->EMR2, linebit);
+        }
+        else
+        {
+            CLEAR_BIT(EXTI->EMR2, linebit);
+        }
 
-    if (Config->Edge & EDGE_FALLING)
-    {
-        SET_BIT(EXTI->FTSR, linebit);
-    }
-    else
-    {
-        CLEAR_BIT(EXTI->FTSR, linebit);
+        /* set rising and falling edge configuration */
+        if (Config->Edge & EDGE_RISING)
+        {
+            SET_BIT(EXTI->RTSR2, linebit);
+        }
+        else
+        {
+            CLEAR_BIT(EXTI->RTSR2, linebit);
+        }
+
+        if (Config->Edge & EDGE_FALLING)
+        {
+            SET_BIT(EXTI->FTSR2, linebit);
+        }
+        else
+        {
+            CLEAR_BIT(EXTI->FTSR2, linebit);
+        }
     }
 #endif
 }
@@ -113,23 +179,53 @@ void XPD_EXTI_Deinit(uint8_t Line)
     XPD_EXTI_Callbacks[Line] = NULL;
 
 #ifdef EXTI_BB
-    /* Clear EXTI line configuration */
-    EXTI_BB->IMR[Line] = 0;
-    EXTI_BB->EMR[Line] = 0;
+    if (Line < 32)
+    {
+        /* Clear EXTI line configuration */
+        EXTI_BB->IMR[Line] = 0;
+        EXTI_BB->EMR[Line] = 0;
 
-    /* Clear Rising Falling edge configuration */
-    EXTI_BB->RTSR[Line] = 0;
-    EXTI_BB->FTSR[Line] = 0;
+        /* Clear Rising Falling edge configuration */
+        EXTI_BB->RTSR[Line] = 0;
+        EXTI_BB->FTSR[Line] = 0;
+    }
+    else
+    {
+        Line -= 32;
+
+        /* Clear EXTI line configuration */
+        EXTI_BB->IMR2[Line] = 0;
+        EXTI_BB->EMR2[Line] = 0;
+
+        /* Clear Rising Falling edge configuration */
+        EXTI_BB->RTSR2[Line] = 0;
+        EXTI_BB->FTSR2[Line] = 0;
+    }
 #else
-    uint32_t linebit = 1 << Line;
+    if (Line < 32)
+    {
+        uint32_t linebit = 1 << Line;
 
-    /* Clear EXTI line configuration */
-    CLEAR_BIT(EXTI->IMR, linebit);
-    CLEAR_BIT(EXTI->EMR, linebit);
+        /* Clear EXTI line configuration */
+        CLEAR_BIT(EXTI->IMR, linebit);
+        CLEAR_BIT(EXTI->EMR, linebit);
 
-    /* Clear Rising Falling edge configuration */
-    CLEAR_BIT(EXTI->RTSR, linebit);
-    CLEAR_BIT(EXTI->FTSR, linebit);
+        /* Clear Rising Falling edge configuration */
+        CLEAR_BIT(EXTI->RTSR, linebit);
+        CLEAR_BIT(EXTI->FTSR, linebit);
+    }
+    else
+    {
+        uint32_t linebit = 1 << (Line - 32);
+
+        /* Clear EXTI line configuration */
+        CLEAR_BIT(EXTI->IMR2, linebit);
+        CLEAR_BIT(EXTI->EMR2, linebit);
+
+        /* Clear Rising Falling edge configuration */
+        CLEAR_BIT(EXTI->RTSR2, linebit);
+        CLEAR_BIT(EXTI->FTSR2, linebit);
+    }
 #endif
 }
 

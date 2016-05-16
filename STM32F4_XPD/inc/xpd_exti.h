@@ -47,7 +47,7 @@ typedef struct
  * @{ */
 
 /** @brief EXTI callbacks container array */
-extern XPD_ValueCallbackType XPD_EXTI_Callbacks[32];
+extern XPD_ValueCallbackType XPD_EXTI_Callbacks[];
 
 /** @} */
 
