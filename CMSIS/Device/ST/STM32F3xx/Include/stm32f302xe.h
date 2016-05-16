@@ -4727,14 +4727,14 @@ typedef struct {
 typedef struct {
     union {
         struct {
-            __IO uint32_t EA : 4;                    /*!< EndPoint Address */
-            __IO uint32_t TX_VALID : 2;              /*!< EndPoint TX VALID */
+            __IO uint32_t EA : 4;                    /*!<  EndPoint Address */
+            __IO uint32_t STAT_TX : 2;               /*!<  EndPoint TX Status */
             __IO uint32_t DTOG_TX : 1;               /*!<  EndPoint Data TOGGLE TX */
             __IO uint32_t CTR_TX : 1;                /*!<  EndPoint Correct TRansfer TX */
             __IO uint32_t KIND : 1;                  /*!<  EndPoint KIND */
             __IO uint32_t TYPE : 2;                  /*!<  EndPoint TYPE */
             __IO uint32_t SETUP : 1;                 /*!<  EndPoint SETUP */
-            __IO uint32_t RX_VALID : 2;              /*!< EndPoint RX VALID */
+            __IO uint32_t STAT_RX : 2;               /*!<  EndPoint RX Status */
             __IO uint32_t DTOG_RX : 1;               /*!<  EndPoint Data TOGGLE RX */
             __IO uint32_t CTR_RX : 1;                /*!<  EndPoint Correct TRansfer RX */
                  uint32_t __RESERVED1 : 16;
@@ -4820,14 +4820,14 @@ typedef struct {
 
 typedef struct {
     struct {
-        __IO uint32_t EA[4];                     /*!< EndPoint Address */
-        __IO uint32_t TX_VALID[2];               /*!< EndPoint TX VALID */
+        __IO uint32_t EA[4];                     /*!<  EndPoint Address */
+        __IO uint32_t STAT_TX[2];                /*!<  EndPoint TX Status */
         __IO uint32_t DTOG_TX;                   /*!<  EndPoint Data TOGGLE TX */
         __IO uint32_t CTR_TX;                    /*!<  EndPoint Correct TRansfer TX */
         __IO uint32_t KIND;                      /*!<  EndPoint KIND */
         __IO uint32_t T_FIELD[2];                /*!<  EndPoint TYPE */
         __IO uint32_t SETUP;                     /*!<  EndPoint SETUP */
-        __IO uint32_t RX_VALID[2];               /*!< EndPoint RX VALID */
+        __IO uint32_t STAT_RX[2];                /*!<  EndPoint RX Stauts */
         __IO uint32_t DTOG_RX;                   /*!<  EndPoint Data TOGGLE RX */
         __IO uint32_t CTR_RX;                    /*!<  EndPoint Correct TRansfer RX */
              uint32_t __RESERVED0[16];
