@@ -4894,15 +4894,6 @@ typedef struct {
 } USB_BitBand_TypeDef;
 
 
-typedef struct {
-    struct {
-        __IO uint16_t TX_ADDR;
-        __IO uint16_t TX_COUNT;
-        __IO uint16_t RX_ADDR;
-        __IO uint16_t RX_COUNT;
-    }BDT[8];
-}USB_BufferDescriptorTable_TypeDef;
-
 
 /**
   * @brief Window WATCHDOG
