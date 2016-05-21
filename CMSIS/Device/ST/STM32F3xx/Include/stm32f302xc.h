@@ -189,7 +189,7 @@ typedef enum
 typedef struct {
     union {
         struct {
-            __IO uint32_t ADRD : 1;                  /*!< ADC Ready (ADRDY) flag  */
+            __IO uint32_t ADRDY : 1;                 /*!< ADC Ready (ADRDY) flag  */
             __IO uint32_t EOSMP : 1;                 /*!< ADC End of Sampling flag */
             __IO uint32_t EOC : 1;                   /*!< ADC End of Regular Conversion flag */
             __IO uint32_t EOS : 1;                   /*!< ADC End of Regular sequence of Conversions flag */
@@ -206,7 +206,7 @@ typedef struct {
     } ISR;                                   /*!< ADC Interrupt and Status Register,                 Address offset: 0x00 */
     union {
         struct {
-            __IO uint32_t RDY : 1;                   /*!< ADC Ready (ADRDY) interrupt source */
+            __IO uint32_t ADRDY : 1;                 /*!< ADC Ready (ADRDY) interrupt source */
             __IO uint32_t EOSMP : 1;                 /*!< ADC End of Sampling interrupt source */
             __IO uint32_t EOC : 1;                   /*!< ADC End of Regular Conversion interrupt source */
             __IO uint32_t EOS : 1;                   /*!< ADC End of Regular sequence of Conversions interrupt source */
@@ -4865,7 +4865,7 @@ typedef struct {
 /******************************************************************************/
 
 /********************  Bit definition for ADC_ISR register  ********************/
-#define ADC_ISR_ADRD          ((uint32_t)0x00000001) /*!< ADC Ready (ADRDY) flag  */
+#define ADC_ISR_ADRDY         ((uint32_t)0x00000001) /*!< ADC Ready (ADRDY) flag  */
 #define ADC_ISR_EOSMP         ((uint32_t)0x00000002) /*!< ADC End of Sampling flag */
 #define ADC_ISR_EOC           ((uint32_t)0x00000004) /*!< ADC End of Regular Conversion flag */
 #define ADC_ISR_EOS           ((uint32_t)0x00000008) /*!< ADC End of Regular sequence of Conversions flag */
@@ -4878,7 +4878,7 @@ typedef struct {
 #define ADC_ISR_JQOVF         ((uint32_t)0x00000400) /*!< ADC Injected Context Queue Overflow flag */
 
 /********************  Bit definition for ADC_IER register  ********************/
-#define ADC_IER_RDY           ((uint32_t)0x00000001) /*!< ADC Ready (ADRDY) interrupt source */
+#define ADC_IER_ADRDY         ((uint32_t)0x00000001) /*!< ADC Ready (ADRDY) interrupt source */
 #define ADC_IER_EOSMP         ((uint32_t)0x00000002) /*!< ADC End of Sampling interrupt source */
 #define ADC_IER_EOC           ((uint32_t)0x00000004) /*!< ADC End of Regular Conversion interrupt source */
 #define ADC_IER_EOS           ((uint32_t)0x00000008) /*!< ADC End of Regular sequence of Conversions interrupt source */
