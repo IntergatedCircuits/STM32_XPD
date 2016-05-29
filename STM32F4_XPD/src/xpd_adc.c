@@ -73,7 +73,7 @@ static void adc_dmaConversionRedirect(void *hdma)
 
     /* Not externally triggered, not continuous, last element of scan, disable interrupt */
     if (    ((hadc->Inst->CR2.w & (ADC_CR2_CONT | ADC_CR2_EXTEN)) == 0)
-         && ((hadc->Inst->SQR1.b.L |  ADC_REG_BIT(hadc,CR2,EOCS)) == 0))
+         && ((hadc->Inst->SQR1.b.L == 0) || (ADC_REG_BIT(hadc,CR2,EOCS) == 0)))
     {
         XPD_ADC_DisableIT(hadc, EOC);
     }
@@ -283,7 +283,7 @@ void XPD_ADC_ChannelConfig(ADC_HandleType * hadc, ADC_ChannelInitType * Config)
 void XPD_ADC_Start(ADC_HandleType * hadc)
 {
     /* if not already on, wait until ADC starts up */
-    if (ADC_REG_BIT(hadc,CR2,ADON) != ENABLE)
+    if (ADC_REG_BIT(hadc,CR2,ADON) == 0)
     {
         XPD_ADC_Enable(hadc);
 
@@ -313,7 +313,7 @@ void XPD_ADC_Stop(ADC_HandleType * hadc)
 
 /**
  * @brief Polls the status of the ADC operation(s).
- * @param hadc: pointer to the DMA stream handle structure
+ * @param hadc: pointer to the ADC handle structure
  * @param Operation: the type of operation to check
  * @param Timeout: the timeout in ms for the polling.
  * @return ERROR if there was an input error, TIMEOUT if timed out, OK if successful
@@ -322,7 +322,8 @@ XPD_ReturnType XPD_ADC_PollStatus(ADC_HandleType * hadc, ADC_OperationType Opera
 {
     XPD_ReturnType result;
 
-    /* Polling for single conversion is not allowed when DMA is used, and EOC is raised on end of sequence */
+    /* Polling for single conversion is not allowed when DMA is used,
+     * and EOC is raised on end of single conversion */
     if (    ( Operation == ADC_OPERATION_CONVERSION )
          && ((hadc->Inst->CR2.w & (ADC_CR2_EOCS | ADC_CR2_DMA)) == (ADC_CR2_EOCS | ADC_CR2_DMA)))
     {
@@ -361,10 +362,10 @@ void XPD_ADC_Start_IT(ADC_HandleType * hadc)
  */
 void XPD_ADC_Stop_IT(ADC_HandleType * hadc)
 {
+    XPD_ADC_Stop(hadc);
+
     /* ADC end of conversion interrupt for regular and injected group */
     CLEAR_BIT(hadc->Inst->CR1.w, ADC_CR1_EOCIE | ADC_CR1_JEOCIE | ADC_CR1_OVRIE);
-
-    XPD_ADC_Disable(hadc);
 }
 
 /**
@@ -373,8 +374,12 @@ void XPD_ADC_Stop_IT(ADC_HandleType * hadc)
  */
 void XPD_ADC_IRQHandler(ADC_HandleType * hadc)
 {
+    uint32_t sr = hadc->Inst->SR.w;
+    uint32_t cr1 = hadc->Inst->CR1.w;
+
     /* End of conversion flag for regular channels */
-    if (ADC_REG_BIT(hadc,SR,EOC) && ADC_REG_BIT(hadc,CR1,EOCIE))
+    if (    ((sr  & ADC_SR_EOC) != 0)
+         && ((cr1 & ADC_CR1_EOCIE) != 0))
     {
         /* if the conversion is not continuous / external triggered */
         if ((hadc->Inst->CR2.w & (ADC_CR2_CONT | ADC_CR2_EXTEN)) == 0)
@@ -383,7 +388,7 @@ void XPD_ADC_IRQHandler(ADC_HandleType * hadc)
             if (ADC_REG_BIT(hadc,CR2,EOCS) == 0)
             {
                 /* disable the ADC end of conversion interrupt for regular group */
-                CLEAR_BIT(hadc->Inst->CR1.w, ADC_CR1_EOCIE | ADC_CR1_OVRIE);
+                XPD_ADC_DisableIT(hadc, EOC);
             }
             /* conversion sequence */
             else
@@ -401,7 +406,7 @@ void XPD_ADC_IRQHandler(ADC_HandleType * hadc)
                 if (hadc->ActiveConversions == 0)
                 {
                     /* disable the ADC end of conversion interrupt for regular group */
-                    CLEAR_BIT(hadc->Inst->CR1.w, ADC_CR1_EOCIE | ADC_CR1_OVRIE);
+                    XPD_ADC_DisableIT(hadc, EOC);
                 }
             }
         }
@@ -414,7 +419,8 @@ void XPD_ADC_IRQHandler(ADC_HandleType * hadc)
     }
 
     /* End of conversion flag for injected channels */
-    if (ADC_REG_BIT(hadc,SR,JEOC) && ADC_REG_BIT(hadc,CR1,JEOCIE))
+    if (    ((sr  & ADC_SR_JEOC) != 0)
+         && ((cr1 & ADC_CR1_JEOCIE) != 0))
     {
         /* injected conversion is not continuous or not automatic, and software triggered */
         if (((ADC_REG_BIT(hadc,CR2,CONT) & ADC_REG_BIT(hadc,CR1,JAUTO)) == 0) && (hadc->Inst->CR2.b.JEXTEN == 0))
@@ -430,10 +436,11 @@ void XPD_ADC_IRQHandler(ADC_HandleType * hadc)
     }
 
     /* Check analog watchdog flag */
-    if (ADC_REG_BIT(hadc,SR,AWD) && ADC_REG_BIT(hadc,CR1,AWDIE))
+    if (    ((sr  & ADC_SR_AWD) != 0)
+         && ((cr1 & ADC_CR1_AWDIE) != 0))
     {
         /* clear the watchdog flag */
-        XPD_ADC_ClearFlag(hadc,AWD);
+        XPD_ADC_ClearFlag(hadc, AWD);
 
         /* watchdog callback */
         XPD_SAFE_CALLBACK(hadc->Callbacks.Watchdog, hadc);
@@ -441,7 +448,8 @@ void XPD_ADC_IRQHandler(ADC_HandleType * hadc)
 
 #ifdef USE_XPD_ADC_ERROR_DETECT
     /* Check Overrun flag */
-    if (ADC_REG_BIT(hadc,SR,OVR) && ADC_REG_BIT(hadc,CR1,OVRIE))
+    if (    ((sr  & ADC_SR_OVR) != 0)
+         && ((cr1 & ADC_CR1_OVRIE) != 0))
     {
         /* Clear the Overrun flag */
         XPD_ADC_ClearFlag(hadc, OVR);
@@ -459,8 +467,6 @@ void XPD_ADC_IRQHandler(ADC_HandleType * hadc)
  */
 void XPD_ADC_Start_DMA(ADC_HandleType * hadc, void * Address)
 {
-    __IO uint32_t counter = 0;
-
     /* Set the DMA transfer complete callback */
     hadc->DMA.Conversion->Callbacks.Complete = adc_dmaConversionRedirect;
 
@@ -749,7 +755,7 @@ void XPD_ADC_Injected_Start(ADC_HandleType * hadc)
 {
     /* Check if ADC peripheral is disabled in order to enable it and wait during
      Tstab time the ADC's stabilization */
-    if (ADC_REG_BIT(hadc,CR2,ADON) != ENABLE)
+    if (ADC_REG_BIT(hadc,CR2,ADON) == 0)
     {
         /* Enable the Peripheral */
         XPD_ADC_Enable(hadc);
@@ -829,7 +835,33 @@ void XPD_ADC_MultiMode_Start_DMA(ADC_HandleType * hadc, void * Address)
     /* pass the continuous DMA request setting to the common config */
     ADC_COMMON_REG_BIT(CCR,DDS) = ADC_REG_BIT(hadc,CR2,DDS);
 
-    XPD_ADC_Start_DMA(hadc, Address);
+    /* Set the DMA transfer complete callback */
+    hadc->DMA.Conversion->Callbacks.Complete = adc_dmaConversionRedirect;
+
+    /* Set the DMA half transfer complete callback */
+    hadc->DMA.Conversion->Callbacks.HalfComplete = adc_dmaHalfConversionRedirect;
+
+#ifdef USE_XPD_DMA_ERROR_DETECT
+    /* Set the DMA error callback */
+    hadc->DMA.Conversion->Callbacks.Error = adc_dmaErrorRedirect;
+#endif
+
+    /* configure the DMA channel */
+    hadc->DMA.Conversion->Transfer.DataCount     = hadc->Inst->SQR1.b.L + 1;
+    hadc->DMA.Conversion->Transfer.SourceAddress = (void *)&ADC->CDR.w;
+    hadc->DMA.Conversion->Transfer.DestAddress   = Address;
+
+    XPD_DMA_Start_IT(hadc->DMA.Conversion);
+
+#ifdef USE_XPD_ADC_ERROR_DETECT
+    /* Enable ADC overrun interrupt */
+    XPD_ADC_EnableIT(hadc, OVR);
+#endif
+
+    /* Enable ADC DMA mode */
+    ADC_REG_BIT(hadc, CR2, DMA) = 1;
+
+    XPD_ADC_Start(hadc);
 }
 
 /**
@@ -846,9 +878,10 @@ void XPD_ADC_MultiMode_Stop_DMA(ADC_HandleType * hadc)
 
 /**
  * @brief Return the result of the last common ADC regular conversions.
+ * @param hadc: pointer to the ADC handle structure
  * @return A pair of conversion results in a single word
  */
-uint32_t XPD_ADC_MultiMode_GetValues(void)
+uint32_t XPD_ADC_MultiMode_GetValues(ADC_HandleType * hadc)
 {
     /* return the multi mode conversion values */
     return ADC->CDR.w;

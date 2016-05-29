@@ -65,14 +65,14 @@ uint32_t        XPD_ADC_GetClockFreq        (void);
 /** @brief ADC sample times */
 typedef enum
 {
-    ADC_SAMPLETIME_3CYCLES   = 0, /*!< Sampling during 3 clock cycles */
-    ADC_SAMPLETIME_15CYCLES  = 1, /*!< Sampling during 15 clock cycles */
-    ADC_SAMPLETIME_28CYCLES  = 2, /*!< Sampling during 28 clock cycles */
-    ADC_SAMPLETIME_56CYCLES  = 3, /*!< Sampling during 56 clock cycles */
-    ADC_SAMPLETIME_84CYCLES  = 4, /*!< Sampling during 84 clock cycles */
-    ADC_SAMPLETIME_112CYCLES = 5, /*!< Sampling during 112 clock cycles */
-    ADC_SAMPLETIME_144CYCLES = 6, /*!< Sampling during 144 clock cycles */
-    ADC_SAMPLETIME_480CYCLES = 7  /*!< Sampling during 480 clock cycles */
+    ADC_SAMPLETIME_3   = 0, /*!< Sampling during 3 clock cycles */
+    ADC_SAMPLETIME_15  = 1, /*!< Sampling during 15 clock cycles */
+    ADC_SAMPLETIME_28  = 2, /*!< Sampling during 28 clock cycles */
+    ADC_SAMPLETIME_56  = 3, /*!< Sampling during 56 clock cycles */
+    ADC_SAMPLETIME_84  = 4, /*!< Sampling during 84 clock cycles */
+    ADC_SAMPLETIME_112 = 5, /*!< Sampling during 112 clock cycles */
+    ADC_SAMPLETIME_144 = 6, /*!< Sampling during 144 clock cycles */
+    ADC_SAMPLETIME_480 = 7  /*!< Sampling during 480 clock cycles */
 }ADC_SampleTimeType;
 
 /** @brief ADC conversion resolution */
@@ -443,7 +443,7 @@ typedef struct
 void            XPD_ADC_MultiMode_Init          (ADC_MultiMode_InitType * Config);
 void            XPD_ADC_MultiMode_Start_DMA     (ADC_HandleType * hadc, void * Address);
 void            XPD_ADC_MultiMode_Stop_DMA      (ADC_HandleType * hadc);
-uint32_t        XPD_ADC_MultiMode_GetValues     (void);
+uint32_t        XPD_ADC_MultiMode_GetValues     (ADC_HandleType * hadc);
 /** @} */
 
 /** @} */
