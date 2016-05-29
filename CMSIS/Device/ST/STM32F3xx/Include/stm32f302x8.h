@@ -10407,11 +10407,6 @@ typedef struct {
 #define ADC_TEMPSENSOR_CHANNEL  16
 #define ADC_VBAT_CHANNEL        17
 
-/* Note: Vopamp2/3/4 internal channels available on ADC2/3/4 respectively     */
-#define ADC_VOPAMP2_CHANNEL     17
-#define ADC_VOPAMP3_CHANNEL     17
-#define ADC_VOPAMP4_CHANNEL     17
-
 /* Note: VrefInt internal channels available on all ADCs, but only            */
 /*       one ADC is allowed to be connected to VrefInt at the same time.      */
 #define ADC_VREFINT_CHANNEL     18
