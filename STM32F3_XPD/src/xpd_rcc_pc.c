@@ -51,18 +51,24 @@ void XPD_ADC_ClockConfig(ADC_ClockSourceType ClockSource)
 #if defined(RCC_CFGR_ADCPRE)
     RCC->CFGR.b.ADCPRE = ClockSource;
 #else
-    if (ClockSource < ADC_CLOCKSOURCE_PLLCLK_DIV1)
+    if (ClockSource < ADC_CLOCKSOURCE_PLLCLK)
     {
 #if defined(RCC_CFGR2_ADCPRE12)
+        XPD_ADC12_ClockCtrl(ENABLE);
+
         ADC1_2_COMMON->CCR.b.CKMODE = ClockSource;
 
         RCC->CFGR2.b.ADCPRE12 = 0;
 #if defined(RCC_CFGR2_ADCPRE34)
+        XPD_ADC34_ClockCtrl(ENABLE);
+
         ADC3_4_COMMON->CCR.b.CKMODE = ClockSource;
 
         RCC->CFGR2.b.ADCPRE34 = 0;
 #endif
 #elif defined(RCC_CFGR2_ADCPRES)
+        XPD_ADC1_ClockCtrl(ENABLE);
+
         ADC1_COMMON->CCR.b.CKMODE = ClockSource;
 
         RCC->CFGR2.b.ADCPRES = 0;
@@ -71,15 +77,21 @@ void XPD_ADC_ClockConfig(ADC_ClockSourceType ClockSource)
     else
     {
 #if defined(RCC_CFGR2_ADCPRE12)
+        XPD_ADC12_ClockCtrl(ENABLE);
+
         ADC1_2_COMMON->CCR.b.CKMODE = 0;
 
         RCC->CFGR2.b.ADCPRE12 = ClockSource;
 #if defined(RCC_CFGR2_ADCPRE34)
+        XPD_ADC34_ClockCtrl(ENABLE);
+
         ADC3_4_COMMON->CCR.b.CKMODE = 0;
 
         RCC->CFGR2.b.ADCPRE34 = ClockSource;
 #endif
 #elif defined(RCC_CFGR2_ADCPRES)
+        XPD_ADC1_ClockCtrl(ENABLE);
+
         ADC1_COMMON->CCR.b.CKMODE = 0;
 
         RCC->CFGR2.b.ADCPRES = ClockSource;
@@ -126,7 +138,9 @@ uint32_t XPD_ADC_GetClockFreq(void)
  */
 void XPD_ADC12_ClockConfig(ADC_ClockSourceType ClockSource)
 {
-    if (ClockSource < ADC_CLOCKSOURCE_PLLCLK_DIV1)
+    XPD_ADC12_ClockCtrl(ENABLE);
+
+    if (ClockSource < ADC_CLOCKSOURCE_PLLCLK)
     {
         ADC1_2_COMMON->CCR.b.CKMODE = ClockSource;
 
@@ -155,7 +169,9 @@ uint32_t XPD_ADC12_GetClockFreq(void)
  */
 void XPD_ADC34_ClockConfig(ADC_ClockSourceType ClockSource)
 {
-    if (ClockSource < ADC_CLOCKSOURCE_PLLCLK_DIV1)
+    XPD_ADC34_ClockCtrl(ENABLE);
+
+    if (ClockSource < ADC_CLOCKSOURCE_PLLCLK)
     {
         ADC3_4_COMMON->CCR.b.CKMODE = ClockSource;
 
@@ -511,7 +527,7 @@ uint32_t XPD_SDADC_GetClockFreq(void)
     {
         freq /= ((source - SDADC_CLOCKSOURCE_SYSCLK_DIV24) * 4) + 24;
     }
-    else if (source > SDADC_CLOCKSOURCE_SYSCLK_DIV1)
+    else if (source > SDADC_CLOCKSOURCE_SYSCLK)
     {
         freq /= ((source - SDADC_CLOCKSOURCE_SYSCLK_DIV2) * 2) + 2;
     }

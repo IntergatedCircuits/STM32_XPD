@@ -43,10 +43,10 @@
 #if defined(RCC_CFGR2_ADC1PRES) || defined(RCC_CFGR2_ADCPRE12)
 typedef enum
 {
-    ADC_CLOCKSOURCE_HCLK_DIV1     = 0x01, /*!< HCLK clock source */
+    ADC_CLOCKSOURCE_HCLK          = 0x01, /*!< HCLK clock source */
     ADC_CLOCKSOURCE_HCLK_DIV2     = 0x02, /*!< HCLK / 2 clock source */
     ADC_CLOCKSOURCE_HCLK_DIV4     = 0x03, /*!< HCLK / 4 clock source */
-    ADC_CLOCKSOURCE_PLLCLK_DIV1   = 0x10, /*!< PLLCLK clock source */
+    ADC_CLOCKSOURCE_PLLCLK        = 0x10, /*!< PLLCLK clock source */
     ADC_CLOCKSOURCE_PLLCLK_DIV2   = 0x11, /*!< PLLCLK / 2 clock source */
     ADC_CLOCKSOURCE_PLLCLK_DIV4   = 0x12, /*!< PLLCLK / 4 clock source */
     ADC_CLOCKSOURCE_PLLCLK_DIV6   = 0x13, /*!< PLLCLK / 6 clock source */
@@ -231,7 +231,7 @@ uint32_t        XPD_RTC_GetClockFreq        (void);
 /** @brief SDADC clock source types */
 typedef enum
 {
-    SDADC_CLOCKSOURCE_SYSCLK_DIV1  = 0x00, /*!< SYSCLK clock source */
+    SDADC_CLOCKSOURCE_SYSCLK       = 0x00, /*!< SYSCLK clock source */
     SDADC_CLOCKSOURCE_SYSCLK_DIV2  = 0x10, /*!< SYSCLK / 2 clock source */
     SDADC_CLOCKSOURCE_SYSCLK_DIV4  = 0x11, /*!< SYSCLK / 4 clock source */
     SDADC_CLOCKSOURCE_SYSCLK_DIV6  = 0x12, /*!< SYSCLK / 6 clock source */
@@ -342,7 +342,7 @@ uint32_t        XPD_USART_GetClockFreq      (void);
 typedef enum
 {
     USB_CLOCKSOURCE_PLL         = 1, /*!< PLL clock source */
-    USB_CLOCKSOURCE_PLL_DIV1_5  = 0, /*!< PLL * 2 / 3 clock source */
+    USB_CLOCKSOURCE_PLL_DIV1p5  = 0, /*!< PLL * 2 / 3 clock source */
 }USB_ClockSourceType;
 /** @} */
 
