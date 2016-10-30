@@ -1,26 +1,9 @@
-/**
-  ******************************************************************************
-  * @file    core_cm4.h
-  * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2016-01-17
-  * @brief   CMSIS Cortex-M4 Core Peripheral Access Layer Header File
-  *
-  *  This file is part of STM32_XPD.
-  *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
-  *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
-  *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
-  */
+/**************************************************************************//**
+ * @file     core_cm4.h
+ * @brief    CMSIS Cortex-M4 Core Peripheral Access Layer Header File
+ * @version  V4.30
+ * @date     20. October 2015
+ ******************************************************************************/
 /* Copyright (c) 2009 - 2015 ARM LIMITED
 
    All rights reserved.
@@ -464,20 +447,20 @@ typedef union
  */
 typedef struct
 {
-    __IOM uint32_t ISER[8U];               /*!< Offset: 0x000 (R/W)  Interrupt Set Enable Register */
-          uint32_t RESERVED0[24U];
-    __IOM uint32_t ICER[8U];               /*!< Offset: 0x080 (R/W)  Interrupt Clear Enable Register */
-          uint32_t RSERVED1[24U];
-    __IOM uint32_t ISPR[8U];               /*!< Offset: 0x100 (R/W)  Interrupt Set Pending Register */
-          uint32_t RESERVED2[24U];
-    __IOM uint32_t ICPR[8U];               /*!< Offset: 0x180 (R/W)  Interrupt Clear Pending Register */
-          uint32_t RESERVED3[24U];
-    __IOM uint32_t IABR[8U];               /*!< Offset: 0x200 (R/W)  Interrupt Active bit Register */
-          uint32_t RESERVED4[56U];
-    __IOM uint8_t  IP[240U];               /*!< Offset: 0x300 (R/W)  Interrupt Priority Register (8Bit wide) */
-          uint32_t RESERVED5[644U];
-    __OM  uint32_t STIR;                   /*!< Offset: 0xE00 ( /W)  Software Trigger Interrupt Register */
-}  NVIC_Type;
+    __IO uint32_t ISER[8];                                  /*!< Offset: 0x000 (R/W)  Interrupt Set Enable Register */
+         uint32_t __RESERVED0[24];
+    __IO uint32_t ICER[8];                                  /*!< Offset: 0x080 (R/W)  Interrupt Clear Enable Register */
+         uint32_t RSERVED1[24];
+    __IO uint32_t ISPR[8];                                  /*!< Offset: 0x100 (R/W)  Interrupt Set Pending Register */
+         uint32_t __RESERVED1[24];
+    __IO uint32_t ICPR[8];                                  /*!< Offset: 0x180 (R/W)  Interrupt Clear Pending Register */
+         uint32_t __RESERVED2[24];
+    __IO uint32_t IABR[8];                                  /*!< Offset: 0x200 (R/W)  Interrupt Active bit Register */
+         uint32_t __RESERVED3[56];
+    __IO uint8_t IP[240];                                   /*!< Offset: 0x300 (R/W)  Interrupt Priority Register (8Bit wide) */
+         uint32_t __RESERVED4[644];
+    __O  uint32_t STIR;                                     /*!< Offset: 0xE00 ( /W)  Software Trigger Interrupt Register */
+} NVIC_Type;
 
 /* Software Triggered Interrupt Register Definitions */
 #define NVIC_STIR_INTID_Pos                 0U                                         /*!< STIR: INTLINESNUM Position */
@@ -500,165 +483,172 @@ typedef struct
 {
     union {
         struct {
-            __IM uint32_t REVISION : 4;
-            __IM uint32_t PARTNO : 12;
-            __IM uint32_t ARCHITECTURE : 4;
-            __IM uint32_t VARIANT : 4;
-            __IM uint32_t IMPLEMENTER : 8;
+            __I  uint32_t REVISION : 4;                     /*!< SCB CPUID: REVISION Mask */
+            __I  uint32_t PARTNO : 12;                      /*!< SCB CPUID: PARTNO Mask */
+            __I  uint32_t ARCHITECTURE : 4;                 /*!< SCB CPUID: ARCHITECTURE Mask */
+            __I  uint32_t VARIANT : 4;                      /*!< SCB CPUID: VARIANT Mask */
+            __I  uint32_t IMPLEMENTER : 8;                  /*!< SCB CPUID: IMPLEMENTER Mask */
         } b;
-        __IM uint32_t w;
-    } CPUID;                             /*!< Offset: 0x000 (R/ )  CPUID Base Register */
+        __I  uint32_t w;
+    } CPUID;                                                /*!< Offset: 0x000 (R/ )  CPUID Base Register */
     union {
         struct {
-            __IOM uint32_t VECTACTIVE :9;
-                  uint32_t __RESERVED0 :2;
-            __IOM uint32_t RETTOBASE :1;
-            __IOM uint32_t VECTPENDING :9;
-                  uint32_t __RESERVED1 :1;
-            __IOM uint32_t ISRPENDING :1;
-            __IOM uint32_t ISPREEMPT :1;
-                  uint32_t __RESERVED2 :1;
-            __IOM uint32_t PENDSTCLR :1;
-            __IOM uint32_t PENDSTSET :1;
-            __IOM uint32_t PENDSVCLR :1;
-            __IOM uint32_t PENDSVSET :1;
-                  uint32_t __RESERVED3 :2;
-            __IOM uint32_t MNIPENDSET :1;
+            __IO uint32_t VECTACTIVE : 9;                   /*!< SCB ICSR: VECTACTIVE Mask */
+                 uint32_t __RESERVED0 : 2;
+            __IO uint32_t RETTOBASE : 1;                    /*!< SCB ICSR: RETTOBASE Mask */
+            __IO uint32_t VECTPENDING : 9;                  /*!< SCB ICSR: VECTPENDING Mask */
+                 uint32_t __RESERVED1 : 1;
+            __IO uint32_t ISRPENDING : 1;                   /*!< SCB ICSR: ISRPENDING Mask */
+            __IO uint32_t ISRPREEMPT : 1;                   /*!< SCB ICSR: ISRPREEMPT Mask */
+                 uint32_t __RESERVED2 : 1;
+            __IO uint32_t PENDSTCLR : 1;                    /*!< SCB ICSR: PENDSTCLR Mask */
+            __IO uint32_t PENDSTSET : 1;                    /*!< SCB ICSR: PENDSTSET Mask */
+            __IO uint32_t PENDSVCLR : 1;                    /*!< SCB ICSR: PENDSVCLR Mask */
+            __IO uint32_t PENDSVSET : 1;                    /*!< SCB ICSR: PENDSVSET Mask */
+                 uint32_t __RESERVED3 : 2;
+            __IO uint32_t NMIPENDSET : 1;                   /*!< SCB ICSR: NMIPENDSET Mask */
         } b;
-        __IOM uint32_t w;
-    } ICSR;                              /*!< Offset: 0x004 (R/W)  Interrupt Control and State Register */
-    __IOM uint32_t VTOR;                 /*!< Offset: 0x008 (R/W)  Vector Table Offset Register */
-    union {
-      struct {
-            __IOM uint32_t VECTRESET :1;
-            __IOM uint32_t VECTCLRACTIVE :1;
-            __IOM uint32_t SYSRESETREQ :1;
-                  uint32_t __RESERVED0 :5;
-            __IOM uint32_t PRIGROUP :3;
-                  uint32_t __RESERVED1 :4;
-            __IOM uint32_t ENDIANESS :1;
-            __IOM uint32_t VECTKEY :16;
-        } b;
-        __IOM uint32_t w;
-    } AIRCR;                             /*!< Offset: 0x00C (R/W)  Application Interrupt and Reset Control Register */
+        __IO uint32_t w;
+    } ICSR;                                                 /*!< Offset: 0x004 (R/W)  Interrupt Control and State Register */
     union {
         struct {
-                  uint32_t __RESERVED0 :1;
-            __IOM uint32_t SLEEPONEXIT :1;
-            __IOM uint32_t SLEEPDEEP :1;
-                  uint32_t __RESERVED1 :1;
-            __IOM uint32_t SEVONPEND :1;
-                  uint32_t __RESERVED2 :27;
+                 uint32_t __RESERVED0 : 7;
+            __IO uint32_t TBLOFF : 25;                      /*!< SCB VTOR: TBLOFF Mask */
         } b;
-        __IOM uint32_t w;
-    } SCR;                               /*!< Offset: 0x010 (R/W)  System Control Register */
+        __IO uint32_t w;
+    } VTOR;                                                 /*!< Offset: 0x008 (R/W)  Vector Table Offset Register */
     union {
         struct {
-            __IOM uint32_t NONBASETHRDENA :1;
-            __IOM uint32_t USERSETMPEND :1;
-                  uint32_t __RESERVED0 :1;
-            __IOM uint32_t UNALIGN_TRP :1;
-            __IOM uint32_t DIV_0_TRP :1;
-                  uint32_t __RESERVED1 :3;
-            __IOM uint32_t BFHFNMIGN :1;
-            __IOM uint32_t STKALIGN :1;
-                  uint32_t __RESERVED2 :22;
+            __IO uint32_t VECTRESET : 1;                    /*!< SCB AIRCR: VECTRESET Mask */
+            __IO uint32_t VECTCLRACTIVE : 1;                /*!< SCB AIRCR: VECTCLRACTIVE Mask */
+            __IO uint32_t SYSRESETREQ : 1;                  /*!< SCB AIRCR: SYSRESETREQ Mask */
+                 uint32_t __RESERVED0 : 5;
+            __IO uint32_t PRIGROUP : 3;                     /*!< SCB AIRCR: PRIGROUP Mask */
+                 uint32_t __RESERVED1 : 4;
+            __IO uint32_t ENDIANESS : 1;                    /*!< SCB AIRCR: ENDIANESS Mask */
+            __IO uint32_t VECTKEY : 16;                     /*!< SCB AIRCR: VECTKEY Mask */
+            __IO uint32_t VECTKEYSTAT : 16;                 /*!< SCB AIRCR: VECTKEYSTAT Mask */
         } b;
-        __IOM uint32_t w;
-    } CCR;                               /*!< Offset: 0x014 (R/W)  Configuration Control Register */
-    __IOM uint8_t  SHP[12U];             /*!< Offset: 0x018 (R/W)  System Handlers Priority Registers (4-7, 8-11, 12-15) */
+        __IO uint32_t w;
+    } AIRCR;                                                /*!< Offset: 0x00C (R/W)  Application Interrupt and Reset Control Register */
     union {
         struct {
-            __IOM uint32_t MEMFAULTACT :1;
-            __IOM uint32_t BUSFAULTACT :1;
-                  uint32_t __RESERVED0 :1;
-            __IOM uint32_t USGFAULTACT :1;
-                  uint32_t __RESERVED1 :3;
-            __IOM uint32_t SVCALLACT :1;
-            __IOM uint32_t MONITORACT :1;
-                  uint32_t __RESERVED2 :1;
-            __IOM uint32_t PENDSVACT :1;
-            __IOM uint32_t SYSTICKACT :1;
-            __IOM uint32_t USGFAULTPENDED :1;
-            __IOM uint32_t EMFAULTPENDED :1;
-            __IOM uint32_t BUSFAULTPENDED :1;
-            __IOM uint32_t SVCALLPENDED :1;
-            __IOM uint32_t MEMFAULTENA :1;
-            __IOM uint32_t BUSFAULTENA :1;
-            __IOM uint32_t USGFAULTENA :1;
-                  uint32_t __RESERVED3 :13;
+                 uint32_t __RESERVED0 : 1;
+            __IO uint32_t SLEEPONEXIT : 1;                  /*!< SCB SCR: SLEEPONEXIT Mask */
+            __IO uint32_t SLEEPDEEP : 1;                    /*!< SCB SCR: SLEEPDEEP Mask */
+                 uint32_t __RESERVED1 : 1;
+            __IO uint32_t SEVONPEND : 1;                    /*!< SCB SCR: SEVONPEND Mask */
+                 uint32_t __RESERVED2 : 27;
         } b;
-        __IOM uint32_t w;
-    } SHCSR;                             /*!< Offset: 0x024 (R/W)  System Handler Control and State Register */
+        __IO uint32_t w;
+    } SCR;                                                  /*!< Offset: 0x010 (R/W)  System Control Register */
     union {
         struct {
-            __IOM uint8_t IACCVIOL : 1;
-            __IOM uint8_t DACCVIOL : 1;
+            __IO uint32_t NONBASETHRDENA : 1;               /*!< SCB CCR: NONBASETHRDENA Mask */
+            __IO uint32_t USERSETMPEND : 1;                 /*!< SCB CCR: USERSETMPEND Mask */
+                 uint32_t __RESERVED0 : 1;
+            __IO uint32_t UNALIGN_TRP : 1;                  /*!< SCB CCR: UNALIGN_TRP Mask */
+            __IO uint32_t DIV_0_TRP : 1;                    /*!< SCB CCR: DIV_0_TRP Mask */
+                 uint32_t __RESERVED1 : 3;
+            __IO uint32_t BFHFNMIGN : 1;                    /*!< SCB CCR: BFHFNMIGN Mask */
+            __IO uint32_t STKALIGN : 1;                     /*!< SCB CCR: STKALIGN Mask */
+                 uint32_t __RESERVED2 : 22;
+        } b;
+        __IO uint32_t w;
+    } CCR;                                                  /*!< Offset: 0x014 (R/W)  Configuration Control Register */
+    __IO uint8_t SHP[12];                                   /*!< Offset: 0x018 (R/W)  System Handlers Priority Registers (4-7, 8-11, 12-15) */
+    union {
+        struct {
+            __IO uint32_t MEMFAULTACT : 1;                  /*!< SCB SHCSR: MEMFAULTACT Mask */
+            __IO uint32_t BUSFAULTACT : 1;                  /*!< SCB SHCSR: BUSFAULTACT Mask */
+                 uint32_t __RESERVED0 : 1;
+            __IO uint32_t USGFAULTACT : 1;                  /*!< SCB SHCSR: USGFAULTACT Mask */
+                 uint32_t __RESERVED1 : 3;
+            __IO uint32_t SVCALLACT : 1;                    /*!< SCB SHCSR: SVCALLACT Mask */
+            __IO uint32_t MONITORACT : 1;                   /*!< SCB SHCSR: MONITORACT Mask */
+                 uint32_t __RESERVED2 : 1;
+            __IO uint32_t PENDSVACT : 1;                    /*!< SCB SHCSR: PENDSVACT Mask */
+            __IO uint32_t SYSTICKACT : 1;                   /*!< SCB SHCSR: SYSTICKACT Mask */
+            __IO uint32_t USGFAULTPENDED : 1;               /*!< SCB SHCSR: USGFAULTPENDED Mask */
+            __IO uint32_t MEMFAULTPENDED : 1;               /*!< SCB SHCSR: MEMFAULTPENDED Mask */
+            __IO uint32_t BUSFAULTPENDED : 1;               /*!< SCB SHCSR: BUSFAULTPENDED Mask */
+            __IO uint32_t SVCALLPENDED : 1;                 /*!< SCB SHCSR: SVCALLPENDED Mask */
+            __IO uint32_t MEMFAULTENA : 1;                  /*!< SCB SHCSR: MEMFAULTENA Mask */
+            __IO uint32_t BUSFAULTENA : 1;                  /*!< SCB SHCSR: BUSFAULTENA Mask */
+            __IO uint32_t USGFAULTENA : 1;                  /*!< SCB SHCSR: USGFAULTENA Mask */
+                 uint32_t __RESERVED3 : 13;
+        } b;
+        __IO uint32_t w;
+    } SHCSR;                                                /*!< Offset: 0x024 (R/W)  System Handler Control and State Register */
+    union {
+        struct {
+            __IO uint8_t IACCVIOL : 1;
+            __IO uint8_t DACCVIOL : 1;
                  uint8_t __RESERVED0 : 1;
-            __IOM uint8_t MUNSTKERR : 1;
-            __IOM uint8_t MSTKERR : 1;
-            __IOM uint8_t MLSPERR : 1;
+            __IO uint8_t MUNSTKERR : 1;
+            __IO uint8_t MSTKERR : 1;
+            __IO uint8_t MLSPERR : 1;
                  uint8_t __RESERVED1 : 1;
-            __IOM uint8_t MMARVALID : 1;
+            __IO uint8_t MMARVALID : 1;
         } b;
-        __IOM uint8_t w;
-    } MEMFAULTSR;                        /*!< Offset: 0x028 (R/W)  Memory Fault Status Register */
+        __IO uint8_t w;
+    } MEMFAULTSR;                                           /*!< Offset: 0x028 (R/W)  Memory Fault Status Register */
     union {
         struct {
-            __IOM uint8_t IBUSERR : 1;
-            __IOM uint8_t PRECISERR : 1;
-            __IOM uint8_t IMPRECISERR : 1;
-            __IOM uint8_t UNSTKERR : 1;
-            __IOM uint8_t STKERR : 1;
-            __IOM uint8_t LSPERR : 1;
+            __IO uint8_t IBUSERR : 1;
+            __IO uint8_t PRECISERR : 1;
+            __IO uint8_t IMPRECISERR : 1;
+            __IO uint8_t UNSTKERR : 1;
+            __IO uint8_t STKERR : 1;
+            __IO uint8_t LSPERR : 1;
                  uint8_t __RESERVED0 : 1;
-            __IOM uint8_t BFARVALID : 1;
+            __IO uint8_t BFARVALID : 1;
         } b;
-        __IOM uint8_t w;
-    } BUSFAULTSR;                        /*!< Offset: 0x029 (R/W)  Bus Fault Status Register */
+        __IO uint8_t w;
+    } BUSFAULTSR;                                           /*!< Offset: 0x029 (R/W)  Bus Fault Status Register */
     union {
         struct {
-            __IOM uint16_t UNDEFINSTR : 1;
-            __IOM uint16_t INVSTATE : 1;
-            __IOM uint16_t INVPC : 1;
-            __IOM uint16_t NOCP : 1;
-                  uint16_t __RESERVED0 : 4;
-            __IOM uint16_t UNALIGNED : 1;
-            __IOM uint16_t DIVBYZERO : 1;
-                  uint16_t __RESERVED1 : 6;
+            __IO uint16_t UNDEFINSTR : 1;
+            __IO uint16_t INVSTATE : 1;
+            __IO uint16_t INVPC : 1;
+            __IO uint16_t NOCP : 1;
+                 uint16_t __RESERVED0 : 4;
+            __IO uint16_t UNALIGNED : 1;
+            __IO uint16_t DIVBYZERO : 1;
+                 uint16_t __RESERVED1 : 6;
         } b;
-        __IOM uint16_t w;
-    } USGFAULTSR;                        /*!< Offset: 0x02A (R/W)  Usage Fault Status Register */
+        __IO uint16_t w;
+    } USGFAULTSR;                                           /*!< Offset: 0x02A (R/W)  Usage Fault Status Register */
     union {
         struct {
-                  uint32_t __RESERVED0 :1;
-            __IOM uint32_t VECTTBL :1;
-                  uint32_t __RESERVED1 :28;
-            __IOM uint32_t FORCED :1;
-            __IOM uint32_t DEBUGEVT :1;
+                 uint32_t __RESERVED0 : 1;
+            __IO uint32_t VECTTBL : 1;                      /*!< SCB HFSR: VECTTBL Mask */
+                 uint32_t __RESERVED1 : 28;
+            __IO uint32_t FORCED : 1;                       /*!< SCB HFSR: FORCED Mask */
+            __IO uint32_t DEBUGEVT : 1;                     /*!< SCB HFSR: DEBUGEVT Mask */
         } b;
-        __IOM uint32_t w;
-    } HFSR;                              /*!< Offset: 0x02C (R/W)  HardFault Status Register */
+        __IO uint32_t w;
+    } HFSR;                                                 /*!< Offset: 0x02C (R/W)  HardFault Status Register */
     union {
         struct {
-            __IOM uint32_t HALTED :1;
-            __IOM uint32_t BKPT :1;
-            __IOM uint32_t DWTTRAP :1;
-            __IOM uint32_t VCATCH :1;
-            __IOM uint32_t EXTERNAL :1;
-                  uint32_t __RESERVED0 :27;
+            __IO uint32_t HALTED : 1;                       /*!< SCB DFSR: HALTED Mask */
+            __IO uint32_t BKPT : 1;                         /*!< SCB DFSR: BKPT Mask */
+            __IO uint32_t DWTTRAP : 1;                      /*!< SCB DFSR: DWTTRAP Mask */
+            __IO uint32_t VCATCH : 1;                       /*!< SCB DFSR: VCATCH Mask */
+            __IO uint32_t EXTERNAL : 1;                     /*!< SCB DFSR: EXTERNAL Mask */
+                 uint32_t __RESERVED0 : 27;
         } b;
-        __IOM uint32_t w;
-    } DFSR;                              /*!< Offset: 0x030 (R/W)  Debug Fault Status Register */
-    __IOM uint32_t MMFAR;                /*!< Offset: 0x034 (R/W)  MemManage Fault Address Register */
-    __IOM uint32_t BFAR;                 /*!< Offset: 0x038 (R/W)  BusFault Address Register */
-    __IOM uint32_t AFSR;                 /*!< Offset: 0x03C (R/W)  Auxiliary Fault Status Register */
-    __IM  uint32_t PFR[2U];              /*!< Offset: 0x040 (R/ )  Processor Feature Register */
-    __IM  uint32_t DFR;                  /*!< Offset: 0x048 (R/ )  Debug Feature Register */
-    __IM  uint32_t ADR;                  /*!< Offset: 0x04C (R/ )  Auxiliary Feature Register */
-    __IM  uint32_t MMFR[4U];             /*!< Offset: 0x050 (R/ )  Memory Model Feature Register */
-    __IM  uint32_t ISAR[5U];             /*!< Offset: 0x060 (R/ )  Instruction Set Attributes Register */
-          uint32_t RESERVED0[5U];
+        __IO uint32_t w;
+    } DFSR;                                                 /*!< Offset: 0x030 (R/W)  Debug Fault Status Register */
+    __IO uint32_t MMFAR;                                    /*!< Offset: 0x034 (R/W)  MemManage Fault Address Register */
+    __IO uint32_t BFAR;                                     /*!< Offset: 0x038 (R/W)  BusFault Address Register */
+    __IO uint32_t AFSR;                                     /*!< Offset: 0x03C (R/W)  Auxiliary Fault Status Register */
+    __I  uint32_t PFR[2];                                   /*!< Offset: 0x040 (R/ )  Processor Feature Register */
+    __I  uint32_t DFR;                                      /*!< Offset: 0x048 (R/ )  Debug Feature Register */
+    __I  uint32_t ADR;                                      /*!< Offset: 0x04C (R/ )  Auxiliary Feature Register */
+    __I  uint32_t MMFR[4];                                  /*!< Offset: 0x050 (R/ )  Memory Model Feature Register */
+    __I  uint32_t ISAR[5];                                  /*!< Offset: 0x060 (R/ )  Instruction Set Attributes Register */
+         uint32_t __RESERVED0[5];
     union {
         struct {
                   uint32_t __RESERVED0 : 20;
@@ -667,7 +657,7 @@ typedef struct
                   uint32_t __RESERVED1 : 8;
         } b;
         __IOM uint32_t w;
-    } CPACR;                             /*!< Offset: 0x088 (R/W)  Coprocessor Access Control Register */
+    } CPACR;                                                /*!< Offset: 0x088 (R/W)  Coprocessor Access Control Register */
 } SCB_Type;
 
 /* SCB CPUID Register Definitions */
@@ -869,23 +859,23 @@ typedef struct
         uint32_t RESERVED0[1U];
     union {
         struct {
-            __IM uint32_t INTLINESNUM : 4;
+            __I  uint32_t INTLINESNUM : 4;                  /*!< ICTR: INTLINESNUM Mask */
                  uint32_t __RESERVED0 : 28;
         } b;
-        __IM uint32_t w;
-    } ICTR;                              /*!< Offset: 0x004 (R/ )  Interrupt Controller Type Register */
+        __I  uint32_t w;
+    } ICTR;                                                 /*!< Offset: 0x004 (R/ )  Interrupt Controller Type Register */
     union {
         struct {
-            __IOM uint32_t DISMCYCINT : 1;
-            __IOM uint32_t DISDEFWBUF : 1;
-            __IOM uint32_t DISFOLD : 1;
-                  uint32_t __RESERVED0 : 5;
-            __IOM uint32_t DISFPCA : 1;
-            __IOM uint32_t DISOOFP : 1;
-                  uint32_t __RESERVED1 : 22;
+            __IO uint32_t DISMCYCINT : 1;                   /*!< ACTLR: DISMCYCINT Mask */
+            __IO uint32_t DISDEFWBUF : 1;                   /*!< ACTLR: DISDEFWBUF Mask */
+            __IO uint32_t DISFOLD : 1;                      /*!< ACTLR: DISFOLD Mask */
+                 uint32_t __RESERVED0 : 5;
+            __IO uint32_t DISFPCA : 1;                      /*!< ACTLR: DISFPCA Mask */
+            __IO uint32_t DISOOFP : 1;                      /*!< ACTLR: DISOOFP Mask */
+                 uint32_t __RESERVED1 : 22;
         } b;
-        __IOM uint32_t w;
-    } ACTLR;                             /*!< Offset: 0x008 (R/W)  Auxiliary Control Register */
+        __IO uint32_t w;
+    } ACTLR;                                                /*!< Offset: 0x008 (R/W)  Auxiliary Control Register */
 } SCnSCB_Type;
 
 /* Interrupt Controller Type Register Definitions */
@@ -925,38 +915,26 @@ typedef struct
 {
     union {
         struct {
-            __IOM uint32_t ENABLE : 1;
-            __IOM uint32_t TICKINT : 1;
-            __IOM uint32_t CLKSOURCE : 1;
-                  uint32_t __RESERVED0 : 13;
-            __IOM uint32_t COUNTFLAG : 1;
-                  uint32_t __RESERVED1 : 15;
-        }b;
-        __IOM uint32_t w;
-    } CTRL;                              /*!< Offset: 0x000 (R/W)  SysTick Control and Status Register */
+            __IO uint32_t ENABLE : 1;                       /*!< SysTick CTRL: ENABLE Mask */
+            __IO uint32_t TICKINT : 1;                      /*!< SysTick CTRL: TICKINT Mask */
+            __IO uint32_t CLKSOURCE : 1;                    /*!< SysTick CTRL: CLKSOURCE Mask */
+                 uint32_t __RESERVED0 : 13;
+            __IO uint32_t COUNTFLAG : 1;                    /*!< SysTick CTRL: COUNTFLAG Mask */
+                 uint32_t __RESERVED1 : 15;
+        } b;
+        __IO uint32_t w;
+    } CTRL;                                                 /*!< Offset: 0x000 (R/W)  SysTick Control and Status Register */
+    __IO uint32_t LOAD;                                     /*!< Offset: 0x004 (R/W)  SysTick Reload Value Register */
+    __IO uint32_t VAL;                                      /*!< Offset: 0x008 (R/W)  SysTick Current Value Register */
     union {
         struct {
-            __IOM uint32_t RELOAD : 24;
-                  uint32_t __RESERVED0 : 8;
-        }b;
-        __IOM uint32_t w;
-    } LOAD;                              /*!< Offset: 0x004 (R/W)  SysTick Reload Value Register */
-    union {
-        struct {
-            __IOM uint32_t CURRENT : 24;
-                  uint32_t __RESERVED0 : 8;
-        }b;
-        __IOM uint32_t w;
-    } VAL;                               /*!< Offset: 0x008 (R/W)  SysTick Current Value Register */
-    union {
-        struct {
-            __IM uint32_t TENMS : 24;
-                  uint32_t __RESERVED0 : 6;
-            __IM uint32_t SKEW : 1;
-            __IM uint32_t NOREF : 1;
-        }b;
-        __IM uint32_t w;
-    } CALIB;                             /*!< Offset: 0x00C (R/ )  SysTick Calibration Register */
+            __I  uint32_t TENMS : 24;                       /*!< SysTick CALIB: TENMS Mask */
+                 uint32_t __RESERVED0 : 6;
+            __I  uint32_t SKEW : 1;                         /*!< SysTick CALIB: SKEW Mask */
+            __I  uint32_t NOREF : 1;                        /*!< SysTick CALIB: NOREF Mask */
+        } b;
+        __I  uint32_t w;
+    } CALIB;                                                /*!< Offset: 0x00C (R/ )  SysTick Calibration Register */
 } SysTick_Type;
 
 /* SysTick Control / Status Register Definitions */
@@ -1005,71 +983,71 @@ typedef struct
  */
 typedef struct
 {
-    __OM  union {
-        __OM  uint8_t    u8;               /*!< Offset: 0x000 ( /W)  ITM Stimulus Port 8-bit */
-        __OM  uint16_t   u16;              /*!< Offset: 0x000 ( /W)  ITM Stimulus Port 16-bit */
-        __OM  uint32_t   u32;              /*!< Offset: 0x000 ( /W)  ITM Stimulus Port 32-bit */
-    } PORT [32U];                          /*!< Offset: 0x000 ( /W)  ITM Stimulus Port Registers */
+    __O union {
+        __O  uint8_t    u8;                                 /*!< Offset: 0x000 ( /W)  ITM Stimulus Port 8-bit */
+        __O  uint16_t   u16;                                /*!< Offset: 0x000 ( /W)  ITM Stimulus Port 16-bit */
+        __O  uint32_t   u32;                                /*!< Offset: 0x000 ( /W)  ITM Stimulus Port 32-bit */
+    } PORT [32U];                                           /*!< Offset: 0x000 ( /W)  ITM Stimulus Port Registers */
           uint32_t RESERVED0[864U];
-    __IOM uint32_t TER;                    /*!< Offset: 0xE00 (R/W)  ITM Trace Enable Register */
+    __IO uint32_t TER;                                     /*!< Offset: 0xE00 (R/W)  ITM Trace Enable Register */
           uint32_t RESERVED1[15U];
     union {
         struct {
-            __IOM uint32_t PRIVMASK : 4;
+            __IO uint32_t PRIVMASK : 4;
                   uint32_t __RESERVED0 : 28;
         } b;
-        __IOM uint32_t w;
-    } TPR;                                 /*!< Offset: 0xE40 (R/W)  ITM Trace Privilege Register */
+        __IO uint32_t w;
+    } TPR;                                                  /*!< Offset: 0xE40 (R/W)  ITM Trace Privilege Register */
           uint32_t RESERVED2[15U];
     union {
         struct {
-            __IOM uint32_t ITMENA : 1;
-            __IOM uint32_t TSENA : 1;
-            __IOM uint32_t SYNCENA : 1;
-            __IOM uint32_t DWTENA : 1;
-            __IOM uint32_t SWOENA : 1;
-                  uint32_t __RESERVED0 : 3;
-            __IOM uint32_t TSPrescale : 2;
-            __IOM uint32_t GTSFREQ : 2;
-                  uint32_t __RESERVED1 : 4;
-            __IOM uint32_t TraceBusID : 7;
-            __IOM uint32_t BUSY : 1;
-                  uint32_t __RESERVED2 : 8;
+            __IO uint32_t ITMENA : 1;
+            __IO uint32_t TSENA : 1;
+            __IO uint32_t SYNCENA : 1;
+            __IO uint32_t DWTENA : 1;
+            __IO uint32_t SWOENA : 1;
+                 uint32_t __RESERVED0 : 3;
+            __IO uint32_t TSPrescale : 2;
+            __IO uint32_t GTSFREQ : 2;
+                 uint32_t __RESERVED1 : 4;
+            __IO uint32_t TraceBusID : 7;
+            __IO uint32_t BUSY : 1;
+                 uint32_t __RESERVED2 : 8;
         } b;
-        __IOM uint32_t w;
-    } TCR;                                 /*!< Offset: 0xE80 (R/W)  ITM Trace Control Register */
+        __IO uint32_t w;
+    } TCR;                                                   /*!< Offset: 0xE80 (R/W)  ITM Trace Control Register */
           uint32_t RESERVED3[29U];
     union {
         struct {
-            __OM uint32_t ATVALIDM : 1;
+            __O  uint32_t ATVALIDM : 1;
                  uint32_t __RESERVED0 : 31;
         } b;
-        __OM uint32_t w;
-    } IWR;                                 /*!< Offset: 0xEF8 ( /W)  ITM Integration Write Register */
+        __O  uint32_t w;
+    } IWR;                                                   /*!< Offset: 0xEF8 ( /W)  ITM Integration Write Register */
     union {
         struct {
-            __IM uint32_t ATREADYM : 1;
+            __I  uint32_t ATREADYM : 1;
                  uint32_t __RESERVED0 : 31;
         } b;
-        __IM uint32_t w;
-    } IRR;                                 /*!< Offset: 0xEFC (R/ )  ITM Integration Read Register */
+        __I  uint32_t w;
+    } IRR;                                                   /*!< Offset: 0xEFC (R/ )  ITM Integration Read Register */
     union {
         struct {
-            __IOM uint32_t INTEGRATION : 1;
-                  uint32_t __RESERVED0 : 31;
+            __IO uint32_t INTEGRATION : 1;
+                 uint32_t __RESERVED0 : 31;
         } b;
-        __IOM uint32_t w;
-    } IMCR;                                /*!< Offset: 0xF00 (R/W)  ITM Integration Mode Control Register */
+        __IO uint32_t w;
+    } IMCR;                                                  /*!< Offset: 0xF00 (R/W)  ITM Integration Mode Control Register */
           uint32_t RESERVED4[43U];
-    __OM  uint32_t LAR;                    /*!< Offset: 0xFB0 ( /W)  ITM Lock Access Register */
+    __O  uint32_t LAR;                                       /*!< Offset: 0xFB0 ( /W)  ITM Lock Access Register */
     union {
         struct {
-            __IM uint32_t Present : 1;
-            __IM uint32_t Access : 1;
-            __IM uint32_t ByteAcc : 1;
+            __I  uint32_t Present : 1;
+            __I  uint32_t Access : 1;
+            __I  uint32_t ByteAcc : 1;
             uint32_t __RESERVED0 : 29;
         } b;
-        __IM uint32_t w;
+        __I  uint32_t w;
     } LSR;                                 /*!< Offset: 0xFB4 (R/ )  ITM Lock Status Register */
           uint32_t RESERVED5[6U];
     __IM  uint32_t PID4;                   /*!< Offset: 0xFD0 (R/ )  ITM Peripheral Identification Register #4 */
@@ -1157,120 +1135,125 @@ typedef struct
 {
     union {
         struct {
-            __IOM uint32_t CYCCNTENA : 1;
-            __IOM uint32_t POSTPRESET : 4;
-            __IOM uint32_t POSTINIT : 4;
-            __IOM uint32_t CYCTAP : 1;
-            __IOM uint32_t SYNCTAP : 2;
-            __IOM uint32_t PCSAMPLENA : 1;
-                  uint32_t __RESERVED0 : 3;
-            __IOM uint32_t EXCTRCENA : 1;
-            __IOM uint32_t CPIEVTENA : 1;
-            __IOM uint32_t EXCEVTENA : 1;
-            __IOM uint32_t SLEEPEVTENA : 1;
-            __IOM uint32_t LSUEVTENA : 1;
-            __IOM uint32_t FOLDEVTENA : 1;
-            __IOM uint32_t CYCEVTENA : 1;
-                  uint32_t __RESERVED1 : 1;
-            __IOM uint32_t NOPRFCNT : 1;
-            __IOM uint32_t NOCYCCNT : 1;
-            __IOM uint32_t NOEXTTRIG : 1;
-            __IOM uint32_t NOTRCPKT : 1;
-            __IOM uint32_t NUMCOMP : 1;
-                  uint32_t __RESERVED2 : 3;
+            __IO uint32_t CYCCNTENA : 1;                    /*!< DWT CTRL: CYCCNTENA Mask */
+            __IO uint32_t POSTPRESET : 4;                   /*!< DWT CTRL: POSTPRESET Mask */
+            __IO uint32_t POSTINIT : 4;                     /*!< DWT CTRL: POSTINIT Mask */
+            __IO uint32_t CYCTAP : 1;                       /*!< DWT CTRL: CYCTAP Mask */
+            __IO uint32_t SYNCTAP : 2;                      /*!< DWT CTRL: SYNCTAP Mask */
+            __IO uint32_t PCSAMPLENA : 1;                   /*!< DWT CTRL: PCSAMPLENA Mask */
+                 uint32_t __RESERVED0 : 3;
+            __IO uint32_t EXCTRCENA : 1;                    /*!< DWT CTRL: EXCTRCENA Mask */
+            __IO uint32_t CPIEVTENA : 1;                    /*!< DWT CTRL: CPIEVTENA Mask */
+            __IO uint32_t EXCEVTENA : 1;                    /*!< DWT CTRL: EXCEVTENA Mask */
+            __IO uint32_t SLEEPEVTENA : 1;                  /*!< DWT CTRL: SLEEPEVTENA Mask */
+            __IO uint32_t LSUEVTENA : 1;                    /*!< DWT CTRL: LSUEVTENA Mask */
+            __IO uint32_t FOLDEVTENA : 1;                   /*!< DWT CTRL: FOLDEVTENA Mask */
+            __IO uint32_t CYCEVTENA : 1;                    /*!< DWT CTRL: CYCEVTENA Mask */
+                 uint32_t __RESERVED1 : 1;
+            __IO uint32_t NOPRFCNT : 1;                     /*!< DWT CTRL: NOPRFCNT Mask */
+            __IO uint32_t NOCYCCNT : 1;                     /*!< DWT CTRL: NOCYCCNT Mask */
+            __IO uint32_t NOEXTTRIG : 1;                    /*!< DWT CTRL: NOEXTTRIG Mask */
+            __IO uint32_t NOTRCPKT : 1;                     /*!< DWT CTRL: NOTRCPKT Mask */
+            __IO uint32_t NUMCOMP : 4;                      /*!< DWT CTRL: NUMCOMP Mask */
         } b;
-        __IOM uint32_t w;
-    } CTRL;                                /*!< Offset: 0x000 (R/W)  Control Register */
-    __IOM uint32_t CYCCNT;                 /*!< Offset: 0x004 (R/W)  Cycle Count Register */
-    __IOM uint32_t CPICNT;                 /*!< Offset: 0x008 (R/W)  CPI Count Register */
-    __IOM uint32_t EXCCNT;                 /*!< Offset: 0x00C (R/W)  Exception Overhead Count Register */
-    __IOM uint32_t SLEEPCNT;               /*!< Offset: 0x010 (R/W)  Sleep Count Register */
-    __IOM uint32_t LSUCNT;                 /*!< Offset: 0x014 (R/W)  LSU Count Register */
-    __IOM uint32_t FOLDCNT;                /*!< Offset: 0x018 (R/W)  Folded-instruction Count Register */
-    __IM  uint32_t PCSR;                   /*!< Offset: 0x01C (R/ )  Program Counter Sample Register */
-    __IOM uint32_t COMP0;                  /*!< Offset: 0x020 (R/W)  Comparator Register 0 */
-    __IOM uint32_t MASK0;                  /*!< Offset: 0x024 (R/W)  Mask Register 0 */
+        __IO uint32_t w;
+    } CTRL;                                                 /*!< Offset: 0x000 (R/W)  Control Register */
+    __IO uint32_t CYCCNT;                                   /*!< Offset: 0x004 (R/W)  Cycle Count Register */
+    __IO uint32_t CPICNT;                                   /*!< Offset: 0x008 (R/W)  CPI Count Register */
+    __IO uint32_t EXCCNT;                                   /*!< Offset: 0x00C (R/W)  Exception Overhead Count Register */
+    __IO uint32_t SLEEPCNT;                                 /*!< Offset: 0x010 (R/W)  Sleep Count Register */
+    __IO uint32_t LSUCNT;                                   /*!< Offset: 0x014 (R/W)  LSU Count Register */
+    __IO uint32_t FOLDCNT;                                  /*!< Offset: 0x018 (R/W)  Folded-instruction Count Register */
+    __I  uint32_t PCSR;                                     /*!< Offset: 0x01C (R/ )  Program Counter Sample Register */
+    __IO uint32_t COMP0;                                    /*!< Offset: 0x020 (R/W)  Comparator Register 0 */
     union {
         struct {
-            __IOM uint32_t FUNCTION : 4;
-                  uint32_t __RESERVED0 : 1;
-            __IOM uint32_t EMITRANGE : 1;
-                  uint32_t __RESERVED1 : 1;
-            __IOM uint32_t CYCMATCH : 1;
-            __IOM uint32_t DATAVMATCH : 1;
-            __IOM uint32_t LNK1ENA : 1;
-            __IOM uint32_t DATAVSIZE : 2;
-            __IOM uint32_t DATAVADDR0 : 4;
-            __IOM uint32_t DATAVADDR1 : 4;
-                  uint32_t __RESERVED2 : 4;
-            __IOM uint32_t MATCHED : 1;
-                  uint32_t __RESERVED3 : 7;
+            __IO uint32_t MASK : 5;                         /*!< DWT MASK: MASK Mask */
+                 uint32_t __RESERVED0 : 27;
         } b;
-        __IOM uint32_t w;
-    } FUNCTION0;                           /*!< Offset: 0x028 (R/W)  Function Register 0 */
-          uint32_t RESERVED0[1U];
-    __IOM uint32_t COMP1;                  /*!< Offset: 0x030 (R/W)  Comparator Register 1 */
-    __IOM uint32_t MASK1;                  /*!< Offset: 0x034 (R/W)  Mask Register 1 */
+        __IO uint32_t w;
+    } MASK0;                                                /*!< Offset: 0x024 (R/W)  Mask Register 0 */
     union {
         struct {
-            __IOM uint32_t FUNCTION : 4;
-                  uint32_t __RESERVED0 : 1;
-            __IOM uint32_t EMITRANGE : 1;
-                  uint32_t __RESERVED1 : 1;
-            __IOM uint32_t CYCMATCH : 1;
-            __IOM uint32_t DATAVMATCH : 1;
-            __IOM uint32_t LNK1ENA : 1;
-            __IOM uint32_t DATAVSIZE : 2;
-            __IOM uint32_t DATAVADDR0 : 4;
-            __IOM uint32_t DATAVADDR1 : 4;
-                  uint32_t __RESERVED2 : 4;
-            __IOM uint32_t MATCHED : 1;
-                  uint32_t __RESERVED3 : 7;
+            __IO uint32_t FUNCTION : 4;                     /*!< DWT FUNCTION: FUNCTION Mask */
+                 uint32_t __RESERVED0 : 1;
+            __IO uint32_t EMITRANGE : 1;                    /*!< DWT FUNCTION: EMITRANGE Mask */
+                 uint32_t __RESERVED1 : 1;
+            __IO uint32_t CYCMATCH : 1;                     /*!< DWT FUNCTION: CYCMATCH Mask */
+            __IO uint32_t DATAVMATCH : 1;                   /*!< DWT FUNCTION: DATAVMATCH Mask */
+            __IO uint32_t LNK1ENA : 1;                      /*!< DWT FUNCTION: LNK1ENA Mask */
+            __IO uint32_t DATAVSIZE : 2;                    /*!< DWT FUNCTION: DATAVSIZE Mask */
+            __IO uint32_t DATAVADDR0 : 4;                   /*!< DWT FUNCTION: DATAVADDR0 Mask */
+            __IO uint32_t DATAVADDR1 : 4;                   /*!< DWT FUNCTION: DATAVADDR1 Mask */
+                 uint32_t __RESERVED2 : 4;
+            __IO uint32_t MATCHED : 1;                      /*!< DWT FUNCTION: MATCHED Mask */
+                 uint32_t __RESERVED3 : 7;
         } b;
-        __IOM uint32_t w;
-    } FUNCTION1;                           /*!< Offset: 0x038 (R/W)  Function Register 1 */
-          uint32_t RESERVED1[1U];
-    __IOM uint32_t COMP2;                  /*!< Offset: 0x040 (R/W)  Comparator Register 2 */
-    __IOM uint32_t MASK2;                  /*!< Offset: 0x044 (R/W)  Mask Register 2 */
+        __IO uint32_t w;
+    } FUNCTION0;                                            /*!< Offset: 0x028 (R/W)  Function Register 0 */
+         uint32_t __RESERVED0;
+    __IO uint32_t COMP1;                                    /*!< Offset: 0x030 (R/W)  Comparator Register 1 */
+    __IO uint32_t MASK1;                                    /*!< Offset: 0x034 (R/W)  Mask Register 1 */
     union {
         struct {
-            __IOM uint32_t FUNCTION : 4;
-                  uint32_t __RESERVED0 : 1;
-            __IOM uint32_t EMITRANGE : 1;
-                  uint32_t __RESERVED1 : 1;
-            __IOM uint32_t CYCMATCH : 1;
-            __IOM uint32_t DATAVMATCH : 1;
-            __IOM uint32_t LNK1ENA : 1;
-            __IOM uint32_t DATAVSIZE : 2;
-            __IOM uint32_t DATAVADDR0 : 4;
-            __IOM uint32_t DATAVADDR1 : 4;
-                  uint32_t __RESERVED2 : 4;
-            __IOM uint32_t MATCHED : 1;
-                  uint32_t __RESERVED3 : 7;
+            __IO uint32_t FUNCTION : 4;                     /*!< DWT FUNCTION: FUNCTION Mask */
+                 uint32_t __RESERVED0 : 1;
+            __IO uint32_t EMITRANGE : 1;                    /*!< DWT FUNCTION: EMITRANGE Mask */
+                 uint32_t __RESERVED1 : 1;
+            __IO uint32_t CYCMATCH : 1;                     /*!< DWT FUNCTION: CYCMATCH Mask */
+            __IO uint32_t DATAVMATCH : 1;                   /*!< DWT FUNCTION: DATAVMATCH Mask */
+            __IO uint32_t LNK1ENA : 1;                      /*!< DWT FUNCTION: LNK1ENA Mask */
+            __IO uint32_t DATAVSIZE : 2;                    /*!< DWT FUNCTION: DATAVSIZE Mask */
+            __IO uint32_t DATAVADDR0 : 4;                   /*!< DWT FUNCTION: DATAVADDR0 Mask */
+            __IO uint32_t DATAVADDR1 : 4;                   /*!< DWT FUNCTION: DATAVADDR1 Mask */
+                 uint32_t __RESERVED2 : 4;
+            __IO uint32_t MATCHED : 1;                      /*!< DWT FUNCTION: MATCHED Mask */
+                 uint32_t __RESERVED3 : 7;
         } b;
         __IOM uint32_t w;
-    } FUNCTION2;                           /*!< Offset: 0x048 (R/W)  Function Register 2 */
-          uint32_t RESERVED2[1U];
-    __IOM uint32_t COMP3;                  /*!< Offset: 0x050 (R/W)  Comparator Register 3 */
-    __IOM uint32_t MASK3;                  /*!< Offset: 0x054 (R/W)  Mask Register 3 */
+    } FUNCTION1;                                            /*!< Offset: 0x038 (R/W)  Function Register 1 */
+         uint32_t __RESERVED1;
+    __IO uint32_t COMP2;                                    /*!< Offset: 0x040 (R/W)  Comparator Register 2 */
+    __IO uint32_t MASK2;                                    /*!< Offset: 0x044 (R/W)  Mask Register 2 */
     union {
         struct {
-            __IOM uint32_t FUNCTION : 4;
-                  uint32_t __RESERVED0 : 1;
-            __IOM uint32_t EMITRANGE : 1;
-                  uint32_t __RESERVED1 : 1;
-            __IOM uint32_t CYCMATCH : 1;
-            __IOM uint32_t DATAVMATCH : 1;
-            __IOM uint32_t LNK1ENA : 1;
-            __IOM uint32_t DATAVSIZE : 2;
-            __IOM uint32_t DATAVADDR0 : 4;
-            __IOM uint32_t DATAVADDR1 : 4;
-                  uint32_t __RESERVED2 : 4;
-            __IOM uint32_t MATCHED : 1;
-                  uint32_t __RESERVED3 : 7;
+            __IO uint32_t FUNCTION : 4;                     /*!< DWT FUNCTION: FUNCTION Mask */
+                 uint32_t __RESERVED0 : 1;
+            __IO uint32_t EMITRANGE : 1;                    /*!< DWT FUNCTION: EMITRANGE Mask */
+                 uint32_t __RESERVED1 : 1;
+            __IO uint32_t CYCMATCH : 1;                     /*!< DWT FUNCTION: CYCMATCH Mask */
+            __IO uint32_t DATAVMATCH : 1;                   /*!< DWT FUNCTION: DATAVMATCH Mask */
+            __IO uint32_t LNK1ENA : 1;                      /*!< DWT FUNCTION: LNK1ENA Mask */
+            __IO uint32_t DATAVSIZE : 2;                    /*!< DWT FUNCTION: DATAVSIZE Mask */
+            __IO uint32_t DATAVADDR0 : 4;                   /*!< DWT FUNCTION: DATAVADDR0 Mask */
+            __IO uint32_t DATAVADDR1 : 4;                   /*!< DWT FUNCTION: DATAVADDR1 Mask */
+                 uint32_t __RESERVED2 : 4;
+            __IO uint32_t MATCHED : 1;                      /*!< DWT FUNCTION: MATCHED Mask */
+                 uint32_t __RESERVED3 : 7;
         } b;
         __IOM uint32_t w;
-    } FUNCTION3;                           /*!< Offset: 0x058 (R/W)  Function Register 3 */
+    } FUNCTION2;                                            /*!< Offset: 0x048 (R/W)  Function Register 2 */
+         uint32_t __RESERVED2;
+    __IO uint32_t COMP3;                                    /*!< Offset: 0x050 (R/W)  Comparator Register 3 */
+    __IO uint32_t MASK3;                                    /*!< Offset: 0x054 (R/W)  Mask Register 3 */
+    union {
+        struct {
+            __IO uint32_t FUNCTION : 4;                     /*!< DWT FUNCTION: FUNCTION Mask */
+                 uint32_t __RESERVED0 : 1;
+            __IO uint32_t EMITRANGE : 1;                    /*!< DWT FUNCTION: EMITRANGE Mask */
+                 uint32_t __RESERVED1 : 1;
+            __IO uint32_t CYCMATCH : 1;                     /*!< DWT FUNCTION: CYCMATCH Mask */
+            __IO uint32_t DATAVMATCH : 1;                   /*!< DWT FUNCTION: DATAVMATCH Mask */
+            __IO uint32_t LNK1ENA : 1;                      /*!< DWT FUNCTION: LNK1ENA Mask */
+            __IO uint32_t DATAVSIZE : 2;                    /*!< DWT FUNCTION: DATAVSIZE Mask */
+            __IO uint32_t DATAVADDR0 : 4;                   /*!< DWT FUNCTION: DATAVADDR0 Mask */
+            __IO uint32_t DATAVADDR1 : 4;                   /*!< DWT FUNCTION: DATAVADDR1 Mask */
+                 uint32_t __RESERVED2 : 4;
+            __IO uint32_t MATCHED : 1;                      /*!< DWT FUNCTION: MATCHED Mask */
+                 uint32_t __RESERVED3 : 7;
+        } b;
+        __IOM uint32_t w;
+    } FUNCTION3;                                            /*!< Offset: 0x058 (R/W)  Function Register 3 */
 } DWT_Type;
 
 /* DWT Control Register Definitions */
@@ -1395,107 +1378,108 @@ typedef struct
  */
 typedef struct
 {
-    __IOM uint32_t SSPSR;                  /*!< Offset: 0x000 (R/ )  Supported Parallel Port Size Register */
-    __IOM uint32_t CSPSR;                  /*!< Offset: 0x004 (R/W)  Current Parallel Port Size Register */
-          uint32_t RESERVED0[2U];
-    __IOM uint32_t ACPR;                   /*!< Offset: 0x010 (R/W)  Asynchronous Clock Prescaler Register */
-          uint32_t RESERVED1[55U];
-    __IOM uint32_t SPPR;                   /*!< Offset: 0x0F0 (R/W)  Selected Pin Protocol Register */
-          uint32_t RESERVED2[131U];
+    __IO uint32_t SSPSR;                                    /*!< Offset: 0x000 (R/ )  Supported Parallel Port Size Register */
+    __IO uint32_t CSPSR;                                    /*!< Offset: 0x004 (R/W)  Current Parallel Port Size Register */
+         uint32_t __RESERVED0[2];
+    __IO uint32_t ACPR;                                     /*!< Offset: 0x010 (R/W)  Asynchronous Clock Prescaler Register */
+         uint32_t __RESERVED1[55];
     union {
         struct {
-            __IM uint32_t FlInProg : 1;
-            __IM uint32_t FtStopped : 1;
-            __IM uint32_t TCPresent : 1;
-            __IM uint32_t FtNonStop : 1;
+            __IO uint32_t TXMODE : 2;                       /*!< TPI SPPR: TXMODE Mask */
+                 uint32_t __RESERVED0 : 30;
+        } b;
+        __IO uint32_t w;
+    } SPPR;                                                 /*!< Offset: 0x0F0 (R/W)  Selected Pin Protocol Register */
+         uint32_t __RESERVED2[131];
+    union {
+        struct {
+            __I  uint32_t FlInProg : 1;                     /*!< TPI FFSR: FlInProg Mask */
+            __I  uint32_t FtStopped : 1;                    /*!< TPI FFSR: FtStopped Mask */
+            __I  uint32_t TCPresent : 1;                    /*!< TPI FFSR: TCPresent Mask */
+            __I  uint32_t FtNonStop : 1;                    /*!< TPI FFSR: FtNonStop Mask */
                  uint32_t __RESERVED0 : 28;
         } b;
-        __IM uint32_t w;
-    } FFSR;                                /*!< Offset: 0x300 (R/ )  Formatter and Flush Status Register */
+        __I  uint32_t w;
+    } FFSR;                                                 /*!< Offset: 0x300 (R/ )  Formatter and Flush Status Register */
     union {
         struct {
-            __IOM uint32_t EnFCont : 1;
-                  uint32_t __RESERVED0 : 7;
-            __IOM uint32_t TrigIn : 1;
-                  uint32_t __RESERVED1 : 23;
+                 uint32_t __RESERVED0 : 1;
+            __IO uint32_t EnFCont : 1;                      /*!< TPI FFCR: EnFCont Mask */
+                 uint32_t __RESERVED1 : 6;
+            __IO uint32_t TrigIn : 1;                       /*!< TPI FFCR: TrigIn Mask */
+                 uint32_t __RESERVED2 : 23;
         } b;
-        __IOM uint32_t w;
-    } FFCR;                                /*!< Offset: 0x304 (R/W)  Formatter and Flush Control Register */
-    __IM  uint32_t FSCR;                   /*!< Offset: 0x308 (R/ )  Formatter Synchronization Counter Register */
-          uint32_t RESERVED3[759U];
-    __IM  uint32_t TRIGGER;                /*!< Offset: 0xEE8 (R/ )  TRIGGER */
+        __IO uint32_t w;
+    } FFCR;                                                 /*!< Offset: 0x304 (R/W)  Formatter and Flush Control Register */
+    __I  uint32_t FSCR;                                     /*!< Offset: 0x308 (R/ )  Formatter Synchronization Counter Register */
+         uint32_t __RESERVED3[759];
+    __I  uint32_t TRIGGER;                                  /*!< Offset: 0xEE8 (R/ )  TRIGGER */
     union {
         struct {
-            __IM uint32_t ETM0 : 8;
-            __IM uint32_t ETM1 : 8;
-            __IM uint32_t ETM2 : 8;
-            __IM uint32_t ETM_bytecount : 2;
-            __IM uint32_t ETM_ATVALID : 1;
-            __IM uint32_t ITM_bytecount : 2;
-            __IM uint32_t ITM_ATVALID : 1;
+            __I  uint32_t ETM0 : 8;                         /*!< TPI FIFO0: ETM0 Mask */
+            __I  uint32_t ETM1 : 8;                         /*!< TPI FIFO0: ETM1 Mask */
+            __I  uint32_t ETM2 : 8;                         /*!< TPI FIFO0: ETM2 Mask */
+            __I  uint32_t ETM_bytecount : 2;                /*!< TPI FIFO0: ETM_bytecount Mask */
+            __I  uint32_t ETM_ATVALID : 1;                  /*!< TPI FIFO0: ETM_ATVALID Mask */
+            __I  uint32_t ITM_bytecount : 2;                /*!< TPI FIFO0: ITM_bytecount Mask */
+            __I  uint32_t ITM_ATVALID : 1;                  /*!< TPI FIFO0: ITM_ATVALID Mask */
                  uint32_t __RESERVED0 : 2;
         } b;
-        __IM uint32_t w;
-    } FIFO0;                               /*!< Offset: 0xEEC (R/ )  Integration ETM Data */
+        __I  uint32_t w;
+    } FIFO0;                                                /*!< Offset: 0xEEC (R/ )  Integration ETM Data */
     union {
         struct {
-            __IM uint32_t ATREADY : 1;
+            __I  uint32_t ATREADY : 1;                      /*!< TPI ITATBCTR2: ATREADY Mask */
                  uint32_t __RESERVED0 : 31;
         } b;
-        __IM uint32_t w;
-    } ITATBCTR2;                           /*!< Offset: 0xEF0 (R/ )  ITATBCTR2 */
-          uint32_t RESERVED4[1U];
+        __I  uint32_t w;
+    } ITATBCTR2;                                            /*!< Offset: 0xEF0 (R/ )  ITATBCTR2 */
+         uint32_t __RESERVED4;
     union {
         struct {
-            __IM uint32_t ATREADY : 1;
+            __I  uint32_t ATREADY : 1;                      /*!< TPI ITATBCTR0: ATREADY Mask */
                  uint32_t __RESERVED0 : 31;
         } b;
-        __IM  uint32_t w;
-    } ITATBCTR0;                           /*!< Offset: 0xEF8 (R/ )  ITATBCTR0 */
+        __I  uint32_t w;
+    } ITATBCTR0;                                            /*!< Offset: 0xEF8 (R/ )  ITATBCTR0 */
     union {
         struct {
-            __IM uint32_t ITM0 : 8;
-            __IM uint32_t ITM1 : 8;
-            __IM uint32_t ITM2 : 8;
-            __IM uint32_t ETM_bytecount : 2;
-            __IM uint32_t ETM_ATVALID : 1;
-            __IM uint32_t ITM_bytecount : 2;
-            __IM uint32_t ITM_ATVALID : 1;
+            __I  uint32_t ITM0 : 8;                         /*!< TPI FIFO1: ITM0 Mask */
+            __I  uint32_t ITM1 : 8;                         /*!< TPI FIFO1: ITM1 Mask */
+            __I  uint32_t ITM2 : 8;                         /*!< TPI FIFO1: ITM2 Mask */
+            __I  uint32_t ETM_bytecount : 2;                /*!< TPI FIFO1: ETM_bytecount Mask */
+            __I  uint32_t ETM_ATVALID : 1;                  /*!< TPI FIFO1: ETM_ATVALID Mask */
+            __I  uint32_t ITM_bytecount : 2;                /*!< TPI FIFO1: ITM_bytecount Mask */
+            __I  uint32_t ITM_ATVALID : 1;                  /*!< TPI FIFO1: ITM_ATVALID Mask */
                  uint32_t __RESERVED0 : 2;
         } b;
-        __IM uint32_t w;
-    } FIFO1;                               /*!< Offset: 0xEFC (R/ )  Integration ITM Data */
+        __I  uint32_t w;
+    } FIFO1;                                                /*!< Offset: 0xEFC (R/ )  Integration ITM Data */
+    __IO uint32_t ITCTRL;                                   /*!< Offset: 0xF00 (R/W)  Integration Mode Control */
+         uint32_t __RESERVED5[39];
+    __IO uint32_t CLAIMSET;                                 /*!< Offset: 0xFA0 (R/W)  Claim tag set */
+    __IO uint32_t CLAIMCLR;                                 /*!< Offset: 0xFA4 (R/W)  Claim tag clear */
+         uint32_t __RESERVED6[8];
     union {
         struct {
-            __IOM uint32_t Mode : 1;
-                  uint32_t __RESERVED0 : 31;
+            __I  uint32_t NrTraceInput : 5;                 /*!< TPI DEVID: NrTraceInput Mask */
+            __I  uint32_t AsynClkIn : 1;                    /*!< TPI DEVID: AsynClkIn Mask */
+            __I  uint32_t MinBufSz : 3;                     /*!< TPI DEVID: MinBufSz Mask */
+            __I  uint32_t PTINVALID : 1;                    /*!< TPI DEVID: PTINVALID Mask */
+            __I  uint32_t MANCVALID : 1;                    /*!< TPI DEVID: MANCVALID Mask */
+            __I  uint32_t NRZVALID : 1;                     /*!< TPI DEVID: NRZVALID Mask */
+                 uint32_t __RESERVED0 : 20;
         } b;
-        __IOM uint32_t w;
-    } ITCTRL;                              /*!< Offset: 0xF00 (R/W)  Integration Mode Control */
-          uint32_t RESERVED5[39U];
-    __IOM uint32_t CLAIMSET;               /*!< Offset: 0xFA0 (R/W)  Claim tag set */
-    __IOM uint32_t CLAIMCLR;               /*!< Offset: 0xFA4 (R/W)  Claim tag clear */
-          uint32_t RESERVED7[8U];
+        __I  uint32_t w;
+    } DEVID;                                                /*!< Offset: 0xFC8 (R/ )  TPIU_DEVID */
     union {
         struct {
-            __IM uint32_t NrTraceInput : 5;
-            __IM uint32_t AsynClkIn : 1;
-            __IM uint32_t MinBufSz : 3;
-            __IM uint32_t PTINVALID : 1;
-            __IM uint32_t MANCVALID : 1;
-            __IM uint32_t NRZVALID : 1;
-                 uint32_t __RESERVED0 : 21;
-        } b;
-        __IM uint32_t w;
-    } DEVID;                               /*!< Offset: 0xFC8 (R/ )  TPIU_DEVID */
-    union {
-        struct {
-            __IM uint32_t SubType : 4;
-            __IM uint32_t MajorType : 4;
+            __I  uint32_t SubType : 4;                      /*!< TPI DEVTYPE: SubType Mask */
+            __I  uint32_t MajorType : 4;                    /*!< TPI DEVTYPE: MajorType Mask */
                  uint32_t __RESERVED0 : 24;
         } b;
-        __IM uint32_t w;
-    } DEVTYPE;                             /*!< Offset: 0xFCC (R/ )  TPIU_DEVTYPE */
+        __I  uint32_t w;
+    } DEVTYPE;                                              /*!< Offset: 0xFCC (R/ )  TPIU_DEVTYPE */
 } TPI_Type;
 
 /* TPI Asynchronous Clock Prescaler Register Definitions */
@@ -1630,55 +1614,56 @@ typedef struct
 {
     union {
         struct {
-            __IM uint32_t SEPARATE : 1;
+            __I  uint32_t SEPARATE : 1;                     /*!< MPU TYPE: SEPARATE Mask */
                  uint32_t __RESERVED0 : 7;
-            __IM uint32_t DREGION : 8;
-            __IM uint32_t IREGION : 16;
+            __I  uint32_t DREGION : 8;                      /*!< MPU TYPE: DREGION Mask */
+            __I  uint32_t IREGION : 8;                      /*!< MPU TYPE: IREGION Mask */
+                 uint32_t __RESERVED1 : 8;
         } b;
-        __IM uint32_t w;
-    } TYPE;                                /*!< Offset: 0x000 (R/ )  MPU Type Register */
+        __I  uint32_t w;
+    } TYPE;                                                 /*!< Offset: 0x000 (R/ )  MPU Type Register */
     union {
         struct {
-            __IOM uint32_t ENABLE : 1;
-            __IOM uint32_t HFNMIENA : 1;
-            __IOM uint32_t PRIVDEFENA : 1;
-                  uint32_t __RESERVED0 : 29;
+            __IO uint32_t ENABLE : 1;                       /*!< MPU CTRL: ENABLE Mask */
+            __IO uint32_t HFNMIENA : 1;                     /*!< MPU CTRL: HFNMIENA Mask */
+            __IO uint32_t PRIVDEFENA : 1;                   /*!< MPU CTRL: PRIVDEFENA Mask */
+                 uint32_t __RESERVED0 : 29;
         } b;
-        __IOM uint32_t w;
-    } CTRL;                                /*!< Offset: 0x004 (R/W)  MPU Control Register */
-    __IOM uint32_t RNR;                    /*!< Offset: 0x008 (R/W)  MPU Region RNRber Register */
+        __IO uint32_t w;
+    } CTRL;                                                 /*!< Offset: 0x004 (R/W)  MPU Control Register */
+    __IO uint32_t RNR;                                      /*!< Offset: 0x008 (R/W)  MPU Region RNRber Register */
     union {
         struct {
-            __IOM uint32_t REGION : 4;
-            __IOM uint32_t VALID : 1;
-            __IOM uint32_t ADDR : 27;
+            __IO uint32_t REGION : 4;                       /*!< MPU RBAR: REGION Mask */
+            __IO uint32_t VALID : 1;                        /*!< MPU RBAR: VALID Mask */
+            __IO uint32_t ADDR : 27;                        /*!< MPU RBAR: ADDR Mask */
         } b;
-        __IOM uint32_t w;
-    } RBAR;                                /*!< Offset: 0x00C (R/W)  MPU Region Base Address Register */
+        __IO uint32_t w;
+    } RBAR;                                                 /*!< Offset: 0x00C (R/W)  MPU Region Base Address Register */
     union {
         struct {
-            __IOM uint32_t ENABLE : 1;
-            __IOM uint32_t SIZE : 5;
-                  uint32_t __RESERVED0 : 2;
-            __IOM uint32_t SRD : 8;
-            __IOM uint32_t B : 1;
-            __IOM uint32_t C : 1;
-            __IOM uint32_t S : 1;
-            __IOM uint32_t TEX : 3;
-                  uint32_t __RESERVED1 : 2;
-            __IOM uint32_t AP : 3;
-                  uint32_t __RESERVED2 : 1;
-            __IOM uint32_t XN : 1;
-                  uint32_t __RESERVED3 : 3;
+            __IO uint32_t ENABLE : 1;                       /*!< MPU RASR: Region enable bit Disable Mask */
+                 uint32_t __RESERVED0 : 7;
+            __IO uint32_t SRD : 8;                          /*!< MPU RASR: Sub-Region Disable Mask */
+            __IO uint32_t ATTRS : 16;                       /*!< MPU RASR: MPU Region Attribute field Mask */
+            __IO uint32_t B : 1;                            /*!< MPU RASR: ATTRS.B Mask */
+            __IO uint32_t C : 1;                            /*!< MPU RASR: ATTRS.C Mask */
+            __IO uint32_t S : 1;                            /*!< MPU RASR: ATTRS.S Mask */
+            __IO uint32_t TEX : 3;                          /*!< MPU RASR: ATTRS.TEX Mask */
+                 uint32_t __RESERVED1 : 2;
+            __IO uint32_t AP : 3;                           /*!< MPU RASR: ATTRS.AP Mask */
+                 uint32_t __RESERVED2 : 1;
+            __IO uint32_t XN : 1;                           /*!< MPU RASR: ATTRS.XN Mask */
+                 uint32_t __RESERVED3 : 3;
         } b;
-        __IOM uint32_t w;
-    } RASR;                                /*!< Offset: 0x010 (R/W)  MPU Region Attribute and Size Register */
-    __IOM uint32_t RBAR_A1;                /*!< Offset: 0x014 (R/W)  MPU Alias 1 Region Base Address Register */
-    __IOM uint32_t RASR_A1;                /*!< Offset: 0x018 (R/W)  MPU Alias 1 Region Attribute and Size Register */
-    __IOM uint32_t RBAR_A2;                /*!< Offset: 0x01C (R/W)  MPU Alias 2 Region Base Address Register */
-    __IOM uint32_t RASR_A2;                /*!< Offset: 0x020 (R/W)  MPU Alias 2 Region Attribute and Size Register */
-    __IOM uint32_t RBAR_A3;                /*!< Offset: 0x024 (R/W)  MPU Alias 3 Region Base Address Register */
-    __IOM uint32_t RASR_A3;                /*!< Offset: 0x028 (R/W)  MPU Alias 3 Region Attribute and Size Register */
+        __IO uint32_t w;
+    } RASR;                                                 /*!< Offset: 0x010 (R/W)  MPU Region Attribute and Size Register */
+    __IO uint32_t RBAR_A1;                                  /*!< Offset: 0x014 (R/W)  MPU Alias 1 Region Base Address Register */
+    __IO uint32_t RASR_A1;                                  /*!< Offset: 0x018 (R/W)  MPU Alias 1 Region Attribute and Size Register */
+    __IO uint32_t RBAR_A2;                                  /*!< Offset: 0x01C (R/W)  MPU Alias 2 Region Base Address Register */
+    __IO uint32_t RASR_A2;                                  /*!< Offset: 0x020 (R/W)  MPU Alias 2 Region Attribute and Size Register */
+    __IO uint32_t RBAR_A3;                                  /*!< Offset: 0x024 (R/W)  MPU Alias 3 Region Base Address Register */
+    __IO uint32_t RASR_A3;                                  /*!< Offset: 0x028 (R/W)  MPU Alias 3 Region Attribute and Size Register */
 } MPU_Type;
 
 /* MPU Type Register Definitions */
@@ -1763,59 +1748,65 @@ typedef struct
  */
 typedef struct
 {
-        uint32_t __RESERVED0[1U];
+         uint32_t __RESERVED0;
     union {
         struct {
-            __IOM uint32_t LSPACT : 1;
-            __IOM uint32_t USER : 1;
-                  uint32_t __RESERVED0 : 1;
-            __IOM uint32_t THREAD : 1;
-            __IOM uint32_t HFRDY : 1;
-            __IOM uint32_t MMRDY : 1;
-            __IOM uint32_t BFRDY : 1;
-                  uint32_t __RESERVED1 : 1;
-            __IOM uint32_t MONRDY : 1;
-                  uint32_t __RESERVED2 : 21;
-            __IOM uint32_t LSPEN : 1;
-            __IOM uint32_t ASPEN : 1;
+            __IO uint32_t LSPACT : 1;                       /*!< FPCCR: Lazy state preservation active bit Mask */
+            __IO uint32_t USER : 1;                         /*!< FPCCR: privilege level bit Mask */
+                 uint32_t __RESERVED0 : 1;
+            __IO uint32_t THREAD : 1;                       /*!< FPCCR: processor mode active bit Mask */
+            __IO uint32_t HFRDY : 1;                        /*!< FPCCR: HFRDY bit Mask */
+            __IO uint32_t MMRDY : 1;                        /*!< FPCCR: MMRDY bit Mask */
+            __IO uint32_t BFRDY : 1;                        /*!< FPCCR: BFRDY bit Mask */
+                 uint32_t __RESERVED1 : 1;
+            __IO uint32_t MONRDY : 1;                       /*!< FPCCR: MONRDY bit Mask */
+                 uint32_t __RESERVED2 : 21;
+            __IO uint32_t LSPEN : 1;                        /*!< FPCCR: LSPEN bit Mask */
+            __IO uint32_t ASPEN : 1;                        /*!< FPCCR: ASPEN bit Mask */
         } b;
-        __IOM uint32_t w;
-    } FPCCR;                               /*!< Offset: 0x004 (R/W)  Floating-Point Context Control Register */
-    __IOM uint32_t FPCAR;                  /*!< Offset: 0x008 (R/W)  Floating-Point Context Address Register */
+        __IO uint32_t w;
+    } FPCCR;                                                /*!< Offset: 0x004 (R/W)  Floating-Point Context Control Register */
     union {
         struct {
-            uint32_t __RESERVED0 : 22;
-            __IOM uint32_t RMode : 2;
-            __IOM uint32_t FZ : 1;
-            __IOM uint32_t DN : 1;
-            __IOM uint32_t AHP : 1;
-            uint32_t __RESERVED1 : 5;
+                 uint32_t __RESERVED0 : 3;
+            __IO uint32_t ADDRESS : 29;                     /*!< FPCAR: ADDRESS bit Mask */
         } b;
-        __IOM uint32_t w;
-    } FPDSCR;                              /*!< Offset: 0x00C (R/W)  Floating-Point Default Status Control Register */
+        __IO uint32_t w;
+    } FPCAR;                                                /*!< Offset: 0x008 (R/W)  Floating-Point Context Address Register */
     union {
         struct {
-            __IM uint32_t A_SIMD_registers : 4;
-            __IM uint32_t Single_precision : 4;
-            __IM uint32_t Double_precision : 4;
-            __IM uint32_t FP_excep_trapping : 4;
-            __IM uint32_t Divide : 4;
-            __IM uint32_t Square_root : 4;
-            __IM uint32_t Short_vectors : 4;
-            __IM uint32_t FP_rounding_modes : 4;
+                 uint32_t __RESERVED0 : 22;
+            __IO uint32_t RMode : 2;                        /*!< FPDSCR: RMode bit Mask */
+            __IO uint32_t FZ : 1;                           /*!< FPDSCR: FZ bit Mask */
+            __IO uint32_t DN : 1;                           /*!< FPDSCR: DN bit Mask */
+            __IO uint32_t AHP : 1;                          /*!< FPDSCR: AHP bit Mask */
+                 uint32_t __RESERVED1 : 5;
         } b;
-        __IM uint32_t w;
-    } MVFR0;                               /*!< Offset: 0x010 (R/ )  Media and FP Feature Register 0 */
+        __IO uint32_t w;
+    } FPDSCR;                                               /*!< Offset: 0x00C (R/W)  Floating-Point Default Status Control Register */
     union {
         struct {
-            __IM uint32_t FtZ_mode : 4;
-            __IM uint32_t D_NaN_mode : 4;
+            __I  uint32_t A_SIMD_registers : 4;             /*!< MVFR0: A_SIMD registers bits Mask */
+            __I  uint32_t Single_precision : 4;             /*!< MVFR0: Single-precision bits Mask */
+            __I  uint32_t Double_precision : 4;             /*!< MVFR0: Double-precision bits Mask */
+            __I  uint32_t FP_excep_trapping : 4;            /*!< MVFR0: FP exception trapping bits Mask */
+            __I  uint32_t Divide : 4;                       /*!< MVFR0: Divide bits Mask */
+            __I  uint32_t Square_root : 4;                  /*!< MVFR0: Square root bits Mask */
+            __I  uint32_t Short_vectors : 4;                /*!< MVFR0: Short vectors bits Mask */
+            __I  uint32_t FP_rounding_modes : 4;            /*!< MVFR0: FP rounding modes bits Mask */
+        } b;
+        __I  uint32_t w;
+    } MVFR0;                                                /*!< Offset: 0x010 (R/ )  Media and FP Feature Register 0 */
+    union {
+        struct {
+            __I  uint32_t FtZ_mode : 4;                     /*!< MVFR1: FtZ mode bits Mask */
+            __I  uint32_t D_NaN_mode : 4;                   /*!< MVFR1: D_NaN mode bits Mask */
                  uint32_t __RESERVED0 : 16;
-            __IM uint32_t FP_HPFP : 4;
-            __IM uint32_t FP_fused_MAC : 4;
+            __I  uint32_t FP_HPFP : 4;                      /*!< MVFR1: FP HPFP bits Mask */
+            __I  uint32_t FP_fused_MAC : 4;                 /*!< MVFR1: FP fused MAC bits Mask */
         } b;
-        __IM uint32_t w;
-    } MVFR1;                               /*!< Offset: 0x014 (R/ )  Media and FP Feature Register 1 */
+        __I  uint32_t w;
+    } MVFR1;                                                /*!< Offset: 0x014 (R/ )  Media and FP Feature Register 1 */
 } FPU_Type;
 
 /* Floating-Point Context Control Register Definitions */
@@ -1919,56 +1910,57 @@ typedef struct
 {
     union {
         struct {
-            __IOM uint32_t C_DEBUGEN : 1;
-            __IOM uint32_t C_HALT : 1;
-            __IOM uint32_t C_STEP : 1;
-            __IOM uint32_t C_MASKINTS : 1;
-                  uint32_t __RESERVED0 : 1;
-            __IOM uint32_t C_SNAPSTALL : 1;
-                  uint32_t __RESERVED1 : 10;
-            __IOM uint32_t S_REGRDY : 1;
-            __IOM uint32_t S_HALT : 1;
-            __IOM uint32_t S_SLEEP : 1;
-            __IOM uint32_t S_LOCKUP : 1;
-                  uint32_t __RESERVED2 : 4;
-            __IOM uint32_t S_RETIRE_ST : 1;
-            __IOM uint32_t S_RESET_ST : 1;
-                  uint32_t __RESERVED3 : 6;
+            __IO uint32_t C_DEBUGEN : 1;                    /*!< CoreDebug DHCSR: C_DEBUGEN Mask */
+            __IO uint32_t C_HALT : 1;                       /*!< CoreDebug DHCSR: C_HALT Mask */
+            __IO uint32_t C_STEP : 1;                       /*!< CoreDebug DHCSR: C_STEP Mask */
+            __IO uint32_t C_MASKINTS : 1;                   /*!< CoreDebug DHCSR: C_MASKINTS Mask */
+                 uint32_t __RESERVED0 : 1;
+            __IO uint32_t C_SNAPSTALL : 1;                  /*!< CoreDebug DHCSR: C_SNAPSTALL Mask */
+                 uint32_t __RESERVED1 : 10;
+            __IO uint32_t DBGKEY : 16;                      /*!< CoreDebug DHCSR: DBGKEY Mask */
+            __IO uint32_t S_REGRDY : 1;                     /*!< CoreDebug DHCSR: S_REGRDY Mask */
+            __IO uint32_t S_HALT : 1;                       /*!< CoreDebug DHCSR: S_HALT Mask */
+            __IO uint32_t S_SLEEP : 1;                      /*!< CoreDebug DHCSR: S_SLEEP Mask */
+            __IO uint32_t S_LOCKUP : 1;                     /*!< CoreDebug DHCSR: S_LOCKUP Mask */
+                 uint32_t __RESERVED2 : 4;
+            __IO uint32_t S_RETIRE_ST : 1;                  /*!< CoreDebug DHCSR: S_RETIRE_ST Mask */
+            __IO uint32_t S_RESET_ST : 1;                   /*!< CoreDebug DHCSR: S_RESET_ST Mask */
+                 uint32_t __RESERVED3 : 6;
         } b;
-        __IOM uint32_t w;
-    } DHCSR;                             /*!< Offset: 0x000 (R/W)  Debug Halting Control and Status Register */
+        __IO uint32_t w;
+    } DHCSR;                                                /*!< Offset: 0x000 (R/W)  Debug Halting Control and Status Register */
     union {
         struct {
-            __OM uint32_t REGSEL : 5;
+            __O  uint32_t REGSEL : 5;                       /*!< CoreDebug DCRSR: REGSEL Mask */
                  uint32_t __RESERVED0 : 11;
-            __OM uint32_t REGWnR : 1;
+            __O  uint32_t REGWnR : 1;                       /*!< CoreDebug DCRSR: REGWnR Mask */
                  uint32_t __RESERVED1 : 15;
         } b;
-        __OM uint32_t w;
-    } DCRSR;                             /*!< Offset: 0x004 ( /W)  Debug Core Register Selector Register */
-    __IOM uint32_t DCRDR;                /*!< Offset: 0x008 (R/W)  Debug Core Register Data Register */
+        __O  uint32_t w;
+    } DCRSR;                                                /*!< Offset: 0x004 ( /W)  Debug Core Register Selector Register */
+    __IO uint32_t DCRDR;                                    /*!< Offset: 0x008 (R/W)  Debug Core Register Data Register */
     union {
         struct {
-            __IOM uint32_t VC_CORERESET : 1;
-                  uint32_t __RESERVED0 : 3;
-            __IOM uint32_t VC_MMERR : 1;
-            __IOM uint32_t VC_NOCPERR : 1;
-            __IOM uint32_t C_CHKERR : 1;
-            __IOM uint32_t VC_STATERR : 1;
-            __IOM uint32_t VC_BUSERR : 1;
-            __IOM uint32_t VC_INTERR : 1;
-            __IOM uint32_t VC_HARDERR : 1;
-                  uint32_t __RESERVED1 : 5;
-            __IOM uint32_t MON_EN : 1;
-            __IOM uint32_t MON_PEND : 1;
-            __IOM uint32_t MON_STEP : 1;
-            __IOM uint32_t MON_REQ : 1;
-                  uint32_t __RESERVED2 : 4;
-            __IOM uint32_t TRCENA : 1;
-                  uint32_t __RESERVED3 : 7;
+            __IO uint32_t VC_CORERESET : 1;                 /*!< CoreDebug DEMCR: VC_CORERESET Mask */
+                 uint32_t __RESERVED0 : 3;
+            __IO uint32_t VC_MMERR : 1;                     /*!< CoreDebug DEMCR: VC_MMERR Mask */
+            __IO uint32_t VC_NOCPERR : 1;                   /*!< CoreDebug DEMCR: VC_NOCPERR Mask */
+            __IO uint32_t VC_CHKERR : 1;                    /*!< CoreDebug DEMCR: VC_CHKERR Mask */
+            __IO uint32_t VC_STATERR : 1;                   /*!< CoreDebug DEMCR: VC_STATERR Mask */
+            __IO uint32_t VC_BUSERR : 1;                    /*!< CoreDebug DEMCR: VC_BUSERR Mask */
+            __IO uint32_t VC_INTERR : 1;                    /*!< CoreDebug DEMCR: VC_INTERR Mask */
+            __IO uint32_t VC_HARDERR : 1;                   /*!< CoreDebug DEMCR: VC_HARDERR Mask */
+                 uint32_t __RESERVED1 : 5;
+            __IO uint32_t MON_EN : 1;                       /*!< CoreDebug DEMCR: MON_EN Mask */
+            __IO uint32_t MON_PEND : 1;                     /*!< CoreDebug DEMCR: MON_PEND Mask */
+            __IO uint32_t MON_STEP : 1;                     /*!< CoreDebug DEMCR: MON_STEP Mask */
+            __IO uint32_t MON_REQ : 1;                      /*!< CoreDebug DEMCR: MON_REQ Mask */
+                 uint32_t __RESERVED2 : 4;
+            __IO uint32_t TRCENA : 1;                       /*!< CoreDebug DEMCR: TRCENA Mask */
+                 uint32_t __RESERVED3 : 7;
         } b;
-        __IOM uint32_t w;
-    } DEMCR;                             /*!< Offset: 0x00C (R/W)  Debug Exception and Monitor Control Register */
+        __IO uint32_t w;
+    } DEMCR;                                                /*!< Offset: 0x00C (R/W)  Debug Exception and Monitor Control Register */
 } CoreDebug_Type;
 
 /* Debug Halting Control and Status Register Definitions */
@@ -2388,9 +2380,9 @@ __STATIC_INLINE uint32_t SysTick_Config(uint32_t ticks)
     return (1UL);                                                   /* Reload value impossible */
   }
 
-  SysTick->LOAD.w = (uint32_t)(ticks - 1UL);                        /* set reload register */
+  SysTick->LOAD   = (uint32_t)(ticks - 1UL);                        /* set reload register */
   NVIC_SetPriority (SysTick_IRQn, (1UL << __NVIC_PRIO_BITS) - 1UL); /* set Priority for Systick Interrupt */
-  SysTick->VAL.w  = 0UL;                                            /* Load the SysTick Counter Value */
+  SysTick->VAL    = 0UL;                                            /* Load the SysTick Counter Value */
   SysTick->CTRL.w = SysTick_CTRL_CLKSOURCE_Msk |
                     SysTick_CTRL_TICKINT_Msk   |
                     SysTick_CTRL_ENABLE_Msk;                        /* Enable SysTick IRQ and SysTick Timer */
