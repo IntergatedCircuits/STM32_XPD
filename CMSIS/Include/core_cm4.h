@@ -1,9 +1,26 @@
-/**************************************************************************//**
- * @file     core_cm4.h
- * @brief    CMSIS Cortex-M4 Core Peripheral Access Layer Header File
- * @version  V4.30
- * @date     20. October 2015
- ******************************************************************************/
+/**
+  ******************************************************************************
+  * @file    core_cm4.h
+  * @author  Benedek Kupper
+  * @version V0.2
+  * @date    2016-01-17
+  * @brief   CMSIS Cortex-M4 Core Peripheral Access Layer Header File
+  *
+  *  This file is part of STM32_XPD.
+  *
+  *  STM32_XPD is free software: you can redistribute it and/or modify
+  *  it under the terms of the GNU General Public License as published by
+  *  the Free Software Foundation, either version 3 of the License, or
+  *  (at your option) any later version.
+  *
+  *  STM32_XPD is distributed in the hope that it will be useful,
+  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  *  GNU General Public License for more details.
+  *
+  *  You should have received a copy of the GNU General Public License
+  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  */
 /* Copyright (c) 2009 - 2015 ARM LIMITED
 
    All rights reserved.
@@ -450,15 +467,15 @@ typedef struct
     __IO uint32_t ISER[8];                                  /*!< Offset: 0x000 (R/W)  Interrupt Set Enable Register */
          uint32_t __RESERVED0[24];
     __IO uint32_t ICER[8];                                  /*!< Offset: 0x080 (R/W)  Interrupt Clear Enable Register */
-         uint32_t RSERVED1[24];
-    __IO uint32_t ISPR[8];                                  /*!< Offset: 0x100 (R/W)  Interrupt Set Pending Register */
          uint32_t __RESERVED1[24];
-    __IO uint32_t ICPR[8];                                  /*!< Offset: 0x180 (R/W)  Interrupt Clear Pending Register */
+    __IO uint32_t ISPR[8];                                  /*!< Offset: 0x100 (R/W)  Interrupt Set Pending Register */
          uint32_t __RESERVED2[24];
+    __IO uint32_t ICPR[8];                                  /*!< Offset: 0x180 (R/W)  Interrupt Clear Pending Register */
+         uint32_t __RESERVED3[24];
     __IO uint32_t IABR[8];                                  /*!< Offset: 0x200 (R/W)  Interrupt Active bit Register */
-         uint32_t __RESERVED3[56];
+         uint32_t __RESERVED4[56];
     __IO uint8_t IP[240];                                   /*!< Offset: 0x300 (R/W)  Interrupt Priority Register (8Bit wide) */
-         uint32_t __RESERVED4[644];
+         uint32_t __RESERVED5[644];
     __O  uint32_t STIR;                                     /*!< Offset: 0xE00 ( /W)  Software Trigger Interrupt Register */
 } NVIC_Type;
 
@@ -993,75 +1010,75 @@ typedef struct
           uint32_t RESERVED1[15U];
     union {
         struct {
-            __IO uint32_t PRIVMASK : 4;
-                  uint32_t __RESERVED0 : 28;
+            __IO uint32_t PRIVMASK : 4;                     /*!< ITM TPR: PRIVMASK Mask */
+                 uint32_t __RESERVED0 : 28;
         } b;
         __IO uint32_t w;
     } TPR;                                                  /*!< Offset: 0xE40 (R/W)  ITM Trace Privilege Register */
-          uint32_t RESERVED2[15U];
+         uint32_t __RESERVED2[15];
     union {
         struct {
-            __IO uint32_t ITMENA : 1;
-            __IO uint32_t TSENA : 1;
-            __IO uint32_t SYNCENA : 1;
-            __IO uint32_t DWTENA : 1;
-            __IO uint32_t SWOENA : 1;
+            __IO uint32_t ITMENA : 1;                       /*!< ITM TCR: ITM Enable bit Mask */
+            __IO uint32_t TSENA : 1;                        /*!< ITM TCR: TSENA Mask */
+            __IO uint32_t SYNCENA : 1;                      /*!< ITM TCR: SYNCENA Mask */
+            __IO uint32_t DWTENA : 1;                       /*!< ITM TCR: DWTENA Mask */
+            __IO uint32_t SWOENA : 1;                       /*!< ITM TCR: SWOENA Mask */
                  uint32_t __RESERVED0 : 3;
-            __IO uint32_t TSPrescale : 2;
-            __IO uint32_t GTSFREQ : 2;
+            __IO uint32_t TSPrescale : 2;                   /*!< ITM TCR: TSPrescale Mask */
+            __IO uint32_t GTSFREQ : 2;                      /*!< ITM TCR: Global timestamp frequency Mask */
                  uint32_t __RESERVED1 : 4;
-            __IO uint32_t TraceBusID : 7;
-            __IO uint32_t BUSY : 1;
+            __IO uint32_t TraceBusID : 7;                   /*!< ITM TCR: ATBID Mask */
+            __IO uint32_t BUSY : 1;                         /*!< ITM TCR: BUSY Mask */
                  uint32_t __RESERVED2 : 8;
         } b;
         __IO uint32_t w;
-    } TCR;                                                   /*!< Offset: 0xE80 (R/W)  ITM Trace Control Register */
-          uint32_t RESERVED3[29U];
+    } TCR;                                                  /*!< Offset: 0xE80 (R/W)  ITM Trace Control Register */
+         uint32_t __RESERVED3[29];
     union {
         struct {
-            __O  uint32_t ATVALIDM : 1;
+            __O  uint32_t ATVALIDM : 1;                     /*!< ITM IWR: ATVALIDM Mask */
                  uint32_t __RESERVED0 : 31;
         } b;
         __O  uint32_t w;
-    } IWR;                                                   /*!< Offset: 0xEF8 ( /W)  ITM Integration Write Register */
+    } IWR;                                                  /*!< Offset: 0xEF8 ( /W)  ITM Integration Write Register */
     union {
         struct {
-            __I  uint32_t ATREADYM : 1;
+            __I  uint32_t ATREADYM : 1;                     /*!< ITM IRR: ATREADYM Mask */
                  uint32_t __RESERVED0 : 31;
         } b;
         __I  uint32_t w;
-    } IRR;                                                   /*!< Offset: 0xEFC (R/ )  ITM Integration Read Register */
+    } IRR;                                                  /*!< Offset: 0xEFC (R/ )  ITM Integration Read Register */
     union {
         struct {
-            __IO uint32_t INTEGRATION : 1;
+            __IO uint32_t INTEGRATION : 1;                  /*!< ITM IMCR: INTEGRATION Mask */
                  uint32_t __RESERVED0 : 31;
         } b;
         __IO uint32_t w;
-    } IMCR;                                                  /*!< Offset: 0xF00 (R/W)  ITM Integration Mode Control Register */
-          uint32_t RESERVED4[43U];
-    __O  uint32_t LAR;                                       /*!< Offset: 0xFB0 ( /W)  ITM Lock Access Register */
+    } IMCR;                                                 /*!< Offset: 0xF00 (R/W)  ITM Integration Mode Control Register */
+         uint32_t __RESERVED4[43];
+    __O  uint32_t LAR;                                      /*!< Offset: 0xFB0 ( /W)  ITM Lock Access Register */
     union {
         struct {
-            __I  uint32_t Present : 1;
-            __I  uint32_t Access : 1;
-            __I  uint32_t ByteAcc : 1;
-            uint32_t __RESERVED0 : 29;
+            __I  uint32_t Present : 1;                      /*!< ITM LSR: Present Mask */
+            __I  uint32_t Access : 1;                       /*!< ITM LSR: Access Mask */
+            __I  uint32_t ByteAcc : 1;                      /*!< ITM LSR: ByteAcc Mask */
+                 uint32_t __RESERVED0 : 29;
         } b;
         __I  uint32_t w;
-    } LSR;                                 /*!< Offset: 0xFB4 (R/ )  ITM Lock Status Register */
-          uint32_t RESERVED5[6U];
-    __IM  uint32_t PID4;                   /*!< Offset: 0xFD0 (R/ )  ITM Peripheral Identification Register #4 */
-    __IM  uint32_t PID5;                   /*!< Offset: 0xFD4 (R/ )  ITM Peripheral Identification Register #5 */
-    __IM  uint32_t PID6;                   /*!< Offset: 0xFD8 (R/ )  ITM Peripheral Identification Register #6 */
-    __IM  uint32_t PID7;                   /*!< Offset: 0xFDC (R/ )  ITM Peripheral Identification Register #7 */
-    __IM  uint32_t PID0;                   /*!< Offset: 0xFE0 (R/ )  ITM Peripheral Identification Register #0 */
-    __IM  uint32_t PID1;                   /*!< Offset: 0xFE4 (R/ )  ITM Peripheral Identification Register #1 */
-    __IM  uint32_t PID2;                   /*!< Offset: 0xFE8 (R/ )  ITM Peripheral Identification Register #2 */
-    __IM  uint32_t PID3;                   /*!< Offset: 0xFEC (R/ )  ITM Peripheral Identification Register #3 */
-    __IM  uint32_t CID0;                   /*!< Offset: 0xFF0 (R/ )  ITM Component  Identification Register #0 */
-    __IM  uint32_t CID1;                   /*!< Offset: 0xFF4 (R/ )  ITM Component  Identification Register #1 */
-    __IM  uint32_t CID2;                   /*!< Offset: 0xFF8 (R/ )  ITM Component  Identification Register #2 */
-    __IM  uint32_t CID3;                   /*!< Offset: 0xFFC (R/ )  ITM Component  Identification Register #3 */
+    } LSR;                                                  /*!< Offset: 0xFB4 (R/ )  ITM Lock Status Register */
+         uint32_t __RESERVED5[6];
+    __I  uint32_t PID4;                                     /*!< Offset: 0xFD0 (R/ )  ITM Peripheral Identification Register #4 */
+    __I  uint32_t PID5;                                     /*!< Offset: 0xFD4 (R/ )  ITM Peripheral Identification Register #5 */
+    __I  uint32_t PID6;                                     /*!< Offset: 0xFD8 (R/ )  ITM Peripheral Identification Register #6 */
+    __I  uint32_t PID7;                                     /*!< Offset: 0xFDC (R/ )  ITM Peripheral Identification Register #7 */
+    __I  uint32_t PID0;                                     /*!< Offset: 0xFE0 (R/ )  ITM Peripheral Identification Register #0 */
+    __I  uint32_t PID1;                                     /*!< Offset: 0xFE4 (R/ )  ITM Peripheral Identification Register #1 */
+    __I  uint32_t PID2;                                     /*!< Offset: 0xFE8 (R/ )  ITM Peripheral Identification Register #2 */
+    __I  uint32_t PID3;                                     /*!< Offset: 0xFEC (R/ )  ITM Peripheral Identification Register #3 */
+    __I  uint32_t CID0;                                     /*!< Offset: 0xFF0 (R/ )  ITM Component  Identification Register #0 */
+    __I  uint32_t CID1;                                     /*!< Offset: 0xFF4 (R/ )  ITM Component  Identification Register #1 */
+    __I  uint32_t CID2;                                     /*!< Offset: 0xFF8 (R/ )  ITM Component  Identification Register #2 */
+    __I  uint32_t CID3;                                     /*!< Offset: 0xFFC (R/ )  ITM Component  Identification Register #3 */
 } ITM_Type;
 
 /* ITM Trace Privilege Register Definitions */
