@@ -374,13 +374,13 @@ typedef union
  */
 typedef struct
 {
-    __IO uint32_t ISER;                                     /*!< Offset: 0x000 (R/W)  Interrupt Set Enable Register */
+    __IO uint32_t ISER[1];                                  /*!< Offset: 0x000 (R/W)  Interrupt Set Enable Register */
          uint32_t __RESERVED0[31];
-    __IO uint32_t ICER;                                     /*!< Offset: 0x080 (R/W)  Interrupt Clear Enable Register */
+    __IO uint32_t ICER[1];                                  /*!< Offset: 0x080 (R/W)  Interrupt Clear Enable Register */
          uint32_t __RESERVED1[31];
-    __IO uint32_t ISPR;                                     /*!< Offset: 0x100 (R/W)  Interrupt Set Pending Register */
+    __IO uint32_t ISPR[1];                                  /*!< Offset: 0x100 (R/W)  Interrupt Set Pending Register */
          uint32_t __RESERVED2[31];
-    __IO uint32_t ICPR;                                     /*!< Offset: 0x180 (R/W)  Interrupt Clear Pending Register */
+    __IO uint32_t ICPR[1];                                  /*!< Offset: 0x180 (R/W)  Interrupt Clear Pending Register */
          uint32_t __RESERVED3[95];
     __IO uint32_t IP[8];                                    /*!< Offset: 0x300 (R/W)  Interrupt Priority Register */
 } NVIC_Type;
