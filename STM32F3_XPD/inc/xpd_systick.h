@@ -60,8 +60,8 @@ __STATIC_INLINE XPD_ReturnType XPD_SysTick_Init(uint32_t Period, SysTick_ClockSo
     }
     else
     {
-        SysTick->LOAD.w = Period;                /* set reload register */
-        SysTick->VAL.w  = 0;                     /* reset the SysTick Counter Value */
+        SysTick->LOAD = Period;                  /* set reload register */
+        SysTick->VAL  = 0;                       /* reset the SysTick Counter Value */
         SysTick->CTRL.b.CLKSOURCE = ClockSource; /* set clock source */
 
         return XPD_OK;
@@ -105,7 +105,7 @@ __STATIC_INLINE void XPD_SysTick_DisableIT(void)
  */
 __STATIC_INLINE void XPD_SysTick_Start_IT(void)
 {
-    SysTick->VAL.w  = 0;                     /* reset the SysTick Counter Value */
+    SysTick->VAL = 0;                        /* reset the SysTick Counter Value */
     SysTick->CTRL.b.TICKINT = 1;             /* enable interrupt generation */
     SysTick->CTRL.b.ENABLE = 1;              /* enable counter */
 }

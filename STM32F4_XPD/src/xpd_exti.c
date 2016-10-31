@@ -4,7 +4,7 @@
   * @author  Benedek Kupper
   * @version V0.1
   * @date    2016-01-17
-  * @brief   STM32 eXtensible Peripheral Drivers TODO Module
+  * @brief   STM32 eXtensible Peripheral Drivers EXTI Module
   *
   *  This file is part of STM32_XPD.
   *

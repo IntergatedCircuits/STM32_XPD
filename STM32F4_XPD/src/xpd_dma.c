@@ -42,7 +42,7 @@ static const XPD_CtrlFnType dma_clkCtrl[] = {
         XPD_DMA2_ClockCtrl
 #endif
 };
-static uint8_t dma_users[] = {
+static volatile uint8_t dma_users[] = {
         0,
 #ifdef DMA2
         0

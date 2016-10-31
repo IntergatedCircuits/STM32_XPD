@@ -160,7 +160,7 @@ typedef void ( *XPD_HandleCallbackType )    ( void * Handle );
  * @param  PARAMETERS: the required parameters of the function
  */
 #define XPD_SAFE_CALLBACK(CALLBACK, ...)      \
-    do{ if ((CALLBACK) != NULL) CALLBACK(__VA_ARGS__); }while(0)
+    do{ if ((CALLBACK) != NULL) (void) CALLBACK(__VA_ARGS__); }while(0)
 
 /** @} */
 

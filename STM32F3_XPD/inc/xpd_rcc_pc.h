@@ -151,7 +151,7 @@ uint32_t        XPD_I2C_GetClockFreq        (I2C_HandleType * hi2c);
 /** @} */
 #endif /* USE_XPD_I2C */
 
-#if defined(USE_XPD_I2C)
+#if defined(USE_XPD_I2S)
 #include "xpd_i2s.h"
 
 /** @addtogroup I2S

@@ -608,11 +608,11 @@ uint32_t XPD_RCC_GetClockFreq(RCC_ClockType SelectedClock)
 {
     switch (SelectedClock)
     {
-    case SYSCLK:
-        return SystemCoreClock << AHBPrescTable[RCC->CFGR.b.HPRE];
-
     case HCLK:
         return SystemCoreClock;
+
+    case SYSCLK:
+        return SystemCoreClock << AHBPrescTable[RCC->CFGR.b.HPRE];
 
     case PCLK1:
         return SystemCoreClock >> APBPrescTable[RCC->CFGR.b.PPRE1];

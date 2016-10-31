@@ -198,11 +198,11 @@ void XPD_Init(void)
 #endif
 
 #if (DATA_CACHE_ENABLE != 0)
-   XPD_FLASH_DataCacheCtrl(ENABLE);
+    XPD_FLASH_DataCacheCtrl(ENABLE);
 #endif
 
 #if (PREFETCH_ENABLE != 0)
-   XPD_FLASH_PrefetchBufferCtrl(ENABLE);
+    XPD_FLASH_PrefetchBufferCtrl(ENABLE);
 #endif
 
     /* Set Interrupt Group Priority */

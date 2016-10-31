@@ -37,7 +37,6 @@
 static const uint16_t adc_clkPreTable[] = { 1, 2, 4, 6, 8, 10, 12, 16, 32, 64, 128, 256 };
 
 #endif
-/** @} */
 
 /** @defgroup ADC_Clock_Source_Exported_Functions ADC Clock Source Exported Functions
  * @{ */
@@ -56,13 +55,13 @@ void XPD_ADC_ClockConfig(ADC_ClockSourceType ClockSource)
 #if defined(RCC_CFGR2_ADCPRE12)
         XPD_ADC12_ClockCtrl(ENABLE);
 
-        ADC1_2_COMMON->CCR.b.CKMODE = ClockSource;
+        ADC12_COMMON->CCR.b.CKMODE = ClockSource;
 
         RCC->CFGR2.b.ADCPRE12 = 0;
 #if defined(RCC_CFGR2_ADCPRE34)
         XPD_ADC34_ClockCtrl(ENABLE);
 
-        ADC3_4_COMMON->CCR.b.CKMODE = ClockSource;
+        ADC34_COMMON->CCR.b.CKMODE = ClockSource;
 
         RCC->CFGR2.b.ADCPRE34 = 0;
 #endif
@@ -79,13 +78,13 @@ void XPD_ADC_ClockConfig(ADC_ClockSourceType ClockSource)
 #if defined(RCC_CFGR2_ADCPRE12)
         XPD_ADC12_ClockCtrl(ENABLE);
 
-        ADC1_2_COMMON->CCR.b.CKMODE = 0;
+        ADC12_COMMON->CCR.b.CKMODE = 0;
 
         RCC->CFGR2.b.ADCPRE12 = ClockSource;
 #if defined(RCC_CFGR2_ADCPRE34)
         XPD_ADC34_ClockCtrl(ENABLE);
 
-        ADC3_4_COMMON->CCR.b.CKMODE = 0;
+        ADC34_COMMON->CCR.b.CKMODE = 0;
 
         RCC->CFGR2.b.ADCPRE34 = ClockSource;
 #endif
@@ -110,7 +109,7 @@ uint32_t XPD_ADC_GetClockFreq(void)
     return XPD_RCC_GetClockFreq(PCLK2) / ((RCC->CFGR.b.ADCPRE + 1) * 2);
 #else
 #if defined(RCC_CFGR2_ADCPRE12)
-    uint32_t mode = ADC1_2_COMMON->CCR.b.CKMODE;
+    uint32_t mode = ADC12_COMMON->CCR.b.CKMODE;
     uint32_t source = RCC->CFGR2.b.ADCPRE12;
 #elif defined(RCC_CFGR2_ADC1PRES)
     uint32_t mode = ADC1_COMMON->CCR.b.CKMODE;
@@ -142,13 +141,13 @@ void XPD_ADC12_ClockConfig(ADC_ClockSourceType ClockSource)
 
     if (ClockSource < ADC_CLOCKSOURCE_PLLCLK)
     {
-        ADC1_2_COMMON->CCR.b.CKMODE = ClockSource;
+        ADC12_COMMON->CCR.b.CKMODE = ClockSource;
 
         RCC->CFGR2.b.ADCPRE12 = 0;
     }
     else
     {
-        ADC1_2_COMMON->CCR.b.CKMODE = 0;
+        ADC12_COMMON->CCR.b.CKMODE = 0;
 
         RCC->CFGR2.b.ADCPRE12 = ClockSource;
     }
@@ -173,13 +172,13 @@ void XPD_ADC34_ClockConfig(ADC_ClockSourceType ClockSource)
 
     if (ClockSource < ADC_CLOCKSOURCE_PLLCLK)
     {
-        ADC3_4_COMMON->CCR.b.CKMODE = ClockSource;
+        ADC34_COMMON->CCR.b.CKMODE = ClockSource;
 
         RCC->CFGR2.b.ADCPRE34 = 0;
     }
     else
     {
-        ADC3_4_COMMON->CCR.b.CKMODE = 0;
+        ADC34_COMMON->CCR.b.CKMODE = 0;
 
         RCC->CFGR2.b.ADCPRE34 = ClockSource;
     }
@@ -191,7 +190,7 @@ void XPD_ADC34_ClockConfig(ADC_ClockSourceType ClockSource)
  */
 uint32_t XPD_ADC34_GetClockFreq(void)
 {
-    uint32_t mode = ADC3_4_COMMON->CCR.b.CKMODE;
+    uint32_t mode = ADC34_COMMON->CCR.b.CKMODE;
     uint32_t source = RCC->CFGR2.b.ADCPRE34;
 
     if (source != 0)

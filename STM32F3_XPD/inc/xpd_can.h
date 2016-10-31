@@ -27,7 +27,7 @@
 #include "xpd_common.h"
 #include "xpd_config.h"
 
-#if defined(CAN_FM1R_FBM27)
+#if defined(CAN2)
 #define __DUAL_CAN_DEVICE
 #define CAN_FILTERBANK_NUMBER   28
 #define CAN_MASTER              CAN1
@@ -340,7 +340,7 @@ typedef struct
 
 #else
 #define CAN_REG_BIT(HANDLE, REG_NAME, BIT_NAME) ((HANDLE)->Inst->REG_NAME.b.BIT_NAME)
-#define CAN_MASTER_REG_BIT(REG_NAME, BIT_NAME)  (CAN_MASTER->Inst->REG_NAME.b.BIT_NAME)
+#define CAN_MASTER_REG_BIT(REG_NAME, BIT_NAME)  (CAN_MASTER->REG_NAME.b.BIT_NAME)
 
 /**
  * @brief  Clear the specified CAN transmit flag.
