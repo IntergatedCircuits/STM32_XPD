@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    xpd_rcc_gen.h
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2016-01-10
+  * @version V0.2
+  * @date    2016-11-05
   * @brief   STM32 eXtensible Peripheral Drivers RCC Peripherals Module
   *
   *  This file is part of STM32_XPD.
@@ -54,6 +54,12 @@ void XPD_ADC3_ClockCtrl(FunctionalState NewState);
 #ifdef RCC_APB2LPENR_ADC3LPEN
 void XPD_ADC3_SleepClockCtrl(FunctionalState NewState);
 #endif
+#ifdef RCC_AHB1ENR_BKPSRAMEN
+void XPD_BKPSRAM_ClockCtrl(FunctionalState NewState);
+#endif
+#ifdef RCC_AHB1LPENR_BKPSRAMLPEN
+void XPD_BKPSRAM_SleepClockCtrl(FunctionalState NewState);
+#endif
 #ifdef RCC_APB1ENR_CAN1EN
 void XPD_CAN1_ClockCtrl(FunctionalState NewState);
 #endif
@@ -71,6 +77,9 @@ void XPD_CAN2_SleepClockCtrl(FunctionalState NewState);
 #endif
 #ifdef RCC_APB1RSTR_CAN2RST
 void XPD_CAN2_Reset(void);
+#endif
+#ifdef RCC_AHB1ENR_CCMDATARAMEN
+void XPD_CCMDATARAM_ClockCtrl(FunctionalState NewState);
 #endif
 #ifdef RCC_APB1ENR_CECEN
 void XPD_CEC_ClockCtrl(FunctionalState NewState);
@@ -116,6 +125,15 @@ void XPD_DCMI_SleepClockCtrl(FunctionalState NewState);
 #endif
 #ifdef RCC_AHB2RSTR_DCMIRST
 void XPD_DCMI_Reset(void);
+#endif
+#ifdef RCC_APB2ENR_DFSDM1EN
+void XPD_DFSDM1_ClockCtrl(FunctionalState NewState);
+#endif
+#ifdef RCC_APB2LPENR_DFSDM1LPEN
+void XPD_DFSDM1_SleepClockCtrl(FunctionalState NewState);
+#endif
+#ifdef RCC_APB2RSTR_DFSDM1RST
+void XPD_DFSDM1_Reset(void);
 #endif
 #ifdef RCC_AHB1ENR_DMA1EN
 void XPD_DMA1_ClockCtrl(FunctionalState NewState);
@@ -185,6 +203,9 @@ void XPD_EXTI_ClockCtrl(FunctionalState NewState);
 #endif
 #ifdef RCC_APB2LPENR_EXTITLPEN
 void XPD_EXTI_SleepClockCtrl(FunctionalState NewState);
+#endif
+#ifdef RCC_AHB1LPENR_FLITFLPEN
+void XPD_FLITF_SleepClockCtrl(FunctionalState NewState);
 #endif
 #ifdef RCC_AHB3ENR_FMCEN
 void XPD_FMC_ClockCtrl(FunctionalState NewState);
@@ -408,16 +429,22 @@ void XPD_QSPI_SleepClockCtrl(FunctionalState NewState);
 #ifdef RCC_AHB3RSTR_QSPIRST
 void XPD_QSPI_Reset(void);
 #endif
-#ifdef RCC_CKGATENR_RCC_CKEN
-void XPD_RCC_CK_ClockCtrl(FunctionalState NewState);
-#endif
 #ifdef RCC_AHB2ENR_RNGEN
+void XPD_RNG_ClockCtrl(FunctionalState NewState);
+#endif
+#ifdef RCC_AHB1ENR_RNGEN
 void XPD_RNG_ClockCtrl(FunctionalState NewState);
 #endif
 #ifdef RCC_AHB2LPENR_RNGLPEN
 void XPD_RNG_SleepClockCtrl(FunctionalState NewState);
 #endif
+#ifdef RCC_AHB1LPENR_RNGLPEN
+void XPD_RNG_SleepClockCtrl(FunctionalState NewState);
+#endif
 #ifdef RCC_AHB2RSTR_RNGRST
+void XPD_RNG_Reset(void);
+#endif
+#ifdef RCC_AHB1RSTR_RNGRST
 void XPD_RNG_Reset(void);
 #endif
 #ifdef RCC_APB1ENR_RTCAPBEN
@@ -515,6 +542,15 @@ void XPD_SPI6_SleepClockCtrl(FunctionalState NewState);
 #endif
 #ifdef RCC_APB2RSTR_SPI6RST
 void XPD_SPI6_Reset(void);
+#endif
+#ifdef RCC_AHB1LPENR_SRAM1LPEN
+void XPD_SRAM1_SleepClockCtrl(FunctionalState NewState);
+#endif
+#ifdef RCC_AHB1LPENR_SRAM2LPEN
+void XPD_SRAM2_SleepClockCtrl(FunctionalState NewState);
+#endif
+#ifdef RCC_AHB1LPENR_SRAM3LPEN
+void XPD_SRAM3_SleepClockCtrl(FunctionalState NewState);
 #endif
 #ifdef RCC_APB2ENR_SYSCFGEN
 void XPD_SYSCFG_ClockCtrl(FunctionalState NewState);
