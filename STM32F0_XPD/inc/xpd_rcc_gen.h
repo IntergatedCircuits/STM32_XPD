@@ -23,7 +23,6 @@
   */
 #ifndef XPD_RCC_GEN_H_
 #define XPD_RCC_GEN_H_
-#include "xpd_rcc.h"
 
 
 /** @addtogroup RCC
