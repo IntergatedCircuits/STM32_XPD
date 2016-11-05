@@ -1,3 +1,26 @@
+/**
+  ******************************************************************************
+  * @file    xpd_rcc_gen.c
+  * @author  Benedek Kupper
+  * @version V0.2
+  * @date    2016-11-05
+  * @brief   STM32 eXtensible Peripheral Drivers RCC Peripherals Module
+  *
+  *  This file is part of STM32_XPD.
+  *
+  *  STM32_XPD is free software: you can redistribute it and/or modify
+  *  it under the terms of the GNU General Public License as published by
+  *  the Free Software Foundation, either version 3 of the License, or
+  *  (at your option) any later version.
+  *
+  *  STM32_XPD is distributed in the hope that it will be useful,
+  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  *  GNU General Public License for more details.
+  *
+  *  You should have received a copy of the GNU General Public License
+  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  */
 #include "xpd_rcc.h"
 
 /** @addtogroup RCC
@@ -9,11 +32,21 @@
 /** @addtogroup RCC_Generated_Functions
  * @{ */
 #ifdef RCC_AHBENR_ADC1EN
-/** @brief Sets the new clock state of the ADC1 peripheral. */
+/** @brief Sets the new clock state of the ADC1 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_ADC1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHBENR,ADC1EN) = NewState;
     NewState = (FunctionalState)RCC->AHBENR.w;
+}
+#endif
+#ifdef RCC_APB2ENR_ADC1EN
+/** @brief Sets the new clock state of the ADC1 peripheral.
+ *  @param NewState: the new clock state to set */
+void XPD_ADC1_ClockCtrl(FunctionalState NewState)
+{
+    RCC_REG_BIT(APB2ENR,ADC1EN) = NewState;
+    NewState = (FunctionalState)RCC->APB2ENR.w;
 }
 #endif
 #ifdef RCC_AHBRSTR_ADC1RST
@@ -24,8 +57,17 @@ void XPD_ADC1_Reset(void)
     RCC_REG_BIT(AHBRSTR,ADC1RST) = 0;
 }
 #endif
+#ifdef RCC_APB2RSTR_ADC1RST
+/** @brief Forces and releases a reset on the ADC1 peripheral. */
+void XPD_ADC1_Reset(void)
+{
+    RCC_REG_BIT(APB2RSTR,ADC1RST) = 1;
+    RCC_REG_BIT(APB2RSTR,ADC1RST) = 0;
+}
+#endif
 #ifdef RCC_AHBENR_ADC12EN
-/** @brief Sets the new clock state of the ADC12 peripheral. */
+/** @brief Sets the new clock state of the ADC12 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_ADC12_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHBENR,ADC12EN) = NewState;
@@ -41,7 +83,8 @@ void XPD_ADC12_Reset(void)
 }
 #endif
 #ifdef RCC_AHBENR_ADC34EN
-/** @brief Sets the new clock state of the ADC34 peripheral. */
+/** @brief Sets the new clock state of the ADC34 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_ADC34_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHBENR,ADC34EN) = NewState;
@@ -57,7 +100,8 @@ void XPD_ADC34_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_CANEN
-/** @brief Sets the new clock state of the CAN peripheral. */
+/** @brief Sets the new clock state of the CAN peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_CAN_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,CANEN) = NewState;
@@ -73,7 +117,8 @@ void XPD_CAN_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_CECEN
-/** @brief Sets the new clock state of the CEC peripheral. */
+/** @brief Sets the new clock state of the CEC peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_CEC_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,CECEN) = NewState;
@@ -89,7 +134,8 @@ void XPD_CEC_Reset(void)
 }
 #endif
 #ifdef RCC_AHBENR_CRCEN
-/** @brief Sets the new clock state of the CRC peripheral. */
+/** @brief Sets the new clock state of the CRC peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_CRC_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHBENR,CRCEN) = NewState;
@@ -97,7 +143,8 @@ void XPD_CRC_ClockCtrl(FunctionalState NewState)
 }
 #endif
 #ifdef RCC_APB1ENR_DAC1EN
-/** @brief Sets the new clock state of the DAC1 peripheral. */
+/** @brief Sets the new clock state of the DAC1 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_DAC1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,DAC1EN) = NewState;
@@ -113,7 +160,8 @@ void XPD_DAC1_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_DAC2EN
-/** @brief Sets the new clock state of the DAC2 peripheral. */
+/** @brief Sets the new clock state of the DAC2 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_DAC2_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,DAC2EN) = NewState;
@@ -129,7 +177,8 @@ void XPD_DAC2_Reset(void)
 }
 #endif
 #ifdef RCC_AHBENR_DMA1EN
-/** @brief Sets the new clock state of the DMA1 peripheral. */
+/** @brief Sets the new clock state of the DMA1 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_DMA1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHBENR,DMA1EN) = NewState;
@@ -137,7 +186,8 @@ void XPD_DMA1_ClockCtrl(FunctionalState NewState)
 }
 #endif
 #ifdef RCC_AHBENR_DMA2EN
-/** @brief Sets the new clock state of the DMA2 peripheral. */
+/** @brief Sets the new clock state of the DMA2 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_DMA2_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHBENR,DMA2EN) = NewState;
@@ -145,7 +195,8 @@ void XPD_DMA2_ClockCtrl(FunctionalState NewState)
 }
 #endif
 #ifdef RCC_AHBENR_FLITFEN
-/** @brief Sets the new clock state of the FLITF peripheral. */
+/** @brief Sets the new clock state of the FLITF peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_FLITF_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHBENR,FLITFEN) = NewState;
@@ -153,7 +204,8 @@ void XPD_FLITF_ClockCtrl(FunctionalState NewState)
 }
 #endif
 #ifdef RCC_AHBENR_FMCEN
-/** @brief Sets the new clock state of the FMC peripheral. */
+/** @brief Sets the new clock state of the FMC peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_FMC_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHBENR,FMCEN) = NewState;
@@ -169,7 +221,8 @@ void XPD_FMC_Reset(void)
 }
 #endif
 #ifdef RCC_AHBENR_GPIOAEN
-/** @brief Sets the new clock state of the GPIOA peripheral. */
+/** @brief Sets the new clock state of the GPIOA peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_GPIOA_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHBENR,GPIOAEN) = NewState;
@@ -185,7 +238,8 @@ void XPD_GPIOA_Reset(void)
 }
 #endif
 #ifdef RCC_AHBENR_GPIOBEN
-/** @brief Sets the new clock state of the GPIOB peripheral. */
+/** @brief Sets the new clock state of the GPIOB peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_GPIOB_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHBENR,GPIOBEN) = NewState;
@@ -201,7 +255,8 @@ void XPD_GPIOB_Reset(void)
 }
 #endif
 #ifdef RCC_AHBENR_GPIOCEN
-/** @brief Sets the new clock state of the GPIOC peripheral. */
+/** @brief Sets the new clock state of the GPIOC peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_GPIOC_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHBENR,GPIOCEN) = NewState;
@@ -217,7 +272,8 @@ void XPD_GPIOC_Reset(void)
 }
 #endif
 #ifdef RCC_AHBENR_GPIODEN
-/** @brief Sets the new clock state of the GPIOD peripheral. */
+/** @brief Sets the new clock state of the GPIOD peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_GPIOD_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHBENR,GPIODEN) = NewState;
@@ -233,7 +289,8 @@ void XPD_GPIOD_Reset(void)
 }
 #endif
 #ifdef RCC_AHBENR_GPIOEEN
-/** @brief Sets the new clock state of the GPIOE peripheral. */
+/** @brief Sets the new clock state of the GPIOE peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_GPIOE_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHBENR,GPIOEEN) = NewState;
@@ -249,7 +306,8 @@ void XPD_GPIOE_Reset(void)
 }
 #endif
 #ifdef RCC_AHBENR_GPIOFEN
-/** @brief Sets the new clock state of the GPIOF peripheral. */
+/** @brief Sets the new clock state of the GPIOF peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_GPIOF_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHBENR,GPIOFEN) = NewState;
@@ -265,7 +323,8 @@ void XPD_GPIOF_Reset(void)
 }
 #endif
 #ifdef RCC_AHBENR_GPIOGEN
-/** @brief Sets the new clock state of the GPIOG peripheral. */
+/** @brief Sets the new clock state of the GPIOG peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_GPIOG_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHBENR,GPIOGEN) = NewState;
@@ -281,7 +340,8 @@ void XPD_GPIOG_Reset(void)
 }
 #endif
 #ifdef RCC_AHBENR_GPIOHEN
-/** @brief Sets the new clock state of the GPIOH peripheral. */
+/** @brief Sets the new clock state of the GPIOH peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_GPIOH_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHBENR,GPIOHEN) = NewState;
@@ -297,7 +357,8 @@ void XPD_GPIOH_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_HRTIM1EN
-/** @brief Sets the new clock state of the HRTIM1 peripheral. */
+/** @brief Sets the new clock state of the HRTIM1 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_HRTIM1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,HRTIM1EN) = NewState;
@@ -313,7 +374,8 @@ void XPD_HRTIM1_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_I2C1EN
-/** @brief Sets the new clock state of the I2C1 peripheral. */
+/** @brief Sets the new clock state of the I2C1 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_I2C1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,I2C1EN) = NewState;
@@ -329,7 +391,8 @@ void XPD_I2C1_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_I2C2EN
-/** @brief Sets the new clock state of the I2C2 peripheral. */
+/** @brief Sets the new clock state of the I2C2 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_I2C2_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,I2C2EN) = NewState;
@@ -345,7 +408,8 @@ void XPD_I2C2_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_I2C3EN
-/** @brief Sets the new clock state of the I2C3 peripheral. */
+/** @brief Sets the new clock state of the I2C3 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_I2C3_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,I2C3EN) = NewState;
@@ -361,7 +425,8 @@ void XPD_I2C3_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_PWREN
-/** @brief Sets the new clock state of the PWR peripheral. */
+/** @brief Sets the new clock state of the PWR peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_PWR_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,PWREN) = NewState;
@@ -377,7 +442,8 @@ void XPD_PWR_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_SDADC1EN
-/** @brief Sets the new clock state of the SDADC1 peripheral. */
+/** @brief Sets the new clock state of the SDADC1 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_SDADC1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,SDADC1EN) = NewState;
@@ -393,7 +459,8 @@ void XPD_SDADC1_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_SDADC2EN
-/** @brief Sets the new clock state of the SDADC2 peripheral. */
+/** @brief Sets the new clock state of the SDADC2 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_SDADC2_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,SDADC2EN) = NewState;
@@ -409,7 +476,8 @@ void XPD_SDADC2_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_SDADC3EN
-/** @brief Sets the new clock state of the SDADC3 peripheral. */
+/** @brief Sets the new clock state of the SDADC3 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_SDADC3_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,SDADC3EN) = NewState;
@@ -425,7 +493,8 @@ void XPD_SDADC3_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_SPI1EN
-/** @brief Sets the new clock state of the SPI1 peripheral. */
+/** @brief Sets the new clock state of the SPI1 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_SPI1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,SPI1EN) = NewState;
@@ -441,7 +510,8 @@ void XPD_SPI1_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_SPI2EN
-/** @brief Sets the new clock state of the SPI2 peripheral. */
+/** @brief Sets the new clock state of the SPI2 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_SPI2_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,SPI2EN) = NewState;
@@ -457,7 +527,8 @@ void XPD_SPI2_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_SPI3EN
-/** @brief Sets the new clock state of the SPI3 peripheral. */
+/** @brief Sets the new clock state of the SPI3 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_SPI3_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,SPI3EN) = NewState;
@@ -473,7 +544,8 @@ void XPD_SPI3_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_SPI4EN
-/** @brief Sets the new clock state of the SPI4 peripheral. */
+/** @brief Sets the new clock state of the SPI4 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_SPI4_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,SPI4EN) = NewState;
@@ -489,7 +561,8 @@ void XPD_SPI4_Reset(void)
 }
 #endif
 #ifdef RCC_AHBENR_SRAMEN
-/** @brief Sets the new clock state of the SRAM peripheral. */
+/** @brief Sets the new clock state of the SRAM peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_SRAM_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHBENR,SRAMEN) = NewState;
@@ -497,7 +570,8 @@ void XPD_SRAM_ClockCtrl(FunctionalState NewState)
 }
 #endif
 #ifdef RCC_APB2ENR_SYSCFGEN
-/** @brief Sets the new clock state of the SYSCFG peripheral. */
+/** @brief Sets the new clock state of the SYSCFG peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_SYSCFG_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,SYSCFGEN) = NewState;
@@ -513,7 +587,8 @@ void XPD_SYSCFG_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_TIM1EN
-/** @brief Sets the new clock state of the TIM1 peripheral. */
+/** @brief Sets the new clock state of the TIM1 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,TIM1EN) = NewState;
@@ -529,7 +604,8 @@ void XPD_TIM1_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_TIM12EN
-/** @brief Sets the new clock state of the TIM12 peripheral. */
+/** @brief Sets the new clock state of the TIM12 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM12_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM12EN) = NewState;
@@ -545,7 +621,8 @@ void XPD_TIM12_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_TIM13EN
-/** @brief Sets the new clock state of the TIM13 peripheral. */
+/** @brief Sets the new clock state of the TIM13 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM13_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM13EN) = NewState;
@@ -561,7 +638,8 @@ void XPD_TIM13_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_TIM14EN
-/** @brief Sets the new clock state of the TIM14 peripheral. */
+/** @brief Sets the new clock state of the TIM14 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM14_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM14EN) = NewState;
@@ -577,7 +655,8 @@ void XPD_TIM14_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_TIM15EN
-/** @brief Sets the new clock state of the TIM15 peripheral. */
+/** @brief Sets the new clock state of the TIM15 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM15_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,TIM15EN) = NewState;
@@ -593,7 +672,8 @@ void XPD_TIM15_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_TIM16EN
-/** @brief Sets the new clock state of the TIM16 peripheral. */
+/** @brief Sets the new clock state of the TIM16 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM16_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,TIM16EN) = NewState;
@@ -609,7 +689,8 @@ void XPD_TIM16_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_TIM17EN
-/** @brief Sets the new clock state of the TIM17 peripheral. */
+/** @brief Sets the new clock state of the TIM17 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM17_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,TIM17EN) = NewState;
@@ -625,7 +706,8 @@ void XPD_TIM17_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_TIM18EN
-/** @brief Sets the new clock state of the TIM18 peripheral. */
+/** @brief Sets the new clock state of the TIM18 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM18_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM18EN) = NewState;
@@ -641,7 +723,8 @@ void XPD_TIM18_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_TIM19EN
-/** @brief Sets the new clock state of the TIM19 peripheral. */
+/** @brief Sets the new clock state of the TIM19 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM19_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,TIM19EN) = NewState;
@@ -657,7 +740,8 @@ void XPD_TIM19_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_TIM2EN
-/** @brief Sets the new clock state of the TIM2 peripheral. */
+/** @brief Sets the new clock state of the TIM2 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM2_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM2EN) = NewState;
@@ -673,7 +757,8 @@ void XPD_TIM2_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_TIM20EN
-/** @brief Sets the new clock state of the TIM20 peripheral. */
+/** @brief Sets the new clock state of the TIM20 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM20_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,TIM20EN) = NewState;
@@ -689,7 +774,8 @@ void XPD_TIM20_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_TIM3EN
-/** @brief Sets the new clock state of the TIM3 peripheral. */
+/** @brief Sets the new clock state of the TIM3 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM3_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM3EN) = NewState;
@@ -705,7 +791,8 @@ void XPD_TIM3_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_TIM4EN
-/** @brief Sets the new clock state of the TIM4 peripheral. */
+/** @brief Sets the new clock state of the TIM4 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM4_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM4EN) = NewState;
@@ -721,7 +808,8 @@ void XPD_TIM4_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_TIM5EN
-/** @brief Sets the new clock state of the TIM5 peripheral. */
+/** @brief Sets the new clock state of the TIM5 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM5_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM5EN) = NewState;
@@ -737,7 +825,8 @@ void XPD_TIM5_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_TIM6EN
-/** @brief Sets the new clock state of the TIM6 peripheral. */
+/** @brief Sets the new clock state of the TIM6 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM6_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM6EN) = NewState;
@@ -753,7 +842,8 @@ void XPD_TIM6_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_TIM7EN
-/** @brief Sets the new clock state of the TIM7 peripheral. */
+/** @brief Sets the new clock state of the TIM7 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM7_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,TIM7EN) = NewState;
@@ -769,7 +859,8 @@ void XPD_TIM7_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_TIM8EN
-/** @brief Sets the new clock state of the TIM8 peripheral. */
+/** @brief Sets the new clock state of the TIM8 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TIM8_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,TIM8EN) = NewState;
@@ -785,7 +876,8 @@ void XPD_TIM8_Reset(void)
 }
 #endif
 #ifdef RCC_AHBENR_TSCEN
-/** @brief Sets the new clock state of the TSC peripheral. */
+/** @brief Sets the new clock state of the TSC peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_TSC_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHBENR,TSCEN) = NewState;
@@ -801,7 +893,8 @@ void XPD_TSC_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_UART4EN
-/** @brief Sets the new clock state of the UART4 peripheral. */
+/** @brief Sets the new clock state of the UART4 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_UART4_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,UART4EN) = NewState;
@@ -817,7 +910,8 @@ void XPD_UART4_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_UART5EN
-/** @brief Sets the new clock state of the UART5 peripheral. */
+/** @brief Sets the new clock state of the UART5 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_UART5_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,UART5EN) = NewState;
@@ -833,7 +927,8 @@ void XPD_UART5_Reset(void)
 }
 #endif
 #ifdef RCC_APB2ENR_USART1EN
-/** @brief Sets the new clock state of the USART1 peripheral. */
+/** @brief Sets the new clock state of the USART1 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_USART1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,USART1EN) = NewState;
@@ -849,7 +944,8 @@ void XPD_USART1_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_USART2EN
-/** @brief Sets the new clock state of the USART2 peripheral. */
+/** @brief Sets the new clock state of the USART2 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_USART2_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,USART2EN) = NewState;
@@ -865,7 +961,8 @@ void XPD_USART2_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_USART3EN
-/** @brief Sets the new clock state of the USART3 peripheral. */
+/** @brief Sets the new clock state of the USART3 peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_USART3_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,USART3EN) = NewState;
@@ -881,7 +978,8 @@ void XPD_USART3_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_USBEN
-/** @brief Sets the new clock state of the USB peripheral. */
+/** @brief Sets the new clock state of the USB peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_USB_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,USBEN) = NewState;
@@ -897,7 +995,8 @@ void XPD_USB_Reset(void)
 }
 #endif
 #ifdef RCC_APB1ENR_WWDGEN
-/** @brief Sets the new clock state of the WWDG peripheral. */
+/** @brief Sets the new clock state of the WWDG peripheral.
+ *  @param NewState: the new clock state to set */
 void XPD_WWDG_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB1ENR,WWDGEN) = NewState;
