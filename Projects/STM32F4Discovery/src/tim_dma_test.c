@@ -47,7 +47,7 @@ static void timx_init(TIM_HandleType * tim)
     idma.Peripheral.Increment     = DISABLE;
     XPD_DMA_Init(&dmax, &idma);
 
-    XPD_DMA_BINDTO(&dmax, &timx, Channel[TIM_CHANNEL_3]);
+    timx.DMA.Channel[TIM_CHANNEL_3] = &dmax;
 
     XPD_NVIC_SetPriorityConfig(DMA1_Stream7_IRQn, 0, 3);
     XPD_NVIC_EnableIRQ(DMA1_Stream7_IRQn);

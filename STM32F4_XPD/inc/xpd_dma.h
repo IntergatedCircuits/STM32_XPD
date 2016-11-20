@@ -159,16 +159,6 @@ typedef struct
 #endif
 
 /**
- * @brief  Binds a DMA handle to a peripheral handle in both directions.
- * @param  HDMA: specifies the DMA handle
- * @param  HANDLE: specifies the peripheral owner handle
- * @param  DMASLOT: specifies the DMA slot in the peripheral handle to set to
- */
-#define         XPD_DMA_BINDTO(HDMA,HANDLE,DMASLOT)         \
-    do{(HANDLE)->DMA.DMASLOT = (HDMA);                      \
-       (HDMA)->Owner = (HANDLE); }while(0)
-
-/**
  * @brief  Enable the specified DMA interrupt.
  * @param  HANDLE: specifies the DMA Handle.
  * @param  IT_NAME: specifies the interrupt to enable.
@@ -223,6 +213,13 @@ typedef struct
  */
 #define         XPD_DMA_ClearFlag(HANDLE, FLAG_NAME)        \
     (((DMA_BitBand_TypeDef *)(HANDLE)->Base_BB)->LIFCR.C##FLAG_NAME##IF0 = 1)
+
+/**
+ * @brief  Provides the circular mode of DMA stream.
+ * @param  HANDLE: specifies the DMA Handle.
+ */
+#define         XPD_DMA_CircularMode(HANDLE)                \
+        (DMA_REG_BIT((HANDLE), CR, CIRC))
 
 /** @} */
 

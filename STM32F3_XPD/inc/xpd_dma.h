@@ -157,6 +157,14 @@ typedef struct
 #define         XPD_DMA_DisableIT(HANDLE,   IT_NAME)        \
         (DMA_REG_BIT((HANDLE), CCR, IT_NAME##IE) = 0)
 
+/**
+ * @brief  Provides the circular mode of DMA stream.
+ * @param  HANDLE: specifies the DMA Handle.
+ */
+#define         XPD_DMA_CircularMode(HANDLE)                \
+        (DMA_REG_BIT((HANDLE), CCR, CIRC))
+
+
 #ifdef DMA_BB
 /**
  * @brief  Get the specified DMA flag.
