@@ -179,6 +179,7 @@ static void can_frameReceive(CAN_HandleType * hcan, uint8_t FIFONumber)
 XPD_ReturnType XPD_CAN_Init(CAN_HandleType* hcan, CAN_InitType* Config)
 {
     XPD_ReturnType result = XPD_OK;
+    uint32_t timeout = INAK_TIMEOUT;
 
     /* enable peripheral clock */
 #ifdef __DUAL_CAN_DEVICE
@@ -207,7 +208,7 @@ XPD_ReturnType XPD_CAN_Init(CAN_HandleType* hcan, CAN_InitType* Config)
     /* request initialization */
     CAN_REG_BIT(hcan, MCR, INRQ) = 1;
 
-    result = XPD_WaitForMatch(&hcan->Inst->MSR.w, CAN_MSR_INAK, CAN_MSR_INAK, INAK_TIMEOUT);
+    result = XPD_WaitForMatch(&hcan->Inst->MSR.w, CAN_MSR_INAK, CAN_MSR_INAK, &timeout);
     if(result != XPD_OK)
     {
         return result;
@@ -226,7 +227,7 @@ XPD_ReturnType XPD_CAN_Init(CAN_HandleType* hcan, CAN_InitType* Config)
     /* request leave initialization */
     CAN_REG_BIT(hcan, MCR, INRQ) = 0;
 
-    result = XPD_WaitForMatch(&hcan->Inst->MSR.w, CAN_MSR_INAK, 0, INAK_TIMEOUT);
+    result = XPD_WaitForMatch(&hcan->Inst->MSR.w, CAN_MSR_INAK, 0, &timeout);
     if(result != XPD_OK)
     {
         return result;
@@ -282,10 +283,11 @@ XPD_ReturnType XPD_CAN_Deinit(CAN_HandleType* hcan)
  */
 XPD_ReturnType XPD_CAN_Sleep(CAN_HandleType* hcan)
 {
+    uint32_t timeout = SLAK_TIMEOUT;
     CAN_REG_BIT(hcan, MCR, INRQ) = 0;
     CAN_REG_BIT(hcan, MCR, SLEEP) = 1;
 
-    return XPD_WaitForMatch(&hcan->Inst->MSR.w, CAN_MSR_SLAK, CAN_MSR_SLAK, SLAK_TIMEOUT);
+    return XPD_WaitForMatch(&hcan->Inst->MSR.w, CAN_MSR_SLAK, CAN_MSR_SLAK, &timeout);
 }
 
 /**
@@ -295,9 +297,10 @@ XPD_ReturnType XPD_CAN_Sleep(CAN_HandleType* hcan)
  */
 XPD_ReturnType XPD_CAN_WakeUp(CAN_HandleType* hcan)
 {
+    uint32_t timeout = SLAK_TIMEOUT;
     CAN_REG_BIT(hcan, MCR, SLEEP) = 0;
 
-    return XPD_WaitForMatch(&hcan->Inst->MSR.w, CAN_MSR_SLAK, 0, SLAK_TIMEOUT);
+    return XPD_WaitForMatch(&hcan->Inst->MSR.w, CAN_MSR_SLAK, 0, &timeout);
 }
 
 /**
@@ -403,7 +406,6 @@ XPD_ReturnType XPD_CAN_Transmit(CAN_HandleType * hcan, CAN_FrameType * Frame, ui
 {
     uint32_t temp;
     XPD_ReturnType result;
-    uint32_t starttime = XPD_GetTimer();
 
     /* no timeout, no wait for success */
     if (Timeout == 0)
@@ -421,7 +423,7 @@ XPD_ReturnType XPD_CAN_Transmit(CAN_HandleType * hcan, CAN_FrameType * Frame, ui
     {
         do
         {
-            result = XPD_WaitForDiff(&hcan->Inst->TSR.w, CAN_TSR_TME, 0, Timeout);
+            result = XPD_WaitForDiff(&hcan->Inst->TSR.w, CAN_TSR_TME, 0, &Timeout);
 
             /* if getting free mailbox times out, exit with busy */
             if (result != XPD_OK)
@@ -433,9 +435,6 @@ XPD_ReturnType XPD_CAN_Transmit(CAN_HandleType * hcan, CAN_FrameType * Frame, ui
             /* get mailbox if available */
             result = can_frameTransmit(hcan, Frame);
 
-            /* calculate remaining time */
-            Timeout -= XPD_GetTimer() - starttime;
-
         /* until free mailbox was found */
         } while (result != XPD_OK);
 
@@ -446,7 +445,7 @@ XPD_ReturnType XPD_CAN_Transmit(CAN_HandleType * hcan, CAN_FrameType * Frame, ui
             temp = CAN_TSR_TXOK0 << (temp * 8);
 
             /* wait for txok with the remaining time */
-            result = XPD_WaitForMatch(&hcan->Inst->TSR.w, temp, temp, Timeout);
+            result = XPD_WaitForMatch(&hcan->Inst->TSR.w, temp, temp, &Timeout);
         }
     }
 
@@ -518,7 +517,7 @@ XPD_ReturnType XPD_CAN_Receive(CAN_HandleType* hcan, CAN_FrameType* Frame, uint8
         hcan->RxFrame[FIFONumber] = Frame;
 
         /* wait until at least one frame is in FIFO */
-        result = XPD_WaitForDiff(&hcan->Inst->RFR[FIFONumber].w, CAN_RF0R_FMP0, 0, Timeout);
+        result = XPD_WaitForDiff(&hcan->Inst->RFR[FIFONumber].w, CAN_RF0R_FMP0, 0, &Timeout);
 
         if (result == XPD_OK)
         {

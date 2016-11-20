@@ -85,8 +85,8 @@ typedef enum
 /** @brief Signal active level type */
 typedef enum
 {
-    ACTIVE_LOW  = 0, /*!< Signal is active low */
-    ACTIVE_HIGH = 1  /*!< Signal is active high */
+    ACTIVE_LOW  = 1, /*!< Signal is active low */
+    ACTIVE_HIGH = 0  /*!< Signal is active high */
 }ActiveLevelType;
 
 /** @brief General level type */

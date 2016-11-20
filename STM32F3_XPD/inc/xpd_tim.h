@@ -235,7 +235,7 @@ void            XPD_TIM_Counter_Start       (TIM_HandleType * htim);
 void            XPD_TIM_Counter_Stop        (TIM_HandleType * htim);
 void            XPD_TIM_Counter_Start_IT    (TIM_HandleType * htim);
 void            XPD_TIM_Counter_Stop_IT     (TIM_HandleType * htim);
-void            XPD_TIM_Counter_Start_DMA   (TIM_HandleType * htim, void * Address, uint16_t Length);
+XPD_ReturnType  XPD_TIM_Counter_Start_DMA   (TIM_HandleType * htim, void * Address, uint16_t Length);
 void            XPD_TIM_Counter_Stop_DMA    (TIM_HandleType * htim);
 
 TIM_CounterType XPD_TIM_Counter_GetDirection(TIM_HandleType * htim);
@@ -350,7 +350,7 @@ void            XPD_TIM_Output_Start        (TIM_HandleType * htim, TIM_ChannelT
 void            XPD_TIM_Output_Stop         (TIM_HandleType * htim, TIM_ChannelType Channel);
 void            XPD_TIM_Output_Start_IT     (TIM_HandleType * htim, TIM_ChannelType Channel);
 void            XPD_TIM_Output_Stop_IT      (TIM_HandleType * htim, TIM_ChannelType Channel);
-void            XPD_TIM_Output_Start_DMA    (TIM_HandleType * htim, TIM_ChannelType Channel,
+XPD_ReturnType  XPD_TIM_Output_Start_DMA    (TIM_HandleType * htim, TIM_ChannelType Channel,
                                              void * Address, uint16_t Length);
 void            XPD_TIM_Output_Stop_DMA     (TIM_HandleType * htim, TIM_ChannelType Channel);
 
