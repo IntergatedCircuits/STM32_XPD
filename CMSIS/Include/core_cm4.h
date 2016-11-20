@@ -544,7 +544,6 @@ typedef struct
                  uint32_t __RESERVED1 : 4;
             __IO uint32_t ENDIANESS : 1;                    /*!< SCB AIRCR: ENDIANESS Mask */
             __IO uint32_t VECTKEY : 16;                     /*!< SCB AIRCR: VECTKEY Mask */
-            __IO uint32_t VECTKEYSTAT : 16;                 /*!< SCB AIRCR: VECTKEYSTAT Mask */
         } b;
         __IO uint32_t w;
     } AIRCR;                                                /*!< Offset: 0x00C (R/W)  Application Interrupt and Reset Control Register */
@@ -669,11 +668,11 @@ typedef struct
     union {
         struct {
                   uint32_t __RESERVED0 : 20;
-            __IOM  uint32_t CP10 : 2;
-            __IOM  uint32_t CP11 : 2;
+            __IO  uint32_t CP10 : 2;
+            __IO  uint32_t CP11 : 2;
                   uint32_t __RESERVED1 : 8;
         } b;
-        __IOM uint32_t w;
+        __IO uint32_t w;
     } CPACR;                                                /*!< Offset: 0x088 (R/W)  Coprocessor Access Control Register */
 } SCB_Type;
 

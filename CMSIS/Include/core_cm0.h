@@ -438,7 +438,6 @@ typedef struct
                  uint32_t __RESERVED1 : 12;
             __IO uint32_t ENDIANESS : 1;                    /*!< SCB AIRCR: ENDIANESS Mask */
             __IO uint32_t VECTKEY : 16;                     /*!< SCB AIRCR: VECTKEY Mask */
-            __IO uint32_t VECTKEYSTAT : 16;                 /*!< SCB AIRCR: VECTKEYSTAT Mask */
         } b;
         __IO uint32_t w;
     } AIRCR;                                                /*!< Offset: 0x00C (R/W)  Application Interrupt and Reset Control Register */
