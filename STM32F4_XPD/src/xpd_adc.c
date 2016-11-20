@@ -454,7 +454,7 @@ XPD_ReturnType XPD_ADC_PollStatus(ADC_HandleType * hadc, ADC_OperationType Opera
     }
     else
     {
-        result = XPD_WaitForMatch(&hadc->Inst->SR.w, Operation, Operation, Timeout);
+        result = XPD_WaitForMatch(&hadc->Inst->SR.w, Operation, Operation, &Timeout);
         if (result == XPD_OK)
         {
             CLEAR_BIT(hadc->Inst->SR.w, Operation);
@@ -587,36 +587,39 @@ void XPD_ADC_IRQHandler(ADC_HandleType * hadc)
  * @brief Sets up and enables a DMA transfer for the ADC regular conversions.
  * @param hadc: pointer to the ADC handle structure
  * @param Address: memory address to the conversion data storage
+ * @return BUSY if the DMA is used by other peripheral, OK otherwise
  */
-void XPD_ADC_Start_DMA(ADC_HandleType * hadc, void * Address)
+XPD_ReturnType XPD_ADC_Start_DMA(ADC_HandleType * hadc, void * Address)
 {
-    /* Set the DMA transfer complete callback */
-    hadc->DMA.Conversion->Callbacks.Complete = adc_dmaConversionRedirect;
+    XPD_ReturnType result = XPD_DMA_Attach(hadc->DMA.Conversion, hadc, (void *)&hadc->Inst->DR);
 
-    /* Set the DMA half transfer complete callback */
-    hadc->DMA.Conversion->Callbacks.HalfComplete = adc_dmaHalfConversionRedirect;
+    if (result == XPD_OK)
+    {
+        /* Set the DMA transfer complete callback */
+        hadc->DMA.Conversion->Callbacks.Complete = adc_dmaConversionRedirect;
+
+        /* Set the DMA half transfer complete callback */
+        hadc->DMA.Conversion->Callbacks.HalfComplete = adc_dmaHalfConversionRedirect;
 
 #ifdef USE_XPD_DMA_ERROR_DETECT
-    /* Set the DMA error callback */
-    hadc->DMA.Conversion->Callbacks.Error = adc_dmaErrorRedirect;
+        /* Set the DMA error callback */
+        hadc->DMA.Conversion->Callbacks.Error = adc_dmaErrorRedirect;
 #endif
 
-    /* configure the DMA channel */
-    hadc->DMA.Conversion->Transfer.DataCount     = hadc->Inst->SQR1.b.L + 1;
-    hadc->DMA.Conversion->Transfer.SourceAddress = (void *)&hadc->Inst->DR;
-    hadc->DMA.Conversion->Transfer.DestAddress   = Address;
-
-    XPD_DMA_Start_IT(hadc->DMA.Conversion);
+        /* configure the DMA channel */
+        XPD_DMA_Start_IT(hadc->DMA.Conversion, Address, hadc->Inst->SQR1.b.L + 1);
 
 #ifdef USE_XPD_ADC_ERROR_DETECT
-    /* Enable ADC overrun interrupt */
-    XPD_ADC_EnableIT(hadc, OVR);
+        /* Enable ADC overrun interrupt */
+        XPD_ADC_EnableIT(hadc, OVR);
 #endif
 
-    /* Enable ADC DMA mode */
-    ADC_REG_BIT(hadc, CR2, DMA) = 1;
+        /* Enable ADC DMA mode */
+        ADC_REG_BIT(hadc, CR2, DMA) = 1;
 
-    XPD_ADC_Start(hadc);
+        XPD_ADC_Start(hadc);
+    }
+    return result;
 }
 
 /**
@@ -830,39 +833,42 @@ void XPD_ADC_MultiMode_Init(ADC_HandleType * hadc, ADC_MultiMode_InitType * Conf
  * @brief Sets up and enables a DMA transfer for the multi ADC regular conversions.
  * @param hadc: pointer to the ADC handle structure
  * @param Address: memory address to the conversion data storage
+ * @return BUSY if the DMA is used by other peripheral, OK otherwise
  */
-void XPD_ADC_MultiMode_Start_DMA(ADC_HandleType * hadc, void * Address)
+XPD_ReturnType XPD_ADC_MultiMode_Start_DMA(ADC_HandleType * hadc, void * Address)
 {
-    /* pass the continuous DMA request setting to the common config */
-    ADC_COMMON_REG_BIT(CCR,DDS) = ADC_REG_BIT(hadc,CR2,DDS);
+    XPD_ReturnType result = XPD_DMA_Attach(hadc->DMA.Conversion, hadc, (void *)&ADC->CDR.w);
 
-    /* Set the DMA transfer complete callback */
-    hadc->DMA.Conversion->Callbacks.Complete = adc_dmaConversionRedirect;
+    if (result == XPD_OK)
+    {
+        /* pass the continuous DMA request setting to the common config */
+        ADC_COMMON_REG_BIT(CCR,DDS) = ADC_REG_BIT(hadc, CR2, DDS);
 
-    /* Set the DMA half transfer complete callback */
-    hadc->DMA.Conversion->Callbacks.HalfComplete = adc_dmaHalfConversionRedirect;
+        /* Set the DMA transfer complete callback */
+        hadc->DMA.Conversion->Callbacks.Complete = adc_dmaConversionRedirect;
+
+        /* Set the DMA half transfer complete callback */
+        hadc->DMA.Conversion->Callbacks.HalfComplete = adc_dmaHalfConversionRedirect;
 
 #ifdef USE_XPD_DMA_ERROR_DETECT
-    /* Set the DMA error callback */
-    hadc->DMA.Conversion->Callbacks.Error = adc_dmaErrorRedirect;
+        /* Set the DMA error callback */
+        hadc->DMA.Conversion->Callbacks.Error = adc_dmaErrorRedirect;
 #endif
 
-    /* configure the DMA channel */
-    hadc->DMA.Conversion->Transfer.DataCount     = hadc->Inst->SQR1.b.L + 1;
-    hadc->DMA.Conversion->Transfer.SourceAddress = (void *)&ADC->CDR.w;
-    hadc->DMA.Conversion->Transfer.DestAddress   = Address;
-
-    XPD_DMA_Start_IT(hadc->DMA.Conversion);
+        /* configure the DMA channel */
+        XPD_DMA_Start_IT(hadc->DMA.Conversion, Address, hadc->Inst->SQR1.b.L + 1);
 
 #ifdef USE_XPD_ADC_ERROR_DETECT
-    /* Enable ADC overrun interrupt */
-    XPD_ADC_EnableIT(hadc, OVR);
+        /* Enable ADC overrun interrupt */
+        XPD_ADC_EnableIT(hadc, OVR);
 #endif
 
-    /* Enable ADC DMA mode */
-    ADC_REG_BIT(hadc, CR2, DMA) = 1;
+        /* Enable ADC DMA mode */
+        ADC_REG_BIT(hadc, CR2, DMA) = 1;
 
-    XPD_ADC_Start(hadc);
+        XPD_ADC_Start(hadc);
+    }
+    return result;
 }
 
 /**

@@ -99,13 +99,14 @@ XPD_ReturnType XPD_RCC_HSIConfig(RCC_HSI_InitType * Config)
     }
     else
     {
+        uint32_t timeout = RCC_HSI_TIMEOUT;
         RCC_REG_BIT(CR,HSION) = Config->State;
 
         /* Check the HSI State */
         if (Config->State != OSC_OFF)
         {
             /* Wait until HSI is ready */
-            result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_HSIRDY, RCC_CR_HSIRDY, RCC_HSI_TIMEOUT);
+            result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_HSIRDY, RCC_CR_HSIRDY, &timeout);
 
             /* Adjusts the Internal High Speed oscillator (HSI) calibration value.*/
             RCC->CR.b.HSICAL = Config->CalibrationValue;
@@ -113,7 +114,7 @@ XPD_ReturnType XPD_RCC_HSIConfig(RCC_HSI_InitType * Config)
         else
         {
             /* Wait until HSI is disabled */
-            result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_HSIRDY, 0, RCC_HSI_TIMEOUT);
+            result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_HSIRDY, 0, &timeout);
         }
     }
     return result;
@@ -144,12 +145,13 @@ XPD_ReturnType XPD_RCC_HSEConfig(RCC_HSE_InitType * Config)
     }
     else
     {
+        uint32_t timeout = RCC_HSE_TIMEOUT;
         /* Reset HSEON and HSEBYP bits before configuring the HSE */
         RCC_REG_BIT(CR,HSEON) = 0;
         RCC_REG_BIT(CR,HSEBYP) = 0;
 
         /* Wait until HSE is disabled */
-        result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_HSERDY, 0, RCC_HSE_TIMEOUT);
+        result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_HSERDY, 0, &timeout);
 
         if ((result == XPD_OK) && (Config->State != OSC_OFF))
         {
@@ -167,7 +169,7 @@ XPD_ReturnType XPD_RCC_HSEConfig(RCC_HSE_InitType * Config)
             }
 
             /* Wait until HSE is ready */
-            result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_HSERDY, RCC_CR_HSERDY, RCC_HSE_TIMEOUT);
+            result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_HSERDY, RCC_CR_HSERDY, &timeout);
         }
     }
     return result;
@@ -190,11 +192,12 @@ XPD_ReturnType XPD_RCC_PLLConfig(RCC_PLL_InitType * Config)
     }
     else
     {
+        uint32_t timeout = RCC_PLL_TIMEOUT;
         /* Disable the main PLL. */
         RCC_REG_BIT(CR,PLLON) = OSC_OFF;
 
         /* Wait until PLL is disabled */
-        result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_PLLRDY, 0, RCC_PLL_TIMEOUT);
+        result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_PLLRDY, 0, &timeout);
 
         if ((result == XPD_OK) && (Config->State != OSC_OFF))
         {
@@ -213,7 +216,7 @@ XPD_ReturnType XPD_RCC_PLLConfig(RCC_PLL_InitType * Config)
             RCC_REG_BIT(CR,PLLON) = OSC_ON;
 
             /* Wait until PLL is ready */
-            result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_PLLRDY, RCC_CR_PLLRDY, RCC_PLL_TIMEOUT);
+            result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_PLLRDY, RCC_CR_PLLRDY, &timeout);
         }
     }
     return result;
@@ -227,6 +230,7 @@ XPD_ReturnType XPD_RCC_PLLConfig(RCC_PLL_InitType * Config)
 XPD_ReturnType XPD_RCC_LSIConfig(RCC_OscStateType NewState)
 {
     XPD_ReturnType result = XPD_OK;
+    uint32_t timeout = RCC_LSI_TIMEOUT;
 
     /* Check the LSI State */
     if (NewState != OSC_OFF)
@@ -235,7 +239,7 @@ XPD_ReturnType XPD_RCC_LSIConfig(RCC_OscStateType NewState)
         RCC_REG_BIT(CSR,LSION) = OSC_ON;
 
         /* Wait until LSI is ready */
-        result = XPD_WaitForMatch(&RCC->CSR.w, RCC_CSR_LSIRDY, RCC_CSR_LSIRDY, RCC_LSI_TIMEOUT);
+        result = XPD_WaitForMatch(&RCC->CSR.w, RCC_CSR_LSIRDY, RCC_CSR_LSIRDY, &timeout);
     }
     else
     {
@@ -243,7 +247,7 @@ XPD_ReturnType XPD_RCC_LSIConfig(RCC_OscStateType NewState)
         RCC_REG_BIT(CSR,LSION) = OSC_OFF;
 
         /* Wait until LSI is disabled */
-        result = XPD_WaitForMatch(&RCC->CSR.w, RCC_CSR_LSIRDY, 0, RCC_LSI_TIMEOUT);
+        result = XPD_WaitForMatch(&RCC->CSR.w, RCC_CSR_LSIRDY, 0, &timeout);
     }
     return result;
 }
@@ -256,6 +260,7 @@ XPD_ReturnType XPD_RCC_LSIConfig(RCC_OscStateType NewState)
 XPD_ReturnType XPD_RCC_LSEConfig(RCC_OscStateType NewState)
 {
     XPD_ReturnType result = XPD_OK;
+    uint32_t timeout = RCC_DBP_TIMEOUT;
 
     /* Enable Power Clock*/
     XPD_PWR_ClockCtrl(ENABLE);
@@ -264,7 +269,7 @@ XPD_ReturnType XPD_RCC_LSEConfig(RCC_OscStateType NewState)
     PWR_REG_BIT(CR,DBP) = 1;
 
     /* Wait for Backup domain Write protection disable */
-    result = XPD_WaitForMatch(&PWR->CR.w, PWR_CR_DBP, 1, RCC_DBP_TIMEOUT);
+    result = XPD_WaitForMatch(&PWR->CR.w, PWR_CR_DBP, 1, &timeout);
     if (result != XPD_OK)
     {
         return result;
@@ -274,8 +279,9 @@ XPD_ReturnType XPD_RCC_LSEConfig(RCC_OscStateType NewState)
     RCC_REG_BIT(BDCR,LSEON) = 0;
     RCC_REG_BIT(BDCR,LSEBYP) = 0;
 
+    timeout = RCC_LSE_TIMEOUT;
     /* Wait until LSE is disabled */
-    result = XPD_WaitForMatch(&RCC->BDCR.w, RCC_BDCR_LSERDY, 0, RCC_LSE_TIMEOUT);
+    result = XPD_WaitForMatch(&RCC->BDCR.w, RCC_BDCR_LSERDY, 0, &timeout);
 
     /* Check the LSE State */
     if ((result == XPD_OK) && (NewState != OSC_OFF))
@@ -294,7 +300,7 @@ XPD_ReturnType XPD_RCC_LSEConfig(RCC_OscStateType NewState)
         }
 
         /* Wait until LSE is ready */
-        result = XPD_WaitForMatch(&RCC->BDCR.w, RCC_BDCR_LSERDY, RCC_BDCR_LSERDY, RCC_LSE_TIMEOUT);
+        result = XPD_WaitForMatch(&RCC->BDCR.w, RCC_BDCR_LSERDY, RCC_BDCR_LSERDY, &timeout);
     }
     return result;
 }
@@ -512,6 +518,8 @@ static const uint8_t AHBPrescTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6,
 XPD_ReturnType XPD_RCC_HCLKConfig(RCC_OscType SYSCLK_Source, ClockDividerType HCLK_Divider, uint8_t FlashLatency)
 {
     XPD_ReturnType result;
+    uint32_t clkDiv = rcc_convertClockDivider(HCLK, HCLK_Divider);
+    uint32_t timeout = RCC_CLOCKSWITCH_TIMEOUT;
 
     /* Increasing the CPU frequency */
     if (FlashLatency > XPD_FLASH_GetLatency())
@@ -527,7 +535,7 @@ XPD_ReturnType XPD_RCC_HCLKConfig(RCC_OscType SYSCLK_Source, ClockDividerType HC
         }
     }
 
-    RCC->CFGR.b.HPRE = rcc_convertClockDivider(HCLK, HCLK_Divider);
+    RCC->CFGR.b.HPRE = clkDiv;
 
     switch (SYSCLK_Source)
     {
@@ -565,7 +573,7 @@ XPD_ReturnType XPD_RCC_HCLKConfig(RCC_OscType SYSCLK_Source, ClockDividerType HC
     RCC->CFGR.b.SW = SYSCLK_Source;
 
     /* wait until the settings have been processed */
-    result = XPD_WaitForMatch(&RCC->CFGR.w, RCC_CFGR_SWS, SYSCLK_Source << 2, RCC_CLOCKSWITCH_TIMEOUT);
+    result = XPD_WaitForMatch(&RCC->CFGR.w, RCC_CFGR_SWS, SYSCLK_Source << 2, &timeout);
     if (result != XPD_OK)
     {
         return result;
@@ -586,7 +594,7 @@ XPD_ReturnType XPD_RCC_HCLKConfig(RCC_OscType SYSCLK_Source, ClockDividerType HC
     }
 
     /* Update SystemCoreClock variable */
-    SystemCoreClock = XPD_RCC_GetOscFreq(SYSCLK_Source) >> AHBPrescTable[RCC->CFGR.b.HPRE];
+    SystemCoreClock = XPD_RCC_GetOscFreq(SYSCLK_Source) >> AHBPrescTable[clkDiv];
 
     /* Configure the source of time base considering new system clocks settings*/
     XPD_InitTimer();

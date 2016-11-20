@@ -85,8 +85,8 @@ typedef enum
 /** @brief Signal active level type */
 typedef enum
 {
-    ACTIVE_LOW  = 0, /*!< Signal is active low */
-    ACTIVE_HIGH = 1  /*!< Signal is active high */
+    ACTIVE_LOW  = 1, /*!< Signal is active low */
+    ACTIVE_HIGH = 0  /*!< Signal is active high */
 }ActiveLevelType;
 
 /** @brief General level type */
@@ -121,6 +121,23 @@ typedef enum
     CLK_DIV256 = 8, /*!< Clock is divided by 256 */
     CLK_DIV512 = 9  /*!< Clock is divided by 512 */
 }ClockDividerType;
+
+/** @brief Clock sampling phase type */
+typedef enum
+{
+    CLOCK_PHASE_1EDGE = 0,
+    CLOCK_PHASE_2EDGE = 1
+}ClockPhaseType;
+
+/** @brief Data transfer setup type */
+typedef struct
+{
+    void *   SrcAddress;     /*!< Source start address */
+    void *   DstAddress;     /*!< Destination start address */
+    uint16_t DataCount;      /*!< The amount of data to transfer */
+    uint8_t  DataSize;       /*!< Data element size in bytes (i.e. sizeof()) */
+    uint8_t  PeriphIncSize;  /*!< Peripheral pointer increment (not used by DMA) */
+}DataTransferType;
 
 /**
  * @brief Function pointer type for binary control function reference

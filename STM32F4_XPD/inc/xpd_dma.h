@@ -251,11 +251,15 @@ XPD_ReturnType  XPD_DMA_Deinit          (DMA_HandleType * hdma);
 void            XPD_DMA_Enable          (DMA_HandleType * hdma);
 void            XPD_DMA_Disable         (DMA_HandleType * hdma);
 
-void            XPD_DMA_Start           (DMA_HandleType * hdma);
-void            XPD_DMA_Start_IT        (DMA_HandleType * hdma);
+XPD_ReturnType  XPD_DMA_Attach          (DMA_HandleType * hdma, void * Owner, void * PeriphAddress);
+void            XPD_DMA_SetDirection    (DMA_HandleType * hdma, DMA_DirectionType Direction);
+
+void            XPD_DMA_Start           (DMA_HandleType * hdma, void * Data, uint16_t DataCount);
+void            XPD_DMA_Start_IT        (DMA_HandleType * hdma, void * Data, uint16_t DataCount);
 XPD_ReturnType  XPD_DMA_Stop            (DMA_HandleType * hdma);
 void            XPD_DMA_Stop_IT         (DMA_HandleType * hdma);
 
+XPD_ReturnType  XPD_DMA_GetStatus       (DMA_HandleType * hdma);
 XPD_ReturnType  XPD_DMA_PollStatus      (DMA_HandleType * hdma, DMA_OperationType Operation, uint32_t Timeout);
 DMA_ErrorType   XPD_DMA_GetError        (DMA_HandleType * hdma);
 

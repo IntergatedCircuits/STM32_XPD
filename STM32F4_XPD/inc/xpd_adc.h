@@ -310,7 +310,7 @@ void            XPD_ADC_Start_IT            (ADC_HandleType * hadc);
 void            XPD_ADC_Stop_IT             (ADC_HandleType * hadc);
 void            XPD_ADC_IRQHandler          (ADC_HandleType * hadc);
 
-void            XPD_ADC_Start_DMA           (ADC_HandleType * hadc, void * Address);
+XPD_ReturnType  XPD_ADC_Start_DMA           (ADC_HandleType * hadc, void * Address);
 void            XPD_ADC_Stop_DMA            (ADC_HandleType * hadc);
 
 void            XPD_ADC_WatchdogConfig      (ADC_HandleType * hadc, uint8_t Channel, ADC_WatchdogInitType * Config);
@@ -441,7 +441,7 @@ typedef struct
 /** @addtogroup ADC_MultiMode_Exported_Functions
  * @{ */
 void            XPD_ADC_MultiMode_Init          (ADC_HandleType * hadc, ADC_MultiMode_InitType * Config);
-void            XPD_ADC_MultiMode_Start_DMA     (ADC_HandleType * hadc, void * Address);
+XPD_ReturnType  XPD_ADC_MultiMode_Start_DMA     (ADC_HandleType * hadc, void * Address);
 void            XPD_ADC_MultiMode_Stop_DMA      (ADC_HandleType * hadc);
 uint32_t        XPD_ADC_MultiMode_GetValues     (ADC_HandleType * hadc);
 /** @} */
