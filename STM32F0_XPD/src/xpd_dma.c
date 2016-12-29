@@ -53,14 +53,8 @@ static uint8_t dma_users[] = {
 
 static void dma_calcBase(DMA_HandleType * hdma)
 {
-#ifdef DMA_BB
-    /* base points to the FEIF bit of the current stream (in BB alias) */
-    hdma->Base_BB = DMA_BB(DMA_BASE(hdma->Inst));
-    hdma->Base_BB += 16 * DMA_CHANNEL_NUMBER(hdma->Inst);
-#else
     hdma->Base = DMA_BASE(hdma->Inst);
     hdma->ChannelOffset = DMA_CHANNEL_NUMBER(hdma->Inst) * 4;
-#endif
 }
 
 /** @defgroup DMA_Exported_Functions DMA Exported Functions
