@@ -76,7 +76,7 @@ void XPD_DBGMCU_ClockCtrl(FunctionalState NewState);
 void XPD_DBGMCU_Reset(void);
 #endif
 #ifdef RCC_AHBENR_DMAEN
-void XPD_DMA_ClockCtrl(FunctionalState NewState);
+void XPD_DMA1_ClockCtrl(FunctionalState NewState);
 #endif
 #ifdef RCC_AHBENR_DMA2EN
 void XPD_DMA2_ClockCtrl(FunctionalState NewState);

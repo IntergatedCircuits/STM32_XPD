@@ -227,6 +227,6 @@ void XPD_PWR_DisablePVD(void)
 
 /** @} */
 
-/** @} */
-
 #endif /* PWR_CR_PLS */
+
+/** @} */

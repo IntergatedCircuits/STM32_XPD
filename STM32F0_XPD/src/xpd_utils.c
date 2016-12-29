@@ -117,20 +117,27 @@ __weak void XPD_Delay_us(uint32_t microseconds)
  * @param varAddress: the word address that needs to be monitored
  * @param bitSelector: a bit mask that selects which bits should be considered
  * @param match: the expected value to wait for
- * @param mstimeout: the timeout in ms
+ * @param mstimeout: pointer to the timeout in ms
  * @return TIMEOUT if timed out, or OK if match occurred within the deadline
  */
-__weak XPD_ReturnType XPD_WaitForMatch(volatile uint32_t * varAddress, uint32_t bitSelector, uint32_t match, uint32_t mstimeout)
+__weak XPD_ReturnType XPD_WaitForMatch(volatile uint32_t * varAddress, uint32_t bitSelector, uint32_t match, uint32_t * mstimeout)
 {
     XPD_ReturnType result = XPD_OK;
     uint32_t starttime = XPD_GetTimer();
+    uint32_t timeout = *mstimeout;
+    uint32_t acttime = starttime;
 
     while((*varAddress & bitSelector) != match)
     {
-        if((mstimeout != XPD_NO_TIMEOUT) && ((XPD_GetTimer() - starttime) > mstimeout))
+        if((timeout != XPD_NO_TIMEOUT) && ((XPD_GetTimer() - starttime) > timeout))
         {
             result = XPD_TIMEOUT;
             break;
+        }
+        if (acttime != XPD_GetTimer())
+        {
+            (*mstimeout)--;
+            acttime = XPD_GetTimer();
         }
     }
     return result;
@@ -141,20 +148,27 @@ __weak XPD_ReturnType XPD_WaitForMatch(volatile uint32_t * varAddress, uint32_t 
  * @param varAddress: the word address that needs to be monitored
  * @param bitSelector: a bit mask that selects which bits should be considered
  * @param match: the initial value that needs to differ
- * @param mstimeout: the timeout in ms
+ * @param mstimeout: pointer to the timeout in ms
  * @return TIMEOUT if timed out, or OK if match occurred within the deadline
  */
-__weak XPD_ReturnType XPD_WaitForDiff(volatile uint32_t * varAddress, uint32_t bitSelector, uint32_t match, uint32_t mstimeout)
+__weak XPD_ReturnType XPD_WaitForDiff(volatile uint32_t * varAddress, uint32_t bitSelector, uint32_t match, uint32_t * mstimeout)
 {
     XPD_ReturnType result = XPD_OK;
     uint32_t starttime = XPD_GetTimer();
+    uint32_t timeout = *mstimeout;
+    uint32_t acttime = starttime;
 
     while((*varAddress & bitSelector) == match)
     {
-        if((mstimeout != XPD_NO_TIMEOUT) && ((XPD_GetTimer() - starttime) > mstimeout))
+        if((timeout != XPD_NO_TIMEOUT) && ((XPD_GetTimer() - starttime) > timeout))
         {
             result = XPD_TIMEOUT;
             break;
+        }
+        if (acttime != XPD_GetTimer())
+        {
+            (*mstimeout)--;
+            acttime = XPD_GetTimer();
         }
     }
     return result;
@@ -212,6 +226,9 @@ void XPD_Init(void)
 
     /* enable clock for PWR */
     XPD_PWR_ClockCtrl(ENABLE);
+
+    /* Enable SYSCFG clock  */
+    XPD_SYSCFG_ClockCtrl(ENABLE);
 }
 
 /**

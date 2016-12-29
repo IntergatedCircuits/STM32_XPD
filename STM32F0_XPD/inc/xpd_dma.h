@@ -73,9 +73,9 @@ typedef enum
 /** @brief DMA channel setup structure */
 typedef struct
 {
-    DMA_DirectionType Direction;        /*!< DMA channel direction */
-    DMA_ModeType      Mode;             /*!< DMA operating mode */
-    LevelType         Priority;         /*!< DMA bus arbitration priority level */
+    DMA_DirectionType Direction;         /*!< DMA channel direction */
+    DMA_ModeType      Mode;              /*!< DMA operating mode */
+    LevelType         Priority;          /*!< DMA bus arbitration priority level */
     struct {
         FunctionalState   Increment;     /*!< The address is incremented after each transfer */
         DMA_AlignmentType DataAlignment; /*!< The data width */
@@ -86,14 +86,6 @@ typedef struct
     }Peripheral;                         /*   Peripheral side configuration */
 }DMA_InitType;
 
-/** @brief DMA transfer setup structure */
-typedef struct
-{
-    void *   SourceAddress;   /*!< Source start address */
-    void *   DestAddress;     /*!< Destination start address */
-    uint16_t DataCount;       /*!< The amount of data to transfer */
-}DMA_TransferType;
-
 /** @brief DMA channel handle structure */
 typedef struct
 {
@@ -102,8 +94,8 @@ typedef struct
     DMA_Channel_BitBand_TypeDef * Inst_BB;    /*!< The address of the peripheral instance in the bit-band region */
     void * Base_BB;                           /*!< [Internal] The address of the master DMA bits used by the handle */
 #else
-    DMA_TypeDef * Base;
-    uint8_t ChannelOffset;
+    DMA_TypeDef * Base;                       /*!< [Internal] The address of the master DMA used by the handle */
+    uint8_t ChannelOffset;                    /*!< [Internal] The offset of the channel in the master DMA */
 #endif
     struct {
         XPD_HandleCallbackType Complete;      /*!< DMA transfer complete callback */
@@ -113,7 +105,6 @@ typedef struct
 #endif
     } Callbacks;                              /*   Handle Callbacks */
     void * Owner;                             /*!< [Internal] The pointer of the peripheral handle which uses this handle */
-    DMA_TransferType       Transfer;          /*!< Current transfer configuration structure */
     volatile DMA_ErrorType Errors;            /*!< Transfer errors */
 }DMA_HandleType;
 
@@ -143,16 +134,6 @@ typedef struct
 #endif
 
 /**
- * @brief  Binds a DMA handle to a peripheral handle in both directions.
- * @param  HDMA: specifies the DMA handle
- * @param  HANDLE: specifies the peripheral owner handle
- * @param  DMASLOT: specifies the DMA slot in the peripheral handle to set to
- */
-#define         XPD_DMA_BINDTO(HDMA,HANDLE,DMASLOT)         \
-    do{(HANDLE)->DMA.DMASLOT = (HDMA);                      \
-       (HDMA)->Owner = (HANDLE); }while(0)
-
-/**
  * @brief  Enable the specified DMA interrupt.
  * @param  HANDLE: specifies the DMA Handle.
  * @param  IT_NAME: specifies the interrupt to enable.
@@ -175,6 +156,13 @@ typedef struct
  */
 #define         XPD_DMA_DisableIT(HANDLE,   IT_NAME)        \
         (DMA_REG_BIT((HANDLE), CCR, IT_NAME##IE) = 0)
+
+/**
+ * @brief  Provides the circular mode of DMA stream.
+ * @param  HANDLE: specifies the DMA Handle.
+ */
+#define         XPD_DMA_CircularMode(HANDLE)                \
+        (DMA_REG_BIT((HANDLE), CCR, CIRC))
 
 #ifdef DMA_BB
 /**
@@ -231,6 +219,152 @@ typedef struct
 
 #endif /* DMA_Stream_BB */
 
+#ifdef DMA_CSELR_C1S
+
+/* Additional defines for complete macro functionality */
+#define DMA1_CSELR_CH1_DEFAULT      0U
+#define DMA1_CSELR_CH2_DEFAULT      0U
+#define DMA1_CSELR_CH3_DEFAULT      0U
+#define DMA1_CSELR_CH4_DEFAULT      0U
+#define DMA1_CSELR_CH5_DEFAULT      0U
+#define DMA1_CSELR_CH6_DEFAULT      0U
+#define DMA1_CSELR_CH7_DEFAULT      0U
+#define DMA2_CSELR_CH1_DEFAULT      0U
+#define DMA2_CSELR_CH2_DEFAULT      0U
+#define DMA2_CSELR_CH3_DEFAULT      0U
+#define DMA2_CSELR_CH4_DEFAULT      0U
+#define DMA2_CSELR_CH5_DEFAULT      0U
+#define DMA2_CSELR_CH6_DEFAULT      0U
+#define DMA2_CSELR_CH7_DEFAULT      0U
+
+/**
+ * @brief  Sets the DMA remapping for the given channel.
+ * @param  BASE: specifies the name of the DMA base.
+ *         This parameter can be one of the following values:
+ *            @arg DMA1
+ *            @arg DMA2 (if available)
+ * @param  CHANNEL: specifies the channel number to remap [1..7].
+ * @param  SELECTION: specify the remap target selection. Using DEFAULT resets the remapping.
+ */
+#define XPD_DMA_ChannelRemap(BASE, CHANNEL, SELECTION)           \
+    (MODIFY_REG(BASE->CSELR.w, 0xF << ((uint32_t)((CHANNEL) - 1) * 4), BASE##_CSELR_CH##CHANNEL##_##SELECTION))
+#endif /* DMA_CSELR_C1S */
+
+#ifdef SYSCFG_CFGR1_DMA_RMP
+
+/* Defines for macro functionality */
+#ifdef SYSCFG_CFGR1_ADC_DMA_RMP
+#define DMA_RMP_ADC_CH1         0U
+#define DMA_RMP_ADC_CH2         (SYSCFG_CFGR1_ADC_DMA_RMP)
+#define DMA_RMP_ADC_BIT         (SYSCFG_CFGR1_ADC_DMA_RMP)
+#endif
+
+#ifdef SYSCFG_CFGR1_I2C1_DMA_RMP
+/* Single bit for both channels */
+#define DMA_RMP_I2C1_RX_CH3     0U
+#define DMA_RMP_I2C1_RX_CH7     (SYSCFG_CFGR1_I2C1_DMA_RMP)
+#define DMA_RMP_I2C1_RX_BIT     (SYSCFG_CFGR1_I2C1_DMA_RMP)
+#define DMA_RMP_I2C1_TX_CH2     0U
+#define DMA_RMP_I2C1_TX_CH6     (SYSCFG_CFGR1_I2C1_DMA_RMP)
+#define DMA_RMP_I2C1_TX_BIT     (SYSCFG_CFGR1_I2C1_DMA_RMP)
+#endif
+
+#ifdef SYSCFG_CFGR1_SPI2_DMA_RMP
+/* Single bit for both channels */
+#define DMA_RMP_SPI2_RX_CH4     0U
+#define DMA_RMP_SPI2_RX_CH6     (SYSCFG_CFGR1_SPI2_DMA_RMP)
+#define DMA_RMP_SPI2_RX_BIT     (SYSCFG_CFGR1_SPI2_DMA_RMP)
+#define DMA_RMP_SPI2_TX_CH5     0U
+#define DMA_RMP_SPI2_TX_CH7     (SYSCFG_CFGR1_SPI2_DMA_RMP)
+#define DMA_RMP_SPI2_TX_BIT     (SYSCFG_CFGR1_SPI2_DMA_RMP)
+#endif
+
+#ifdef SYSCFG_CFGR1_TIM1_DMA_RMP
+#define DMA_RMP_TIM1_CH2        0U
+#define DMA_RMP_TIM1_CH3        0U
+#define DMA_RMP_TIM1_CH4        0U
+#define DMA_RMP_TIM1_CH6        (SYSCFG_CFGR1_TIM1_DMA_RMP)
+#define DMA_RMP_TIM1_BIT        (SYSCFG_CFGR1_TIM1_DMA_RMP)
+#endif
+
+#ifdef SYSCFG_CFGR1_TIM2_DMA_RMP
+#define DMA_RMP_TIM2_CH3        0U
+#define DMA_RMP_TIM2_CH4        0U
+#define DMA_RMP_TIM2_CH7        (SYSCFG_CFGR1_TIM2_DMA_RMP)
+#define DMA_RMP_TIM2_BIT        (SYSCFG_CFGR1_TIM2_DMA_RMP)
+#endif
+
+#ifdef SYSCFG_CFGR1_TIM3_DMA_RMP
+#define DMA_RMP_TIM3_CH4        0U
+#define DMA_RMP_TIM3_CH6        (SYSCFG_CFGR1_TIM3_DMA_RMP)
+#define DMA_RMP_TIM3_BIT        (SYSCFG_CFGR1_TIM3_DMA_RMP)
+#endif
+
+#ifdef SYSCFG_CFGR1_TIM16_DMA_RMP
+#ifdef SYSCFG_CFGR1_TIM16_DMA_RMP2
+#define DMA_RMP_TIM16_CH3       0U
+#define DMA_RMP_TIM16_CH4       (SYSCFG_CFGR1_TIM16_DMA_RMP)
+#define DMA_RMP_TIM16_CH6       (SYSCFG_CFGR1_TIM16_DMA_RMP2)
+#define DMA_RMP_TIM16_BIT       (SYSCFG_CFGR1_TIM16_DMA_RMP | SYSCFG_CFGR1_TIM16_DMA_RMP2)
+#else
+#define DMA_RMP_TIM16_CH3       0U
+#define DMA_RMP_TIM16_CH4       (SYSCFG_CFGR1_TIM16_DMA_RMP)
+#define DMA_RMP_TIM16_BIT       (SYSCFG_CFGR1_TIM16_DMA_RMP)
+#endif
+#endif
+
+#ifdef SYSCFG_CFGR1_TIM17_DMA_RMP
+#ifdef SYSCFG_CFGR1_TIM17_DMA_RMP2
+#define DMA_RMP_TIM17_CH1       0U
+#define DMA_RMP_TIM17_CH2       (SYSCFG_CFGR1_TIM17_DMA_RMP)
+#define DMA_RMP_TIM17_CH7       (SYSCFG_CFGR1_TIM17_DMA_RMP2)
+#define DMA_RMP_TIM17_BIT       (SYSCFG_CFGR1_TIM17_DMA_RMP | SYSCFG_CFGR1_TIM17_DMA_RMP2)
+#else
+#define DMA_RMP_TIM17_CH1       0U
+#define DMA_RMP_TIM17_CH2       (SYSCFG_CFGR1_TIM17_DMA_RMP)
+#define DMA_RMP_TIM17_BIT       (SYSCFG_CFGR1_TIM17_DMA_RMP)
+#endif
+#endif
+
+#ifdef SYSCFG_CFGR1_USART1TX_DMA_RMP
+#define DMA_RMP_USART1_TX_CH2   0U
+#define DMA_RMP_USART1_TX_CH4   (SYSCFG_CFGR1_USART1TX_DMA_RMP)
+#define DMA_RMP_USART1_TX_BIT   (SYSCFG_CFGR1_USART1TX_DMA_RMP)
+#endif
+
+#ifdef SYSCFG_CFGR1_USART1RX_DMA_RMP
+#define DMA_RMP_USART1_RX_CH3   0U
+#define DMA_RMP_USART1_RX_CH5   (SYSCFG_CFGR1_USART1RX_DMA_RMP)
+#define DMA_RMP_USART1_RX_BIT   (SYSCFG_CFGR1_USART1RX_DMA_RMP)
+#endif
+
+#ifdef SYSCFG_CFGR1_USART2_DMA_RMP
+/* Single bit for both channels */
+#define DMA_RMP_USART2_RX_CH5   0U
+#define DMA_RMP_USART2_RX_CH7   (SYSCFG_CFGR1_USART2_DMA_RMP)
+#define DMA_RMP_USART2_RX_BIT   (SYSCFG_CFGR1_USART2_DMA_RMP)
+#define DMA_RMP_USART2_TX_CH4   0U
+#define DMA_RMP_USART2_TX_CH6   (SYSCFG_CFGR1_USART2_DMA_RMP)
+#define DMA_RMP_USART2_TX_BIT   (SYSCFG_CFGR1_USART2_DMA_RMP)
+#endif
+
+#ifdef SYSCFG_CFGR1_USART3_DMA_RMP
+/* Single bit for both channels, channel not available without remap */
+#define DMA_RMP_USART3_RX_CH3   (SYSCFG_CFGR1_USART3_DMA_RMP)
+#define DMA_RMP_USART3_RX_BIT   (SYSCFG_CFGR1_USART3_DMA_RMP)
+#define DMA_RMP_USART3_TX_CH2   (SYSCFG_CFGR1_USART3_DMA_RMP)
+#define DMA_RMP_USART3_TX_BIT   (SYSCFG_CFGR1_USART3_DMA_RMP)
+#endif
+
+/**
+ * @brief  Sets the DMA remapping for the given request source.
+ * @param  SOURCE: source of DMA request
+ * @param  CHANNEL: specifies the DMA channel number to remap to [1..7].
+ */
+#define XPD_DMA_SourceRemap(SOURCE, CHANNEL)                    \
+    (MODIFY_REG(SYSCFG->CFGR1.w, DMA_RMP_##SOURCE##_BIT, DMA_RMP_##SOURCE##_CH##CHANNEL))
+#endif /* SYSCFG_CFGR1_DMA_RMP */
+
 /** @} */
 
 /** @addtogroup DMA_Exported_Functions
@@ -241,11 +375,14 @@ XPD_ReturnType  XPD_DMA_Deinit          (DMA_HandleType * hdma);
 void            XPD_DMA_Enable          (DMA_HandleType * hdma);
 void            XPD_DMA_Disable         (DMA_HandleType * hdma);
 
-void            XPD_DMA_Start           (DMA_HandleType * hdma);
-void            XPD_DMA_Start_IT        (DMA_HandleType * hdma);
+void            XPD_DMA_SetDirection    (DMA_HandleType * hdma, DMA_DirectionType Direction);
+
+XPD_ReturnType  XPD_DMA_Start           (DMA_HandleType * hdma, void * PeriphAddress, DataStreamType * DataStream);
+XPD_ReturnType  XPD_DMA_Start_IT        (DMA_HandleType * hdma, void * PeriphAddress, DataStreamType * DataStream);
 XPD_ReturnType  XPD_DMA_Stop            (DMA_HandleType * hdma);
 void            XPD_DMA_Stop_IT         (DMA_HandleType * hdma);
 
+XPD_ReturnType  XPD_DMA_GetStatus       (DMA_HandleType * hdma);
 XPD_ReturnType  XPD_DMA_PollStatus      (DMA_HandleType * hdma, DMA_OperationType Operation, uint32_t Timeout);
 DMA_ErrorType   XPD_DMA_GetError        (DMA_HandleType * hdma);
 

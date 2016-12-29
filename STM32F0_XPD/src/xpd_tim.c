@@ -209,29 +209,41 @@ void XPD_TIM_Counter_Stop_IT(TIM_HandleType * htim)
  * @param htim: pointer to the TIM handle structure
  * @param Address: memory address of the counter data
  * @param Length: the amount of data to be transferred
+ * @return BUSY if the DMA is used by other peripheral, OK otherwise
  */
-void XPD_TIM_Counter_Start_DMA(TIM_HandleType * htim, void * Address, uint16_t Length)
+XPD_ReturnType XPD_TIM_Counter_Start_DMA(TIM_HandleType * htim, void * Address, uint16_t Length)
 {
-    /* set the DMA complete callback */
-    htim->DMA.Update->Callbacks.Complete = tim_dmaUpdateRedirect;
+    DataStreamType stream;
+    XPD_ReturnType result;
+
+    stream.buffer = Address;
+    stream.length = Length;
+
+    /* Set up DMA for transfer */
+    result = XPD_DMA_Start_IT(htim->DMA.Update, (void *)&htim->Inst->ARR, &stream);
+
+    /* If the DMA is currently used, return with error */
+    if (result == XPD_OK)
+    {
+        /* Set the callback owner */
+        htim->DMA.Update->Owner = htim;
+
+        /* set the DMA complete callback */
+        htim->DMA.Update->Callbacks.Complete = tim_dmaUpdateRedirect;
 
 #ifdef USE_XPD_DMA_ERROR_DETECT
-    /* set the DMA error callback */
-    htim->DMA.Update->Callbacks.Error = tim_dmaErrorRedirect;
+        /* set the DMA error callback */
+        htim->DMA.Update->Callbacks.Error = tim_dmaErrorRedirect;
 #endif
 
-    /* configure the DMA channel */
-    htim->DMA.Update->Transfer.DataCount     = Length;
-    htim->DMA.Update->Transfer.SourceAddress = Address;
-    htim->DMA.Update->Transfer.DestAddress   = (void *)&htim->Inst->ARR;
+        /* enable the TIM Update DMA request */
+        TIM_REG_BIT(htim, DIER, UDE) = 1;
 
-    XPD_DMA_Start_IT(htim->DMA.Update);
+        /* enable the counter */
+        XPD_TIM_Counter_Start(htim);
+    }
 
-    /* enable the TIM Update DMA request */
-    TIM_REG_BIT(htim, DIER, UDE) = 1;
-
-    /* enable the counter */
-    XPD_TIM_Counter_Start(htim);
+    return result;
 }
 
 /**
@@ -505,8 +517,6 @@ void XPD_TIM_IRQHandler(TIM_HandleType * htim)
  */
 void XPD_TIM_Output_Init(TIM_HandleType * htim, TIM_ChannelType Channel, TIM_Output_InitType * Config)
 {
-    XPD_EnterCritical(htim);
-
     /* set the output compare polarities (0 is active high) */
     {
         uint32_t pol = 0;
@@ -565,8 +575,6 @@ void XPD_TIM_Output_Init(TIM_HandleType * htim, TIM_ChannelType Channel, TIM_Out
 
         MODIFY_REG(htim->Inst->CR2.w,(TIM_CR2_OIS1 | TIM_CR2_OIS1N) << (Channel * 2), idle);
     }
-
-    XPD_ExitCritical(htim);
 }
 
 /**
@@ -654,26 +662,37 @@ void XPD_TIM_Output_Stop_IT(TIM_HandleType * htim, TIM_ChannelType Channel)
  * @param Channel: the selected compare channel to use
  * @param Address: the memory start address of the pulse values
  * @param Length: the memory size of the pulse values
+ * @return BUSY if the DMA is used by other peripheral, OK otherwise
  */
-void XPD_TIM_Output_Start_DMA(TIM_HandleType * htim, TIM_ChannelType Channel, void * Address, uint16_t Length)
+XPD_ReturnType XPD_TIM_Output_Start_DMA(TIM_HandleType * htim, TIM_ChannelType Channel, void * Address, uint16_t Length)
 {
-    /* callbacks subscription */
-    htim->DMA.Channel[Channel]->Callbacks.Complete = tim_dmaChannelEventRedirects[Channel];
+    DataStreamType stream;
+    XPD_ReturnType result;
+
+    stream.buffer = Address;
+    stream.length = Length;
+
+    /* Set up DMA for transfer */
+    result = XPD_DMA_Start_IT(htim->DMA.Channel[Channel], (void *) &((&htim->Inst->CCR1)[Channel]), &stream);
+
+    /* If the DMA is currently used, return with error */
+    if (result == XPD_OK)
+    {
+        /* Set the callback owner */
+        htim->DMA.Update->Owner = htim;
+
+        /* set the DMA complete callback */
+        htim->DMA.Channel[Channel]->Callbacks.Complete = tim_dmaChannelEventRedirects[Channel];
 
 #ifdef USE_XPD_DMA_ERROR_DETECT
-    htim->DMA.Channel[Channel]->Callbacks.Error = tim_dmaErrorRedirect;
+        htim->DMA.Channel[Channel]->Callbacks.Error = tim_dmaErrorRedirect;
 #endif
 
-    /* configure the DMA channel */
-    htim->DMA.Channel[Channel]->Transfer.DataCount     = Length;
-    htim->DMA.Channel[Channel]->Transfer.SourceAddress = Address;
-    htim->DMA.Channel[Channel]->Transfer.DestAddress   = (void *)&((&htim->Inst->CCR1)[Channel]);
+        XPD_TIM_Channel_EnableDMA(htim, Channel);
 
-    XPD_DMA_Start_IT(htim->DMA.Channel[Channel]);
-
-    XPD_TIM_Channel_EnableDMA(htim, Channel);
-
-    XPD_TIM_Output_Start(htim, Channel);
+        XPD_TIM_Output_Start(htim, Channel);
+    }
+    return result;
 }
 
 /**
@@ -742,7 +761,7 @@ void XPD_TIM_Output_DriveConfig(TIM_HandleType * htim, TIM_Output_DriveType * Co
 
     /* break configuration */
     TIM_REG_BIT(htim, BDTR, BKE) = Config->Break.State;
-    TIM_REG_BIT(htim, BDTR, BKP) = Config->Break.Polarity;
+    TIM_REG_BIT(htim, BDTR, BKP) = 1 - Config->Break.Polarity;
 
     /* final step, set lock level */
     htim->Inst->BDTR.b.LOCK = Config->LockLevel;

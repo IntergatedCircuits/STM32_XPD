@@ -86,8 +86,10 @@ void XPD_CEC_Reset(void)
 /** @brief Sets the new clock state of the COMP peripheral. */
 void XPD_COMP_ClockCtrl(FunctionalState NewState)
 {
+#if 0 /* SYSCFG clock is kept on */
     RCC_REG_BIT(APB2ENR,SYSCFGCOMPEN) = NewState;
     NewState = (FunctionalState)RCC->APB2ENR.w;
+#endif
 }
 #endif
 #ifdef RCC_AHBENR_CRCEN
@@ -153,7 +155,7 @@ void XPD_DBGMCU_Reset(void)
 #ifdef RCC_AHBENR_DMAEN
 /** @brief Sets the new clock state of the DMA peripheral.
  *  @param NewState: the new clock state to set */
-void XPD_DMA_ClockCtrl(FunctionalState NewState)
+void XPD_DMA1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHBENR,DMAEN) = NewState;
     NewState = (FunctionalState)RCC->AHBENR.w;
