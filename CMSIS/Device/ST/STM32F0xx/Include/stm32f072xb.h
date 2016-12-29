@@ -1105,7 +1105,13 @@ typedef struct {
         struct {
             __IO uint32_t MEM_MODE : 2;                     /*!< SYSCFG_Memory Remap Config */
                  uint32_t __RESERVED0 : 6;
-            __IO uint32_t DMA_RMP : 7;                      /*!< DMA remap mask */
+            __IO uint32_t ADC_DMA_RMP : 1;                  /*!< ADC DMA remap */
+            __IO uint32_t USART1TX_DMA_RMP : 1;             /*!< USART1 TX DMA remap */
+            __IO uint32_t USART1RX_DMA_RMP : 1;             /*!< USART1 RX DMA remap */
+            __IO uint32_t TIM16_DMA_RMP : 1;                /*!< Timer 16 DMA remap */
+            __IO uint32_t TIM17_DMA_RMP : 1;                /*!< Timer 17 DMA remap */
+            __IO uint32_t TIM16_DMA_RMP2 : 1;               /*!< Timer 16 DMA remap 2  */
+            __IO uint32_t TIM17_DMA_RMP2 : 1;               /*!< Timer 17 DMA remap 2  */
                  uint32_t __RESERVED1 : 1;
             __IO uint32_t I2C_FMP_PB6 : 1;                  /*!< I2C PB6 Fast mode plus */
             __IO uint32_t I2C_FMP_PB7 : 1;                  /*!< I2C PB7 Fast mode plus */

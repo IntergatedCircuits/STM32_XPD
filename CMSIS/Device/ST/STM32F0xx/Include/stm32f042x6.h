@@ -978,7 +978,11 @@ typedef struct {
                  uint32_t __RESERVED0 : 2;
             __IO uint32_t PA11_PA12_RMP : 1;                /*!< PA11 and PA12 remap on QFN28 and TSSOP20 packages */
                  uint32_t __RESERVED1 : 3;
-            __IO uint32_t DMA_RMP : 5;                      /*!< DMA remap mask */
+            __IO uint32_t ADC_DMA_RMP : 1;                  /*!< ADC DMA remap */
+            __IO uint32_t USART1TX_DMA_RMP : 1;             /*!< USART1 TX DMA remap */
+            __IO uint32_t USART1RX_DMA_RMP : 1;             /*!< USART1 RX DMA remap */
+            __IO uint32_t TIM16_DMA_RMP : 1;                /*!< Timer 16 DMA remap */
+            __IO uint32_t TIM17_DMA_RMP : 1;                /*!< Timer 17 DMA remap */
                  uint32_t __RESERVED2 : 3;
             __IO uint32_t I2C_FMP_PB6 : 1;                  /*!< I2C PB6 Fast mode plus */
             __IO uint32_t I2C_FMP_PB7 : 1;                  /*!< I2C PB7 Fast mode plus */
