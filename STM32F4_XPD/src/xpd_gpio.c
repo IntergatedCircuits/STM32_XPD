@@ -281,7 +281,7 @@ void XPD_GPIO_LockPin(GPIO_TypeDef * GPIOx, uint8_t Pin)
 
     if ((GPIOx->LCKR.w & pinmask) == 0)
     {
-        XPD_EnterCritical(GPIOx);
+        XPD_ENTER_CRITICAL(GPIOx);
 
         /* Apply lock key write sequence */
         /* LCKK='1' + LCK[x] */
@@ -296,7 +296,7 @@ void XPD_GPIO_LockPin(GPIO_TypeDef * GPIOx, uint8_t Pin)
 
         (void)temp;
 
-        XPD_ExitCritical(GPIOx);
+        XPD_EXIT_CRITICAL(GPIOx);
     }
 }
 

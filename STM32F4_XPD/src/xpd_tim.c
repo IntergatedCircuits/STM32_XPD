@@ -213,11 +213,17 @@ void XPD_TIM_Counter_Stop_IT(TIM_HandleType * htim)
  */
 XPD_ReturnType XPD_TIM_Counter_Start_DMA(TIM_HandleType * htim, void * Address, uint16_t Length)
 {
-    XPD_ReturnType result = XPD_DMA_Attach(htim->DMA.Update, htim, (void *)&htim->Inst->ARR);
+    XPD_ReturnType result;
+
+    /* Set up DMA for transfer */
+    result = XPD_DMA_Start_IT(htim->DMA.Update, (void *)&htim->Inst->ARR, Address, Length);
 
     /* If the DMA is currently used, return with error */
     if (result == XPD_OK)
     {
+        /* Set the callback owner */
+        htim->DMA.Update->Owner = htim;
+
         /* set the DMA complete callback */
         htim->DMA.Update->Callbacks.Complete = tim_dmaUpdateRedirect;
 
@@ -225,9 +231,6 @@ XPD_ReturnType XPD_TIM_Counter_Start_DMA(TIM_HandleType * htim, void * Address, 
         /* set the DMA error callback */
         htim->DMA.Update->Callbacks.Error = tim_dmaErrorRedirect;
 #endif
-
-        /* configure the DMA channel */
-        XPD_DMA_Start_IT(htim->DMA.Update, Address, Length);
 
         /* enable the TIM Update DMA request */
         TIM_REG_BIT(htim, DIER, UDE) = 1;
@@ -510,8 +513,6 @@ void XPD_TIM_IRQHandler(TIM_HandleType * htim)
  */
 void XPD_TIM_Output_Init(TIM_HandleType * htim, TIM_ChannelType Channel, TIM_Output_InitType * Config)
 {
-    XPD_EnterCritical(htim);
-
     /* set the output compare polarities (0 is active high) */
     {
         uint32_t pol = 0;
@@ -570,8 +571,6 @@ void XPD_TIM_Output_Init(TIM_HandleType * htim, TIM_ChannelType Channel, TIM_Out
 
         MODIFY_REG(htim->Inst->CR2.w,(TIM_CR2_OIS1 | TIM_CR2_OIS1N) << (Channel * 2), idle);
     }
-
-    XPD_ExitCritical(htim);
 }
 
 /**
@@ -663,19 +662,23 @@ void XPD_TIM_Output_Stop_IT(TIM_HandleType * htim, TIM_ChannelType Channel)
  */
 XPD_ReturnType XPD_TIM_Output_Start_DMA(TIM_HandleType * htim, TIM_ChannelType Channel, void * Address, uint16_t Length)
 {
-    XPD_ReturnType result = XPD_DMA_Attach(htim->DMA.Channel[Channel], htim, (void *) &((&htim->Inst->CCR1)[Channel]));
+    XPD_ReturnType result;
+
+    /* Set up DMA for transfer */
+    result = XPD_DMA_Start_IT(htim->DMA.Channel[Channel], (void *) &((&htim->Inst->CCR1)[Channel]), Address, Length);
 
     /* If the DMA is currently used, return with error */
     if (result == XPD_OK)
     {
-        /* callbacks subscription */
+        /* Set the callback owner */
+        htim->DMA.Update->Owner = htim;
+
+        /* set the DMA complete callback */
         htim->DMA.Channel[Channel]->Callbacks.Complete = tim_dmaChannelEventRedirects[Channel];
 
 #ifdef USE_XPD_DMA_ERROR_DETECT
         htim->DMA.Channel[Channel]->Callbacks.Error = tim_dmaErrorRedirect;
 #endif
-
-        XPD_DMA_Start_IT(htim->DMA.Channel[Channel], Address, Length);
 
         XPD_TIM_Channel_EnableDMA(htim, Channel);
 

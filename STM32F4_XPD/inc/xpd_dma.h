@@ -107,14 +107,6 @@ typedef struct
     }FIFO;                               /*   FIFO configuration */
 }DMA_InitType;
 
-/** @brief DMA transfer setup structure */
-typedef struct
-{
-    void *   SourceAddress;   /*!< Source start address */
-    void *   DestAddress;     /*!< Destination start address */
-    uint16_t DataCount;       /*!< The amount of data to transfer */
-}DMA_TransferType;
-
 /** @brief DMA stream handle structure */
 typedef struct
 {
@@ -122,6 +114,8 @@ typedef struct
 #ifdef DMA_Stream_BB
     DMA_Stream_BitBand_TypeDef * Inst_BB;    /*!< The address of the peripheral instance in the bit-band region */
 #endif
+    DMA_TypeDef * Base;                      /*!< [Internal] The address of the master DMA used by the handle */
+    uint8_t StreamOffset;                    /*!< [Internal] The offset of the stream in the master DMA */
     struct {
         XPD_HandleCallbackType Complete;     /*!< DMA transfer complete callback */
         XPD_HandleCallbackType HalfComplete; /*!< DMA transfer half complete callback */
@@ -130,10 +124,6 @@ typedef struct
 #endif
     } Callbacks;                             /*   Handle Callbacks */
     void * Owner;                            /*!< [Internal] The pointer of the peripheral handle which uses this handle */
-#ifdef DMA_BB
-    void * Base_BB;                          /*!< [Internal] The address of the master DMA bits used by the handle */
-#endif
-    DMA_TransferType       Transfer;         /*!< Current transfer configuration structure */
     volatile DMA_ErrorType Errors;           /*!< Transfer errors */
 }DMA_HandleType;
 
@@ -198,7 +188,7 @@ typedef struct
  *            @arg FE:      FIFO Error
  */
 #define         XPD_DMA_GetFlag(  HANDLE, FLAG_NAME)        \
-    (((DMA_BitBand_TypeDef *)(HANDLE)->Base_BB)->LISR.FLAG_NAME##IF0)
+    ((HANDLE)->Base->LISR.w & (DMA_LISR_##FLAG_NAME##IF0 << (uint32_t)((HANDLE)->StreamOffset)))
 
 /**
  * @brief  Clear the specified DMA flag.
@@ -212,16 +202,7 @@ typedef struct
  *            @arg FE:      FIFO Error
  */
 #define         XPD_DMA_ClearFlag(HANDLE, FLAG_NAME)        \
-    (((DMA_BitBand_TypeDef *)(HANDLE)->Base_BB)->LIFCR.C##FLAG_NAME##IF0 = 1)
-
-/**
- * @brief  Provides the circular mode of DMA stream.
- * @param  HANDLE: specifies the DMA Handle.
- */
-#define         XPD_DMA_CircularMode(HANDLE)                \
-        (DMA_REG_BIT((HANDLE), CR, CIRC))
-
-/** @} */
+    ((HANDLE)->Base->LIFCR.w = (DMA_LIFCR_C##FLAG_NAME##IF0 << (uint32_t)((HANDLE)->StreamOffset)))
 
 #ifdef DMA_Stream_BB
 #define DMA_REG_BIT(HANDLE, REG_NAME, BIT_NAME) ((HANDLE)->Inst_BB->REG_NAME.BIT_NAME)
@@ -229,16 +210,18 @@ typedef struct
 #define DMA_REG_BIT(HANDLE, REG_NAME, BIT_NAME) ((HANDLE)->Inst->REG_NAME.b.BIT_NAME)
 #endif
 
-#define         __XPD_DMA_ITConfig_TC(HANDLE,_VALUE_)         \
-    (DMA_REG_BIT((HANDLE),CR,TCIE) = (_VALUE_))
-#define         __XPD_DMA_ITConfig_TE(HANDLE,_VALUE_)         \
-    (DMA_REG_BIT((HANDLE),CR,TEIE) = (_VALUE_))
-#define         __XPD_DMA_ITConfig_HT(HANDLE,_VALUE_)         \
-    (DMA_REG_BIT((HANDLE),CR,HTIE) = (_VALUE_))
-#define         __XPD_DMA_ITConfig_DME(HANDLE,_VALUE_)        \
-    (DMA_REG_BIT((HANDLE),CR,DMEIE) = (_VALUE_))
-#define         __XPD_DMA_ITConfig_FE(HANDLE,_VALUE_)         \
-    (DMA_REG_BIT((HANDLE),FCR,FEIE) = (_VALUE_))
+#define         __XPD_DMA_ITConfig_TC(HANDLE,VALUE)         \
+    (DMA_REG_BIT((HANDLE),CR,TCIE) = (VALUE))
+#define         __XPD_DMA_ITConfig_TE(HANDLE,VALUE)         \
+    (DMA_REG_BIT((HANDLE),CR,TEIE) = (VALUE))
+#define         __XPD_DMA_ITConfig_HT(HANDLE,VALUE)         \
+    (DMA_REG_BIT((HANDLE),CR,HTIE) = (VALUE))
+#define         __XPD_DMA_ITConfig_DME(HANDLE,VALUE)        \
+    (DMA_REG_BIT((HANDLE),CR,DMEIE) = (VALUE))
+#define         __XPD_DMA_ITConfig_FE(HANDLE,VALUE)         \
+    (DMA_REG_BIT((HANDLE),FCR,FEIE) = (VALUE))
+
+/** @} */
 
 /** @addtogroup DMA_Exported_Functions
  * @{ */
@@ -248,11 +231,10 @@ XPD_ReturnType  XPD_DMA_Deinit          (DMA_HandleType * hdma);
 void            XPD_DMA_Enable          (DMA_HandleType * hdma);
 void            XPD_DMA_Disable         (DMA_HandleType * hdma);
 
-XPD_ReturnType  XPD_DMA_Attach          (DMA_HandleType * hdma, void * Owner, void * PeriphAddress);
-void            XPD_DMA_SetDirection    (DMA_HandleType * hdma, DMA_DirectionType Direction);
-
-void            XPD_DMA_Start           (DMA_HandleType * hdma, void * Data, uint16_t DataCount);
-void            XPD_DMA_Start_IT        (DMA_HandleType * hdma, void * Data, uint16_t DataCount);
+XPD_ReturnType  XPD_DMA_Start           (DMA_HandleType * hdma, void * PeriphAddress,
+                                         void * MemAddress, uint16_t DataCount);
+XPD_ReturnType  XPD_DMA_Start_IT        (DMA_HandleType * hdma, void * PeriphAddress,
+                                         void * MemAddress, uint16_t DataCount);
 XPD_ReturnType  XPD_DMA_Stop            (DMA_HandleType * hdma);
 void            XPD_DMA_Stop_IT         (DMA_HandleType * hdma);
 

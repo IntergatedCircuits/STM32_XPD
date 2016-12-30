@@ -591,10 +591,17 @@ void XPD_ADC_IRQHandler(ADC_HandleType * hadc)
  */
 XPD_ReturnType XPD_ADC_Start_DMA(ADC_HandleType * hadc, void * Address)
 {
-    XPD_ReturnType result = XPD_DMA_Attach(hadc->DMA.Conversion, hadc, (void *)&hadc->Inst->DR);
+    XPD_ReturnType result;
 
+    /* Set up DMA for transfer */
+    result = XPD_DMA_Start_IT(hadc->DMA.Conversion, (void *)&hadc->Inst->DR, Address, hadc->Inst->SQR1.b.L + 1);
+
+    /* If the DMA is currently used, return with error */
     if (result == XPD_OK)
     {
+        /* Set the callback owner */
+        hadc->DMA.Conversion->Owner = hadc;
+
         /* Set the DMA transfer complete callback */
         hadc->DMA.Conversion->Callbacks.Complete = adc_dmaConversionRedirect;
 
@@ -604,12 +611,7 @@ XPD_ReturnType XPD_ADC_Start_DMA(ADC_HandleType * hadc, void * Address)
 #ifdef USE_XPD_DMA_ERROR_DETECT
         /* Set the DMA error callback */
         hadc->DMA.Conversion->Callbacks.Error = adc_dmaErrorRedirect;
-#endif
 
-        /* configure the DMA channel */
-        XPD_DMA_Start_IT(hadc->DMA.Conversion, Address, hadc->Inst->SQR1.b.L + 1);
-
-#ifdef USE_XPD_ADC_ERROR_DETECT
         /* Enable ADC overrun interrupt */
         XPD_ADC_EnableIT(hadc, OVR);
 #endif
@@ -837,12 +839,16 @@ void XPD_ADC_MultiMode_Init(ADC_HandleType * hadc, ADC_MultiMode_InitType * Conf
  */
 XPD_ReturnType XPD_ADC_MultiMode_Start_DMA(ADC_HandleType * hadc, void * Address)
 {
-    XPD_ReturnType result = XPD_DMA_Attach(hadc->DMA.Conversion, hadc, (void *)&ADC->CDR.w);
+    XPD_ReturnType result;
 
+    /* Set up DMA for transfer */
+    result = XPD_DMA_Start_IT(hadc->DMA.Conversion, (void *)&ADC->CDR.w, Address, hadc->Inst->SQR1.b.L + 1);
+
+    /* If the DMA is currently used, return with error */
     if (result == XPD_OK)
     {
-        /* pass the continuous DMA request setting to the common config */
-        ADC_COMMON_REG_BIT(CCR,DDS) = ADC_REG_BIT(hadc, CR2, DDS);
+        /* Set the callback owner */
+        hadc->DMA.Conversion->Owner = hadc;
 
         /* Set the DMA transfer complete callback */
         hadc->DMA.Conversion->Callbacks.Complete = adc_dmaConversionRedirect;
@@ -853,15 +859,13 @@ XPD_ReturnType XPD_ADC_MultiMode_Start_DMA(ADC_HandleType * hadc, void * Address
 #ifdef USE_XPD_DMA_ERROR_DETECT
         /* Set the DMA error callback */
         hadc->DMA.Conversion->Callbacks.Error = adc_dmaErrorRedirect;
-#endif
 
-        /* configure the DMA channel */
-        XPD_DMA_Start_IT(hadc->DMA.Conversion, Address, hadc->Inst->SQR1.b.L + 1);
-
-#ifdef USE_XPD_ADC_ERROR_DETECT
         /* Enable ADC overrun interrupt */
         XPD_ADC_EnableIT(hadc, OVR);
 #endif
+
+        /* pass the continuous DMA request setting to the common config */
+        ADC_COMMON_REG_BIT(CCR,DDS) = ADC_REG_BIT(hadc, CR2, DDS);
 
         /* Enable ADC DMA mode */
         ADC_REG_BIT(hadc, CR2, DMA) = 1;
