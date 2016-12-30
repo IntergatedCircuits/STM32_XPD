@@ -92,11 +92,9 @@ typedef struct
     DMA_Channel_TypeDef * Inst;               /*!< The address of the peripheral instance used by the handle */
 #ifdef DMA_BB
     DMA_Channel_BitBand_TypeDef * Inst_BB;    /*!< The address of the peripheral instance in the bit-band region */
-    void * Base_BB;                           /*!< [Internal] The address of the master DMA bits used by the handle */
-#else
+#endif
     DMA_TypeDef * Base;                       /*!< [Internal] The address of the master DMA used by the handle */
     uint8_t ChannelOffset;                    /*!< [Internal] The offset of the channel in the master DMA */
-#endif
     struct {
         XPD_HandleCallbackType Complete;      /*!< DMA transfer complete callback */
         XPD_HandleCallbackType HalfComplete;  /*!< DMA transfer half complete callback */
@@ -158,67 +156,34 @@ typedef struct
         (DMA_REG_BIT((HANDLE), CCR, IT_NAME##IE) = 0)
 
 /**
- * @brief  Provides the circular mode of DMA stream.
+ * @brief  Get the specified DMA flag.
  * @param  HANDLE: specifies the DMA Handle.
+ * @param  FLAG_NAME: specifies the flag to return.
+ *         This parameter can be one of the following values:
+ *            @arg TC:      Transfer Complete
+ *            @arg HT:      Half Transfer Complete
+ *            @arg TE:      Transfer Error
  */
-#define         XPD_DMA_CircularMode(HANDLE)                \
-        (DMA_REG_BIT((HANDLE), CCR, CIRC))
+#define         XPD_DMA_GetFlag(  HANDLE, FLAG_NAME)        \
+    ((HANDLE)->Base->ISR.w & (DMA_ISR_##FLAG_NAME##IF1 << (uint32_t)((HANDLE)->ChannelOffset)))
 
+/**
+ * @brief  Clear the specified DMA flag.
+ * @param  HANDLE: specifies the DMA Handle.
+ * @param  FLAG_NAME: specifies the flag to clear.
+ *         This parameter can be one of the following values:
+ *            @arg TC:      Transfer Complete
+ *            @arg HT:      Half Transfer Complete
+ *            @arg TE:      Transfer Error
+ */
+#define         XPD_DMA_ClearFlag(HANDLE, FLAG_NAME)        \
+    ((HANDLE)->Base->IFCR.w = (DMA_IFCR_C##FLAG_NAME##IF1 << (uint32_t)((HANDLE)->ChannelOffset)))
 
 #ifdef DMA_BB
-/**
- * @brief  Get the specified DMA flag.
- * @param  HANDLE: specifies the DMA Handle.
- * @param  FLAG_NAME: specifies the flag to return.
- *         This parameter can be one of the following values:
- *            @arg TC:      Transfer Complete
- *            @arg HT:      Half Transfer Complete
- *            @arg TE:      Transfer Error
- */
-#define         XPD_DMA_GetFlag(  HANDLE, FLAG_NAME)        \
-    (((DMA_BitBand_TypeDef *)(HANDLE)->Base_BB)->ISR.FLAG_NAME##IF1)
-
-/**
- * @brief  Clear the specified DMA flag.
- * @param  HANDLE: specifies the DMA Handle.
- * @param  FLAG_NAME: specifies the flag to clear.
- *         This parameter can be one of the following values:
- *            @arg TC:      Transfer Complete
- *            @arg HT:      Half Transfer Complete
- *            @arg TE:      Transfer Error
- */
-#define         XPD_DMA_ClearFlag(HANDLE, FLAG_NAME)        \
-    (((DMA_BitBand_TypeDef *)(HANDLE)->Base_BB)->IFCR.C##FLAG_NAME##IF1 = 1)
-
 #define DMA_REG_BIT(HANDLE, REG_NAME, BIT_NAME) ((HANDLE)->Inst_BB->REG_NAME.BIT_NAME)
 #else
-/**
- * @brief  Get the specified DMA flag.
- * @param  HANDLE: specifies the DMA Handle.
- * @param  FLAG_NAME: specifies the flag to return.
- *         This parameter can be one of the following values:
- *            @arg TC:      Transfer Complete
- *            @arg HT:      Half Transfer Complete
- *            @arg TE:      Transfer Error
- */
-#define         XPD_DMA_GetFlag(  HANDLE, FLAG_NAME)        \
-    ((HANDLE)->Base->ISR.w & (DMA_ISR_##FLAG_NAME##IF1 << (uint32_t)(HANDLE)->ChannelOffset))
-
-/**
- * @brief  Clear the specified DMA flag.
- * @param  HANDLE: specifies the DMA Handle.
- * @param  FLAG_NAME: specifies the flag to clear.
- *         This parameter can be one of the following values:
- *            @arg TC:      Transfer Complete
- *            @arg HT:      Half Transfer Complete
- *            @arg TE:      Transfer Error
- */
-#define         XPD_DMA_ClearFlag(HANDLE, FLAG_NAME)        \
-    ((HANDLE)->Base->IFCR.w |= (DMA_IFCR_C##FLAG_NAME##IF1 << (uint32_t)(HANDLE)->ChannelOffset))
-
 #define DMA_REG_BIT(HANDLE, REG_NAME, BIT_NAME) ((HANDLE)->Inst->REG_NAME.b.BIT_NAME)
-
-#endif /* DMA_Stream_BB */
+#endif /* DMA_BB */
 
 /** @} */
 
@@ -230,11 +195,10 @@ XPD_ReturnType  XPD_DMA_Deinit          (DMA_HandleType * hdma);
 void            XPD_DMA_Enable          (DMA_HandleType * hdma);
 void            XPD_DMA_Disable         (DMA_HandleType * hdma);
 
-XPD_ReturnType  XPD_DMA_Attach          (DMA_HandleType * hdma, void * Owner, void * PeriphAddress);
-void            XPD_DMA_SetDirection    (DMA_HandleType * hdma, DMA_DirectionType Direction);
-
-void            XPD_DMA_Start           (DMA_HandleType * hdma, void * Data, uint16_t DataCount);
-void            XPD_DMA_Start_IT        (DMA_HandleType * hdma, void * Data, uint16_t DataCount);
+XPD_ReturnType  XPD_DMA_Start           (DMA_HandleType * hdma, void * PeriphAddress,
+                                         void * MemAddress, uint16_t DataCount);
+XPD_ReturnType  XPD_DMA_Start_IT        (DMA_HandleType * hdma, void * PeriphAddress,
+                                         void * MemAddress, uint16_t DataCount);
 XPD_ReturnType  XPD_DMA_Stop            (DMA_HandleType * hdma);
 void            XPD_DMA_Stop_IT         (DMA_HandleType * hdma);
 

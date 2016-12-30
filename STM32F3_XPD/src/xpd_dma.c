@@ -53,14 +53,8 @@ static uint8_t dma_users[] = {
 
 static void dma_calcBase(DMA_HandleType * hdma)
 {
-#ifdef DMA_BB
-    /* base points to the FEIF bit of the current stream (in BB alias) */
-    hdma->Base_BB = DMA_BB(DMA_BASE(hdma->Inst));
-    hdma->Base_BB += 16 * DMA_CHANNEL_NUMBER(hdma->Inst);
-#else
     hdma->Base = DMA_BASE(hdma->Inst);
     hdma->ChannelOffset = DMA_CHANNEL_NUMBER(hdma->Inst) * 4;
-#endif
 }
 
 /** @defgroup DMA_Exported_Functions DMA Exported Functions
@@ -162,91 +156,68 @@ void XPD_DMA_Disable(DMA_HandleType * hdma)
 }
 
 /**
- * @brief Attaches the DMA stream to the peripheral.
+ * @brief Sets up a DMA transfer and starts it.
  * @param hdma: pointer to the DMA stream handle structure
- * @param Owner: pointer to the peripheral owner handle
  * @param PeriphAddress: pointer to the peripheral data register
+ * @param MemAddress: pointer to the memory data
+ * @param DataCount: the amount of data to be transferred
  * @return BUSY if DMA is in use, OK if success
  */
-XPD_ReturnType XPD_DMA_Attach(DMA_HandleType * hdma, void * Owner, void * PeriphAddress)
+XPD_ReturnType XPD_DMA_Start(DMA_HandleType * hdma, void * PeriphAddress, void * MemAddress, uint16_t DataCount)
 {
     XPD_ReturnType result = XPD_OK;
 
+    /* Enter critical section to ensure single user of DMA */
+    XPD_ENTER_CRITICAL(hdma);
+
+    /* If previous user was a different peripheral, check busy state first */
     if ((uint32_t)PeriphAddress != hdma->Inst->CPAR)
     {
         result = XPD_DMA_GetStatus(hdma);
-
-        if (result == XPD_OK)
-        {
-            XPD_DMA_Disable(hdma);
-
-            hdma->Inst->CPAR = (uint32_t)PeriphAddress;
-
-            hdma->Owner = Owner;
-        }
     }
+
+    if (result == XPD_OK)
+    {
+        XPD_DMA_Disable(hdma);
+
+        /* DMA transfer setup */
+        hdma->Inst->CNDTR = DataCount;
+        hdma->Inst->CPAR  = (uint32_t)PeriphAddress;
+        hdma->Inst->CMAR  = (uint32_t)MemAddress;
+
+        /* reset error state */
+        hdma->Errors = DMA_ERROR_NONE;
+
+        XPD_DMA_Enable(hdma);
+    }
+
+    XPD_EXIT_CRITICAL(hdma);
+
     return result;
-}
-
-/**
- * @brief Set the DMA stream transfer direction.
- * @param hdma: pointer to the DMA stream handle structure
- * @param Direction: the data transfer direction to set
- */
-void XPD_DMA_SetDirection(DMA_HandleType * hdma, DMA_DirectionType Direction)
-{
-    DMA_REG_BIT(hdma,CCR,DIR) = Direction;
-}
-
-/**
- * @brief Sets up a DMA transfer and starts it.
- * @param hdma: pointer to the DMA stream handle structure
- * @param Data: The data buffer in the memory to use with DMA
- * @param DataCount: The amount of data to transfer with DMA
- */
-void XPD_DMA_Start(DMA_HandleType * hdma, void * Data, uint16_t DataCount)
-{
-    XPD_DMA_Disable(hdma);
-
-    /* DMA Stream data length */
-    hdma->Inst->CNDTR = DataCount;
-
-    /* DMA Stream memory address */
-    hdma->Inst->CMAR = (uint32_t)Data;
-
-    /* reset error state */
-    hdma->Errors = DMA_ERROR_NONE;
-
-    XPD_DMA_Enable(hdma);
 }
 
 /**
  * @brief Sets up a DMA transfer, starts it and produces completion callback using the interrupt stack.
  * @param hdma: pointer to the DMA stream handle structure
- * @param Data: The data buffer in the memory to use with DMA
- * @param DataCount: The amount of data to transfer with DMA
+ * @param PeriphAddress: pointer to the peripheral data register
+ * @param MemAddress: pointer to the memory data
+ * @param DataCount: the amount of data to be transferred
+ * @return BUSY if DMA is in use, OK if success
  */
-void XPD_DMA_Start_IT(DMA_HandleType * hdma, void * Data, uint16_t DataCount)
+XPD_ReturnType XPD_DMA_Start_IT(DMA_HandleType * hdma, void * PeriphAddress, void * MemAddress, uint16_t DataCount)
 {
-    XPD_DMA_Disable(hdma);
+    XPD_ReturnType result = XPD_DMA_Start(hdma, PeriphAddress, MemAddress, DataCount);
 
-    /* DMA Stream data length */
-    hdma->Inst->CNDTR = DataCount;
-
-    /* DMA Stream memory address */
-    hdma->Inst->CMAR = (uint32_t)Data;
-
-    /* reset error state */
-    hdma->Errors = DMA_ERROR_NONE;
-
-    /* enable interrupts */
+    if (result == XPD_OK)
+    {
+        /* enable interrupts */
 #ifdef USE_XPD_DMA_ERROR_DETECT
-    SET_BIT(hdma->Inst->CCR.w, (DMA_CCR_TCIE | DMA_CCR_HTIE | DMA_CCR_TEIE));
+        SET_BIT(hdma->Inst->CCR.w, (DMA_CCR_TCIE | DMA_CCR_HTIE | DMA_CCR_TEIE));
 #else
-    SET_BIT(hdma->Inst->CCR.w, (DMA_CCR_TCIE | DMA_CCR_HTIE));
+        SET_BIT(hdma->Inst->CCR.w, (DMA_CCR_TCIE | DMA_CCR_HTIE));
 #endif
-
-    XPD_DMA_Enable(hdma);
+    }
+    return result;
 }
 
 /**
@@ -292,14 +263,7 @@ void XPD_DMA_Stop_IT(DMA_HandleType *hdma)
  */
 XPD_ReturnType XPD_DMA_GetStatus(DMA_HandleType * hdma)
 {
-    if ((DMA_REG_BIT(hdma, CCR, EN) != 0) && (hdma->Inst->CNDTR > 0))
-    {
-        return XPD_BUSY;
-    }
-    else
-    {
-        return XPD_OK;
-    }
+    return ((DMA_REG_BIT(hdma, CCR, EN) != 0) && (hdma->Inst->CNDTR > 0)) ? XPD_BUSY : XPD_OK;
 }
 
 /**

@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    stm32f3_gpio.c
+  * @file    xpd_gpio.c
   * @author  Benedek Kupper
   * @version V0.1
   * @date    2015-12-30
@@ -23,7 +23,6 @@
   */
 #include "xpd_gpio.h"
 #include "xpd_rcc.h"
-#include "xpd_utils.h"
 
 #define GPIO_PORT_OFFSET(__GPIOx__) (((uint32_t)(__GPIOx__) - (uint32_t)GPIOA_BASE) >> 10)
 
@@ -281,8 +280,6 @@ void XPD_GPIO_LockPin(GPIO_TypeDef * GPIOx, uint8_t Pin)
 
     if ((GPIOx->LCKR.w & pinmask) == 0)
     {
-        XPD_EnterCritical(GPIOx);
-
         /* Apply lock key write sequence */
         /* LCKK='1' + LCK[x] */
         GPIOx->LCKR.w = temp;
@@ -295,8 +292,6 @@ void XPD_GPIO_LockPin(GPIO_TypeDef * GPIOx, uint8_t Pin)
         temp = GPIOx->LCKR.w;
 
         (void)temp;
-
-        XPD_ExitCritical(GPIOx);
     }
 }
 

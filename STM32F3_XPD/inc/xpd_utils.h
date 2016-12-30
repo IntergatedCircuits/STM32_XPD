@@ -51,21 +51,23 @@ extern XPD_CallbacksType XPD_Callbacks;
 /** @defgroup XPD_Exported_Macros XPD Exported Macros
  * @{ */
 
-#ifndef XPD_CRITICAL_OVERRIDE
+#ifndef XPD_ENTER_CRITICAL
 /**
  * @brief Enters a critical section by disabling interrupts. [overrideable]
  * @param HANDLE: pointer to the requester handle
  */
-#define XPD_EnterCritical(HANDLE)       \
+#define XPD_ENTER_CRITICAL(HANDLE)       \
     __disable_irq()
+#endif
 
+#ifndef XPD_EXIT_CRITICAL
 /**
  * @brief Leaves a critical section by enabling interrupts. [overrideable]
  * @param HANDLE: pointer to the requester handle
  */
-#define XPD_ExitCritical(HANDLE)        \
+#define XPD_EXIT_CRITICAL(HANDLE)        \
     __enable_irq()
-#endif /* XPD_CRITICAL_OVERRIDE */
+#endif
 
 /** @brief Timeout value for indefinite waiting */
 #define XPD_NO_TIMEOUT      0xFFFFFFFF

@@ -83,7 +83,7 @@ static XPD_ReturnType can_frameTransmit(CAN_HandleType * hcan, CAN_FrameType * F
     uint32_t temp = 3;
     XPD_ReturnType result;
 
-    XPD_EnterCritical(hcan);
+    XPD_ENTER_CRITICAL(hcan);
 
     transmitmailbox = XPD_CAN_TxEmptyMailbox(hcan);
 
@@ -116,7 +116,7 @@ static XPD_ReturnType can_frameTransmit(CAN_HandleType * hcan, CAN_FrameType * F
         result = XPD_BUSY;
     }
 
-    XPD_ExitCritical(hcan);
+    XPD_EXIT_CRITICAL(hcan);
 
     return result;
 }
@@ -793,7 +793,7 @@ void XPD_CAN_FilterBankReset(CAN_HandleType * hcan)
 {
     uint8_t filterbankoffset, filterbanksize, i;
 
-    XPD_EnterCritical(hcan);
+    XPD_ENTER_CRITICAL(hcan);
 
 #ifdef __DUAL_CAN_DEVICE
     XPD_CAN1_ClockCtrl(ENABLE);
@@ -811,7 +811,7 @@ void XPD_CAN_FilterBankReset(CAN_HandleType * hcan)
         FilterInfo[i].configuredFields = 0;
     }
 
-    XPD_ExitCritical(hcan);
+    XPD_EXIT_CRITICAL(hcan);
 }
 
 /**
@@ -829,7 +829,7 @@ XPD_ReturnType XPD_CAN_FilterInit(CAN_HandleType * hcan, uint8_t FIFONumber, CAN
     uint8_t type = (Filter->Mode & CAN_FILTER_MATCH) | ((Filter->Pattern.Type & CAN_IDTYPE_EXT_DATA) >> 1);
     XPD_ReturnType result = XPD_ERROR;
 
-    XPD_EnterCritical(hcan);
+    XPD_ENTER_CRITICAL(hcan);
 
 #ifdef __DUAL_CAN_DEVICE
     XPD_CAN1_ClockCtrl(ENABLE);
@@ -986,7 +986,7 @@ XPD_ReturnType XPD_CAN_FilterInit(CAN_HandleType * hcan, uint8_t FIFONumber, CAN
         }
     }
 
-    XPD_ExitCritical(hcan);
+    XPD_EXIT_CRITICAL(hcan);
 
     return result;
 }
@@ -1005,7 +1005,7 @@ XPD_ReturnType XPD_CAN_FilterIndexUpdate(CAN_HandleType * hcan, uint8_t FIFONumb
     uint32_t fFifoReg;
     XPD_ReturnType result = XPD_ERROR;
 
-    XPD_EnterCritical(hcan);
+    XPD_ENTER_CRITICAL(hcan);
 
     fFifoReg = CAN_MASTER->FFA1R;
     filterbankoffset = getFilterBankOffset(hcan);
@@ -1039,7 +1039,7 @@ XPD_ReturnType XPD_CAN_FilterIndexUpdate(CAN_HandleType * hcan, uint8_t FIFONumb
         }
     }
 
-    XPD_ExitCritical(hcan);
+    XPD_EXIT_CRITICAL(hcan);
 
     return result;
 }
@@ -1059,7 +1059,7 @@ XPD_ReturnType XPD_CAN_FilterDeinit(CAN_HandleType * hcan, uint8_t FIFONumber, u
     FilterRegister FR;
     XPD_ReturnType result = XPD_ERROR;
 
-    XPD_EnterCritical(hcan);
+    XPD_ENTER_CRITICAL(hcan);
 
     fFifoReg = CAN_MASTER->FFA1R;
     filterbankoffset = getFilterBankOffset(hcan);
@@ -1131,7 +1131,7 @@ XPD_ReturnType XPD_CAN_FilterDeinit(CAN_HandleType * hcan, uint8_t FIFONumber, u
         }
     }
 
-    XPD_ExitCritical(hcan);
+    XPD_EXIT_CRITICAL(hcan);
 
     return result;
 }
@@ -1158,7 +1158,7 @@ XPD_ReturnType XPD_CAN_FilterBankSizeConfig(CAN_HandleType * hcan, uint8_t NewSi
     }
     else
     {
-        XPD_EnterCritical(hcan);
+        XPD_ENTER_CRITICAL(hcan);
 
         /* slave CAN bank size is counted from the end */
         if (hcan->Inst != CAN_MASTER)
@@ -1201,7 +1201,7 @@ XPD_ReturnType XPD_CAN_FilterBankSizeConfig(CAN_HandleType * hcan, uint8_t NewSi
             CAN_MASTER_REG_BIT(FMR,FINIT) = 0;
         }
 
-        XPD_ExitCritical(hcan);
+        XPD_EXIT_CRITICAL(hcan);
     }
 
     return result;

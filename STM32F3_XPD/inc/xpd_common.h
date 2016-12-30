@@ -122,6 +122,21 @@ typedef enum
     CLK_DIV512 = 9  /*!< Clock is divided by 512 */
 }ClockDividerType;
 
+/** @brief Clock sampling phase type */
+typedef enum
+{
+    CLOCK_PHASE_1EDGE = 0, /*!< Data sampling begins at the first clock phase switch */
+    CLOCK_PHASE_2EDGE = 1  /*!< Data sampling begins at the second clock phase switch */
+}ClockPhaseType;
+
+/** @brief Data transfer stream type */
+typedef struct
+{
+    void   * buffer; /*!< Pointer to the initial data element */
+    uint16_t length; /*!< Length of the data stream */
+    uint16_t size;   /*!< Size of a data element */
+}DataStreamType;
+
 /**
  * @brief Function pointer type for binary control function reference
  * @param NewState: the state to set
