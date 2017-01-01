@@ -30,6 +30,10 @@
 /** @addtogroup CAN
  * @{ */
 
+#ifndef CAN_TSR_CODE_Pos
+#define CAN_TSR_CODE_Pos 24U
+#endif
+
 #define CAN_STATE_TRANSMIT      0x0F
 #define CAN_STATE_RECEIVE       0x30
 #define CAN_STATE_RECEIVE0      0x10
@@ -57,18 +61,23 @@ static bool can_slaveFiltersUnused();
  * @{ */
 
 /**
- * @brief Checks if the transmit request has been successful by returning the TXOK flag of the mailbox.
+ * @brief Gets an empty transmit mailbox.
  * @param hcan: pointer to the CAN handle structure
- * @param Mailbox: the selected transmission mailbox [0..2]
- * @return 1 if the request was successful, 0 otherwise
+ * @param mailbox: Set to the lowest number empty mailbox
+ * @return BUSY if all mailboxes are full, OK if empty mailbox found
  */
-static inline uint32_t can_txOk(CAN_HandleType * hcan, uint8_t Mailbox)
+static XPD_ReturnType can_getEmptyMailbox(CAN_HandleType * hcan, uint8_t * mailbox)
 {
-#ifdef CAN_BB
-    return hcan->Inst_BB->TSR.MB[Mailbox].TXOK;
-#else
-    return ((hcan->Inst->TSR.w >> (Mailbox * 8)) & CAN_TSR_TXOK0);
-#endif
+    XPD_ReturnType result = XPD_BUSY;
+    uint32_t reg = hcan->Inst->TSR.w;
+
+    /* Check if at least one mailbox is empty */
+    if ((reg & CAN_TSR_TME) != 0)
+    {
+        *mailbox = (reg & CAN_TSR_CODE) >> CAN_TSR_CODE_Pos;
+        result = XPD_OK;
+    }
+    return result;
 }
 
 /**
@@ -79,16 +88,15 @@ static inline uint32_t can_txOk(CAN_HandleType * hcan, uint8_t Mailbox)
  */
 static XPD_ReturnType can_frameTransmit(CAN_HandleType * hcan, CAN_FrameType * Frame)
 {
-    uint32_t transmitmailbox;
-    uint32_t temp = 3;
+    uint8_t transmitmailbox;
     XPD_ReturnType result;
 
-    XPD_ENTER_CRITICAL(hcan);
+    result = can_getEmptyMailbox(hcan, &transmitmailbox);
 
-    transmitmailbox = XPD_CAN_TxEmptyMailbox(hcan);
-
-    if (transmitmailbox < 3)
+    if (result == XPD_OK)
     {
+        uint32_t temp = 3;
+
         /* set up the Id */
         if ((Frame->Id.Type & CAN_IDTYPE_EXT_DATA) == CAN_IDTYPE_STD_DATA)
         {
@@ -104,19 +112,11 @@ static XPD_ReturnType can_frameTransmit(CAN_HandleType * hcan, CAN_FrameType * F
         hcan->Inst->sTxMailBox[transmitmailbox].TDHR.w = Frame->Data.Word[1];
 
         /* request transmission */
-        XPD_CAN_TxRequest(hcan, transmitmailbox);
+        CAN_REG_BIT(hcan,sTxMailBox[transmitmailbox].TIR,TXRQ) = 1;
 
         /* save the mailbox number to the Index field */
         Frame->Index = transmitmailbox;
-
-        result = XPD_OK;
     }
-    else
-    {
-        result = XPD_BUSY;
-    }
-
-    XPD_EXIT_CRITICAL(hcan);
 
     return result;
 }
@@ -155,9 +155,10 @@ static void can_frameReceive(CAN_HandleType * hcan, uint8_t FIFONumber)
         hcan->RxFrame[FIFONumber]->Data.Word[1] = rxFIFO.RDHR.w;
 
         /* Release the FIFO */
-        XPD_CAN_RxRelease(hcan, FIFONumber);
+        XPD_CAN_ClearRxFlag(hcan, FIFONumber, RFOM);
     }
 }
+
 /** @} */
 
 /** @defgroup CAN_Exported_Functions CAN Exported Functions
@@ -308,7 +309,7 @@ XPD_ReturnType XPD_CAN_WakeUp(CAN_HandleType* hcan)
  * @param hcan: pointer to the CAN handle structure
  * @return Current CAN error state
  */
-CAN_ErrorType XPD_CAN_GetErrorState(CAN_HandleType * hcan)
+CAN_ErrorType XPD_CAN_GetError(CAN_HandleType * hcan)
 {
     CAN_ErrorType errors = (hcan->Inst->ESR.w) & 0x77;
 
@@ -327,73 +328,6 @@ CAN_ErrorType XPD_CAN_GetErrorState(CAN_HandleType * hcan)
  *            The mailbox number is returned in the input frame's Index field.
  * @{
  */
-
-/**
- * @brief Returns if the transmit mailbox is empty.
- * @param hcan: pointer to the CAN handle structure
- * @param Mailbox: the selected transmission mailbox [0..2]
- * @return Emptiness of the mailbox
- */
-bool XPD_CAN_TxEmpty(CAN_HandleType * hcan, uint8_t Mailbox)
-{
-#ifdef CAN_BB
-    return hcan->Inst_BB->TSR.TME[Mailbox];
-#else
-    return (hcan->Inst->TSR.w >> (26 + Mailbox)) & 1;
-#endif
-}
-
-/**
- * @brief Requests transmission on the mailbox.
- * @param hcan: pointer to the CAN handle structure
- * @param Mailbox: the selected transmission mailbox [0..2]
- */
-void XPD_CAN_TxRequest(CAN_HandleType * hcan, uint8_t Mailbox)
-{
-    CAN_REG_BIT(hcan,sTxMailBox[Mailbox].TIR,TXRQ) = 1;
-}
-
-/**
- * @brief Gets the result of the transmission request.
- * @param hcan: pointer to the CAN handle structure
- * @param Mailbox: the selected transmission mailbox [0..2]
- * @return OK if successful or ERROR if not
- */
-XPD_ReturnType XPD_CAN_TxResult(CAN_HandleType * hcan, uint8_t Mailbox)
-{
-    return !can_txOk(hcan, Mailbox);
-}
-
-/**
- * @brief Aborts the transmission on the mailbox.
- * @param hcan: pointer to the CAN handle structure
- * @param Mailbox: the selected transmission mailbox [0..2]
- */
-void XPD_CAN_TxAbort(CAN_HandleType * hcan, uint8_t Mailbox)
-{
-#ifdef CAN_BB
-    hcan->Inst_BB->TSR.MB[Mailbox].ABRQ = 1;
-#else
-    hcan->Inst->TSR.w = CAN_TSR_ABRQ0 << ((uint32_t)Mailbox * 8);
-#endif
-}
-
-/**
- * @brief Gets an empty transmit mailbox.
- * @param hcan: pointer to the CAN handle structure
- * @return The lowest number empty mailbox, or 3 if not available
- */
-uint8_t XPD_CAN_TxEmptyMailbox(CAN_HandleType * hcan)
-{
-    uint32_t reg = hcan->Inst->TSR.w;
-    uint8_t mailbox = 3;
-    /* if at least one mailbox is empty */
-    if ((reg & CAN_TSR_TME) != 0)
-    {
-        mailbox = ((reg & CAN_TSR_CODE) >> 24) & 0x3;
-    }
-    return mailbox;
-}
 
 /**
  * @brief Transmits a frame and waits for completion until times out.
@@ -484,16 +418,6 @@ XPD_ReturnType XPD_CAN_Transmit_IT(CAN_HandleType * hcan, CAN_FrameType * Frame)
  *            The received data is stored in the provided frame pointers.
  * @{
  */
-
-/**
- * @brief Releases a receive FIFO.
- * @param hcan: pointer to the CAN handle structure
- * @param FIFONumber: the selected receive FIFO [0 .. 1]
- */
-void XPD_CAN_RxRelease(CAN_HandleType * hcan, uint8_t FIFONumber)
-{
-    CAN_REG_BIT(hcan,RFR[FIFONumber],RFOM) = 1;
-}
 
 /**
  * @brief Waits for a received frame and gets it from the FIFO.
@@ -589,7 +513,7 @@ void XPD_CAN_TX_IRQHandler(CAN_HandleType* hcan)
         for (i = 0; i < 3; i++)
         {
             temp = 1 << i;
-            if (((hcan->State & temp) != 0) && can_txOk(hcan, i))
+            if (((hcan->State & temp) != 0) && XPD_CAN_GetTxFlag(hcan, i, TXOK))
             {
                 CLEAR_BIT(hcan->State, temp);
 
@@ -705,7 +629,7 @@ void XPD_CAN_SCE_IRQHandler(CAN_HandleType* hcan)
  * @{
  */
 
-static inline void can_filterBankEnable(uint8_t FilterNumber)
+__STATIC_INLINE void can_filterBankEnable(uint8_t FilterNumber)
 {
 #ifdef CAN_BB
     CAN_BB(CAN_MASTER)->FA1R[FilterNumber] = 1;
@@ -714,7 +638,7 @@ static inline void can_filterBankEnable(uint8_t FilterNumber)
 #endif
 }
 
-static inline void can_filterBankDisable(uint8_t FilterNumber)
+__STATIC_INLINE void can_filterBankDisable(uint8_t FilterNumber)
 {
 #ifdef CAN_BB
     CAN_BB(CAN_MASTER)->FA1R[FilterNumber] = 0;
@@ -723,7 +647,7 @@ static inline void can_filterBankDisable(uint8_t FilterNumber)
 #endif
 }
 
-static inline uint8_t getFilterBankOffset(CAN_HandleType * hcan)
+__STATIC_INLINE uint8_t can_getFilterBankOffset(CAN_HandleType * hcan)
 {
 #ifdef __DUAL_CAN_DEVICE
     if (hcan->Inst == CAN_MASTER)
@@ -739,7 +663,7 @@ static inline uint8_t getFilterBankOffset(CAN_HandleType * hcan)
 #endif
 }
 
-static inline uint8_t getFilterBankSize(CAN_HandleType * hcan)
+__STATIC_INLINE uint8_t can_getFilterBankSize(CAN_HandleType * hcan)
 {
 #ifdef __DUAL_CAN_DEVICE
     if (hcan->Inst == CAN_MASTER)
@@ -793,14 +717,12 @@ void XPD_CAN_FilterBankReset(CAN_HandleType * hcan)
 {
     uint8_t filterbankoffset, filterbanksize, i;
 
-    XPD_ENTER_CRITICAL(hcan);
-
 #ifdef __DUAL_CAN_DEVICE
     XPD_CAN1_ClockCtrl(ENABLE);
 #endif
 
-    filterbankoffset = getFilterBankOffset(hcan);
-    filterbanksize = getFilterBankSize(hcan);
+    filterbankoffset = can_getFilterBankOffset(hcan);
+    filterbanksize = can_getFilterBankSize(hcan);
 
     for (i = filterbankoffset; i < filterbanksize; i++)
     {
@@ -810,8 +732,6 @@ void XPD_CAN_FilterBankReset(CAN_HandleType * hcan)
         FilterInfo[i].type = FILTERTYPE_INVALID;
         FilterInfo[i].configuredFields = 0;
     }
-
-    XPD_EXIT_CRITICAL(hcan);
 }
 
 /**
@@ -829,15 +749,13 @@ XPD_ReturnType XPD_CAN_FilterInit(CAN_HandleType * hcan, uint8_t FIFONumber, CAN
     uint8_t type = (Filter->Mode & CAN_FILTER_MATCH) | ((Filter->Pattern.Type & CAN_IDTYPE_EXT_DATA) >> 1);
     XPD_ReturnType result = XPD_ERROR;
 
-    XPD_ENTER_CRITICAL(hcan);
-
 #ifdef __DUAL_CAN_DEVICE
     XPD_CAN1_ClockCtrl(ENABLE);
 #endif
 
     fFifoReg = CAN_MASTER->FFA1R;
-    filterbanksize = getFilterBankSize(hcan);
-    filterbankoffset = getFilterBankOffset(hcan);
+    filterbanksize = can_getFilterBankSize(hcan);
+    filterbankoffset = can_getFilterBankOffset(hcan);
 
     fbank = filterbanksize;
 
@@ -986,8 +904,6 @@ XPD_ReturnType XPD_CAN_FilterInit(CAN_HandleType * hcan, uint8_t FIFONumber, CAN
         }
     }
 
-    XPD_EXIT_CRITICAL(hcan);
-
     return result;
 }
 
@@ -1005,11 +921,9 @@ XPD_ReturnType XPD_CAN_FilterIndexUpdate(CAN_HandleType * hcan, uint8_t FIFONumb
     uint32_t fFifoReg;
     XPD_ReturnType result = XPD_ERROR;
 
-    XPD_ENTER_CRITICAL(hcan);
-
     fFifoReg = CAN_MASTER->FFA1R;
-    filterbankoffset = getFilterBankOffset(hcan);
-    filterbanksize = getFilterBankSize(hcan);
+    filterbankoffset = can_getFilterBankOffset(hcan);
+    filterbanksize = can_getFilterBankSize(hcan);
 
     for (fbank = filterbankoffset; fbank < filterbanksize; fbank++)
     {
@@ -1039,8 +953,6 @@ XPD_ReturnType XPD_CAN_FilterIndexUpdate(CAN_HandleType * hcan, uint8_t FIFONumb
         }
     }
 
-    XPD_EXIT_CRITICAL(hcan);
-
     return result;
 }
 
@@ -1059,11 +971,9 @@ XPD_ReturnType XPD_CAN_FilterDeinit(CAN_HandleType * hcan, uint8_t FIFONumber, u
     FilterRegister FR;
     XPD_ReturnType result = XPD_ERROR;
 
-    XPD_ENTER_CRITICAL(hcan);
-
     fFifoReg = CAN_MASTER->FFA1R;
-    filterbankoffset = getFilterBankOffset(hcan);
-    filterbanksize = getFilterBankSize(hcan);
+    filterbankoffset = can_getFilterBankOffset(hcan);
+    filterbanksize = can_getFilterBankSize(hcan);
 
     for (fbank = filterbankoffset; fbank < filterbanksize; fbank++)
     {
@@ -1131,8 +1041,6 @@ XPD_ReturnType XPD_CAN_FilterDeinit(CAN_HandleType * hcan, uint8_t FIFONumber, u
         }
     }
 
-    XPD_EXIT_CRITICAL(hcan);
-
     return result;
 }
 
@@ -1158,8 +1066,6 @@ XPD_ReturnType XPD_CAN_FilterBankSizeConfig(CAN_HandleType * hcan, uint8_t NewSi
     }
     else
     {
-        XPD_ENTER_CRITICAL(hcan);
-
         /* slave CAN bank size is counted from the end */
         if (hcan->Inst != CAN_MASTER)
         {
@@ -1200,8 +1106,6 @@ XPD_ReturnType XPD_CAN_FilterBankSizeConfig(CAN_HandleType * hcan, uint8_t NewSi
 
             CAN_MASTER_REG_BIT(FMR,FINIT) = 0;
         }
-
-        XPD_EXIT_CRITICAL(hcan);
     }
 
     return result;

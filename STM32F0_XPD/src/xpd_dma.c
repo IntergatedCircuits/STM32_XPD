@@ -156,23 +156,14 @@ void XPD_DMA_Disable(DMA_HandleType * hdma)
 }
 
 /**
- * @brief Set the DMA stream transfer direction.
- * @param hdma: pointer to the DMA stream handle structure
- * @param Direction: the data transfer direction to set
- */
-void XPD_DMA_SetDirection(DMA_HandleType * hdma, DMA_DirectionType Direction)
-{
-    DMA_REG_BIT(hdma,CCR,DIR) = Direction;
-}
-
-/**
  * @brief Sets up a DMA transfer and starts it.
  * @param hdma: pointer to the DMA stream handle structure
  * @param PeriphAddress: pointer to the peripheral data register
- * @param DataStream: pointer to the data stream to transfer with DMA
+ * @param MemAddress: pointer to the memory data
+ * @param DataCount: the amount of data to be transferred
  * @return BUSY if DMA is in use, OK if success
  */
-XPD_ReturnType XPD_DMA_Start(DMA_HandleType * hdma, void * PeriphAddress, DataStreamType * DataStream)
+XPD_ReturnType XPD_DMA_Start(DMA_HandleType * hdma, void * PeriphAddress, void * MemAddress, uint16_t DataCount)
 {
     XPD_ReturnType result = XPD_OK;
 
@@ -189,14 +180,10 @@ XPD_ReturnType XPD_DMA_Start(DMA_HandleType * hdma, void * PeriphAddress, DataSt
     {
         XPD_DMA_Disable(hdma);
 
-        /* DMA Stream peripheral address */
-        hdma->Inst->CPAR = (uint32_t)PeriphAddress;
-
-        /* DMA Stream data length */
-        hdma->Inst->CNDTR = DataStream->length;
-
-        /* DMA Stream memory address */
-        hdma->Inst->CMAR = (uint32_t)DataStream->buffer;
+        /* DMA transfer setup */
+        hdma->Inst->CNDTR = DataCount;
+        hdma->Inst->CPAR  = (uint32_t)PeriphAddress;
+        hdma->Inst->CMAR  = (uint32_t)MemAddress;
 
         /* reset error state */
         hdma->Errors = DMA_ERROR_NONE;
@@ -213,12 +200,13 @@ XPD_ReturnType XPD_DMA_Start(DMA_HandleType * hdma, void * PeriphAddress, DataSt
  * @brief Sets up a DMA transfer, starts it and produces completion callback using the interrupt stack.
  * @param hdma: pointer to the DMA stream handle structure
  * @param PeriphAddress: pointer to the peripheral data register
- * @param DataStream: pointer to the data stream to transfer with DMA
+ * @param MemAddress: pointer to the memory data
+ * @param DataCount: the amount of data to be transferred
  * @return BUSY if DMA is in use, OK if success
  */
-XPD_ReturnType XPD_DMA_Start_IT(DMA_HandleType * hdma, void * PeriphAddress, DataStreamType * DataStream)
+XPD_ReturnType XPD_DMA_Start_IT(DMA_HandleType * hdma, void * PeriphAddress, void * MemAddress, uint16_t DataCount)
 {
-    XPD_ReturnType result = XPD_DMA_Start(hdma, PeriphAddress, DataStream);
+    XPD_ReturnType result = XPD_DMA_Start(hdma, PeriphAddress, MemAddress, DataCount);
 
     if (result == XPD_OK)
     {

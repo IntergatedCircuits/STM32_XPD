@@ -669,10 +669,8 @@ XPD_ReturnType XPD_RCC_HCLKConfig(RCC_OscType SYSCLK_Source, ClockDividerType HC
 }
 
 /**
- * @brief Sets the new configuration for an APB peripheral clock.
- * @param PCLKx: the selected peripheral clock. Permitted values:
-             @arg @ref RCC_ClockType::PCLK1
-             @arg @ref RCC_ClockType::PCLK2
+ * @brief Sets the new configuration for the APB peripheral clock.
+ * @param PCLKx: unused
  * @param HCLK_Divider: Clock divider of @ref RCC_ClockType::PCLK1 clock. Permitted values:
              @arg @ref ClockDividerType::CLK_DIV1
              @arg @ref ClockDividerType::CLK_DIV2
@@ -683,7 +681,7 @@ XPD_ReturnType XPD_RCC_HCLKConfig(RCC_OscType SYSCLK_Source, ClockDividerType HC
  */
 void XPD_RCC_PCLKConfig(RCC_ClockType PCLKx, ClockDividerType PCLK_Divider)
 {
-    uint32_t pprex = rcc_convertClockDivider(PCLKx, PCLK_Divider);
+    uint32_t pprex = rcc_convertClockDivider(PCLK1, PCLK_Divider);
 
     RCC->CFGR.b.PPRE = pprex;
 }
@@ -704,7 +702,6 @@ uint32_t XPD_RCC_GetClockFreq(RCC_ClockType SelectedClock)
         return SystemCoreClock << AHBPrescTable[RCC->CFGR.b.HPRE];
 
     case PCLK1:
-    case PCLK2:
         return SystemCoreClock >> APBPrescTable[RCC->CFGR.b.PPRE];
 
     default:

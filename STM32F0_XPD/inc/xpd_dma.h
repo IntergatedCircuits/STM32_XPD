@@ -165,7 +165,7 @@ typedef struct
  *            @arg TE:      Transfer Error
  */
 #define         XPD_DMA_GetFlag(  HANDLE, FLAG_NAME)        \
-    ((HANDLE)->Base->ISR.w & (DMA_ISR_##FLAG_NAME##IF1 << (uint32_t)(HANDLE)->ChannelOffset))
+    ((HANDLE)->Base->ISR.w & (DMA_ISR_##FLAG_NAME##IF1 << (uint32_t)((HANDLE)->ChannelOffset)))
 
 /**
  * @brief  Clear the specified DMA flag.
@@ -177,7 +177,7 @@ typedef struct
  *            @arg TE:      Transfer Error
  */
 #define         XPD_DMA_ClearFlag(HANDLE, FLAG_NAME)        \
-    ((HANDLE)->Base->IFCR.w = (DMA_IFCR_C##FLAG_NAME##IF1 << (uint32_t)(HANDLE)->ChannelOffset))
+    ((HANDLE)->Base->IFCR.w = (DMA_IFCR_C##FLAG_NAME##IF1 << (uint32_t)((HANDLE)->ChannelOffset)))
 
 /**
  * @brief  Provides the circular mode of DMA stream.
@@ -348,10 +348,10 @@ XPD_ReturnType  XPD_DMA_Deinit          (DMA_HandleType * hdma);
 void            XPD_DMA_Enable          (DMA_HandleType * hdma);
 void            XPD_DMA_Disable         (DMA_HandleType * hdma);
 
-void            XPD_DMA_SetDirection    (DMA_HandleType * hdma, DMA_DirectionType Direction);
-
-XPD_ReturnType  XPD_DMA_Start           (DMA_HandleType * hdma, void * PeriphAddress, DataStreamType * DataStream);
-XPD_ReturnType  XPD_DMA_Start_IT        (DMA_HandleType * hdma, void * PeriphAddress, DataStreamType * DataStream);
+XPD_ReturnType  XPD_DMA_Start           (DMA_HandleType * hdma, void * PeriphAddress,
+                                         void * MemAddress, uint16_t DataCount);
+XPD_ReturnType  XPD_DMA_Start_IT        (DMA_HandleType * hdma, void * PeriphAddress,
+                                         void * MemAddress, uint16_t DataCount);
 XPD_ReturnType  XPD_DMA_Stop            (DMA_HandleType * hdma);
 void            XPD_DMA_Stop_IT         (DMA_HandleType * hdma);
 
