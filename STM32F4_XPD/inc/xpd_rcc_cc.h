@@ -152,7 +152,7 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
  *            @arg CSS:        Clock Security System
  */
 #define             XPD_RCC_EnableIT(IT_NAME)        \
-    do{ RCC_REG_BIT(CIR,IT_NAME##IE) = 1; }while(0)
+    (RCC_REG_BIT(CIR,IT_NAME##IE) = 1)
 
 /**
  * @brief  Enable the specified RCC interrupt.
@@ -168,7 +168,7 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
  *            @arg CSS:        Clock Security System
  */
 #define             XPD_RCC_DisableIT(IT_NAME)       \
-    do{ RCC_REG_BIT(CIR,IT_NAME##IE) = 0; }while(0)
+    (RCC_REG_BIT(CIR,IT_NAME##IE) = 0)
 
 /**
  * @brief  Get the specified RCC flag.
@@ -200,7 +200,7 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
  *            @arg CSS:        Clock Security System
  */
 #define             XPD_RCC_ClearFlag(FLAG_NAME)     \
-    do{ RCC_REG_BIT(CIR,FLAG_NAME##C) = 1; }while(0)
+    (RCC_REG_BIT(CIR,FLAG_NAME##C) = 1)
 
 /** @} */
 

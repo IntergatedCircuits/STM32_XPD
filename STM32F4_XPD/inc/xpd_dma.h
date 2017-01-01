@@ -204,6 +204,13 @@ typedef struct
 #define         XPD_DMA_ClearFlag(HANDLE, FLAG_NAME)        \
     ((HANDLE)->Base->LIFCR.w = (DMA_LIFCR_C##FLAG_NAME##IF0 << (uint32_t)((HANDLE)->StreamOffset)))
 
+/**
+ * @brief  Provides the circular mode of DMA stream.
+ * @param  HANDLE: specifies the DMA Handle.
+ */
+#define         XPD_DMA_CircularMode(HANDLE)                \
+        (DMA_REG_BIT((HANDLE), CR, CIRC))
+
 #ifdef DMA_Stream_BB
 #define DMA_REG_BIT(HANDLE, REG_NAME, BIT_NAME) ((HANDLE)->Inst_BB->REG_NAME.BIT_NAME)
 #else

@@ -602,15 +602,11 @@ XPD_ReturnType XPD_ADC_Start_DMA(ADC_HandleType * hadc, void * Address)
         /* Set the callback owner */
         hadc->DMA.Conversion->Owner = hadc;
 
-        /* Set the DMA transfer complete callback */
-        hadc->DMA.Conversion->Callbacks.Complete = adc_dmaConversionRedirect;
-
-        /* Set the DMA half transfer complete callback */
+        /* Set the DMA transfer callbacks */
+        hadc->DMA.Conversion->Callbacks.Complete     = adc_dmaConversionRedirect;
         hadc->DMA.Conversion->Callbacks.HalfComplete = adc_dmaHalfConversionRedirect;
-
 #ifdef USE_XPD_DMA_ERROR_DETECT
-        /* Set the DMA error callback */
-        hadc->DMA.Conversion->Callbacks.Error = adc_dmaErrorRedirect;
+        hadc->DMA.Conversion->Callbacks.Error        = adc_dmaErrorRedirect;
 
         /* Enable ADC overrun interrupt */
         XPD_ADC_EnableIT(hadc, OVR);
@@ -850,15 +846,11 @@ XPD_ReturnType XPD_ADC_MultiMode_Start_DMA(ADC_HandleType * hadc, void * Address
         /* Set the callback owner */
         hadc->DMA.Conversion->Owner = hadc;
 
-        /* Set the DMA transfer complete callback */
-        hadc->DMA.Conversion->Callbacks.Complete = adc_dmaConversionRedirect;
-
-        /* Set the DMA half transfer complete callback */
+        /* Set the DMA transfer callbacks */
+        hadc->DMA.Conversion->Callbacks.Complete     = adc_dmaConversionRedirect;
         hadc->DMA.Conversion->Callbacks.HalfComplete = adc_dmaHalfConversionRedirect;
-
 #ifdef USE_XPD_DMA_ERROR_DETECT
-        /* Set the DMA error callback */
-        hadc->DMA.Conversion->Callbacks.Error = adc_dmaErrorRedirect;
+        hadc->DMA.Conversion->Callbacks.Error        = adc_dmaErrorRedirect;
 
         /* Enable ADC overrun interrupt */
         XPD_ADC_EnableIT(hadc, OVR);
