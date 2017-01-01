@@ -195,7 +195,7 @@ typedef struct
  *            @arg WKU:     Wakeup Interrupt
  *            @arg SLK:     Sleep Interrupt
  */
-#define         XPD_CAN_EnableIT(HANDLE,IT_NAME)          \
+#define         XPD_CAN_EnableIT(HANDLE,IT_NAME)          	\
     (CAN_REG_BIT((HANDLE),IER,IT_NAME##IE) = 1)
 
 /**
@@ -218,7 +218,7 @@ typedef struct
  *            @arg WKU:     Wakeup Interrupt
  *            @arg SLK:     Sleep Interrupt
  */
-#define         XPD_CAN_DisableIT(HANDLE,IT_NAME)         \
+#define         XPD_CAN_DisableIT(HANDLE,IT_NAME)           \
     (CAN_REG_BIT((HANDLE),IER,IT_NAME##IE) = 0)
 
 /**
@@ -231,8 +231,8 @@ typedef struct
  *            @arg FULL:    FIFO Full
  *            @arg FOV:     FIFO Overrun
  */
-#define         XPD_CAN_ClearRxFlag(HANDLE,FIFO,FLAG_NAME)\
-    (CAN_REG_BIT((HANDLE),RFR[(FIFO)],FLAG_NAME) = 1)
+#define         XPD_CAN_ClearRxFlag(HANDLE,FIFO,FLAG_NAME)  \
+    ((HANDLE)->Inst->RFR[FIFO].w = CAN_RF0R_##FLAG_NAME##0)
 
 /**
  * @brief  Get the specified CAN receive flag.
@@ -245,8 +245,39 @@ typedef struct
  *            @arg FOV:     FIFO Overrun
  * @return The state of the flag.
  */
-#define         XPD_CAN_GetRxFlag(HANDLE,FIFO,FLAG_NAME)  \
+#define         XPD_CAN_GetRxFlag(HANDLE,FIFO,FLAG_NAME)    \
     (CAN_REG_BIT((HANDLE),RFR[(FIFO)],FLAG_NAME))
+
+/**
+ * @brief  Clear the specified CAN transmit flag.
+ * @param  HANDLE: specifies the CAN Handle.
+ * @param  MB: specifies the mailbox index.
+ * @param  FLAG_NAME: specifies the flag to clear.
+ *         This parameter can be one of the following values:
+ *            @arg RQCP:    Request Completed
+ *            @arg TXOK:    Transmission OK
+ *            @arg ALST:    Arbitration Lost
+ *            @arg TERR:    Transmission Error
+ *            @arg ABRQ:    Abort Request
+ */
+#define         XPD_CAN_ClearTxFlag(HANDLE,MB,FLAG_NAME)    \
+        ((HANDLE)->Inst->TSR.w = CAN_TSR_##FLAG_NAME##0 << (8 * (MB)))
+
+/**
+ * @brief  Get the specified CAN transmit flag.
+ * @param  HANDLE: specifies the CAN Handle.
+ * @param  MB: specifies the mailbox index.
+ * @param  FLAG_NAME: specifies the flag to return.
+ *         This parameter can be one of the following values:
+ *            @arg RQCP:    Request Completed
+ *            @arg TXOK:    Transmission OK
+ *            @arg ALST:    Arbitration Lost
+ *            @arg TERR:    Transmission Error
+ *            @arg ABRQ:    Abort Request
+ * @return The state of the flag.
+ */
+#define         XPD_CAN_GetTxFlag(HANDLE,MB,FLAG_NAME)      \
+        (((HANDLE)->Inst->TSR.w & (CAN_TSR_##FLAG_NAME##0 << (8 * (MB)))) != 0 ? 1 : 0)
 
 /**
  * @brief  Clear the specified CAN error flag.
@@ -257,8 +288,8 @@ typedef struct
  *            @arg EPV:     Error Passive
  *            @arg BOF:     Bus Off
  */
-#define         XPD_CAN_ClearErrFlag(HANDLE,FLAG_NAME)      \
-    (CAN_REG_BIT((HANDLE),ESR,FLAG_NAME) = 1)
+#define         XPD_CAN_ClearErrorFlag(HANDLE,FLAG_NAME)    \
+    ((HANDLE)->Inst->ESR.w = CAN_ESR_##FLAG_NAME)
 
 /**
  * @brief  Get the specified CAN error flag.
@@ -270,7 +301,7 @@ typedef struct
  *            @arg BOF:     Bus Off
  * @return The state of the flag.
  */
-#define         XPD_CAN_GetErrFlag(HANDLE,FLAG_NAME)        \
+#define         XPD_CAN_GetErrorFlag(HANDLE,FLAG_NAME)      \
     (CAN_REG_BIT((HANDLE),ESR,FLAG_NAME))
 
 /**
@@ -285,7 +316,7 @@ typedef struct
  *            @arg INAK:    Initialization Acknowledge
  */
 #define         XPD_CAN_ClearFlag(HANDLE,FLAG_NAME)         \
-    (CAN_REG_BIT((HANDLE),MSR,FLAG_NAME) = 1)
+    ((HANDLE)->Inst->MSR.w = CAN_MSR_##FLAG_NAME)
 
 /**
  * @brief  Get the specified CAN state flag.
@@ -305,74 +336,10 @@ typedef struct
 
 #ifdef CAN_BB
 #define CAN_REG_BIT(HANDLE, REG_NAME, BIT_NAME) ((HANDLE)->Inst_BB->REG_NAME.BIT_NAME)
-#define CAN_MASTER_REG_BIT(REG_NAME, BIT_NAME)    (CAN_BB(CAN_MASTER)->REG_NAME.BIT_NAME)
-
-/**
- * @brief  Clear the specified CAN transmit flag.
- * @param  HANDLE: specifies the CAN Handle.
- * @param  MB: specifies the mailbox index.
- * @param  FLAG_NAME: specifies the flag to clear.
- *         This parameter can be one of the following values:
- *            @arg RQCP:    Request Completed
- *            @arg TXOK:    Transmission OK
- *            @arg ALST:    Arbitration Lost
- *            @arg TERR:    Transmission Error
- *            @arg ABRQ:    Abort Request
- */
-#define         XPD_CAN_ClearTxFlag(HANDLE,MB,FLAG_NAME)  \
-    (CAN_REG_BIT((HANDLE),TSR.MB[(MB)],FLAG_NAME) = 1)
-
-/**
- * @brief  Get the specified CAN transmit flag.
- * @param  HANDLE: specifies the CAN Handle.
- * @param  MB: specifies the mailbox index.
- * @param  FLAG_NAME: specifies the flag to return.
- *         This parameter can be one of the following values:
- *            @arg RQCP:    Request Completed
- *            @arg TXOK:    Transmission OK
- *            @arg ALST:    Arbitration Lost
- *            @arg TERR:    Transmission Error
- *            @arg ABRQ:    Abort Request
- * @return The state of the flag.
- */
-#define         XPD_CAN_GetTxFlag(HANDLE,MB,FLAG_NAME)    \
-    (CAN_REG_BIT((HANDLE),TSR.MB[(MB)],FLAG_NAME))
-
+#define CAN_MASTER_REG_BIT(REG_NAME, BIT_NAME)  (CAN_BB(CAN_MASTER)->REG_NAME.BIT_NAME)
 #else
 #define CAN_REG_BIT(HANDLE, REG_NAME, BIT_NAME) ((HANDLE)->Inst->REG_NAME.b.BIT_NAME)
 #define CAN_MASTER_REG_BIT(REG_NAME, BIT_NAME)  (CAN_MASTER->REG_NAME.b.BIT_NAME)
-
-/**
- * @brief  Clear the specified CAN transmit flag.
- * @param  HANDLE: specifies the CAN Handle.
- * @param  MB: specifies the mailbox index.
- * @param  FLAG_NAME: specifies the flag to clear.
- *         This parameter can be one of the following values:
- *            @arg RQCP:    Request Completed
- *            @arg TXOK:    Transmission OK
- *            @arg ALST:    Arbitration Lost
- *            @arg TERR:    Transmission Error
- *            @arg ABRQ:    Abort Request
- */
-#define         XPD_CAN_ClearTxFlag(HANDLE,MB,FLAG_NAME)  \
-        ((HANDLE)->Inst->TSR.w |= CAN_TSR_##FLAG_NAME##0 << (8 * (MB)))
-
-/**
- * @brief  Get the specified CAN transmit flag.
- * @param  HANDLE: specifies the CAN Handle.
- * @param  MB: specifies the mailbox index.
- * @param  FLAG_NAME: specifies the flag to return.
- *         This parameter can be one of the following values:
- *            @arg RQCP:    Request Completed
- *            @arg TXOK:    Transmission OK
- *            @arg ALST:    Arbitration Lost
- *            @arg TERR:    Transmission Error
- *            @arg ABRQ:    Abort Request
- * @return The state of the flag.
- */
-#define         XPD_CAN_GetTxFlag(HANDLE,MB,FLAG_NAME)    \
-        (((HANDLE)->Inst->TSR.w & (CAN_TSR_##FLAG_NAME##0 << (8 * (MB)))) != 0 ? 1 : 0)
-
 #endif
 
 /** @} */
@@ -396,7 +363,7 @@ XPD_ReturnType  XPD_CAN_Deinit              (CAN_HandleType * hcan);
 XPD_ReturnType  XPD_CAN_Sleep               (CAN_HandleType * hcan);
 XPD_ReturnType  XPD_CAN_WakeUp              (CAN_HandleType * hcan);
 
-CAN_ErrorType   XPD_CAN_GetErrorState       (CAN_HandleType * hcan);
+CAN_ErrorType   XPD_CAN_GetError            (CAN_HandleType * hcan);
 /** @} */
 
 /** @addtogroup CAN_Exported_Functions_Filter
@@ -412,18 +379,12 @@ XPD_ReturnType  XPD_CAN_FilterBankSizeConfig(CAN_HandleType* hcan, uint8_t NewSi
 
 /** @addtogroup CAN_Exported_Functions_Transmit
  * @{ */
-void            XPD_CAN_TxRequest           (CAN_HandleType * hcan, uint8_t Mailbox);
-void            XPD_CAN_TxAbort             (CAN_HandleType * hcan, uint8_t Mailbox);
-XPD_ReturnType  XPD_CAN_TxResult            (CAN_HandleType * hcan, uint8_t Mailbox);
-bool            XPD_CAN_TxEmpty             (CAN_HandleType * hcan, uint8_t Mailbox);
-uint8_t         XPD_CAN_TxEmptyMailbox      (CAN_HandleType * hcan);
 XPD_ReturnType  XPD_CAN_Transmit            (CAN_HandleType * hcan, CAN_FrameType * Frame, uint32_t Timeout);
 XPD_ReturnType  XPD_CAN_Transmit_IT         (CAN_HandleType * hcan, CAN_FrameType * Frame);
 /** @} */
 
 /** @addtogroup CAN_Exported_Functions_Receive
  * @{ */
-void            XPD_CAN_RxRelease           (CAN_HandleType * hcan, uint8_t FIFONumber);
 XPD_ReturnType  XPD_CAN_Receive             (CAN_HandleType * hcan, CAN_FrameType * Frame, uint8_t FIFONumber, uint32_t Timeout);
 XPD_ReturnType  XPD_CAN_Receive_IT          (CAN_HandleType * hcan, CAN_FrameType * Frame, uint8_t FIFONumber);
 /** @} */
