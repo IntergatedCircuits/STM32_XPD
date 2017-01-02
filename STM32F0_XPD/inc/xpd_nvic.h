@@ -57,7 +57,7 @@
  * @param  SUB_PRIO: the subpriority value
  */
 #define         XPD_NVIC_SetPriorityConfig(IRQN,PREEMPT_PRIO,SUB_PRIO)      \
-    NVIC_SetPriority((IRQN), (PREEMPT_PRIO))
+    NVIC_SetPriority((IRQN), (SUB_PRIO))
 
 /**
  * @brief System reset redirection macro.
