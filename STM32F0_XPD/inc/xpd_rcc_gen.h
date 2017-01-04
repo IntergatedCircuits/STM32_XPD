@@ -34,10 +34,10 @@
 /** @defgroup RCC_Generated_Functions RCC Generated Functions
  * @{ */
 #ifdef RCC_APB2ENR_ADCEN
-void XPD_ADC_ClockCtrl(FunctionalState NewState);
+void XPD_ADC1_ClockCtrl(FunctionalState NewState);
 #endif
 #ifdef RCC_APB2RSTR_ADCRST
-void XPD_ADC_Reset(void);
+void XPD_ADC1_Reset(void);
 #endif
 #ifdef RCC_APB1ENR_CANEN
 void XPD_CAN_ClockCtrl(FunctionalState NewState);

@@ -61,6 +61,8 @@ void XPD_ADC_ClockConfig(ADC_ClockSourceType ClockSource)
         RCC_REG_BIT(CR2, HSI14DIS) = 1;
         RCC_REG_BIT(CR2, HSI14ON) = 0;
     }
+    XPD_ADC1_ClockCtrl(ENABLE);
+
     ADC1->CFGR2.b.CKMODE = ClockSource;
 }
 
@@ -78,7 +80,7 @@ uint32_t XPD_ADC_GetClockFreq(void)
     }
     else
     {
-        return XPD_RCC_GetClockFreq(PCLK2) / (ClockSource * 2);
+        return XPD_RCC_GetClockFreq(PCLK1) / (ClockSource * 2);
     }
 }
 

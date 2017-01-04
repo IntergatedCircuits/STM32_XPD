@@ -34,7 +34,7 @@
 #ifdef RCC_APB2ENR_ADCEN
 /** @brief Sets the new clock state of the ADC peripheral.
  *  @param NewState: the new clock state to set */
-void XPD_ADC_ClockCtrl(FunctionalState NewState)
+void XPD_ADC1_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(APB2ENR,ADCEN) = NewState;
     NewState = (FunctionalState)RCC->APB2ENR.w;
@@ -42,7 +42,7 @@ void XPD_ADC_ClockCtrl(FunctionalState NewState)
 #endif
 #ifdef RCC_APB2RSTR_ADCRST
 /** @brief Forces and releases a reset on the ADC peripheral. */
-void XPD_ADC_Reset(void)
+void XPD_ADC1_Reset(void)
 {
     RCC_REG_BIT(APB2RSTR,ADCRST) = 1;
     RCC_REG_BIT(APB2RSTR,ADCRST) = 0;
