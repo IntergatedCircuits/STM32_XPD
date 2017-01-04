@@ -96,6 +96,11 @@ XPD_ReturnType  XPD_WaitForMatch        (volatile uint32_t * varAddress, uint32_
 XPD_ReturnType  XPD_WaitForDiff         (volatile uint32_t * varAddress, uint32_t bitSelector,
                                          uint32_t            match,      uint32_t * mstimeout);
 /** @} */
+/** @addtogroup XPD_Exported_Functions_Stream
+ * @{ */
+void            XPD_ReadToStream        (volatile uint32_t * reg, DataStreamType * stream);
+void            XPD_WriteFromStream     (volatile uint32_t * reg, DataStreamType * stream);
+/** @} */
 /** @addtogroup XPD_Exported_Functions_IRQ
  * @{ */
 void            XPD_SysTick_IRQHandler  (void);
