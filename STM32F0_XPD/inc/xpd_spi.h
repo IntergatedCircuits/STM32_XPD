@@ -55,7 +55,9 @@ typedef enum
     SPI_NSS_SOFT        = SPI_CR1_SSM,                          /*!< NSS is disconnected from the pin */
     SPI_NSS_HARD_INPUT  = 0,                                    /*!< NSS is slave chip select or puts master in slave mode */
     SPI_NSS_HARD_OUTPUT = SPI_CR2_SSOE,                         /*!< Single master node, NSS is disconnected from the pin */
+#ifdef SPI_CR2_NSSP
     SPI_NSS_HARD_OUTPUT_PULSED = (SPI_CR2_SSOE | SPI_CR2_NSSP), /*!< Single master node, NSS is disconnected from the pin */
+#endif
 }SPI_NSSType;
 
 /** @brief SPI bit order */
@@ -70,7 +72,7 @@ typedef struct
 {
     SPI_ModeType    Mode;           /*!< Specifies the SPI operating mode. */
     SPI_ChannelType Channel;        /*!< Specifies the SPI channel type. */
-    uint8_t         DataSize;       /*!< Specifies the SPI data size. Permitted values: @arg 4 .. 16 */
+    uint8_t         DataSize;       /*!< Specifies the SPI data size in bits. */
     SPI_FormatType  Format;         /*!< Specifies whether data transfers start from MSB or LSB bit. */
     FunctionalState TI_Mode;        /*!< Specifies if the TI mode is enabled or not. */
     SPI_NSSType     NSS;            /*!< Specifies whether the NSS signal is managed by hardware (NSS pin) or by software using the SSI bit. */

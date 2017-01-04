@@ -257,24 +257,34 @@ XPD_ReturnType XPD_SPI_Init(SPI_HandleType * hspi, SPI_InitType * Config)
     /* Disable CRC by setting 0 length */
     if (Config->CRC_Length == 0)
     {
-        CLEAR_BIT(hspi->Inst->CR1.w, SPI_CR1_CRCL | SPI_CR1_CRCEN);
+#ifdef SPI_CR1_CRCL
+        SPI_REG_BIT(hspi, CR1, CRCL) = 0;
+#endif
+        SPI_REG_BIT(hspi, CR1, CRCEN) = 0;
         hspi->CRCSize = 0;
     }
-    /* Set 8 bit CRC when not 16 bit is requested, and data fits in 1 byte */
-    else if ((Config->CRC_Length < 16) && (Config->DataSize <= 8))
-    {
-        hspi->Inst->CR1.w = (hspi->Inst->CR1.w & (~SPI_CR1_CRCL)) | SPI_CR1_CRCEN;
-        hspi->Inst->CRCPR = Config->CRC_Polynomial;
-        hspi->CRCSize = 1;
-    }
-    /* Set 16 bit CRC when requested, or when data size requires it */
     else
     {
-        SET_BIT(hspi->Inst->CR1.w, SPI_CR1_CRCL | SPI_CR1_CRCEN);
-        hspi->Inst->CRCPR = Config->CRC_Polynomial;
-        hspi->CRCSize = (Config->DataSize <= 8) ? 2 : 1;
-    }
+#ifdef SPI_CR1_CRCL
+        /* Set 8 bit CRC when not 16 bit is requested, and data fits in 1 byte */
+        if ((Config->CRC_Length < 16) && (Config->DataSize <= 8))
+        {
+            hspi->CRCSize = 1;
+        }
+        /* Set 16 bit CRC when requested, or when data size requires it */
+        else
+        {
+            hspi->CRCSize = 2;
+        }
+        SPI_REG_BIT(hspi, CR1, CRCL) = hspi->CRCSize - 1;
+#else
+        /* CRC size equals data size */
+        hspi->CRCSize = (Config->DataSize > 8) ? 2 : 1;
 #endif
+        /* Set up CRC configuration */
+        SPI_REG_BIT(hspi, CR1, CRCEN) = 1;
+        hspi->Inst->CRCPR = Config->CRC_Polynomial;
+    }
 
 #ifdef SPI_SR_FRLVL
     /* Rx FIFO threshold is set to quarter full when data size fits in 1 byte */
@@ -282,7 +292,13 @@ XPD_ReturnType XPD_SPI_Init(SPI_HandleType * hspi, SPI_InitType * Config)
 #endif
     SPI_REG_BIT(hspi, CR2, FRF)   = Config->TI_Mode;
 
+#if defined(SPI_CR2_DS)
+    /* Configure data bit size */
     hspi->Inst->CR2.b.DS = Config->DataSize - 1;
+#elif defined(SPI_CR1_DFF)
+    /* Configure data frame format */
+    SPI_REG_BIT(hspi, CR1, DFF)   = (uint32_t)(Config->DataSize > 8);
+#endif
 
     /* Activate the SPI mode (Make sure that I2SMOD bit in I2SCFGR register is reset) */
     SPI_REG_BIT(hspi, I2SCFGR, I2SMOD) = 0;
@@ -472,8 +488,8 @@ XPD_ReturnType XPD_SPI_Transmit(SPI_HandleType * hspi, void * TxData, uint16_t L
         }
 #endif
 
-        /* Control if the TX fifo is empty and the BSY flag */
-        result = XPD_WaitForMatch(&hspi->Inst->SR.w, SPI_SR_FTLVL | SPI_SR_BSY, 0, &Timeout);
+        /* Control the BSY flag */
+        result = XPD_WaitForMatch(&hspi->Inst->SR.w, SPI_SR_BSY, 0, &Timeout);
 
         /* Clear overrun flag in 2 Lines communication mode because received data is not read */
         if (duplex)
