@@ -175,6 +175,63 @@ __weak XPD_ReturnType XPD_WaitForDiff(volatile uint32_t * varAddress, uint32_t b
 }
 /** @} */
 
+/** @defgroup XPD_Exported_Functions_Stream XPD Data Stream Handling Functions
+ *  @brief    XPD Utilities data stream handlers
+ * @{
+ */
+
+/**
+ * @brief Reads new register data to the stream and updates its context.
+ * @param reg: pointer to the register to read from
+ * @param stream: pointer to the destination stream
+ */
+void XPD_ReadToStream(volatile uint32_t * reg, DataStreamType * stream)
+{
+    /* Different size of data transferred */
+    switch (stream->size)
+    {
+        case 1:
+            *((uint8_t*) stream->buffer) = *((__IO uint8_t  *)reg);
+            break;
+        case 2:
+            *((uint16_t*)stream->buffer) = *((__IO uint16_t *)reg);
+            break;
+        default:
+            *((uint32_t*)stream->buffer) = *((__IO uint32_t *)reg);
+            break;
+    }
+    /* Stream context update */
+    stream->buffer += stream->size;
+    stream->length--;
+}
+
+/**
+ * @brief Writes a new stream data element to the register and updates the stream context.
+ * @param reg: pointer to the register to write to
+ * @param stream: pointer to the source stream
+ */
+void XPD_WriteFromStream(volatile uint32_t * reg, DataStreamType * stream)
+{
+    /* Different size of data transferred */
+    switch (stream->size)
+    {
+        case 1:
+            *((__IO uint8_t  *)reg) = *((uint8_t*) stream->buffer);
+            break;
+        case 2:
+            *((__IO uint16_t *)reg) = *((uint16_t*)stream->buffer);
+            break;
+        default:
+            *((__IO uint32_t *)reg) = *((uint32_t*)stream->buffer);
+            break;
+    }
+    /* Stream context update */
+    stream->buffer += stream->size;
+    stream->length--;
+}
+
+/** @} */
+
 /** @defgroup XPD_Exported_Functions_IRQ XPD Interrupt Handling Functions
  *  @brief    XPD Utilities interrupt handlers
  * @{
