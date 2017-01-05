@@ -51,6 +51,22 @@ static uint8_t dma_users[] = {
 #endif
 };
 
+static void dma_clockCtrl(DMA_HandleType * hdma, FunctionalState ClockState)
+{
+    uint32_t bo = DMA_BASE_OFFSET(hdma->Inst);
+
+    if (ClockState == DISABLE)
+    {
+        CLEAR_BIT(dma_users[bo], 1 << DMA_CHANNEL_NUMBER(hdma->Inst));
+    }
+    else
+    {
+        SET_BIT(dma_users[bo], 1 << DMA_CHANNEL_NUMBER(hdma->Inst));
+    }
+
+    dma_clkCtrl[bo]((dma_users[bo] > 0) ? ENABLE : DISABLE);
+}
+
 static void dma_calcBase(DMA_HandleType * hdma)
 {
     hdma->Base = DMA_BASE(hdma->Inst);
@@ -69,13 +85,7 @@ static void dma_calcBase(DMA_HandleType * hdma)
 XPD_ReturnType XPD_DMA_Init(DMA_HandleType * hdma, DMA_InitType * Config)
 {
     /* enable DMA clock */
-    {
-        uint32_t bo = DMA_BASE_OFFSET(hdma->Inst);
-
-        SET_BIT(dma_users[bo], 1 << DMA_CHANNEL_NUMBER(hdma->Inst));
-
-        dma_clkCtrl[bo](ENABLE);
-    }
+    dma_clockCtrl(hdma, ENABLE);
 
 #ifdef DMA_Channel_BB
     hdma->Inst_BB = DMA_Channel_BB(hdma->Inst);
@@ -124,15 +134,7 @@ XPD_ReturnType XPD_DMA_Deinit(DMA_HandleType * hdma)
     XPD_DMA_ClearFlag(hdma, TE);
 
     /* disable DMA clock */
-    {
-        uint32_t bo = DMA_BASE_OFFSET(hdma->Inst);
-        CLEAR_BIT(dma_users[bo], 1 << DMA_CHANNEL_NUMBER(hdma->Inst));
-
-        if (dma_users[bo] == 0)
-        {
-            dma_clkCtrl[bo](DISABLE);
-        }
-    }
+    dma_clockCtrl(hdma, DISABLE);
 
     return XPD_OK;
 }
