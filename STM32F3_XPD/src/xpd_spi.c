@@ -48,27 +48,8 @@
 #define SPI_RESET_ERRORS(HANDLE)    ((void)0)
 #endif
 
-#ifdef SPI_SR_FRLVL
-__STATIC_INLINE uint8_t spi_getRxFifoLevel(SPI_HandleType * hspi)
-{
-    uint8_t level = hspi->Inst->SR.b.FRLVL;
-    if (level == 3)
-        { level++; }
-    return level;
-}
-
-static void spi_flushRxFifo(SPI_HandleType * hspi)
-{
-    uint8_t tmp;
-    uint8_t length = spi_getRxFifoLevel(hspi);
-
-    while (length > 0)
-    {
-        tmp = *((__IO uint8_t *)&hspi->Inst->DR);
-        length--;
-    }
-}
-#endif
+#define SPI_REG_BY_SIZE(REG, SIZE) \
+    ((SIZE == 1) ? *((__IO uint8_t *)REG) : *((__IO uint16_t *)REG))
 
 #ifdef USE_XPD_SPI_ERROR_DETECT
 /* Reinitialize CRC calculation by OFF-ON switch */
@@ -81,29 +62,25 @@ __STATIC_INLINE void spi_initCRC(SPI_HandleType * hspi)
 /* Receive CRC bytes on SPI and check for error */
 static XPD_ReturnType spi_receiveCRC(SPI_HandleType * hspi, uint32_t * timeout)
 {
-#ifdef SPI_SR_FRLVL
     XPD_ReturnType result;
 
+#ifdef SPI_SR_FRLVL
     /* Set FIFO threshold according to CRC size */
     SPI_REG_BIT(hspi, CR2, FRXTH) = 2 - hspi->CRCSize;
+#endif
 
     /* wait for not empty receive buffer */
     result = XPD_WaitForDiff(&hspi->Inst->SR.w, SPI_SR_RXNE, 0, timeout);
-
-    /* throw away CRC from FIFO */
-    spi_flushRxFifo(hspi);
-
-    /* Reset Rx FIFO threshold */
-    SPI_REG_BIT(hspi, CR2, FRXTH) = 2 - hspi->RxStream.size;
-#else
-    /* wait for not empty receive buffer */
-    XPD_ReturnType result = XPD_WaitForDiff(&hspi->Inst->SR.w, SPI_SR_RXNE, 0, timeout);
 
     if (result == XPD_OK)
     {
         /* read CRC data from data register */
         uint32_t temp = hspi->Inst->DR;
     }
+
+#ifdef SPI_SR_FRLVL
+    /* Reset Rx FIFO threshold */
+    SPI_REG_BIT(hspi, CR2, FRXTH) = 2 - hspi->RxStream.size;
 #endif
 
     /* Check if CRC error occurred */
@@ -131,9 +108,11 @@ static void spi_dmaTransmitRedirect(void * hdma)
         /* Clear overrun flag in 2 Lines communication mode because received data is not read */
         if (SPI_REG_BIT(hspi, CR1, BIDIMODE) == 0)
         {
-#ifdef SPI_SR_FRLVL
-            spi_flushRxFifo(hspi);
-#endif
+            while (XPD_SPI_GetFlag(hspi, RXNE) != 0)
+            {
+                /* empty received data from data register */
+                uint16_t temp = SPI_REG_BY_SIZE(&hspi->Inst->DR, hspi->RxStream.size);
+            }
             XPD_SPI_ClearFlag(hspi, OVR);
         }
 
@@ -504,9 +483,11 @@ XPD_ReturnType XPD_SPI_Transmit(SPI_HandleType * hspi, void * TxData, uint16_t L
         /* Clear overrun flag in 2 Lines communication mode because received data is not read */
         if (duplex)
         {
-#ifdef SPI_SR_FRLVL
-            spi_flushRxFifo(hspi);
-#endif
+            while (XPD_SPI_GetFlag(hspi, RXNE) != 0)
+            {
+                /* empty received data from data register */
+                uint16_t temp = SPI_REG_BY_SIZE(&hspi->Inst->DR, hspi->RxStream.size);
+            }
             XPD_SPI_ClearFlag(hspi, OVR);
         }
     }
@@ -861,15 +842,11 @@ void XPD_SPI_IRQHandler(SPI_HandleType * hspi)
             }
             else
             {
+                /* read CRC data from data register */
+                uint16_t temp = SPI_REG_BY_SIZE(&hspi->Inst->DR, hspi->RxStream.size);
 #ifdef SPI_SR_FRLVL
-                /* throw away CRC from FIFO */
-                spi_flushRxFifo(hspi);
-
                 /* Reset Rx FIFO threshold */
                 SPI_REG_BIT(hspi, CR2, FRXTH) = 2 - hspi->RxStream.size;
-#else
-                /* read CRC data from data register */
-                uint32_t temp = hspi->Inst->DR;
 #endif
 
                 /* Check if CRC error occurred */
@@ -939,9 +916,11 @@ void XPD_SPI_IRQHandler(SPI_HandleType * hspi)
             /* Clear overrun flag in 2 Lines communication mode because received is not read */
             if (SPI_REG_BIT(hspi, CR1, BIDIMODE) == 0)
             {
-#ifdef SPI_SR_FRLVL
-                spi_flushRxFifo(hspi);
-#endif
+                while (XPD_SPI_GetFlag(hspi, RXNE) != 0)
+                {
+                    /* empty received data from data register */
+                    uint16_t temp = SPI_REG_BY_SIZE(&hspi->Inst->DR, hspi->RxStream.size);
+                }
                 XPD_SPI_ClearFlag(hspi, OVR);
             }
 
