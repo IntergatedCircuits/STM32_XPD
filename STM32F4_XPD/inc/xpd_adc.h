@@ -189,8 +189,8 @@ typedef struct
         XPD_HandleCallbackType InjConvComplete;     /*!< Injected conversion(s) complete callback */
         XPD_HandleCallbackType HalfInjConvComplete; /*!< Half of the injected conversions complete callback */
         XPD_HandleCallbackType Watchdog;            /*!< Watchdog alert callback */
-#ifdef USE_XPD_ADC_ERROR_DETECT
-        XPD_HandleCallbackType Error;
+#if defined(USE_XPD_ADC_ERROR_DETECT) || defined(USE_DMA_ERROR_DETECT)
+        XPD_HandleCallbackType Error;               /*!< DMA transfer or overrun error callback */
 #endif
     }Callbacks;                                     /*   Handle Callbacks */
     struct {

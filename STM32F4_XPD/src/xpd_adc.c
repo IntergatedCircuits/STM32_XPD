@@ -330,10 +330,9 @@ void XPD_ADC_Start_IT(ADC_HandleType * hadc)
 {
     /* ADC overrun and end of conversion interrupt for regular group */
 #ifdef USE_XPD_ADC_ERROR_DETECT
-    SET_BIT(hadc->Inst->CR1.w, ADC_CR1_EOCIE | ADC_CR1_OVRIE);
-#else
-    XPD_ADC_EnableIT(hadc, EOC);
+    XPD_ADC_EnableIT(hadc, OVR);
 #endif
+    XPD_ADC_EnableIT(hadc, EOC);
 
     XPD_ADC_Start(hadc);
 }
@@ -642,10 +641,9 @@ void XPD_ADC_Injected_Start(ADC_HandleType * hadc)
 void XPD_ADC_Injected_Start_IT(ADC_HandleType * hadc)
 {
 #ifdef USE_XPD_ADC_ERROR_DETECT
-    SET_BIT(hadc->Inst->CR1.w, ADC_CR1_JEOCIE | ADC_CR1_OVRIE);
-#else
-    XPD_ADC_EnableIT(hadc, JEOC);
+    XPD_ADC_EnableIT(hadc, OVR);
 #endif
+    XPD_ADC_EnableIT(hadc, JEOC);
 
     XPD_ADC_Injected_Start(hadc);
 }
