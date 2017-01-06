@@ -26,6 +26,7 @@
 
 #include "xpd_common.h"
 #include "xpd_config.h"
+#include "xpd_adc_calc.h"
 #include "xpd_dma.h"
 
 /** @defgroup ADC
@@ -298,8 +299,6 @@ typedef struct
  * @{ */
 XPD_ReturnType  XPD_ADC_Init                (ADC_HandleType * hadc, ADC_InitType * Config);
 XPD_ReturnType  XPD_ADC_Deinit              (ADC_HandleType * hadc);
-void            XPD_ADC_Enable              (ADC_HandleType * hadc);
-void            XPD_ADC_Disable             (ADC_HandleType * hadc);
 void            XPD_ADC_ChannelConfig       (ADC_HandleType * hadc, ADC_ChannelInitType * Config);
 
 void            XPD_ADC_Start               (ADC_HandleType * hadc);
@@ -316,20 +315,6 @@ void            XPD_ADC_Stop_DMA            (ADC_HandleType * hadc);
 void            XPD_ADC_WatchdogConfig      (ADC_HandleType * hadc, uint8_t Channel, ADC_WatchdogInitType * Config);
 
 uint16_t        XPD_ADC_GetValue            (ADC_HandleType * hadc);
-
-int32_t         XPD_ADC_SetVDDA             (uint16_t vRefintConversion);
-
-int32_t         XPD_ADC_GetValue_mV         (uint16_t channelConversion);
-int32_t         XPD_ADC_GetVDDA_mV          (void);
-int32_t         XPD_ADC_GetVBAT_mV          (uint16_t vBatConversion);
-int32_t         XPD_ADC_GetTemperature      (uint16_t tempConversion);
-
-#if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
-float           XPD_ADC_GetValue_V          (uint16_t channelConversion);
-float           XPD_ADC_GetVDDA_V           (void);
-float           XPD_ADC_GetVBAT_V           (uint16_t vBatConversion);
-float           XPD_ADC_GetTemperature_C    (uint16_t tempConversion);
-#endif
 /** @} */
 
 /** @} */
