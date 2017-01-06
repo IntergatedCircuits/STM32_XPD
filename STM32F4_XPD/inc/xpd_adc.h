@@ -189,7 +189,7 @@ typedef struct
         XPD_HandleCallbackType InjConvComplete;     /*!< Injected conversion(s) complete callback */
         XPD_HandleCallbackType HalfInjConvComplete; /*!< Half of the injected conversions complete callback */
         XPD_HandleCallbackType Watchdog;            /*!< Watchdog alert callback */
-#if defined(USE_XPD_ADC_ERROR_DETECT) || defined(USE_DMA_ERROR_DETECT)
+#if defined(USE_XPD_ADC_ERROR_DETECT) || defined(USE_XPD_DMA_ERROR_DETECT)
         XPD_HandleCallbackType Error;               /*!< DMA transfer or overrun error callback */
 #endif
     }Callbacks;                                     /*   Handle Callbacks */
@@ -203,7 +203,7 @@ typedef struct
 
 /** @defgroup ADC_Core_Exported_Macros ADC Core Exported Macros
  * @{ */
-#ifdef USE_XPD_ADC_ERROR_DETECT
+#if defined(USE_XPD_ADC_ERROR_DETECT) || defined(USE_XPD_DMA_ERROR_DETECT)
 /**
  * @brief  ADC Handle initializer macro
  * @param  INSTANCE: specifies the ADC peripheral instance.
