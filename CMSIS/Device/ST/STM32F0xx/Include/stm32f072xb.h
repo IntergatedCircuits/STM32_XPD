@@ -3,7 +3,7 @@
   * @file    stm32f072xb.h
   * @author  Benedek Kupper
   * @version V0.1
-  * @date    2015-10-31
+  * @date    2017-01-08
   * @brief   CMSIS Cortex-M0 Device Peripheral Access Layer Header File. 
   *          This file contains all the peripheral register's definitions, bits 
   *          definitions and memory mapping for STM32F0xx devices.            
@@ -238,16 +238,13 @@ typedef struct {
          uint32_t __RESERVED0[2];
     __IO uint32_t TR;                                       /*!< ADC analog watchdog 1 threshold register,      Address offset: 0x20 */
          uint32_t __RESERVED1;
-    union {
-        struct {
-            __IO uint32_t CHSEL : 19;                       /*!< ADC group regular sequencer channels, available when ADC_CFGR1_CHSELRMOD is reset */
-                 uint32_t __RESERVED0 : 13;
-        } b;
-        __IO uint32_t w;
-    } CHSELR;                                               /*!< ADC group regular sequencer register,          Address offset: 0x28 */
+    __IO uint32_t CHSELR;                                   /*!< ADC group regular sequencer register,          Address offset: 0x28 */
          uint32_t __RESERVED2[5];
     __IO uint32_t DR;                                       /*!< ADC group regular data register,               Address offset: 0x40 */
 } ADC_TypeDef;
+
+
+
 typedef struct {
     union {
         struct {
