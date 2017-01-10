@@ -231,7 +231,15 @@ typedef struct {
         __IO uint32_t w;
     } SMPR;                                                 /*!< ADC sampling time register,                    Address offset: 0x14 */
          uint32_t __RESERVED0[2];
-    __IO uint32_t TR;                                       /*!< ADC analog watchdog 1 threshold register,      Address offset: 0x20 */
+     union {
+         struct {
+             __IO uint32_t LT : 12;                         /*!< ADC analog watchdog 1 threshold low */
+                  uint32_t __RESERVED0 : 4;
+             __IO uint32_t HT : 12;                         /*!< ADC Analog watchdog 1 threshold high */
+                  uint32_t __RESERVED1 : 4;
+         } b;
+         __IO uint32_t w;
+     } TR;                                                  /*!< ADC analog watchdog 1 threshold register,      Address offset: 0x20 */
          uint32_t __RESERVED1;
     __IO uint32_t CHSELR;                                   /*!< ADC group regular sequencer register,          Address offset: 0x28 */
          uint32_t __RESERVED2[5];
