@@ -201,7 +201,8 @@ typedef struct
 #define         NEW_SPI_HANDLE(INSTANCE, INIT_FN, DEINIT_FN)    \
     {.Inst      = (INSTANCE),                                   \
      .Callbacks = {(INIT_FN),(DEINIT_FN),NULL,NULL,NULL},       \
-     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl}
+     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,                   \
+     .Errors    = SPI_ERROR_NONE}
 #else
 /**
  * @brief  SPI Handle initializer macro

@@ -295,7 +295,6 @@ XPD_ReturnType XPD_SPI_Init(SPI_HandleType * hspi, SPI_InitType * Config)
     /* Initialize handle variables */
     hspi->TxStream.length = hspi->RxStream.length = 0;
     hspi->TxStream.size   = hspi->RxStream.size   = (Config->DataSize <= 8) ? 1 : 2;
-    SPI_RESET_ERRORS(hspi);
 
     return XPD_OK;
 }
