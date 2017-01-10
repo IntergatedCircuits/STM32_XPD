@@ -93,6 +93,9 @@ static void adc_dmaErrorRedirect(void *hdma)
 {
     ADC_HandleType* hadc = (ADC_HandleType*) ((DMA_HandleType*) hdma)->Owner;
 
+    /* Update error code */
+    hadc->Errors |= ADC_ERROR_DMA;
+
     XPD_SAFE_CALLBACK(hadc->Callbacks.Error, hadc);
 }
 #endif
@@ -282,6 +285,10 @@ void XPD_ADC_Start(ADC_HandleType * hadc)
 
     /* initialize number of remaining conversions count */
     hadc->ActiveConversions = hadc->Inst->SQR1.b.L + 1;
+
+#if defined(USE_XPD_ADC_ERROR_DETECT) || defined(USE_XPD_DMA_ERROR_DETECT)
+    hadc->Errors = ADC_ERROR_NONE;
+#endif
 }
 
 /**
@@ -432,6 +439,9 @@ void XPD_ADC_IRQHandler(ADC_HandleType * hadc)
     if (    ((sr  & ADC_SR_OVR) != 0)
          && ((cr1 & ADC_CR1_OVRIE) != 0))
     {
+        /* Update error code */
+        hadc->Errors |= ADC_ERROR_OVR;
+
         /* Clear the Overrun flag */
         XPD_ADC_ClearFlag(hadc, OVR);
 
@@ -465,9 +475,6 @@ XPD_ReturnType XPD_ADC_Start_DMA(ADC_HandleType * hadc, void * Address)
         hadc->DMA.Conversion->Callbacks.HalfComplete = adc_dmaHalfConversionRedirect;
 #ifdef USE_XPD_DMA_ERROR_DETECT
         hadc->DMA.Conversion->Callbacks.Error        = adc_dmaErrorRedirect;
-
-        /* Enable ADC overrun interrupt */
-        XPD_ADC_EnableIT(hadc, OVR);
 #endif
 
         /* Enable ADC DMA mode */
@@ -487,16 +494,11 @@ void XPD_ADC_Stop_DMA(ADC_HandleType * hadc)
     /* Disable the Peripheral */
     XPD_ADC_Stop(hadc);
 
-#ifdef USE_XPD_ADC_ERROR_DETECT
-    /* Disable ADC overrun interrupt */
-    XPD_ADC_DisableIT(hadc, OVR);
-#endif
-
     /* Disable the selected ADC DMA mode */
     ADC_REG_BIT(hadc, CR2, DMA) = 0;
 
     /* Disable the ADC DMA Stream */
-    XPD_DMA_Disable(hadc->DMA.Conversion);
+    XPD_DMA_Stop_IT(hadc->DMA.Conversion);
 }
 
 /**
@@ -518,6 +520,16 @@ void XPD_ADC_WatchdogConfig(ADC_HandleType * hadc, uint8_t Channel, ADC_Watchdog
     hadc->Inst->CR1.b.AWDCH = Channel;
 
     XPD_ADC_EnableIT(hadc, AWD);
+}
+
+/**
+ * @brief Returns the currently active analog watchdog.
+ * @param hadc: pointer to the ADC handle structure
+ * @return Set if the watchdog is active, 0 otherwise
+ */
+uint8_t XPD_ADC_WatchdogStatus(ADC_HandleType * hadc)
+{
+    return XPD_ADC_GetFlag(hadc, AWD);
 }
 
 /**
@@ -591,7 +603,8 @@ void XPD_ADC_Injected_Init(ADC_HandleType * hadc, ADC_Injected_InitType * Config
             ADC_COMMON_REG_BIT(CCR, VBATE) = 1;
         }
         /* if ADC1 Channel_16 or Channel_17 is selected enable TSVREFE Channel(Temperature sensor and VREFINT) */
-        else if((Config->Channel == ADC_TEMPSENSOR_CHANNEL) || (Config->Channel == ADC_VREFINT_CHANNEL))
+        else if (((Config->Channel == ADC_TEMPSENSOR_CHANNEL) || (Config->Channel == ADC_VREFINT_CHANNEL))
+                && (ADC_COMMON_REG_BIT(CCR,TSVREFE) == 0))
         {
             /* Enable the TSVREFE channel*/
             ADC_COMMON_REG_BIT(CCR,TSVREFE) = 1;
@@ -708,9 +721,6 @@ XPD_ReturnType XPD_ADC_MultiMode_Start_DMA(ADC_HandleType * hadc, void * Address
         hadc->DMA.Conversion->Callbacks.HalfComplete = adc_dmaHalfConversionRedirect;
 #ifdef USE_XPD_DMA_ERROR_DETECT
         hadc->DMA.Conversion->Callbacks.Error        = adc_dmaErrorRedirect;
-
-        /* Enable ADC overrun interrupt */
-        XPD_ADC_EnableIT(hadc, OVR);
 #endif
 
         /* pass the continuous DMA request setting to the common config */

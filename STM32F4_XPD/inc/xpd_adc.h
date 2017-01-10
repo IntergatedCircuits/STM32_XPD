@@ -63,6 +63,14 @@ uint32_t        XPD_ADC_GetClockFreq        (void);
 /** @defgroup ADC_Core_Exported_Types ADC Core Exported Types
  * @{ */
 
+/** @brief ADC error types */
+typedef enum
+{
+    ADC_ERROR_NONE      = 0,   /*!< No error */
+    ADC_ERROR_OVR       = 1,   /*!< Overrun flag */
+    ADC_ERROR_DMA       = 4,   /*!< DMA transfer error */
+}ADC_ErrorType;
+
 /** @brief ADC sample times */
 typedef enum
 {
@@ -197,6 +205,9 @@ typedef struct
         DMA_HandleType * Conversion;                /*!< DMA handle for update transfer */
     }DMA;                                           /*   DMA handle references */
     volatile uint8_t ActiveConversions;             /*!< ADC number of current regular conversion rank */
+#if defined(USE_XPD_ADC_ERROR_DETECT) || defined(USE_XPD_DMA_ERROR_DETECT)
+    volatile ADC_ErrorType Errors;                  /*!< Conversion errors */
+#endif
 }ADC_HandleType;
 
 /** @} */
@@ -213,7 +224,8 @@ typedef struct
 #define         NEW_ADC_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)               \
     {.Inst      = (INSTANCE),                                            \
      .Callbacks = {(INIT_FN),(DEINIT_FN),NULL,NULL,NULL,NULL,NULL,NULL}, \
-     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl}
+     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,                            \
+     .Errors    = ADC_ERROR_NONE}
 #else
 /**
  * @brief  ADC Handle initializer macro
@@ -313,6 +325,7 @@ XPD_ReturnType  XPD_ADC_Start_DMA           (ADC_HandleType * hadc, void * Addre
 void            XPD_ADC_Stop_DMA            (ADC_HandleType * hadc);
 
 void            XPD_ADC_WatchdogConfig      (ADC_HandleType * hadc, uint8_t Channel, ADC_WatchdogInitType * Config);
+uint8_t         XPD_ADC_WatchdogStatus      (ADC_HandleType * hadc);
 
 uint16_t        XPD_ADC_GetValue            (ADC_HandleType * hadc);
 /** @} */
