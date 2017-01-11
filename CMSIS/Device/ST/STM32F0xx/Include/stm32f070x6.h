@@ -6941,6 +6941,8 @@ typedef struct {
 
 #define ADC_VREFINT_CAL      (*((__I uint16_t *)((uint32_t)0x1FFFF7BAU)))
 
+#define ADC_VBAT_SCALER      2
+
 /**
   * @}
   */
