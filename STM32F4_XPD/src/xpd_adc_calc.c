@@ -56,7 +56,7 @@ float XPD_ADC_GetVDDA_V(void)
 float XPD_ADC_GetVBAT_V(uint16_t vBatConversion)
 {
     /* Convert to V from ADC range, multiply by 2 */
-    return (2.0 * (float)vBatConversion * VDDA_V) / 4095.0;
+    return (ADC_VBAT_SCALER * (float)vBatConversion * VDDA_V) / 4095.0;
 }
 
 /**
@@ -77,6 +77,7 @@ float XPD_ADC_GetTemperature_C(uint16_t tempConversion)
 {
     float temp;
 
+#if defined(ADC_TEMPSENSOR)
     /*
      * Convert the conversion result as it was measured at 3.3V
      * tempConvCorrected / VDDA_mV = tempConversion / 3300
@@ -87,6 +88,15 @@ float XPD_ADC_GetTemperature_C(uint16_t tempConversion)
     temp -= (110.0 - 30.0) * (float)ADC_TEMPSENSOR->CAL30;
     temp /= (float)(ADC_TEMPSENSOR->CAL110 - ADC_TEMPSENSOR->CAL30);
     temp += 30.0;
+#elif defined(ADC_TEMPSENSOR_30)
+    /*
+     * Calculate temperature using calibration at 30°C and average slope:
+     * temp = (V30 - Vsense)/Avg_slope + 30
+     */
+    temp = ADC_TEMPSENSOR_SLOPE(XPD_ADC_GetValue_V(ADC_TEMPSENSOR_30 - tempConversion)) + 30;
+#else
+    temp = 0;
+#endif
     return temp;
 }
 #endif
@@ -124,7 +134,7 @@ int32_t XPD_ADC_GetVDDA_mV(void)
 int32_t XPD_ADC_GetVBAT_mV(uint16_t vBatConversion)
 {
     /* Convert to mV from ADC range, multiply by 2 */
-    return (2 * (int32_t)vBatConversion * VDDA_mV) / 4095;
+    return (ADC_VBAT_SCALER * (int32_t)vBatConversion * VDDA_mV) / 4095;
 }
 
 /**
@@ -133,7 +143,7 @@ int32_t XPD_ADC_GetVBAT_mV(uint16_t vBatConversion)
  */
 int32_t XPD_ADC_GetValue_mV(uint16_t channelConversion)
 {
-    /* Convert to mV from ADC range, multiply by 2 */
+    /* Convert to mV from ADC range */
     return ((int32_t)channelConversion * VDDA_mV) / 4095;
 }
 
@@ -144,6 +154,7 @@ int32_t XPD_ADC_GetValue_mV(uint16_t channelConversion)
 int32_t XPD_ADC_GetTemperature(uint16_t tempConversion)
 {
     int32_t temp;
+#if defined(ADC_TEMPSENSOR)
     /*
      * Convert the conversion result as it was measured at 3.3V
      * tempConvCorrected / VDDA_mV = tempConversion / 3300
@@ -154,6 +165,15 @@ int32_t XPD_ADC_GetTemperature(uint16_t tempConversion)
     temp -= (110 - 30) * (int32_t)ADC_TEMPSENSOR->CAL30;
     temp /= (int32_t)(ADC_TEMPSENSOR->CAL110 - ADC_TEMPSENSOR->CAL30);
     temp += 30;
+#elif defined(ADC_TEMPSENSOR_30)
+    /*
+     * Calculate temperature using calibration at 30°C and average slope:
+     * temp = (V30 - Vsense)/Avg_slope + 30
+     */
+    temp = ADC_TEMPSENSOR_SLOPE(XPD_ADC_GetValue_mV(ADC_TEMPSENSOR_30 - tempConversion)) + 30;
+#else
+    temp = 0;
+#endif
     return temp;
 }
 

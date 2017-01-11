@@ -69,8 +69,6 @@ static void adc_dmaConversionRedirect(void *hdma)
 {
     ADC_HandleType* hadc = (ADC_HandleType*) ((DMA_HandleType*) hdma)->Owner;
 
-    hadc->ActiveConversions = 0;
-
     /* Not externally triggered, not continuous, last element of scan, disable interrupt */
     if (    ((hadc->Inst->CR2.w & (ADC_CR2_CONT | ADC_CR2_EXTEN)) == 0)
          && ((hadc->Inst->SQR1.b.L == 0) || (ADC_REG_BIT(hadc,CR2,EOCS) == 0)))
@@ -83,8 +81,6 @@ static void adc_dmaConversionRedirect(void *hdma)
 static void adc_dmaHalfConversionRedirect(void *hdma)
 {
     ADC_HandleType* hadc = (ADC_HandleType*) ((DMA_HandleType*) hdma)->Owner;
-
-    hadc->ActiveConversions = (hadc->Inst->SQR1.b.L + 1)/2;
 
     XPD_SAFE_CALLBACK(hadc->Callbacks.HalfConvComplete, hadc);
 }
@@ -206,9 +202,6 @@ XPD_ReturnType XPD_ADC_Deinit(ADC_HandleType * hadc)
  */
 void XPD_ADC_ChannelConfig(ADC_HandleType * hadc, ADC_ChannelInitType * Config)
 {
-    /* sample time configuration */
-    adc_sampleTimeConfig(hadc, Config->Channel, Config->SampleTime);
-
     /* channel configuration for a given rank */
     if (Config->Rank < 7)
     {
@@ -238,6 +231,10 @@ void XPD_ADC_ChannelConfig(ADC_HandleType * hadc, ADC_ChannelInitType * Config)
         MODIFY_REG(hadc->Inst->SQR1.w, channelMask, channelVal);
     }
 
+    /* sample time configuration */
+    adc_sampleTimeConfig(hadc, Config->Channel, Config->SampleTime);
+
+    /* Only ADC1 has access to internal measurement channels */
     if (hadc->Inst == ADC1)
     {
         /* if ADC1 channel 18 is selected, enable VBAT */
@@ -247,7 +244,7 @@ void XPD_ADC_ChannelConfig(ADC_HandleType * hadc, ADC_ChannelInitType * Config)
             ADC_COMMON_REG_BIT(CCR, VBATE) = 1;
         }
         /* if ADC1 channel 16 or 17 is selected, enable Temperature sensor and VREFINT */
-        else if((Config->Channel == ADC_TEMPSENSOR_CHANNEL) || (Config->Channel == ADC_VREFINT_CHANNEL))
+        else if ((Config->Channel == ADC_TEMPSENSOR_CHANNEL) || (Config->Channel == ADC_VREFINT_CHANNEL))
         {
             /* enable the TS-VREF input */
             ADC_COMMON_REG_BIT(CCR,TSVREFE) = 1;
@@ -402,8 +399,12 @@ void XPD_ADC_IRQHandler(ADC_HandleType * hadc)
         /* clear the ADC flag for regular end of conversion */
         XPD_ADC_ClearFlag(hadc, EOC);
 
-        /* conversion complete callback */
-        XPD_SAFE_CALLBACK(hadc->Callbacks.ConvComplete, hadc);
+        /* Callback only if single conversion, or end of sequence */
+        if ((ADC_REG_BIT(hadc,CR2,EOCS) == 0) || (hadc->ActiveConversions == 0))
+        {
+            /* conversion complete callback */
+            XPD_SAFE_CALLBACK(hadc->Callbacks.ConvComplete, hadc);
+        }
     }
 
     /* End of conversion flag for injected channels */
@@ -416,6 +417,7 @@ void XPD_ADC_IRQHandler(ADC_HandleType * hadc)
             /* disable the ADC end of conversion interrupt for injected group */
             XPD_ADC_DisableIT(hadc, JEOC);
         }
+
         /* clear the ADC flag for injected end of conversion */
         XPD_ADC_ClearFlag(hadc, JEOC);
 
@@ -427,11 +429,12 @@ void XPD_ADC_IRQHandler(ADC_HandleType * hadc)
     if (    ((sr  & ADC_SR_AWD) != 0)
          && ((cr1 & ADC_CR1_AWDIE) != 0))
     {
-        /* clear the watchdog flag */
-        XPD_ADC_ClearFlag(hadc, AWD);
-
         /* watchdog callback */
         XPD_SAFE_CALLBACK(hadc->Callbacks.Watchdog, hadc);
+
+        /* clear the watchdog flag only after callback,
+         * so watchdog status can be determined */
+        XPD_ADC_ClearFlag(hadc, AWD);
     }
 
 #ifdef USE_XPD_ADC_ERROR_DETECT
@@ -512,14 +515,23 @@ void XPD_ADC_WatchdogConfig(ADC_HandleType * hadc, uint8_t Channel, ADC_Watchdog
     /* set the analog watchdog mode */
     MODIFY_REG(hadc->Inst->CR1.w, (ADC_CR1_AWDSGL | ADC_CR1_JAWDEN | ADC_CR1_AWDEN), Config->Mode);
 
-    /* set thresholds */
-    hadc->Inst->HTR = Config->Threshold.High;
-    hadc->Inst->LTR = Config->Threshold.Low;
+    /* Watchdog activation */
+    if (Config->Mode != ADC_WATCHDOG_NONE)
+    {
+        /* set thresholds */
+        hadc->Inst->HTR = Config->Threshold.High;
+        hadc->Inst->LTR = Config->Threshold.Low;
 
-    /* select the analog watchdog channel */
-    hadc->Inst->CR1.b.AWDCH = Channel;
+        /* select the analog watchdog channel */
+        hadc->Inst->CR1.b.AWDCH = Channel;
 
-    XPD_ADC_EnableIT(hadc, AWD);
+        XPD_ADC_EnableIT(hadc, AWD);
+    }
+    else
+    {
+        /* Watchdog deactivation */
+        XPD_ADC_DisableIT(hadc, AWD);
+    }
 }
 
 /**
