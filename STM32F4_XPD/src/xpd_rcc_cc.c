@@ -406,7 +406,7 @@ void XPD_RCC_IRQHandler(void)
     if ((cir & (RCC_CIR_LSERDYF | RCC_CIR_LSERDYIE)) == (RCC_CIR_LSERDYF | RCC_CIR_LSERDYIE))
     {
         /* Clear RCC LSERDY pending bit */
-        RCC_REG_BIT(CIR,LSERDYC) = 1;
+        XPD_RCC_ClearFlag(LSERDY);
 
         /* LSE Ready callback */
         rcc_readyOscillator = LSE;
@@ -416,7 +416,7 @@ void XPD_RCC_IRQHandler(void)
     if ((cir & (RCC_CIR_LSIRDYF | RCC_CIR_LSIRDYIE)) == (RCC_CIR_LSIRDYF | RCC_CIR_LSIRDYIE))
     {
         /* Clear RCC LSIRDY pending bit */
-        RCC_REG_BIT(CIR,LSIRDYC) = 1;
+        XPD_RCC_ClearFlag(LSIRDY);
 
         /* LSI Ready callback */
         rcc_readyOscillator = LSI;
@@ -426,7 +426,7 @@ void XPD_RCC_IRQHandler(void)
     if ((cir & (RCC_CIR_PLLRDYF | RCC_CIR_PLLRDYIE)) == (RCC_CIR_PLLRDYF | RCC_CIR_PLLRDYIE))
     {
         /* Clear RCC PLLRDY pending bit */
-        RCC_REG_BIT(CIR,PLLRDYC) = 1;
+        XPD_RCC_ClearFlag(PLLRDY);
 
         /* PLL Ready callback */
         rcc_readyOscillator = PLL;
@@ -436,7 +436,7 @@ void XPD_RCC_IRQHandler(void)
     if ((cir & (RCC_CIR_HSERDYF | RCC_CIR_HSERDYIE)) == (RCC_CIR_HSERDYF | RCC_CIR_HSERDYIE))
     {
         /* Clear RCC HSERDY pending bit */
-        RCC_REG_BIT(CIR,HSERDYC) = 1;
+        XPD_RCC_ClearFlag(HSERDY);
 
         /* HSE Ready callback */
         rcc_readyOscillator = HSE;
@@ -446,7 +446,7 @@ void XPD_RCC_IRQHandler(void)
     if ((cir & (RCC_CIR_HSIRDYF | RCC_CIR_HSIRDYIE)) == (RCC_CIR_HSIRDYF | RCC_CIR_HSIRDYIE))
     {
         /* Clear RCC HSIRDY pending bit */
-        RCC_REG_BIT(CIR,HSIRDYC) = 1;
+        XPD_RCC_ClearFlag(HSIRDY);
 
         /* HSI Ready callback */
         rcc_readyOscillator = HSI;
@@ -486,7 +486,7 @@ void XPD_NMI_IRQHandler(void)
     if (RCC_REG_BIT(CIR,CSSF) != 0)
     {
         /* Clear RCC CSS pending bit */
-        RCC_REG_BIT(CIR,CSSC) = 1;
+        XPD_RCC_ClearFlag(CSS);
 
         /* RCC Clock Security System interrupt user callback */
         XPD_SAFE_CALLBACK(XPD_RCC_Callbacks.CSS,);
@@ -718,32 +718,40 @@ void XPD_RCC_MCOConfig(uint8_t MCOx, uint8_t MCOSource, ClockDividerType MCODiv)
 }
 
 #ifdef RCC_CFGR_MCO1EN
+/**
+ * @brief Enables a master clock output
+ * @param MCOx: the number of the MCO
+ */
 void XPD_RCC_EnableMCO(uint8_t MCOx)
 {
-    if(MCOx == 1)
-    {
-        RCC_REG_BIT(CFGR,MCO1EN) = 1;
-    }
 #ifdef RCC_CFGR_MCO2EN
-    else
+    if (MCOx == 2)
     {
         RCC_REG_BIT(CFGR,MCO2EN) = 1;
     }
+    else
 #endif
+    {
+        RCC_REG_BIT(CFGR,MCO1EN) = 1;
+    }
 }
 
+/**
+ * @brief Disables a master clock output
+ * @param MCOx: the number of the MCO
+ */
 void XPD_RCC_DisableMCO(uint8_t MCOx)
 {
-    if(MCOx == 1)
-    {
-        RCC_REG_BIT(CFGR,MCO1EN) = 0;
-    }
 #ifdef RCC_CFGR_MCO2EN
-    else
+    if (MCOx == 2)
     {
         RCC_REG_BIT(CFGR,MCO2EN) = 0;
     }
+    else
 #endif
+    {
+        RCC_REG_BIT(CFGR,MCO1EN) = 0;
+    }
 }
 #endif /* RCC_CFGR_MCO1EN */
 
@@ -828,12 +836,13 @@ void XPD_RCC_ResetAPB2(void)
     RCC->APB2RSTR.w = 0xFFFFFFFF;
     RCC->APB2RSTR.w = 0x00000000;
 }
-/** @} */
-
-/** @} */
 
 /** @} */
 
 /** @} */
 
 XPD_RCC_CallbacksType XPD_RCC_Callbacks = { NULL, NULL };
+
+/** @} */
+
+/** @} */
