@@ -1,10 +1,10 @@
 /**
   ******************************************************************************
-  * @file    stm32f405xx.h
+  * @file    stm32f401xe.h
   * @author  Benedek Kupper
-  * @version V0.2
-  * @date    2016-11-05
-  * @brief   CMSIS STM32F405xx Device Peripheral Access Layer Header File.
+  * @version V0.1
+  * @date    2017-01-11
+  * @brief   CMSIS STM32F401xExx Device Peripheral Access Layer Header File. 
   *
   *          This file contains:
   *           - Data structures and the address mapping for all peripherals
@@ -61,12 +61,12 @@
   * @{
   */
 
-/** @addtogroup stm32f405xx
+/** @addtogroup stm32f401xe
   * @{
   */
     
-#ifndef __STM32F405xx_H
-#define __STM32F405xx_H
+#ifndef __STM32F401xE_H
+#define __STM32F401xE_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -102,7 +102,6 @@ typedef enum
 {
 /******  Cortex-M4 Processor Exceptions Numbers ****************************************************************/
   NonMaskableInt_IRQn         = -14,    /*!< 2 Non Maskable Interrupt                                          */
-  HardFault_IRQn              = -13,    /*!< 3 Cortex-M4 Hard Fault Interrupt                                  */
   MemoryManagement_IRQn       = -12,    /*!< 4 Cortex-M4 Memory Management Interrupt                           */
   BusFault_IRQn               = -11,    /*!< 5 Cortex-M4 Bus Fault Interrupt                                   */
   UsageFault_IRQn             = -10,    /*!< 6 Cortex-M4 Usage Fault Interrupt                                 */
@@ -130,10 +129,6 @@ typedef enum
   DMA1_Stream5_IRQn           = 16,     /*!< DMA1 Stream 5 global Interrupt                                    */
   DMA1_Stream6_IRQn           = 17,     /*!< DMA1 Stream 6 global Interrupt                                    */
   ADC_IRQn                    = 18,     /*!< ADC1, ADC2 and ADC3 global Interrupts                             */
-  CAN1_TX_IRQn                = 19,     /*!< CAN1 TX Interrupt                                                 */
-  CAN1_RX0_IRQn               = 20,     /*!< CAN1 RX0 Interrupt                                                */
-  CAN1_RX1_IRQn               = 21,     /*!< CAN1 RX1 Interrupt                                                */
-  CAN1_SCE_IRQn               = 22,     /*!< CAN1 SCE Interrupt                                                */
   EXTI9_5_IRQn                = 23,     /*!< External Line[9:5] Interrupts                                     */
   TIM1_BRK_TIM9_IRQn          = 24,     /*!< TIM1 Break interrupt and TIM9 global interrupt                    */
   TIM1_UP_TIM10_IRQn          = 25,     /*!< TIM1 Update Interrupt and TIM10 global interrupt                  */
@@ -150,32 +145,18 @@ typedef enum
   SPI2_IRQn                   = 36,     /*!< SPI2 global Interrupt                                             */
   USART1_IRQn                 = 37,     /*!< USART1 global Interrupt                                           */
   USART2_IRQn                 = 38,     /*!< USART2 global Interrupt                                           */
-  USART3_IRQn                 = 39,     /*!< USART3 global Interrupt                                           */
   EXTI15_10_IRQn              = 40,     /*!< External Line[15:10] Interrupts                                   */
   RTC_Alarm_IRQn              = 41,     /*!< RTC Alarm (A and B) through EXTI Line Interrupt                   */
-  OTG_FS_WKUP_IRQn            = 42,     /*!< USB OTG FS Wakeup through EXTI line interrupt                     */    
-  TIM8_BRK_TIM12_IRQn         = 43,     /*!< TIM8 Break Interrupt and TIM12 global interrupt                   */
-  TIM8_UP_TIM13_IRQn          = 44,     /*!< TIM8 Update Interrupt and TIM13 global interrupt                  */
-  TIM8_TRG_COM_TIM14_IRQn     = 45,     /*!< TIM8 Trigger and Commutation Interrupt and TIM14 global interrupt */
-  TIM8_CC_IRQn                = 46,     /*!< TIM8 Capture Compare Interrupt                                    */
+  OTG_FS_WKUP_IRQn            = 42,     /*!< USB OTG FS Wakeup through EXTI line interrupt                     */  
   DMA1_Stream7_IRQn           = 47,     /*!< DMA1 Stream7 Interrupt                                            */
-  FSMC_IRQn                   = 48,     /*!< FSMC global Interrupt                                             */
   SDIO_IRQn                   = 49,     /*!< SDIO global Interrupt                                             */
   TIM5_IRQn                   = 50,     /*!< TIM5 global Interrupt                                             */
   SPI3_IRQn                   = 51,     /*!< SPI3 global Interrupt                                             */
-  UART4_IRQn                  = 52,     /*!< UART4 global Interrupt                                            */
-  UART5_IRQn                  = 53,     /*!< UART5 global Interrupt                                            */
-  TIM6_DAC_IRQn               = 54,     /*!< TIM6 global and DAC1&2 underrun error  interrupts                 */
-  TIM7_IRQn                   = 55,     /*!< TIM7 global interrupt                                             */
   DMA2_Stream0_IRQn           = 56,     /*!< DMA2 Stream 0 global Interrupt                                    */
   DMA2_Stream1_IRQn           = 57,     /*!< DMA2 Stream 1 global Interrupt                                    */
   DMA2_Stream2_IRQn           = 58,     /*!< DMA2 Stream 2 global Interrupt                                    */
   DMA2_Stream3_IRQn           = 59,     /*!< DMA2 Stream 3 global Interrupt                                    */
   DMA2_Stream4_IRQn           = 60,     /*!< DMA2 Stream 4 global Interrupt                                    */
-  CAN2_TX_IRQn                = 63,     /*!< CAN2 TX Interrupt                                                 */
-  CAN2_RX0_IRQn               = 64,     /*!< CAN2 RX0 Interrupt                                                */
-  CAN2_RX1_IRQn               = 65,     /*!< CAN2 RX1 Interrupt                                                */
-  CAN2_SCE_IRQn               = 66,     /*!< CAN2 SCE Interrupt                                                */
   OTG_FS_IRQn                 = 67,     /*!< USB OTG FS global Interrupt                                       */
   DMA2_Stream5_IRQn           = 68,     /*!< DMA2 Stream 5 global interrupt                                    */
   DMA2_Stream6_IRQn           = 69,     /*!< DMA2 Stream 6 global interrupt                                    */
@@ -183,12 +164,8 @@ typedef enum
   USART6_IRQn                 = 71,     /*!< USART6 global interrupt                                           */
   I2C3_EV_IRQn                = 72,     /*!< I2C3 event interrupt                                              */
   I2C3_ER_IRQn                = 73,     /*!< I2C3 error interrupt                                              */
-  OTG_HS_EP1_OUT_IRQn         = 74,     /*!< USB OTG HS End Point 1 Out global interrupt                       */
-  OTG_HS_EP1_IN_IRQn          = 75,     /*!< USB OTG HS End Point 1 In global interrupt                        */
-  OTG_HS_WKUP_IRQn            = 76,     /*!< USB OTG HS Wakeup through EXTI interrupt                          */
-  OTG_HS_IRQn                 = 77,     /*!< USB OTG HS global interrupt                                       */
-  HASH_RNG_IRQn               = 80,     /*!< Hash and RNG global interrupt                                     */
-  FPU_IRQn                    = 81      /*!< FPU global interrupt                                              */
+  FPU_IRQn                    = 81,      /*!< FPU global interrupt                                             */
+  SPI4_IRQn                   = 84       /*!< SPI4 global Interrupt                                            */
 } IRQn_Type;
 
 /**
@@ -569,421 +546,6 @@ typedef struct {
 
 
 
-
-/**
-  * @brief Controller Area Network TxMailBox
-  */
-typedef struct {
-    union {
-        struct {
-            __IO uint32_t TXRQ : 1;                         /*!<Transmit Mailbox Request */
-            __IO uint32_t RTR : 1;                          /*!<Remote Transmission Request */
-            __IO uint32_t IDE : 1;                          /*!<Identifier Extension */
-            __IO uint32_t EXID : 18;                        /*!<Extended Identifier */
-            __IO uint32_t STID : 11;                        /*!<Standard Identifier or Extended Identifier */
-        } b;
-        __IO uint32_t w;
-    } TIR;                                                  /*!< CAN TX mailbox identifier register */
-    union {
-        struct {
-            __IO uint32_t DLC : 4;                          /*!<Data Length Code */
-                 uint32_t __RESERVED0 : 4;
-            __IO uint32_t TGT : 1;                          /*!<Transmit Global Time */
-                 uint32_t __RESERVED1 : 7;
-            __IO uint32_t TIME : 16;                        /*!<Message Time Stamp */
-        } b;
-        __IO uint32_t w;
-    } TDTR;                                                 /*!< CAN mailbox data length control and time stamp register */
-    union {
-        struct {
-            __IO uint32_t DATA0 : 8;                        /*!<Data byte 0 */
-            __IO uint32_t DATA1 : 8;                        /*!<Data byte 1 */
-            __IO uint32_t DATA2 : 8;                        /*!<Data byte 2 */
-            __IO uint32_t DATA3 : 8;                        /*!<Data byte 3 */
-        } b;
-        __IO uint32_t w;
-    } TDLR;                                                 /*!< CAN mailbox data low register */
-    union {
-        struct {
-            __IO uint32_t DATA4 : 8;                        /*!<Data byte 4 */
-            __IO uint32_t DATA5 : 8;                        /*!<Data byte 5 */
-            __IO uint32_t DATA6 : 8;                        /*!<Data byte 6 */
-            __IO uint32_t DATA7 : 8;                        /*!<Data byte 7 */
-        } b;
-        __IO uint32_t w;
-    } TDHR;                                                 /*!< CAN mailbox data high register */
-} CAN_TxMailBox_TypeDef;
-
-
-/**
-  * @brief Controller Area Network FIFOMailBox
-  */
-typedef struct {
-    union {
-        struct {
-                 uint32_t __RESERVED0 : 1;
-            __IO uint32_t RTR : 1;                          /*!<Remote Transmission Request */
-            __IO uint32_t IDE : 1;                          /*!<Identifier Extension */
-            __IO uint32_t EXID : 18;                        /*!<Extended Identifier */
-            __IO uint32_t STID : 11;                        /*!<Standard Identifier or Extended Identifier */
-        } b;
-        __IO uint32_t w;
-    } RIR;                                                  /*!< CAN receive FIFO mailbox identifier register */
-    union {
-        struct {
-            __IO uint32_t DLC : 4;                          /*!<Data Length Code */
-                 uint32_t __RESERVED0 : 4;
-            __IO uint32_t FMI : 8;                          /*!<Filter Match Index */
-            __IO uint32_t TIME : 16;                        /*!<Message Time Stamp */
-        } b;
-        __IO uint32_t w;
-    } RDTR;                                                 /*!< CAN receive FIFO mailbox data length control and time stamp register */
-    union {
-        struct {
-            __IO uint32_t DATA0 : 8;                        /*!<Data byte 0 */
-            __IO uint32_t DATA1 : 8;                        /*!<Data byte 1 */
-            __IO uint32_t DATA2 : 8;                        /*!<Data byte 2 */
-            __IO uint32_t DATA3 : 8;                        /*!<Data byte 3 */
-        } b;
-        __IO uint32_t w;
-    } RDLR;                                                 /*!< CAN receive FIFO mailbox data low register */
-    union {
-        struct {
-            __IO uint32_t DATA4 : 8;                        /*!<Data byte 4 */
-            __IO uint32_t DATA5 : 8;                        /*!<Data byte 5 */
-            __IO uint32_t DATA6 : 8;                        /*!<Data byte 6 */
-            __IO uint32_t DATA7 : 8;                        /*!<Data byte 7 */
-        } b;
-        __IO uint32_t w;
-    } RDHR;                                                 /*!< CAN receive FIFO mailbox data high register */
-} CAN_FIFOMailBox_TypeDef;
-
-
-/**
-  * @brief Controller Area Network FilterRegister
-  */
-typedef struct {
-    __IO uint32_t FR1;                                      /*!< CAN Filter bank register 1 */
-    __IO uint32_t FR2;                                      /*!< CAN Filter bank register 1 */
-} CAN_FilterRegister_TypeDef;
-
-
-/**
-  * @brief Controller Area Network
-  */
-typedef struct {
-    union {
-        struct {
-            __IO uint32_t INRQ : 1;                         /*!<Initialization Request */
-            __IO uint32_t SLEEP : 1;                        /*!<Sleep Mode Request */
-            __IO uint32_t TXFP : 1;                         /*!<Transmit FIFO Priority */
-            __IO uint32_t RFLM : 1;                         /*!<Receive FIFO Locked Mode */
-            __IO uint32_t NART : 1;                         /*!<No Automatic Retransmission */
-            __IO uint32_t AWUM : 1;                         /*!<Automatic Wakeup Mode */
-            __IO uint32_t ABOM : 1;                         /*!<Automatic Bus-Off Management */
-            __IO uint32_t TTCM : 1;                         /*!<Time Triggered Communication Mode */
-                 uint32_t __RESERVED0 : 7;
-            __IO uint32_t RESET : 1;                        /*!<bxCAN software master reset */
-            __IO uint32_t DBF : 1;                          /*!<bxCAN Debug freeze */
-                 uint32_t __RESERVED1 : 15;
-        } b;
-        __IO uint32_t w;
-    } MCR;                                                  /*!< CAN master control register,         Address offset: 0x00          */
-    union {
-        struct {
-            __IO uint32_t INAK : 1;                         /*!<Initialization Acknowledge */
-            __IO uint32_t SLAK : 1;                         /*!<Sleep Acknowledge */
-            __IO uint32_t ERRI : 1;                         /*!<Error Interrupt */
-            __IO uint32_t WKUI : 1;                         /*!<Wakeup Interrupt */
-            __IO uint32_t SLAKI : 1;                        /*!<Sleep Acknowledge Interrupt */
-                 uint32_t __RESERVED0 : 3;
-            __IO uint32_t TXM : 1;                          /*!<Transmit Mode */
-            __IO uint32_t RXM : 1;                          /*!<Receive Mode */
-            __IO uint32_t SAMP : 1;                         /*!<Last Sample Point */
-            __IO uint32_t RX : 1;                           /*!<CAN Rx Signal */
-                 uint32_t __RESERVED1 : 20;
-        } b;
-        __IO uint32_t w;
-    } MSR;                                                  /*!< CAN master status register,          Address offset: 0x04          */
-    union {
-        struct {
-            __IO uint32_t RQCP0 : 1;                        /*!<Request Completed Mailbox0 */
-            __IO uint32_t TXOK0 : 1;                        /*!<Transmission OK of Mailbox0 */
-            __IO uint32_t ALST0 : 1;                        /*!<Arbitration Lost for Mailbox0 */
-            __IO uint32_t TERR0 : 1;                        /*!<Transmission Error of Mailbox0 */
-                 uint32_t __RESERVED0 : 3;
-            __IO uint32_t ABRQ0 : 1;                        /*!<Abort Request for Mailbox0 */
-            __IO uint32_t RQCP1 : 1;                        /*!<Request Completed Mailbox1 */
-            __IO uint32_t TXOK1 : 1;                        /*!<Transmission OK of Mailbox1 */
-            __IO uint32_t ALST1 : 1;                        /*!<Arbitration Lost for Mailbox1 */
-            __IO uint32_t TERR1 : 1;                        /*!<Transmission Error of Mailbox1 */
-                 uint32_t __RESERVED1 : 3;
-            __IO uint32_t ABRQ1 : 1;                        /*!<Abort Request for Mailbox 1 */
-            __IO uint32_t RQCP2 : 1;                        /*!<Request Completed Mailbox2 */
-            __IO uint32_t TXOK2 : 1;                        /*!<Transmission OK of Mailbox 2 */
-            __IO uint32_t ALST2 : 1;                        /*!<Arbitration Lost for mailbox 2 */
-            __IO uint32_t TERR2 : 1;                        /*!<Transmission Error of Mailbox 2 */
-                 uint32_t __RESERVED2 : 3;
-            __IO uint32_t ABRQ2 : 1;                        /*!<Abort Request for Mailbox 2 */
-            __IO uint32_t CODE : 2;                         /*!<Mailbox Code */
-            __IO uint32_t TME : 3;                          /*!<TME[2:0] bits */
-            __IO uint32_t LOW : 3;                          /*!<LOW[2:0] bits */
-        } b;
-        __IO uint32_t w;
-    } TSR;                                                  /*!< CAN transmit status register,        Address offset: 0x08          */
-    union {
-        struct {
-            __IO uint32_t FMP : 2;                          /*!<FIFO Message Pending */
-                 uint32_t __RESERVED0 : 1;
-            __IO uint32_t FULL : 1;                         /*!<FIFO Full */
-            __IO uint32_t FOVR : 1;                         /*!<FIFO Overrun */
-            __IO uint32_t RFOM : 1;                         /*!<Release FIFO Output Mailbox */
-                 uint32_t __RESERVED1 : 26;
-        } b;
-        __IO uint32_t w;
-    } RFR[2];                                               /*!< CAN receive FIFO registers,          Address offset: 0x0C          */
-    union {
-        struct {
-            __IO uint32_t TMEIE : 1;                        /*!<Transmit Mailbox Empty Interrupt Enable */
-            __IO uint32_t FMP0IE : 1;                       /*!<FIFO Message Pending Interrupt Enable */
-            __IO uint32_t FF0IE : 1;                        /*!<FIFO Full Interrupt Enable */
-            __IO uint32_t FOV0IE : 1;                       /*!<FIFO Overrun Interrupt Enable */
-            __IO uint32_t FMP1IE : 1;                       /*!<FIFO Message Pending Interrupt Enable */
-            __IO uint32_t FF1IE : 1;                        /*!<FIFO Full Interrupt Enable */
-            __IO uint32_t FOV1IE : 1;                       /*!<FIFO Overrun Interrupt Enable */
-                 uint32_t __RESERVED0 : 1;
-            __IO uint32_t EWGIE : 1;                        /*!<Error Warning Interrupt Enable */
-            __IO uint32_t EPVIE : 1;                        /*!<Error Passive Interrupt Enable */
-            __IO uint32_t BOFIE : 1;                        /*!<Bus-Off Interrupt Enable */
-            __IO uint32_t LECIE : 1;                        /*!<Last Error Code Interrupt Enable */
-                 uint32_t __RESERVED1 : 3;
-            __IO uint32_t ERRIE : 1;                        /*!<Error Interrupt Enable */
-            __IO uint32_t WKUIE : 1;                        /*!<Wakeup Interrupt Enable */
-            __IO uint32_t SLKIE : 1;                        /*!<Sleep Interrupt Enable */
-                 uint32_t __RESERVED2 : 14;
-        } b;
-        __IO uint32_t w;
-    } IER;                                                  /*!< CAN interrupt enable register,       Address offset: 0x14          */
-    union {
-        struct {
-            __IO uint32_t EWGF : 1;                         /*!<Error Warning Flag */
-            __IO uint32_t EPVF : 1;                         /*!<Error Passive Flag */
-            __IO uint32_t BOFF : 1;                         /*!<Bus-Off Flag */
-                 uint32_t __RESERVED0 : 1;
-            __IO uint32_t LEC : 3;                          /*!<LEC[2:0] bits (Last Error Code) */
-                 uint32_t __RESERVED1 : 9;
-            __IO uint32_t TEC : 8;                          /*!<Least significant byte of the 9-bit Transmit Error Counter */
-            __IO uint32_t REC : 8;                          /*!<Receive Error Counter */
-        } b;
-        __IO uint32_t w;
-    } ESR;                                                  /*!< CAN error status register,           Address offset: 0x18          */
-    union {
-        struct {
-            __IO uint32_t BRP : 10;                         /*!<Baud Rate Prescaler */
-                 uint32_t __RESERVED0 : 6;
-            __IO uint32_t TS1 : 4;                          /*!<Time Segment 1 */
-            __IO uint32_t TS2 : 3;                          /*!<Time Segment 2 */
-                 uint32_t __RESERVED1 : 1;
-            __IO uint32_t SJW : 2;                          /*!<Resynchronization Jump Width */
-                 uint32_t __RESERVED2 : 4;
-            __IO uint32_t LBKM : 1;                         /*!<Loop Back Mode (Debug) */
-            __IO uint32_t SILM : 1;                         /*!<Silent Mode */
-        } b;
-        __IO uint32_t w;
-    } BTR;                                                  /*!< CAN bit timing register,             Address offset: 0x1C          */
-         uint32_t __RESERVED0[88];
-    CAN_TxMailBox_TypeDef sTxMailBox[3];                    /*!< CAN Tx MailBox,                      Address offset: 0x180 - 0x1AC */
-    CAN_FIFOMailBox_TypeDef sFIFOMailBox[2];                /*!< CAN FIFO MailBox,                    Address offset: 0x1B0 - 0x1CC */
-         uint32_t __RESERVED1[12];
-    union {
-        struct {
-            __IO uint32_t FINIT : 1;                        /*!<Filter Init Mode */
-                 uint32_t __RESERVED0 : 7;
-            __IO uint32_t CAN2SB : 6;                       /*!<CAN2 start bank */
-                 uint32_t __RESERVED1 : 18;
-        } b;
-        __IO uint32_t w;
-    } FMR;                                                  /*!< CAN filter master register,          Address offset: 0x200         */
-    __IO uint32_t FM1R;                                     /*!< CAN filter mode register,            Address offset: 0x204         */
-         uint32_t __RESERVED2;
-    __IO uint32_t FS1R;                                     /*!< CAN filter scale register,           Address offset: 0x20C         */
-         uint32_t __RESERVED3;
-    __IO uint32_t FFA1R;                                    /*!< CAN filter FIFO assignment register, Address offset: 0x214         */
-         uint32_t __RESERVED4;
-    __IO uint32_t FA1R;                                     /*!< CAN filter activation register,      Address offset: 0x21C         */
-         uint32_t __RESERVED5[8];
-    CAN_FilterRegister_TypeDef sFilterRegister[28];         /*!< CAN Filter Register,           Address offset: 0x240-0x31C   */
-} CAN_TypeDef;
-
-
-typedef struct {
-    struct {
-        __IO uint32_t INRQ;                                 /*!<Initialization Request */
-        __IO uint32_t SLEEP;                                /*!<Sleep Mode Request */
-        __IO uint32_t TXFP;                                 /*!<Transmit FIFO Priority */
-        __IO uint32_t RFLM;                                 /*!<Receive FIFO Locked Mode */
-        __IO uint32_t NART;                                 /*!<No Automatic Retransmission */
-        __IO uint32_t AWUM;                                 /*!<Automatic Wakeup Mode */
-        __IO uint32_t ABOM;                                 /*!<Automatic Bus-Off Management */
-        __IO uint32_t TTCM;                                 /*!<Time Triggered Communication Mode */
-             uint32_t __RESERVED0[7];
-        __IO uint32_t RESET;                                /*!<bxCAN software master reset */
-        __IO uint32_t DBF;                                  /*!<bxCAN Debug freeze */
-             uint32_t __RESERVED1[15];
-    } MCR;                                                  /*!< CAN master control register,         Address offset: 0x00          */
-    struct {
-        __IO uint32_t INAK;                                 /*!<Initialization Acknowledge */
-        __IO uint32_t SLAK;                                 /*!<Sleep Acknowledge */
-        __IO uint32_t ERRI;                                 /*!<Error Interrupt */
-        __IO uint32_t WKUI;                                 /*!<Wakeup Interrupt */
-        __IO uint32_t SLAKI;                                /*!<Sleep Acknowledge Interrupt */
-             uint32_t __RESERVED0[3];
-        __IO uint32_t TXM;                                  /*!<Transmit Mode */
-        __IO uint32_t RXM;                                  /*!<Receive Mode */
-        __IO uint32_t SAMP;                                 /*!<Last Sample Point */
-        __IO uint32_t RX;                                   /*!<CAN Rx Signal */
-             uint32_t __RESERVED1[20];
-    } MSR;                                                  /*!< CAN master status register,          Address offset: 0x04          */
-    struct {
-        struct {
-            __IO uint32_t RQCP;                             /*!<Request Completed MailboxX */
-            __IO uint32_t TXOK;                             /*!<Transmission OK of MailboxX */
-            __IO uint32_t ALST;                             /*!<Arbitration Lost for MailboxX */
-            __IO uint32_t TERR;                             /*!<Transmission Error of MailboxX */
-                 uint32_t __RESERVED0[3];
-            __IO uint32_t ABRQ;                             /*!<Abort Request for MailboxX */
-        }MB[3];                                             /*!<State of each mailbox */
-        __IO uint32_t CODE[2];                              /*!<Mailbox Code */
-        __IO uint32_t TME[3];                               /*!<TME[2:0] bits */
-        __IO uint32_t LOW[3];                               /*!<LOW[2:0] bits */
-    } TSR;                                                  /*!< CAN transmit status register,        Address offset: 0x08          */
-    struct {
-        __IO uint32_t FMP[2];                               /*!<FIFO Message Pending */
-             uint32_t __RESERVED0;
-        __IO uint32_t FULL;                                 /*!<FIFO Full */
-        __IO uint32_t FOVR;                                 /*!<FIFO Overrun */
-        __IO uint32_t RFOM;                                 /*!<Release FIFO Output Mailbox */
-             uint32_t __RESERVED1[26];
-    } RFR[2];                                               /*!< CAN receive FIFO registers,          Address offset: 0x0C          */
-    struct {
-        __IO uint32_t TMEIE;                                /*!<Transmit Mailbox Empty Interrupt Enable */
-        __IO uint32_t FMP0IE;                               /*!<FIFO Message Pending Interrupt Enable */
-        __IO uint32_t FF0IE;                                /*!<FIFO Full Interrupt Enable */
-        __IO uint32_t FOV0IE;                               /*!<FIFO Overrun Interrupt Enable */
-        __IO uint32_t FMP1IE;                               /*!<FIFO Message Pending Interrupt Enable */
-        __IO uint32_t FF1IE;                                /*!<FIFO Full Interrupt Enable */
-        __IO uint32_t FOV1IE;                               /*!<FIFO Overrun Interrupt Enable */
-             uint32_t __RESERVED0;
-        __IO uint32_t EWGIE;                                /*!<Error Warning Interrupt Enable */
-        __IO uint32_t EPVIE;                                /*!<Error Passive Interrupt Enable */
-        __IO uint32_t BOFIE;                                /*!<Bus-Off Interrupt Enable */
-        __IO uint32_t LECIE;                                /*!<Last Error Code Interrupt Enable */
-             uint32_t __RESERVED1[3];
-        __IO uint32_t ERRIE;                                /*!<Error Interrupt Enable */
-        __IO uint32_t WKUIE;                                /*!<Wakeup Interrupt Enable */
-        __IO uint32_t SLKIE;                                /*!<Sleep Interrupt Enable */
-             uint32_t __RESERVED2[14];
-    } IER;                                                  /*!< CAN interrupt enable register,       Address offset: 0x14          */
-    struct {
-        __IO uint32_t EWGF;                                 /*!<Error Warning Flag */
-        __IO uint32_t EPVF;                                 /*!<Error Passive Flag */
-        __IO uint32_t BOFF;                                 /*!<Bus-Off Flag */
-             uint32_t __RESERVED0;
-        __IO uint32_t LEC[3];                               /*!<LEC[2:0] bits (Last Error Code) */
-             uint32_t __RESERVED1[9];
-        __IO uint32_t TEC[8];                               /*!<Least significant byte of the 9-bit Transmit Error Counter */
-        __IO uint32_t REC[8];                               /*!<Receive Error Counter */
-    } ESR;                                                  /*!< CAN error status register,           Address offset: 0x18          */
-    struct {
-        __IO uint32_t BRP[10];                              /*!<Baud Rate Prescaler */
-             uint32_t __RESERVED0[6];
-        __IO uint32_t TS1[4];                               /*!<Time Segment 1 */
-        __IO uint32_t TS2[3];                               /*!<Time Segment 2 */
-             uint32_t __RESERVED1;
-        __IO uint32_t SJW[2];                               /*!<Resynchronization Jump Width */
-             uint32_t __RESERVED2[4];
-        __IO uint32_t LBKM;                                 /*!<Loop Back Mode (Debug) */
-        __IO uint32_t SILM;                                 /*!<Silent Mode */
-    } BTR;                                                  /*!< CAN bit timing register,             Address offset: 0x1C          */
-         uint32_t __RESERVED0[88][32];
-    struct {
-        struct {
-            __IO uint32_t TXRQ;                             /*!<Transmit Mailbox Request */
-            __IO uint32_t RTR;                              /*!<Remote Transmission Request */
-            __IO uint32_t IDE;                              /*!<Identifier Extension */
-            __IO uint32_t EXID[18];                         /*!<Extended Identifier */
-            __IO uint32_t STID[11];                         /*!<Standard Identifier or Extended Identifier */
-        } TIR;                                              /*!< CAN TX mailbox identifier register */
-        struct {
-            __IO uint32_t DLC[4];                           /*!<Data Length Code */
-                 uint32_t __RESERVED0[4];
-            __IO uint32_t TGT;                              /*!<Transmit Global Time */
-                 uint32_t __RESERVED1[7];
-            __IO uint32_t TIME[16];                         /*!<Message Time Stamp */
-        } TDTR;                                             /*!< CAN mailbox data length control and time stamp register */
-        struct {
-            __IO uint32_t DATA0[8];                         /*!<Data byte 0 */
-            __IO uint32_t DATA1[8];                         /*!<Data byte 1 */
-            __IO uint32_t DATA2[8];                         /*!<Data byte 2 */
-            __IO uint32_t DATA3[8];                         /*!<Data byte 3 */
-        } TDLR;                                             /*!< CAN mailbox data low register */
-        struct {
-            __IO uint32_t DATA4[8];                         /*!<Data byte 4 */
-            __IO uint32_t DATA5[8];                         /*!<Data byte 5 */
-            __IO uint32_t DATA6[8];                         /*!<Data byte 6 */
-            __IO uint32_t DATA7[8];                         /*!<Data byte 7 */
-        } TDHR;                                             /*!< CAN mailbox data high register */
-    } sTxMailBox[3];                                        /*!< CAN Tx MailBox,                      Address offset: 0x180 - 0x1AC */
-    struct {
-        struct {
-                 uint32_t __RESERVED0;
-            __IO uint32_t RTR;                              /*!<Remote Transmission Request */
-            __IO uint32_t IDE;                              /*!<Identifier Extension */
-            __IO uint32_t EXID[18];                         /*!<Extended Identifier */
-            __IO uint32_t STID[11];                         /*!<Standard Identifier or Extended Identifier */
-        } RIR;                                              /*!< CAN receive FIFO mailbox identifier register */
-        struct {
-            __IO uint32_t DLC[4];                           /*!<Data Length Code */
-                 uint32_t __RESERVED0[4];
-            __IO uint32_t FMI[8];                           /*!<Filter Match Index */
-            __IO uint32_t TIME[16];                         /*!<Message Time Stamp */
-        } RDTR;                                             /*!< CAN receive FIFO mailbox data length control and time stamp register */
-        struct {
-            __IO uint32_t DATA0[8];                         /*!<Data byte 0 */
-            __IO uint32_t DATA1[8];                         /*!<Data byte 1 */
-            __IO uint32_t DATA2[8];                         /*!<Data byte 2 */
-            __IO uint32_t DATA3[8];                         /*!<Data byte 3 */
-        } RDLR;                                             /*!< CAN receive FIFO mailbox data low register */
-        struct {
-            __IO uint32_t DATA4[8];                         /*!<Data byte 4 */
-            __IO uint32_t DATA5[8];                         /*!<Data byte 5 */
-            __IO uint32_t DATA6[8];                         /*!<Data byte 6 */
-            __IO uint32_t DATA7[8];                         /*!<Data byte 7 */
-        } RDHR;                                             /*!< CAN receive FIFO mailbox data high register */
-    } sFIFOMailBox[2];                                      /*!< CAN FIFO MailBox,                    Address offset: 0x1B0 - 0x1CC */
-         uint32_t __RESERVED1[12][32];
-    struct {
-        __IO uint32_t FINIT;                                /*!<Filter Init Mode */
-             uint32_t __RESERVED0[7];
-        __IO uint32_t CAN2SB[6];                            /*!<CAN2 start bank */
-             uint32_t __RESERVED1[18];
-    } FMR;                                                  /*!< CAN filter master register,          Address offset: 0x200         */
-    __IO uint32_t FM1R[32];                                 /*!< CAN filter mode register,            Address offset: 0x204         */
-         uint32_t __RESERVED2[32];
-    __IO uint32_t FS1R[32];                                 /*!< CAN filter scale register,           Address offset: 0x20C         */
-         uint32_t __RESERVED3[32];
-    __IO uint32_t FFA1R[32];                                /*!< CAN filter FIFO assignment register, Address offset: 0x214         */
-         uint32_t __RESERVED4[32];
-    __IO uint32_t FA1R[32];                                 /*!< CAN filter activation register,      Address offset: 0x21C         */
-         uint32_t __RESERVED5[8][32];
-    struct {
-        __IO uint32_t FR1[32];                              /*!< CAN Filter bank register 1 */
-        __IO uint32_t FR2[32];                              /*!< CAN Filter bank register 1 */
-    } sFilterRegister[28];                                  /*!< CAN Filter Register,                 Address offset: 0x240-0x31C   */
-} CAN_BitBand_TypeDef;
-
-
-
 /** 
   * @brief CRC calculation unit 
   */
@@ -1010,125 +572,6 @@ typedef struct {
              uint32_t __RESERVED0[31];
     } CR;                                                   /*!< CRC Control register,          Address offset: 0x08 */
 } CRC_BitBand_TypeDef;
-
-
-
-/**
-  * @brief Digital to Analog Converter
-  */
-typedef struct {
-    union {
-        struct {
-            __IO uint32_t EN1 : 1;                          /*!<DAC channel1 enable */
-            __IO uint32_t BOFF1 : 1;                        /*!<DAC channel1 output buffer disable */
-            __IO uint32_t TEN1 : 1;                         /*!<DAC channel1 Trigger enable */
-            __IO uint32_t TSEL1 : 3;                        /*!<TSEL1[2:0] (DAC channel1 Trigger selection) */
-            __IO uint32_t WAVE1 : 2;                        /*!<WAVE1[1:0] (DAC channel1 noise/triangle wave generation enable) */
-            __IO uint32_t MAMP1 : 4;                        /*!<MAMP1[3:0] (DAC channel1 Mask/Amplitude selector) */
-            __IO uint32_t DMAEN1 : 1;                       /*!<DAC channel1 DMA enable */
-            __IO uint32_t DMAUDRIE1 : 1;                    /*!<DAC channel1 DMA underrun interrupt enable*/
-                 uint32_t __RESERVED0 : 2;
-            __IO uint32_t EN2 : 1;                          /*!<DAC channel2 enable */
-            __IO uint32_t BOFF2 : 1;                        /*!<DAC channel2 output buffer disable */
-            __IO uint32_t TEN2 : 1;                         /*!<DAC channel2 Trigger enable */
-            __IO uint32_t TSEL2 : 3;                        /*!<TSEL2[2:0] (DAC channel2 Trigger selection) */
-            __IO uint32_t WAVE2 : 2;                        /*!<WAVE2[1:0] (DAC channel2 noise/triangle wave generation enable) */
-            __IO uint32_t MAMP2 : 4;                        /*!<MAMP2[3:0] (DAC channel2 Mask/Amplitude selector) */
-            __IO uint32_t DMAEN2 : 1;                       /*!<DAC channel2 DMA enabled */
-            __IO uint32_t DMAUDRIE2 : 1;                    /*!<DAC channel2 DMA underrun interrupt enable*/
-                 uint32_t __RESERVED1 : 2;
-        } b;
-        __IO uint32_t w;
-    } CR;                                                   /*!< DAC control register,                                    Address offset: 0x00 */
-    union {
-        struct {
-            __IO uint32_t SWTRIG1 : 1;                      /*!<DAC channel1 software trigger */
-            __IO uint32_t SWTRIG2 : 1;                      /*!<DAC channel2 software trigger */
-                 uint32_t __RESERVED0 : 30;
-        } b;
-        __IO uint32_t w;
-    } SWTRIGR;                                              /*!< DAC software trigger register,                           Address offset: 0x04 */
-    struct {
-        __IO uint32_t D12R;                                 /*!< DAC channel 12-bit right-aligned data holding register */
-        __IO uint32_t D12L;                                 /*!< DAC channel 12-bit left-aligned data holding register */
-        __IO uint32_t D8R;                                  /*!< DAC channel 8-bit right-aligned data holding register */
-    } DHR1;                                                 /*!< DAC channel 1 data holding registers */
-    struct {
-        __IO uint32_t D12R;                                 /*!< DAC channel 12-bit right-aligned data holding register */
-        __IO uint32_t D12L;                                 /*!< DAC channel 12-bit left-aligned data holding register */
-        __IO uint32_t D8R;                                  /*!< DAC channel 8-bit right-aligned data holding register */
-    } DHR2;                                                 /*!< DAC channel 2 data holding registers */
-    struct {
-        __IO uint32_t D12R;                                 /*!< DAC channel 12-bit right-aligned data holding register */
-        __IO uint32_t D12L;                                 /*!< DAC channel 12-bit left-aligned data holding register */
-        __IO uint32_t D8R;                                  /*!< DAC channel 8-bit right-aligned data holding register */
-    } DHRD;                                                 /*!< DAC dual channel data holding registers */
-    __IO uint32_t DOR1;                                     /*!< DAC channel1 data output register,                       Address offset: 0x2C */
-    __IO uint32_t DOR2;                                     /*!< DAC channel2 data output register,                       Address offset: 0x30 */
-    union {
-        struct {
-                 uint32_t __RESERVED0 : 13;
-            __IO uint32_t DMAUDR1 : 1;                      /*!<DAC channel1 DMA underrun flag */
-                 uint32_t __RESERVED1 : 15;
-            __IO uint32_t DMAUDR2 : 1;                      /*!<DAC channel2 DMA underrun flag */
-                 uint32_t __RESERVED2 : 2;
-        } b;
-        __IO uint32_t w;
-    } SR;                                                   /*!< DAC status register,                                     Address offset: 0x34 */
-} DAC_TypeDef;
-
-
-typedef struct {
-    struct {
-        __IO uint32_t EN1;                                  /*!<DAC channel1 enable */
-        __IO uint32_t BOFF1;                                /*!<DAC channel1 output buffer disable */
-        __IO uint32_t TEN1;                                 /*!<DAC channel1 Trigger enable */
-        __IO uint32_t TSEL1[3];                             /*!<TSEL1[2:0] (DAC channel1 Trigger selection) */
-        __IO uint32_t WAVE1[2];                             /*!<WAVE1[1:0] (DAC channel1 noise/triangle wave generation enable) */
-        __IO uint32_t MAMP1[4];                             /*!<MAMP1[3:0] (DAC channel1 Mask/Amplitude selector) */
-        __IO uint32_t DMAEN1;                               /*!<DAC channel1 DMA enable */
-        __IO uint32_t DMAUDRIE1;                            /*!<DAC channel1 DMA underrun interrupt enable*/
-             uint32_t __RESERVED0[2];
-        __IO uint32_t EN2;                                  /*!<DAC channel2 enable */
-        __IO uint32_t BOFF2;                                /*!<DAC channel2 output buffer disable */
-        __IO uint32_t TEN2;                                 /*!<DAC channel2 Trigger enable */
-        __IO uint32_t TSEL2[3];                             /*!<TSEL2[2:0] (DAC channel2 Trigger selection) */
-        __IO uint32_t WAVE2[2];                             /*!<WAVE2[1:0] (DAC channel2 noise/triangle wave generation enable) */
-        __IO uint32_t MAMP2[4];                             /*!<MAMP2[3:0] (DAC channel2 Mask/Amplitude selector) */
-        __IO uint32_t DMAEN2;                               /*!<DAC channel2 DMA enabled */
-        __IO uint32_t DMAUDRIE2;                            /*!<DAC channel2 DMA underrun interrupt enable*/
-             uint32_t __RESERVED1[2];
-    } CR;                                                   /*!< DAC control register,                                    Address offset: 0x00 */
-    struct {
-        __IO uint32_t SWTRIG1;                              /*!<DAC channel1 software trigger */
-        __IO uint32_t SWTRIG2;                              /*!<DAC channel2 software trigger */
-             uint32_t __RESERVED0[30];
-    } SWTRIGR;                                              /*!< DAC software trigger register,                           Address offset: 0x04 */
-    struct {
-        __IO uint32_t D12R[32];                             /*!< DAC channel 12-bit right-aligned data holding register */
-        __IO uint32_t D12L[32];                             /*!< DAC channel 12-bit left-aligned data holding register */
-        __IO uint32_t D8R[32];                              /*!< DAC channel 8-bit right-aligned data holding register */
-    } DHR1;                                                 /*!< DAC channel 1 data holding registers */
-    struct {
-        __IO uint32_t D12R[32];                             /*!< DAC channel 12-bit right-aligned data holding register */
-        __IO uint32_t D12L[32];                             /*!< DAC channel 12-bit left-aligned data holding register */
-        __IO uint32_t D8R[32];                              /*!< DAC channel 8-bit right-aligned data holding register */
-    } DHR2;                                                 /*!< DAC channel 2 data holding registers */
-    struct {
-        __IO uint32_t D12R[32];                             /*!< DAC channel 12-bit right-aligned data holding register */
-        __IO uint32_t D12L[32];                             /*!< DAC channel 12-bit left-aligned data holding register */
-        __IO uint32_t D8R[32];                              /*!< DAC channel 8-bit right-aligned data holding register */
-    } DHRD;                                                 /*!< DAC dual channel data holding registers */
-    __IO uint32_t DOR1[32];                                 /*!< DAC channel1 data output register,                       Address offset: 0x2C */
-    __IO uint32_t DOR2[32];                                 /*!< DAC channel2 data output register,                       Address offset: 0x30 */
-    struct {
-             uint32_t __RESERVED0[13];
-        __IO uint32_t DMAUDR1;                              /*!<DAC channel1 DMA underrun flag */
-             uint32_t __RESERVED1[15];
-        __IO uint32_t DMAUDR2;                              /*!<DAC channel2 DMA underrun flag */
-             uint32_t __RESERVED2[2];
-    } SR;                                                   /*!< DAC status register,                                     Address offset: 0x34 */
-} DAC_BitBand_TypeDef;
 
 
 
@@ -1692,243 +1135,10 @@ typedef struct {
 
 
 /**
-  * @brief Flexible Static Memory Controller
-  */
-typedef struct {
-    struct {
-        union {
-            struct {
-                __IO uint32_t MBKEN : 1;                    /*!<Memory bank enable bit                 */
-                __IO uint32_t MUXEN : 1;                    /*!<Address/data multiplexing enable bit   */
-                __IO uint32_t MTYP : 2;                     /*!<MTYP[1:0] bits (Memory type)           */
-                __IO uint32_t MWID : 2;                     /*!<MWID[1:0] bits (Memory data bus width) */
-                __IO uint32_t FACCEN : 1;                   /*!<Flash access enable                    */
-                     uint32_t __RESERVED0 : 1;
-                __IO uint32_t BURSTEN : 1;                  /*!<Burst enable bit                       */
-                __IO uint32_t WAITPOL : 1;                  /*!<Wait signal polarity bit               */
-                __IO uint32_t WRAPMOD : 1;                  /*!<Wrapped burst mode support             */
-                __IO uint32_t WAITCFG : 1;                  /*!<Wait timing configuration              */
-                __IO uint32_t WREN : 1;                     /*!<Write enable bit                       */
-                __IO uint32_t WAITEN : 1;                   /*!<Wait enable bit                        */
-                __IO uint32_t EXTMOD : 1;                   /*!<Extended mode enable                   */
-                __IO uint32_t ASYNCWAIT : 1;                /*!<Asynchronous wait                      */
-                __IO uint32_t CPSIZE : 3;                   /*!<CRAM page size */
-                __IO uint32_t CBURSTRW : 1;                 /*!<Write burst enable                     */
-                     uint32_t __RESERVED1 : 12;
-            } b;
-            __IO uint32_t w;
-        } BCR;                                              /*!< NOR/PSRAM chip-select control register(BCR) */
-        union {
-            struct {
-                __IO uint32_t ADDSET : 4;                   /*!<ADDSET[3:0] bits (Address setup phase duration) */
-                __IO uint32_t ADDHLD : 4;                   /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
-                __IO uint32_t DATAST : 8;                   /*!<DATAST [7:0] bits (Data-phase duration) */
-                __IO uint32_t BUSTURN : 4;                  /*!<BUSTURN[3:0] bits (Bus turnaround phase duration) */
-                __IO uint32_t CLKDIV : 4;                   /*!<CLKDIV[3:0] bits (Clock divide ratio) */
-                __IO uint32_t DATLAT : 4;                   /*!<DATLA[3:0] bits (Data latency) */
-                __IO uint32_t ACCMOD : 2;                   /*!<ACCMOD[1:0] bits (Access mode) */
-                     uint32_t __RESERVED0 : 2;
-            } b;
-            __IO uint32_t w;
-        } BTR;                                              /*!< NOR/PSRAM chip-select timing register(BTR) */
-    } BCTR[4];                                              /*!< NOR/PSRAM chip-select control register(BCR) and chip-select timing register(BTR), Address offset: 0x00-1C */
-} FSMC_Bank1_TypeDef;
-
-
-
-/**
-  * @brief Flexible Static Memory Controller Bank1E
-  */
-typedef struct {
-    union {
-        struct {
-            __IO uint32_t ADDSET : 4;                       /*!<ADDSET[3:0] bits (Address setup phase duration) */
-            __IO uint32_t ADDHLD : 4;                       /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
-            __IO uint32_t DATAST : 8;                       /*!<DATAST [7:0] bits (Data-phase duration) */
-            __IO uint32_t BUSTURN : 4;                      /*!<BUSTURN[3:0] bits (Bus turnaround duration) */
-            __IO uint32_t CLKDIV : 4;                       /*!<CLKDIV[3:0] bits (Clock divide ratio) */
-            __IO uint32_t DATLAT : 4;                       /*!<DATLA[3:0] bits (Data latency) */
-            __IO uint32_t ACCMOD : 2;                       /*!<ACCMOD[1:0] bits (Access mode) */
-                 uint32_t __RESERVED0 : 2;
-        } b;
-        __IO uint32_t w;
-    } BWTR[7];                                              /*!< NOR/PSRAM write timing registers, Address offset: 0x104-0x11C */
-} FSMC_Bank1E_TypeDef;
-
-
-/** 
-  * @brief Flexible Static Memory Controller Bank2
-  */
-typedef struct {
-    union {
-        struct {
-                 uint32_t __RESERVED0 : 1;
-            __IO uint32_t PWAITEN : 1;                      /*!<Wait feature enable bit */
-            __IO uint32_t PBKEN : 1;                        /*!<PC Card/NAND Flash memory bank enable bit */
-            __IO uint32_t PTYP : 1;                         /*!<Memory type */
-            __IO uint32_t PWID : 2;                         /*!<PWID[1:0] bits (NAND Flash databus width) */
-            __IO uint32_t ECCEN : 1;                        /*!<ECC computation logic enable bit */
-                 uint32_t __RESERVED1 : 2;
-            __IO uint32_t TCLR : 4;                         /*!<TCLR[3:0] bits (CLE to RE delay) */
-            __IO uint32_t TAR : 4;                          /*!<TAR[3:0] bits (ALE to RE delay) */
-            __IO uint32_t ECCPS : 3;                        /*!<ECCPS[1:0] bits (ECC page size) */
-                 uint32_t __RESERVED2 : 12;
-        } b;
-        __IO uint32_t w;
-    } PCR2;                                                 /*!< NAND Flash control register 2,                       Address offset: 0x60 */
-    union {
-        struct {
-            __IO uint32_t IRS : 1;                          /*!<Interrupt Rising Edge status                */
-            __IO uint32_t ILS : 1;                          /*!<Interrupt Level status                      */
-            __IO uint32_t IFS : 1;                          /*!<Interrupt Falling Edge status               */
-            __IO uint32_t IREN : 1;                         /*!<Interrupt Rising Edge detection Enable bit  */
-            __IO uint32_t ILEN : 1;                         /*!<Interrupt Level detection Enable bit        */
-            __IO uint32_t IFEN : 1;                         /*!<Interrupt Falling Edge detection Enable bit */
-            __IO uint32_t FEMPT : 1;                        /*!<FIFO empty */
-                 uint32_t __RESERVED0 : 25;
-        } b;
-        __IO uint32_t w;
-    } SR2;                                                  /*!< NAND Flash FIFO status and interrupt register 2,     Address offset: 0x64 */
-    union {
-        struct {
-            __IO uint32_t MEMSET2 : 8;                      /*!<MEMSET2[7:0] bits (Common memory 2 setup time) */
-            __IO uint32_t MEMWAIT2 : 8;                     /*!<MEMWAIT2[7:0] bits (Common memory 2 wait time) */
-            __IO uint32_t MEMHOLD2 : 8;                     /*!<MEMHOLD2[7:0] bits (Common memory 2 hold time) */
-            __IO uint32_t MEMHIZ2 : 8;                      /*!<MEMHIZ2[7:0] bits (Common memory 2 databus HiZ time) */
-        } b;
-        __IO uint32_t w;
-    } PMEM2;                                                /*!< NAND Flash Common memory space timing register 2,    Address offset: 0x68 */
-    union {
-        struct {
-            __IO uint32_t ATTSET2 : 8;                      /*!<ATTSET2[7:0] bits (Attribute memory 2 setup time) */
-            __IO uint32_t ATTWAIT2 : 8;                     /*!<ATTWAIT2[7:0] bits (Attribute memory 2 wait time) */
-            __IO uint32_t ATTHOLD2 : 8;                     /*!<ATTHOLD2[7:0] bits (Attribute memory 2 hold time) */
-            __IO uint32_t ATTHIZ2 : 8;                      /*!<ATTHIZ2[7:0] bits (Attribute memory 2 databus HiZ time) */
-        } b;
-        __IO uint32_t w;
-    } PATT2;                                                /*!< NAND Flash Attribute memory space timing register 2, Address offset: 0x6C */
-         uint32_t __RESERVED0;
-    __IO uint32_t ECCR2;                                    /*!< NAND Flash ECC result registers 2,                   Address offset: 0x74 */
-         uint32_t __RESERVED1[2];
-    union {
-        struct {
-                 uint32_t __RESERVED0 : 1;
-            __IO uint32_t PWAITEN : 1;                      /*!<Wait feature enable bit */
-            __IO uint32_t PBKEN : 1;                        /*!<PC Card/NAND Flash memory bank enable bit */
-            __IO uint32_t PTYP : 1;                         /*!<Memory type */
-            __IO uint32_t PWID : 2;                         /*!<PWID[1:0] bits (NAND Flash databus width) */
-            __IO uint32_t ECCEN : 1;                        /*!<ECC computation logic enable bit */
-                 uint32_t __RESERVED1 : 2;
-            __IO uint32_t TCLR : 4;                         /*!<TCLR[3:0] bits (CLE to RE delay) */
-            __IO uint32_t TAR : 4;                          /*!<TAR[3:0] bits (ALE to RE delay) */
-            __IO uint32_t ECCPS : 3;                        /*!<ECCPS[2:0] bits (ECC page size) */
-                 uint32_t __RESERVED2 : 12;
-        } b;
-        __IO uint32_t w;
-    } PCR3;                                                 /*!< NAND Flash control register 3,                       Address offset: 0x80 */
-    union {
-        struct {
-            __IO uint32_t IRS : 1;                          /*!<Interrupt Rising Edge status                */
-            __IO uint32_t ILS : 1;                          /*!<Interrupt Level status                      */
-            __IO uint32_t IFS : 1;                          /*!<Interrupt Falling Edge status               */
-            __IO uint32_t IREN : 1;                         /*!<Interrupt Rising Edge detection Enable bit  */
-            __IO uint32_t ILEN : 1;                         /*!<Interrupt Level detection Enable bit        */
-            __IO uint32_t IFEN : 1;                         /*!<Interrupt Falling Edge detection Enable bit */
-            __IO uint32_t FEMPT : 1;                        /*!<FIFO empty */
-                 uint32_t __RESERVED0 : 25;
-        } b;
-        __IO uint32_t w;
-    } SR3;                                                  /*!< NAND Flash FIFO status and interrupt register 3,     Address offset: 0x84 */
-    union {
-        struct {
-            __IO uint32_t MEMSET3 : 8;                      /*!<MEMSET3[7:0] bits (Common memory 3 setup time) */
-            __IO uint32_t MEMWAIT3 : 8;                     /*!<MEMWAIT3[7:0] bits (Common memory 3 wait time) */
-            __IO uint32_t MEMHOLD3 : 8;                     /*!<MEMHOLD3[7:0] bits (Common memory 3 hold time) */
-            __IO uint32_t MEMHIZ3 : 8;                      /*!<MEMHIZ3[7:0] bits (Common memory 3 databus HiZ time) */
-        } b;
-        __IO uint32_t w;
-    } PMEM3;                                                /*!< NAND Flash Common memory space timing register 3,    Address offset: 0x88 */
-    union {
-        struct {
-            __IO uint32_t ATTSET3 : 8;                      /*!<ATTSET3[7:0] bits (Attribute memory 3 setup time) */
-            __IO uint32_t ATTWAIT3 : 8;                     /*!<ATTWAIT3[7:0] bits (Attribute memory 3 wait time) */
-            __IO uint32_t ATTHOLD3 : 8;                     /*!<ATTHOLD3[7:0] bits (Attribute memory 3 hold time) */
-            __IO uint32_t ATTHIZ3 : 8;                      /*!<ATTHIZ3[7:0] bits (Attribute memory 3 databus HiZ time) */
-        } b;
-        __IO uint32_t w;
-    } PATT3;                                                /*!< NAND Flash Attribute memory space timing register 3, Address offset: 0x8C */
-         uint32_t __RESERVED2;
-    __IO uint32_t ECCR3;                                    /*!< NAND Flash ECC result registers 3,                   Address offset: 0x94 */
-} FSMC_Bank2_3_TypeDef;
-
-
-/** 
-  * @brief Flexible Static Memory Controller Bank4
-  */
-typedef struct {
-    union {
-        struct {
-                 uint32_t __RESERVED0 : 1;
-            __IO uint32_t PWAITEN : 1;                      /*!<Wait feature enable bit */
-            __IO uint32_t PBKEN : 1;                        /*!<PC Card/NAND Flash memory bank enable bit */
-            __IO uint32_t PTYP : 1;                         /*!<Memory type */
-            __IO uint32_t PWID : 2;                         /*!<PWID[1:0] bits (NAND Flash databus width) */
-            __IO uint32_t ECCEN : 1;                        /*!<ECC computation logic enable bit */
-                 uint32_t __RESERVED1 : 2;
-            __IO uint32_t TCLR : 4;                         /*!<TCLR[3:0] bits (CLE to RE delay) */
-            __IO uint32_t TAR : 4;                          /*!<TAR[3:0] bits (ALE to RE delay) */
-            __IO uint32_t ECCPS : 3;                        /*!<ECCPS[2:0] bits (ECC page size) */
-                 uint32_t __RESERVED2 : 12;
-        } b;
-        __IO uint32_t w;
-    } PCR4;                                                 /*!< PC Card  control register 4,                       Address offset: 0xA0 */
-    union {
-        struct {
-            __IO uint32_t IRS : 1;                          /*!<Interrupt Rising Edge status                 */
-            __IO uint32_t ILS : 1;                          /*!<Interrupt Level status                       */
-            __IO uint32_t IFS : 1;                          /*!<Interrupt Falling Edge status                */
-            __IO uint32_t IREN : 1;                         /*!<Interrupt Rising Edge detection Enable bit   */
-            __IO uint32_t ILEN : 1;                         /*!<Interrupt Level detection Enable bit         */
-            __IO uint32_t IFEN : 1;                         /*!<Interrupt Falling Edge detection Enable bit  */
-            __IO uint32_t FEMPT : 1;                        /*!<FIFO empty */
-                 uint32_t __RESERVED0 : 25;
-        } b;
-        __IO uint32_t w;
-    } SR4;                                                  /*!< PC Card  FIFO status and interrupt register 4,     Address offset: 0xA4 */
-    union {
-        struct {
-            __IO uint32_t MEMSET4 : 8;                      /*!<MEMSET4[7:0] bits (Common memory 4 setup time) */
-            __IO uint32_t MEMWAIT4 : 8;                     /*!<MEMWAIT4[7:0] bits (Common memory 4 wait time) */
-            __IO uint32_t MEMHOLD4 : 8;                     /*!<MEMHOLD4[7:0] bits (Common memory 4 hold time) */
-            __IO uint32_t MEMHIZ4 : 8;                      /*!<MEMHIZ4[7:0] bits (Common memory 4 databus HiZ time) */
-        } b;
-        __IO uint32_t w;
-    } PMEM4;                                                /*!< PC Card  Common memory space timing register 4,    Address offset: 0xA8 */
-    union {
-        struct {
-            __IO uint32_t ATTSET4 : 8;                      /*!<ATTSET4[7:0] bits (Attribute memory 4 setup time) */
-            __IO uint32_t ATTWAIT4 : 8;                     /*!<ATTWAIT4[7:0] bits (Attribute memory 4 wait time) */
-            __IO uint32_t ATTHOLD4 : 8;                     /*!<ATTHOLD4[7:0] bits (Attribute memory 4 hold time) */
-            __IO uint32_t ATTHIZ4 : 8;                      /*!<ATTHIZ4[7:0] bits (Attribute memory 4 databus HiZ time) */
-        } b;
-        __IO uint32_t w;
-    } PATT4;                                                /*!< PC Card  Attribute memory space timing register 4, Address offset: 0xAC */
-    union {
-        struct {
-            __IO uint32_t IOSET4 : 8;                       /*!<IOSET4[7:0] bits (I/O 4 setup time) */
-            __IO uint32_t IOWAIT4 : 8;                      /*!<IOWAIT4[7:0] bits (I/O 4 wait time) */
-            __IO uint32_t IOHOLD4 : 8;                      /*!<IOHOLD4[7:0] bits (I/O 4 hold time) */
-            __IO uint32_t IOHIZ4 : 8;                       /*!<IOHIZ4[7:0] bits (I/O 4 databus HiZ time) */
-        } b;
-        __IO uint32_t w;
-    } PIO4;                                                 /*!< PC Card  I/O space timing register 4,              Address offset: 0xB0 */
-} FSMC_Bank4_TypeDef;
-
-
-
-/**
   * @brief General Purpose I/O
   */
+
+
 typedef struct {
     __IO uint32_t MODER;                                    /*!< GPIO port mode register,               Address offset: 0x00      */
     __IO uint32_t OTYPER;                                   /*!< GPIO port output type register,        Address offset: 0x04      */
@@ -1996,9 +1206,9 @@ typedef struct {
     } MEMRMP;                                               /*!< SYSCFG memory remap register,                      Address offset: 0x00      */
     union {
         struct {
-                 uint32_t __RESERVED0 : 23;
-            __IO uint32_t MII_RMII_SEL : 1;                 /*!<Ethernet PHY interface selection */
-                 uint32_t __RESERVED1 : 8;
+                 uint32_t __RESERVED0 : 16;
+            __IO uint32_t ADC1DC2 : 1;                      /*!< Refer to AN4073 on how to use this bit  */
+                 uint32_t __RESERVED1 : 15;
         } b;
         __IO uint32_t w;
     } PMC;                                                  /*!< SYSCFG peripheral mode configuration register,     Address offset: 0x04      */
@@ -2022,9 +1232,9 @@ typedef struct {
              uint32_t __RESERVED0[29];
     } MEMRMP;                                               /*!< SYSCFG memory remap register,                      Address offset: 0x00      */
     struct {
-             uint32_t __RESERVED0[23];
-        __IO uint32_t MII_RMII_SEL;                         /*!<Ethernet PHY interface selection */
-             uint32_t __RESERVED1[8];
+             uint32_t __RESERVED0[16];
+        __IO uint32_t ADC1DC2;                              /*!< Refer to AN4073 on how to use this bit  */
+             uint32_t __RESERVED1[15];
     } PMC;                                                  /*!< SYSCFG peripheral mode configuration register,     Address offset: 0x04      */
     __IO uint32_t EXTICR[4][32];                            /*!< SYSCFG external interrupt configuration registers, Address offset: 0x08-0x14 */
          uint32_t __RESERVED0[2][32];
@@ -2323,11 +1533,14 @@ typedef struct {
             __IO uint32_t CSBF : 1;                         /*!< Clear Standby Flag                  */
             __IO uint32_t PVDE : 1;                         /*!< Power Voltage Detector Enable       */
             __IO uint32_t PLS : 3;                          /*!< PLS[2:0] bits (PVD Level Selection) */
-            __IO uint32_t DBP : 1;                          /*!< Disable Backup Domain write protection               */
-            __IO uint32_t FPDS : 1;                         /*!< Flash power down in Stop mode                        */
-                 uint32_t __RESERVED0 : 4;
-            __IO uint32_t VOS : 1;                          /*!< VOS bit (Regulator voltage scaling output selection) */
-                 uint32_t __RESERVED1 : 17;
+            __IO uint32_t DBP : 1;                          /*!< Disable Backup Domain write protection                     */
+            __IO uint32_t FPDS : 1;                         /*!< Flash power down in Stop mode                              */
+            __IO uint32_t LPLVDS : 1;                       /*!< Low Power Regulator Low Voltage in Deep Sleep mode         */
+            __IO uint32_t MRLVDS : 1;                       /*!< Main Regulator Low Voltage in Deep Sleep mode              */
+                 uint32_t __RESERVED0 : 1;
+            __IO uint32_t ADCDC1 : 1;                       /*!< Refer to AN4073 on how to use this bit                     */
+            __IO uint32_t VOS : 2;                          /*!< VOS[1:0] bits (Regulator voltage scaling output selection) */
+                 uint32_t __RESERVED1 : 16;
         } b;
         __IO uint32_t w;
     } CR;                                                   /*!< PWR power control register,        Address offset: 0x00 */
@@ -2357,11 +1570,14 @@ typedef struct {
         __IO uint32_t CSBF;                                 /*!< Clear Standby Flag                  */
         __IO uint32_t PVDE;                                 /*!< Power Voltage Detector Enable       */
         __IO uint32_t PLS[3];                               /*!< PLS[2:0] bits (PVD Level Selection) */
-        __IO uint32_t DBP;                                  /*!< Disable Backup Domain write protection               */
-        __IO uint32_t FPDS;                                 /*!< Flash power down in Stop mode                        */
-             uint32_t __RESERVED0[4];
-        __IO uint32_t VOS;                                  /*!< VOS bit (Regulator voltage scaling output selection) */
-             uint32_t __RESERVED1[17];
+        __IO uint32_t DBP;                                  /*!< Disable Backup Domain write protection                     */
+        __IO uint32_t FPDS;                                 /*!< Flash power down in Stop mode                              */
+        __IO uint32_t LPLVDS;                               /*!< Low Power Regulator Low Voltage in Deep Sleep mode         */
+        __IO uint32_t MRLVDS;                               /*!< Main Regulator Low Voltage in Deep Sleep mode              */
+             uint32_t __RESERVED0;
+        __IO uint32_t ADCDC1;                               /*!< Refer to AN4073 on how to use this bit                     */
+        __IO uint32_t VOS[2];                               /*!< VOS[1:0] bits (Regulator voltage scaling output selection) */
+             uint32_t __RESERVED1[16];
     } CR;                                                   /*!< PWR power control register,        Address offset: 0x00 */
     struct {
         __IO uint32_t WUF;                                  /*!< Wakeup Flag                                      */
@@ -2470,37 +1686,26 @@ typedef struct {
             __IO uint32_t GPIOCRST : 1;
             __IO uint32_t GPIODRST : 1;
             __IO uint32_t GPIOERST : 1;
-            __IO uint32_t GPIOFRST : 1;
-            __IO uint32_t GPIOGRST : 1;
+                 uint32_t __RESERVED0 : 2;
             __IO uint32_t GPIOHRST : 1;
-            __IO uint32_t GPIOIRST : 1;
-                 uint32_t __RESERVED0 : 3;
+                 uint32_t __RESERVED1 : 4;
             __IO uint32_t CRCRST : 1;
-                 uint32_t __RESERVED1 : 8;
+                 uint32_t __RESERVED2 : 8;
             __IO uint32_t DMA1RST : 1;
             __IO uint32_t DMA2RST : 1;
-                 uint32_t __RESERVED2 : 6;
-            __IO uint32_t OTGHRST : 1;
-                 uint32_t __RESERVED3 : 2;
+                 uint32_t __RESERVED3 : 9;
         } b;
         __IO uint32_t w;
     } AHB1RSTR;                                             /*!< RCC AHB1 peripheral reset register,                          Address offset: 0x10 */
     union {
         struct {
-                 uint32_t __RESERVED0 : 6;
-            __IO uint32_t RNGRST : 1;
+                 uint32_t __RESERVED0 : 7;
             __IO uint32_t OTGFSRST : 1;
                  uint32_t __RESERVED1 : 24;
         } b;
         __IO uint32_t w;
     } AHB2RSTR;                                             /*!< RCC AHB2 peripheral reset register,                          Address offset: 0x14 */
-    union {
-        struct {
-            __IO uint32_t FSMCRST : 1;
-                 uint32_t __RESERVED0 : 31;
-        } b;
-        __IO uint32_t w;
-    } AHB3RSTR;                                             /*!< RCC AHB3 peripheral reset register,                          Address offset: 0x18 */
+    __IO uint32_t AHB3RSTR;                                 /*!< RCC AHB3 peripheral reset register,                          Address offset: 0x18 */
          uint32_t __RESERVED0;
     union {
         struct {
@@ -2508,39 +1713,27 @@ typedef struct {
             __IO uint32_t TIM3RST : 1;
             __IO uint32_t TIM4RST : 1;
             __IO uint32_t TIM5RST : 1;
-            __IO uint32_t TIM6RST : 1;
-            __IO uint32_t TIM7RST : 1;
-            __IO uint32_t TIM12RST : 1;
-            __IO uint32_t TIM13RST : 1;
-            __IO uint32_t TIM14RST : 1;
-                 uint32_t __RESERVED0 : 2;
+                 uint32_t __RESERVED0 : 7;
             __IO uint32_t WWDGRST : 1;
                  uint32_t __RESERVED1 : 2;
             __IO uint32_t SPI2RST : 1;
             __IO uint32_t SPI3RST : 1;
                  uint32_t __RESERVED2 : 1;
             __IO uint32_t USART2RST : 1;
-            __IO uint32_t USART3RST : 1;
-            __IO uint32_t UART4RST : 1;
-            __IO uint32_t UART5RST : 1;
+                 uint32_t __RESERVED3 : 3;
             __IO uint32_t I2C1RST : 1;
             __IO uint32_t I2C2RST : 1;
             __IO uint32_t I2C3RST : 1;
-                 uint32_t __RESERVED3 : 1;
-            __IO uint32_t CAN1RST : 1;
-            __IO uint32_t CAN2RST : 1;
-                 uint32_t __RESERVED4 : 1;
+                 uint32_t __RESERVED4 : 4;
             __IO uint32_t PWRRST : 1;
-            __IO uint32_t DACRST : 1;
-                 uint32_t __RESERVED5 : 2;
+                 uint32_t __RESERVED5 : 3;
         } b;
         __IO uint32_t w;
     } APB1RSTR;                                             /*!< RCC APB1 peripheral reset register,                          Address offset: 0x20 */
     union {
         struct {
             __IO uint32_t TIM1RST : 1;
-            __IO uint32_t TIM8RST : 1;
-                 uint32_t __RESERVED0 : 2;
+                 uint32_t __RESERVED0 : 3;
             __IO uint32_t USART1RST : 1;
             __IO uint32_t USART6RST : 1;
                  uint32_t __RESERVED1 : 2;
@@ -2548,13 +1741,13 @@ typedef struct {
                  uint32_t __RESERVED2 : 2;
             __IO uint32_t SDIORST : 1;
             __IO uint32_t SPI1RST : 1;
-                 uint32_t __RESERVED3 : 1;
+            __IO uint32_t SPI4RST : 1;
             __IO uint32_t SYSCFGRST : 1;
-                 uint32_t __RESERVED4 : 1;
+                 uint32_t __RESERVED3 : 1;
             __IO uint32_t TIM9RST : 1;
             __IO uint32_t TIM10RST : 1;
             __IO uint32_t TIM11RST : 1;
-                 uint32_t __RESERVED5 : 13;
+                 uint32_t __RESERVED4 : 13;
         } b;
         __IO uint32_t w;
     } APB2RSTR;                                             /*!< RCC APB2 peripheral reset register,                          Address offset: 0x24 */
@@ -2566,41 +1759,29 @@ typedef struct {
             __IO uint32_t GPIOCEN : 1;
             __IO uint32_t GPIODEN : 1;
             __IO uint32_t GPIOEEN : 1;
-            __IO uint32_t GPIOFEN : 1;
-            __IO uint32_t GPIOGEN : 1;
+                 uint32_t __RESERVED0 : 2;
             __IO uint32_t GPIOHEN : 1;
-            __IO uint32_t GPIOIEN : 1;
-                 uint32_t __RESERVED0 : 3;
+                 uint32_t __RESERVED1 : 4;
             __IO uint32_t CRCEN : 1;
-                 uint32_t __RESERVED1 : 5;
+                 uint32_t __RESERVED2 : 5;
             __IO uint32_t BKPSRAMEN : 1;
-                 uint32_t __RESERVED2 : 1;
+                 uint32_t __RESERVED3 : 1;
             __IO uint32_t CCMDATARAMEN : 1;
             __IO uint32_t DMA1EN : 1;
             __IO uint32_t DMA2EN : 1;
-                 uint32_t __RESERVED3 : 6;
-            __IO uint32_t OTGHSEN : 1;
-            __IO uint32_t OTGHSULPIEN : 1;
-                 uint32_t __RESERVED4 : 1;
+                 uint32_t __RESERVED4 : 9;
         } b;
         __IO uint32_t w;
     } AHB1ENR;                                              /*!< RCC AHB1 peripheral clock register,                          Address offset: 0x30 */
     union {
         struct {
-                 uint32_t __RESERVED0 : 6;
-            __IO uint32_t RNGEN : 1;
+                 uint32_t __RESERVED0 : 7;
             __IO uint32_t OTGFSEN : 1;
                  uint32_t __RESERVED1 : 24;
         } b;
         __IO uint32_t w;
     } AHB2ENR;                                              /*!< RCC AHB2 peripheral clock register,                          Address offset: 0x34 */
-    union {
-        struct {
-            __IO uint32_t FSMCEN : 1;
-                 uint32_t __RESERVED0 : 31;
-        } b;
-        __IO uint32_t w;
-    } AHB3ENR;                                              /*!< RCC AHB3 peripheral clock register,                          Address offset: 0x38 */
+    __IO uint32_t AHB3ENR;                                  /*!< RCC AHB3 peripheral clock register,                          Address offset: 0x38 */
          uint32_t __RESERVED2;
     union {
         struct {
@@ -2608,57 +1789,41 @@ typedef struct {
             __IO uint32_t TIM3EN : 1;
             __IO uint32_t TIM4EN : 1;
             __IO uint32_t TIM5EN : 1;
-            __IO uint32_t TIM6EN : 1;
-            __IO uint32_t TIM7EN : 1;
-            __IO uint32_t TIM12EN : 1;
-            __IO uint32_t TIM13EN : 1;
-            __IO uint32_t TIM14EN : 1;
-                 uint32_t __RESERVED0 : 2;
+                 uint32_t __RESERVED0 : 7;
             __IO uint32_t WWDGEN : 1;
                  uint32_t __RESERVED1 : 2;
             __IO uint32_t SPI2EN : 1;
             __IO uint32_t SPI3EN : 1;
                  uint32_t __RESERVED2 : 1;
             __IO uint32_t USART2EN : 1;
-            __IO uint32_t USART3EN : 1;
-            __IO uint32_t UART4EN : 1;
-            __IO uint32_t UART5EN : 1;
+                 uint32_t __RESERVED3 : 3;
             __IO uint32_t I2C1EN : 1;
             __IO uint32_t I2C2EN : 1;
             __IO uint32_t I2C3EN : 1;
-                 uint32_t __RESERVED3 : 1;
-            __IO uint32_t CAN1EN : 1;
-            __IO uint32_t CAN2EN : 1;
-                 uint32_t __RESERVED4 : 1;
+                 uint32_t __RESERVED4 : 4;
             __IO uint32_t PWREN : 1;
-            __IO uint32_t DACEN : 1;
-                 uint32_t __RESERVED5 : 2;
+                 uint32_t __RESERVED5 : 3;
         } b;
         __IO uint32_t w;
     } APB1ENR;                                              /*!< RCC APB1 peripheral clock enable register,                   Address offset: 0x40 */
     union {
         struct {
             __IO uint32_t TIM1EN : 1;
-            __IO uint32_t TIM8EN : 1;
-                 uint32_t __RESERVED0 : 2;
+                 uint32_t __RESERVED0 : 3;
             __IO uint32_t USART1EN : 1;
             __IO uint32_t USART6EN : 1;
                  uint32_t __RESERVED1 : 2;
             __IO uint32_t ADC1EN : 1;
-            __IO uint32_t ADC2EN : 1;
-            __IO uint32_t ADC3EN : 1;
+                 uint32_t __RESERVED2 : 2;
             __IO uint32_t SDIOEN : 1;
             __IO uint32_t SPI1EN : 1;
-                 uint32_t __RESERVED2 : 1;
+            __IO uint32_t SPI4EN : 1;
             __IO uint32_t SYSCFGEN : 1;
                  uint32_t __RESERVED3 : 1;
             __IO uint32_t TIM9EN : 1;
             __IO uint32_t TIM10EN : 1;
             __IO uint32_t TIM11EN : 1;
-                 uint32_t __RESERVED4 : 1;
-            __IO uint32_t SPI5EN : 1;
-            __IO uint32_t SPI6EN : 1;
-                 uint32_t __RESERVED5 : 10;
+                 uint32_t __RESERVED4 : 13;
         } b;
         __IO uint32_t w;
     } APB2ENR;                                              /*!< RCC APB2 peripheral clock enable register,                   Address offset: 0x44 */
@@ -2670,43 +1835,31 @@ typedef struct {
             __IO uint32_t GPIOCLPEN : 1;
             __IO uint32_t GPIODLPEN : 1;
             __IO uint32_t GPIOELPEN : 1;
-            __IO uint32_t GPIOFLPEN : 1;
-            __IO uint32_t GPIOGLPEN : 1;
+                 uint32_t __RESERVED0 : 2;
             __IO uint32_t GPIOHLPEN : 1;
-            __IO uint32_t GPIOILPEN : 1;
-                 uint32_t __RESERVED0 : 3;
+                 uint32_t __RESERVED1 : 4;
             __IO uint32_t CRCLPEN : 1;
-                 uint32_t __RESERVED1 : 2;
+                 uint32_t __RESERVED2 : 2;
             __IO uint32_t FLITFLPEN : 1;
             __IO uint32_t SRAM1LPEN : 1;
             __IO uint32_t SRAM2LPEN : 1;
             __IO uint32_t BKPSRAMLPEN : 1;
-                 uint32_t __RESERVED2 : 2;
+                 uint32_t __RESERVED3 : 2;
             __IO uint32_t DMA1LPEN : 1;
             __IO uint32_t DMA2LPEN : 1;
-                 uint32_t __RESERVED3 : 6;
-            __IO uint32_t OTGHSLPEN : 1;
-            __IO uint32_t OTGHSULPILPEN : 1;
-                 uint32_t __RESERVED4 : 1;
+                 uint32_t __RESERVED4 : 9;
         } b;
         __IO uint32_t w;
     } AHB1LPENR;                                            /*!< RCC AHB1 peripheral clock enable in low power mode register, Address offset: 0x50 */
     union {
         struct {
-                 uint32_t __RESERVED0 : 6;
-            __IO uint32_t RNGLPEN : 1;
+                 uint32_t __RESERVED0 : 7;
             __IO uint32_t OTGFSLPEN : 1;
                  uint32_t __RESERVED1 : 24;
         } b;
         __IO uint32_t w;
     } AHB2LPENR;                                            /*!< RCC AHB2 peripheral clock enable in low power mode register, Address offset: 0x54 */
-    union {
-        struct {
-            __IO uint32_t FSMCLPEN : 1;
-                 uint32_t __RESERVED0 : 31;
-        } b;
-        __IO uint32_t w;
-    } AHB3LPENR;                                            /*!< RCC AHB3 peripheral clock enable in low power mode register, Address offset: 0x58 */
+    __IO uint32_t AHB3LPENR;                                /*!< RCC AHB3 peripheral clock enable in low power mode register, Address offset: 0x58 */
          uint32_t __RESERVED4;
     union {
         struct {
@@ -2714,28 +1867,18 @@ typedef struct {
             __IO uint32_t TIM3LPEN : 1;
             __IO uint32_t TIM4LPEN : 1;
             __IO uint32_t TIM5LPEN : 1;
-            __IO uint32_t TIM6LPEN : 1;
-            __IO uint32_t TIM7LPEN : 1;
-            __IO uint32_t TIM12LPEN : 1;
-            __IO uint32_t TIM13LPEN : 1;
-            __IO uint32_t TIM14LPEN : 1;
-                 uint32_t __RESERVED0 : 2;
+                 uint32_t __RESERVED0 : 7;
             __IO uint32_t WWDGLPEN : 1;
                  uint32_t __RESERVED1 : 2;
             __IO uint32_t SPI2LPEN : 1;
             __IO uint32_t SPI3LPEN : 1;
                  uint32_t __RESERVED2 : 1;
             __IO uint32_t USART2LPEN : 1;
-            __IO uint32_t USART3LPEN : 1;
-            __IO uint32_t UART4LPEN : 1;
-            __IO uint32_t UART5LPEN : 1;
+                 uint32_t __RESERVED3 : 3;
             __IO uint32_t I2C1LPEN : 1;
             __IO uint32_t I2C2LPEN : 1;
             __IO uint32_t I2C3LPEN : 1;
-                 uint32_t __RESERVED3 : 1;
-            __IO uint32_t CAN1LPEN : 1;
-            __IO uint32_t CAN2LPEN : 1;
-                 uint32_t __RESERVED4 : 1;
+                 uint32_t __RESERVED4 : 4;
             __IO uint32_t PWRLPEN : 1;
             __IO uint32_t DACLPEN : 1;
                  uint32_t __RESERVED5 : 2;
@@ -2745,17 +1888,15 @@ typedef struct {
     union {
         struct {
             __IO uint32_t TIM1LPEN : 1;
-            __IO uint32_t TIM8LPEN : 1;
-                 uint32_t __RESERVED0 : 2;
+                 uint32_t __RESERVED0 : 3;
             __IO uint32_t USART1LPEN : 1;
             __IO uint32_t USART6LPEN : 1;
                  uint32_t __RESERVED1 : 2;
             __IO uint32_t ADC1LPEN : 1;
-            __IO uint32_t ADC2LPEN : 1;
-            __IO uint32_t ADC3LPEN : 1;
+                 uint32_t __RESERVED2 : 2;
             __IO uint32_t SDIOLPEN : 1;
             __IO uint32_t SPI1LPEN : 1;
-                 uint32_t __RESERVED2 : 1;
+            __IO uint32_t SPI4LPEN : 1;
             __IO uint32_t SYSCFGLPEN : 1;
                  uint32_t __RESERVED3 : 1;
             __IO uint32_t TIM9LPEN : 1;
@@ -2817,6 +1958,15 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } PLLI2SCFGR;                                           /*!< RCC PLLI2S configuration register,                           Address offset: 0x84 */
+         uint32_t __RESERVED7;
+    union {
+        struct {
+                 uint32_t __RESERVED0 : 24;
+            __IO uint32_t TIMPRE : 1;                       /******************************************************************************/
+                 uint32_t __RESERVED1 : 7;
+        } b;
+        __IO uint32_t w;
+    } DCKCFGR;                                              /*!< RCC DCKCFGR configuration register,                          Address offset: 0x8C */
 } RCC_TypeDef;
 
 
@@ -2895,65 +2045,45 @@ typedef struct {
         __IO uint32_t GPIOCRST;
         __IO uint32_t GPIODRST;
         __IO uint32_t GPIOERST;
-        __IO uint32_t GPIOFRST;
-        __IO uint32_t GPIOGRST;
+             uint32_t __RESERVED0[2];
         __IO uint32_t GPIOHRST;
-        __IO uint32_t GPIOIRST;
-             uint32_t __RESERVED0[3];
+             uint32_t __RESERVED1[4];
         __IO uint32_t CRCRST;
-             uint32_t __RESERVED1[8];
+             uint32_t __RESERVED2[8];
         __IO uint32_t DMA1RST;
         __IO uint32_t DMA2RST;
-             uint32_t __RESERVED2[6];
-        __IO uint32_t OTGHRST;
-             uint32_t __RESERVED3[2];
+             uint32_t __RESERVED3[9];
     } AHB1RSTR;                                             /*!< RCC AHB1 peripheral reset register,                          Address offset: 0x10 */
     struct {
-             uint32_t __RESERVED0[6];
-        __IO uint32_t RNGRST;
+             uint32_t __RESERVED0[7];
         __IO uint32_t OTGFSRST;
              uint32_t __RESERVED1[24];
     } AHB2RSTR;                                             /*!< RCC AHB2 peripheral reset register,                          Address offset: 0x14 */
-    struct {
-        __IO uint32_t FSMCRST;
-             uint32_t __RESERVED0[31];
-    } AHB3RSTR;                                             /*!< RCC AHB3 peripheral reset register,                          Address offset: 0x18 */
+    __IO uint32_t AHB3RSTR[32];                             /*!< RCC AHB3 peripheral reset register,                          Address offset: 0x18 */
          uint32_t __RESERVED0[32];
     struct {
         __IO uint32_t TIM2RST;
         __IO uint32_t TIM3RST;
         __IO uint32_t TIM4RST;
         __IO uint32_t TIM5RST;
-        __IO uint32_t TIM6RST;
-        __IO uint32_t TIM7RST;
-        __IO uint32_t TIM12RST;
-        __IO uint32_t TIM13RST;
-        __IO uint32_t TIM14RST;
-             uint32_t __RESERVED0[2];
+             uint32_t __RESERVED0[7];
         __IO uint32_t WWDGRST;
              uint32_t __RESERVED1[2];
         __IO uint32_t SPI2RST;
         __IO uint32_t SPI3RST;
              uint32_t __RESERVED2;
         __IO uint32_t USART2RST;
-        __IO uint32_t USART3RST;
-        __IO uint32_t UART4RST;
-        __IO uint32_t UART5RST;
+             uint32_t __RESERVED3[3];
         __IO uint32_t I2C1RST;
         __IO uint32_t I2C2RST;
         __IO uint32_t I2C3RST;
-             uint32_t __RESERVED3;
-        __IO uint32_t CAN1RST;
-        __IO uint32_t CAN2RST;
-             uint32_t __RESERVED4;
+             uint32_t __RESERVED4[4];
         __IO uint32_t PWRRST;
-        __IO uint32_t DACRST;
-             uint32_t __RESERVED5[2];
+             uint32_t __RESERVED5[3];
     } APB1RSTR;                                             /*!< RCC APB1 peripheral reset register,                          Address offset: 0x20 */
     struct {
         __IO uint32_t TIM1RST;
-        __IO uint32_t TIM8RST;
-             uint32_t __RESERVED0[2];
+             uint32_t __RESERVED0[3];
         __IO uint32_t USART1RST;
         __IO uint32_t USART6RST;
              uint32_t __RESERVED1[2];
@@ -2961,13 +2091,13 @@ typedef struct {
              uint32_t __RESERVED2[2];
         __IO uint32_t SDIORST;
         __IO uint32_t SPI1RST;
-             uint32_t __RESERVED3;
+        __IO uint32_t SPI4RST;
         __IO uint32_t SYSCFGRST;
-             uint32_t __RESERVED4;
+             uint32_t __RESERVED3;
         __IO uint32_t TIM9RST;
         __IO uint32_t TIM10RST;
         __IO uint32_t TIM11RST;
-             uint32_t __RESERVED5[13];
+             uint32_t __RESERVED4[13];
     } APB2RSTR;                                             /*!< RCC APB2 peripheral reset register,                          Address offset: 0x24 */
          uint32_t __RESERVED1[2][32];
     struct {
@@ -2976,87 +2106,62 @@ typedef struct {
         __IO uint32_t GPIOCEN;
         __IO uint32_t GPIODEN;
         __IO uint32_t GPIOEEN;
-        __IO uint32_t GPIOFEN;
-        __IO uint32_t GPIOGEN;
+             uint32_t __RESERVED0[2];
         __IO uint32_t GPIOHEN;
-        __IO uint32_t GPIOIEN;
-             uint32_t __RESERVED0[3];
+             uint32_t __RESERVED1[4];
         __IO uint32_t CRCEN;
-             uint32_t __RESERVED1[5];
+             uint32_t __RESERVED2[5];
         __IO uint32_t BKPSRAMEN;
-             uint32_t __RESERVED2;
+             uint32_t __RESERVED3;
         __IO uint32_t CCMDATARAMEN;
         __IO uint32_t DMA1EN;
         __IO uint32_t DMA2EN;
-             uint32_t __RESERVED3[6];
-        __IO uint32_t OTGHSEN;
-        __IO uint32_t OTGHSULPIEN;
-             uint32_t __RESERVED4;
+             uint32_t __RESERVED4[9];
     } AHB1ENR;                                              /*!< RCC AHB1 peripheral clock register,                          Address offset: 0x30 */
     struct {
-             uint32_t __RESERVED0[6];
-        __IO uint32_t RNGEN;
+             uint32_t __RESERVED0[7];
         __IO uint32_t OTGFSEN;
              uint32_t __RESERVED1[24];
     } AHB2ENR;                                              /*!< RCC AHB2 peripheral clock register,                          Address offset: 0x34 */
-    struct {
-        __IO uint32_t FSMCEN;
-             uint32_t __RESERVED0[31];
-    } AHB3ENR;                                              /*!< RCC AHB3 peripheral clock register,                          Address offset: 0x38 */
+    __IO uint32_t AHB3ENR[32];                              /*!< RCC AHB3 peripheral clock register,                          Address offset: 0x38 */
          uint32_t __RESERVED2[32];
     struct {
         __IO uint32_t TIM2EN;
         __IO uint32_t TIM3EN;
         __IO uint32_t TIM4EN;
         __IO uint32_t TIM5EN;
-        __IO uint32_t TIM6EN;
-        __IO uint32_t TIM7EN;
-        __IO uint32_t TIM12EN;
-        __IO uint32_t TIM13EN;
-        __IO uint32_t TIM14EN;
-             uint32_t __RESERVED0[2];
+             uint32_t __RESERVED0[7];
         __IO uint32_t WWDGEN;
              uint32_t __RESERVED1[2];
         __IO uint32_t SPI2EN;
         __IO uint32_t SPI3EN;
              uint32_t __RESERVED2;
         __IO uint32_t USART2EN;
-        __IO uint32_t USART3EN;
-        __IO uint32_t UART4EN;
-        __IO uint32_t UART5EN;
+             uint32_t __RESERVED3[3];
         __IO uint32_t I2C1EN;
         __IO uint32_t I2C2EN;
         __IO uint32_t I2C3EN;
-             uint32_t __RESERVED3;
-        __IO uint32_t CAN1EN;
-        __IO uint32_t CAN2EN;
-             uint32_t __RESERVED4;
+             uint32_t __RESERVED4[4];
         __IO uint32_t PWREN;
-        __IO uint32_t DACEN;
-             uint32_t __RESERVED5[2];
+             uint32_t __RESERVED5[3];
     } APB1ENR;                                              /*!< RCC APB1 peripheral clock enable register,                   Address offset: 0x40 */
     struct {
         __IO uint32_t TIM1EN;
-        __IO uint32_t TIM8EN;
-             uint32_t __RESERVED0[2];
+             uint32_t __RESERVED0[3];
         __IO uint32_t USART1EN;
         __IO uint32_t USART6EN;
              uint32_t __RESERVED1[2];
         __IO uint32_t ADC1EN;
-        __IO uint32_t ADC2EN;
-        __IO uint32_t ADC3EN;
+             uint32_t __RESERVED2[2];
         __IO uint32_t SDIOEN;
         __IO uint32_t SPI1EN;
-             uint32_t __RESERVED2;
+        __IO uint32_t SPI4EN;
         __IO uint32_t SYSCFGEN;
              uint32_t __RESERVED3;
         __IO uint32_t TIM9EN;
         __IO uint32_t TIM10EN;
         __IO uint32_t TIM11EN;
-             uint32_t __RESERVED4;
-        __IO uint32_t SPI5EN;
-        __IO uint32_t SPI6EN;
-             uint32_t __RESERVED5[10];
+             uint32_t __RESERVED4[13];
     } APB2ENR;                                              /*!< RCC APB2 peripheral clock enable register,                   Address offset: 0x44 */
          uint32_t __RESERVED3[2][32];
     struct {
@@ -3065,80 +2170,59 @@ typedef struct {
         __IO uint32_t GPIOCLPEN;
         __IO uint32_t GPIODLPEN;
         __IO uint32_t GPIOELPEN;
-        __IO uint32_t GPIOFLPEN;
-        __IO uint32_t GPIOGLPEN;
+             uint32_t __RESERVED0[2];
         __IO uint32_t GPIOHLPEN;
-        __IO uint32_t GPIOILPEN;
-             uint32_t __RESERVED0[3];
+             uint32_t __RESERVED1[4];
         __IO uint32_t CRCLPEN;
-             uint32_t __RESERVED1[2];
+             uint32_t __RESERVED2[2];
         __IO uint32_t FLITFLPEN;
         __IO uint32_t SRAM1LPEN;
         __IO uint32_t SRAM2LPEN;
         __IO uint32_t BKPSRAMLPEN;
-             uint32_t __RESERVED2[2];
+             uint32_t __RESERVED3[2];
         __IO uint32_t DMA1LPEN;
         __IO uint32_t DMA2LPEN;
-             uint32_t __RESERVED3[6];
-        __IO uint32_t OTGHSLPEN;
-        __IO uint32_t OTGHSULPILPEN;
-             uint32_t __RESERVED4;
+             uint32_t __RESERVED4[9];
     } AHB1LPENR;                                            /*!< RCC AHB1 peripheral clock enable in low power mode register, Address offset: 0x50 */
     struct {
-             uint32_t __RESERVED0[6];
-        __IO uint32_t RNGLPEN;
+             uint32_t __RESERVED0[7];
         __IO uint32_t OTGFSLPEN;
              uint32_t __RESERVED1[24];
     } AHB2LPENR;                                            /*!< RCC AHB2 peripheral clock enable in low power mode register, Address offset: 0x54 */
-    struct {
-        __IO uint32_t FSMCLPEN;
-             uint32_t __RESERVED0[31];
-    } AHB3LPENR;                                            /*!< RCC AHB3 peripheral clock enable in low power mode register, Address offset: 0x58 */
+    __IO uint32_t AHB3LPENR[32];                            /*!< RCC AHB3 peripheral clock enable in low power mode register, Address offset: 0x58 */
          uint32_t __RESERVED4[32];
     struct {
         __IO uint32_t TIM2LPEN;
         __IO uint32_t TIM3LPEN;
         __IO uint32_t TIM4LPEN;
         __IO uint32_t TIM5LPEN;
-        __IO uint32_t TIM6LPEN;
-        __IO uint32_t TIM7LPEN;
-        __IO uint32_t TIM12LPEN;
-        __IO uint32_t TIM13LPEN;
-        __IO uint32_t TIM14LPEN;
-             uint32_t __RESERVED0[2];
+             uint32_t __RESERVED0[7];
         __IO uint32_t WWDGLPEN;
              uint32_t __RESERVED1[2];
         __IO uint32_t SPI2LPEN;
         __IO uint32_t SPI3LPEN;
              uint32_t __RESERVED2;
         __IO uint32_t USART2LPEN;
-        __IO uint32_t USART3LPEN;
-        __IO uint32_t UART4LPEN;
-        __IO uint32_t UART5LPEN;
+             uint32_t __RESERVED3[3];
         __IO uint32_t I2C1LPEN;
         __IO uint32_t I2C2LPEN;
         __IO uint32_t I2C3LPEN;
-             uint32_t __RESERVED3;
-        __IO uint32_t CAN1LPEN;
-        __IO uint32_t CAN2LPEN;
-             uint32_t __RESERVED4;
+             uint32_t __RESERVED4[4];
         __IO uint32_t PWRLPEN;
         __IO uint32_t DACLPEN;
              uint32_t __RESERVED5[2];
     } APB1LPENR;                                            /*!< RCC APB1 peripheral clock enable in low power mode register, Address offset: 0x60 */
     struct {
         __IO uint32_t TIM1LPEN;
-        __IO uint32_t TIM8LPEN;
-             uint32_t __RESERVED0[2];
+             uint32_t __RESERVED0[3];
         __IO uint32_t USART1LPEN;
         __IO uint32_t USART6LPEN;
              uint32_t __RESERVED1[2];
         __IO uint32_t ADC1LPEN;
-        __IO uint32_t ADC2LPEN;
-        __IO uint32_t ADC3LPEN;
+             uint32_t __RESERVED2[2];
         __IO uint32_t SDIOLPEN;
         __IO uint32_t SPI1LPEN;
-             uint32_t __RESERVED2;
+        __IO uint32_t SPI4LPEN;
         __IO uint32_t SYSCFGLPEN;
              uint32_t __RESERVED3;
         __IO uint32_t TIM9LPEN;
@@ -3186,6 +2270,12 @@ typedef struct {
         __IO uint32_t PLLI2SR[3];
              uint32_t __RESERVED2;
     } PLLI2SCFGR;                                           /*!< RCC PLLI2S configuration register,                           Address offset: 0x84 */
+         uint32_t __RESERVED7[32];
+    struct {
+             uint32_t __RESERVED0[24];
+        __IO uint32_t TIMPRE;                               /******************************************************************************/
+             uint32_t __RESERVED1[7];
+    } DCKCFGR;                                              /*!< RCC DCKCFGR configuration register,                          Address offset: 0x8C */
 } RCC_BitBand_TypeDef;
 
 
@@ -4679,36 +3769,6 @@ typedef struct {
 } WWDG_BitBand_TypeDef;
 
 
-
-/**
-  * @brief RNG
-  */
-typedef struct {
-    union {
-        struct {
-                 uint32_t __RESERVED0 : 2;
-            __IO uint32_t RNGEN : 1;
-            __IO uint32_t IE : 1;
-                 uint32_t __RESERVED1 : 28;
-        } b;
-        __IO uint32_t w;
-    } CR;                                                   /*!< RNG control register, Address offset: 0x00 */
-    union {
-        struct {
-            __IO uint32_t DRDY : 1;
-            __IO uint32_t CECS : 1;
-            __IO uint32_t SECS : 1;
-                 uint32_t __RESERVED0 : 2;
-            __IO uint32_t CEIS : 1;
-            __IO uint32_t SEIS : 1;
-                 uint32_t __RESERVED1 : 25;
-        } b;
-        __IO uint32_t w;
-    } SR;                                                   /*!< RNG status register,  Address offset: 0x04 */
-    __IO uint32_t DR;                                       /*!< RNG data register,    Address offset: 0x08 */
-} RNG_TypeDef;
-
-
  
 /**
   * @brief USB_OTG_Core_register
@@ -5707,22 +4767,18 @@ typedef struct {
 
 
 
+
 /**
   * @brief Peripheral_memory_map
   */
 #define FLASH_BASE            0x08000000U /*!< FLASH(up to 1 MB) base address in the alias region                         */
-#define CCMDATARAM_BASE       0x10000000U /*!< CCM(core coupled memory) data RAM(64 KB) base address in the alias region  */
-#define SRAM1_BASE            0x20000000U /*!< SRAM1(112 KB) base address in the alias region                             */
-#define SRAM2_BASE            0x2001C000U /*!< SRAM2(16 KB) base address in the alias region                              */
+#define SRAM1_BASE            0x20000000U /*!< SRAM1(96 KB) base address in the alias region                             */
 #define PERIPH_BASE           0x40000000U /*!< Peripheral base address in the alias region                                */
 #define BKPSRAM_BASE          0x40024000U /*!< Backup SRAM(4 KB) base address in the alias region                         */
-#define FSMC_R_BASE           0xA0000000U /*!< FSMC registers base address                                                */
-#define SRAM1_BB_BASE         0x22000000U /*!< SRAM1(112 KB) base address in the bit-band region                             */
-#define SRAM2_BB_BASE         0x22380000U /*!< SRAM2(16 KB) base address in the bit-band region                              */
-#define PERIPH_BB_BASE        0x42000000U /*!< Peripheral base address in the bit-band region                                */
-#define BKPSRAM_BB_BASE       0x42480000U /*!< Backup SRAM(4 KB) base address in the bit-band region                         */
-#define FLASH_END             0x080FFFFFU /*!< FLASH end address */
-#define CCMDATARAM_END        0x1000FFFFU /*!< CCM data RAM end address */
+#define SRAM1_BB_BASE         0x22000000U /*!< SRAM1(96 KB) base address in the bit-band region                          */
+#define PERIPH_BB_BASE        0x42000000U /*!< Peripheral base address in the bit-band region                             */
+#define BKPSRAM_BB_BASE       0x42480000U /*!< Backup SRAM(4 KB) base address in the bit-band region                      */
+#define FLASH_END             0x0807FFFFU /*!< FLASH end address */
 
 /* Legacy defines */
 #define SRAM_BASE             SRAM1_BASE
@@ -5740,11 +4796,6 @@ typedef struct {
 #define TIM3_BASE             (APB1PERIPH_BASE + 0x0400U)
 #define TIM4_BASE             (APB1PERIPH_BASE + 0x0800U)
 #define TIM5_BASE             (APB1PERIPH_BASE + 0x0C00U)
-#define TIM6_BASE             (APB1PERIPH_BASE + 0x1000U)
-#define TIM7_BASE             (APB1PERIPH_BASE + 0x1400U)
-#define TIM12_BASE            (APB1PERIPH_BASE + 0x1800U)
-#define TIM13_BASE            (APB1PERIPH_BASE + 0x1C00U)
-#define TIM14_BASE            (APB1PERIPH_BASE + 0x2000U)
 #define RTC_BASE              (APB1PERIPH_BASE + 0x2800U)
 #define WWDG_BASE             (APB1PERIPH_BASE + 0x2C00U)
 #define IWDG_BASE             (APB1PERIPH_BASE + 0x3000U)
@@ -5753,28 +4804,20 @@ typedef struct {
 #define SPI3_BASE             (APB1PERIPH_BASE + 0x3C00U)
 #define I2S3ext_BASE          (APB1PERIPH_BASE + 0x4000U)
 #define USART2_BASE           (APB1PERIPH_BASE + 0x4400U)
-#define USART3_BASE           (APB1PERIPH_BASE + 0x4800U)
-#define UART4_BASE            (APB1PERIPH_BASE + 0x4C00U)
-#define UART5_BASE            (APB1PERIPH_BASE + 0x5000U)
 #define I2C1_BASE             (APB1PERIPH_BASE + 0x5400U)
 #define I2C2_BASE             (APB1PERIPH_BASE + 0x5800U)
 #define I2C3_BASE             (APB1PERIPH_BASE + 0x5C00U)
-#define CAN1_BASE             (APB1PERIPH_BASE + 0x6400U)
-#define CAN2_BASE             (APB1PERIPH_BASE + 0x6800U)
 #define PWR_BASE              (APB1PERIPH_BASE + 0x7000U)
-#define DAC_BASE              (APB1PERIPH_BASE + 0x7400U)
 
 /*!< APB2 peripherals */
 #define TIM1_BASE             (APB2PERIPH_BASE + 0x0000U)
-#define TIM8_BASE             (APB2PERIPH_BASE + 0x0400U)
 #define USART1_BASE           (APB2PERIPH_BASE + 0x1000U)
 #define USART6_BASE           (APB2PERIPH_BASE + 0x1400U)
 #define ADC1_BASE             (APB2PERIPH_BASE + 0x2000U)
-#define ADC2_BASE             (APB2PERIPH_BASE + 0x2100U)
-#define ADC3_BASE             (APB2PERIPH_BASE + 0x2200U)
 #define ADC_BASE              (APB2PERIPH_BASE + 0x2300U)
 #define SDIO_BASE             (APB2PERIPH_BASE + 0x2C00U)
 #define SPI1_BASE             (APB2PERIPH_BASE + 0x3000U)
+#define SPI4_BASE             (APB2PERIPH_BASE + 0x3400U)
 #define SYSCFG_BASE           (APB2PERIPH_BASE + 0x3800U)
 #define EXTI_BASE             (APB2PERIPH_BASE + 0x3C00U)
 #define TIM9_BASE             (APB2PERIPH_BASE + 0x4000U)
@@ -5787,10 +4830,7 @@ typedef struct {
 #define GPIOC_BASE            (AHB1PERIPH_BASE + 0x0800U)
 #define GPIOD_BASE            (AHB1PERIPH_BASE + 0x0C00U)
 #define GPIOE_BASE            (AHB1PERIPH_BASE + 0x1000U)
-#define GPIOF_BASE            (AHB1PERIPH_BASE + 0x1400U)
-#define GPIOG_BASE            (AHB1PERIPH_BASE + 0x1800U)
 #define GPIOH_BASE            (AHB1PERIPH_BASE + 0x1C00U)
-#define GPIOI_BASE            (AHB1PERIPH_BASE + 0x2000U)
 #define CRC_BASE              (AHB1PERIPH_BASE + 0x3000U)
 #define RCC_BASE              (AHB1PERIPH_BASE + 0x3800U)
 #define FLASH_R_BASE          (AHB1PERIPH_BASE + 0x3C00U)
@@ -5813,20 +4853,10 @@ typedef struct {
 #define DMA2_Stream6_BASE     (DMA2_BASE + 0x0A0U)
 #define DMA2_Stream7_BASE     (DMA2_BASE + 0x0B8U)
 
-/*!< AHB2 peripherals */
-#define RNG_BASE              (AHB2PERIPH_BASE + 0x60800U)
-
-/*!< FSMC Bankx registers base address */
-#define FSMC_Bank1_R_BASE     (FSMC_R_BASE + 0x0000U)
-#define FSMC_Bank1E_R_BASE    (FSMC_R_BASE + 0x0104U)
-#define FSMC_Bank2_3_R_BASE   (FSMC_R_BASE + 0x0060U)
-#define FSMC_Bank4_R_BASE     (FSMC_R_BASE + 0x00A0U)
-
 /* Debug MCU registers base address */
 #define DBGMCU_BASE           0xE0042000U
 
 /*!< USB registers base address */
-#define USB_OTG_HS_PERIPH_BASE               0x40040000U
 #define USB_OTG_FS_PERIPH_BASE               0x50000000U
 
 #define USB_OTG_GLOBAL_BASE                  0x000U
@@ -5853,11 +4883,6 @@ typedef struct {
 #define TIM3                ((TIM_TypeDef *) TIM3_BASE)
 #define TIM4                ((TIM_TypeDef *) TIM4_BASE)
 #define TIM5                ((TIM_TypeDef *) TIM5_BASE)
-#define TIM6                ((TIM_TypeDef *) TIM6_BASE)
-#define TIM7                ((TIM_TypeDef *) TIM7_BASE)
-#define TIM12               ((TIM_TypeDef *) TIM12_BASE)
-#define TIM13               ((TIM_TypeDef *) TIM13_BASE)
-#define TIM14               ((TIM_TypeDef *) TIM14_BASE)
 #define RTC                 ((RTC_TypeDef *) RTC_BASE)
 #define WWDG                ((WWDG_TypeDef *) WWDG_BASE)
 #define IWDG                ((IWDG_TypeDef *) IWDG_BASE)
@@ -5866,26 +4891,18 @@ typedef struct {
 #define SPI3                ((SPI_TypeDef *) SPI3_BASE)
 #define I2S3ext             ((SPI_TypeDef *) I2S3ext_BASE)
 #define USART2              ((USART_TypeDef *) USART2_BASE)
-#define USART3              ((USART_TypeDef *) USART3_BASE)
-#define UART4               ((USART_TypeDef *) UART4_BASE)
-#define UART5               ((USART_TypeDef *) UART5_BASE)
 #define I2C1                ((I2C_TypeDef *) I2C1_BASE)
 #define I2C2                ((I2C_TypeDef *) I2C2_BASE)
 #define I2C3                ((I2C_TypeDef *) I2C3_BASE)
-#define CAN1                ((CAN_TypeDef *) CAN1_BASE)
-#define CAN2                ((CAN_TypeDef *) CAN2_BASE)
 #define PWR                 ((PWR_TypeDef *) PWR_BASE)
-#define DAC                 ((DAC_TypeDef *) DAC_BASE)
 #define TIM1                ((TIM_TypeDef *) TIM1_BASE)
-#define TIM8                ((TIM_TypeDef *) TIM8_BASE)
 #define USART1              ((USART_TypeDef *) USART1_BASE)
 #define USART6              ((USART_TypeDef *) USART6_BASE)
 #define ADC                 ((ADC_Common_TypeDef *) ADC_BASE)
 #define ADC1                ((ADC_TypeDef *) ADC1_BASE)
-#define ADC2                ((ADC_TypeDef *) ADC2_BASE)
-#define ADC3                ((ADC_TypeDef *) ADC3_BASE)
 #define SDIO                ((SDIO_TypeDef *) SDIO_BASE)
 #define SPI1                ((SPI_TypeDef *) SPI1_BASE)
+#define SPI4                ((SPI_TypeDef *) SPI4_BASE) 
 #define SYSCFG              ((SYSCFG_TypeDef *) SYSCFG_BASE)
 #define EXTI                ((EXTI_TypeDef *) EXTI_BASE)
 #define TIM9                ((TIM_TypeDef *) TIM9_BASE)
@@ -5896,10 +4913,7 @@ typedef struct {
 #define GPIOC               ((GPIO_TypeDef *) GPIOC_BASE)
 #define GPIOD               ((GPIO_TypeDef *) GPIOD_BASE)
 #define GPIOE               ((GPIO_TypeDef *) GPIOE_BASE)
-#define GPIOF               ((GPIO_TypeDef *) GPIOF_BASE)
-#define GPIOG               ((GPIO_TypeDef *) GPIOG_BASE)
 #define GPIOH               ((GPIO_TypeDef *) GPIOH_BASE)
-#define GPIOI               ((GPIO_TypeDef *) GPIOI_BASE)
 #define CRC                 ((CRC_TypeDef *) CRC_BASE)
 #define RCC                 ((RCC_TypeDef *) RCC_BASE)
 #define FLASH               ((FLASH_TypeDef *) FLASH_R_BASE)
@@ -5920,24 +4934,15 @@ typedef struct {
 #define DMA2_Stream4        ((DMA_Stream_TypeDef *) DMA2_Stream4_BASE)
 #define DMA2_Stream5        ((DMA_Stream_TypeDef *) DMA2_Stream5_BASE)
 #define DMA2_Stream6        ((DMA_Stream_TypeDef *) DMA2_Stream6_BASE)
-#define DMA2_Stream7        ((DMA_Stream_TypeDef *) DMA2_Stream7_BASE)  
-#define RNG                 ((RNG_TypeDef *) RNG_BASE)
-#define FSMC_Bank1          ((FSMC_Bank1_TypeDef *) FSMC_Bank1_R_BASE)
-#define FSMC_Bank1E         ((FSMC_Bank1E_TypeDef *) FSMC_Bank1E_R_BASE)
-#define FSMC_Bank2_3        ((FSMC_Bank2_3_TypeDef *) FSMC_Bank2_3_R_BASE)
-#define FSMC_Bank4          ((FSMC_Bank4_TypeDef *) FSMC_Bank4_R_BASE)
+#define DMA2_Stream7        ((DMA_Stream_TypeDef *) DMA2_Stream7_BASE)
 
 #define DBGMCU              ((DBGMCU_TypeDef *) DBGMCU_BASE)
 
-#define USB_OTG_FS          ((USB_OTG_TypeDef *) USB_OTG_FS_PERIPH_BASE)
-#define USB_OTG_HS          ((USB_OTG_TypeDef *) USB_OTG_HS_PERIPH_BASE)
-
+#define USB_OTG_FS          ((USB_OTG_GlobalTypeDef *) USB_OTG_FS_PERIPH_BASE)
 
 #define ADC_COMMON_BB              ((ADC_Common_BitBand_TypeDef *) PERIPH_BB(ADC_BASE))
 #define ADC_BB(inst)               ((ADC_BitBand_TypeDef *) PERIPH_BB(inst))
-#define CAN_BB(inst)               ((CAN_BitBand_TypeDef *) PERIPH_BB(inst))
 #define CRC_BB                     ((CRC_BitBand_TypeDef *) PERIPH_BB(CRC_BASE))
-#define DAC_BB                     ((DAC_BitBand_TypeDef *) PERIPH_BB(DAC_BASE))
 #define DMA_Stream_BB(inst)        ((DMA_Stream_BitBand_TypeDef *) PERIPH_BB(inst))
 #define DMA_BB(inst)               ((DMA_BitBand_TypeDef *) PERIPH_BB(inst))
 #define EXTI_BB                    ((EXTI_BitBand_TypeDef *) PERIPH_BB(EXTI_BASE))
@@ -5954,7 +4959,6 @@ typedef struct {
 #define TIM_BB(inst)               ((TIM_BitBand_TypeDef *) PERIPH_BB(inst))
 #define USART_BB(inst)             ((USART_BitBand_TypeDef *) PERIPH_BB(inst))
 #define WWDG_BB                    ((WWDG_BitBand_TypeDef *) PERIPH_BB(WWDG_BASE))
-
 /**
   * @}
   */
@@ -5977,12 +4981,12 @@ typedef struct {
 /*                                                                            */
 /******************************************************************************/
 /********************  Bit definition for ADC_SR register  ********************/
-#define  ADC_SR_AWD                          0x00000001U        /*!<Analog watchdog flag */
-#define  ADC_SR_EOC                          0x00000002U        /*!<End of conversion */
-#define  ADC_SR_JEOC                         0x00000004U        /*!<Injected channel end of conversion */
-#define  ADC_SR_JSTRT                        0x00000008U        /*!<Injected channel Start flag */
-#define  ADC_SR_STRT                         0x00000010U        /*!<Regular channel Start flag */
-#define  ADC_SR_OVR                          0x00000020U        /*!<Overrun flag */
+#define  ADC_SR_AWD                          0x00000001U       /*!<Analog watchdog flag */
+#define  ADC_SR_EOC                          0x00000002U       /*!<End of conversion */
+#define  ADC_SR_JEOC                         0x00000004U       /*!<Injected channel end of conversion */
+#define  ADC_SR_JSTRT                        0x00000008U       /*!<Injected channel Start flag */
+#define  ADC_SR_STRT                         0x00000010U       /*!<Regular channel Start flag */
+#define  ADC_SR_OVR                          0x00000020U       /*!<Overrun flag */
 
 /*******************  Bit definition for ADC_CR1 register  ********************/
 #define  ADC_CR1_AWDCH                       0x0000001FU        /*!<AWDCH[4:0] bits (Analog watchdog channel select bits) */
@@ -6339,1327 +5343,6 @@ typedef struct {
 
 /******************************************************************************/
 /*                                                                            */
-/*                         Controller Area Network                            */
-/*                                                                            */
-/******************************************************************************/
-/*!<CAN control and status registers */
-/*******************  Bit definition for CAN_MCR register  ********************/
-#define  CAN_MCR_INRQ                        0x00000001U        /*!<Initialization Request */
-#define  CAN_MCR_SLEEP                       0x00000002U        /*!<Sleep Mode Request */
-#define  CAN_MCR_TXFP                        0x00000004U        /*!<Transmit FIFO Priority */
-#define  CAN_MCR_RFLM                        0x00000008U        /*!<Receive FIFO Locked Mode */
-#define  CAN_MCR_NART                        0x00000010U        /*!<No Automatic Retransmission */
-#define  CAN_MCR_AWUM                        0x00000020U        /*!<Automatic Wakeup Mode */
-#define  CAN_MCR_ABOM                        0x00000040U        /*!<Automatic Bus-Off Management */
-#define  CAN_MCR_TTCM                        0x00000080U        /*!<Time Triggered Communication Mode */
-#define  CAN_MCR_RESET                       0x00008000U        /*!<bxCAN software master reset */
-#define  CAN_MCR_DBF                         0x00010000U        /*!<bxCAN Debug freeze */
-/*******************  Bit definition for CAN_MSR register  ********************/
-#define  CAN_MSR_INAK                        0x0001U            /*!<Initialization Acknowledge */
-#define  CAN_MSR_SLAK                        0x0002U            /*!<Sleep Acknowledge */
-#define  CAN_MSR_ERRI                        0x0004U            /*!<Error Interrupt */
-#define  CAN_MSR_WKUI                        0x0008U            /*!<Wakeup Interrupt */
-#define  CAN_MSR_SLAKI                       0x0010U            /*!<Sleep Acknowledge Interrupt */
-#define  CAN_MSR_TXM                         0x0100U            /*!<Transmit Mode */
-#define  CAN_MSR_RXM                         0x0200U            /*!<Receive Mode */
-#define  CAN_MSR_SAMP                        0x0400U            /*!<Last Sample Point */
-#define  CAN_MSR_RX                          0x0800U            /*!<CAN Rx Signal */
-
-/*******************  Bit definition for CAN_TSR register  ********************/
-#define  CAN_TSR_RQCP0                       0x00000001U        /*!<Request Completed Mailbox0 */
-#define  CAN_TSR_TXOK0                       0x00000002U        /*!<Transmission OK of Mailbox0 */
-#define  CAN_TSR_ALST0                       0x00000004U        /*!<Arbitration Lost for Mailbox0 */
-#define  CAN_TSR_TERR0                       0x00000008U        /*!<Transmission Error of Mailbox0 */
-#define  CAN_TSR_ABRQ0                       0x00000080U        /*!<Abort Request for Mailbox0 */
-#define  CAN_TSR_RQCP1                       0x00000100U        /*!<Request Completed Mailbox1 */
-#define  CAN_TSR_TXOK1                       0x00000200U        /*!<Transmission OK of Mailbox1 */
-#define  CAN_TSR_ALST1                       0x00000400U        /*!<Arbitration Lost for Mailbox1 */
-#define  CAN_TSR_TERR1                       0x00000800U        /*!<Transmission Error of Mailbox1 */
-#define  CAN_TSR_ABRQ1                       0x00008000U        /*!<Abort Request for Mailbox 1 */
-#define  CAN_TSR_RQCP2                       0x00010000U        /*!<Request Completed Mailbox2 */
-#define  CAN_TSR_TXOK2                       0x00020000U        /*!<Transmission OK of Mailbox 2 */
-#define  CAN_TSR_ALST2                       0x00040000U        /*!<Arbitration Lost for mailbox 2 */
-#define  CAN_TSR_TERR2                       0x00080000U        /*!<Transmission Error of Mailbox 2 */
-#define  CAN_TSR_ABRQ2                       0x00800000U        /*!<Abort Request for Mailbox 2 */
-#define  CAN_TSR_CODE                        0x03000000U        /*!<Mailbox Code */
-
-#define  CAN_TSR_TME                         0x1C000000U        /*!<TME[2:0] bits */
-#define  CAN_TSR_TME0                        0x04000000U        /*!<Transmit Mailbox 0 Empty */
-#define  CAN_TSR_TME1                        0x08000000U        /*!<Transmit Mailbox 1 Empty */
-#define  CAN_TSR_TME2                        0x10000000U        /*!<Transmit Mailbox 2 Empty */
-
-#define  CAN_TSR_LOW                         0xE0000000U        /*!<LOW[2:0] bits */
-#define  CAN_TSR_LOW0                        0x20000000U        /*!<Lowest Priority Flag for Mailbox 0 */
-#define  CAN_TSR_LOW1                        0x40000000U        /*!<Lowest Priority Flag for Mailbox 1 */
-#define  CAN_TSR_LOW2                        0x80000000U        /*!<Lowest Priority Flag for Mailbox 2 */
-
-/*******************  Bit definition for CAN_RF0R register  *******************/
-#define  CAN_RF0R_FMP0                       0x03U               /*!<FIFO 0 Message Pending */
-#define  CAN_RF0R_FULL0                      0x08U               /*!<FIFO 0 Full */
-#define  CAN_RF0R_FOVR0                      0x10U               /*!<FIFO 0 Overrun */
-#define  CAN_RF0R_RFOM0                      0x20U               /*!<Release FIFO 0 Output Mailbox */
-
-/*******************  Bit definition for CAN_RF1R register  *******************/
-#define  CAN_RF1R_FMP1                       0x03U               /*!<FIFO 1 Message Pending */
-#define  CAN_RF1R_FULL1                      0x08U               /*!<FIFO 1 Full */
-#define  CAN_RF1R_FOVR1                      0x10U               /*!<FIFO 1 Overrun */
-#define  CAN_RF1R_RFOM1                      0x20U               /*!<Release FIFO 1 Output Mailbox */
-
-/********************  Bit definition for CAN_IER register  *******************/
-#define  CAN_IER_TMEIE                       0x00000001U        /*!<Transmit Mailbox Empty Interrupt Enable */
-#define  CAN_IER_FMPIE0                      0x00000002U        /*!<FIFO Message Pending Interrupt Enable */
-#define  CAN_IER_FFIE0                       0x00000004U        /*!<FIFO Full Interrupt Enable */
-#define  CAN_IER_FOVIE0                      0x00000008U        /*!<FIFO Overrun Interrupt Enable */
-#define  CAN_IER_FMPIE1                      0x00000010U        /*!<FIFO Message Pending Interrupt Enable */
-#define  CAN_IER_FFIE1                       0x00000020U        /*!<FIFO Full Interrupt Enable */
-#define  CAN_IER_FOVIE1                      0x00000040U        /*!<FIFO Overrun Interrupt Enable */
-#define  CAN_IER_EWGIE                       0x00000100U        /*!<Error Warning Interrupt Enable */
-#define  CAN_IER_EPVIE                       0x00000200U        /*!<Error Passive Interrupt Enable */
-#define  CAN_IER_BOFIE                       0x00000400U        /*!<Bus-Off Interrupt Enable */
-#define  CAN_IER_LECIE                       0x00000800U        /*!<Last Error Code Interrupt Enable */
-#define  CAN_IER_ERRIE                       0x00008000U        /*!<Error Interrupt Enable */
-#define  CAN_IER_WKUIE                       0x00010000U        /*!<Wakeup Interrupt Enable */
-#define  CAN_IER_SLKIE                       0x00020000U        /*!<Sleep Interrupt Enable */
-#define  CAN_IER_EWGIE                       0x00000100U        /*!<Error warning interrupt enable */
-#define  CAN_IER_EPVIE                       0x00000200U        /*!<Error passive interrupt enable */
-#define  CAN_IER_BOFIE                       0x00000400U        /*!<Bus-off interrupt enable */
-#define  CAN_IER_LECIE                       0x00000800U        /*!<Last error code interrupt enable */
-#define  CAN_IER_ERRIE                       0x00008000U        /*!<Error interrupt enable */
-
-
-/********************  Bit definition for CAN_ESR register  *******************/
-#define  CAN_ESR_EWGF                        0x00000001U        /*!<Error Warning Flag */
-#define  CAN_ESR_EPVF                        0x00000002U        /*!<Error Passive Flag */
-#define  CAN_ESR_BOFF                        0x00000004U        /*!<Bus-Off Flag */
-
-#define  CAN_ESR_LEC                         0x00000070U        /*!<LEC[2:0] bits (Last Error Code) */
-#define  CAN_ESR_LEC_0                       0x00000010U        /*!<Bit 0 */
-#define  CAN_ESR_LEC_1                       0x00000020U        /*!<Bit 1 */
-#define  CAN_ESR_LEC_2                       0x00000040U        /*!<Bit 2 */
-
-#define  CAN_ESR_TEC                         0x00FF0000U        /*!<Least significant byte of the 9-bit Transmit Error Counter */
-#define  CAN_ESR_REC                         0xFF000000U        /*!<Receive Error Counter */
-
-/*******************  Bit definition for CAN_BTR register  ********************/
-#define  CAN_BTR_BRP                         0x000003FFU        /*!<Baud Rate Prescaler */
-#define  CAN_BTR_TS1                         0x000F0000U        /*!<Time Segment 1 */
-#define  CAN_BTR_TS1_0                       0x00010000U        /*!<Bit 0 */
-#define  CAN_BTR_TS1_1                       0x00020000U        /*!<Bit 1 */
-#define  CAN_BTR_TS1_2                       0x00040000U        /*!<Bit 2 */
-#define  CAN_BTR_TS1_3                       0x00080000U        /*!<Bit 3 */
-#define  CAN_BTR_TS2                         0x00700000U        /*!<Time Segment 2 */
-#define  CAN_BTR_TS2_0                       0x00100000U        /*!<Bit 0 */
-#define  CAN_BTR_TS2_1                       0x00200000U        /*!<Bit 1 */
-#define  CAN_BTR_TS2_2                       0x00400000U        /*!<Bit 2 */
-#define  CAN_BTR_SJW                         0x03000000U        /*!<Resynchronization Jump Width */
-#define  CAN_BTR_SJW_0                       0x01000000U        /*!<Bit 0 */
-#define  CAN_BTR_SJW_1                       0x02000000U        /*!<Bit 1 */
-#define  CAN_BTR_LBKM                        0x40000000U        /*!<Loop Back Mode (Debug) */
-#define  CAN_BTR_SILM                        0x80000000U        /*!<Silent Mode */
-
-
-/*!<Mailbox registers */
-/******************  Bit definition for CAN_TI0R register  ********************/
-#define  CAN_TI0R_TXRQ                       0x00000001U        /*!<Transmit Mailbox Request */
-#define  CAN_TI0R_RTR                        0x00000002U        /*!<Remote Transmission Request */
-#define  CAN_TI0R_IDE                        0x00000004U        /*!<Identifier Extension */
-#define  CAN_TI0R_EXID                       0x001FFFF8U        /*!<Extended Identifier */
-#define  CAN_TI0R_STID                       0xFFE00000U        /*!<Standard Identifier or Extended Identifier */
-
-/******************  Bit definition for CAN_TDT0R register  *******************/
-#define  CAN_TDT0R_DLC                       0x0000000FU        /*!<Data Length Code */
-#define  CAN_TDT0R_TGT                       0x00000100U        /*!<Transmit Global Time */
-#define  CAN_TDT0R_TIME                      0xFFFF0000U        /*!<Message Time Stamp */
-
-/******************  Bit definition for CAN_TDL0R register  *******************/
-#define  CAN_TDL0R_DATA0                     0x000000FFU        /*!<Data byte 0 */
-#define  CAN_TDL0R_DATA1                     0x0000FF00U        /*!<Data byte 1 */
-#define  CAN_TDL0R_DATA2                     0x00FF0000U        /*!<Data byte 2 */
-#define  CAN_TDL0R_DATA3                     0xFF000000U        /*!<Data byte 3 */
-
-/******************  Bit definition for CAN_TDH0R register  *******************/
-#define  CAN_TDH0R_DATA4                     0x000000FFU        /*!<Data byte 4 */
-#define  CAN_TDH0R_DATA5                     0x0000FF00U        /*!<Data byte 5 */
-#define  CAN_TDH0R_DATA6                     0x00FF0000U        /*!<Data byte 6 */
-#define  CAN_TDH0R_DATA7                     0xFF000000U        /*!<Data byte 7 */
-
-/*******************  Bit definition for CAN_TI1R register  *******************/
-#define  CAN_TI1R_TXRQ                       0x00000001U        /*!<Transmit Mailbox Request */
-#define  CAN_TI1R_RTR                        0x00000002U        /*!<Remote Transmission Request */
-#define  CAN_TI1R_IDE                        0x00000004U        /*!<Identifier Extension */
-#define  CAN_TI1R_EXID                       0x001FFFF8U        /*!<Extended Identifier */
-#define  CAN_TI1R_STID                       0xFFE00000U        /*!<Standard Identifier or Extended Identifier */
-
-/*******************  Bit definition for CAN_TDT1R register  ******************/
-#define  CAN_TDT1R_DLC                       0x0000000FU        /*!<Data Length Code */
-#define  CAN_TDT1R_TGT                       0x00000100U        /*!<Transmit Global Time */
-#define  CAN_TDT1R_TIME                      0xFFFF0000U        /*!<Message Time Stamp */
-
-/*******************  Bit definition for CAN_TDL1R register  ******************/
-#define  CAN_TDL1R_DATA0                     0x000000FFU        /*!<Data byte 0 */
-#define  CAN_TDL1R_DATA1                     0x0000FF00U        /*!<Data byte 1 */
-#define  CAN_TDL1R_DATA2                     0x00FF0000U        /*!<Data byte 2 */
-#define  CAN_TDL1R_DATA3                     0xFF000000U        /*!<Data byte 3 */
-
-/*******************  Bit definition for CAN_TDH1R register  ******************/
-#define  CAN_TDH1R_DATA4                     0x000000FFU        /*!<Data byte 4 */
-#define  CAN_TDH1R_DATA5                     0x0000FF00U        /*!<Data byte 5 */
-#define  CAN_TDH1R_DATA6                     0x00FF0000U        /*!<Data byte 6 */
-#define  CAN_TDH1R_DATA7                     0xFF000000U        /*!<Data byte 7 */
-
-/*******************  Bit definition for CAN_TI2R register  *******************/
-#define  CAN_TI2R_TXRQ                       0x00000001U        /*!<Transmit Mailbox Request */
-#define  CAN_TI2R_RTR                        0x00000002U        /*!<Remote Transmission Request */
-#define  CAN_TI2R_IDE                        0x00000004U        /*!<Identifier Extension */
-#define  CAN_TI2R_EXID                       0x001FFFF8U        /*!<Extended identifier */
-#define  CAN_TI2R_STID                       0xFFE00000U        /*!<Standard Identifier or Extended Identifier */
-
-/*******************  Bit definition for CAN_TDT2R register  ******************/  
-#define  CAN_TDT2R_DLC                       0x0000000FU        /*!<Data Length Code */
-#define  CAN_TDT2R_TGT                       0x00000100U        /*!<Transmit Global Time */
-#define  CAN_TDT2R_TIME                      0xFFFF0000U        /*!<Message Time Stamp */
-
-/*******************  Bit definition for CAN_TDL2R register  ******************/
-#define  CAN_TDL2R_DATA0                     0x000000FFU        /*!<Data byte 0 */
-#define  CAN_TDL2R_DATA1                     0x0000FF00U        /*!<Data byte 1 */
-#define  CAN_TDL2R_DATA2                     0x00FF0000U        /*!<Data byte 2 */
-#define  CAN_TDL2R_DATA3                     0xFF000000U        /*!<Data byte 3 */
-
-/*******************  Bit definition for CAN_TDH2R register  ******************/
-#define  CAN_TDH2R_DATA4                     0x000000FFU        /*!<Data byte 4 */
-#define  CAN_TDH2R_DATA5                     0x0000FF00U        /*!<Data byte 5 */
-#define  CAN_TDH2R_DATA6                     0x00FF0000U        /*!<Data byte 6 */
-#define  CAN_TDH2R_DATA7                     0xFF000000U        /*!<Data byte 7 */
-
-/*******************  Bit definition for CAN_RI0R register  *******************/
-#define  CAN_RI0R_RTR                        0x00000002U        /*!<Remote Transmission Request */
-#define  CAN_RI0R_IDE                        0x00000004U        /*!<Identifier Extension */
-#define  CAN_RI0R_EXID                       0x001FFFF8U        /*!<Extended Identifier */
-#define  CAN_RI0R_STID                       0xFFE00000U        /*!<Standard Identifier or Extended Identifier */
-
-/*******************  Bit definition for CAN_RDT0R register  ******************/
-#define  CAN_RDT0R_DLC                       0x0000000FU        /*!<Data Length Code */
-#define  CAN_RDT0R_FMI                       0x0000FF00U        /*!<Filter Match Index */
-#define  CAN_RDT0R_TIME                      0xFFFF0000U        /*!<Message Time Stamp */
-
-/*******************  Bit definition for CAN_RDL0R register  ******************/
-#define  CAN_RDL0R_DATA0                     0x000000FFU        /*!<Data byte 0 */
-#define  CAN_RDL0R_DATA1                     0x0000FF00U        /*!<Data byte 1 */
-#define  CAN_RDL0R_DATA2                     0x00FF0000U        /*!<Data byte 2 */
-#define  CAN_RDL0R_DATA3                     0xFF000000U        /*!<Data byte 3 */
-
-/*******************  Bit definition for CAN_RDH0R register  ******************/
-#define  CAN_RDH0R_DATA4                     0x000000FFU        /*!<Data byte 4 */
-#define  CAN_RDH0R_DATA5                     0x0000FF00U        /*!<Data byte 5 */
-#define  CAN_RDH0R_DATA6                     0x00FF0000U        /*!<Data byte 6 */
-#define  CAN_RDH0R_DATA7                     0xFF000000U        /*!<Data byte 7 */
-
-/*******************  Bit definition for CAN_RI1R register  *******************/
-#define  CAN_RI1R_RTR                        0x00000002U        /*!<Remote Transmission Request */
-#define  CAN_RI1R_IDE                        0x00000004U        /*!<Identifier Extension */
-#define  CAN_RI1R_EXID                       0x001FFFF8U        /*!<Extended identifier */
-#define  CAN_RI1R_STID                       0xFFE00000U        /*!<Standard Identifier or Extended Identifier */
-
-/*******************  Bit definition for CAN_RDT1R register  ******************/
-#define  CAN_RDT1R_DLC                       0x0000000FU        /*!<Data Length Code */
-#define  CAN_RDT1R_FMI                       0x0000FF00U        /*!<Filter Match Index */
-#define  CAN_RDT1R_TIME                      0xFFFF0000U        /*!<Message Time Stamp */
-
-/*******************  Bit definition for CAN_RDL1R register  ******************/
-#define  CAN_RDL1R_DATA0                     0x000000FFU        /*!<Data byte 0 */
-#define  CAN_RDL1R_DATA1                     0x0000FF00U        /*!<Data byte 1 */
-#define  CAN_RDL1R_DATA2                     0x00FF0000U        /*!<Data byte 2 */
-#define  CAN_RDL1R_DATA3                     0xFF000000U        /*!<Data byte 3 */
-
-/*******************  Bit definition for CAN_RDH1R register  ******************/
-#define  CAN_RDH1R_DATA4                     0x000000FFU        /*!<Data byte 4 */
-#define  CAN_RDH1R_DATA5                     0x0000FF00U        /*!<Data byte 5 */
-#define  CAN_RDH1R_DATA6                     0x00FF0000U        /*!<Data byte 6 */
-#define  CAN_RDH1R_DATA7                     0xFF000000U        /*!<Data byte 7 */
-
-/*!<CAN filter registers */
-/*******************  Bit definition for CAN_FMR register  ********************/
-#define  CAN_FMR_FINIT                       0x01U               /*!<Filter Init Mode */
-#define  CAN_FMR_CAN2SB                      0x00003F00U        /*!<CAN2 start bank */
-
-/*******************  Bit definition for CAN_FM1R register  *******************/
-#define  CAN_FM1R_FBM                        0x0FFFFFFFU        /*!<Filter Mode */
-#define  CAN_FM1R_FBM0                       0x00000001U        /*!<Filter Init Mode bit 0 */
-#define  CAN_FM1R_FBM1                       0x00000002U        /*!<Filter Init Mode bit 1 */
-#define  CAN_FM1R_FBM2                       0x00000004U        /*!<Filter Init Mode bit 2 */
-#define  CAN_FM1R_FBM3                       0x00000008U        /*!<Filter Init Mode bit 3 */
-#define  CAN_FM1R_FBM4                       0x00000010U        /*!<Filter Init Mode bit 4 */
-#define  CAN_FM1R_FBM5                       0x00000020U        /*!<Filter Init Mode bit 5 */
-#define  CAN_FM1R_FBM6                       0x00000040U        /*!<Filter Init Mode bit 6 */
-#define  CAN_FM1R_FBM7                       0x00000080U        /*!<Filter Init Mode bit 7 */
-#define  CAN_FM1R_FBM8                       0x00000100U        /*!<Filter Init Mode bit 8 */
-#define  CAN_FM1R_FBM9                       0x00000200U        /*!<Filter Init Mode bit 9 */
-#define  CAN_FM1R_FBM10                      0x00000400U        /*!<Filter Init Mode bit 10 */
-#define  CAN_FM1R_FBM11                      0x00000800U        /*!<Filter Init Mode bit 11 */
-#define  CAN_FM1R_FBM12                      0x00001000U        /*!<Filter Init Mode bit 12 */
-#define  CAN_FM1R_FBM13                      0x00002000U        /*!<Filter Init Mode bit 13 */
-#define  CAN_FM1R_FBM14                      0x00004000U        /*!<Filter Init Mode bit 14 */
-#define  CAN_FM1R_FBM15                      0x00008000U        /*!<Filter Init Mode bit 15 */
-#define  CAN_FM1R_FBM16                      0x00010000U        /*!<Filter Init Mode bit 16 */
-#define  CAN_FM1R_FBM17                      0x00020000U        /*!<Filter Init Mode bit 17 */
-#define  CAN_FM1R_FBM18                      0x00040000U        /*!<Filter Init Mode bit 18 */
-#define  CAN_FM1R_FBM19                      0x00080000U        /*!<Filter Init Mode bit 19 */
-#define  CAN_FM1R_FBM20                      0x00100000U        /*!<Filter Init Mode bit 20 */
-#define  CAN_FM1R_FBM21                      0x00200000U        /*!<Filter Init Mode bit 21 */
-#define  CAN_FM1R_FBM22                      0x00400000U        /*!<Filter Init Mode bit 22 */
-#define  CAN_FM1R_FBM23                      0x00800000U        /*!<Filter Init Mode bit 23 */
-#define  CAN_FM1R_FBM24                      0x01000000U        /*!<Filter Init Mode bit 24 */
-#define  CAN_FM1R_FBM25                      0x02000000U        /*!<Filter Init Mode bit 25 */
-#define  CAN_FM1R_FBM26                      0x04000000U        /*!<Filter Init Mode bit 26 */
-#define  CAN_FM1R_FBM27                      0x08000000U        /*!<Filter Init Mode bit 27 */
-
-/*******************  Bit definition for CAN_FS1R register  *******************/
-#define  CAN_FS1R_FSC                        0x0FFFFFFFU        /*!<Filter Scale Configuration */
-#define  CAN_FS1R_FSC0                       0x00000001U        /*!<Filter Scale Configuration bit 0 */
-#define  CAN_FS1R_FSC1                       0x00000002U        /*!<Filter Scale Configuration bit 1 */
-#define  CAN_FS1R_FSC2                       0x00000004U        /*!<Filter Scale Configuration bit 2 */
-#define  CAN_FS1R_FSC3                       0x00000008U        /*!<Filter Scale Configuration bit 3 */
-#define  CAN_FS1R_FSC4                       0x00000010U        /*!<Filter Scale Configuration bit 4 */
-#define  CAN_FS1R_FSC5                       0x00000020U        /*!<Filter Scale Configuration bit 5 */
-#define  CAN_FS1R_FSC6                       0x00000040U        /*!<Filter Scale Configuration bit 6 */
-#define  CAN_FS1R_FSC7                       0x00000080U        /*!<Filter Scale Configuration bit 7 */
-#define  CAN_FS1R_FSC8                       0x00000100U        /*!<Filter Scale Configuration bit 8 */
-#define  CAN_FS1R_FSC9                       0x00000200U        /*!<Filter Scale Configuration bit 9 */
-#define  CAN_FS1R_FSC10                      0x00000400U        /*!<Filter Scale Configuration bit 10 */
-#define  CAN_FS1R_FSC11                      0x00000800U        /*!<Filter Scale Configuration bit 11 */
-#define  CAN_FS1R_FSC12                      0x00001000U        /*!<Filter Scale Configuration bit 12 */
-#define  CAN_FS1R_FSC13                      0x00002000U        /*!<Filter Scale Configuration bit 13 */
-#define  CAN_FS1R_FSC14                      0x00004000U        /*!<Filter Scale Configuration bit 14 */
-#define  CAN_FS1R_FSC15                      0x00008000U        /*!<Filter Scale Configuration bit 15 */
-#define  CAN_FS1R_FSC16                      0x00010000U        /*!<Filter Scale Configuration bit 16 */
-#define  CAN_FS1R_FSC17                      0x00020000U        /*!<Filter Scale Configuration bit 17 */
-#define  CAN_FS1R_FSC18                      0x00040000U        /*!<Filter Scale Configuration bit 18 */
-#define  CAN_FS1R_FSC19                      0x00080000U        /*!<Filter Scale Configuration bit 19 */
-#define  CAN_FS1R_FSC20                      0x00100000U        /*!<Filter Scale Configuration bit 20 */
-#define  CAN_FS1R_FSC21                      0x00200000U        /*!<Filter Scale Configuration bit 21 */
-#define  CAN_FS1R_FSC22                      0x00400000U        /*!<Filter Scale Configuration bit 22 */
-#define  CAN_FS1R_FSC23                      0x00800000U        /*!<Filter Scale Configuration bit 23 */
-#define  CAN_FS1R_FSC24                      0x01000000U        /*!<Filter Scale Configuration bit 24 */
-#define  CAN_FS1R_FSC25                      0x02000000U        /*!<Filter Scale Configuration bit 25 */
-#define  CAN_FS1R_FSC26                      0x04000000U        /*!<Filter Scale Configuration bit 26 */
-#define  CAN_FS1R_FSC27                      0x08000000U        /*!<Filter Scale Configuration bit 27 */
-
-/******************  Bit definition for CAN_FFA1R register  *******************/
-#define  CAN_FFA1R_FFA                        0x0FFFFFFFU        /*!<Filter FIFO Assignment */
-#define  CAN_FFA1R_FFA0                       0x00000001U        /*!<Filter FIFO Assignment bit 0 */
-#define  CAN_FFA1R_FFA1                       0x00000002U        /*!<Filter FIFO Assignment bit 1 */
-#define  CAN_FFA1R_FFA2                       0x00000004U        /*!<Filter FIFO Assignment bit 2 */
-#define  CAN_FFA1R_FFA3                       0x00000008U        /*!<Filter FIFO Assignment bit 3 */
-#define  CAN_FFA1R_FFA4                       0x00000010U        /*!<Filter FIFO Assignment bit 4 */
-#define  CAN_FFA1R_FFA5                       0x00000020U        /*!<Filter FIFO Assignment bit 5 */
-#define  CAN_FFA1R_FFA6                       0x00000040U        /*!<Filter FIFO Assignment bit 6 */
-#define  CAN_FFA1R_FFA7                       0x00000080U        /*!<Filter FIFO Assignment bit 7 */
-#define  CAN_FFA1R_FFA8                       0x00000100U        /*!<Filter FIFO Assignment bit 8 */
-#define  CAN_FFA1R_FFA9                       0x00000200U        /*!<Filter FIFO Assignment bit 9 */
-#define  CAN_FFA1R_FFA10                      0x00000400U        /*!<Filter FIFO Assignment bit 10 */
-#define  CAN_FFA1R_FFA11                      0x00000800U        /*!<Filter FIFO Assignment bit 11 */
-#define  CAN_FFA1R_FFA12                      0x00001000U        /*!<Filter FIFO Assignment bit 12 */
-#define  CAN_FFA1R_FFA13                      0x00002000U        /*!<Filter FIFO Assignment bit 13 */
-#define  CAN_FFA1R_FFA14                      0x00004000U        /*!<Filter FIFO Assignment bit 14 */
-#define  CAN_FFA1R_FFA15                      0x00008000U        /*!<Filter FIFO Assignment bit 15 */
-#define  CAN_FFA1R_FFA16                      0x00010000U        /*!<Filter FIFO Assignment bit 16 */
-#define  CAN_FFA1R_FFA17                      0x00020000U        /*!<Filter FIFO Assignment bit 17 */
-#define  CAN_FFA1R_FFA18                      0x00040000U        /*!<Filter FIFO Assignment bit 18 */
-#define  CAN_FFA1R_FFA19                      0x00080000U        /*!<Filter FIFO Assignment bit 19 */
-#define  CAN_FFA1R_FFA20                      0x00100000U        /*!<Filter FIFO Assignment bit 20 */
-#define  CAN_FFA1R_FFA21                      0x00200000U        /*!<Filter FIFO Assignment bit 21 */
-#define  CAN_FFA1R_FFA22                      0x00400000U        /*!<Filter FIFO Assignment bit 22 */
-#define  CAN_FFA1R_FFA23                      0x00800000U        /*!<Filter FIFO Assignment bit 23 */
-#define  CAN_FFA1R_FFA24                      0x01000000U        /*!<Filter FIFO Assignment bit 24 */
-#define  CAN_FFA1R_FFA25                      0x02000000U        /*!<Filter FIFO Assignment bit 25 */
-#define  CAN_FFA1R_FFA26                      0x04000000U        /*!<Filter FIFO Assignment bit 26 */
-#define  CAN_FFA1R_FFA27                      0x08000000U        /*!<Filter FIFO Assignment bit 27 */
-
-/*******************  Bit definition for CAN_FA1R register  *******************/
-#define  CAN_FA1R_FACT                        0x0FFFFFFFU        /*!<Filter Active */
-#define  CAN_FA1R_FACT0                       0x00000001U        /*!<Filter Active bit 0 */
-#define  CAN_FA1R_FACT1                       0x00000002U        /*!<Filter Active bit 1 */
-#define  CAN_FA1R_FACT2                       0x00000004U        /*!<Filter Active bit 2 */
-#define  CAN_FA1R_FACT3                       0x00000008U        /*!<Filter Active bit 3 */
-#define  CAN_FA1R_FACT4                       0x00000010U        /*!<Filter Active bit 4 */
-#define  CAN_FA1R_FACT5                       0x00000020U        /*!<Filter Active bit 5 */
-#define  CAN_FA1R_FACT6                       0x00000040U        /*!<Filter Active bit 6 */
-#define  CAN_FA1R_FACT7                       0x00000080U        /*!<Filter Active bit 7 */
-#define  CAN_FA1R_FACT8                       0x00000100U        /*!<Filter Active bit 8 */
-#define  CAN_FA1R_FACT9                       0x00000200U        /*!<Filter Active bit 9 */
-#define  CAN_FA1R_FACT10                      0x00000400U        /*!<Filter Active bit 10 */
-#define  CAN_FA1R_FACT11                      0x00000800U        /*!<Filter Active bit 11 */
-#define  CAN_FA1R_FACT12                      0x00001000U        /*!<Filter Active bit 12 */
-#define  CAN_FA1R_FACT13                      0x00002000U        /*!<Filter Active bit 13 */
-#define  CAN_FA1R_FACT14                      0x00004000U        /*!<Filter Active bit 14 */
-#define  CAN_FA1R_FACT15                      0x00008000U        /*!<Filter Active bit 15 */
-#define  CAN_FA1R_FACT16                      0x00010000U        /*!<Filter Active bit 16 */
-#define  CAN_FA1R_FACT17                      0x00020000U        /*!<Filter Active bit 17 */
-#define  CAN_FA1R_FACT18                      0x00040000U        /*!<Filter Active bit 18 */
-#define  CAN_FA1R_FACT19                      0x00080000U        /*!<Filter Active bit 19 */
-#define  CAN_FA1R_FACT20                      0x00100000U        /*!<Filter Active bit 20 */
-#define  CAN_FA1R_FACT21                      0x00200000U        /*!<Filter Active bit 21 */
-#define  CAN_FA1R_FACT22                      0x00400000U        /*!<Filter Active bit 22 */
-#define  CAN_FA1R_FACT23                      0x00800000U        /*!<Filter Active bit 23 */
-#define  CAN_FA1R_FACT24                      0x01000000U        /*!<Filter Active bit 24 */
-#define  CAN_FA1R_FACT25                      0x02000000U        /*!<Filter Active bit 25 */
-#define  CAN_FA1R_FACT26                      0x04000000U        /*!<Filter Active bit 26 */
-#define  CAN_FA1R_FACT27                      0x08000000U        /*!<Filter Active bit 27 */
-
-/*******************  Bit definition for CAN_F0R1 register  *******************/
-#define  CAN_F0R1_FB0                        0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F0R1_FB1                        0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F0R1_FB2                        0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F0R1_FB3                        0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F0R1_FB4                        0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F0R1_FB5                        0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F0R1_FB6                        0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F0R1_FB7                        0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F0R1_FB8                        0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F0R1_FB9                        0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F0R1_FB10                       0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F0R1_FB11                       0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F0R1_FB12                       0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F0R1_FB13                       0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F0R1_FB14                       0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F0R1_FB15                       0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F0R1_FB16                       0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F0R1_FB17                       0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F0R1_FB18                       0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F0R1_FB19                       0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F0R1_FB20                       0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F0R1_FB21                       0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F0R1_FB22                       0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F0R1_FB23                       0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F0R1_FB24                       0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F0R1_FB25                       0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F0R1_FB26                       0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F0R1_FB27                       0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F0R1_FB28                       0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F0R1_FB29                       0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F0R1_FB30                       0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F0R1_FB31                       0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F1R1 register  *******************/
-#define  CAN_F1R1_FB0                        0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F1R1_FB1                        0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F1R1_FB2                        0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F1R1_FB3                        0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F1R1_FB4                        0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F1R1_FB5                        0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F1R1_FB6                        0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F1R1_FB7                        0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F1R1_FB8                        0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F1R1_FB9                        0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F1R1_FB10                       0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F1R1_FB11                       0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F1R1_FB12                       0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F1R1_FB13                       0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F1R1_FB14                       0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F1R1_FB15                       0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F1R1_FB16                       0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F1R1_FB17                       0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F1R1_FB18                       0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F1R1_FB19                       0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F1R1_FB20                       0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F1R1_FB21                       0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F1R1_FB22                       0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F1R1_FB23                       0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F1R1_FB24                       0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F1R1_FB25                       0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F1R1_FB26                       0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F1R1_FB27                       0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F1R1_FB28                       0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F1R1_FB29                       0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F1R1_FB30                       0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F1R1_FB31                       0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F2R1 register  *******************/
-#define  CAN_F2R1_FB0                        0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F2R1_FB1                        0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F2R1_FB2                        0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F2R1_FB3                        0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F2R1_FB4                        0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F2R1_FB5                        0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F2R1_FB6                        0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F2R1_FB7                        0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F2R1_FB8                        0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F2R1_FB9                        0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F2R1_FB10                       0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F2R1_FB11                       0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F2R1_FB12                       0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F2R1_FB13                       0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F2R1_FB14                       0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F2R1_FB15                       0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F2R1_FB16                       0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F2R1_FB17                       0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F2R1_FB18                       0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F2R1_FB19                       0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F2R1_FB20                       0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F2R1_FB21                       0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F2R1_FB22                       0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F2R1_FB23                       0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F2R1_FB24                       0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F2R1_FB25                       0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F2R1_FB26                       0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F2R1_FB27                       0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F2R1_FB28                       0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F2R1_FB29                       0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F2R1_FB30                       0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F2R1_FB31                       0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F3R1 register  *******************/
-#define  CAN_F3R1_FB0                        0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F3R1_FB1                        0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F3R1_FB2                        0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F3R1_FB3                        0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F3R1_FB4                        0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F3R1_FB5                        0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F3R1_FB6                        0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F3R1_FB7                        0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F3R1_FB8                        0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F3R1_FB9                        0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F3R1_FB10                       0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F3R1_FB11                       0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F3R1_FB12                       0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F3R1_FB13                       0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F3R1_FB14                       0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F3R1_FB15                       0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F3R1_FB16                       0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F3R1_FB17                       0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F3R1_FB18                       0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F3R1_FB19                       0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F3R1_FB20                       0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F3R1_FB21                       0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F3R1_FB22                       0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F3R1_FB23                       0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F3R1_FB24                       0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F3R1_FB25                       0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F3R1_FB26                       0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F3R1_FB27                       0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F3R1_FB28                       0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F3R1_FB29                       0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F3R1_FB30                       0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F3R1_FB31                       0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F4R1 register  *******************/
-#define  CAN_F4R1_FB0                        0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F4R1_FB1                        0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F4R1_FB2                        0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F4R1_FB3                        0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F4R1_FB4                        0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F4R1_FB5                        0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F4R1_FB6                        0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F4R1_FB7                        0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F4R1_FB8                        0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F4R1_FB9                        0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F4R1_FB10                       0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F4R1_FB11                       0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F4R1_FB12                       0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F4R1_FB13                       0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F4R1_FB14                       0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F4R1_FB15                       0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F4R1_FB16                       0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F4R1_FB17                       0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F4R1_FB18                       0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F4R1_FB19                       0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F4R1_FB20                       0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F4R1_FB21                       0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F4R1_FB22                       0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F4R1_FB23                       0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F4R1_FB24                       0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F4R1_FB25                       0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F4R1_FB26                       0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F4R1_FB27                       0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F4R1_FB28                       0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F4R1_FB29                       0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F4R1_FB30                       0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F4R1_FB31                       0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F5R1 register  *******************/
-#define  CAN_F5R1_FB0                        0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F5R1_FB1                        0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F5R1_FB2                        0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F5R1_FB3                        0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F5R1_FB4                        0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F5R1_FB5                        0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F5R1_FB6                        0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F5R1_FB7                        0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F5R1_FB8                        0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F5R1_FB9                        0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F5R1_FB10                       0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F5R1_FB11                       0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F5R1_FB12                       0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F5R1_FB13                       0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F5R1_FB14                       0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F5R1_FB15                       0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F5R1_FB16                       0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F5R1_FB17                       0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F5R1_FB18                       0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F5R1_FB19                       0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F5R1_FB20                       0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F5R1_FB21                       0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F5R1_FB22                       0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F5R1_FB23                       0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F5R1_FB24                       0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F5R1_FB25                       0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F5R1_FB26                       0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F5R1_FB27                       0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F5R1_FB28                       0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F5R1_FB29                       0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F5R1_FB30                       0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F5R1_FB31                       0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F6R1 register  *******************/
-#define  CAN_F6R1_FB0                        0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F6R1_FB1                        0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F6R1_FB2                        0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F6R1_FB3                        0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F6R1_FB4                        0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F6R1_FB5                        0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F6R1_FB6                        0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F6R1_FB7                        0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F6R1_FB8                        0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F6R1_FB9                        0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F6R1_FB10                       0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F6R1_FB11                       0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F6R1_FB12                       0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F6R1_FB13                       0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F6R1_FB14                       0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F6R1_FB15                       0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F6R1_FB16                       0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F6R1_FB17                       0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F6R1_FB18                       0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F6R1_FB19                       0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F6R1_FB20                       0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F6R1_FB21                       0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F6R1_FB22                       0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F6R1_FB23                       0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F6R1_FB24                       0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F6R1_FB25                       0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F6R1_FB26                       0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F6R1_FB27                       0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F6R1_FB28                       0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F6R1_FB29                       0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F6R1_FB30                       0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F6R1_FB31                       0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F7R1 register  *******************/
-#define  CAN_F7R1_FB0                        0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F7R1_FB1                        0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F7R1_FB2                        0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F7R1_FB3                        0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F7R1_FB4                        0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F7R1_FB5                        0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F7R1_FB6                        0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F7R1_FB7                        0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F7R1_FB8                        0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F7R1_FB9                        0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F7R1_FB10                       0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F7R1_FB11                       0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F7R1_FB12                       0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F7R1_FB13                       0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F7R1_FB14                       0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F7R1_FB15                       0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F7R1_FB16                       0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F7R1_FB17                       0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F7R1_FB18                       0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F7R1_FB19                       0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F7R1_FB20                       0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F7R1_FB21                       0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F7R1_FB22                       0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F7R1_FB23                       0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F7R1_FB24                       0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F7R1_FB25                       0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F7R1_FB26                       0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F7R1_FB27                       0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F7R1_FB28                       0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F7R1_FB29                       0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F7R1_FB30                       0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F7R1_FB31                       0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F8R1 register  *******************/
-#define  CAN_F8R1_FB0                        0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F8R1_FB1                        0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F8R1_FB2                        0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F8R1_FB3                        0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F8R1_FB4                        0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F8R1_FB5                        0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F8R1_FB6                        0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F8R1_FB7                        0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F8R1_FB8                        0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F8R1_FB9                        0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F8R1_FB10                       0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F8R1_FB11                       0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F8R1_FB12                       0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F8R1_FB13                       0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F8R1_FB14                       0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F8R1_FB15                       0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F8R1_FB16                       0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F8R1_FB17                       0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F8R1_FB18                       0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F8R1_FB19                       0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F8R1_FB20                       0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F8R1_FB21                       0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F8R1_FB22                       0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F8R1_FB23                       0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F8R1_FB24                       0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F8R1_FB25                       0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F8R1_FB26                       0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F8R1_FB27                       0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F8R1_FB28                       0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F8R1_FB29                       0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F8R1_FB30                       0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F8R1_FB31                       0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F9R1 register  *******************/
-#define  CAN_F9R1_FB0                        0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F9R1_FB1                        0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F9R1_FB2                        0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F9R1_FB3                        0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F9R1_FB4                        0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F9R1_FB5                        0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F9R1_FB6                        0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F9R1_FB7                        0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F9R1_FB8                        0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F9R1_FB9                        0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F9R1_FB10                       0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F9R1_FB11                       0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F9R1_FB12                       0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F9R1_FB13                       0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F9R1_FB14                       0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F9R1_FB15                       0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F9R1_FB16                       0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F9R1_FB17                       0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F9R1_FB18                       0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F9R1_FB19                       0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F9R1_FB20                       0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F9R1_FB21                       0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F9R1_FB22                       0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F9R1_FB23                       0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F9R1_FB24                       0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F9R1_FB25                       0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F9R1_FB26                       0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F9R1_FB27                       0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F9R1_FB28                       0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F9R1_FB29                       0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F9R1_FB30                       0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F9R1_FB31                       0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F10R1 register  ******************/
-#define  CAN_F10R1_FB0                       0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F10R1_FB1                       0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F10R1_FB2                       0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F10R1_FB3                       0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F10R1_FB4                       0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F10R1_FB5                       0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F10R1_FB6                       0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F10R1_FB7                       0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F10R1_FB8                       0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F10R1_FB9                       0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F10R1_FB10                      0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F10R1_FB11                      0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F10R1_FB12                      0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F10R1_FB13                      0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F10R1_FB14                      0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F10R1_FB15                      0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F10R1_FB16                      0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F10R1_FB17                      0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F10R1_FB18                      0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F10R1_FB19                      0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F10R1_FB20                      0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F10R1_FB21                      0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F10R1_FB22                      0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F10R1_FB23                      0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F10R1_FB24                      0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F10R1_FB25                      0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F10R1_FB26                      0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F10R1_FB27                      0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F10R1_FB28                      0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F10R1_FB29                      0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F10R1_FB30                      0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F10R1_FB31                      0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F11R1 register  ******************/
-#define  CAN_F11R1_FB0                       0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F11R1_FB1                       0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F11R1_FB2                       0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F11R1_FB3                       0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F11R1_FB4                       0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F11R1_FB5                       0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F11R1_FB6                       0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F11R1_FB7                       0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F11R1_FB8                       0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F11R1_FB9                       0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F11R1_FB10                      0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F11R1_FB11                      0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F11R1_FB12                      0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F11R1_FB13                      0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F11R1_FB14                      0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F11R1_FB15                      0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F11R1_FB16                      0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F11R1_FB17                      0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F11R1_FB18                      0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F11R1_FB19                      0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F11R1_FB20                      0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F11R1_FB21                      0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F11R1_FB22                      0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F11R1_FB23                      0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F11R1_FB24                      0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F11R1_FB25                      0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F11R1_FB26                      0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F11R1_FB27                      0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F11R1_FB28                      0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F11R1_FB29                      0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F11R1_FB30                      0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F11R1_FB31                      0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F12R1 register  ******************/
-#define  CAN_F12R1_FB0                       0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F12R1_FB1                       0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F12R1_FB2                       0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F12R1_FB3                       0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F12R1_FB4                       0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F12R1_FB5                       0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F12R1_FB6                       0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F12R1_FB7                       0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F12R1_FB8                       0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F12R1_FB9                       0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F12R1_FB10                      0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F12R1_FB11                      0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F12R1_FB12                      0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F12R1_FB13                      0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F12R1_FB14                      0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F12R1_FB15                      0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F12R1_FB16                      0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F12R1_FB17                      0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F12R1_FB18                      0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F12R1_FB19                      0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F12R1_FB20                      0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F12R1_FB21                      0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F12R1_FB22                      0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F12R1_FB23                      0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F12R1_FB24                      0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F12R1_FB25                      0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F12R1_FB26                      0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F12R1_FB27                      0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F12R1_FB28                      0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F12R1_FB29                      0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F12R1_FB30                      0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F12R1_FB31                      0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F13R1 register  ******************/
-#define  CAN_F13R1_FB0                       0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F13R1_FB1                       0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F13R1_FB2                       0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F13R1_FB3                       0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F13R1_FB4                       0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F13R1_FB5                       0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F13R1_FB6                       0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F13R1_FB7                       0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F13R1_FB8                       0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F13R1_FB9                       0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F13R1_FB10                      0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F13R1_FB11                      0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F13R1_FB12                      0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F13R1_FB13                      0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F13R1_FB14                      0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F13R1_FB15                      0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F13R1_FB16                      0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F13R1_FB17                      0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F13R1_FB18                      0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F13R1_FB19                      0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F13R1_FB20                      0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F13R1_FB21                      0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F13R1_FB22                      0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F13R1_FB23                      0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F13R1_FB24                      0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F13R1_FB25                      0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F13R1_FB26                      0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F13R1_FB27                      0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F13R1_FB28                      0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F13R1_FB29                      0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F13R1_FB30                      0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F13R1_FB31                      0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F0R2 register  *******************/
-#define  CAN_F0R2_FB0                        0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F0R2_FB1                        0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F0R2_FB2                        0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F0R2_FB3                        0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F0R2_FB4                        0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F0R2_FB5                        0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F0R2_FB6                        0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F0R2_FB7                        0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F0R2_FB8                        0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F0R2_FB9                        0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F0R2_FB10                       0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F0R2_FB11                       0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F0R2_FB12                       0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F0R2_FB13                       0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F0R2_FB14                       0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F0R2_FB15                       0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F0R2_FB16                       0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F0R2_FB17                       0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F0R2_FB18                       0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F0R2_FB19                       0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F0R2_FB20                       0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F0R2_FB21                       0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F0R2_FB22                       0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F0R2_FB23                       0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F0R2_FB24                       0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F0R2_FB25                       0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F0R2_FB26                       0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F0R2_FB27                       0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F0R2_FB28                       0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F0R2_FB29                       0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F0R2_FB30                       0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F0R2_FB31                       0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F1R2 register  *******************/
-#define  CAN_F1R2_FB0                        0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F1R2_FB1                        0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F1R2_FB2                        0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F1R2_FB3                        0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F1R2_FB4                        0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F1R2_FB5                        0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F1R2_FB6                        0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F1R2_FB7                        0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F1R2_FB8                        0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F1R2_FB9                        0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F1R2_FB10                       0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F1R2_FB11                       0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F1R2_FB12                       0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F1R2_FB13                       0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F1R2_FB14                       0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F1R2_FB15                       0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F1R2_FB16                       0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F1R2_FB17                       0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F1R2_FB18                       0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F1R2_FB19                       0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F1R2_FB20                       0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F1R2_FB21                       0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F1R2_FB22                       0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F1R2_FB23                       0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F1R2_FB24                       0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F1R2_FB25                       0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F1R2_FB26                       0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F1R2_FB27                       0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F1R2_FB28                       0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F1R2_FB29                       0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F1R2_FB30                       0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F1R2_FB31                       0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F2R2 register  *******************/
-#define  CAN_F2R2_FB0                        0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F2R2_FB1                        0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F2R2_FB2                        0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F2R2_FB3                        0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F2R2_FB4                        0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F2R2_FB5                        0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F2R2_FB6                        0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F2R2_FB7                        0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F2R2_FB8                        0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F2R2_FB9                        0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F2R2_FB10                       0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F2R2_FB11                       0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F2R2_FB12                       0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F2R2_FB13                       0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F2R2_FB14                       0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F2R2_FB15                       0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F2R2_FB16                       0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F2R2_FB17                       0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F2R2_FB18                       0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F2R2_FB19                       0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F2R2_FB20                       0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F2R2_FB21                       0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F2R2_FB22                       0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F2R2_FB23                       0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F2R2_FB24                       0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F2R2_FB25                       0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F2R2_FB26                       0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F2R2_FB27                       0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F2R2_FB28                       0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F2R2_FB29                       0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F2R2_FB30                       0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F2R2_FB31                       0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F3R2 register  *******************/
-#define  CAN_F3R2_FB0                        0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F3R2_FB1                        0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F3R2_FB2                        0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F3R2_FB3                        0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F3R2_FB4                        0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F3R2_FB5                        0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F3R2_FB6                        0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F3R2_FB7                        0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F3R2_FB8                        0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F3R2_FB9                        0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F3R2_FB10                       0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F3R2_FB11                       0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F3R2_FB12                       0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F3R2_FB13                       0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F3R2_FB14                       0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F3R2_FB15                       0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F3R2_FB16                       0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F3R2_FB17                       0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F3R2_FB18                       0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F3R2_FB19                       0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F3R2_FB20                       0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F3R2_FB21                       0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F3R2_FB22                       0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F3R2_FB23                       0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F3R2_FB24                       0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F3R2_FB25                       0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F3R2_FB26                       0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F3R2_FB27                       0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F3R2_FB28                       0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F3R2_FB29                       0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F3R2_FB30                       0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F3R2_FB31                       0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F4R2 register  *******************/
-#define  CAN_F4R2_FB0                        0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F4R2_FB1                        0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F4R2_FB2                        0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F4R2_FB3                        0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F4R2_FB4                        0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F4R2_FB5                        0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F4R2_FB6                        0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F4R2_FB7                        0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F4R2_FB8                        0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F4R2_FB9                        0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F4R2_FB10                       0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F4R2_FB11                       0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F4R2_FB12                       0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F4R2_FB13                       0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F4R2_FB14                       0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F4R2_FB15                       0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F4R2_FB16                       0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F4R2_FB17                       0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F4R2_FB18                       0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F4R2_FB19                       0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F4R2_FB20                       0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F4R2_FB21                       0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F4R2_FB22                       0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F4R2_FB23                       0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F4R2_FB24                       0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F4R2_FB25                       0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F4R2_FB26                       0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F4R2_FB27                       0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F4R2_FB28                       0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F4R2_FB29                       0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F4R2_FB30                       0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F4R2_FB31                       0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F5R2 register  *******************/
-#define  CAN_F5R2_FB0                        0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F5R2_FB1                        0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F5R2_FB2                        0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F5R2_FB3                        0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F5R2_FB4                        0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F5R2_FB5                        0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F5R2_FB6                        0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F5R2_FB7                        0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F5R2_FB8                        0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F5R2_FB9                        0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F5R2_FB10                       0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F5R2_FB11                       0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F5R2_FB12                       0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F5R2_FB13                       0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F5R2_FB14                       0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F5R2_FB15                       0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F5R2_FB16                       0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F5R2_FB17                       0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F5R2_FB18                       0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F5R2_FB19                       0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F5R2_FB20                       0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F5R2_FB21                       0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F5R2_FB22                       0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F5R2_FB23                       0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F5R2_FB24                       0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F5R2_FB25                       0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F5R2_FB26                       0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F5R2_FB27                       0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F5R2_FB28                       0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F5R2_FB29                       0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F5R2_FB30                       0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F5R2_FB31                       0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F6R2 register  *******************/
-#define  CAN_F6R2_FB0                        0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F6R2_FB1                        0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F6R2_FB2                        0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F6R2_FB3                        0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F6R2_FB4                        0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F6R2_FB5                        0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F6R2_FB6                        0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F6R2_FB7                        0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F6R2_FB8                        0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F6R2_FB9                        0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F6R2_FB10                       0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F6R2_FB11                       0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F6R2_FB12                       0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F6R2_FB13                       0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F6R2_FB14                       0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F6R2_FB15                       0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F6R2_FB16                       0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F6R2_FB17                       0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F6R2_FB18                       0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F6R2_FB19                       0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F6R2_FB20                       0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F6R2_FB21                       0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F6R2_FB22                       0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F6R2_FB23                       0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F6R2_FB24                       0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F6R2_FB25                       0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F6R2_FB26                       0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F6R2_FB27                       0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F6R2_FB28                       0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F6R2_FB29                       0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F6R2_FB30                       0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F6R2_FB31                       0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F7R2 register  *******************/
-#define  CAN_F7R2_FB0                        0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F7R2_FB1                        0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F7R2_FB2                        0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F7R2_FB3                        0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F7R2_FB4                        0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F7R2_FB5                        0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F7R2_FB6                        0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F7R2_FB7                        0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F7R2_FB8                        0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F7R2_FB9                        0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F7R2_FB10                       0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F7R2_FB11                       0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F7R2_FB12                       0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F7R2_FB13                       0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F7R2_FB14                       0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F7R2_FB15                       0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F7R2_FB16                       0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F7R2_FB17                       0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F7R2_FB18                       0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F7R2_FB19                       0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F7R2_FB20                       0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F7R2_FB21                       0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F7R2_FB22                       0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F7R2_FB23                       0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F7R2_FB24                       0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F7R2_FB25                       0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F7R2_FB26                       0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F7R2_FB27                       0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F7R2_FB28                       0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F7R2_FB29                       0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F7R2_FB30                       0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F7R2_FB31                       0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F8R2 register  *******************/
-#define  CAN_F8R2_FB0                        0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F8R2_FB1                        0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F8R2_FB2                        0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F8R2_FB3                        0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F8R2_FB4                        0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F8R2_FB5                        0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F8R2_FB6                        0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F8R2_FB7                        0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F8R2_FB8                        0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F8R2_FB9                        0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F8R2_FB10                       0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F8R2_FB11                       0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F8R2_FB12                       0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F8R2_FB13                       0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F8R2_FB14                       0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F8R2_FB15                       0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F8R2_FB16                       0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F8R2_FB17                       0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F8R2_FB18                       0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F8R2_FB19                       0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F8R2_FB20                       0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F8R2_FB21                       0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F8R2_FB22                       0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F8R2_FB23                       0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F8R2_FB24                       0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F8R2_FB25                       0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F8R2_FB26                       0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F8R2_FB27                       0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F8R2_FB28                       0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F8R2_FB29                       0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F8R2_FB30                       0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F8R2_FB31                       0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F9R2 register  *******************/
-#define  CAN_F9R2_FB0                        0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F9R2_FB1                        0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F9R2_FB2                        0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F9R2_FB3                        0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F9R2_FB4                        0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F9R2_FB5                        0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F9R2_FB6                        0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F9R2_FB7                        0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F9R2_FB8                        0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F9R2_FB9                        0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F9R2_FB10                       0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F9R2_FB11                       0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F9R2_FB12                       0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F9R2_FB13                       0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F9R2_FB14                       0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F9R2_FB15                       0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F9R2_FB16                       0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F9R2_FB17                       0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F9R2_FB18                       0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F9R2_FB19                       0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F9R2_FB20                       0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F9R2_FB21                       0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F9R2_FB22                       0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F9R2_FB23                       0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F9R2_FB24                       0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F9R2_FB25                       0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F9R2_FB26                       0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F9R2_FB27                       0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F9R2_FB28                       0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F9R2_FB29                       0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F9R2_FB30                       0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F9R2_FB31                       0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F10R2 register  ******************/
-#define  CAN_F10R2_FB0                       0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F10R2_FB1                       0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F10R2_FB2                       0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F10R2_FB3                       0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F10R2_FB4                       0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F10R2_FB5                       0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F10R2_FB6                       0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F10R2_FB7                       0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F10R2_FB8                       0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F10R2_FB9                       0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F10R2_FB10                      0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F10R2_FB11                      0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F10R2_FB12                      0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F10R2_FB13                      0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F10R2_FB14                      0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F10R2_FB15                      0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F10R2_FB16                      0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F10R2_FB17                      0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F10R2_FB18                      0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F10R2_FB19                      0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F10R2_FB20                      0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F10R2_FB21                      0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F10R2_FB22                      0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F10R2_FB23                      0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F10R2_FB24                      0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F10R2_FB25                      0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F10R2_FB26                      0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F10R2_FB27                      0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F10R2_FB28                      0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F10R2_FB29                      0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F10R2_FB30                      0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F10R2_FB31                      0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F11R2 register  ******************/
-#define  CAN_F11R2_FB0                       0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F11R2_FB1                       0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F11R2_FB2                       0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F11R2_FB3                       0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F11R2_FB4                       0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F11R2_FB5                       0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F11R2_FB6                       0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F11R2_FB7                       0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F11R2_FB8                       0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F11R2_FB9                       0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F11R2_FB10                      0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F11R2_FB11                      0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F11R2_FB12                      0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F11R2_FB13                      0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F11R2_FB14                      0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F11R2_FB15                      0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F11R2_FB16                      0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F11R2_FB17                      0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F11R2_FB18                      0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F11R2_FB19                      0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F11R2_FB20                      0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F11R2_FB21                      0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F11R2_FB22                      0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F11R2_FB23                      0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F11R2_FB24                      0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F11R2_FB25                      0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F11R2_FB26                      0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F11R2_FB27                      0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F11R2_FB28                      0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F11R2_FB29                      0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F11R2_FB30                      0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F11R2_FB31                      0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F12R2 register  ******************/
-#define  CAN_F12R2_FB0                       0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F12R2_FB1                       0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F12R2_FB2                       0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F12R2_FB3                       0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F12R2_FB4                       0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F12R2_FB5                       0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F12R2_FB6                       0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F12R2_FB7                       0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F12R2_FB8                       0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F12R2_FB9                       0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F12R2_FB10                      0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F12R2_FB11                      0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F12R2_FB12                      0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F12R2_FB13                      0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F12R2_FB14                      0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F12R2_FB15                      0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F12R2_FB16                      0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F12R2_FB17                      0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F12R2_FB18                      0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F12R2_FB19                      0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F12R2_FB20                      0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F12R2_FB21                      0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F12R2_FB22                      0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F12R2_FB23                      0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F12R2_FB24                      0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F12R2_FB25                      0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F12R2_FB26                      0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F12R2_FB27                      0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F12R2_FB28                      0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F12R2_FB29                      0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F12R2_FB30                      0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F12R2_FB31                      0x80000000U        /*!<Filter bit 31 */
-
-/*******************  Bit definition for CAN_F13R2 register  ******************/
-#define  CAN_F13R2_FB0                       0x00000001U        /*!<Filter bit 0 */
-#define  CAN_F13R2_FB1                       0x00000002U        /*!<Filter bit 1 */
-#define  CAN_F13R2_FB2                       0x00000004U        /*!<Filter bit 2 */
-#define  CAN_F13R2_FB3                       0x00000008U        /*!<Filter bit 3 */
-#define  CAN_F13R2_FB4                       0x00000010U        /*!<Filter bit 4 */
-#define  CAN_F13R2_FB5                       0x00000020U        /*!<Filter bit 5 */
-#define  CAN_F13R2_FB6                       0x00000040U        /*!<Filter bit 6 */
-#define  CAN_F13R2_FB7                       0x00000080U        /*!<Filter bit 7 */
-#define  CAN_F13R2_FB8                       0x00000100U        /*!<Filter bit 8 */
-#define  CAN_F13R2_FB9                       0x00000200U        /*!<Filter bit 9 */
-#define  CAN_F13R2_FB10                      0x00000400U        /*!<Filter bit 10 */
-#define  CAN_F13R2_FB11                      0x00000800U        /*!<Filter bit 11 */
-#define  CAN_F13R2_FB12                      0x00001000U        /*!<Filter bit 12 */
-#define  CAN_F13R2_FB13                      0x00002000U        /*!<Filter bit 13 */
-#define  CAN_F13R2_FB14                      0x00004000U        /*!<Filter bit 14 */
-#define  CAN_F13R2_FB15                      0x00008000U        /*!<Filter bit 15 */
-#define  CAN_F13R2_FB16                      0x00010000U        /*!<Filter bit 16 */
-#define  CAN_F13R2_FB17                      0x00020000U        /*!<Filter bit 17 */
-#define  CAN_F13R2_FB18                      0x00040000U        /*!<Filter bit 18 */
-#define  CAN_F13R2_FB19                      0x00080000U        /*!<Filter bit 19 */
-#define  CAN_F13R2_FB20                      0x00100000U        /*!<Filter bit 20 */
-#define  CAN_F13R2_FB21                      0x00200000U        /*!<Filter bit 21 */
-#define  CAN_F13R2_FB22                      0x00400000U        /*!<Filter bit 22 */
-#define  CAN_F13R2_FB23                      0x00800000U        /*!<Filter bit 23 */
-#define  CAN_F13R2_FB24                      0x01000000U        /*!<Filter bit 24 */
-#define  CAN_F13R2_FB25                      0x02000000U        /*!<Filter bit 25 */
-#define  CAN_F13R2_FB26                      0x04000000U        /*!<Filter bit 26 */
-#define  CAN_F13R2_FB27                      0x08000000U        /*!<Filter bit 27 */
-#define  CAN_F13R2_FB28                      0x10000000U        /*!<Filter bit 28 */
-#define  CAN_F13R2_FB29                      0x20000000U        /*!<Filter bit 29 */
-#define  CAN_F13R2_FB30                      0x40000000U        /*!<Filter bit 30 */
-#define  CAN_F13R2_FB31                      0x80000000U        /*!<Filter bit 31 */
-
-/******************************************************************************/
-/*                                                                            */
 /*                          CRC calculation unit                              */
 /*                                                                            */
 /******************************************************************************/
@@ -7673,100 +5356,6 @@ typedef struct {
 
 /********************  Bit definition for CRC_CR register  ********************/
 #define  CRC_CR_RESET                        0x01U        /*!< RESET bit */
-
-
-/******************************************************************************/
-/*                                                                            */
-/*                      Digital to Analog Converter                           */
-/*                                                                            */
-/******************************************************************************/
-/********************  Bit definition for DAC_CR register  ********************/
-#define  DAC_CR_EN1                          0x00000001U        /*!<DAC channel1 enable */
-#define  DAC_CR_BOFF1                        0x00000002U        /*!<DAC channel1 output buffer disable */
-#define  DAC_CR_TEN1                         0x00000004U        /*!<DAC channel1 Trigger enable */
-
-#define  DAC_CR_TSEL1                        0x00000038U        /*!<TSEL1[2:0] (DAC channel1 Trigger selection) */
-#define  DAC_CR_TSEL1_0                      0x00000008U        /*!<Bit 0 */
-#define  DAC_CR_TSEL1_1                      0x00000010U        /*!<Bit 1 */
-#define  DAC_CR_TSEL1_2                      0x00000020U        /*!<Bit 2 */
-
-#define  DAC_CR_WAVE1                        0x000000C0U        /*!<WAVE1[1:0] (DAC channel1 noise/triangle wave generation enable) */
-#define  DAC_CR_WAVE1_0                      0x00000040U        /*!<Bit 0 */
-#define  DAC_CR_WAVE1_1                      0x00000080U        /*!<Bit 1 */
-
-#define  DAC_CR_MAMP1                        0x00000F00U        /*!<MAMP1[3:0] (DAC channel1 Mask/Amplitude selector) */
-#define  DAC_CR_MAMP1_0                      0x00000100U        /*!<Bit 0 */
-#define  DAC_CR_MAMP1_1                      0x00000200U        /*!<Bit 1 */
-#define  DAC_CR_MAMP1_2                      0x00000400U        /*!<Bit 2 */
-#define  DAC_CR_MAMP1_3                      0x00000800U        /*!<Bit 3 */
-
-#define  DAC_CR_DMAEN1                       0x00001000U        /*!<DAC channel1 DMA enable */
-#define  DAC_CR_DMAUDRIE1                    0x00002000U        /*!<DAC channel1 DMA underrun interrupt enable*/
-#define  DAC_CR_EN2                          0x00010000U        /*!<DAC channel2 enable */
-#define  DAC_CR_BOFF2                        0x00020000U        /*!<DAC channel2 output buffer disable */
-#define  DAC_CR_TEN2                         0x00040000U        /*!<DAC channel2 Trigger enable */
-
-#define  DAC_CR_TSEL2                        0x00380000U        /*!<TSEL2[2:0] (DAC channel2 Trigger selection) */
-#define  DAC_CR_TSEL2_0                      0x00080000U        /*!<Bit 0 */
-#define  DAC_CR_TSEL2_1                      0x00100000U        /*!<Bit 1 */
-#define  DAC_CR_TSEL2_2                      0x00200000U        /*!<Bit 2 */
-
-#define  DAC_CR_WAVE2                        0x00C00000U        /*!<WAVE2[1:0] (DAC channel2 noise/triangle wave generation enable) */
-#define  DAC_CR_WAVE2_0                      0x00400000U        /*!<Bit 0 */
-#define  DAC_CR_WAVE2_1                      0x00800000U        /*!<Bit 1 */
-
-#define  DAC_CR_MAMP2                        0x0F000000U        /*!<MAMP2[3:0] (DAC channel2 Mask/Amplitude selector) */
-#define  DAC_CR_MAMP2_0                      0x01000000U        /*!<Bit 0 */
-#define  DAC_CR_MAMP2_1                      0x02000000U        /*!<Bit 1 */
-#define  DAC_CR_MAMP2_2                      0x04000000U        /*!<Bit 2 */
-#define  DAC_CR_MAMP2_3                      0x08000000U        /*!<Bit 3 */
-
-#define  DAC_CR_DMAEN2                       0x10000000U        /*!<DAC channel2 DMA enabled */
-#define  DAC_CR_DMAUDRIE2                    0x20000000U        /*!<DAC channel2 DMA underrun interrupt enable*/
-
-/*****************  Bit definition for DAC_SWTRIGR register  ******************/
-#define  DAC_SWTRIGR_SWTRIG1                 0x01U               /*!<DAC channel1 software trigger */
-#define  DAC_SWTRIGR_SWTRIG2                 0x02U               /*!<DAC channel2 software trigger */
-
-/*****************  Bit definition for DAC_DHR12R1 register  ******************/
-#define  DAC_DHR12R1_DACC1DHR                0x0FFFU            /*!<DAC channel1 12-bit Right aligned data */
-
-/*****************  Bit definition for DAC_DHR12L1 register  ******************/
-#define  DAC_DHR12L1_DACC1DHR                0xFFF0U            /*!<DAC channel1 12-bit Left aligned data */
-
-/******************  Bit definition for DAC_DHR8R1 register  ******************/
-#define  DAC_DHR8R1_DACC1DHR                 0xFFU               /*!<DAC channel1 8-bit Right aligned data */
-
-/*****************  Bit definition for DAC_DHR12R2 register  ******************/
-#define  DAC_DHR12R2_DACC2DHR                0x0FFFU            /*!<DAC channel2 12-bit Right aligned data */
-
-/*****************  Bit definition for DAC_DHR12L2 register  ******************/
-#define  DAC_DHR12L2_DACC2DHR                0xFFF0U            /*!<DAC channel2 12-bit Left aligned data */
-
-/******************  Bit definition for DAC_DHR8R2 register  ******************/
-#define  DAC_DHR8R2_DACC2DHR                 0xFFU               /*!<DAC channel2 8-bit Right aligned data */
-
-/*****************  Bit definition for DAC_DHR12RD register  ******************/
-#define  DAC_DHR12RD_DACC1DHR                0x00000FFFU        /*!<DAC channel1 12-bit Right aligned data */
-#define  DAC_DHR12RD_DACC2DHR                0x0FFF0000U        /*!<DAC channel2 12-bit Right aligned data */
-
-/*****************  Bit definition for DAC_DHR12LD register  ******************/
-#define  DAC_DHR12LD_DACC1DHR                0x0000FFF0U        /*!<DAC channel1 12-bit Left aligned data */
-#define  DAC_DHR12LD_DACC2DHR                0xFFF00000U        /*!<DAC channel2 12-bit Left aligned data */
-
-/******************  Bit definition for DAC_DHR8RD register  ******************/
-#define  DAC_DHR8RD_DACC1DHR                 0x00FFU            /*!<DAC channel1 8-bit Right aligned data */
-#define  DAC_DHR8RD_DACC2DHR                 0xFF00U            /*!<DAC channel2 8-bit Right aligned data */
-
-/*******************  Bit definition for DAC_DOR1 register  *******************/
-#define  DAC_DOR1_DACC1DOR                   0x0FFFU            /*!<DAC channel1 data output */
-
-/*******************  Bit definition for DAC_DOR2 register  *******************/
-#define  DAC_DOR2_DACC2DOR                   0x0FFFU            /*!<DAC channel2 data output */
-
-/********************  Bit definition for DAC_SR register  ********************/
-#define  DAC_SR_DMAUDR1                      0x00002000U        /*!<DAC channel1 DMA underrun flag */
-#define  DAC_SR_DMAUDR2                      0x20000000U        /*!<DAC channel2 DMA underrun flag */
 
 /******************************************************************************/
 /*                                                                            */
@@ -8189,835 +5778,6 @@ typedef struct {
 #define FLASH_OPTCR1_nWRP_9                  0x02000000U
 #define FLASH_OPTCR1_nWRP_10                 0x04000000U
 #define FLASH_OPTCR1_nWRP_11                 0x08000000U
-
-/******************************************************************************/
-/*                                                                            */
-/*                       Flexible Static Memory Controller                    */
-/*                                                                            */
-/******************************************************************************/
-/******************  Bit definition for FSMC_BCR1 register  *******************/
-#define  FSMC_BCR1_MBKEN                     0x00000001U        /*!<Memory bank enable bit                 */
-#define  FSMC_BCR1_MUXEN                     0x00000002U        /*!<Address/data multiplexing enable bit   */
-
-#define  FSMC_BCR1_MTYP                      0x0000000CU        /*!<MTYP[1:0] bits (Memory type)           */
-#define  FSMC_BCR1_MTYP_0                    0x00000004U        /*!<Bit 0 */
-#define  FSMC_BCR1_MTYP_1                    0x00000008U        /*!<Bit 1 */
-
-#define  FSMC_BCR1_MWID                      0x00000030U        /*!<MWID[1:0] bits (Memory data bus width) */
-#define  FSMC_BCR1_MWID_0                    0x00000010U        /*!<Bit 0 */
-#define  FSMC_BCR1_MWID_1                    0x00000020U        /*!<Bit 1 */
-
-#define  FSMC_BCR1_FACCEN                    0x00000040U        /*!<Flash access enable                    */
-#define  FSMC_BCR1_BURSTEN                   0x00000100U        /*!<Burst enable bit                       */
-#define  FSMC_BCR1_WAITPOL                   0x00000200U        /*!<Wait signal polarity bit               */
-#define  FSMC_BCR1_WRAPMOD                   0x00000400U        /*!<Wrapped burst mode support             */
-#define  FSMC_BCR1_WAITCFG                   0x00000800U        /*!<Wait timing configuration              */
-#define  FSMC_BCR1_WREN                      0x00001000U        /*!<Write enable bit                       */
-#define  FSMC_BCR1_WAITEN                    0x00002000U        /*!<Wait enable bit                        */
-#define  FSMC_BCR1_EXTMOD                    0x00004000U        /*!<Extended mode enable                   */
-#define  FSMC_BCR1_ASYNCWAIT                 0x00008000U        /*!<Asynchronous wait                      */
-#define  FSMC_BCR1_CPSIZE                    0x00070000U        /*!<CRAM page size */
-#define  FSMC_BCR1_CPSIZE_0                  0x00010000U        /*!<Bit 0 */
-#define  FSMC_BCR1_CPSIZE_1                  0x00020000U        /*!<Bit 1 */
-#define  FSMC_BCR1_CPSIZE_2                  0x00040000U        /*!<Bit 2 */
-#define  FSMC_BCR1_CBURSTRW                  0x00080000U        /*!<Write burst enable                     */
-
-/******************  Bit definition for FSMC_BCR2 register  *******************/
-#define  FSMC_BCR2_MBKEN                     0x00000001U        /*!<Memory bank enable bit                */
-#define  FSMC_BCR2_MUXEN                     0x00000002U        /*!<Address/data multiplexing enable bit   */
-
-#define  FSMC_BCR2_MTYP                      0x0000000CU        /*!<MTYP[1:0] bits (Memory type)           */
-#define  FSMC_BCR2_MTYP_0                    0x00000004U        /*!<Bit 0 */
-#define  FSMC_BCR2_MTYP_1                    0x00000008U        /*!<Bit 1 */
-
-#define  FSMC_BCR2_MWID                      0x00000030U        /*!<MWID[1:0] bits (Memory data bus width) */
-#define  FSMC_BCR2_MWID_0                    0x00000010U        /*!<Bit 0 */
-#define  FSMC_BCR2_MWID_1                    0x00000020U        /*!<Bit 1 */
-
-#define  FSMC_BCR2_FACCEN                    0x00000040U        /*!<Flash access enable                    */
-#define  FSMC_BCR2_BURSTEN                   0x00000100U        /*!<Burst enable bit                       */
-#define  FSMC_BCR2_WAITPOL                   0x00000200U        /*!<Wait signal polarity bit               */
-#define  FSMC_BCR2_WRAPMOD                   0x00000400U        /*!<Wrapped burst mode support             */
-#define  FSMC_BCR2_WAITCFG                   0x00000800U        /*!<Wait timing configuration              */
-#define  FSMC_BCR2_WREN                      0x00001000U        /*!<Write enable bit                       */
-#define  FSMC_BCR2_WAITEN                    0x00002000U        /*!<Wait enable bit                        */
-#define  FSMC_BCR2_EXTMOD                    0x00004000U        /*!<Extended mode enable                   */
-#define  FSMC_BCR2_ASYNCWAIT                 0x00008000U        /*!<Asynchronous wait                      */
-#define  FSMC_BCR2_CPSIZE                    0x00070000U        /*!<CRAM page size */
-#define  FSMC_BCR2_CPSIZE_0                  0x00010000U        /*!<Bit 0 */
-#define  FSMC_BCR2_CPSIZE_1                  0x00020000U        /*!<Bit 1 */
-#define  FSMC_BCR2_CPSIZE_2                  0x00040000U        /*!<Bit 2 */
-#define  FSMC_BCR2_CBURSTRW                  0x00080000U        /*!<Write burst enable                     */
-
-/******************  Bit definition for FSMC_BCR3 register  *******************/
-#define  FSMC_BCR3_MBKEN                     0x00000001U        /*!<Memory bank enable bit                 */
-#define  FSMC_BCR3_MUXEN                     0x00000002U        /*!<Address/data multiplexing enable bit   */
-
-#define  FSMC_BCR3_MTYP                      0x0000000CU        /*!<MTYP[1:0] bits (Memory type)           */
-#define  FSMC_BCR3_MTYP_0                    0x00000004U        /*!<Bit 0 */
-#define  FSMC_BCR3_MTYP_1                    0x00000008U        /*!<Bit 1 */
-
-#define  FSMC_BCR3_MWID                      0x00000030U        /*!<MWID[1:0] bits (Memory data bus width) */
-#define  FSMC_BCR3_MWID_0                    0x00000010U        /*!<Bit 0 */
-#define  FSMC_BCR3_MWID_1                    0x00000020U        /*!<Bit 1 */
-
-#define  FSMC_BCR3_FACCEN                    0x00000040U        /*!<Flash access enable                    */
-#define  FSMC_BCR3_BURSTEN                   0x00000100U        /*!<Burst enable bit                       */
-#define  FSMC_BCR3_WAITPOL                   0x00000200U        /*!<Wait signal polarity bit               */
-#define  FSMC_BCR3_WRAPMOD                   0x00000400U        /*!<Wrapped burst mode support             */
-#define  FSMC_BCR3_WAITCFG                   0x00000800U        /*!<Wait timing configuration              */
-#define  FSMC_BCR3_WREN                      0x00001000U        /*!<Write enable bit                       */
-#define  FSMC_BCR3_WAITEN                    0x00002000U        /*!<Wait enable bit                        */
-#define  FSMC_BCR3_EXTMOD                    0x00004000U        /*!<Extended mode enable                   */
-#define  FSMC_BCR3_ASYNCWAIT                 0x00008000U        /*!<Asynchronous wait                      */
-#define  FSMC_BCR3_CPSIZE                    0x00070000U        /*!<CRAM page size */
-#define  FSMC_BCR3_CPSIZE_0                  0x00010000U        /*!<Bit 0 */
-#define  FSMC_BCR3_CPSIZE_1                  0x00020000U        /*!<Bit 1 */
-#define  FSMC_BCR3_CPSIZE_2                  0x00040000U        /*!<Bit 2 */
-#define  FSMC_BCR3_CBURSTRW                  0x00080000U        /*!<Write burst enable                     */
-
-/******************  Bit definition for FSMC_BCR4 register  *******************/
-#define  FSMC_BCR4_MBKEN                     0x00000001U        /*!<Memory bank enable bit */
-#define  FSMC_BCR4_MUXEN                     0x00000002U        /*!<Address/data multiplexing enable bit   */
-
-#define  FSMC_BCR4_MTYP                      0x0000000CU        /*!<MTYP[1:0] bits (Memory type)           */
-#define  FSMC_BCR4_MTYP_0                    0x00000004U        /*!<Bit 0 */
-#define  FSMC_BCR4_MTYP_1                    0x00000008U        /*!<Bit 1 */
-
-#define  FSMC_BCR4_MWID                      0x00000030U        /*!<MWID[1:0] bits (Memory data bus width) */
-#define  FSMC_BCR4_MWID_0                    0x00000010U        /*!<Bit 0 */
-#define  FSMC_BCR4_MWID_1                    0x00000020U        /*!<Bit 1 */
-
-#define  FSMC_BCR4_FACCEN                    0x00000040U        /*!<Flash access enable                    */
-#define  FSMC_BCR4_BURSTEN                   0x00000100U        /*!<Burst enable bit                       */
-#define  FSMC_BCR4_WAITPOL                   0x00000200U        /*!<Wait signal polarity bit               */
-#define  FSMC_BCR4_WRAPMOD                   0x00000400U        /*!<Wrapped burst mode support             */
-#define  FSMC_BCR4_WAITCFG                   0x00000800U        /*!<Wait timing configuration              */
-#define  FSMC_BCR4_WREN                      0x00001000U        /*!<Write enable bit                       */
-#define  FSMC_BCR4_WAITEN                    0x00002000U        /*!<Wait enable bit                        */
-#define  FSMC_BCR4_EXTMOD                    0x00004000U        /*!<Extended mode enable                   */
-#define  FSMC_BCR4_ASYNCWAIT                 0x00008000U        /*!<Asynchronous wait                      */
-#define  FSMC_BCR4_CPSIZE                    0x00070000U        /*!<CRAM page size */
-#define  FSMC_BCR4_CPSIZE_0                  0x00010000U        /*!<Bit 0 */
-#define  FSMC_BCR4_CPSIZE_1                  0x00020000U        /*!<Bit 1 */
-#define  FSMC_BCR4_CPSIZE_2                  0x00040000U        /*!<Bit 2 */
-#define  FSMC_BCR4_CBURSTRW                  0x00080000U        /*!<Write burst enable                     */
-
-/******************  Bit definition for FSMC_BTR1 register  ******************/
-#define  FSMC_BTR1_ADDSET                    0x0000000FU        /*!<ADDSET[3:0] bits (Address setup phase duration) */
-#define  FSMC_BTR1_ADDSET_0                  0x00000001U        /*!<Bit 0 */
-#define  FSMC_BTR1_ADDSET_1                  0x00000002U        /*!<Bit 1 */
-#define  FSMC_BTR1_ADDSET_2                  0x00000004U        /*!<Bit 2 */
-#define  FSMC_BTR1_ADDSET_3                  0x00000008U        /*!<Bit 3 */
-
-#define  FSMC_BTR1_ADDHLD                    0x000000F0U        /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
-#define  FSMC_BTR1_ADDHLD_0                  0x00000010U        /*!<Bit 0 */
-#define  FSMC_BTR1_ADDHLD_1                  0x00000020U        /*!<Bit 1 */
-#define  FSMC_BTR1_ADDHLD_2                  0x00000040U        /*!<Bit 2 */
-#define  FSMC_BTR1_ADDHLD_3                  0x00000080U        /*!<Bit 3 */
-
-#define  FSMC_BTR1_DATAST                    0x0000FF00U        /*!<DATAST [7:0] bits (Data-phase duration) */
-#define  FSMC_BTR1_DATAST_0                  0x00000100U        /*!<Bit 0 */
-#define  FSMC_BTR1_DATAST_1                  0x00000200U        /*!<Bit 1 */
-#define  FSMC_BTR1_DATAST_2                  0x00000400U        /*!<Bit 2 */
-#define  FSMC_BTR1_DATAST_3                  0x00000800U        /*!<Bit 3 */
-#define  FSMC_BTR1_DATAST_4                  0x00001000U        /*!<Bit 4 */
-#define  FSMC_BTR1_DATAST_5                  0x00002000U        /*!<Bit 5 */
-#define  FSMC_BTR1_DATAST_6                  0x00004000U        /*!<Bit 6 */
-#define  FSMC_BTR1_DATAST_7                  0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_BTR1_BUSTURN                   0x000F0000U        /*!<BUSTURN[3:0] bits (Bus turnaround phase duration) */
-#define  FSMC_BTR1_BUSTURN_0                 0x00010000U        /*!<Bit 0 */
-#define  FSMC_BTR1_BUSTURN_1                 0x00020000U        /*!<Bit 1 */
-#define  FSMC_BTR1_BUSTURN_2                 0x00040000U        /*!<Bit 2 */
-#define  FSMC_BTR1_BUSTURN_3                 0x00080000U        /*!<Bit 3 */
-
-#define  FSMC_BTR1_CLKDIV                    0x00F00000U        /*!<CLKDIV[3:0] bits (Clock divide ratio) */
-#define  FSMC_BTR1_CLKDIV_0                  0x00100000U        /*!<Bit 0 */
-#define  FSMC_BTR1_CLKDIV_1                  0x00200000U        /*!<Bit 1 */
-#define  FSMC_BTR1_CLKDIV_2                  0x00400000U        /*!<Bit 2 */
-#define  FSMC_BTR1_CLKDIV_3                  0x00800000U        /*!<Bit 3 */
-
-#define  FSMC_BTR1_DATLAT                    0x0F000000U        /*!<DATLA[3:0] bits (Data latency) */
-#define  FSMC_BTR1_DATLAT_0                  0x01000000U        /*!<Bit 0 */
-#define  FSMC_BTR1_DATLAT_1                  0x02000000U        /*!<Bit 1 */
-#define  FSMC_BTR1_DATLAT_2                  0x04000000U        /*!<Bit 2 */
-#define  FSMC_BTR1_DATLAT_3                  0x08000000U        /*!<Bit 3 */
-
-#define  FSMC_BTR1_ACCMOD                    0x30000000U        /*!<ACCMOD[1:0] bits (Access mode) */
-#define  FSMC_BTR1_ACCMOD_0                  0x10000000U        /*!<Bit 0 */
-#define  FSMC_BTR1_ACCMOD_1                  0x20000000U        /*!<Bit 1 */
-
-/******************  Bit definition for FSMC_BTR2 register  *******************/
-#define  FSMC_BTR2_ADDSET                    0x0000000FU        /*!<ADDSET[3:0] bits (Address setup phase duration) */
-#define  FSMC_BTR2_ADDSET_0                  0x00000001U        /*!<Bit 0 */
-#define  FSMC_BTR2_ADDSET_1                  0x00000002U        /*!<Bit 1 */
-#define  FSMC_BTR2_ADDSET_2                  0x00000004U        /*!<Bit 2 */
-#define  FSMC_BTR2_ADDSET_3                  0x00000008U        /*!<Bit 3 */
-
-#define  FSMC_BTR2_ADDHLD                    0x000000F0U        /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
-#define  FSMC_BTR2_ADDHLD_0                  0x00000010U        /*!<Bit 0 */
-#define  FSMC_BTR2_ADDHLD_1                  0x00000020U        /*!<Bit 1 */
-#define  FSMC_BTR2_ADDHLD_2                  0x00000040U        /*!<Bit 2 */
-#define  FSMC_BTR2_ADDHLD_3                  0x00000080U        /*!<Bit 3 */
-
-#define  FSMC_BTR2_DATAST                    0x0000FF00U        /*!<DATAST [7:0] bits (Data-phase duration) */
-#define  FSMC_BTR2_DATAST_0                  0x00000100U        /*!<Bit 0 */
-#define  FSMC_BTR2_DATAST_1                  0x00000200U        /*!<Bit 1 */
-#define  FSMC_BTR2_DATAST_2                  0x00000400U        /*!<Bit 2 */
-#define  FSMC_BTR2_DATAST_3                  0x00000800U        /*!<Bit 3 */
-#define  FSMC_BTR2_DATAST_4                  0x00001000U        /*!<Bit 4 */
-#define  FSMC_BTR2_DATAST_5                  0x00002000U        /*!<Bit 5 */
-#define  FSMC_BTR2_DATAST_6                  0x00004000U        /*!<Bit 6 */
-#define  FSMC_BTR2_DATAST_7                  0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_BTR2_BUSTURN                   0x000F0000U        /*!<BUSTURN[3:0] bits (Bus turnaround phase duration) */
-#define  FSMC_BTR2_BUSTURN_0                 0x00010000U        /*!<Bit 0 */
-#define  FSMC_BTR2_BUSTURN_1                 0x00020000U        /*!<Bit 1 */
-#define  FSMC_BTR2_BUSTURN_2                 0x00040000U        /*!<Bit 2 */
-#define  FSMC_BTR2_BUSTURN_3                 0x00080000U        /*!<Bit 3 */
-
-#define  FSMC_BTR2_CLKDIV                    0x00F00000U        /*!<CLKDIV[3:0] bits (Clock divide ratio) */
-#define  FSMC_BTR2_CLKDIV_0                  0x00100000U        /*!<Bit 0 */
-#define  FSMC_BTR2_CLKDIV_1                  0x00200000U        /*!<Bit 1 */
-#define  FSMC_BTR2_CLKDIV_2                  0x00400000U        /*!<Bit 2 */
-#define  FSMC_BTR2_CLKDIV_3                  0x00800000U        /*!<Bit 3 */
-
-#define  FSMC_BTR2_DATLAT                    0x0F000000U        /*!<DATLA[3:0] bits (Data latency) */
-#define  FSMC_BTR2_DATLAT_0                  0x01000000U        /*!<Bit 0 */
-#define  FSMC_BTR2_DATLAT_1                  0x02000000U        /*!<Bit 1 */
-#define  FSMC_BTR2_DATLAT_2                  0x04000000U        /*!<Bit 2 */
-#define  FSMC_BTR2_DATLAT_3                  0x08000000U        /*!<Bit 3 */
-
-#define  FSMC_BTR2_ACCMOD                    0x30000000U        /*!<ACCMOD[1:0] bits (Access mode) */
-#define  FSMC_BTR2_ACCMOD_0                  0x10000000U        /*!<Bit 0 */
-#define  FSMC_BTR2_ACCMOD_1                  0x20000000U        /*!<Bit 1 */
-
-/*******************  Bit definition for FSMC_BTR3 register  *******************/
-#define  FSMC_BTR3_ADDSET                    0x0000000FU        /*!<ADDSET[3:0] bits (Address setup phase duration) */
-#define  FSMC_BTR3_ADDSET_0                  0x00000001U        /*!<Bit 0 */
-#define  FSMC_BTR3_ADDSET_1                  0x00000002U        /*!<Bit 1 */
-#define  FSMC_BTR3_ADDSET_2                  0x00000004U        /*!<Bit 2 */
-#define  FSMC_BTR3_ADDSET_3                  0x00000008U        /*!<Bit 3 */
-
-#define  FSMC_BTR3_ADDHLD                    0x000000F0U        /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
-#define  FSMC_BTR3_ADDHLD_0                  0x00000010U        /*!<Bit 0 */
-#define  FSMC_BTR3_ADDHLD_1                  0x00000020U        /*!<Bit 1 */
-#define  FSMC_BTR3_ADDHLD_2                  0x00000040U        /*!<Bit 2 */
-#define  FSMC_BTR3_ADDHLD_3                  0x00000080U        /*!<Bit 3 */
-
-#define  FSMC_BTR3_DATAST                    0x0000FF00U        /*!<DATAST [7:0] bits (Data-phase duration) */
-#define  FSMC_BTR3_DATAST_0                  0x00000100U        /*!<Bit 0 */
-#define  FSMC_BTR3_DATAST_1                  0x00000200U        /*!<Bit 1 */
-#define  FSMC_BTR3_DATAST_2                  0x00000400U        /*!<Bit 2 */
-#define  FSMC_BTR3_DATAST_3                  0x00000800U        /*!<Bit 3 */
-#define  FSMC_BTR3_DATAST_4                  0x00001000U        /*!<Bit 4 */
-#define  FSMC_BTR3_DATAST_5                  0x00002000U        /*!<Bit 5 */
-#define  FSMC_BTR3_DATAST_6                  0x00004000U        /*!<Bit 6 */
-#define  FSMC_BTR3_DATAST_7                  0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_BTR3_BUSTURN                   0x000F0000U        /*!<BUSTURN[3:0] bits (Bus turnaround phase duration) */
-#define  FSMC_BTR3_BUSTURN_0                 0x00010000U        /*!<Bit 0 */
-#define  FSMC_BTR3_BUSTURN_1                 0x00020000U        /*!<Bit 1 */
-#define  FSMC_BTR3_BUSTURN_2                 0x00040000U        /*!<Bit 2 */
-#define  FSMC_BTR3_BUSTURN_3                 0x00080000U        /*!<Bit 3 */
-
-#define  FSMC_BTR3_CLKDIV                    0x00F00000U        /*!<CLKDIV[3:0] bits (Clock divide ratio) */
-#define  FSMC_BTR3_CLKDIV_0                  0x00100000U        /*!<Bit 0 */
-#define  FSMC_BTR3_CLKDIV_1                  0x00200000U        /*!<Bit 1 */
-#define  FSMC_BTR3_CLKDIV_2                  0x00400000U        /*!<Bit 2 */
-#define  FSMC_BTR3_CLKDIV_3                  0x00800000U        /*!<Bit 3 */
-
-#define  FSMC_BTR3_DATLAT                    0x0F000000U        /*!<DATLA[3:0] bits (Data latency) */
-#define  FSMC_BTR3_DATLAT_0                  0x01000000U        /*!<Bit 0 */
-#define  FSMC_BTR3_DATLAT_1                  0x02000000U        /*!<Bit 1 */
-#define  FSMC_BTR3_DATLAT_2                  0x04000000U        /*!<Bit 2 */
-#define  FSMC_BTR3_DATLAT_3                  0x08000000U        /*!<Bit 3 */
-
-#define  FSMC_BTR3_ACCMOD                    0x30000000U        /*!<ACCMOD[1:0] bits (Access mode) */
-#define  FSMC_BTR3_ACCMOD_0                  0x10000000U        /*!<Bit 0 */
-#define  FSMC_BTR3_ACCMOD_1                  0x20000000U        /*!<Bit 1 */
-
-/******************  Bit definition for FSMC_BTR4 register  *******************/
-#define  FSMC_BTR4_ADDSET                    0x0000000FU        /*!<ADDSET[3:0] bits (Address setup phase duration) */
-#define  FSMC_BTR4_ADDSET_0                  0x00000001U        /*!<Bit 0 */
-#define  FSMC_BTR4_ADDSET_1                  0x00000002U        /*!<Bit 1 */
-#define  FSMC_BTR4_ADDSET_2                  0x00000004U        /*!<Bit 2 */
-#define  FSMC_BTR4_ADDSET_3                  0x00000008U        /*!<Bit 3 */
-
-#define  FSMC_BTR4_ADDHLD                    0x000000F0U        /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
-#define  FSMC_BTR4_ADDHLD_0                  0x00000010U        /*!<Bit 0 */
-#define  FSMC_BTR4_ADDHLD_1                  0x00000020U        /*!<Bit 1 */
-#define  FSMC_BTR4_ADDHLD_2                  0x00000040U        /*!<Bit 2 */
-#define  FSMC_BTR4_ADDHLD_3                  0x00000080U        /*!<Bit 3 */
-
-#define  FSMC_BTR4_DATAST                    0x0000FF00U        /*!<DATAST [7:0] bits (Data-phase duration) */
-#define  FSMC_BTR4_DATAST_0                  0x00000100U        /*!<Bit 0 */
-#define  FSMC_BTR4_DATAST_1                  0x00000200U        /*!<Bit 1 */
-#define  FSMC_BTR4_DATAST_2                  0x00000400U        /*!<Bit 2 */
-#define  FSMC_BTR4_DATAST_3                  0x00000800U        /*!<Bit 3 */
-#define  FSMC_BTR4_DATAST_4                  0x00001000U        /*!<Bit 4 */
-#define  FSMC_BTR4_DATAST_5                  0x00002000U        /*!<Bit 5 */
-#define  FSMC_BTR4_DATAST_6                  0x00004000U        /*!<Bit 6 */
-#define  FSMC_BTR4_DATAST_7                  0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_BTR4_BUSTURN                   0x000F0000U        /*!<BUSTURN[3:0] bits (Bus turnaround phase duration) */
-#define  FSMC_BTR4_BUSTURN_0                 0x00010000U        /*!<Bit 0 */
-#define  FSMC_BTR4_BUSTURN_1                 0x00020000U        /*!<Bit 1 */
-#define  FSMC_BTR4_BUSTURN_2                 0x00040000U        /*!<Bit 2 */
-#define  FSMC_BTR4_BUSTURN_3                 0x00080000U        /*!<Bit 3 */
-
-#define  FSMC_BTR4_CLKDIV                    0x00F00000U        /*!<CLKDIV[3:0] bits (Clock divide ratio) */
-#define  FSMC_BTR4_CLKDIV_0                  0x00100000U        /*!<Bit 0 */
-#define  FSMC_BTR4_CLKDIV_1                  0x00200000U        /*!<Bit 1 */
-#define  FSMC_BTR4_CLKDIV_2                  0x00400000U        /*!<Bit 2 */
-#define  FSMC_BTR4_CLKDIV_3                  0x00800000U        /*!<Bit 3 */
-
-#define  FSMC_BTR4_DATLAT                    0x0F000000U        /*!<DATLA[3:0] bits (Data latency) */
-#define  FSMC_BTR4_DATLAT_0                  0x01000000U        /*!<Bit 0 */
-#define  FSMC_BTR4_DATLAT_1                  0x02000000U        /*!<Bit 1 */
-#define  FSMC_BTR4_DATLAT_2                  0x04000000U        /*!<Bit 2 */
-#define  FSMC_BTR4_DATLAT_3                  0x08000000U        /*!<Bit 3 */
-
-#define  FSMC_BTR4_ACCMOD                    0x30000000U        /*!<ACCMOD[1:0] bits (Access mode) */
-#define  FSMC_BTR4_ACCMOD_0                  0x10000000U        /*!<Bit 0 */
-#define  FSMC_BTR4_ACCMOD_1                  0x20000000U        /*!<Bit 1 */
-
-/******************  Bit definition for FSMC_BWTR1 register  ******************/
-#define  FSMC_BWTR1_ADDSET                   0x0000000FU        /*!<ADDSET[3:0] bits (Address setup phase duration) */
-#define  FSMC_BWTR1_ADDSET_0                 0x00000001U        /*!<Bit 0 */
-#define  FSMC_BWTR1_ADDSET_1                 0x00000002U        /*!<Bit 1 */
-#define  FSMC_BWTR1_ADDSET_2                 0x00000004U        /*!<Bit 2 */
-#define  FSMC_BWTR1_ADDSET_3                 0x00000008U        /*!<Bit 3 */
-
-#define  FSMC_BWTR1_ADDHLD                   0x000000F0U        /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
-#define  FSMC_BWTR1_ADDHLD_0                 0x00000010U        /*!<Bit 0 */
-#define  FSMC_BWTR1_ADDHLD_1                 0x00000020U        /*!<Bit 1 */
-#define  FSMC_BWTR1_ADDHLD_2                 0x00000040U        /*!<Bit 2 */
-#define  FSMC_BWTR1_ADDHLD_3                 0x00000080U        /*!<Bit 3 */
-
-#define  FSMC_BWTR1_DATAST                   0x0000FF00U        /*!<DATAST [7:0] bits (Data-phase duration) */
-#define  FSMC_BWTR1_DATAST_0                 0x00000100U        /*!<Bit 0 */
-#define  FSMC_BWTR1_DATAST_1                 0x00000200U        /*!<Bit 1 */
-#define  FSMC_BWTR1_DATAST_2                 0x00000400U        /*!<Bit 2 */
-#define  FSMC_BWTR1_DATAST_3                 0x00000800U        /*!<Bit 3 */
-#define  FSMC_BWTR1_DATAST_4                 0x00001000U        /*!<Bit 4 */
-#define  FSMC_BWTR1_DATAST_5                 0x00002000U        /*!<Bit 5 */
-#define  FSMC_BWTR1_DATAST_6                 0x00004000U        /*!<Bit 6 */
-#define  FSMC_BWTR1_DATAST_7                 0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_BWTR1_BUSTURN                  0x000F0000U        /*!<BUSTURN[3:0] bits (Bus turnaround duration) */
-#define  FSMC_BWTR1_BUSTURN_0                0x00010000U        /*!<Bit 0 */
-#define  FSMC_BWTR1_BUSTURN_1                0x00020000U        /*!<Bit 1 */
-#define  FSMC_BWTR1_BUSTURN_2                0x00040000U        /*!<Bit 2 */
-#define  FSMC_BWTR1_BUSTURN_3                0x00080000U        /*!<Bit 3 */
-
-#define  FSMC_BWTR1_ACCMOD                   0x30000000U        /*!<ACCMOD[1:0] bits (Access mode) */
-#define  FSMC_BWTR1_ACCMOD_0                 0x10000000U        /*!<Bit 0 */
-#define  FSMC_BWTR1_ACCMOD_1                 0x20000000U        /*!<Bit 1 */
-
-/******************  Bit definition for FSMC_BWTR2 register  ******************/
-#define  FSMC_BWTR2_ADDSET                   0x0000000FU        /*!<ADDSET[3:0] bits (Address setup phase duration) */
-#define  FSMC_BWTR2_ADDSET_0                 0x00000001U        /*!<Bit 0 */
-#define  FSMC_BWTR2_ADDSET_1                 0x00000002U        /*!<Bit 1 */
-#define  FSMC_BWTR2_ADDSET_2                 0x00000004U        /*!<Bit 2 */
-#define  FSMC_BWTR2_ADDSET_3                 0x00000008U        /*!<Bit 3 */
-
-#define  FSMC_BWTR2_ADDHLD                   0x000000F0U        /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
-#define  FSMC_BWTR2_ADDHLD_0                 0x00000010U        /*!<Bit 0 */
-#define  FSMC_BWTR2_ADDHLD_1                 0x00000020U        /*!<Bit 1 */
-#define  FSMC_BWTR2_ADDHLD_2                 0x00000040U        /*!<Bit 2 */
-#define  FSMC_BWTR2_ADDHLD_3                 0x00000080U        /*!<Bit 3 */
-
-#define  FSMC_BWTR2_DATAST                   0x0000FF00U        /*!<DATAST [7:0] bits (Data-phase duration) */
-#define  FSMC_BWTR2_DATAST_0                 0x00000100U        /*!<Bit 0 */
-#define  FSMC_BWTR2_DATAST_1                 0x00000200U        /*!<Bit 1 */
-#define  FSMC_BWTR2_DATAST_2                 0x00000400U        /*!<Bit 2 */
-#define  FSMC_BWTR2_DATAST_3                 0x00000800U        /*!<Bit 3 */
-#define  FSMC_BWTR2_DATAST_4                 0x00001000U        /*!<Bit 4 */
-#define  FSMC_BWTR2_DATAST_5                 0x00002000U        /*!<Bit 5 */
-#define  FSMC_BWTR2_DATAST_6                 0x00004000U        /*!<Bit 6 */
-#define  FSMC_BWTR2_DATAST_7                 0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_BWTR2_BUSTURN                  0x000F0000U        /*!<BUSTURN[3:0] bits (Bus turnaround duration) */
-#define  FSMC_BWTR2_BUSTURN_0                0x00010000U        /*!<Bit 0 */
-#define  FSMC_BWTR2_BUSTURN_1                0x00020000U        /*!<Bit 1 */
-#define  FSMC_BWTR2_BUSTURN_2                0x00040000U        /*!<Bit 2 */
-#define  FSMC_BWTR2_BUSTURN_3                0x00080000U        /*!<Bit 3 */
-
-#define  FSMC_BWTR2_ACCMOD                   0x30000000U        /*!<ACCMOD[1:0] bits (Access mode) */
-#define  FSMC_BWTR2_ACCMOD_0                 0x10000000U        /*!<Bit 0 */
-#define  FSMC_BWTR2_ACCMOD_1                 0x20000000U        /*!<Bit 1 */
-
-/******************  Bit definition for FSMC_BWTR3 register  ******************/
-#define  FSMC_BWTR3_ADDSET                   0x0000000FU        /*!<ADDSET[3:0] bits (Address setup phase duration) */
-#define  FSMC_BWTR3_ADDSET_0                 0x00000001U        /*!<Bit 0 */
-#define  FSMC_BWTR3_ADDSET_1                 0x00000002U        /*!<Bit 1 */
-#define  FSMC_BWTR3_ADDSET_2                 0x00000004U        /*!<Bit 2 */
-#define  FSMC_BWTR3_ADDSET_3                 0x00000008U        /*!<Bit 3 */
-
-#define  FSMC_BWTR3_ADDHLD                   0x000000F0U        /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
-#define  FSMC_BWTR3_ADDHLD_0                 0x00000010U        /*!<Bit 0 */
-#define  FSMC_BWTR3_ADDHLD_1                 0x00000020U        /*!<Bit 1 */
-#define  FSMC_BWTR3_ADDHLD_2                 0x00000040U        /*!<Bit 2 */
-#define  FSMC_BWTR3_ADDHLD_3                 0x00000080U        /*!<Bit 3 */
-
-#define  FSMC_BWTR3_DATAST                   0x0000FF00U        /*!<DATAST [7:0] bits (Data-phase duration) */
-#define  FSMC_BWTR3_DATAST_0                 0x00000100U        /*!<Bit 0 */
-#define  FSMC_BWTR3_DATAST_1                 0x00000200U        /*!<Bit 1 */
-#define  FSMC_BWTR3_DATAST_2                 0x00000400U        /*!<Bit 2 */
-#define  FSMC_BWTR3_DATAST_3                 0x00000800U        /*!<Bit 3 */
-#define  FSMC_BWTR3_DATAST_4                 0x00001000U        /*!<Bit 4 */
-#define  FSMC_BWTR3_DATAST_5                 0x00002000U        /*!<Bit 5 */
-#define  FSMC_BWTR3_DATAST_6                 0x00004000U        /*!<Bit 6 */
-#define  FSMC_BWTR3_DATAST_7                 0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_BWTR3_BUSTURN                  0x000F0000U        /*!<BUSTURN[3:0] bits (Bus turnaround duration) */
-#define  FSMC_BWTR3_BUSTURN_0                0x00010000U        /*!<Bit 0 */
-#define  FSMC_BWTR3_BUSTURN_1                0x00020000U        /*!<Bit 1 */
-#define  FSMC_BWTR3_BUSTURN_2                0x00040000U        /*!<Bit 2 */
-#define  FSMC_BWTR3_BUSTURN_3                0x00080000U        /*!<Bit 3 */
-
-#define  FSMC_BWTR3_ACCMOD                   0x30000000U        /*!<ACCMOD[1:0] bits (Access mode) */
-#define  FSMC_BWTR3_ACCMOD_0                 0x10000000U        /*!<Bit 0 */
-#define  FSMC_BWTR3_ACCMOD_1                 0x20000000U        /*!<Bit 1 */
-
-/******************  Bit definition for FSMC_BWTR4 register  ******************/
-#define  FSMC_BWTR4_ADDSET                   0x0000000FU        /*!<ADDSET[3:0] bits (Address setup phase duration) */
-#define  FSMC_BWTR4_ADDSET_0                 0x00000001U        /*!<Bit 0 */
-#define  FSMC_BWTR4_ADDSET_1                 0x00000002U        /*!<Bit 1 */
-#define  FSMC_BWTR4_ADDSET_2                 0x00000004U        /*!<Bit 2 */
-#define  FSMC_BWTR4_ADDSET_3                 0x00000008U        /*!<Bit 3 */
-
-#define  FSMC_BWTR4_ADDHLD                   0x000000F0U        /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
-#define  FSMC_BWTR4_ADDHLD_0                 0x00000010U        /*!<Bit 0 */
-#define  FSMC_BWTR4_ADDHLD_1                 0x00000020U        /*!<Bit 1 */
-#define  FSMC_BWTR4_ADDHLD_2                 0x00000040U        /*!<Bit 2 */
-#define  FSMC_BWTR4_ADDHLD_3                 0x00000080U        /*!<Bit 3 */
-
-#define  FSMC_BWTR4_DATAST                   0x0000FF00U        /*!<DATAST [3:0] bits (Data-phase duration) */
-#define  FSMC_BWTR4_DATAST_0                 0x00000100U        /*!<Bit 0 */
-#define  FSMC_BWTR4_DATAST_1                 0x00000200U        /*!<Bit 1 */
-#define  FSMC_BWTR4_DATAST_2                 0x00000400U        /*!<Bit 2 */
-#define  FSMC_BWTR4_DATAST_3                 0x00000800U        /*!<Bit 3 */
-#define  FSMC_BWTR4_DATAST_4                 0x00001000U        /*!<Bit 4 */
-#define  FSMC_BWTR4_DATAST_5                 0x00002000U        /*!<Bit 5 */
-#define  FSMC_BWTR4_DATAST_6                 0x00004000U        /*!<Bit 6 */
-#define  FSMC_BWTR4_DATAST_7                 0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_BWTR4_BUSTURN                  0x000F0000U        /*!<BUSTURN[3:0] bits (Bus turnaround duration) */
-#define  FSMC_BWTR4_BUSTURN_0                0x00010000U        /*!<Bit 0 */
-#define  FSMC_BWTR4_BUSTURN_1                0x00020000U        /*!<Bit 1 */
-#define  FSMC_BWTR4_BUSTURN_2                0x00040000U        /*!<Bit 2 */
-#define  FSMC_BWTR4_BUSTURN_3                0x00080000U        /*!<Bit 3 */
-
-#define  FSMC_BWTR4_ACCMOD                   0x30000000U        /*!<ACCMOD[1:0] bits (Access mode) */
-#define  FSMC_BWTR4_ACCMOD_0                 0x10000000U        /*!<Bit 0 */
-#define  FSMC_BWTR4_ACCMOD_1                 0x20000000U        /*!<Bit 1 */
-
-/******************  Bit definition for FSMC_PCR2 register  *******************/
-#define  FSMC_PCR2_PWAITEN                   0x00000002U        /*!<Wait feature enable bit */
-#define  FSMC_PCR2_PBKEN                     0x00000004U        /*!<PC Card/NAND Flash memory bank enable bit */
-#define  FSMC_PCR2_PTYP                      0x00000008U        /*!<Memory type */
-
-#define  FSMC_PCR2_PWID                      0x00000030U        /*!<PWID[1:0] bits (NAND Flash databus width) */
-#define  FSMC_PCR2_PWID_0                    0x00000010U        /*!<Bit 0 */
-#define  FSMC_PCR2_PWID_1                    0x00000020U        /*!<Bit 1 */
-
-#define  FSMC_PCR2_ECCEN                     0x00000040U        /*!<ECC computation logic enable bit */
-
-#define  FSMC_PCR2_TCLR                      0x00001E00U        /*!<TCLR[3:0] bits (CLE to RE delay) */
-#define  FSMC_PCR2_TCLR_0                    0x00000200U        /*!<Bit 0 */
-#define  FSMC_PCR2_TCLR_1                    0x00000400U        /*!<Bit 1 */
-#define  FSMC_PCR2_TCLR_2                    0x00000800U        /*!<Bit 2 */
-#define  FSMC_PCR2_TCLR_3                    0x00001000U        /*!<Bit 3 */
-
-#define  FSMC_PCR2_TAR                       0x0001E000U        /*!<TAR[3:0] bits (ALE to RE delay) */
-#define  FSMC_PCR2_TAR_0                     0x00002000U        /*!<Bit 0 */
-#define  FSMC_PCR2_TAR_1                     0x00004000U        /*!<Bit 1 */
-#define  FSMC_PCR2_TAR_2                     0x00008000U        /*!<Bit 2 */
-#define  FSMC_PCR2_TAR_3                     0x00010000U        /*!<Bit 3 */
-
-#define  FSMC_PCR2_ECCPS                     0x000E0000U        /*!<ECCPS[1:0] bits (ECC page size) */
-#define  FSMC_PCR2_ECCPS_0                   0x00020000U        /*!<Bit 0 */
-#define  FSMC_PCR2_ECCPS_1                   0x00040000U        /*!<Bit 1 */
-#define  FSMC_PCR2_ECCPS_2                   0x00080000U        /*!<Bit 2 */
-
-/******************  Bit definition for FSMC_PCR3 register  *******************/
-#define  FSMC_PCR3_PWAITEN                   0x00000002U        /*!<Wait feature enable bit */
-#define  FSMC_PCR3_PBKEN                     0x00000004U        /*!<PC Card/NAND Flash memory bank enable bit */
-#define  FSMC_PCR3_PTYP                      0x00000008U        /*!<Memory type */
-
-#define  FSMC_PCR3_PWID                      0x00000030U        /*!<PWID[1:0] bits (NAND Flash databus width) */
-#define  FSMC_PCR3_PWID_0                    0x00000010U        /*!<Bit 0 */
-#define  FSMC_PCR3_PWID_1                    0x00000020U        /*!<Bit 1 */
-
-#define  FSMC_PCR3_ECCEN                     0x00000040U        /*!<ECC computation logic enable bit */
-
-#define  FSMC_PCR3_TCLR                      0x00001E00U        /*!<TCLR[3:0] bits (CLE to RE delay) */
-#define  FSMC_PCR3_TCLR_0                    0x00000200U        /*!<Bit 0 */
-#define  FSMC_PCR3_TCLR_1                    0x00000400U        /*!<Bit 1 */
-#define  FSMC_PCR3_TCLR_2                    0x00000800U        /*!<Bit 2 */
-#define  FSMC_PCR3_TCLR_3                    0x00001000U        /*!<Bit 3 */
-
-#define  FSMC_PCR3_TAR                       0x0001E000U        /*!<TAR[3:0] bits (ALE to RE delay) */
-#define  FSMC_PCR3_TAR_0                     0x00002000U        /*!<Bit 0 */
-#define  FSMC_PCR3_TAR_1                     0x00004000U        /*!<Bit 1 */
-#define  FSMC_PCR3_TAR_2                     0x00008000U        /*!<Bit 2 */
-#define  FSMC_PCR3_TAR_3                     0x00010000U        /*!<Bit 3 */
-
-#define  FSMC_PCR3_ECCPS                     0x000E0000U        /*!<ECCPS[2:0] bits (ECC page size) */
-#define  FSMC_PCR3_ECCPS_0                   0x00020000U        /*!<Bit 0 */
-#define  FSMC_PCR3_ECCPS_1                   0x00040000U        /*!<Bit 1 */
-#define  FSMC_PCR3_ECCPS_2                   0x00080000U        /*!<Bit 2 */
-
-/******************  Bit definition for FSMC_PCR4 register  *******************/
-#define  FSMC_PCR4_PWAITEN                   0x00000002U        /*!<Wait feature enable bit */
-#define  FSMC_PCR4_PBKEN                     0x00000004U        /*!<PC Card/NAND Flash memory bank enable bit */
-#define  FSMC_PCR4_PTYP                      0x00000008U        /*!<Memory type */
-
-#define  FSMC_PCR4_PWID                      0x00000030U        /*!<PWID[1:0] bits (NAND Flash databus width) */
-#define  FSMC_PCR4_PWID_0                    0x00000010U        /*!<Bit 0 */
-#define  FSMC_PCR4_PWID_1                    0x00000020U        /*!<Bit 1 */
-
-#define  FSMC_PCR4_ECCEN                     0x00000040U        /*!<ECC computation logic enable bit */
-
-#define  FSMC_PCR4_TCLR                      0x00001E00U        /*!<TCLR[3:0] bits (CLE to RE delay) */
-#define  FSMC_PCR4_TCLR_0                    0x00000200U        /*!<Bit 0 */
-#define  FSMC_PCR4_TCLR_1                    0x00000400U        /*!<Bit 1 */
-#define  FSMC_PCR4_TCLR_2                    0x00000800U        /*!<Bit 2 */
-#define  FSMC_PCR4_TCLR_3                    0x00001000U        /*!<Bit 3 */
-
-#define  FSMC_PCR4_TAR                       0x0001E000U        /*!<TAR[3:0] bits (ALE to RE delay) */
-#define  FSMC_PCR4_TAR_0                     0x00002000U        /*!<Bit 0 */
-#define  FSMC_PCR4_TAR_1                     0x00004000U        /*!<Bit 1 */
-#define  FSMC_PCR4_TAR_2                     0x00008000U        /*!<Bit 2 */
-#define  FSMC_PCR4_TAR_3                     0x00010000U        /*!<Bit 3 */
-
-#define  FSMC_PCR4_ECCPS                     0x000E0000U        /*!<ECCPS[2:0] bits (ECC page size) */
-#define  FSMC_PCR4_ECCPS_0                   0x00020000U        /*!<Bit 0 */
-#define  FSMC_PCR4_ECCPS_1                   0x00040000U        /*!<Bit 1 */
-#define  FSMC_PCR4_ECCPS_2                   0x00080000U        /*!<Bit 2 */
-
-/*******************  Bit definition for FSMC_SR2 register  *******************/
-#define  FSMC_SR2_IRS                        0x01U               /*!<Interrupt Rising Edge status                */
-#define  FSMC_SR2_ILS                        0x02U               /*!<Interrupt Level status                      */
-#define  FSMC_SR2_IFS                        0x04U               /*!<Interrupt Falling Edge status               */
-#define  FSMC_SR2_IREN                       0x08U               /*!<Interrupt Rising Edge detection Enable bit  */
-#define  FSMC_SR2_ILEN                       0x10U               /*!<Interrupt Level detection Enable bit        */
-#define  FSMC_SR2_IFEN                       0x20U               /*!<Interrupt Falling Edge detection Enable bit */
-#define  FSMC_SR2_FEMPT                      0x40U               /*!<FIFO empty */
-
-/*******************  Bit definition for FSMC_SR3 register  *******************/
-#define  FSMC_SR3_IRS                        0x01U               /*!<Interrupt Rising Edge status                */
-#define  FSMC_SR3_ILS                        0x02U               /*!<Interrupt Level status                      */
-#define  FSMC_SR3_IFS                        0x04U               /*!<Interrupt Falling Edge status               */
-#define  FSMC_SR3_IREN                       0x08U               /*!<Interrupt Rising Edge detection Enable bit  */
-#define  FSMC_SR3_ILEN                       0x10U               /*!<Interrupt Level detection Enable bit        */
-#define  FSMC_SR3_IFEN                       0x20U               /*!<Interrupt Falling Edge detection Enable bit */
-#define  FSMC_SR3_FEMPT                      0x40U               /*!<FIFO empty */
-
-/*******************  Bit definition for FSMC_SR4 register  *******************/
-#define  FSMC_SR4_IRS                        0x01U               /*!<Interrupt Rising Edge status                 */
-#define  FSMC_SR4_ILS                        0x02U               /*!<Interrupt Level status                       */
-#define  FSMC_SR4_IFS                        0x04U               /*!<Interrupt Falling Edge status                */
-#define  FSMC_SR4_IREN                       0x08U               /*!<Interrupt Rising Edge detection Enable bit   */
-#define  FSMC_SR4_ILEN                       0x10U               /*!<Interrupt Level detection Enable bit         */
-#define  FSMC_SR4_IFEN                       0x20U               /*!<Interrupt Falling Edge detection Enable bit  */
-#define  FSMC_SR4_FEMPT                      0x40U               /*!<FIFO empty */
-
-/******************  Bit definition for FSMC_PMEM2 register  ******************/
-#define  FSMC_PMEM2_MEMSET2                  0x000000FFU        /*!<MEMSET2[7:0] bits (Common memory 2 setup time) */
-#define  FSMC_PMEM2_MEMSET2_0                0x00000001U        /*!<Bit 0 */
-#define  FSMC_PMEM2_MEMSET2_1                0x00000002U        /*!<Bit 1 */
-#define  FSMC_PMEM2_MEMSET2_2                0x00000004U        /*!<Bit 2 */
-#define  FSMC_PMEM2_MEMSET2_3                0x00000008U        /*!<Bit 3 */
-#define  FSMC_PMEM2_MEMSET2_4                0x00000010U        /*!<Bit 4 */
-#define  FSMC_PMEM2_MEMSET2_5                0x00000020U        /*!<Bit 5 */
-#define  FSMC_PMEM2_MEMSET2_6                0x00000040U        /*!<Bit 6 */
-#define  FSMC_PMEM2_MEMSET2_7                0x00000080U        /*!<Bit 7 */
-
-#define  FSMC_PMEM2_MEMWAIT2                 0x0000FF00U        /*!<MEMWAIT2[7:0] bits (Common memory 2 wait time) */
-#define  FSMC_PMEM2_MEMWAIT2_0               0x00000100U        /*!<Bit 0 */
-#define  FSMC_PMEM2_MEMWAIT2_1               0x00000200U        /*!<Bit 1 */
-#define  FSMC_PMEM2_MEMWAIT2_2               0x00000400U        /*!<Bit 2 */
-#define  FSMC_PMEM2_MEMWAIT2_3               0x00000800U        /*!<Bit 3 */
-#define  FSMC_PMEM2_MEMWAIT2_4               0x00001000U        /*!<Bit 4 */
-#define  FSMC_PMEM2_MEMWAIT2_5               0x00002000U        /*!<Bit 5 */
-#define  FSMC_PMEM2_MEMWAIT2_6               0x00004000U        /*!<Bit 6 */
-#define  FSMC_PMEM2_MEMWAIT2_7               0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_PMEM2_MEMHOLD2                 0x00FF0000U        /*!<MEMHOLD2[7:0] bits (Common memory 2 hold time) */
-#define  FSMC_PMEM2_MEMHOLD2_0               0x00010000U        /*!<Bit 0 */
-#define  FSMC_PMEM2_MEMHOLD2_1               0x00020000U        /*!<Bit 1 */
-#define  FSMC_PMEM2_MEMHOLD2_2               0x00040000U        /*!<Bit 2 */
-#define  FSMC_PMEM2_MEMHOLD2_3               0x00080000U        /*!<Bit 3 */
-#define  FSMC_PMEM2_MEMHOLD2_4               0x00100000U        /*!<Bit 4 */
-#define  FSMC_PMEM2_MEMHOLD2_5               0x00200000U        /*!<Bit 5 */
-#define  FSMC_PMEM2_MEMHOLD2_6               0x00400000U        /*!<Bit 6 */
-#define  FSMC_PMEM2_MEMHOLD2_7               0x00800000U        /*!<Bit 7 */
-
-#define  FSMC_PMEM2_MEMHIZ2                  0xFF000000U        /*!<MEMHIZ2[7:0] bits (Common memory 2 databus HiZ time) */
-#define  FSMC_PMEM2_MEMHIZ2_0                0x01000000U        /*!<Bit 0 */
-#define  FSMC_PMEM2_MEMHIZ2_1                0x02000000U        /*!<Bit 1 */
-#define  FSMC_PMEM2_MEMHIZ2_2                0x04000000U        /*!<Bit 2 */
-#define  FSMC_PMEM2_MEMHIZ2_3                0x08000000U        /*!<Bit 3 */
-#define  FSMC_PMEM2_MEMHIZ2_4                0x10000000U        /*!<Bit 4 */
-#define  FSMC_PMEM2_MEMHIZ2_5                0x20000000U        /*!<Bit 5 */
-#define  FSMC_PMEM2_MEMHIZ2_6                0x40000000U        /*!<Bit 6 */
-#define  FSMC_PMEM2_MEMHIZ2_7                0x80000000U        /*!<Bit 7 */
-
-/******************  Bit definition for FSMC_PMEM3 register  ******************/
-#define  FSMC_PMEM3_MEMSET3                  0x000000FFU        /*!<MEMSET3[7:0] bits (Common memory 3 setup time) */
-#define  FSMC_PMEM3_MEMSET3_0                0x00000001U        /*!<Bit 0 */
-#define  FSMC_PMEM3_MEMSET3_1                0x00000002U        /*!<Bit 1 */
-#define  FSMC_PMEM3_MEMSET3_2                0x00000004U        /*!<Bit 2 */
-#define  FSMC_PMEM3_MEMSET3_3                0x00000008U        /*!<Bit 3 */
-#define  FSMC_PMEM3_MEMSET3_4                0x00000010U        /*!<Bit 4 */
-#define  FSMC_PMEM3_MEMSET3_5                0x00000020U        /*!<Bit 5 */
-#define  FSMC_PMEM3_MEMSET3_6                0x00000040U        /*!<Bit 6 */
-#define  FSMC_PMEM3_MEMSET3_7                0x00000080U        /*!<Bit 7 */
-
-#define  FSMC_PMEM3_MEMWAIT3                 0x0000FF00U        /*!<MEMWAIT3[7:0] bits (Common memory 3 wait time) */
-#define  FSMC_PMEM3_MEMWAIT3_0               0x00000100U        /*!<Bit 0 */
-#define  FSMC_PMEM3_MEMWAIT3_1               0x00000200U        /*!<Bit 1 */
-#define  FSMC_PMEM3_MEMWAIT3_2               0x00000400U        /*!<Bit 2 */
-#define  FSMC_PMEM3_MEMWAIT3_3               0x00000800U        /*!<Bit 3 */
-#define  FSMC_PMEM3_MEMWAIT3_4               0x00001000U        /*!<Bit 4 */
-#define  FSMC_PMEM3_MEMWAIT3_5               0x00002000U        /*!<Bit 5 */
-#define  FSMC_PMEM3_MEMWAIT3_6               0x00004000U        /*!<Bit 6 */
-#define  FSMC_PMEM3_MEMWAIT3_7               0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_PMEM3_MEMHOLD3                 0x00FF0000U        /*!<MEMHOLD3[7:0] bits (Common memory 3 hold time) */
-#define  FSMC_PMEM3_MEMHOLD3_0               0x00010000U        /*!<Bit 0 */
-#define  FSMC_PMEM3_MEMHOLD3_1               0x00020000U        /*!<Bit 1 */
-#define  FSMC_PMEM3_MEMHOLD3_2               0x00040000U        /*!<Bit 2 */
-#define  FSMC_PMEM3_MEMHOLD3_3               0x00080000U        /*!<Bit 3 */
-#define  FSMC_PMEM3_MEMHOLD3_4               0x00100000U        /*!<Bit 4 */
-#define  FSMC_PMEM3_MEMHOLD3_5               0x00200000U        /*!<Bit 5 */
-#define  FSMC_PMEM3_MEMHOLD3_6               0x00400000U        /*!<Bit 6 */
-#define  FSMC_PMEM3_MEMHOLD3_7               0x00800000U        /*!<Bit 7 */
-
-#define  FSMC_PMEM3_MEMHIZ3                  0xFF000000U        /*!<MEMHIZ3[7:0] bits (Common memory 3 databus HiZ time) */
-#define  FSMC_PMEM3_MEMHIZ3_0                0x01000000U        /*!<Bit 0 */
-#define  FSMC_PMEM3_MEMHIZ3_1                0x02000000U        /*!<Bit 1 */
-#define  FSMC_PMEM3_MEMHIZ3_2                0x04000000U        /*!<Bit 2 */
-#define  FSMC_PMEM3_MEMHIZ3_3                0x08000000U        /*!<Bit 3 */
-#define  FSMC_PMEM3_MEMHIZ3_4                0x10000000U        /*!<Bit 4 */
-#define  FSMC_PMEM3_MEMHIZ3_5                0x20000000U        /*!<Bit 5 */
-#define  FSMC_PMEM3_MEMHIZ3_6                0x40000000U        /*!<Bit 6 */
-#define  FSMC_PMEM3_MEMHIZ3_7                0x80000000U        /*!<Bit 7 */
-
-/******************  Bit definition for FSMC_PMEM4 register  ******************/
-#define  FSMC_PMEM4_MEMSET4                  0x000000FFU        /*!<MEMSET4[7:0] bits (Common memory 4 setup time) */
-#define  FSMC_PMEM4_MEMSET4_0                0x00000001U        /*!<Bit 0 */
-#define  FSMC_PMEM4_MEMSET4_1                0x00000002U        /*!<Bit 1 */
-#define  FSMC_PMEM4_MEMSET4_2                0x00000004U        /*!<Bit 2 */
-#define  FSMC_PMEM4_MEMSET4_3                0x00000008U        /*!<Bit 3 */
-#define  FSMC_PMEM4_MEMSET4_4                0x00000010U        /*!<Bit 4 */
-#define  FSMC_PMEM4_MEMSET4_5                0x00000020U        /*!<Bit 5 */
-#define  FSMC_PMEM4_MEMSET4_6                0x00000040U        /*!<Bit 6 */
-#define  FSMC_PMEM4_MEMSET4_7                0x00000080U        /*!<Bit 7 */
-
-#define  FSMC_PMEM4_MEMWAIT4                 0x0000FF00U        /*!<MEMWAIT4[7:0] bits (Common memory 4 wait time) */
-#define  FSMC_PMEM4_MEMWAIT4_0               0x00000100U        /*!<Bit 0 */
-#define  FSMC_PMEM4_MEMWAIT4_1               0x00000200U        /*!<Bit 1 */
-#define  FSMC_PMEM4_MEMWAIT4_2               0x00000400U        /*!<Bit 2 */
-#define  FSMC_PMEM4_MEMWAIT4_3               0x00000800U        /*!<Bit 3 */
-#define  FSMC_PMEM4_MEMWAIT4_4               0x00001000U        /*!<Bit 4 */
-#define  FSMC_PMEM4_MEMWAIT4_5               0x00002000U        /*!<Bit 5 */
-#define  FSMC_PMEM4_MEMWAIT4_6               0x00004000U        /*!<Bit 6 */
-#define  FSMC_PMEM4_MEMWAIT4_7               0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_PMEM4_MEMHOLD4                 0x00FF0000U        /*!<MEMHOLD4[7:0] bits (Common memory 4 hold time) */
-#define  FSMC_PMEM4_MEMHOLD4_0               0x00010000U        /*!<Bit 0 */
-#define  FSMC_PMEM4_MEMHOLD4_1               0x00020000U        /*!<Bit 1 */
-#define  FSMC_PMEM4_MEMHOLD4_2               0x00040000U        /*!<Bit 2 */
-#define  FSMC_PMEM4_MEMHOLD4_3               0x00080000U        /*!<Bit 3 */
-#define  FSMC_PMEM4_MEMHOLD4_4               0x00100000U        /*!<Bit 4 */
-#define  FSMC_PMEM4_MEMHOLD4_5               0x00200000U        /*!<Bit 5 */
-#define  FSMC_PMEM4_MEMHOLD4_6               0x00400000U        /*!<Bit 6 */
-#define  FSMC_PMEM4_MEMHOLD4_7               0x00800000U        /*!<Bit 7 */
-
-#define  FSMC_PMEM4_MEMHIZ4                  0xFF000000U        /*!<MEMHIZ4[7:0] bits (Common memory 4 databus HiZ time) */
-#define  FSMC_PMEM4_MEMHIZ4_0                0x01000000U        /*!<Bit 0 */
-#define  FSMC_PMEM4_MEMHIZ4_1                0x02000000U        /*!<Bit 1 */
-#define  FSMC_PMEM4_MEMHIZ4_2                0x04000000U        /*!<Bit 2 */
-#define  FSMC_PMEM4_MEMHIZ4_3                0x08000000U        /*!<Bit 3 */
-#define  FSMC_PMEM4_MEMHIZ4_4                0x10000000U        /*!<Bit 4 */
-#define  FSMC_PMEM4_MEMHIZ4_5                0x20000000U        /*!<Bit 5 */
-#define  FSMC_PMEM4_MEMHIZ4_6                0x40000000U        /*!<Bit 6 */
-#define  FSMC_PMEM4_MEMHIZ4_7                0x80000000U        /*!<Bit 7 */
-
-/******************  Bit definition for FSMC_PATT2 register  ******************/
-#define  FSMC_PATT2_ATTSET2                  0x000000FFU        /*!<ATTSET2[7:0] bits (Attribute memory 2 setup time) */
-#define  FSMC_PATT2_ATTSET2_0                0x00000001U        /*!<Bit 0 */
-#define  FSMC_PATT2_ATTSET2_1                0x00000002U        /*!<Bit 1 */
-#define  FSMC_PATT2_ATTSET2_2                0x00000004U        /*!<Bit 2 */
-#define  FSMC_PATT2_ATTSET2_3                0x00000008U        /*!<Bit 3 */
-#define  FSMC_PATT2_ATTSET2_4                0x00000010U        /*!<Bit 4 */
-#define  FSMC_PATT2_ATTSET2_5                0x00000020U        /*!<Bit 5 */
-#define  FSMC_PATT2_ATTSET2_6                0x00000040U        /*!<Bit 6 */
-#define  FSMC_PATT2_ATTSET2_7                0x00000080U        /*!<Bit 7 */
-
-#define  FSMC_PATT2_ATTWAIT2                 0x0000FF00U        /*!<ATTWAIT2[7:0] bits (Attribute memory 2 wait time) */
-#define  FSMC_PATT2_ATTWAIT2_0               0x00000100U        /*!<Bit 0 */
-#define  FSMC_PATT2_ATTWAIT2_1               0x00000200U        /*!<Bit 1 */
-#define  FSMC_PATT2_ATTWAIT2_2               0x00000400U        /*!<Bit 2 */
-#define  FSMC_PATT2_ATTWAIT2_3               0x00000800U        /*!<Bit 3 */
-#define  FSMC_PATT2_ATTWAIT2_4               0x00001000U        /*!<Bit 4 */
-#define  FSMC_PATT2_ATTWAIT2_5               0x00002000U        /*!<Bit 5 */
-#define  FSMC_PATT2_ATTWAIT2_6               0x00004000U        /*!<Bit 6 */
-#define  FSMC_PATT2_ATTWAIT2_7               0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_PATT2_ATTHOLD2                 0x00FF0000U        /*!<ATTHOLD2[7:0] bits (Attribute memory 2 hold time) */
-#define  FSMC_PATT2_ATTHOLD2_0               0x00010000U        /*!<Bit 0 */
-#define  FSMC_PATT2_ATTHOLD2_1               0x00020000U        /*!<Bit 1 */
-#define  FSMC_PATT2_ATTHOLD2_2               0x00040000U        /*!<Bit 2 */
-#define  FSMC_PATT2_ATTHOLD2_3               0x00080000U        /*!<Bit 3 */
-#define  FSMC_PATT2_ATTHOLD2_4               0x00100000U        /*!<Bit 4 */
-#define  FSMC_PATT2_ATTHOLD2_5               0x00200000U        /*!<Bit 5 */
-#define  FSMC_PATT2_ATTHOLD2_6               0x00400000U        /*!<Bit 6 */
-#define  FSMC_PATT2_ATTHOLD2_7               0x00800000U        /*!<Bit 7 */
-
-#define  FSMC_PATT2_ATTHIZ2                  0xFF000000U        /*!<ATTHIZ2[7:0] bits (Attribute memory 2 databus HiZ time) */
-#define  FSMC_PATT2_ATTHIZ2_0                0x01000000U        /*!<Bit 0 */
-#define  FSMC_PATT2_ATTHIZ2_1                0x02000000U        /*!<Bit 1 */
-#define  FSMC_PATT2_ATTHIZ2_2                0x04000000U        /*!<Bit 2 */
-#define  FSMC_PATT2_ATTHIZ2_3                0x08000000U        /*!<Bit 3 */
-#define  FSMC_PATT2_ATTHIZ2_4                0x10000000U        /*!<Bit 4 */
-#define  FSMC_PATT2_ATTHIZ2_5                0x20000000U        /*!<Bit 5 */
-#define  FSMC_PATT2_ATTHIZ2_6                0x40000000U        /*!<Bit 6 */
-#define  FSMC_PATT2_ATTHIZ2_7                0x80000000U        /*!<Bit 7 */
-
-/******************  Bit definition for FSMC_PATT3 register  ******************/
-#define  FSMC_PATT3_ATTSET3                  0x000000FFU        /*!<ATTSET3[7:0] bits (Attribute memory 3 setup time) */
-#define  FSMC_PATT3_ATTSET3_0                0x00000001U        /*!<Bit 0 */
-#define  FSMC_PATT3_ATTSET3_1                0x00000002U        /*!<Bit 1 */
-#define  FSMC_PATT3_ATTSET3_2                0x00000004U        /*!<Bit 2 */
-#define  FSMC_PATT3_ATTSET3_3                0x00000008U        /*!<Bit 3 */
-#define  FSMC_PATT3_ATTSET3_4                0x00000010U        /*!<Bit 4 */
-#define  FSMC_PATT3_ATTSET3_5                0x00000020U        /*!<Bit 5 */
-#define  FSMC_PATT3_ATTSET3_6                0x00000040U        /*!<Bit 6 */
-#define  FSMC_PATT3_ATTSET3_7                0x00000080U        /*!<Bit 7 */
-
-#define  FSMC_PATT3_ATTWAIT3                 0x0000FF00U        /*!<ATTWAIT3[7:0] bits (Attribute memory 3 wait time) */
-#define  FSMC_PATT3_ATTWAIT3_0               0x00000100U        /*!<Bit 0 */
-#define  FSMC_PATT3_ATTWAIT3_1               0x00000200U        /*!<Bit 1 */
-#define  FSMC_PATT3_ATTWAIT3_2               0x00000400U        /*!<Bit 2 */
-#define  FSMC_PATT3_ATTWAIT3_3               0x00000800U        /*!<Bit 3 */
-#define  FSMC_PATT3_ATTWAIT3_4               0x00001000U        /*!<Bit 4 */
-#define  FSMC_PATT3_ATTWAIT3_5               0x00002000U        /*!<Bit 5 */
-#define  FSMC_PATT3_ATTWAIT3_6               0x00004000U        /*!<Bit 6 */
-#define  FSMC_PATT3_ATTWAIT3_7               0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_PATT3_ATTHOLD3                 0x00FF0000U        /*!<ATTHOLD3[7:0] bits (Attribute memory 3 hold time) */
-#define  FSMC_PATT3_ATTHOLD3_0               0x00010000U        /*!<Bit 0 */
-#define  FSMC_PATT3_ATTHOLD3_1               0x00020000U        /*!<Bit 1 */
-#define  FSMC_PATT3_ATTHOLD3_2               0x00040000U        /*!<Bit 2 */
-#define  FSMC_PATT3_ATTHOLD3_3               0x00080000U        /*!<Bit 3 */
-#define  FSMC_PATT3_ATTHOLD3_4               0x00100000U        /*!<Bit 4 */
-#define  FSMC_PATT3_ATTHOLD3_5               0x00200000U        /*!<Bit 5 */
-#define  FSMC_PATT3_ATTHOLD3_6               0x00400000U        /*!<Bit 6 */
-#define  FSMC_PATT3_ATTHOLD3_7               0x00800000U        /*!<Bit 7 */
-
-#define  FSMC_PATT3_ATTHIZ3                  0xFF000000U        /*!<ATTHIZ3[7:0] bits (Attribute memory 3 databus HiZ time) */
-#define  FSMC_PATT3_ATTHIZ3_0                0x01000000U        /*!<Bit 0 */
-#define  FSMC_PATT3_ATTHIZ3_1                0x02000000U        /*!<Bit 1 */
-#define  FSMC_PATT3_ATTHIZ3_2                0x04000000U        /*!<Bit 2 */
-#define  FSMC_PATT3_ATTHIZ3_3                0x08000000U        /*!<Bit 3 */
-#define  FSMC_PATT3_ATTHIZ3_4                0x10000000U        /*!<Bit 4 */
-#define  FSMC_PATT3_ATTHIZ3_5                0x20000000U        /*!<Bit 5 */
-#define  FSMC_PATT3_ATTHIZ3_6                0x40000000U        /*!<Bit 6 */
-#define  FSMC_PATT3_ATTHIZ3_7                0x80000000U        /*!<Bit 7 */
-
-/******************  Bit definition for FSMC_PATT4 register  ******************/
-#define  FSMC_PATT4_ATTSET4                  0x000000FFU        /*!<ATTSET4[7:0] bits (Attribute memory 4 setup time) */
-#define  FSMC_PATT4_ATTSET4_0                0x00000001U        /*!<Bit 0 */
-#define  FSMC_PATT4_ATTSET4_1                0x00000002U        /*!<Bit 1 */
-#define  FSMC_PATT4_ATTSET4_2                0x00000004U        /*!<Bit 2 */
-#define  FSMC_PATT4_ATTSET4_3                0x00000008U        /*!<Bit 3 */
-#define  FSMC_PATT4_ATTSET4_4                0x00000010U        /*!<Bit 4 */
-#define  FSMC_PATT4_ATTSET4_5                0x00000020U        /*!<Bit 5 */
-#define  FSMC_PATT4_ATTSET4_6                0x00000040U        /*!<Bit 6 */
-#define  FSMC_PATT4_ATTSET4_7                0x00000080U        /*!<Bit 7 */
-
-#define  FSMC_PATT4_ATTWAIT4                 0x0000FF00U        /*!<ATTWAIT4[7:0] bits (Attribute memory 4 wait time) */
-#define  FSMC_PATT4_ATTWAIT4_0               0x00000100U        /*!<Bit 0 */
-#define  FSMC_PATT4_ATTWAIT4_1               0x00000200U        /*!<Bit 1 */
-#define  FSMC_PATT4_ATTWAIT4_2               0x00000400U        /*!<Bit 2 */
-#define  FSMC_PATT4_ATTWAIT4_3               0x00000800U        /*!<Bit 3 */
-#define  FSMC_PATT4_ATTWAIT4_4               0x00001000U        /*!<Bit 4 */
-#define  FSMC_PATT4_ATTWAIT4_5               0x00002000U        /*!<Bit 5 */
-#define  FSMC_PATT4_ATTWAIT4_6               0x00004000U        /*!<Bit 6 */
-#define  FSMC_PATT4_ATTWAIT4_7               0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_PATT4_ATTHOLD4                 0x00FF0000U        /*!<ATTHOLD4[7:0] bits (Attribute memory 4 hold time) */
-#define  FSMC_PATT4_ATTHOLD4_0               0x00010000U        /*!<Bit 0 */
-#define  FSMC_PATT4_ATTHOLD4_1               0x00020000U        /*!<Bit 1 */
-#define  FSMC_PATT4_ATTHOLD4_2               0x00040000U        /*!<Bit 2 */
-#define  FSMC_PATT4_ATTHOLD4_3               0x00080000U        /*!<Bit 3 */
-#define  FSMC_PATT4_ATTHOLD4_4               0x00100000U        /*!<Bit 4 */
-#define  FSMC_PATT4_ATTHOLD4_5               0x00200000U        /*!<Bit 5 */
-#define  FSMC_PATT4_ATTHOLD4_6               0x00400000U        /*!<Bit 6 */
-#define  FSMC_PATT4_ATTHOLD4_7               0x00800000U        /*!<Bit 7 */
-
-#define  FSMC_PATT4_ATTHIZ4                  0xFF000000U        /*!<ATTHIZ4[7:0] bits (Attribute memory 4 databus HiZ time) */
-#define  FSMC_PATT4_ATTHIZ4_0                0x01000000U        /*!<Bit 0 */
-#define  FSMC_PATT4_ATTHIZ4_1                0x02000000U        /*!<Bit 1 */
-#define  FSMC_PATT4_ATTHIZ4_2                0x04000000U        /*!<Bit 2 */
-#define  FSMC_PATT4_ATTHIZ4_3                0x08000000U        /*!<Bit 3 */
-#define  FSMC_PATT4_ATTHIZ4_4                0x10000000U        /*!<Bit 4 */
-#define  FSMC_PATT4_ATTHIZ4_5                0x20000000U        /*!<Bit 5 */
-#define  FSMC_PATT4_ATTHIZ4_6                0x40000000U        /*!<Bit 6 */
-#define  FSMC_PATT4_ATTHIZ4_7                0x80000000U        /*!<Bit 7 */
-
-/******************  Bit definition for FSMC_PIO4 register  *******************/
-#define  FSMC_PIO4_IOSET4                    0x000000FFU        /*!<IOSET4[7:0] bits (I/O 4 setup time) */
-#define  FSMC_PIO4_IOSET4_0                  0x00000001U        /*!<Bit 0 */
-#define  FSMC_PIO4_IOSET4_1                  0x00000002U        /*!<Bit 1 */
-#define  FSMC_PIO4_IOSET4_2                  0x00000004U        /*!<Bit 2 */
-#define  FSMC_PIO4_IOSET4_3                  0x00000008U        /*!<Bit 3 */
-#define  FSMC_PIO4_IOSET4_4                  0x00000010U        /*!<Bit 4 */
-#define  FSMC_PIO4_IOSET4_5                  0x00000020U        /*!<Bit 5 */
-#define  FSMC_PIO4_IOSET4_6                  0x00000040U        /*!<Bit 6 */
-#define  FSMC_PIO4_IOSET4_7                  0x00000080U        /*!<Bit 7 */
-
-#define  FSMC_PIO4_IOWAIT4                   0x0000FF00U        /*!<IOWAIT4[7:0] bits (I/O 4 wait time) */
-#define  FSMC_PIO4_IOWAIT4_0                 0x00000100U        /*!<Bit 0 */
-#define  FSMC_PIO4_IOWAIT4_1                 0x00000200U        /*!<Bit 1 */
-#define  FSMC_PIO4_IOWAIT4_2                 0x00000400U        /*!<Bit 2 */
-#define  FSMC_PIO4_IOWAIT4_3                 0x00000800U        /*!<Bit 3 */
-#define  FSMC_PIO4_IOWAIT4_4                 0x00001000U        /*!<Bit 4 */
-#define  FSMC_PIO4_IOWAIT4_5                 0x00002000U        /*!<Bit 5 */
-#define  FSMC_PIO4_IOWAIT4_6                 0x00004000U        /*!<Bit 6 */
-#define  FSMC_PIO4_IOWAIT4_7                 0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_PIO4_IOHOLD4                   0x00FF0000U        /*!<IOHOLD4[7:0] bits (I/O 4 hold time) */
-#define  FSMC_PIO4_IOHOLD4_0                 0x00010000U        /*!<Bit 0 */
-#define  FSMC_PIO4_IOHOLD4_1                 0x00020000U        /*!<Bit 1 */
-#define  FSMC_PIO4_IOHOLD4_2                 0x00040000U        /*!<Bit 2 */
-#define  FSMC_PIO4_IOHOLD4_3                 0x00080000U        /*!<Bit 3 */
-#define  FSMC_PIO4_IOHOLD4_4                 0x00100000U        /*!<Bit 4 */
-#define  FSMC_PIO4_IOHOLD4_5                 0x00200000U        /*!<Bit 5 */
-#define  FSMC_PIO4_IOHOLD4_6                 0x00400000U        /*!<Bit 6 */
-#define  FSMC_PIO4_IOHOLD4_7                 0x00800000U        /*!<Bit 7 */
-
-#define  FSMC_PIO4_IOHIZ4                    0xFF000000U        /*!<IOHIZ4[7:0] bits (I/O 4 databus HiZ time) */
-#define  FSMC_PIO4_IOHIZ4_0                  0x01000000U        /*!<Bit 0 */
-#define  FSMC_PIO4_IOHIZ4_1                  0x02000000U        /*!<Bit 1 */
-#define  FSMC_PIO4_IOHIZ4_2                  0x04000000U        /*!<Bit 2 */
-#define  FSMC_PIO4_IOHIZ4_3                  0x08000000U        /*!<Bit 3 */
-#define  FSMC_PIO4_IOHIZ4_4                  0x10000000U        /*!<Bit 4 */
-#define  FSMC_PIO4_IOHIZ4_5                  0x20000000U        /*!<Bit 5 */
-#define  FSMC_PIO4_IOHIZ4_6                  0x40000000U        /*!<Bit 6 */
-#define  FSMC_PIO4_IOHIZ4_7                  0x80000000U        /*!<Bit 7 */
-
-/******************  Bit definition for FSMC_ECCR2 register  ******************/
-#define  FSMC_ECCR2_ECC2                     0xFFFFFFFFU        /*!<ECC result */
-
-/******************  Bit definition for FSMC_ECCR3 register  ******************/
-#define  FSMC_ECCR3_ECC3                     0xFFFFFFFFU        /*!<ECC result */
 
 /******************************************************************************/
 /*                                                                            */
@@ -9507,9 +6267,14 @@ typedef struct {
 #define  PWR_CR_PLS_LEV6                     0x000000C0U     /*!< PVD level 6 */
 #define  PWR_CR_PLS_LEV7                     0x000000E0U     /*!< PVD level 7 */
 
-#define  PWR_CR_DBP                          0x00000100U     /*!< Disable Backup Domain write protection               */
-#define  PWR_CR_FPDS                         0x00000200U     /*!< Flash power down in Stop mode                        */
-#define  PWR_CR_VOS                          0x00004000U     /*!< VOS bit (Regulator voltage scaling output selection) */
+#define  PWR_CR_DBP                          0x00000100U     /*!< Disable Backup Domain write protection                     */
+#define  PWR_CR_FPDS                         0x00000200U     /*!< Flash power down in Stop mode                              */
+#define  PWR_CR_LPLVDS                       0x00000400U     /*!< Low Power Regulator Low Voltage in Deep Sleep mode         */
+#define  PWR_CR_MRLVDS                       0x00000800U     /*!< Main Regulator Low Voltage in Deep Sleep mode              */
+#define  PWR_CR_ADCDC1                       0x00002000U     /*!< Refer to AN4073 on how to use this bit                     */
+#define  PWR_CR_VOS                          0x0000C000U     /*!< VOS[1:0] bits (Regulator voltage scaling output selection) */
+#define  PWR_CR_VOS_0                        0x00004000U     /*!< Bit 0 */
+#define  PWR_CR_VOS_1                        0x00008000U     /*!< Bit 1 */
 
 /* Legacy define */
 #define  PWR_CR_PMODE                        PWR_CR_VOS
@@ -9715,56 +6480,38 @@ typedef struct {
 #define  RCC_AHB1RSTR_GPIOCRST               0x00000004U
 #define  RCC_AHB1RSTR_GPIODRST               0x00000008U
 #define  RCC_AHB1RSTR_GPIOERST               0x00000010U
-#define  RCC_AHB1RSTR_GPIOFRST               0x00000020U
-#define  RCC_AHB1RSTR_GPIOGRST               0x00000040U
 #define  RCC_AHB1RSTR_GPIOHRST               0x00000080U
-#define  RCC_AHB1RSTR_GPIOIRST               0x00000100U
 #define  RCC_AHB1RSTR_CRCRST                 0x00001000U
 #define  RCC_AHB1RSTR_DMA1RST                0x00200000U
 #define  RCC_AHB1RSTR_DMA2RST                0x00400000U
-#define  RCC_AHB1RSTR_OTGHRST                0x20000000U
 
 /********************  Bit definition for RCC_AHB2RSTR register  **************/
-#define  RCC_AHB2RSTR_RNGRST                 0x00000040U
 #define  RCC_AHB2RSTR_OTGFSRST               0x00000080U
 
 /********************  Bit definition for RCC_AHB3RSTR register  **************/
-
-#define  RCC_AHB3RSTR_FSMCRST                0x00000001U
 
 /********************  Bit definition for RCC_APB1RSTR register  **************/
 #define  RCC_APB1RSTR_TIM2RST                0x00000001U
 #define  RCC_APB1RSTR_TIM3RST                0x00000002U
 #define  RCC_APB1RSTR_TIM4RST                0x00000004U
 #define  RCC_APB1RSTR_TIM5RST                0x00000008U
-#define  RCC_APB1RSTR_TIM6RST                0x00000010U
-#define  RCC_APB1RSTR_TIM7RST                0x00000020U
-#define  RCC_APB1RSTR_TIM12RST               0x00000040U
-#define  RCC_APB1RSTR_TIM13RST               0x00000080U
-#define  RCC_APB1RSTR_TIM14RST               0x00000100U
 #define  RCC_APB1RSTR_WWDGRST                0x00000800U
 #define  RCC_APB1RSTR_SPI2RST                0x00004000U
 #define  RCC_APB1RSTR_SPI3RST                0x00008000U
 #define  RCC_APB1RSTR_USART2RST              0x00020000U
-#define  RCC_APB1RSTR_USART3RST              0x00040000U
-#define  RCC_APB1RSTR_UART4RST               0x00080000U
-#define  RCC_APB1RSTR_UART5RST               0x00100000U
 #define  RCC_APB1RSTR_I2C1RST                0x00200000U
 #define  RCC_APB1RSTR_I2C2RST                0x00400000U
 #define  RCC_APB1RSTR_I2C3RST                0x00800000U
-#define  RCC_APB1RSTR_CAN1RST                0x02000000U
-#define  RCC_APB1RSTR_CAN2RST                0x04000000U
 #define  RCC_APB1RSTR_PWRRST                 0x10000000U
-#define  RCC_APB1RSTR_DACRST                 0x20000000U
 
 /********************  Bit definition for RCC_APB2RSTR register  **************/
 #define  RCC_APB2RSTR_TIM1RST                0x00000001U
-#define  RCC_APB2RSTR_TIM8RST                0x00000002U
 #define  RCC_APB2RSTR_USART1RST              0x00000010U
 #define  RCC_APB2RSTR_USART6RST              0x00000020U
 #define  RCC_APB2RSTR_ADCRST                 0x00000100U
 #define  RCC_APB2RSTR_SDIORST                0x00000800U
 #define  RCC_APB2RSTR_SPI1RST                0x00001000U
+#define  RCC_APB2RSTR_SPI4RST                0x00002000U
 #define  RCC_APB2RSTR_SYSCFGRST              0x00004000U
 #define  RCC_APB2RSTR_TIM9RST                0x00010000U
 #define  RCC_APB2RSTR_TIM10RST               0x00020000U
@@ -9779,68 +6526,43 @@ typedef struct {
 #define  RCC_AHB1ENR_GPIOCEN                 0x00000004U
 #define  RCC_AHB1ENR_GPIODEN                 0x00000008U
 #define  RCC_AHB1ENR_GPIOEEN                 0x00000010U
-#define  RCC_AHB1ENR_GPIOFEN                 0x00000020U
-#define  RCC_AHB1ENR_GPIOGEN                 0x00000040U
 #define  RCC_AHB1ENR_GPIOHEN                 0x00000080U
-#define  RCC_AHB1ENR_GPIOIEN                 0x00000100U
 #define  RCC_AHB1ENR_CRCEN                   0x00001000U
 #define  RCC_AHB1ENR_BKPSRAMEN               0x00040000U
-#define  RCC_AHB1ENR_CCMDATARAMEN            0x00100000U
 #define  RCC_AHB1ENR_DMA1EN                  0x00200000U
 #define  RCC_AHB1ENR_DMA2EN                  0x00400000U
 
-#define  RCC_AHB1ENR_OTGHSEN                 0x20000000U
-#define  RCC_AHB1ENR_OTGHSULPIEN             0x40000000U
-
 /********************  Bit definition for RCC_AHB2ENR register  ***************/
-#define  RCC_AHB2ENR_RNGEN                   0x00000040U
 #define  RCC_AHB2ENR_OTGFSEN                 0x00000080U
 
 /********************  Bit definition for RCC_AHB3ENR register  ***************/
-
-#define  RCC_AHB3ENR_FSMCEN                  0x00000001U
 
 /********************  Bit definition for RCC_APB1ENR register  ***************/
 #define  RCC_APB1ENR_TIM2EN                  0x00000001U
 #define  RCC_APB1ENR_TIM3EN                  0x00000002U
 #define  RCC_APB1ENR_TIM4EN                  0x00000004U
 #define  RCC_APB1ENR_TIM5EN                  0x00000008U
-#define  RCC_APB1ENR_TIM6EN                  0x00000010U
-#define  RCC_APB1ENR_TIM7EN                  0x00000020U
-#define  RCC_APB1ENR_TIM12EN                 0x00000040U
-#define  RCC_APB1ENR_TIM13EN                 0x00000080U
-#define  RCC_APB1ENR_TIM14EN                 0x00000100U
 #define  RCC_APB1ENR_WWDGEN                  0x00000800U
 #define  RCC_APB1ENR_SPI2EN                  0x00004000U
 #define  RCC_APB1ENR_SPI3EN                  0x00008000U
 #define  RCC_APB1ENR_USART2EN                0x00020000U
-#define  RCC_APB1ENR_USART3EN                0x00040000U
-#define  RCC_APB1ENR_UART4EN                 0x00080000U
-#define  RCC_APB1ENR_UART5EN                 0x00100000U
 #define  RCC_APB1ENR_I2C1EN                  0x00200000U
 #define  RCC_APB1ENR_I2C2EN                  0x00400000U
 #define  RCC_APB1ENR_I2C3EN                  0x00800000U
-#define  RCC_APB1ENR_CAN1EN                  0x02000000U
-#define  RCC_APB1ENR_CAN2EN                  0x04000000U
 #define  RCC_APB1ENR_PWREN                   0x10000000U
-#define  RCC_APB1ENR_DACEN                   0x20000000U
 
 /********************  Bit definition for RCC_APB2ENR register  ***************/
 #define  RCC_APB2ENR_TIM1EN                  0x00000001U
-#define  RCC_APB2ENR_TIM8EN                  0x00000002U
 #define  RCC_APB2ENR_USART1EN                0x00000010U
 #define  RCC_APB2ENR_USART6EN                0x00000020U
 #define  RCC_APB2ENR_ADC1EN                  0x00000100U
-#define  RCC_APB2ENR_ADC2EN                  0x00000200U
-#define  RCC_APB2ENR_ADC3EN                  0x00000400U
 #define  RCC_APB2ENR_SDIOEN                  0x00000800U
 #define  RCC_APB2ENR_SPI1EN                  0x00001000U
+#define  RCC_APB2ENR_SPI4EN                  0x00002000U
 #define  RCC_APB2ENR_SYSCFGEN                0x00004000U
 #define  RCC_APB2ENR_TIM9EN                  0x00010000U
 #define  RCC_APB2ENR_TIM10EN                 0x00020000U
 #define  RCC_APB2ENR_TIM11EN                 0x00040000U
-#define  RCC_APB2ENR_SPI5EN                  0x00100000U
-#define  RCC_APB2ENR_SPI6EN                  0x00200000U
 
 /********************  Bit definition for RCC_AHB1LPENR register  *************/
 #define  RCC_AHB1LPENR_GPIOALPEN             0x00000001U
@@ -9848,10 +6570,7 @@ typedef struct {
 #define  RCC_AHB1LPENR_GPIOCLPEN             0x00000004U
 #define  RCC_AHB1LPENR_GPIODLPEN             0x00000008U
 #define  RCC_AHB1LPENR_GPIOELPEN             0x00000010U
-#define  RCC_AHB1LPENR_GPIOFLPEN             0x00000020U
-#define  RCC_AHB1LPENR_GPIOGLPEN             0x00000040U
 #define  RCC_AHB1LPENR_GPIOHLPEN             0x00000080U
-#define  RCC_AHB1LPENR_GPIOILPEN             0x00000100U
 #define  RCC_AHB1LPENR_CRCLPEN               0x00001000U
 #define  RCC_AHB1LPENR_FLITFLPEN             0x00008000U
 #define  RCC_AHB1LPENR_SRAM1LPEN             0x00010000U
@@ -9859,52 +6578,35 @@ typedef struct {
 #define  RCC_AHB1LPENR_BKPSRAMLPEN           0x00040000U
 #define  RCC_AHB1LPENR_DMA1LPEN              0x00200000U
 #define  RCC_AHB1LPENR_DMA2LPEN              0x00400000U
-#define  RCC_AHB1LPENR_OTGHSLPEN             0x20000000U
-#define  RCC_AHB1LPENR_OTGHSULPILPEN         0x40000000U
 
 /********************  Bit definition for RCC_AHB2LPENR register  *************/
-#define  RCC_AHB2LPENR_RNGLPEN               0x00000040U
 #define  RCC_AHB2LPENR_OTGFSLPEN             0x00000080U
 
 /********************  Bit definition for RCC_AHB3LPENR register  *************/
-
-#define  RCC_AHB3LPENR_FSMCLPEN              0x00000001U
 
 /********************  Bit definition for RCC_APB1LPENR register  *************/
 #define  RCC_APB1LPENR_TIM2LPEN              0x00000001U
 #define  RCC_APB1LPENR_TIM3LPEN              0x00000002U
 #define  RCC_APB1LPENR_TIM4LPEN              0x00000004U
 #define  RCC_APB1LPENR_TIM5LPEN              0x00000008U
-#define  RCC_APB1LPENR_TIM6LPEN              0x00000010U
-#define  RCC_APB1LPENR_TIM7LPEN              0x00000020U
-#define  RCC_APB1LPENR_TIM12LPEN             0x00000040U
-#define  RCC_APB1LPENR_TIM13LPEN             0x00000080U
-#define  RCC_APB1LPENR_TIM14LPEN             0x00000100U
 #define  RCC_APB1LPENR_WWDGLPEN              0x00000800U
 #define  RCC_APB1LPENR_SPI2LPEN              0x00004000U
 #define  RCC_APB1LPENR_SPI3LPEN              0x00008000U
 #define  RCC_APB1LPENR_USART2LPEN            0x00020000U
-#define  RCC_APB1LPENR_USART3LPEN            0x00040000U
-#define  RCC_APB1LPENR_UART4LPEN             0x00080000U
-#define  RCC_APB1LPENR_UART5LPEN             0x00100000U
 #define  RCC_APB1LPENR_I2C1LPEN              0x00200000U
 #define  RCC_APB1LPENR_I2C2LPEN              0x00400000U
 #define  RCC_APB1LPENR_I2C3LPEN              0x00800000U
-#define  RCC_APB1LPENR_CAN1LPEN              0x02000000U
-#define  RCC_APB1LPENR_CAN2LPEN              0x04000000U
 #define  RCC_APB1LPENR_PWRLPEN               0x10000000U
 #define  RCC_APB1LPENR_DACLPEN               0x20000000U
 
 /********************  Bit definition for RCC_APB2LPENR register  *************/
 #define  RCC_APB2LPENR_TIM1LPEN              0x00000001U
-#define  RCC_APB2LPENR_TIM8LPEN              0x00000002U
 #define  RCC_APB2LPENR_USART1LPEN            0x00000010U
 #define  RCC_APB2LPENR_USART6LPEN            0x00000020U
 #define  RCC_APB2LPENR_ADC1LPEN              0x00000100U
-#define  RCC_APB2LPENR_ADC2LPEN              0x00000200U
-#define  RCC_APB2LPENR_ADC3LPEN              0x00000400U
 #define  RCC_APB2LPENR_SDIOLPEN              0x00000800U
 #define  RCC_APB2LPENR_SPI1LPEN              0x00001000U
+#define  RCC_APB2LPENR_SPI4LPEN              0x00002000U
 #define  RCC_APB2LPENR_SYSCFGLPEN            0x00004000U
 #define  RCC_APB2LPENR_TIM9LPEN              0x00010000U
 #define  RCC_APB2LPENR_TIM10LPEN             0x00020000U
@@ -9957,21 +6659,8 @@ typedef struct {
 #define  RCC_PLLI2SCFGR_PLLI2SR_1            0x20000000U
 #define  RCC_PLLI2SCFGR_PLLI2SR_2            0x40000000U
 
-/******************************************************************************/
-/*                                                                            */
-/*                                    RNG                                     */
-/*                                                                            */
-/******************************************************************************/
-/********************  Bits definition for RNG_CR register  *******************/
-#define RNG_CR_RNGEN                         0x00000004U
-#define RNG_CR_IE                            0x00000008U
-
-/********************  Bits definition for RNG_SR register  *******************/
-#define RNG_SR_DRDY                          0x00000001U
-#define RNG_SR_CECS                          0x00000002U
-#define RNG_SR_SECS                          0x00000004U
-#define RNG_SR_CEIS                          0x00000020U
-#define RNG_SR_SEIS                          0x00000040U
+/********************  Bit definition for RCC_DCKCFGR register  ***************/
+#define  RCC_DCKCFGR_TIMPRE                  0x01000000U
 
 /******************************************************************************/
 /*                                                                            */
@@ -10610,9 +7299,7 @@ typedef struct {
 #define SYSCFG_MEMRMP_MEM_MODE_2        0x00000004U
 
 /******************  Bit definition for SYSCFG_PMC register  ******************/
-#define SYSCFG_PMC_MII_RMII_SEL         0x00800000U /*!<Ethernet PHY interface selection */
-/* Old MII_RMII_SEL bit definition, maintained for legacy purpose */
-#define SYSCFG_PMC_MII_RMII             SYSCFG_PMC_MII_RMII_SEL
+#define SYSCFG_PMC_ADC1DC2              0x00010000U /*!< Refer to AN4073 on how to use this bit  */
 
 /*****************  Bit definition for SYSCFG_EXTICR1 register  ***************/
 #define SYSCFG_EXTICR1_EXTI0            0x000FU /*!<EXTI 0 configuration */
@@ -10627,10 +7314,7 @@ typedef struct {
 #define SYSCFG_EXTICR1_EXTI0_PC         0x0002U /*!<PC[0] pin */
 #define SYSCFG_EXTICR1_EXTI0_PD         0x0003U /*!<PD[0] pin */
 #define SYSCFG_EXTICR1_EXTI0_PE         0x0004U /*!<PE[0] pin */
-#define SYSCFG_EXTICR1_EXTI0_PF         0x0005U /*!<PF[0] pin */
-#define SYSCFG_EXTICR1_EXTI0_PG         0x0006U /*!<PG[0] pin */
 #define SYSCFG_EXTICR1_EXTI0_PH         0x0007U /*!<PH[0] pin */
-#define SYSCFG_EXTICR1_EXTI0_PI         0x0008U /*!<PI[0] pin */
 
 /** 
   * @brief   EXTI1 configuration  
@@ -10640,10 +7324,7 @@ typedef struct {
 #define SYSCFG_EXTICR1_EXTI1_PC         0x0020U /*!<PC[1] pin */
 #define SYSCFG_EXTICR1_EXTI1_PD         0x0030U /*!<PD[1] pin */
 #define SYSCFG_EXTICR1_EXTI1_PE         0x0040U /*!<PE[1] pin */
-#define SYSCFG_EXTICR1_EXTI1_PF         0x0050U /*!<PF[1] pin */
-#define SYSCFG_EXTICR1_EXTI1_PG         0x0060U /*!<PG[1] pin */
 #define SYSCFG_EXTICR1_EXTI1_PH         0x0070U /*!<PH[1] pin */
-#define SYSCFG_EXTICR1_EXTI1_PI         0x0080U /*!<PI[1] pin */
 
 /** 
   * @brief   EXTI2 configuration  
@@ -10653,10 +7334,7 @@ typedef struct {
 #define SYSCFG_EXTICR1_EXTI2_PC         0x0200U /*!<PC[2] pin */
 #define SYSCFG_EXTICR1_EXTI2_PD         0x0300U /*!<PD[2] pin */
 #define SYSCFG_EXTICR1_EXTI2_PE         0x0400U /*!<PE[2] pin */
-#define SYSCFG_EXTICR1_EXTI2_PF         0x0500U /*!<PF[2] pin */
-#define SYSCFG_EXTICR1_EXTI2_PG         0x0600U /*!<PG[2] pin */
 #define SYSCFG_EXTICR1_EXTI2_PH         0x0700U /*!<PH[2] pin */
-#define SYSCFG_EXTICR1_EXTI2_PI         0x0800U /*!<PI[2] pin */
 
 /** 
   * @brief   EXTI3 configuration  
@@ -10666,10 +7344,7 @@ typedef struct {
 #define SYSCFG_EXTICR1_EXTI3_PC         0x2000U /*!<PC[3] pin */
 #define SYSCFG_EXTICR1_EXTI3_PD         0x3000U /*!<PD[3] pin */
 #define SYSCFG_EXTICR1_EXTI3_PE         0x4000U /*!<PE[3] pin */
-#define SYSCFG_EXTICR1_EXTI3_PF         0x5000U /*!<PF[3] pin */
-#define SYSCFG_EXTICR1_EXTI3_PG         0x6000U /*!<PG[3] pin */
 #define SYSCFG_EXTICR1_EXTI3_PH         0x7000U /*!<PH[3] pin */
-#define SYSCFG_EXTICR1_EXTI3_PI         0x8000U /*!<PI[3] pin */
 
 /*****************  Bit definition for SYSCFG_EXTICR2 register  ***************/
 #define SYSCFG_EXTICR2_EXTI4            0x000FU /*!<EXTI 4 configuration */
@@ -10684,10 +7359,7 @@ typedef struct {
 #define SYSCFG_EXTICR2_EXTI4_PC         0x0002U /*!<PC[4] pin */
 #define SYSCFG_EXTICR2_EXTI4_PD         0x0003U /*!<PD[4] pin */
 #define SYSCFG_EXTICR2_EXTI4_PE         0x0004U /*!<PE[4] pin */
-#define SYSCFG_EXTICR2_EXTI4_PF         0x0005U /*!<PF[4] pin */
-#define SYSCFG_EXTICR2_EXTI4_PG         0x0006U /*!<PG[4] pin */
 #define SYSCFG_EXTICR2_EXTI4_PH         0x0007U /*!<PH[4] pin */
-#define SYSCFG_EXTICR2_EXTI4_PI         0x0008U /*!<PI[4] pin */
 
 /** 
   * @brief   EXTI5 configuration  
@@ -10697,10 +7369,7 @@ typedef struct {
 #define SYSCFG_EXTICR2_EXTI5_PC         0x0020U /*!<PC[5] pin */
 #define SYSCFG_EXTICR2_EXTI5_PD         0x0030U /*!<PD[5] pin */
 #define SYSCFG_EXTICR2_EXTI5_PE         0x0040U /*!<PE[5] pin */
-#define SYSCFG_EXTICR2_EXTI5_PF         0x0050U /*!<PF[5] pin */
-#define SYSCFG_EXTICR2_EXTI5_PG         0x0060U /*!<PG[5] pin */
 #define SYSCFG_EXTICR2_EXTI5_PH         0x0070U /*!<PH[5] pin */
-#define SYSCFG_EXTICR2_EXTI5_PI         0x0080U /*!<PI[5] pin */
 
 /** 
   * @brief   EXTI6 configuration  
@@ -10710,10 +7379,7 @@ typedef struct {
 #define SYSCFG_EXTICR2_EXTI6_PC         0x0200U /*!<PC[6] pin */
 #define SYSCFG_EXTICR2_EXTI6_PD         0x0300U /*!<PD[6] pin */
 #define SYSCFG_EXTICR2_EXTI6_PE         0x0400U /*!<PE[6] pin */
-#define SYSCFG_EXTICR2_EXTI6_PF         0x0500U /*!<PF[6] pin */
-#define SYSCFG_EXTICR2_EXTI6_PG         0x0600U /*!<PG[6] pin */
 #define SYSCFG_EXTICR2_EXTI6_PH         0x0700U /*!<PH[6] pin */
-#define SYSCFG_EXTICR2_EXTI6_PI         0x0800U /*!<PI[6] pin */
 
 /** 
   * @brief   EXTI7 configuration  
@@ -10723,10 +7389,7 @@ typedef struct {
 #define SYSCFG_EXTICR2_EXTI7_PC         0x2000U /*!<PC[7] pin */
 #define SYSCFG_EXTICR2_EXTI7_PD         0x3000U /*!<PD[7] pin */
 #define SYSCFG_EXTICR2_EXTI7_PE         0x4000U /*!<PE[7] pin */
-#define SYSCFG_EXTICR2_EXTI7_PF         0x5000U /*!<PF[7] pin */
-#define SYSCFG_EXTICR2_EXTI7_PG         0x6000U /*!<PG[7] pin */
 #define SYSCFG_EXTICR2_EXTI7_PH         0x7000U /*!<PH[7] pin */
-#define SYSCFG_EXTICR2_EXTI7_PI         0x8000U /*!<PI[7] pin */
 
 
 /*****************  Bit definition for SYSCFG_EXTICR3 register  ***************/
@@ -10743,10 +7406,7 @@ typedef struct {
 #define SYSCFG_EXTICR3_EXTI8_PC         0x0002U /*!<PC[8] pin */
 #define SYSCFG_EXTICR3_EXTI8_PD         0x0003U /*!<PD[8] pin */
 #define SYSCFG_EXTICR3_EXTI8_PE         0x0004U /*!<PE[8] pin */
-#define SYSCFG_EXTICR3_EXTI8_PF         0x0005U /*!<PF[8] pin */
-#define SYSCFG_EXTICR3_EXTI8_PG         0x0006U /*!<PG[8] pin */
 #define SYSCFG_EXTICR3_EXTI8_PH         0x0007U /*!<PH[8] pin */
-#define SYSCFG_EXTICR3_EXTI8_PI         0x0008U /*!<PI[8] pin */
 
 /** 
   * @brief   EXTI9 configuration  
@@ -10756,10 +7416,7 @@ typedef struct {
 #define SYSCFG_EXTICR3_EXTI9_PC         0x0020U /*!<PC[9] pin */
 #define SYSCFG_EXTICR3_EXTI9_PD         0x0030U /*!<PD[9] pin */
 #define SYSCFG_EXTICR3_EXTI9_PE         0x0040U /*!<PE[9] pin */
-#define SYSCFG_EXTICR3_EXTI9_PF         0x0050U /*!<PF[9] pin */
-#define SYSCFG_EXTICR3_EXTI9_PG         0x0060U /*!<PG[9] pin */
 #define SYSCFG_EXTICR3_EXTI9_PH         0x0070U /*!<PH[9] pin */
-#define SYSCFG_EXTICR3_EXTI9_PI         0x0080U /*!<PI[9] pin */
 
 /** 
   * @brief   EXTI10 configuration  
@@ -10769,10 +7426,7 @@ typedef struct {
 #define SYSCFG_EXTICR3_EXTI10_PC        0x0200U /*!<PC[10] pin */
 #define SYSCFG_EXTICR3_EXTI10_PD        0x0300U /*!<PD[10] pin */
 #define SYSCFG_EXTICR3_EXTI10_PE        0x0400U /*!<PE[10] pin */
-#define SYSCFG_EXTICR3_EXTI10_PF        0x0500U /*!<PF[10] pin */
-#define SYSCFG_EXTICR3_EXTI10_PG        0x0600U /*!<PG[10] pin */
 #define SYSCFG_EXTICR3_EXTI10_PH        0x0700U /*!<PH[10] pin */
-#define SYSCFG_EXTICR3_EXTI10_PI        0x0800U /*!<PI[10] pin */
 
 /** 
   * @brief   EXTI11 configuration  
@@ -10782,10 +7436,7 @@ typedef struct {
 #define SYSCFG_EXTICR3_EXTI11_PC        0x2000U /*!<PC[11] pin */
 #define SYSCFG_EXTICR3_EXTI11_PD        0x3000U /*!<PD[11] pin */
 #define SYSCFG_EXTICR3_EXTI11_PE        0x4000U /*!<PE[11] pin */
-#define SYSCFG_EXTICR3_EXTI11_PF        0x5000U /*!<PF[11] pin */
-#define SYSCFG_EXTICR3_EXTI11_PG        0x6000U /*!<PG[11] pin */
 #define SYSCFG_EXTICR3_EXTI11_PH        0x7000U /*!<PH[11] pin */
-#define SYSCFG_EXTICR3_EXTI11_PI        0x8000U /*!<PI[11] pin */
 
 /*****************  Bit definition for SYSCFG_EXTICR4 register  ***************/
 #define SYSCFG_EXTICR4_EXTI12           0x000FU /*!<EXTI 12 configuration */
@@ -10800,8 +7451,6 @@ typedef struct {
 #define SYSCFG_EXTICR4_EXTI12_PC        0x0002U /*!<PC[12] pin */
 #define SYSCFG_EXTICR4_EXTI12_PD        0x0003U /*!<PD[12] pin */
 #define SYSCFG_EXTICR4_EXTI12_PE        0x0004U /*!<PE[12] pin */
-#define SYSCFG_EXTICR4_EXTI12_PF        0x0005U /*!<PF[12] pin */
-#define SYSCFG_EXTICR4_EXTI12_PG        0x0006U /*!<PG[12] pin */
 #define SYSCFG_EXTICR4_EXTI12_PH        0x0007U /*!<PH[12] pin */
 
 /** 
@@ -10812,8 +7461,6 @@ typedef struct {
 #define SYSCFG_EXTICR4_EXTI13_PC        0x0020U /*!<PC[13] pin */
 #define SYSCFG_EXTICR4_EXTI13_PD        0x0030U /*!<PD[13] pin */
 #define SYSCFG_EXTICR4_EXTI13_PE        0x0040U /*!<PE[13] pin */
-#define SYSCFG_EXTICR4_EXTI13_PF        0x0050U /*!<PF[13] pin */
-#define SYSCFG_EXTICR4_EXTI13_PG        0x0060U /*!<PG[13] pin */
 #define SYSCFG_EXTICR4_EXTI13_PH        0x0070U /*!<PH[13] pin */
 
 /** 
@@ -10824,8 +7471,6 @@ typedef struct {
 #define SYSCFG_EXTICR4_EXTI14_PC        0x0200U /*!<PC[14] pin */
 #define SYSCFG_EXTICR4_EXTI14_PD        0x0300U /*!<PD[14] pin */
 #define SYSCFG_EXTICR4_EXTI14_PE        0x0400U /*!<PE[14] pin */
-#define SYSCFG_EXTICR4_EXTI14_PF        0x0500U /*!<PF[14] pin */
-#define SYSCFG_EXTICR4_EXTI14_PG        0x0600U /*!<PG[14] pin */
 #define SYSCFG_EXTICR4_EXTI14_PH        0x0700U /*!<PH[14] pin */
 
 /** 
@@ -10836,8 +7481,6 @@ typedef struct {
 #define SYSCFG_EXTICR4_EXTI15_PC        0x2000U /*!<PC[15] pin */
 #define SYSCFG_EXTICR4_EXTI15_PD        0x3000U /*!<PD[15] pin */
 #define SYSCFG_EXTICR4_EXTI15_PE        0x4000U /*!<PE[15] pin */
-#define SYSCFG_EXTICR4_EXTI15_PF        0x5000U /*!<PF[15] pin */
-#define SYSCFG_EXTICR4_EXTI15_PG        0x6000U /*!<PG[15] pin */
 #define SYSCFG_EXTICR4_EXTI15_PH        0x7000U /*!<PH[15] pin */
 
 /******************  Bit definition for SYSCFG_CMPCR register  ****************/  
@@ -11998,19 +8641,10 @@ typedef struct {
   */
  
 /******************************* ADC Instances ********************************/
-#define IS_ADC_ALL_INSTANCE(INSTANCE) (((INSTANCE) == ADC1) || \
-                                       ((INSTANCE) == ADC2) || \
-                                       ((INSTANCE) == ADC3))
-
-/******************************* CAN Instances ********************************/
-#define IS_CAN_ALL_INSTANCE(INSTANCE) (((INSTANCE) == CAN1) || \
-                                       ((INSTANCE) == CAN2))
+#define IS_ADC_ALL_INSTANCE(INSTANCE) ((INSTANCE) == ADC1)
  
 /******************************* CRC Instances ********************************/
 #define IS_CRC_ALL_INSTANCE(INSTANCE) ((INSTANCE) == CRC)
-
-/******************************* DAC Instances ********************************/
-#define IS_DAC_ALL_INSTANCE(INSTANCE) ((INSTANCE) == DAC)
 
 /******************************** DMA Instances *******************************/
 #define IS_DMA_STREAM_ALL_INSTANCE(INSTANCE) (((INSTANCE) == DMA1_Stream0) || \
@@ -12036,10 +8670,7 @@ typedef struct {
                                         ((INSTANCE) == GPIOC) || \
                                         ((INSTANCE) == GPIOD) || \
                                         ((INSTANCE) == GPIOE) || \
-                                        ((INSTANCE) == GPIOF) || \
-                                        ((INSTANCE) == GPIOG) || \
-                                        ((INSTANCE) == GPIOH) || \
-                                        ((INSTANCE) == GPIOI))
+                                        ((INSTANCE) == GPIOH))
 
 /******************************** I2C Instances *******************************/
 #define IS_I2C_ALL_INSTANCE(INSTANCE) (((INSTANCE) == I2C1) || \
@@ -12048,7 +8679,7 @@ typedef struct {
 
 /******************************** I2S Instances *******************************/
 #define IS_I2S_ALL_INSTANCE(INSTANCE)  (((INSTANCE) == SPI2) || \
-                                        ((INSTANCE) == SPI3))
+                                    ((INSTANCE) == SPI3))
 
 /*************************** I2S Extended Instances ***************************/
 #define IS_I2S_ALL_INSTANCE_EXT(PERIPH)  (((INSTANCE) == SPI2)    || \
@@ -12056,16 +8687,14 @@ typedef struct {
                                           ((INSTANCE) == I2S2ext) || \
                                           ((INSTANCE) == I2S3ext))
 
-/******************************* RNG Instances ********************************/
-#define IS_RNG_ALL_INSTANCE(INSTANCE)  ((INSTANCE) == RNG)
-
 /****************************** RTC Instances *********************************/
 #define IS_RTC_ALL_INSTANCE(INSTANCE)  ((INSTANCE) == RTC)
 
 /******************************** SPI Instances *******************************/
 #define IS_SPI_ALL_INSTANCE(INSTANCE) (((INSTANCE) == SPI1) || \
                                        ((INSTANCE) == SPI2) || \
-                                       ((INSTANCE) == SPI3))
+                                       ((INSTANCE) == SPI3) || \
+                                       ((INSTANCE) == SPI4))
 
 /*************************** SPI Extended Instances ***************************/
 #define IS_SPI_ALL_INSTANCE_EXT(INSTANCE) (((INSTANCE) == SPI1)    || \
@@ -12080,15 +8709,9 @@ typedef struct {
                                    ((INSTANCE) == TIM3)   || \
                                    ((INSTANCE) == TIM4)   || \
                                    ((INSTANCE) == TIM5)   || \
-                                   ((INSTANCE) == TIM6)   || \
-                                   ((INSTANCE) == TIM7)   || \
-                                   ((INSTANCE) == TIM8)   || \
                                    ((INSTANCE) == TIM9)   || \
                                    ((INSTANCE) == TIM10)  || \
-                                   ((INSTANCE) == TIM11)  || \
-                                   ((INSTANCE) == TIM12)  || \
-                                   ((INSTANCE) == TIM13)  || \
-                                   ((INSTANCE) == TIM14))
+                                   ((INSTANCE) == TIM11))
 
 /************* TIM Instances : at least 1 capture/compare channel *************/
 #define IS_TIM_CC1_INSTANCE(INSTANCE)   (((INSTANCE) == TIM1)  || \
@@ -12096,13 +8719,9 @@ typedef struct {
                                          ((INSTANCE) == TIM3)  || \
                                          ((INSTANCE) == TIM4)  || \
                                          ((INSTANCE) == TIM5)  || \
-                                         ((INSTANCE) == TIM8)  || \
                                          ((INSTANCE) == TIM9)  || \
                                          ((INSTANCE) == TIM10) || \
-                                         ((INSTANCE) == TIM11) || \
-                                         ((INSTANCE) == TIM12) || \
-                                         ((INSTANCE) == TIM13) || \
-                                         ((INSTANCE) == TIM14))
+                                         ((INSTANCE) == TIM11))
 
 /************ TIM Instances : at least 2 capture/compare channels *************/
 #define IS_TIM_CC2_INSTANCE(INSTANCE) (((INSTANCE) == TIM1) || \
@@ -12110,71 +8729,59 @@ typedef struct {
                                        ((INSTANCE) == TIM3) || \
                                        ((INSTANCE) == TIM4) || \
                                        ((INSTANCE) == TIM5) || \
-                                       ((INSTANCE) == TIM8) || \
-                                       ((INSTANCE) == TIM9) || \
-                                       ((INSTANCE) == TIM12))
+                                       ((INSTANCE) == TIM9))
 
 /************ TIM Instances : at least 3 capture/compare channels *************/
 #define IS_TIM_CC3_INSTANCE(INSTANCE)   (((INSTANCE) == TIM1) || \
                                          ((INSTANCE) == TIM2) || \
                                          ((INSTANCE) == TIM3) || \
                                          ((INSTANCE) == TIM4) || \
-                                         ((INSTANCE) == TIM5) || \
-                                         ((INSTANCE) == TIM8))
+                                         ((INSTANCE) == TIM5))
 
 /************ TIM Instances : at least 4 capture/compare channels *************/
 #define IS_TIM_CC4_INSTANCE(INSTANCE) (((INSTANCE) == TIM1) || \
                                        ((INSTANCE) == TIM2) || \
                                        ((INSTANCE) == TIM3) || \
                                        ((INSTANCE) == TIM4) || \
-                                       ((INSTANCE) == TIM5) || \
-                                       ((INSTANCE) == TIM8))
+                                       ((INSTANCE) == TIM5))
 
 /******************** TIM Instances : Advanced-control timers *****************/
-#define IS_TIM_ADVANCED_INSTANCE(INSTANCE) (((INSTANCE) == TIM1) || \
-                                            ((INSTANCE) == TIM8))
+#define IS_TIM_ADVANCED_INSTANCE(INSTANCE) ((INSTANCE) == TIM1)
 
 /******************* TIM Instances : Timer input XOR function *****************/
 #define IS_TIM_XOR_INSTANCE(INSTANCE)   (((INSTANCE) == TIM1) || \
                                          ((INSTANCE) == TIM2) || \
                                          ((INSTANCE) == TIM3) || \
                                          ((INSTANCE) == TIM4) || \
-                                         ((INSTANCE) == TIM5) || \
-                                         ((INSTANCE) == TIM8))
+                                         ((INSTANCE) == TIM5))
 
 /****************** TIM Instances : DMA requests generation (UDE) *************/
 #define IS_TIM_DMA_INSTANCE(INSTANCE) (((INSTANCE) == TIM1) || \
                                        ((INSTANCE) == TIM2) || \
                                        ((INSTANCE) == TIM3) || \
                                        ((INSTANCE) == TIM4) || \
-                                       ((INSTANCE) == TIM5) || \
-                                       ((INSTANCE) == TIM6) || \
-                                       ((INSTANCE) == TIM7) || \
-                                       ((INSTANCE) == TIM8))
+                                       ((INSTANCE) == TIM5))
 
 /************ TIM Instances : DMA requests generation (CCxDE) *****************/
 #define IS_TIM_DMA_CC_INSTANCE(INSTANCE) (((INSTANCE) == TIM1) || \
                                           ((INSTANCE) == TIM2) || \
                                           ((INSTANCE) == TIM3) || \
                                           ((INSTANCE) == TIM4) || \
-                                          ((INSTANCE) == TIM5) || \
-                                          ((INSTANCE) == TIM8))
+                                          ((INSTANCE) == TIM5))
 
 /************ TIM Instances : DMA requests generation (COMDE) *****************/
 #define IS_TIM_CCDMA_INSTANCE(INSTANCE)  (((INSTANCE) == TIM1) || \
                                           ((INSTANCE) == TIM2) || \
                                           ((INSTANCE) == TIM3) || \
                                           ((INSTANCE) == TIM4) || \
-                                          ((INSTANCE) == TIM5) || \
-                                          ((INSTANCE) == TIM8)) 
+                                          ((INSTANCE) == TIM5)) 
 
 /******************** TIM Instances : DMA burst feature ***********************/
 #define IS_TIM_DMABURST_INSTANCE(INSTANCE)  (((INSTANCE) == TIM1) || \
                                              ((INSTANCE) == TIM2) || \
                                              ((INSTANCE) == TIM3) || \
                                              ((INSTANCE) == TIM4) || \
-                                             ((INSTANCE) == TIM5) || \
-                                             ((INSTANCE) == TIM8))
+                                             ((INSTANCE) == TIM5))
 
 /****** TIM Instances : master mode available (TIMx_CR2.MMS available )********/
 #define IS_TIM_MASTER_INSTANCE(INSTANCE) (((INSTANCE) == TIM1) || \
@@ -12182,11 +8789,7 @@ typedef struct {
                                           ((INSTANCE) == TIM3) || \
                                           ((INSTANCE) == TIM4) || \
                                           ((INSTANCE) == TIM5) || \
-                                          ((INSTANCE) == TIM6) || \
-                                          ((INSTANCE) == TIM7) || \
-                                          ((INSTANCE) == TIM8) || \
-                                          ((INSTANCE) == TIM9) || \
-                                          ((INSTANCE) == TIM12))
+                                          ((INSTANCE) == TIM9))
 
 /*********** TIM Instances : Slave mode available (TIMx_SMCR available )*******/
 #define IS_TIM_SLAVE_INSTANCE(INSTANCE) (((INSTANCE) == TIM1) || \
@@ -12194,9 +8797,7 @@ typedef struct {
                                          ((INSTANCE) == TIM3) || \
                                          ((INSTANCE) == TIM4) || \
                                          ((INSTANCE) == TIM5) || \
-                                         ((INSTANCE) == TIM8) || \
-                                         ((INSTANCE) == TIM9) || \
-                                         ((INSTANCE) == TIM12))
+                                         ((INSTANCE) == TIM9))
 
 /********************** TIM Instances : 32 bit Counter ************************/
 #define IS_TIM_32B_COUNTER_INSTANCE(INSTANCE)(((INSTANCE) == TIM2) || \
@@ -12207,8 +8808,7 @@ typedef struct {
                                         ((INSTANCE) == TIM2) || \
                                         ((INSTANCE) == TIM3) || \
                                         ((INSTANCE) == TIM4) || \
-                                        ((INSTANCE) == TIM5) || \
-                                        ((INSTANCE) == TIM8))
+                                        ((INSTANCE) == TIM5))
 
 /****************** TIM Instances : remapping capability **********************/
 #define IS_TIM_REMAP_INSTANCE(INSTANCE) (((INSTANCE) == TIM2)  || \
@@ -12247,12 +8847,6 @@ typedef struct {
       ((CHANNEL) == TIM_CHANNEL_3) ||          \
       ((CHANNEL) == TIM_CHANNEL_4)))           \
     ||                                         \
-    (((INSTANCE) == TIM8) &&                   \
-     (((CHANNEL) == TIM_CHANNEL_1) ||          \
-      ((CHANNEL) == TIM_CHANNEL_2) ||          \
-      ((CHANNEL) == TIM_CHANNEL_3) ||          \
-      ((CHANNEL) == TIM_CHANNEL_4)))           \
-    ||                                         \
     (((INSTANCE) == TIM9) &&                   \
      (((CHANNEL) == TIM_CHANNEL_1) ||          \
       ((CHANNEL) == TIM_CHANNEL_2)))           \
@@ -12261,16 +8855,6 @@ typedef struct {
      (((CHANNEL) == TIM_CHANNEL_1)))           \
     ||                                         \
     (((INSTANCE) == TIM11) &&                  \
-     (((CHANNEL) == TIM_CHANNEL_1)))           \
-    ||                                         \
-    (((INSTANCE) == TIM12) &&                  \
-     (((CHANNEL) == TIM_CHANNEL_1) ||          \
-      ((CHANNEL) == TIM_CHANNEL_2)))           \
-    ||                                         \
-    (((INSTANCE) == TIM13) &&                  \
-     (((CHANNEL) == TIM_CHANNEL_1)))           \
-    ||                                         \
-    (((INSTANCE) == TIM14) &&                  \
      (((CHANNEL) == TIM_CHANNEL_1))))
 
 /************ TIM Instances : complementary output(s) available ***************/
@@ -12278,54 +8862,38 @@ typedef struct {
    ((((INSTANCE) == TIM1) &&                    \
      (((CHANNEL) == TIM_CHANNEL_1) ||           \
       ((CHANNEL) == TIM_CHANNEL_2) ||           \
-      ((CHANNEL) == TIM_CHANNEL_3)))            \
-    ||                                          \
-    (((INSTANCE) == TIM8) &&                    \
-     (((CHANNEL) == TIM_CHANNEL_1) ||           \
-      ((CHANNEL) == TIM_CHANNEL_2) ||           \
       ((CHANNEL) == TIM_CHANNEL_3))))
 
 /******************** USART Instances : Synchronous mode **********************/
 #define IS_USART_INSTANCE(INSTANCE) (((INSTANCE) == USART1) || \
                                      ((INSTANCE) == USART2) || \
-                                     ((INSTANCE) == USART3) || \
                                      ((INSTANCE) == USART6))
 
 /******************** UART Instances : Asynchronous mode **********************/
 #define IS_UART_INSTANCE(INSTANCE) (((INSTANCE) == USART1) || \
                                     ((INSTANCE) == USART2) || \
-                                    ((INSTANCE) == USART3) || \
-                                    ((INSTANCE) == UART4)  || \
-                                    ((INSTANCE) == UART5)  || \
                                     ((INSTANCE) == USART6))
 
 /****************** UART Instances : Hardware Flow control ********************/
 #define IS_UART_HWFLOW_INSTANCE(INSTANCE) (((INSTANCE) == USART1) || \
                                            ((INSTANCE) == USART2) || \
-                                           ((INSTANCE) == USART3) || \
                                            ((INSTANCE) == USART6))
 
 /********************* UART Instances : Smard card mode ***********************/
 #define IS_SMARTCARD_INSTANCE(INSTANCE) (((INSTANCE) == USART1) || \
                                          ((INSTANCE) == USART2) || \
-                                         ((INSTANCE) == USART3) || \
                                          ((INSTANCE) == USART6))
 
 /*********************** UART Instances : IRDA mode ***************************/
 #define IS_IRDA_INSTANCE(INSTANCE) (((INSTANCE) == USART1) || \
                                     ((INSTANCE) == USART2) || \
-                                    ((INSTANCE) == USART3) || \
-                                    ((INSTANCE) == UART4)  || \
-                                    ((INSTANCE) == UART5)  || \
                                     ((INSTANCE) == USART6))     
 
 /*********************** PCD Instances ****************************************/
-#define IS_PCD_ALL_INSTANCE(INSTANCE) (((INSTANCE) == USB_OTG_FS) || \
-                                        ((INSTANCE) == USB_OTG_HS))
+#define IS_PCD_ALL_INSTANCE(INSTANCE) (((INSTANCE) == USB_OTG_FS))
 
 /*********************** HCD Instances ****************************************/
-#define IS_HCD_ALL_INSTANCE(INSTANCE) (((INSTANCE) == USB_OTG_FS) || \
-                                       ((INSTANCE) == USB_OTG_HS))
+#define IS_HCD_ALL_INSTANCE(INSTANCE) (((INSTANCE) == USB_OTG_FS))
 
 /****************************** IWDG Instances ********************************/
 #define IS_IWDG_ALL_INSTANCE(INSTANCE)  ((INSTANCE) == IWDG)
@@ -12342,25 +8910,9 @@ typedef struct {
 #define USB_OTG_FS_MAX_OUT_ENDPOINTS                   4U    /* Including EP0 */
 #define USB_OTG_FS_TOTAL_FIFO_SIZE                     1280U /* in Bytes */
 
-#define USB_OTG_HS_HOST_MAX_CHANNEL_NBR                12U
-#define USB_OTG_HS_MAX_IN_ENDPOINTS                    6U    /* Including EP0 */
-#define USB_OTG_HS_MAX_OUT_ENDPOINTS                   6U    /* Including EP0 */
-#define USB_OTG_HS_TOTAL_FIFO_SIZE                     4096U /* in Bytes */
-
-/******************************************************************************/
-/*  For a painless codes migration between the STM32F4xx device product       */
-/*  lines, the aliases defined below are put in place to overcome the         */
-/*  differences in the interrupt handlers and IRQn definitions.               */
-/*  No need to update developed interrupt code when moving across             */
-/*  product lines within the same STM32F4 Family                              */
-/******************************************************************************/
-
-/* Aliases for __IRQn */
-#define FMC_IRQn              FSMC_IRQn
-
-/* Aliases for __IRQHandler */
-#define FMC_IRQHandler        FSMC_IRQHandler
-
+/**
+  * @}
+  */
 
 /** @defgroup ADC_Internal_Channels ADC Internal Channels
   * @{
@@ -12388,8 +8940,7 @@ typedef struct
 
 #define ADC_VREFINT_CAL      (*((__I uint16_t *)((uint32_t)0x1FFF7A2AU)))
 
-#define ADC_VBAT_SCALER      2
-
+#define ADC_VBAT_SCALER      4U
 /**
   * @}
   */
@@ -12399,7 +8950,7 @@ typedef struct
   * @{
   */
 
-#define DEVICE_ID_REG        ((__I uint32_t *)((uint32_t)0x1FFF7A10U))
+#define DEVICE_ID_REG        ((__I uint32_t *)((uint32_t)0x1FFF7A10))
 
 /**
   * @}
@@ -12409,8 +8960,7 @@ typedef struct
   * @{
   */
 
-#define DEVICE_FLASH_SIZE_KB (*((__I uint16_t *)((uint32_t)0x1FFF7A22U)))
-
+#define DEVICE_FLASH_SIZE_KB (*((__I uint16_t *)((uint32_t)0x1FFF7A22)))
 /**
   * @}
   */
@@ -12474,16 +9024,22 @@ typedef struct
 #define GPIO_TIM14_AF9         ((uint8_t)0x09)  /* TIM14 Alternate Function mapping */
 
 /* AF 10 selection */
-#define GPIO_OTG_FS_AF10       ((uint8_t)0x0A)  /* OTG_FS Alternate Function mapping */
-#define GPIO_OTG_HS_AF10       ((uint8_t)0x0A)  /* OTG_HS Alternate Function mapping */
+#define GPIO_OTG_FS_AF10        ((uint8_t)0xA)  /* OTG_FS Alternate Function mapping */
+#define GPIO_OTG_HS_AF10        ((uint8_t)0xA)  /* OTG_HS Alternate Function mapping */
+
+/* AF 11 selection */
+#define GPIO_ETH_AF11           ((uint8_t)0x0B)  /* ETHERNET Alternate Function mapping */
 
 /* AF 12 selection */
-#define GPIO_FSMC_AF12         ((uint8_t)0x0C)  /* FSMC Alternate Function mapping                     */
-#define GPIO_OTG_HS_FS_AF12    ((uint8_t)0x0C)  /* OTG HS configured in FS, Alternate Function mapping */
-#define GPIO_SDIO_AF12         ((uint8_t)0x0C)  /* SDIO Alternate Function mapping                     */
+#define GPIO_FSMC_AF12          ((uint8_t)0xC)  /* FSMC Alternate Function mapping                     */
+#define GPIO_OTG_HS_FS_AF12     ((uint8_t)0xC)  /* OTG HS configured in FS, Alternate Function mapping */
+#define GPIO_SDIO_AF12          ((uint8_t)0xC)  /* SDIO Alternate Function mapping                     */
+
+/* AF 13 selection */
+#define GPIO_DCMI_AF13          ((uint8_t)0x0D)  /* DCMI Alternate Function mapping */
 
 /* AF 15 selection */
-#define GPIO_EVENTOUT_AF15     ((uint8_t)0x0F)  /* EVENTOUT Alternate Function mapping */
+#define GPIO_EVENTOUT_AF15      ((uint8_t)0x0F)  /* EVENTOUT Alternate Function mapping */
 
 /**
   * @}
@@ -12493,9 +9049,9 @@ typedef struct
   * @{
   */
 
-#define HSI_VALUE 16000000U /* Value of the internal high speed oscillator in Hz */
+#define HSI_VALUE 16000000 /* Value of the internal high speed oscillator in Hz */
 
-#define LSI_VALUE 32000U    /* Approximate value of the internal low speed oscillator in Hz */
+#define LSI_VALUE 32000    /* Approximate value of the internal low speed oscillator in Hz */
 
 /**
   * @}
@@ -12513,7 +9069,7 @@ typedef struct
 }
 #endif /* __cplusplus */
 
-#endif /* __STM32F405xx_H */
+#endif /* __STM32F401xE_H */
 
 
 

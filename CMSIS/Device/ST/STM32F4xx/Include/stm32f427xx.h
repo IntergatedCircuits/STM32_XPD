@@ -1,10 +1,10 @@
 /**
   ******************************************************************************
-  * @file    stm32f405xx.h
+  * @file    stm32f427xx.h
   * @author  Benedek Kupper
-  * @version V0.2
-  * @date    2016-11-05
-  * @brief   CMSIS STM32F405xx Device Peripheral Access Layer Header File.
+  * @version V0.1
+  * @date    2017-01-11
+  * @brief   CMSIS STM32F427xx Device Peripheral Access Layer Header File.
   *
   *          This file contains:
   *           - Data structures and the address mapping for all peripherals
@@ -57,16 +57,16 @@
   ******************************************************************************
   */
 
-/** @addtogroup CMSIS
+/** @addtogroup CMSIS_Device
   * @{
   */
 
-/** @addtogroup stm32f405xx
+/** @addtogroup stm32f427xx
   * @{
   */
     
-#ifndef __STM32F405xx_H
-#define __STM32F405xx_H
+#ifndef __stm32f427xx_H
+#define __stm32f427xx_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -78,7 +78,7 @@
   */
 
 /**
-  * @brief Configuration of the Cortex-M4 Processor and Core Peripherals 
+  * @brief Configuration of the Cortex-M4 Processor and Core Peripherals
   */
 #define __CM4_REV                 0x0001U  /*!< Core revision r0p1                            */
 #define __MPU_PRESENT             1U       /*!< STM32F4XX provides an MPU                     */
@@ -159,7 +159,7 @@ typedef enum
   TIM8_TRG_COM_TIM14_IRQn     = 45,     /*!< TIM8 Trigger and Commutation Interrupt and TIM14 global interrupt */
   TIM8_CC_IRQn                = 46,     /*!< TIM8 Capture Compare Interrupt                                    */
   DMA1_Stream7_IRQn           = 47,     /*!< DMA1 Stream7 Interrupt                                            */
-  FSMC_IRQn                   = 48,     /*!< FSMC global Interrupt                                             */
+  FMC_IRQn                    = 48,     /*!< FMC global Interrupt                                              */
   SDIO_IRQn                   = 49,     /*!< SDIO global Interrupt                                             */
   TIM5_IRQn                   = 50,     /*!< TIM5 global Interrupt                                             */
   SPI3_IRQn                   = 51,     /*!< SPI3 global Interrupt                                             */
@@ -172,6 +172,8 @@ typedef enum
   DMA2_Stream2_IRQn           = 58,     /*!< DMA2 Stream 2 global Interrupt                                    */
   DMA2_Stream3_IRQn           = 59,     /*!< DMA2 Stream 3 global Interrupt                                    */
   DMA2_Stream4_IRQn           = 60,     /*!< DMA2 Stream 4 global Interrupt                                    */
+  ETH_IRQn                    = 61,     /*!< Ethernet global Interrupt                                         */
+  ETH_WKUP_IRQn               = 62,     /*!< Ethernet Wakeup through EXTI line Interrupt                       */
   CAN2_TX_IRQn                = 63,     /*!< CAN2 TX Interrupt                                                 */
   CAN2_RX0_IRQn               = 64,     /*!< CAN2 RX0 Interrupt                                                */
   CAN2_RX1_IRQn               = 65,     /*!< CAN2 RX1 Interrupt                                                */
@@ -187,8 +189,16 @@ typedef enum
   OTG_HS_EP1_IN_IRQn          = 75,     /*!< USB OTG HS End Point 1 In global interrupt                        */
   OTG_HS_WKUP_IRQn            = 76,     /*!< USB OTG HS Wakeup through EXTI interrupt                          */
   OTG_HS_IRQn                 = 77,     /*!< USB OTG HS global interrupt                                       */
+  DCMI_IRQn                   = 78,     /*!< DCMI global interrupt                                             */
   HASH_RNG_IRQn               = 80,     /*!< Hash and RNG global interrupt                                     */
-  FPU_IRQn                    = 81      /*!< FPU global interrupt                                              */
+  FPU_IRQn                    = 81,     /*!< FPU global interrupt                                              */
+  UART7_IRQn                  = 82,     /*!< UART7 global interrupt                                            */
+  UART8_IRQn                  = 83,     /*!< UART8 global interrupt                                            */
+  SPI4_IRQn                   = 84,     /*!< SPI4 global Interrupt                                             */
+  SPI5_IRQn                   = 85,     /*!< SPI5 global Interrupt                                             */
+  SPI6_IRQn                   = 86,     /*!< SPI6 global Interrupt                                             */
+  SAI1_IRQn                   = 87,     /*!< SAI1 global Interrupt                                             */
+  DMA2D_IRQn                  = 90      /*!< DMA2D global Interrupt                                            */
 } IRQn_Type;
 
 /**
@@ -1197,6 +1207,124 @@ typedef struct {
 } DBGMCU_TypeDef;
 
 
+/**
+  * @brief DCMI
+  */
+typedef struct {
+    union {
+        struct {
+            __IO uint32_t CAPTURE : 1;
+            __IO uint32_t CM : 1;
+            __IO uint32_t CROP : 1;
+            __IO uint32_t JPEG : 1;
+            __IO uint32_t ESS : 1;
+            __IO uint32_t PCKPOL : 1;
+            __IO uint32_t HSPOL : 1;
+            __IO uint32_t VSPOL : 1;
+            __IO uint32_t FCRC : 2;
+            __IO uint32_t EDM : 2;
+            __IO uint32_t CRE : 1;
+                 uint32_t __RESERVED0 : 1;
+            __IO uint32_t ENABLE : 1;
+                 uint32_t __RESERVED1 : 17;
+        } b;
+        __IO uint32_t w;
+    } CR;                                                   /*!< DCMI control register 1,                       Address offset: 0x00 */
+    union {
+        struct {
+            __IO uint32_t HSYNC : 1;
+            __IO uint32_t VSYNC : 1;
+            __IO uint32_t FNE : 1;
+                 uint32_t __RESERVED0 : 29;
+        } b;
+        __IO uint32_t w;
+    } SR;                                                   /*!< DCMI status register,                          Address offset: 0x04 */
+    union {
+        struct {
+            __IO uint32_t FRAME_RIS : 1;
+            __IO uint32_t OVR_RIS : 1;
+            __IO uint32_t ERR_RIS : 1;
+            __IO uint32_t VSYNC_RIS : 1;
+            __IO uint32_t LINE_RIS : 1;
+                 uint32_t __RESERVED0 : 27;
+        } b;
+        __IO uint32_t w;
+    } RIS;                                                 /*!< DCMI raw interrupt status register,            Address offset: 0x08 */
+    union {
+        struct {
+            __IO uint32_t FRAME_IE : 1;
+            __IO uint32_t OVR_IE : 1;
+            __IO uint32_t ERR_IE : 1;
+            __IO uint32_t VSYNC_IE : 1;
+            __IO uint32_t LINE_IE : 1;
+                 uint32_t __RESERVED0 : 27;
+        } b;
+        __IO uint32_t w;
+    } IER;                                                  /*!< DCMI interrupt enable register,                Address offset: 0x0C */
+    union {
+        struct {
+            __IO uint32_t FRAME_MIS : 1;
+            __IO uint32_t OVR_MIS : 1;
+            __IO uint32_t ERR_MIS : 1;
+            __IO uint32_t VSYNC_MIS : 1;
+            __IO uint32_t LINE_MIS : 1;
+                 uint32_t __RESERVED0 : 27;
+        } b;
+        __IO uint32_t w;
+    } MIS;                                                 /*!< DCMI masked interrupt status register,         Address offset: 0x10 */
+    union {
+        struct {
+            __IO uint32_t FRAME_ISC : 1;
+            __IO uint32_t OVR_ISC : 1;
+            __IO uint32_t ERR_ISC : 1;
+            __IO uint32_t VSYNC_ISC : 1;
+            __IO uint32_t LINE_ISC : 1;
+                 uint32_t __RESERVED0 : 27;
+        } b;
+        __IO uint32_t w;
+    } ICR;                                                  /*!< DCMI interrupt clear register,                 Address offset: 0x14 */
+    union {
+        struct {
+            __IO uint32_t FSC : 8;
+            __IO uint32_t LSC : 8;
+            __IO uint32_t LEC : 8;
+            __IO uint32_t FEC : 8;
+        } b;
+        __IO uint32_t w;
+    } ESCR;                                                 /*!< DCMI embedded synchronization code register,   Address offset: 0x18 */
+    union {
+        struct {
+            __IO uint32_t FSU : 8;
+            __IO uint32_t LSU : 8;
+            __IO uint32_t LEU : 8;
+            __IO uint32_t FEU : 8;
+        } b;
+        __IO uint32_t w;
+    } ESUR;                                                 /*!< DCMI embedded synchronization unmask register, Address offset: 0x1C */
+    union {
+        struct {
+            __IO uint32_t HOFFCNT : 14;
+                 uint32_t __RESERVED0 : 2;
+            __IO uint32_t VST : 13;
+                 uint32_t __RESERVED1 : 3;
+        } b;
+        __IO uint32_t w;
+    } CWSTRTR;                                              /*!< DCMI crop window start,                        Address offset: 0x20 */
+    union {
+        struct {
+            __IO uint32_t CAPCNT : 14;
+                 uint32_t __RESERVED0 : 2;
+            __IO uint32_t VLINE : 14;
+                 uint32_t __RESERVED1 : 2;
+        } b;
+        __IO uint32_t w;
+    } CWSIZER;                                              /*!< DCMI crop window size,                         Address offset: 0x24 */
+    union {
+        __IO uint8_t BYTE[4];
+        __IO uint32_t w;
+    } DR;                                                   /*!< DCMI data register,                            Address offset: 0x28 */
+} DCMI_TypeDef;
+
 
 /**
   * @brief DMA Controller
@@ -1531,6 +1659,948 @@ typedef struct {
 
 
 
+/** 
+  * @brief DMA2D Controller
+  */
+typedef struct {
+    union {
+        struct {
+            __IO uint32_t START : 1;                        /*!< Start transfer */
+            __IO uint32_t SUSP : 1;                         /*!< Suspend transfer */
+            __IO uint32_t ABORT : 1;                        /*!< Abort transfer */
+                 uint32_t __RESERVED0 : 5;
+            __IO uint32_t TEIE : 1;                         /*!< Transfer Error Interrupt Enable */
+            __IO uint32_t TCIE : 1;                         /*!< Transfer Complete Interrupt Enable */
+            __IO uint32_t TWIE : 1;                         /*!< Transfer Watermark Interrupt Enable */
+            __IO uint32_t CAEIE : 1;                        /*!< CLUT Access Error Interrupt Enable */
+            __IO uint32_t CTCIE : 1;                        /*!< CLUT Transfer Complete Interrupt Enable */
+            __IO uint32_t CEIE : 1;                         /*!< Configuration Error Interrupt Enable */
+                 uint32_t __RESERVED1 : 2;
+            __IO uint32_t MODE : 2;                         /*!< DMA2D Mode[1:0] */
+                 uint32_t __RESERVED2 : 14;
+        } b;
+        __IO uint32_t w;
+    } CR;                                                   /*!< DMA2D Control Register,                         Address offset: 0x00 */
+    union {
+        struct {
+            __IO uint32_t TEIF : 1;                         /*!< Transfer Error Interrupt Flag */
+            __IO uint32_t TCIF : 1;                         /*!< Transfer Complete Interrupt Flag */
+            __IO uint32_t TWIF : 1;                         /*!< Transfer Watermark Interrupt Flag */
+            __IO uint32_t CAEIF : 1;                        /*!< CLUT Access Error Interrupt Flag */
+            __IO uint32_t CTCIF : 1;                        /*!< CLUT Transfer Complete Interrupt Flag */
+            __IO uint32_t CEIF : 1;                         /*!< Configuration Error Interrupt Flag */
+                 uint32_t __RESERVED0 : 26;
+        } b;
+        __IO uint32_t w;
+    } ISR;                                                  /*!< DMA2D Interrupt Status Register,                Address offset: 0x04 */
+    union {
+        struct {
+            __IO uint32_t CTEIF : 1;                        /*!< Clears Transfer Error Interrupt Flag         */
+            __IO uint32_t CTCIF : 1;                        /*!< Clears Transfer Complete Interrupt Flag      */
+            __IO uint32_t CTWIF : 1;                        /*!< Clears Transfer Watermark Interrupt Flag     */
+            __IO uint32_t CAECIF : 1;                       /*!< Clears CLUT Access Error Interrupt Flag      */
+            __IO uint32_t CCTCIF : 1;                       /*!< Clears CLUT Transfer Complete Interrupt Flag */
+            __IO uint32_t CCEIF : 1;                        /*!< Clears Configuration Error Interrupt Flag    */
+                 uint32_t __RESERVED0 : 26;
+        } b;
+        __IO uint32_t w;
+    } IFCR;                                                 /*!< DMA2D Interrupt Flag Clear Register,            Address offset: 0x08 */
+    __IO uint32_t FGMAR;                                    /*!< DMA2D Foreground Memory Address Register,       Address offset: 0x0C */
+    __IO uint32_t FGOR;                                     /*!< DMA2D Foreground Offset Register,               Address offset: 0x10 */
+    __IO uint32_t BGMAR;                                    /*!< DMA2D Background Memory Address Register,       Address offset: 0x14 */
+    __IO uint32_t BGOR;                                     /*!< DMA2D Background Offset Register,               Address offset: 0x18 */
+    union {
+        struct {
+            __IO uint32_t CM : 4;                           /*!< Input color mode CM[3:0] */
+            __IO uint32_t CCM : 1;                          /*!< CLUT Color mode */
+            __IO uint32_t START : 1;                        /*!< Start */
+                 uint32_t __RESERVED0 : 2;
+            __IO uint32_t CS : 8;                           /*!< CLUT size */
+            __IO uint32_t AM : 2;                           /*!< Alpha mode AM[1:0] */
+                 uint32_t __RESERVED1 : 6;
+            __IO uint32_t ALPHA : 8;                        /*!< Alpha value */
+        } b;
+        __IO uint32_t w;
+    } FGPFCCR;                                              /*!< DMA2D Foreground PFC Control Register,          Address offset: 0x1C */
+    union {
+        struct {
+            __IO uint32_t BLUE : 8;                         /*!< Blue Value */
+            __IO uint32_t GREEN : 8;                        /*!< Green Value */
+            __IO uint32_t RED : 8;                          /*!< Red Value */
+                 uint32_t __RESERVED0 : 8;
+        } b;
+        __IO uint32_t w;
+    } FGCOLR;                                               /*!< DMA2D Foreground Color Register,                Address offset: 0x20 */
+    union {
+        struct {
+            __IO uint32_t CM : 4;                           /*!< Input color mode CM[3:0] */
+            __IO uint32_t CCM : 1;                          /*!< CLUT Color mode */
+            __IO uint32_t START : 1;                        /*!< Start */
+                 uint32_t __RESERVED0 : 2;
+            __IO uint32_t CS : 8;                           /*!< CLUT size */
+            __IO uint32_t AM : 2;                           /*!< Alpha mode AM[1:0] */
+                 uint32_t __RESERVED1 : 6;
+            __IO uint32_t ALPHA : 8;                        /*!< background Input Alpha value */
+        } b;
+        __IO uint32_t w;
+    } BGPFCCR;                                              /*!< DMA2D Background PFC Control Register,          Address offset: 0x24 */
+    union {
+        struct {
+            __IO uint32_t BLUE : 8;                         /*!< Blue Value */
+            __IO uint32_t GREEN : 8;                        /*!< Green Value */
+            __IO uint32_t RED : 8;                          /*!< Red Value */
+                 uint32_t __RESERVED0 : 8;
+        } b;
+        __IO uint32_t w;
+    } BGCOLR;                                               /*!< DMA2D Background Color Register,                Address offset: 0x28 */
+    __IO uint32_t FGCMAR;                                   /*!< DMA2D Foreground CLUT Memory Address Register,  Address offset: 0x2C */
+    __IO uint32_t BGCMAR;                                   /*!< DMA2D Background CLUT Memory Address Register,  Address offset: 0x30 */
+    union {
+        struct {
+            __IO uint32_t CM : 3;                           /*!< Color mode CM[2:0] */
+                 uint32_t __RESERVED0 : 29;
+        } b;
+        __IO uint32_t w;
+    } OPFCCR;                                               /*!< DMA2D Output PFC Control Register,              Address offset: 0x34 */
+    __IO uint32_t OCOLR;                                    /*!< DMA2D Output Color Register,                    Address offset: 0x38 */
+    __IO uint32_t OMAR;                                     /*!< DMA2D Output Memory Address Register,           Address offset: 0x3C */
+    __IO uint32_t OOR;                                      /*!< DMA2D Output Offset Register,                   Address offset: 0x40 */
+    union {
+        struct {
+            __IO uint32_t NL : 16;                          /*!< Number of Lines */
+            __IO uint32_t PL : 14;                          /*!< Pixel per Lines */
+                 uint32_t __RESERVED0 : 2;
+        } b;
+        __IO uint32_t w;
+    } NLR;                                                  /*!< DMA2D Number of Line Register,                  Address offset: 0x44 */
+    __IO uint32_t LWR;                                      /*!< DMA2D Line Watermark Register,                  Address offset: 0x48 */
+    union {
+        struct {
+            __IO uint32_t EN : 1;                           /*!< Enable */
+                 uint32_t __RESERVED0 : 7;
+            __IO uint32_t DT : 8;                           /*!< Dead Time */
+                 uint32_t __RESERVED1 : 16;
+        } b;
+        __IO uint32_t w;
+    } AMTCR;                                                /*!< DMA2D AHB Master Timer Configuration Register,  Address offset: 0x4C */
+         uint32_t __RESERVED0[236];
+    __IO uint32_t FGCLUT[256];                              /*!< DMA2D Foreground CLUT,                          Address offset:400-7FF */
+    __IO uint32_t BGCLUT[256];                              /*!< DMA2D Background CLUT,                          Address offset:800-BFF */
+} DMA2D_TypeDef;
+
+
+typedef struct {
+    struct {
+        __IO uint32_t START;                                /*!< Start transfer */
+        __IO uint32_t SUSP;                                 /*!< Suspend transfer */
+        __IO uint32_t ABORT;                                /*!< Abort transfer */
+             uint32_t __RESERVED0[5];
+        __IO uint32_t TEIE;                                 /*!< Transfer Error Interrupt Enable */
+        __IO uint32_t TCIE;                                 /*!< Transfer Complete Interrupt Enable */
+        __IO uint32_t TWIE;                                 /*!< Transfer Watermark Interrupt Enable */
+        __IO uint32_t CAEIE;                                /*!< CLUT Access Error Interrupt Enable */
+        __IO uint32_t CTCIE;                                /*!< CLUT Transfer Complete Interrupt Enable */
+        __IO uint32_t CEIE;                                 /*!< Configuration Error Interrupt Enable */
+             uint32_t __RESERVED1[2];
+        __IO uint32_t MODE[2];                              /*!< DMA2D Mode[1:0] */
+             uint32_t __RESERVED2[14];
+    } CR;                                                   /*!< DMA2D Control Register,                         Address offset: 0x00 */
+    struct {
+        __IO uint32_t TEIF;                                 /*!< Transfer Error Interrupt Flag */
+        __IO uint32_t TCIF;                                 /*!< Transfer Complete Interrupt Flag */
+        __IO uint32_t TWIF;                                 /*!< Transfer Watermark Interrupt Flag */
+        __IO uint32_t CAEIF;                                /*!< CLUT Access Error Interrupt Flag */
+        __IO uint32_t CTCIF;                                /*!< CLUT Transfer Complete Interrupt Flag */
+        __IO uint32_t CEIF;                                 /*!< Configuration Error Interrupt Flag */
+             uint32_t __RESERVED0[26];
+    } ISR;                                                  /*!< DMA2D Interrupt Status Register,                Address offset: 0x04 */
+    struct {
+        __IO uint32_t CTEIF;                                /*!< Clears Transfer Error Interrupt Flag         */
+        __IO uint32_t CTCIF;                                /*!< Clears Transfer Complete Interrupt Flag      */
+        __IO uint32_t CTWIF;                                /*!< Clears Transfer Watermark Interrupt Flag     */
+        __IO uint32_t CAECIF;                               /*!< Clears CLUT Access Error Interrupt Flag      */
+        __IO uint32_t CCTCIF;                               /*!< Clears CLUT Transfer Complete Interrupt Flag */
+        __IO uint32_t CCEIF;                                /*!< Clears Configuration Error Interrupt Flag    */
+             uint32_t __RESERVED0[26];
+    } IFCR;                                                 /*!< DMA2D Interrupt Flag Clear Register,            Address offset: 0x08 */
+    __IO uint32_t FGMAR[32];                                /*!< DMA2D Foreground Memory Address Register,       Address offset: 0x0C */
+    __IO uint32_t FGOR[32];                                 /*!< DMA2D Foreground Offset Register,               Address offset: 0x10 */
+    __IO uint32_t BGMAR[32];                                /*!< DMA2D Background Memory Address Register,       Address offset: 0x14 */
+    __IO uint32_t BGOR[32];                                 /*!< DMA2D Background Offset Register,               Address offset: 0x18 */
+    struct {
+        __IO uint32_t CM[4];                                /*!< Input color mode CM[3:0] */
+        __IO uint32_t CCM;                                  /*!< CLUT Color mode */
+        __IO uint32_t START;                                /*!< Start */
+             uint32_t __RESERVED0[2];
+        __IO uint32_t CS[8];                                /*!< CLUT size */
+        __IO uint32_t AM[2];                                /*!< Alpha mode AM[1:0] */
+             uint32_t __RESERVED1[6];
+        __IO uint32_t ALPHA[8];                             /*!< Alpha value */
+    } FGPFCCR;                                              /*!< DMA2D Foreground PFC Control Register,          Address offset: 0x1C */
+    struct {
+        __IO uint32_t BLUE[8];                              /*!< Blue Value */
+        __IO uint32_t GREEN[8];                             /*!< Green Value */
+        __IO uint32_t RED[8];                               /*!< Red Value */
+             uint32_t __RESERVED0[8];
+    } FGCOLR;                                               /*!< DMA2D Foreground Color Register,                Address offset: 0x20 */
+    struct {
+        __IO uint32_t CM[4];                                /*!< Input color mode CM[3:0] */
+        __IO uint32_t CCM;                                  /*!< CLUT Color mode */
+        __IO uint32_t START;                                /*!< Start */
+             uint32_t __RESERVED0[2];
+        __IO uint32_t CS[8];                                /*!< CLUT size */
+        __IO uint32_t AM[2];                                /*!< Alpha mode AM[1:0] */
+             uint32_t __RESERVED1[6];
+        __IO uint32_t ALPHA[8];                             /*!< background Input Alpha value */
+    } BGPFCCR;                                              /*!< DMA2D Background PFC Control Register,          Address offset: 0x24 */
+    struct {
+        __IO uint32_t BLUE[8];                              /*!< Blue Value */
+        __IO uint32_t GREEN[8];                             /*!< Green Value */
+        __IO uint32_t RED[8];                               /*!< Red Value */
+             uint32_t __RESERVED0[8];
+    } BGCOLR;                                               /*!< DMA2D Background Color Register,                Address offset: 0x28 */
+    __IO uint32_t FGCMAR[32];                               /*!< DMA2D Foreground CLUT Memory Address Register,  Address offset: 0x2C */
+    __IO uint32_t BGCMAR[32];                               /*!< DMA2D Background CLUT Memory Address Register,  Address offset: 0x30 */
+    struct {
+        __IO uint32_t CM[3];                                /*!< Color mode CM[2:0] */
+             uint32_t __RESERVED0[29];
+    } OPFCCR;                                               /*!< DMA2D Output PFC Control Register,              Address offset: 0x34 */
+    __IO uint32_t OCOLR[32];                                /*!< DMA2D Output Color Register,                    Address offset: 0x38 */
+    __IO uint32_t OMAR[32];                                 /*!< DMA2D Output Memory Address Register,           Address offset: 0x3C */
+    __IO uint32_t OOR[32];                                  /*!< DMA2D Output Offset Register,                   Address offset: 0x40 */
+    struct {
+        __IO uint32_t NL[16];                               /*!< Number of Lines */
+        __IO uint32_t PL[14];                               /*!< Pixel per Lines */
+             uint32_t __RESERVED0[2];
+    } NLR;                                                  /*!< DMA2D Number of Line Register,                  Address offset: 0x44 */
+    __IO uint32_t LWR[32];                                  /*!< DMA2D Line Watermark Register,                  Address offset: 0x48 */
+    struct {
+        __IO uint32_t EN;                                   /*!< Enable */
+             uint32_t __RESERVED0[7];
+        __IO uint32_t DT[8];                                /*!< Dead Time */
+             uint32_t __RESERVED1[16];
+    } AMTCR;                                                /*!< DMA2D AHB Master Timer Configuration Register,  Address offset: 0x4C */
+         uint32_t __RESERVED0[236][32];
+    __IO uint32_t FGCLUT[256][32];                          /*!< DMA2D Foreground CLUT,                          Address offset:400-7FF */
+    __IO uint32_t BGCLUT[256][32];                          /*!< DMA2D Background CLUT,                          Address offset:800-BFF */
+} DMA2D_BitBand_TypeDef;
+
+
+
+/** 
+  * @brief Ethernet MAC
+  */
+typedef struct {
+    union {
+        struct {
+                 uint32_t __RESERVED0 : 2;
+            __IO uint32_t RE : 1;                           /* Receiver enable */
+            __IO uint32_t TE : 1;                           /* Transmitter enable */
+            __IO uint32_t DC : 1;                           /* Defferal check */
+            __IO uint32_t BL : 2;                           /* Back-off limit: random integer number (r) of slot time delays before rescheduling
+                                                               a transmission attempt during retries after a collision: 0 =< r <2^k */
+            __IO uint32_t APCS : 1;                         /* Automatic Pad/CRC stripping */
+                 uint32_t __RESERVED1 : 1;
+            __IO uint32_t RD : 1;                           /* Retry disable */
+            __IO uint32_t IPCO : 1;                         /* IP Checksum offload */
+            __IO uint32_t DM : 1;                           /* Duplex mode */
+            __IO uint32_t LM : 1;                           /* loopback mode */
+            __IO uint32_t ROD : 1;                          /* Receive own disable */
+            __IO uint32_t FES : 1;                          /* Fast ethernet speed */
+                 uint32_t __RESERVED2 : 1;
+            __IO uint32_t CSD : 1;                          /* Carrier sense disable (during transmission) */
+            __IO uint32_t IFG : 3;                          /* Inter-frame gap */
+                 uint32_t __RESERVED3 : 2;
+            __IO uint32_t JD : 1;                           /* Jabber disable */
+            __IO uint32_t WD : 1;                           /* Watchdog disable */
+                 uint32_t __RESERVED4 : 8;
+        } b;
+        __IO uint32_t w;
+    } MACCR;
+    union {
+        struct {
+            __IO uint32_t PM : 1;                           /* Promiscuous mode */
+            __IO uint32_t HU : 1;                           /* Hash unicast */
+            __IO uint32_t HM : 1;                           /* Hash multicast */
+            __IO uint32_t DAIF : 1;                         /* DA Inverse filtering */
+            __IO uint32_t PAM : 1;                          /* Pass all mutlicast */
+            __IO uint32_t BFD : 1;                          /* Broadcast frame disable */
+            __IO uint32_t PCF : 2;                          /* Pass control frames: 3 cases */
+            __IO uint32_t SAIF : 1;                         /* SA inverse filtering */
+            __IO uint32_t SAF : 1;                          /* Source address filter enable */
+            __IO uint32_t HPF : 1;                          /* Hash or perfect filter */
+                 uint32_t __RESERVED0 : 20;
+            __IO uint32_t RA : 1;                           /* Receive all */
+        } b;
+        __IO uint32_t w;
+    } MACFFR;
+    __IO uint32_t MACHTHR;
+    __IO uint32_t MACHTLR;
+    union {
+        struct {
+            __IO uint32_t MB : 1;                           /* MII busy */
+            __IO uint32_t MW : 1;                           /* MII write */
+            __IO uint32_t CR : 3;                           /* CR clock range: 6 cases */
+                 uint32_t __RESERVED0 : 1;
+            __IO uint32_t MR : 5;                           /* MII register in the selected PHY */
+            __IO uint32_t PA : 5;                           /* Physical layer address */
+                 uint32_t __RESERVED1 : 16;
+        } b;
+        __IO uint32_t w;
+    } MACMIIAR;
+    __IO uint32_t MACMIIDR;
+    union {
+        struct {
+            __IO uint32_t FCBBPA : 1;                       /* Flow control busy/backpressure activate */
+            __IO uint32_t TFCE : 1;                         /* Transmit flow control enable */
+            __IO uint32_t RFCE : 1;                         /* Receive flow control enable */
+            __IO uint32_t UPFD : 1;                         /* Unicast pause frame detect */
+            __IO uint32_t PLT : 2;                          /* Pause low threshold: 4 cases */
+                 uint32_t __RESERVED0 : 1;
+            __IO uint32_t ZQPD : 1;                         /* Zero-quanta pause disable */
+                 uint32_t __RESERVED1 : 8;
+            __IO uint32_t PT : 16;                          /* Pause time */
+        } b;
+        __IO uint32_t w;
+    } MACFCR;
+    union {
+        struct {
+            __IO uint32_t VLANTI : 16;                      /* VLAN tag identifier (for receive frames) */
+            __IO uint32_t VLANTC : 1;                       /* 12-bit VLAN tag comparison */
+                 uint32_t __RESERVED0 : 15;
+        } b;
+        __IO uint32_t w;
+    } MACVLANTR;                                            /*    8 */
+         uint32_t __RESERVED0[2];
+    __IO uint32_t MACRWUFFR;                                /*   11 */
+    union {
+        struct {
+            __IO uint32_t PD : 1;                           /* Power Down */
+            __IO uint32_t MPE : 1;                          /* Magic Packet Enable */
+            __IO uint32_t WFE : 1;                          /* Wake-Up Frame Enable */
+                 uint32_t __RESERVED0 : 2;
+            __IO uint32_t MPR : 1;                          /* Magic Packet Received */
+            __IO uint32_t WFR : 1;                          /* Wake-Up Frame Received */
+                 uint32_t __RESERVED1 : 2;
+            __IO uint32_t GU : 1;                           /* Global Unicast */
+                 uint32_t __RESERVED2 : 21;
+            __IO uint32_t WFFRPR : 1;                       /* Wake-Up Frame Filter Register Pointer Reset */
+        } b;
+        __IO uint32_t w;
+    } MACPMTCSR;
+         uint32_t __RESERVED1[2];
+    union {
+        struct {
+                 uint32_t __RESERVED0 : 3;
+            __IO uint32_t PMTS : 1;                         /* PMT status */
+            __IO uint32_t MMCS : 1;                         /* MMC status */
+            __IO uint32_t MMMCRS : 1;                       /* MMC receive status */
+            __IO uint32_t MMCTS : 1;                        /* MMC transmit status */
+                 uint32_t __RESERVED1 : 2;
+            __IO uint32_t TSTS : 1;                         /* Time stamp trigger status */
+                 uint32_t __RESERVED2 : 22;
+        } b;
+        __IO uint32_t w;
+    } MACSR;                                                /*   15 */
+    union {
+        struct {
+                 uint32_t __RESERVED0 : 3;
+            __IO uint32_t PMTIM : 1;                        /* PMT interrupt mask */
+                 uint32_t __RESERVED1 : 5;
+            __IO uint32_t TSTIM : 1;                        /* Time stamp trigger interrupt mask */
+                 uint32_t __RESERVED2 : 22;
+        } b;
+        __IO uint32_t w;
+    } MACIMR;
+    __IO uint32_t MACA0HR;
+    __IO uint32_t MACA0LR;
+    union {
+        struct {
+            __IO uint32_t MACA1H : 16;                      /* MAC address1 high */
+                 uint32_t __RESERVED0 : 8;
+            __IO uint32_t MBC : 6;                          /* Mask byte control: bits to mask for comparison of the MAC Address bytes */
+            __IO uint32_t SA : 1;                           /* Source address */
+            __IO uint32_t AE : 1;                           /* Address enable */
+        } b;
+        __IO uint32_t w;
+    } MACA1HR;
+    __IO uint32_t MACA1LR;
+    union {
+        struct {
+            __IO uint32_t MACA2H : 16;                      /* MAC address1 high */
+                 uint32_t __RESERVED0 : 8;
+            __IO uint32_t MBC : 6;                          /* Mask byte control */
+            __IO uint32_t SA : 1;                           /* Source address */
+            __IO uint32_t AE : 1;                           /* Address enable */
+        } b;
+        __IO uint32_t w;
+    } MACA2HR;
+    __IO uint32_t MACA2LR;
+    union {
+        struct {
+            __IO uint32_t MACA3H : 16;                      /* MAC address3 high */
+                 uint32_t __RESERVED0 : 8;
+            __IO uint32_t MBC : 6;                          /* Mask byte control */
+            __IO uint32_t SA : 1;                           /* Source address */
+            __IO uint32_t AE : 1;                           /* Address enable */
+        } b;
+        __IO uint32_t w;
+    } MACA3HR;
+    __IO uint32_t MACA3LR;                                  /*   24 */
+         uint32_t __RESERVED2[40];
+    union {
+        struct {
+            __IO uint32_t CR : 1;                           /* Counters Reset */
+            __IO uint32_t CSR : 1;                          /* Counter Stop Rollover */
+            __IO uint32_t ROR : 1;                          /* Reset on Read */
+            __IO uint32_t MCF : 1;                          /* MMC Counter Freeze */
+            __IO uint32_t MCP : 1;                          /* MMC counter preset */
+            __IO uint32_t MCFHP : 1;                        /* MMC counter Full-Half preset */
+                 uint32_t __RESERVED0 : 26;
+        } b;
+        __IO uint32_t w;
+    } MMCCR;                                                /*   65 */
+    union {
+        struct {
+                 uint32_t __RESERVED0 : 5;
+            __IO uint32_t RFCES : 1;                        /* Set when Rx crc error counter reaches half the maximum value */
+            __IO uint32_t RFAES : 1;                        /* Set when Rx alignment error counter reaches half the maximum value */
+                 uint32_t __RESERVED1 : 10;
+            __IO uint32_t RGUFS : 1;                        /* Set when Rx good unicast frames counter reaches half the maximum value */
+                 uint32_t __RESERVED2 : 14;
+        } b;
+        __IO uint32_t w;
+    } MMCRIR;
+    union {
+        struct {
+                 uint32_t __RESERVED0 : 14;
+            __IO uint32_t TGFSCS : 1;                       /* Set when Tx good single col counter reaches half the maximum value */
+            __IO uint32_t TGFMSCS : 1;                      /* Set when Tx good multi col counter reaches half the maximum value */
+                 uint32_t __RESERVED1 : 5;
+            __IO uint32_t TGFS : 1;                         /* Set when Tx good frame count counter reaches half the maximum value */
+                 uint32_t __RESERVED2 : 10;
+        } b;
+        __IO uint32_t w;
+    } MMCTIR;
+    union {
+        struct {
+                 uint32_t __RESERVED0 : 5;
+            __IO uint32_t RFCEM : 1;                        /* Mask the interrupt when Rx crc error counter reaches half the maximum value */
+            __IO uint32_t RFAEM : 1;                        /* Mask the interrupt when when Rx alignment error counter reaches half the maximum value */
+                 uint32_t __RESERVED1 : 10;
+            __IO uint32_t RGUFM : 1;                        /* Mask the interrupt when Rx good unicast frames counter reaches half the maximum value */
+                 uint32_t __RESERVED2 : 14;
+        } b;
+        __IO uint32_t w;
+    } MMCRIMR;
+    union {
+        struct {
+                 uint32_t __RESERVED0 : 14;
+            __IO uint32_t TGFSCM : 1;                       /* Mask the interrupt when Tx good single col counter reaches half the maximum value */
+            __IO uint32_t TGFMSCM : 1;                      /* Mask the interrupt when Tx good multi col counter reaches half the maximum value */
+                 uint32_t __RESERVED1 : 5;
+            __IO uint32_t TGFM : 1;                         /* Mask the interrupt when Tx good frame count counter reaches half the maximum value */
+                 uint32_t __RESERVED2 : 10;
+        } b;
+        __IO uint32_t w;
+    } MMCTIMR;                                              /*   69 */
+         uint32_t __RESERVED3[14];
+    __IO uint32_t MMCTGFSCCR;                               /*   84 */
+    __IO uint32_t MMCTGFMSCCR;
+         uint32_t __RESERVED4[5];
+    __IO uint32_t MMCTGFCR;
+         uint32_t __RESERVED5[10];
+    __IO uint32_t MMCRFCECR;
+    __IO uint32_t MMCRFAECR;
+         uint32_t __RESERVED6[10];
+    __IO uint32_t MMCRGUFCR;
+         uint32_t __RESERVED7[334];
+    union {
+        struct {
+            __IO uint32_t TSE : 1;                          /* Time stamp enable */
+            __IO uint32_t TSFCU : 1;                        /* Time stamp fine or coarse update */
+            __IO uint32_t TSSTI : 1;                        /* Time stamp initialize */
+            __IO uint32_t TSSTU : 1;                        /* Time stamp update */
+            __IO uint32_t TSITE : 1;                        /* Time stamp interrupt trigger enable */
+            __IO uint32_t TSARU : 1;                        /* Addend register update */
+                 uint32_t __RESERVED0 : 10;
+            __IO uint32_t TSCNT : 2;                        /* Time stamp clock node type */
+                 uint32_t __RESERVED1 : 14;
+        } b;
+        __IO uint32_t w;
+    } PTPTSCR;
+    __IO uint32_t PTPSSIR;
+    __IO uint32_t PTPTSHR;
+    union {
+        struct {
+            __IO uint32_t STSS : 31;                        /* System Time sub-seconds */
+            __IO uint32_t STPNS : 1;                        /* System Time Positive or negative time */
+        } b;
+        __IO uint32_t w;
+    } PTPTSLR;
+    __IO uint32_t PTPTSHUR;
+    union {
+        struct {
+            __IO uint32_t TSUSS : 31;                       /* Time stamp update sub-seconds */
+            __IO uint32_t TSUPNS : 1;                       /* Time stamp update Positive or negative time */
+        } b;
+        __IO uint32_t w;
+    } PTPTSLUR;
+    __IO uint32_t PTPTSAR;
+    __IO uint32_t PTPTTHR;
+    __IO uint32_t PTPTTLR;
+         uint32_t __RESERVED8;
+    union {
+        struct {
+                 uint32_t __RESERVED0 : 4;
+            __IO uint32_t TSSO : 1;                         /* Time stamp seconds overflow */
+            __IO uint32_t TSTTR : 1;                        /* Time stamp target time reached */
+                 uint32_t __RESERVED1 : 2;
+            __IO uint32_t TSSARFE : 1;                      /* Time stamp snapshot for all received frames enable */
+            __IO uint32_t TSSSR : 1;                        /* Time stamp Sub-seconds rollover */
+            __IO uint32_t TSPTPPSV2E : 1;                   /* Time stamp PTP packet snooping for version2 format enable */
+            __IO uint32_t TSSPTPOEFE : 1;                   /* Time stamp snapshot for PTP over ethernet frames enable */
+            __IO uint32_t TSSIPV6FE : 1;                    /* Time stamp snapshot for IPv6 frames enable */
+            __IO uint32_t TSSIPV4FE : 1;                    /* Time stamp snapshot for IPv4 frames enable */
+            __IO uint32_t TSSEME : 1;                       /* Time stamp snapshot for event message enable */
+            __IO uint32_t TSSMRME : 1;                      /* Time stamp snapshot for message relevant to master enable */
+                 uint32_t __RESERVED2 : 16;
+        } b;
+        __IO uint32_t w;
+    } PTPTSSR;
+         uint32_t __RESERVED9[565];
+    union {
+        struct {
+            __IO uint32_t SR : 1;                           /* Software reset */
+            __IO uint32_t DA : 1;                           /* DMA arbitration scheme */
+            __IO uint32_t DSL : 5;                          /* Descriptor Skip Length */
+            __IO uint32_t EDE : 1;                          /* Enhanced Descriptor Enable */
+            __IO uint32_t PBL : 6;                          /* Programmable burst length */
+            __IO uint32_t RTPR : 2;                         /* Rx Tx priority ratio */
+            __IO uint32_t FB : 1;                           /* Fixed Burst */
+            __IO uint32_t RDP : 6;                          /* RxDMA PBL */
+            __IO uint32_t USP : 1;                          /* Use separate PBL */
+            __IO uint32_t FPM : 1;                          /* 4xPBL mode */
+            __IO uint32_t AAB : 1;                          /* Address-Aligned beats */
+                 uint32_t __RESERVED0 : 6;
+        } b;
+        __IO uint32_t w;
+    } DMABMR;
+    __IO uint32_t DMATPDR;
+    __IO uint32_t DMARPDR;
+    __IO uint32_t DMARDLAR;
+    __IO uint32_t DMATDLAR;
+    union {
+        struct {
+            __IO uint32_t TS : 1;                           /* Transmit status */
+            __IO uint32_t TPSS : 1;                         /* Transmit process stopped status */
+            __IO uint32_t TBUS : 1;                         /* Transmit buffer unavailable status */
+            __IO uint32_t TJTS : 1;                         /* Transmit jabber timeout status */
+            __IO uint32_t ROS : 1;                          /* Receive overflow status */
+            __IO uint32_t TUS : 1;                          /* Transmit underflow status */
+            __IO uint32_t RS : 1;                           /* Receive status */
+            __IO uint32_t RBUS : 1;                         /* Receive buffer unavailable status */
+            __IO uint32_t RPSS : 1;                         /* Receive process stopped status */
+            __IO uint32_t RWTS : 1;                         /* Receive watchdog timeout status */
+            __IO uint32_t ETS : 1;                          /* Early transmit status */
+                 uint32_t __RESERVED0 : 2;
+            __IO uint32_t FBES : 1;                         /* Fatal bus error status */
+            __IO uint32_t ERS : 1;                          /* Early receive status */
+            __IO uint32_t AIS : 1;                          /* Abnormal interrupt summary */
+            __IO uint32_t NIS : 1;                          /* Normal interrupt summary */
+            __IO uint32_t RPS : 3;                          /* Receive process state */
+            __IO uint32_t TPS : 3;                          /* Transmit process state */
+            __IO uint32_t EBS : 3;                          /* Error bits status */
+                 uint32_t __RESERVED1 : 1;
+            __IO uint32_t MMCS : 1;                         /* MMC status */
+            __IO uint32_t PMTS : 1;                         /* PMT status */
+            __IO uint32_t TSTS : 1;                         /* Time-stamp trigger status */
+                 uint32_t __RESERVED2 : 2;
+        } b;
+        __IO uint32_t w;
+    } DMASR;
+    union {
+        struct {
+                 uint32_t __RESERVED0 : 1;
+            __IO uint32_t SR : 1;                           /* Start/stop receive */
+            __IO uint32_t OSF : 1;                          /* operate on second frame */
+            __IO uint32_t RTC : 2;                          /* receive threshold control */
+                 uint32_t __RESERVED1 : 1;
+            __IO uint32_t FUGF : 1;                         /* Forward undersized good frames */
+            __IO uint32_t FEF : 1;                          /* Forward error frames */
+                 uint32_t __RESERVED2 : 5;
+            __IO uint32_t ST : 1;                           /* Start/stop transmission command */
+            __IO uint32_t TTC : 3;                          /* Transmit threshold control */
+                 uint32_t __RESERVED3 : 3;
+            __IO uint32_t FTF : 1;                          /* Flush transmit FIFO */
+            __IO uint32_t TSF : 1;                          /* Transmit store and forward */
+                 uint32_t __RESERVED4 : 2;
+            __IO uint32_t DFRF : 1;                         /* Disable flushing of received frames */
+            __IO uint32_t RSF : 1;                          /* Receive store and forward */
+            __IO uint32_t DTCEFD : 1;                       /* Disable Dropping of TCP/IP checksum error frames */
+                 uint32_t __RESERVED5 : 5;
+        } b;
+        __IO uint32_t w;
+    } DMAOMR;
+    union {
+        struct {
+            __IO uint32_t TIE : 1;                          /* Transmit interrupt enable */
+            __IO uint32_t TPSIE : 1;                        /* Transmit process stopped interrupt enable */
+            __IO uint32_t TBUIE : 1;                        /* Transmit buffer unavailable interrupt enable */
+            __IO uint32_t TJTIE : 1;                        /* Transmit jabber timeout interrupt enable */
+            __IO uint32_t ROIE : 1;                         /* Receive Overflow interrupt enable */
+            __IO uint32_t TUIE : 1;                         /* Transmit Underflow interrupt enable */
+            __IO uint32_t RIE : 1;                          /* Receive interrupt enable */
+            __IO uint32_t RBUIE : 1;                        /* Receive buffer unavailable interrupt enable */
+            __IO uint32_t RPSIE : 1;                        /* Receive process stopped interrupt enable */
+            __IO uint32_t RWTIE : 1;                        /* Receive watchdog timeout interrupt enable */
+            __IO uint32_t ETIE : 1;                         /* Early transmit interrupt enable */
+                 uint32_t __RESERVED0 : 2;
+            __IO uint32_t FBEIE : 1;                        /* Fatal bus error interrupt enable */
+            __IO uint32_t ERIE : 1;                         /* Early receive interrupt enable */
+            __IO uint32_t AISE : 1;                         /* Abnormal interrupt summary enable */
+            __IO uint32_t NISE : 1;                         /* Normal interrupt summary enable */
+                 uint32_t __RESERVED1 : 15;
+        } b;
+        __IO uint32_t w;
+    } DMAIER;
+    union {
+        struct {
+            __IO uint32_t MFC : 16;                         /* Number of frames missed by the controller */
+            __IO uint32_t OMFC : 1;                         /* Overflow bit for missed frame counter */
+            __IO uint32_t MFA : 11;                         /* Number of frames missed by the application */
+            __IO uint32_t OFOC : 1;                         /* Overflow bit for FIFO overflow counter */
+                 uint32_t __RESERVED0 : 3;
+        } b;
+        __IO uint32_t w;
+    } DMAMFBOCR;
+    __IO uint32_t DMARSWTR;
+         uint32_t __RESERVED10[8];
+    __IO uint32_t DMACHTDR;
+    __IO uint32_t DMACHRDR;
+    __IO uint32_t DMACHTBAR;
+    __IO uint32_t DMACHRBAR;
+} ETH_TypeDef;
+
+
+typedef struct {
+    struct {
+             uint32_t __RESERVED0[2];
+        __IO uint32_t RE;                                   /* Receiver enable */
+        __IO uint32_t TE;                                   /* Transmitter enable */
+        __IO uint32_t DC;                                   /* Defferal check */
+        __IO uint32_t BL[2];                                /* Back-off limit: random integer number (r) of slot time delays before rescheduling
+                                                               a transmission attempt during retries after a collision: 0 =< r <2^k */
+        __IO uint32_t APCS;                                 /* Automatic Pad/CRC stripping */
+             uint32_t __RESERVED1;
+        __IO uint32_t RD;                                   /* Retry disable */
+        __IO uint32_t IPCO;                                 /* IP Checksum offload */
+        __IO uint32_t DM;                                   /* Duplex mode */
+        __IO uint32_t LM;                                   /* loopback mode */
+        __IO uint32_t ROD;                                  /* Receive own disable */
+        __IO uint32_t FES;                                  /* Fast ethernet speed */
+             uint32_t __RESERVED2;
+        __IO uint32_t CSD;                                  /* Carrier sense disable (during transmission) */
+        __IO uint32_t IFG[3];                               /* Inter-frame gap */
+             uint32_t __RESERVED3[2];
+        __IO uint32_t JD;                                   /* Jabber disable */
+        __IO uint32_t WD;                                   /* Watchdog disable */
+             uint32_t __RESERVED4[8];
+    } MACCR;
+    struct {
+        __IO uint32_t PM;                                   /* Promiscuous mode */
+        __IO uint32_t HU;                                   /* Hash unicast */
+        __IO uint32_t HM;                                   /* Hash multicast */
+        __IO uint32_t DAIF;                                 /* DA Inverse filtering */
+        __IO uint32_t PAM;                                  /* Pass all mutlicast */
+        __IO uint32_t BFD;                                  /* Broadcast frame disable */
+        __IO uint32_t PCF[2];                               /* Pass control frames: 3 cases */
+        __IO uint32_t SAIF;                                 /* SA inverse filtering */
+        __IO uint32_t SAF;                                  /* Source address filter enable */
+        __IO uint32_t HPF;                                  /* Hash or perfect filter */
+             uint32_t __RESERVED0[20];
+        __IO uint32_t RA;                                   /* Receive all */
+    } MACFFR;
+    __IO uint32_t MACHTHR[32];
+    __IO uint32_t MACHTLR[32];
+    struct {
+        __IO uint32_t MB;                                   /* MII busy */
+        __IO uint32_t MW;                                   /* MII write */
+        __IO uint32_t CR[3];                                /* CR clock range: 6 cases */
+             uint32_t __RESERVED0;
+        __IO uint32_t MR[5];                                /* MII register in the selected PHY */
+        __IO uint32_t PA[5];                                /* Physical layer address */
+             uint32_t __RESERVED1[16];
+    } MACMIIAR;
+    __IO uint32_t MACMIIDR[32];
+    struct {
+        __IO uint32_t FCBBPA;                               /* Flow control busy/backpressure activate */
+        __IO uint32_t TFCE;                                 /* Transmit flow control enable */
+        __IO uint32_t RFCE;                                 /* Receive flow control enable */
+        __IO uint32_t UPFD;                                 /* Unicast pause frame detect */
+        __IO uint32_t PLT[2];                               /* Pause low threshold: 4 cases */
+             uint32_t __RESERVED0;
+        __IO uint32_t ZQPD;                                 /* Zero-quanta pause disable */
+             uint32_t __RESERVED1[8];
+        __IO uint32_t PT[16];                               /* Pause time */
+    } MACFCR;
+    struct {
+        __IO uint32_t VLANTI[16];                           /* VLAN tag identifier (for receive frames) */
+        __IO uint32_t VLANTC;                               /* 12-bit VLAN tag comparison */
+             uint32_t __RESERVED0[15];
+    } MACVLANTR;                                            /*    8 */
+         uint32_t __RESERVED0[2][32];
+    __IO uint32_t MACRWUFFR[32];                            /*   11 */
+    struct {
+        __IO uint32_t PD;                                   /* Power Down */
+        __IO uint32_t MPE;                                  /* Magic Packet Enable */
+        __IO uint32_t WFE;                                  /* Wake-Up Frame Enable */
+             uint32_t __RESERVED0[2];
+        __IO uint32_t MPR;                                  /* Magic Packet Received */
+        __IO uint32_t WFR;                                  /* Wake-Up Frame Received */
+             uint32_t __RESERVED1[2];
+        __IO uint32_t GU;                                   /* Global Unicast */
+             uint32_t __RESERVED2[21];
+        __IO uint32_t WFFRPR;                               /* Wake-Up Frame Filter Register Pointer Reset */
+    } MACPMTCSR;
+         uint32_t __RESERVED1[2][32];
+    struct {
+             uint32_t __RESERVED0[3];
+        __IO uint32_t PMTS;                                 /* PMT status */
+        __IO uint32_t MMCS;                                 /* MMC status */
+        __IO uint32_t MMMCRS;                               /* MMC receive status */
+        __IO uint32_t MMCTS;                                /* MMC transmit status */
+             uint32_t __RESERVED1[2];
+        __IO uint32_t TSTS;                                 /* Time stamp trigger status */
+             uint32_t __RESERVED2[22];
+    } MACSR;                                                /*   15 */
+    struct {
+             uint32_t __RESERVED0[3];
+        __IO uint32_t PMTIM;                                /* PMT interrupt mask */
+             uint32_t __RESERVED1[5];
+        __IO uint32_t TSTIM;                                /* Time stamp trigger interrupt mask */
+             uint32_t __RESERVED2[22];
+    } MACIMR;
+    __IO uint32_t MACA0HR[32];
+    __IO uint32_t MACA0LR[32];
+    struct {
+        __IO uint32_t MACA1H[16];                           /* MAC address1 high */
+             uint32_t __RESERVED0[8];
+        __IO uint32_t MBC[6];                               /* Mask byte control: bits to mask for comparison of the MAC Address bytes */
+        __IO uint32_t SA;                                   /* Source address */
+        __IO uint32_t AE;                                   /* Address enable */
+    } MACA1HR;
+    __IO uint32_t MACA1LR[32];
+    struct {
+        __IO uint32_t MACA2H[16];                           /* MAC address1 high */
+             uint32_t __RESERVED0[8];
+        __IO uint32_t MBC[6];                               /* Mask byte control */
+        __IO uint32_t SA;                                   /* Source address */
+        __IO uint32_t AE;                                   /* Address enable */
+    } MACA2HR;
+    __IO uint32_t MACA2LR[32];
+    struct {
+        __IO uint32_t MACA3H[16];                           /* MAC address3 high */
+             uint32_t __RESERVED0[8];
+        __IO uint32_t MBC[6];                               /* Mask byte control */
+        __IO uint32_t SA;                                   /* Source address */
+        __IO uint32_t AE;                                   /* Address enable */
+    } MACA3HR;
+    __IO uint32_t MACA3LR[32];                              /*   24 */
+         uint32_t __RESERVED2[40][32];
+    struct {
+        __IO uint32_t CR;                                   /* Counters Reset */
+        __IO uint32_t CSR;                                  /* Counter Stop Rollover */
+        __IO uint32_t ROR;                                  /* Reset on Read */
+        __IO uint32_t MCF;                                  /* MMC Counter Freeze */
+        __IO uint32_t MCP;                                  /* MMC counter preset */
+        __IO uint32_t MCFHP;                                /* MMC counter Full-Half preset */
+             uint32_t __RESERVED0[26];
+    } MMCCR;                                                /*   65 */
+    struct {
+             uint32_t __RESERVED0[5];
+        __IO uint32_t RFCES;                                /* Set when Rx crc error counter reaches half the maximum value */
+        __IO uint32_t RFAES;                                /* Set when Rx alignment error counter reaches half the maximum value */
+             uint32_t __RESERVED1[10];
+        __IO uint32_t RGUFS;                                /* Set when Rx good unicast frames counter reaches half the maximum value */
+             uint32_t __RESERVED2[14];
+    } MMCRIR;
+    struct {
+             uint32_t __RESERVED0[14];
+        __IO uint32_t TGFSCS;                               /* Set when Tx good single col counter reaches half the maximum value */
+        __IO uint32_t TGFMSCS;                              /* Set when Tx good multi col counter reaches half the maximum value */
+             uint32_t __RESERVED1[5];
+        __IO uint32_t TGFS;                                 /* Set when Tx good frame count counter reaches half the maximum value */
+             uint32_t __RESERVED2[10];
+    } MMCTIR;
+    struct {
+             uint32_t __RESERVED0[5];
+        __IO uint32_t RFCEM;                                /* Mask the interrupt when Rx crc error counter reaches half the maximum value */
+        __IO uint32_t RFAEM;                                /* Mask the interrupt when when Rx alignment error counter reaches half the maximum value */
+             uint32_t __RESERVED1[10];
+        __IO uint32_t RGUFM;                                /* Mask the interrupt when Rx good unicast frames counter reaches half the maximum value */
+             uint32_t __RESERVED2[14];
+    } MMCRIMR;
+    struct {
+             uint32_t __RESERVED0[14];
+        __IO uint32_t TGFSCM;                               /* Mask the interrupt when Tx good single col counter reaches half the maximum value */
+        __IO uint32_t TGFMSCM;                              /* Mask the interrupt when Tx good multi col counter reaches half the maximum value */
+             uint32_t __RESERVED1[5];
+        __IO uint32_t TGFM;                                 /* Mask the interrupt when Tx good frame count counter reaches half the maximum value */
+             uint32_t __RESERVED2[10];
+    } MMCTIMR;                                              /*   69 */
+         uint32_t __RESERVED3[14][32];
+    __IO uint32_t MMCTGFSCCR[32];                           /*   84 */
+    __IO uint32_t MMCTGFMSCCR[32];
+         uint32_t __RESERVED4[5][32];
+    __IO uint32_t MMCTGFCR[32];
+         uint32_t __RESERVED5[10][32];
+    __IO uint32_t MMCRFCECR[32];
+    __IO uint32_t MMCRFAECR[32];
+         uint32_t __RESERVED6[10][32];
+    __IO uint32_t MMCRGUFCR[32];
+         uint32_t __RESERVED7[334][32];
+    struct {
+        __IO uint32_t TSE;                                  /* Time stamp enable */
+        __IO uint32_t TSFCU;                                /* Time stamp fine or coarse update */
+        __IO uint32_t TSSTI;                                /* Time stamp initialize */
+        __IO uint32_t TSSTU;                                /* Time stamp update */
+        __IO uint32_t TSITE;                                /* Time stamp interrupt trigger enable */
+        __IO uint32_t TSARU;                                /* Addend register update */
+             uint32_t __RESERVED0[10];
+        __IO uint32_t TSCNT[2];                             /* Time stamp clock node type */
+             uint32_t __RESERVED1[14];
+    } PTPTSCR;
+    __IO uint32_t PTPSSIR[32];
+    __IO uint32_t PTPTSHR[32];
+    struct {
+        __IO uint32_t STSS[31];                             /* System Time sub-seconds */
+        __IO uint32_t STPNS;                                /* System Time Positive or negative time */
+    } PTPTSLR;
+    __IO uint32_t PTPTSHUR[32];
+    struct {
+        __IO uint32_t TSUSS[31];                            /* Time stamp update sub-seconds */
+        __IO uint32_t TSUPNS;                               /* Time stamp update Positive or negative time */
+    } PTPTSLUR;
+    __IO uint32_t PTPTSAR[32];
+    __IO uint32_t PTPTTHR[32];
+    __IO uint32_t PTPTTLR[32];
+         uint32_t __RESERVED8[32];
+    struct {
+             uint32_t __RESERVED0[4];
+        __IO uint32_t TSSO;                                 /* Time stamp seconds overflow */
+        __IO uint32_t TSTTR;                                /* Time stamp target time reached */
+             uint32_t __RESERVED1[2];
+        __IO uint32_t TSSARFE;                              /* Time stamp snapshot for all received frames enable */
+        __IO uint32_t TSSSR;                                /* Time stamp Sub-seconds rollover */
+        __IO uint32_t TSPTPPSV2E;                           /* Time stamp PTP packet snooping for version2 format enable */
+        __IO uint32_t TSSPTPOEFE;                           /* Time stamp snapshot for PTP over ethernet frames enable */
+        __IO uint32_t TSSIPV6FE;                            /* Time stamp snapshot for IPv6 frames enable */
+        __IO uint32_t TSSIPV4FE;                            /* Time stamp snapshot for IPv4 frames enable */
+        __IO uint32_t TSSEME;                               /* Time stamp snapshot for event message enable */
+        __IO uint32_t TSSMRME;                              /* Time stamp snapshot for message relevant to master enable */
+             uint32_t __RESERVED2[16];
+    } PTPTSSR;
+         uint32_t __RESERVED9[565][32];
+    struct {
+        __IO uint32_t SR;                                   /* Software reset */
+        __IO uint32_t DA;                                   /* DMA arbitration scheme */
+        __IO uint32_t DSL[5];                               /* Descriptor Skip Length */
+        __IO uint32_t EDE;                                  /* Enhanced Descriptor Enable */
+        __IO uint32_t PBL[6];                               /* Programmable burst length */
+        __IO uint32_t RTPR[2];                              /* Rx Tx priority ratio */
+        __IO uint32_t FB;                                   /* Fixed Burst */
+        __IO uint32_t RDP[6];                               /* RxDMA PBL */
+        __IO uint32_t USP;                                  /* Use separate PBL */
+        __IO uint32_t FPM;                                  /* 4xPBL mode */
+        __IO uint32_t AAB;                                  /* Address-Aligned beats */
+             uint32_t __RESERVED0[6];
+    } DMABMR;
+    __IO uint32_t DMATPDR[32];
+    __IO uint32_t DMARPDR[32];
+    __IO uint32_t DMARDLAR[32];
+    __IO uint32_t DMATDLAR[32];
+    struct {
+        __IO uint32_t TS;                                   /* Transmit status */
+        __IO uint32_t TPSS;                                 /* Transmit process stopped status */
+        __IO uint32_t TBUS;                                 /* Transmit buffer unavailable status */
+        __IO uint32_t TJTS;                                 /* Transmit jabber timeout status */
+        __IO uint32_t ROS;                                  /* Receive overflow status */
+        __IO uint32_t TUS;                                  /* Transmit underflow status */
+        __IO uint32_t RS;                                   /* Receive status */
+        __IO uint32_t RBUS;                                 /* Receive buffer unavailable status */
+        __IO uint32_t RPSS;                                 /* Receive process stopped status */
+        __IO uint32_t RWTS;                                 /* Receive watchdog timeout status */
+        __IO uint32_t ETS;                                  /* Early transmit status */
+             uint32_t __RESERVED0[2];
+        __IO uint32_t FBES;                                 /* Fatal bus error status */
+        __IO uint32_t ERS;                                  /* Early receive status */
+        __IO uint32_t AIS;                                  /* Abnormal interrupt summary */
+        __IO uint32_t NIS;                                  /* Normal interrupt summary */
+        __IO uint32_t RPS[3];                               /* Receive process state */
+        __IO uint32_t TPS[3];                               /* Transmit process state */
+        __IO uint32_t EBS[3];                               /* Error bits status */
+             uint32_t __RESERVED1;
+        __IO uint32_t MMCS;                                 /* MMC status */
+        __IO uint32_t PMTS;                                 /* PMT status */
+        __IO uint32_t TSTS;                                 /* Time-stamp trigger status */
+             uint32_t __RESERVED2[2];
+    } DMASR;
+    struct {
+             uint32_t __RESERVED0;
+        __IO uint32_t SR;                                   /* Start/stop receive */
+        __IO uint32_t OSF;                                  /* operate on second frame */
+        __IO uint32_t RTC[2];                               /* receive threshold control */
+             uint32_t __RESERVED1;
+        __IO uint32_t FUGF;                                 /* Forward undersized good frames */
+        __IO uint32_t FEF;                                  /* Forward error frames */
+             uint32_t __RESERVED2[5];
+        __IO uint32_t ST;                                   /* Start/stop transmission command */
+        __IO uint32_t TTC[3];                               /* Transmit threshold control */
+             uint32_t __RESERVED3[3];
+        __IO uint32_t FTF;                                  /* Flush transmit FIFO */
+        __IO uint32_t TSF;                                  /* Transmit store and forward */
+             uint32_t __RESERVED4[2];
+        __IO uint32_t DFRF;                                 /* Disable flushing of received frames */
+        __IO uint32_t RSF;                                  /* Receive store and forward */
+        __IO uint32_t DTCEFD;                               /* Disable Dropping of TCP/IP checksum error frames */
+             uint32_t __RESERVED5[5];
+    } DMAOMR;
+    struct {
+        __IO uint32_t TIE;                                  /* Transmit interrupt enable */
+        __IO uint32_t TPSIE;                                /* Transmit process stopped interrupt enable */
+        __IO uint32_t TBUIE;                                /* Transmit buffer unavailable interrupt enable */
+        __IO uint32_t TJTIE;                                /* Transmit jabber timeout interrupt enable */
+        __IO uint32_t ROIE;                                 /* Receive Overflow interrupt enable */
+        __IO uint32_t TUIE;                                 /* Transmit Underflow interrupt enable */
+        __IO uint32_t RIE;                                  /* Receive interrupt enable */
+        __IO uint32_t RBUIE;                                /* Receive buffer unavailable interrupt enable */
+        __IO uint32_t RPSIE;                                /* Receive process stopped interrupt enable */
+        __IO uint32_t RWTIE;                                /* Receive watchdog timeout interrupt enable */
+        __IO uint32_t ETIE;                                 /* Early transmit interrupt enable */
+             uint32_t __RESERVED0[2];
+        __IO uint32_t FBEIE;                                /* Fatal bus error interrupt enable */
+        __IO uint32_t ERIE;                                 /* Early receive interrupt enable */
+        __IO uint32_t AISE;                                 /* Abnormal interrupt summary enable */
+        __IO uint32_t NISE;                                 /* Normal interrupt summary enable */
+             uint32_t __RESERVED1[15];
+    } DMAIER;
+    struct {
+        __IO uint32_t MFC[16];                              /* Number of frames missed by the controller */
+        __IO uint32_t OMFC;                                 /* Overflow bit for missed frame counter */
+        __IO uint32_t MFA[11];                              /* Number of frames missed by the application */
+        __IO uint32_t OFOC;                                 /* Overflow bit for FIFO overflow counter */
+             uint32_t __RESERVED0[3];
+    } DMAMFBOCR;
+    __IO uint32_t DMARSWTR[32];
+         uint32_t __RESERVED10[8][32];
+    __IO uint32_t DMACHTDR[32];
+    __IO uint32_t DMACHRDR[32];
+    __IO uint32_t DMACHTBAR[32];
+    __IO uint32_t DMACHRBAR[32];
+} ETH_BitBand_TypeDef;
+
+
 
 /**
   * @brief External Interrupt/Event Controller
@@ -1597,7 +2667,8 @@ typedef struct {
             __IO uint32_t MER : 1;
             __IO uint32_t SNB : 5;
             __IO uint32_t PSIZE : 2;
-                 uint32_t __RESERVED0 : 6;
+                 uint32_t __RESERVED0 : 5;
+            __IO uint32_t MER2 : 1;
             __IO uint32_t STRT : 1;
                  uint32_t __RESERVED1 : 7;
             __IO uint32_t EOPIE : 1;
@@ -1611,13 +2682,15 @@ typedef struct {
             __IO uint32_t OPTLOCK : 1;
             __IO uint32_t OPTSTRT : 1;
             __IO uint32_t BOR_LEV : 2;
-                 uint32_t __RESERVED0 : 1;
+            __IO uint32_t BFB2 : 1;
             __IO uint32_t WDG_SW : 1;
             __IO uint32_t nRST_STOP : 1;
             __IO uint32_t nRST_STDBY : 1;
             __IO uint32_t RDP : 8;
             __IO uint32_t nWRP : 12;
-                 uint32_t __RESERVED1 : 4;
+                 uint32_t __RESERVED0 : 2;
+            __IO uint32_t DB1M : 1;
+            __IO uint32_t SPRMOD : 1;
         } b;
         __IO uint32_t w;
     } OPTCR;                                                /*!< FLASH option control register ,  Address offset: 0x14 */
@@ -1663,7 +2736,8 @@ typedef struct {
         __IO uint32_t MER;
         __IO uint32_t SNB[5];
         __IO uint32_t PSIZE[2];
-             uint32_t __RESERVED0[6];
+             uint32_t __RESERVED0[5];
+        __IO uint32_t MER2;
         __IO uint32_t STRT;
              uint32_t __RESERVED1[7];
         __IO uint32_t EOPIE;
@@ -1674,13 +2748,15 @@ typedef struct {
         __IO uint32_t OPTLOCK;
         __IO uint32_t OPTSTRT;
         __IO uint32_t BOR_LEV[2];
-             uint32_t __RESERVED0;
+        __IO uint32_t BFB2;
         __IO uint32_t WDG_SW;
         __IO uint32_t nRST_STOP;
         __IO uint32_t nRST_STDBY;
         __IO uint32_t RDP[8];
         __IO uint32_t nWRP[12];
-             uint32_t __RESERVED1[4];
+             uint32_t __RESERVED0[2];
+        __IO uint32_t DB1M;
+        __IO uint32_t SPRMOD;
     } OPTCR;                                                /*!< FLASH option control register ,  Address offset: 0x14 */
     struct {
              uint32_t __RESERVED0[16];
@@ -1692,7 +2768,7 @@ typedef struct {
 
 
 /**
-  * @brief Flexible Static Memory Controller
+  * @brief Flexible Memory Controller
   */
 typedef struct {
     struct {
@@ -1714,7 +2790,8 @@ typedef struct {
                 __IO uint32_t ASYNCWAIT : 1;                /*!<Asynchronous wait                      */
                 __IO uint32_t CPSIZE : 3;                   /*!<CRAM page size */
                 __IO uint32_t CBURSTRW : 1;                 /*!<Write burst enable                     */
-                     uint32_t __RESERVED1 : 12;
+                __IO uint32_t CCLKEN : 1;                   /*!<Continous clock enable     */
+                     uint32_t __RESERVED1 : 11;
             } b;
             __IO uint32_t w;
         } BCR;                                              /*!< NOR/PSRAM chip-select control register(BCR) */
@@ -1732,12 +2809,12 @@ typedef struct {
             __IO uint32_t w;
         } BTR;                                              /*!< NOR/PSRAM chip-select timing register(BTR) */
     } BCTR[4];                                              /*!< NOR/PSRAM chip-select control register(BCR) and chip-select timing register(BTR), Address offset: 0x00-1C */
-} FSMC_Bank1_TypeDef;
+} FMC_Bank1_TypeDef;
 
 
 
 /**
-  * @brief Flexible Static Memory Controller Bank1E
+  * @brief Flexible Memory Controller Bank1E
   */
 typedef struct {
     union {
@@ -1753,11 +2830,12 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } BWTR[7];                                              /*!< NOR/PSRAM write timing registers, Address offset: 0x104-0x11C */
-} FSMC_Bank1E_TypeDef;
+} FMC_Bank1E_TypeDef;
+
 
 
 /** 
-  * @brief Flexible Static Memory Controller Bank2
+  * @brief Flexible Memory Controller Bank2
   */
 typedef struct {
     union {
@@ -1859,11 +2937,12 @@ typedef struct {
     } PATT3;                                                /*!< NAND Flash Attribute memory space timing register 3, Address offset: 0x8C */
          uint32_t __RESERVED2;
     __IO uint32_t ECCR3;                                    /*!< NAND Flash ECC result registers 3,                   Address offset: 0x94 */
-} FSMC_Bank2_3_TypeDef;
+} FMC_Bank2_3_TypeDef;
+
 
 
 /** 
-  * @brief Flexible Static Memory Controller Bank4
+  * @brief Flexible Memory Controller Bank4
   */
 typedef struct {
     union {
@@ -1922,11 +3001,77 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } PIO4;                                                 /*!< PC Card  I/O space timing register 4,              Address offset: 0xB0 */
-} FSMC_Bank4_TypeDef;
+} FMC_Bank4_TypeDef;
 
 
 
-/**
+/** 
+  * @brief Flexible Memory Controller Bank5_6
+  */
+typedef struct {
+    union {
+        struct {
+            __IO uint32_t NC : 2;                           /*!<NC[1:0] bits (Number of column bits) */
+            __IO uint32_t NR : 2;                           /*!<NR[1:0] bits (Number of row bits) */
+            __IO uint32_t MWID : 2;                         /*!<NR[1:0] bits (Number of row bits) */
+            __IO uint32_t NB : 1;                           /*!<Number of internal bank */
+            __IO uint32_t CAS : 2;                          /*!<CAS[1:0] bits (CAS latency) */
+            __IO uint32_t WP : 1;                           /*!<Write protection */
+            __IO uint32_t SDCLK : 2;                        /*!<SDRAM clock configuration */
+            __IO uint32_t RBURST : 1;                       /*!<Read burst */
+            __IO uint32_t RPIPE : 2;                        /*!<Write protection */
+                 uint32_t __RESERVED0 : 17;
+        } b;
+        __IO uint32_t w;
+    } SDCR[2];                                              /*!< SDRAM Control registers ,      Address offset: 0x140-0x144  */
+    union {
+        struct {
+            __IO uint32_t TMRD : 4;                         /*!<TMRD[3:0] bits (Load mode register to active) */
+            __IO uint32_t TXSR : 4;                         /*!<TXSR[3:0] bits (Exit self refresh) */
+            __IO uint32_t TRAS : 4;                         /*!<TRAS[3:0] bits (Self refresh time) */
+            __IO uint32_t TRC : 4;                          /*!<TRC[2:0] bits (Row cycle delay) */
+            __IO uint32_t TWR : 4;                          /*!<TRC[2:0] bits (Write recovery delay) */
+            __IO uint32_t TRP : 4;                          /*!<TRP[2:0] bits (Row precharge delay) */
+            __IO uint32_t TRCD : 4;                         /*!<TRP[2:0] bits (Row to column delay) */
+                 uint32_t __RESERVED0 : 4;
+        } b;
+        __IO uint32_t w;
+    } SDTR[2];                                              /*!< SDRAM Timing registers ,       Address offset: 0x148-0x14C  */
+    union {
+        struct {
+            __IO uint32_t MODE : 3;                         /*!<MODE[2:0] bits (Command mode) */
+            __IO uint32_t CTB2 : 1;                         /*!<Command target 2 */
+            __IO uint32_t CTB1 : 1;                         /*!<Command target 1 */
+            __IO uint32_t NRFS : 4;                         /*!<NRFS[3:0] bits (Number of auto-refresh) */
+            __IO uint32_t MRD : 13;                         /*!<MRD[12:0] bits (Mode register definition) */
+                 uint32_t __RESERVED0 : 10;
+        } b;
+        __IO uint32_t w;
+    } SDCMR;                                                /*!< SDRAM Command Mode register,    Address offset: 0x150  */
+    union {
+        struct {
+            __IO uint32_t CRE : 1;                          /*!<Clear refresh error flag */
+            __IO uint32_t COUNT : 13;                       /*!<COUNT[12:0] bits (Refresh timer count) */
+            __IO uint32_t REIE : 1;                         /*!<RES interupt enable */
+                 uint32_t __RESERVED0 : 17;
+        } b;
+        __IO uint32_t w;
+    } SDRTR;                                                /*!< SDRAM Refresh Timer register,   Address offset: 0x154  */
+    union {
+        struct {
+            __IO uint32_t RE : 1;                           /*!<Refresh error flag */
+            __IO uint32_t MODES1 : 2;                       /*!<MODES1[1:0]bits (Status mode for bank 1) */
+            __IO uint32_t MODES2 : 2;                       /*!<MODES2[1:0]bits (Status mode for bank 2) */
+            __IO uint32_t BUSY : 1;                         /*!<Busy status */
+                 uint32_t __RESERVED0 : 26;
+        } b;
+        __IO uint32_t w;
+    } SDSR;                                                 /*!< SDRAM Status register,          Address offset: 0x158  */
+} FMC_Bank5_6_TypeDef;
+
+
+
+/** 
   * @brief General Purpose I/O
   */
 typedef struct {
@@ -1990,15 +3135,19 @@ typedef struct {
     union {
         struct {
             __IO uint32_t MEM_MODE : 3;                     /*!< SYSCFG_Memory Remap Config */
-                 uint32_t __RESERVED0 : 29;
+                 uint32_t __RESERVED0 : 5;
+            __IO uint32_t UFB_MODE : 1;                     /*!< User Flash Bank mode    */
+                 uint32_t __RESERVED1 : 23;
         } b;
         __IO uint32_t w;
     } MEMRMP;                                               /*!< SYSCFG memory remap register,                      Address offset: 0x00      */
     union {
         struct {
-                 uint32_t __RESERVED0 : 23;
+                 uint32_t __RESERVED0 : 16;
+            __IO uint32_t ADCxDC2 : 3;                      /*!< Refer to AN4073 on how to use this bit  */
+                 uint32_t __RESERVED1 : 4;
             __IO uint32_t MII_RMII_SEL : 1;                 /*!<Ethernet PHY interface selection */
-                 uint32_t __RESERVED1 : 8;
+                 uint32_t __RESERVED2 : 8;
         } b;
         __IO uint32_t w;
     } PMC;                                                  /*!< SYSCFG peripheral mode configuration register,     Address offset: 0x04      */
@@ -2019,12 +3168,16 @@ typedef struct {
 typedef struct {
     struct {
         __IO uint32_t MEM_MODE[3];                          /*!< SYSCFG_Memory Remap Config */
-             uint32_t __RESERVED0[29];
+             uint32_t __RESERVED0[5];
+        __IO uint32_t UFB_MODE;                             /*!< User Flash Bank mode    */
+             uint32_t __RESERVED1[23];
     } MEMRMP;                                               /*!< SYSCFG memory remap register,                      Address offset: 0x00      */
     struct {
-             uint32_t __RESERVED0[23];
+             uint32_t __RESERVED0[16];
+        __IO uint32_t ADCxDC2[3];                           /*!< Refer to AN4073 on how to use this bit  */
+             uint32_t __RESERVED1[4];
         __IO uint32_t MII_RMII_SEL;                         /*!<Ethernet PHY interface selection */
-             uint32_t __RESERVED1[8];
+             uint32_t __RESERVED2[8];
     } PMC;                                                  /*!< SYSCFG peripheral mode configuration register,     Address offset: 0x04      */
     __IO uint32_t EXTICR[4][32];                            /*!< SYSCFG external interrupt configuration registers, Address offset: 0x08-0x14 */
          uint32_t __RESERVED0[2][32];
@@ -2323,11 +3476,17 @@ typedef struct {
             __IO uint32_t CSBF : 1;                         /*!< Clear Standby Flag                  */
             __IO uint32_t PVDE : 1;                         /*!< Power Voltage Detector Enable       */
             __IO uint32_t PLS : 3;                          /*!< PLS[2:0] bits (PVD Level Selection) */
-            __IO uint32_t DBP : 1;                          /*!< Disable Backup Domain write protection               */
-            __IO uint32_t FPDS : 1;                         /*!< Flash power down in Stop mode                        */
-                 uint32_t __RESERVED0 : 4;
-            __IO uint32_t VOS : 1;                          /*!< VOS bit (Regulator voltage scaling output selection) */
-                 uint32_t __RESERVED1 : 17;
+            __IO uint32_t DBP : 1;                          /*!< Disable Backup Domain write protection                     */
+            __IO uint32_t FPDS : 1;                         /*!< Flash power down in Stop mode                              */
+            __IO uint32_t LPLVDS : 1;                       /*!< Low-Power Regulator Low Voltage Scaling in Stop mode       */
+            __IO uint32_t MRLVDS : 1;                       /*!< Main regulator Low Voltage Scaling in Stop mode            */
+                 uint32_t __RESERVED0 : 1;
+            __IO uint32_t ADCDC1 : 1;                       /*!< Refer to AN4073 on how to use this bit */
+            __IO uint32_t VOS : 2;                          /*!< VOS[1:0] bits (Regulator voltage scaling output selection) */
+            __IO uint32_t ODEN : 1;                         /*!< Over Drive enable                   */
+            __IO uint32_t ODSWEN : 1;                       /*!< Over Drive switch enabled           */
+            __IO uint32_t UDEN : 2;                         /*!< Under Drive enable in stop mode     */
+                 uint32_t __RESERVED1 : 12;
         } b;
         __IO uint32_t w;
     } CR;                                                   /*!< PWR power control register,        Address offset: 0x00 */
@@ -2342,7 +3501,11 @@ typedef struct {
             __IO uint32_t BRE : 1;                          /*!< Backup regulator enable                          */
                  uint32_t __RESERVED1 : 4;
             __IO uint32_t VOSRDY : 1;                       /*!< Regulator voltage scaling output selection ready */
-                 uint32_t __RESERVED2 : 17;
+                 uint32_t __RESERVED2 : 1;
+            __IO uint32_t ODRDY : 1;                        /*!< Over Drive generator ready                       */
+            __IO uint32_t ODSWRDY : 1;                      /*!< Over Drive Switch ready                          */
+            __IO uint32_t UDSWRDY : 2;                      /*!< Under Drive ready                                */
+                 uint32_t __RESERVED3 : 12;
         } b;
         __IO uint32_t w;
     } CSR;                                                  /*!< PWR power control/status register, Address offset: 0x04 */
@@ -2357,11 +3520,17 @@ typedef struct {
         __IO uint32_t CSBF;                                 /*!< Clear Standby Flag                  */
         __IO uint32_t PVDE;                                 /*!< Power Voltage Detector Enable       */
         __IO uint32_t PLS[3];                               /*!< PLS[2:0] bits (PVD Level Selection) */
-        __IO uint32_t DBP;                                  /*!< Disable Backup Domain write protection               */
-        __IO uint32_t FPDS;                                 /*!< Flash power down in Stop mode                        */
-             uint32_t __RESERVED0[4];
-        __IO uint32_t VOS;                                  /*!< VOS bit (Regulator voltage scaling output selection) */
-             uint32_t __RESERVED1[17];
+        __IO uint32_t DBP;                                  /*!< Disable Backup Domain write protection                     */
+        __IO uint32_t FPDS;                                 /*!< Flash power down in Stop mode                              */
+        __IO uint32_t LPLVDS;                               /*!< Low-Power Regulator Low Voltage Scaling in Stop mode       */
+        __IO uint32_t MRLVDS;                               /*!< Main regulator Low Voltage Scaling in Stop mode            */
+             uint32_t __RESERVED0;
+        __IO uint32_t ADCDC1;                               /*!< Refer to AN4073 on how to use this bit */
+        __IO uint32_t VOS[2];                               /*!< VOS[1:0] bits (Regulator voltage scaling output selection) */
+        __IO uint32_t ODEN;                                 /*!< Over Drive enable                   */
+        __IO uint32_t ODSWEN;                               /*!< Over Drive switch enabled           */
+        __IO uint32_t UDEN[2];                              /*!< Under Drive enable in stop mode     */
+             uint32_t __RESERVED1[12];
     } CR;                                                   /*!< PWR power control register,        Address offset: 0x00 */
     struct {
         __IO uint32_t WUF;                                  /*!< Wakeup Flag                                      */
@@ -2373,7 +3542,11 @@ typedef struct {
         __IO uint32_t BRE;                                  /*!< Backup regulator enable                          */
              uint32_t __RESERVED1[4];
         __IO uint32_t VOSRDY;                               /*!< Regulator voltage scaling output selection ready */
-             uint32_t __RESERVED2[17];
+             uint32_t __RESERVED2;
+        __IO uint32_t ODRDY;                                /*!< Over Drive generator ready                       */
+        __IO uint32_t ODSWRDY;                              /*!< Over Drive Switch ready                          */
+        __IO uint32_t UDSWRDY[2];                           /*!< Under Drive ready                                */
+             uint32_t __RESERVED3[12];
     } CSR;                                                  /*!< PWR power control/status register, Address offset: 0x04 */
 } PWR_BitBand_TypeDef;
 
@@ -2399,7 +3572,9 @@ typedef struct {
             __IO uint32_t PLLRDY : 1;
             __IO uint32_t PLLI2SON : 1;
             __IO uint32_t PLLI2SRDY : 1;
-                 uint32_t __RESERVED2 : 4;
+            __IO uint32_t PLLSAION : 1;
+            __IO uint32_t PLLSAIRDY : 1;
+                 uint32_t __RESERVED2 : 2;
         } b;
         __IO uint32_t w;
     } CR;                                                   /*!< RCC clock control register,                                  Address offset: 0x00 */
@@ -2442,7 +3617,7 @@ typedef struct {
             __IO uint32_t HSERDYF : 1;
             __IO uint32_t PLLRDYF : 1;
             __IO uint32_t PLLI2SRDYF : 1;
-                 uint32_t __RESERVED0 : 1;
+            __IO uint32_t PLLSAIRDYF : 1;
             __IO uint32_t CSSF : 1;
             __IO uint32_t LSIRDYIE : 1;
             __IO uint32_t LSERDYIE : 1;
@@ -2450,16 +3625,17 @@ typedef struct {
             __IO uint32_t HSERDYIE : 1;
             __IO uint32_t PLLRDYIE : 1;
             __IO uint32_t PLLI2SRDYIE : 1;
-                 uint32_t __RESERVED1 : 2;
+            __IO uint32_t PLLSAIRDYIE : 1;
+                 uint32_t __RESERVED0 : 1;
             __IO uint32_t LSIRDYC : 1;
             __IO uint32_t LSERDYC : 1;
             __IO uint32_t HSIRDYC : 1;
             __IO uint32_t HSERDYC : 1;
             __IO uint32_t PLLRDYC : 1;
             __IO uint32_t PLLI2SRDYC : 1;
-                 uint32_t __RESERVED2 : 1;
+            __IO uint32_t PLLSAIRDYC : 1;
             __IO uint32_t CSSC : 1;
-                 uint32_t __RESERVED3 : 8;
+                 uint32_t __RESERVED1 : 8;
         } b;
         __IO uint32_t w;
     } CIR;                                                  /*!< RCC clock interrupt register,                                Address offset: 0x0C */
@@ -2474,20 +3650,26 @@ typedef struct {
             __IO uint32_t GPIOGRST : 1;
             __IO uint32_t GPIOHRST : 1;
             __IO uint32_t GPIOIRST : 1;
-                 uint32_t __RESERVED0 : 3;
+            __IO uint32_t GPIOJRST : 1;
+            __IO uint32_t GPIOKRST : 1;
+                 uint32_t __RESERVED0 : 1;
             __IO uint32_t CRCRST : 1;
                  uint32_t __RESERVED1 : 8;
             __IO uint32_t DMA1RST : 1;
             __IO uint32_t DMA2RST : 1;
-                 uint32_t __RESERVED2 : 6;
+            __IO uint32_t DMA2DRST : 1;
+                 uint32_t __RESERVED2 : 1;
+            __IO uint32_t ETHMACRST : 1;
+                 uint32_t __RESERVED3 : 3;
             __IO uint32_t OTGHRST : 1;
-                 uint32_t __RESERVED3 : 2;
+                 uint32_t __RESERVED4 : 2;
         } b;
         __IO uint32_t w;
     } AHB1RSTR;                                             /*!< RCC AHB1 peripheral reset register,                          Address offset: 0x10 */
     union {
         struct {
-                 uint32_t __RESERVED0 : 6;
+            __IO uint32_t DCMIRST : 1;
+                 uint32_t __RESERVED0 : 5;
             __IO uint32_t RNGRST : 1;
             __IO uint32_t OTGFSRST : 1;
                  uint32_t __RESERVED1 : 24;
@@ -2496,7 +3678,7 @@ typedef struct {
     } AHB2RSTR;                                             /*!< RCC AHB2 peripheral reset register,                          Address offset: 0x14 */
     union {
         struct {
-            __IO uint32_t FSMCRST : 1;
+            __IO uint32_t FMCRST : 1;
                  uint32_t __RESERVED0 : 31;
         } b;
         __IO uint32_t w;
@@ -2532,7 +3714,8 @@ typedef struct {
                  uint32_t __RESERVED4 : 1;
             __IO uint32_t PWRRST : 1;
             __IO uint32_t DACRST : 1;
-                 uint32_t __RESERVED5 : 2;
+            __IO uint32_t UART7RST : 1;
+            __IO uint32_t UART8RST : 1;
         } b;
         __IO uint32_t w;
     } APB1RSTR;                                             /*!< RCC APB1 peripheral reset register,                          Address offset: 0x20 */
@@ -2548,13 +3731,17 @@ typedef struct {
                  uint32_t __RESERVED2 : 2;
             __IO uint32_t SDIORST : 1;
             __IO uint32_t SPI1RST : 1;
-                 uint32_t __RESERVED3 : 1;
+            __IO uint32_t SPI4RST : 1;
             __IO uint32_t SYSCFGRST : 1;
-                 uint32_t __RESERVED4 : 1;
+                 uint32_t __RESERVED3 : 1;
             __IO uint32_t TIM9RST : 1;
             __IO uint32_t TIM10RST : 1;
             __IO uint32_t TIM11RST : 1;
-                 uint32_t __RESERVED5 : 13;
+                 uint32_t __RESERVED4 : 1;
+            __IO uint32_t SPI5RST : 1;
+            __IO uint32_t SPI6RST : 1;
+            __IO uint32_t SAI1RST : 1;
+                 uint32_t __RESERVED5 : 9;
         } b;
         __IO uint32_t w;
     } APB2RSTR;                                             /*!< RCC APB2 peripheral reset register,                          Address offset: 0x24 */
@@ -2570,7 +3757,9 @@ typedef struct {
             __IO uint32_t GPIOGEN : 1;
             __IO uint32_t GPIOHEN : 1;
             __IO uint32_t GPIOIEN : 1;
-                 uint32_t __RESERVED0 : 3;
+            __IO uint32_t GPIOJEN : 1;
+            __IO uint32_t GPIOKEN : 1;
+                 uint32_t __RESERVED0 : 1;
             __IO uint32_t CRCEN : 1;
                  uint32_t __RESERVED1 : 5;
             __IO uint32_t BKPSRAMEN : 1;
@@ -2578,7 +3767,12 @@ typedef struct {
             __IO uint32_t CCMDATARAMEN : 1;
             __IO uint32_t DMA1EN : 1;
             __IO uint32_t DMA2EN : 1;
-                 uint32_t __RESERVED3 : 6;
+            __IO uint32_t DMA2DEN : 1;
+                 uint32_t __RESERVED3 : 1;
+            __IO uint32_t ETHMACEN : 1;
+            __IO uint32_t ETHMACTXEN : 1;
+            __IO uint32_t ETHMACRXEN : 1;
+            __IO uint32_t ETHMACPTPEN : 1;
             __IO uint32_t OTGHSEN : 1;
             __IO uint32_t OTGHSULPIEN : 1;
                  uint32_t __RESERVED4 : 1;
@@ -2587,7 +3781,8 @@ typedef struct {
     } AHB1ENR;                                              /*!< RCC AHB1 peripheral clock register,                          Address offset: 0x30 */
     union {
         struct {
-                 uint32_t __RESERVED0 : 6;
+            __IO uint32_t DCMIEN : 1;
+                 uint32_t __RESERVED0 : 5;
             __IO uint32_t RNGEN : 1;
             __IO uint32_t OTGFSEN : 1;
                  uint32_t __RESERVED1 : 24;
@@ -2596,7 +3791,7 @@ typedef struct {
     } AHB2ENR;                                              /*!< RCC AHB2 peripheral clock register,                          Address offset: 0x34 */
     union {
         struct {
-            __IO uint32_t FSMCEN : 1;
+            __IO uint32_t FMCEN : 1;
                  uint32_t __RESERVED0 : 31;
         } b;
         __IO uint32_t w;
@@ -2632,7 +3827,8 @@ typedef struct {
                  uint32_t __RESERVED4 : 1;
             __IO uint32_t PWREN : 1;
             __IO uint32_t DACEN : 1;
-                 uint32_t __RESERVED5 : 2;
+            __IO uint32_t UART7EN : 1;
+            __IO uint32_t UART8EN : 1;
         } b;
         __IO uint32_t w;
     } APB1ENR;                                              /*!< RCC APB1 peripheral clock enable register,                   Address offset: 0x40 */
@@ -2649,16 +3845,17 @@ typedef struct {
             __IO uint32_t ADC3EN : 1;
             __IO uint32_t SDIOEN : 1;
             __IO uint32_t SPI1EN : 1;
-                 uint32_t __RESERVED2 : 1;
+            __IO uint32_t SPI4EN : 1;
             __IO uint32_t SYSCFGEN : 1;
-                 uint32_t __RESERVED3 : 1;
+                 uint32_t __RESERVED2 : 1;
             __IO uint32_t TIM9EN : 1;
             __IO uint32_t TIM10EN : 1;
             __IO uint32_t TIM11EN : 1;
-                 uint32_t __RESERVED4 : 1;
+                 uint32_t __RESERVED3 : 1;
             __IO uint32_t SPI5EN : 1;
             __IO uint32_t SPI6EN : 1;
-                 uint32_t __RESERVED5 : 10;
+            __IO uint32_t SAI1EN : 1;
+                 uint32_t __RESERVED4 : 9;
         } b;
         __IO uint32_t w;
     } APB2ENR;                                              /*!< RCC APB2 peripheral clock enable register,                   Address offset: 0x44 */
@@ -2674,7 +3871,9 @@ typedef struct {
             __IO uint32_t GPIOGLPEN : 1;
             __IO uint32_t GPIOHLPEN : 1;
             __IO uint32_t GPIOILPEN : 1;
-                 uint32_t __RESERVED0 : 3;
+            __IO uint32_t GPIOJLPEN : 1;
+            __IO uint32_t GPIOKLPEN : 1;
+                 uint32_t __RESERVED0 : 1;
             __IO uint32_t CRCLPEN : 1;
                  uint32_t __RESERVED1 : 2;
             __IO uint32_t FLITFLPEN : 1;
@@ -2684,7 +3883,12 @@ typedef struct {
                  uint32_t __RESERVED2 : 2;
             __IO uint32_t DMA1LPEN : 1;
             __IO uint32_t DMA2LPEN : 1;
-                 uint32_t __RESERVED3 : 6;
+            __IO uint32_t DMA2DLPEN : 1;
+                 uint32_t __RESERVED3 : 1;
+            __IO uint32_t ETHMACLPEN : 1;
+            __IO uint32_t ETHMACTXLPEN : 1;
+            __IO uint32_t ETHMACRXLPEN : 1;
+            __IO uint32_t ETHMACPTPLPEN : 1;
             __IO uint32_t OTGHSLPEN : 1;
             __IO uint32_t OTGHSULPILPEN : 1;
                  uint32_t __RESERVED4 : 1;
@@ -2693,7 +3897,8 @@ typedef struct {
     } AHB1LPENR;                                            /*!< RCC AHB1 peripheral clock enable in low power mode register, Address offset: 0x50 */
     union {
         struct {
-                 uint32_t __RESERVED0 : 6;
+            __IO uint32_t DCMILPEN : 1;
+                 uint32_t __RESERVED0 : 5;
             __IO uint32_t RNGLPEN : 1;
             __IO uint32_t OTGFSLPEN : 1;
                  uint32_t __RESERVED1 : 24;
@@ -2702,7 +3907,7 @@ typedef struct {
     } AHB2LPENR;                                            /*!< RCC AHB2 peripheral clock enable in low power mode register, Address offset: 0x54 */
     union {
         struct {
-            __IO uint32_t FSMCLPEN : 1;
+            __IO uint32_t FMCLPEN : 1;
                  uint32_t __RESERVED0 : 31;
         } b;
         __IO uint32_t w;
@@ -2738,7 +3943,8 @@ typedef struct {
                  uint32_t __RESERVED4 : 1;
             __IO uint32_t PWRLPEN : 1;
             __IO uint32_t DACLPEN : 1;
-                 uint32_t __RESERVED5 : 2;
+            __IO uint32_t UART7LPEN : 1;
+            __IO uint32_t UART8LPEN : 1;
         } b;
         __IO uint32_t w;
     } APB1LPENR;                                            /*!< RCC APB1 peripheral clock enable in low power mode register, Address offset: 0x60 */
@@ -2755,13 +3961,17 @@ typedef struct {
             __IO uint32_t ADC3LPEN : 1;
             __IO uint32_t SDIOLPEN : 1;
             __IO uint32_t SPI1LPEN : 1;
-                 uint32_t __RESERVED2 : 1;
+            __IO uint32_t SPI4LPEN : 1;
             __IO uint32_t SYSCFGLPEN : 1;
-                 uint32_t __RESERVED3 : 1;
+                 uint32_t __RESERVED2 : 1;
             __IO uint32_t TIM9LPEN : 1;
             __IO uint32_t TIM10LPEN : 1;
             __IO uint32_t TIM11LPEN : 1;
-                 uint32_t __RESERVED4 : 13;
+                 uint32_t __RESERVED3 : 1;
+            __IO uint32_t SPI5LPEN : 1;
+            __IO uint32_t SPI6LPEN : 1;
+            __IO uint32_t SAI1LPEN : 1;
+                 uint32_t __RESERVED4 : 9;
         } b;
         __IO uint32_t w;
     } APB2LPENR;                                            /*!< RCC APB2 peripheral clock enable in low power mode register, Address offset: 0x64 */
@@ -2811,12 +4021,39 @@ typedef struct {
         struct {
                  uint32_t __RESERVED0 : 6;
             __IO uint32_t PLLI2SN : 9;
-                 uint32_t __RESERVED1 : 13;
+                 uint32_t __RESERVED1 : 9;
+            __IO uint32_t PLLI2SQ : 4;
             __IO uint32_t PLLI2SR : 3;
                  uint32_t __RESERVED2 : 1;
         } b;
         __IO uint32_t w;
     } PLLI2SCFGR;                                           /*!< RCC PLLI2S configuration register,                           Address offset: 0x84 */
+    union {
+        struct {
+                 uint32_t __RESERVED0 : 6;
+            __IO uint32_t PLLSAIN : 9;
+                 uint32_t __RESERVED1 : 9;
+            __IO uint32_t PLLSAIQ : 4;
+            __IO uint32_t PLLSAIR : 3;
+                 uint32_t __RESERVED2 : 1;
+        } b;
+        __IO uint32_t w;
+    } PLLSAICFGR;                                           /*!< RCC PLLSAI configuration register,                           Address offset: 0x88 */
+    union {
+        struct {
+            __IO uint32_t PLLI2SDIVQ : 5;
+                 uint32_t __RESERVED0 : 3;
+            __IO uint32_t PLLSAIDIVQ : 5;
+                 uint32_t __RESERVED1 : 3;
+            __IO uint32_t PLLSAIDIVR : 2;
+                 uint32_t __RESERVED2 : 2;
+            __IO uint32_t SAI1ASRC : 2;
+            __IO uint32_t SAI1BSRC : 2;
+            __IO uint32_t TIMPRE : 1;
+                 uint32_t __RESERVED3 : 7;
+        } b;
+        __IO uint32_t w;
+    } DCKCFGR;                                              /*!< RCC Dedicated Clocks configuration register,                 Address offset: 0x8C */
 } RCC_TypeDef;
 
 
@@ -2836,7 +4073,9 @@ typedef struct {
         __IO uint32_t PLLRDY;
         __IO uint32_t PLLI2SON;
         __IO uint32_t PLLI2SRDY;
-             uint32_t __RESERVED2[4];
+        __IO uint32_t PLLSAION;
+        __IO uint32_t PLLSAIRDY;
+             uint32_t __RESERVED2[2];
     } CR;                                                   /*!< RCC clock control register,                                  Address offset: 0x00 */
     struct {
         __IO uint32_t PLLM[6];
@@ -2870,7 +4109,7 @@ typedef struct {
         __IO uint32_t HSERDYF;
         __IO uint32_t PLLRDYF;
         __IO uint32_t PLLI2SRDYF;
-             uint32_t __RESERVED0;
+        __IO uint32_t PLLSAIRDYF;
         __IO uint32_t CSSF;
         __IO uint32_t LSIRDYIE;
         __IO uint32_t LSERDYIE;
@@ -2878,16 +4117,17 @@ typedef struct {
         __IO uint32_t HSERDYIE;
         __IO uint32_t PLLRDYIE;
         __IO uint32_t PLLI2SRDYIE;
-             uint32_t __RESERVED1[2];
+        __IO uint32_t PLLSAIRDYIE;
+             uint32_t __RESERVED0;
         __IO uint32_t LSIRDYC;
         __IO uint32_t LSERDYC;
         __IO uint32_t HSIRDYC;
         __IO uint32_t HSERDYC;
         __IO uint32_t PLLRDYC;
         __IO uint32_t PLLI2SRDYC;
-             uint32_t __RESERVED2;
+        __IO uint32_t PLLSAIRDYC;
         __IO uint32_t CSSC;
-             uint32_t __RESERVED3[8];
+             uint32_t __RESERVED1[8];
     } CIR;                                                  /*!< RCC clock interrupt register,                                Address offset: 0x0C */
     struct {
         __IO uint32_t GPIOARST;
@@ -2899,23 +4139,29 @@ typedef struct {
         __IO uint32_t GPIOGRST;
         __IO uint32_t GPIOHRST;
         __IO uint32_t GPIOIRST;
-             uint32_t __RESERVED0[3];
+        __IO uint32_t GPIOJRST;
+        __IO uint32_t GPIOKRST;
+             uint32_t __RESERVED0;
         __IO uint32_t CRCRST;
              uint32_t __RESERVED1[8];
         __IO uint32_t DMA1RST;
         __IO uint32_t DMA2RST;
-             uint32_t __RESERVED2[6];
+        __IO uint32_t DMA2DRST;
+             uint32_t __RESERVED2;
+        __IO uint32_t ETHMACRST;
+             uint32_t __RESERVED3[3];
         __IO uint32_t OTGHRST;
-             uint32_t __RESERVED3[2];
+             uint32_t __RESERVED4[2];
     } AHB1RSTR;                                             /*!< RCC AHB1 peripheral reset register,                          Address offset: 0x10 */
     struct {
-             uint32_t __RESERVED0[6];
+        __IO uint32_t DCMIRST;
+             uint32_t __RESERVED0[5];
         __IO uint32_t RNGRST;
         __IO uint32_t OTGFSRST;
              uint32_t __RESERVED1[24];
     } AHB2RSTR;                                             /*!< RCC AHB2 peripheral reset register,                          Address offset: 0x14 */
     struct {
-        __IO uint32_t FSMCRST;
+        __IO uint32_t FMCRST;
              uint32_t __RESERVED0[31];
     } AHB3RSTR;                                             /*!< RCC AHB3 peripheral reset register,                          Address offset: 0x18 */
          uint32_t __RESERVED0[32];
@@ -2948,7 +4194,8 @@ typedef struct {
              uint32_t __RESERVED4;
         __IO uint32_t PWRRST;
         __IO uint32_t DACRST;
-             uint32_t __RESERVED5[2];
+        __IO uint32_t UART7RST;
+        __IO uint32_t UART8RST;
     } APB1RSTR;                                             /*!< RCC APB1 peripheral reset register,                          Address offset: 0x20 */
     struct {
         __IO uint32_t TIM1RST;
@@ -2961,13 +4208,17 @@ typedef struct {
              uint32_t __RESERVED2[2];
         __IO uint32_t SDIORST;
         __IO uint32_t SPI1RST;
-             uint32_t __RESERVED3;
+        __IO uint32_t SPI4RST;
         __IO uint32_t SYSCFGRST;
-             uint32_t __RESERVED4;
+             uint32_t __RESERVED3;
         __IO uint32_t TIM9RST;
         __IO uint32_t TIM10RST;
         __IO uint32_t TIM11RST;
-             uint32_t __RESERVED5[13];
+             uint32_t __RESERVED4;
+        __IO uint32_t SPI5RST;
+        __IO uint32_t SPI6RST;
+        __IO uint32_t SAI1RST;
+             uint32_t __RESERVED5[9];
     } APB2RSTR;                                             /*!< RCC APB2 peripheral reset register,                          Address offset: 0x24 */
          uint32_t __RESERVED1[2][32];
     struct {
@@ -2980,7 +4231,9 @@ typedef struct {
         __IO uint32_t GPIOGEN;
         __IO uint32_t GPIOHEN;
         __IO uint32_t GPIOIEN;
-             uint32_t __RESERVED0[3];
+        __IO uint32_t GPIOJEN;
+        __IO uint32_t GPIOKEN;
+             uint32_t __RESERVED0;
         __IO uint32_t CRCEN;
              uint32_t __RESERVED1[5];
         __IO uint32_t BKPSRAMEN;
@@ -2988,19 +4241,25 @@ typedef struct {
         __IO uint32_t CCMDATARAMEN;
         __IO uint32_t DMA1EN;
         __IO uint32_t DMA2EN;
-             uint32_t __RESERVED3[6];
+        __IO uint32_t DMA2DEN;
+             uint32_t __RESERVED3;
+        __IO uint32_t ETHMACEN;
+        __IO uint32_t ETHMACTXEN;
+        __IO uint32_t ETHMACRXEN;
+        __IO uint32_t ETHMACPTPEN;
         __IO uint32_t OTGHSEN;
         __IO uint32_t OTGHSULPIEN;
              uint32_t __RESERVED4;
     } AHB1ENR;                                              /*!< RCC AHB1 peripheral clock register,                          Address offset: 0x30 */
     struct {
-             uint32_t __RESERVED0[6];
+        __IO uint32_t DCMIEN;
+             uint32_t __RESERVED0[5];
         __IO uint32_t RNGEN;
         __IO uint32_t OTGFSEN;
              uint32_t __RESERVED1[24];
     } AHB2ENR;                                              /*!< RCC AHB2 peripheral clock register,                          Address offset: 0x34 */
     struct {
-        __IO uint32_t FSMCEN;
+        __IO uint32_t FMCEN;
              uint32_t __RESERVED0[31];
     } AHB3ENR;                                              /*!< RCC AHB3 peripheral clock register,                          Address offset: 0x38 */
          uint32_t __RESERVED2[32];
@@ -3033,7 +4292,8 @@ typedef struct {
              uint32_t __RESERVED4;
         __IO uint32_t PWREN;
         __IO uint32_t DACEN;
-             uint32_t __RESERVED5[2];
+        __IO uint32_t UART7EN;
+        __IO uint32_t UART8EN;
     } APB1ENR;                                              /*!< RCC APB1 peripheral clock enable register,                   Address offset: 0x40 */
     struct {
         __IO uint32_t TIM1EN;
@@ -3047,16 +4307,17 @@ typedef struct {
         __IO uint32_t ADC3EN;
         __IO uint32_t SDIOEN;
         __IO uint32_t SPI1EN;
-             uint32_t __RESERVED2;
+        __IO uint32_t SPI4EN;
         __IO uint32_t SYSCFGEN;
-             uint32_t __RESERVED3;
+             uint32_t __RESERVED2;
         __IO uint32_t TIM9EN;
         __IO uint32_t TIM10EN;
         __IO uint32_t TIM11EN;
-             uint32_t __RESERVED4;
+             uint32_t __RESERVED3;
         __IO uint32_t SPI5EN;
         __IO uint32_t SPI6EN;
-             uint32_t __RESERVED5[10];
+        __IO uint32_t SAI1EN;
+             uint32_t __RESERVED4[9];
     } APB2ENR;                                              /*!< RCC APB2 peripheral clock enable register,                   Address offset: 0x44 */
          uint32_t __RESERVED3[2][32];
     struct {
@@ -3069,7 +4330,9 @@ typedef struct {
         __IO uint32_t GPIOGLPEN;
         __IO uint32_t GPIOHLPEN;
         __IO uint32_t GPIOILPEN;
-             uint32_t __RESERVED0[3];
+        __IO uint32_t GPIOJLPEN;
+        __IO uint32_t GPIOKLPEN;
+             uint32_t __RESERVED0;
         __IO uint32_t CRCLPEN;
              uint32_t __RESERVED1[2];
         __IO uint32_t FLITFLPEN;
@@ -3079,19 +4342,25 @@ typedef struct {
              uint32_t __RESERVED2[2];
         __IO uint32_t DMA1LPEN;
         __IO uint32_t DMA2LPEN;
-             uint32_t __RESERVED3[6];
+        __IO uint32_t DMA2DLPEN;
+             uint32_t __RESERVED3;
+        __IO uint32_t ETHMACLPEN;
+        __IO uint32_t ETHMACTXLPEN;
+        __IO uint32_t ETHMACRXLPEN;
+        __IO uint32_t ETHMACPTPLPEN;
         __IO uint32_t OTGHSLPEN;
         __IO uint32_t OTGHSULPILPEN;
              uint32_t __RESERVED4;
     } AHB1LPENR;                                            /*!< RCC AHB1 peripheral clock enable in low power mode register, Address offset: 0x50 */
     struct {
-             uint32_t __RESERVED0[6];
+        __IO uint32_t DCMILPEN;
+             uint32_t __RESERVED0[5];
         __IO uint32_t RNGLPEN;
         __IO uint32_t OTGFSLPEN;
              uint32_t __RESERVED1[24];
     } AHB2LPENR;                                            /*!< RCC AHB2 peripheral clock enable in low power mode register, Address offset: 0x54 */
     struct {
-        __IO uint32_t FSMCLPEN;
+        __IO uint32_t FMCLPEN;
              uint32_t __RESERVED0[31];
     } AHB3LPENR;                                            /*!< RCC AHB3 peripheral clock enable in low power mode register, Address offset: 0x58 */
          uint32_t __RESERVED4[32];
@@ -3124,7 +4393,8 @@ typedef struct {
              uint32_t __RESERVED4;
         __IO uint32_t PWRLPEN;
         __IO uint32_t DACLPEN;
-             uint32_t __RESERVED5[2];
+        __IO uint32_t UART7LPEN;
+        __IO uint32_t UART8LPEN;
     } APB1LPENR;                                            /*!< RCC APB1 peripheral clock enable in low power mode register, Address offset: 0x60 */
     struct {
         __IO uint32_t TIM1LPEN;
@@ -3138,13 +4408,17 @@ typedef struct {
         __IO uint32_t ADC3LPEN;
         __IO uint32_t SDIOLPEN;
         __IO uint32_t SPI1LPEN;
-             uint32_t __RESERVED2;
+        __IO uint32_t SPI4LPEN;
         __IO uint32_t SYSCFGLPEN;
-             uint32_t __RESERVED3;
+             uint32_t __RESERVED2;
         __IO uint32_t TIM9LPEN;
         __IO uint32_t TIM10LPEN;
         __IO uint32_t TIM11LPEN;
-             uint32_t __RESERVED4[13];
+             uint32_t __RESERVED3;
+        __IO uint32_t SPI5LPEN;
+        __IO uint32_t SPI6LPEN;
+        __IO uint32_t SAI1LPEN;
+             uint32_t __RESERVED4[9];
     } APB2LPENR;                                            /*!< RCC APB2 peripheral clock enable in low power mode register, Address offset: 0x64 */
          uint32_t __RESERVED5[2][32];
     struct {
@@ -3182,10 +4456,31 @@ typedef struct {
     struct {
              uint32_t __RESERVED0[6];
         __IO uint32_t PLLI2SN[9];
-             uint32_t __RESERVED1[13];
+             uint32_t __RESERVED1[9];
+        __IO uint32_t PLLI2SQ[4];
         __IO uint32_t PLLI2SR[3];
              uint32_t __RESERVED2;
     } PLLI2SCFGR;                                           /*!< RCC PLLI2S configuration register,                           Address offset: 0x84 */
+    struct {
+             uint32_t __RESERVED0[6];
+        __IO uint32_t PLLSAIN[9];
+             uint32_t __RESERVED1[9];
+        __IO uint32_t PLLSAIQ[4];
+        __IO uint32_t PLLSAIR[3];
+             uint32_t __RESERVED2;
+    } PLLSAICFGR;                                           /*!< RCC PLLSAI configuration register,                           Address offset: 0x88 */
+    struct {
+        __IO uint32_t PLLI2SDIVQ[5];
+             uint32_t __RESERVED0[3];
+        __IO uint32_t PLLSAIDIVQ[5];
+             uint32_t __RESERVED1[3];
+        __IO uint32_t PLLSAIDIVR[2];
+             uint32_t __RESERVED2[2];
+        __IO uint32_t SAI1ASRC[2];
+        __IO uint32_t SAI1BSRC[2];
+        __IO uint32_t TIMPRE;
+             uint32_t __RESERVED3[7];
+    } DCKCFGR;                                              /*!< RCC Dedicated Clocks configuration register,                 Address offset: 0x8C */
 } RCC_BitBand_TypeDef;
 
 
@@ -3607,8 +4902,60 @@ typedef struct {
 
 
 
+/** 
+  * @brief Serial Audio Interface
+  */
+typedef struct {
+    union {
+        struct {
+            __IO uint32_t SYNCIN : 2;                       /*!<SYNCIN[1:0] bits (Synchronization Inputs)   */
+                 uint32_t __RESERVED0 : 2;
+            __IO uint32_t SYNCOUT : 2;                      /*!<SYNCOUT[1:0] bits (Synchronization Outputs) */
+                 uint32_t __RESERVED1 : 26;
+        } b;
+        __IO uint32_t w;
+    } GCR;                                                  /*!< SAI global configuration register,        Address offset: 0x00 */
+} SAI_TypeDef;
 
-/**
+
+typedef struct {
+    struct {
+        __IO uint32_t SYNCIN[2];                            /*!<SYNCIN[1:0] bits (Synchronization Inputs)   */
+             uint32_t __RESERVED0[2];
+        __IO uint32_t SYNCOUT[2];                           /*!<SYNCOUT[1:0] bits (Synchronization Outputs) */
+             uint32_t __RESERVED1[26];
+    } GCR;                                                  /*!< SAI global configuration register,        Address offset: 0x00 */
+} SAI_BitBand_TypeDef;
+
+
+
+
+typedef struct {
+    __IO uint32_t CR1;                                      /*!< SAI block x configuration register 1,     Address offset: 0x04 */
+    __IO uint32_t CR2;                                      /*!< SAI block x configuration register 2,     Address offset: 0x08 */
+    __IO uint32_t FRCR;                                     /*!< SAI block x frame configuration register, Address offset: 0x0C */
+    __IO uint32_t SLOTR;                                    /*!< SAI block x slot register,                Address offset: 0x10 */
+    __IO uint32_t IMR;                                      /*!< SAI block x interrupt mask register,      Address offset: 0x14 */
+    __IO uint32_t SR;                                       /*!< SAI block x status register,              Address offset: 0x18 */
+    __IO uint32_t CLRFR;                                    /*!< SAI block x clear flag register,          Address offset: 0x1C */
+    __IO uint32_t DR;                                       /*!< SAI block x data register,                Address offset: 0x20 */
+} SAI_Block_TypeDef;
+
+
+typedef struct {
+    __IO uint32_t CR1[32];                                  /*!< SAI block x configuration register 1,     Address offset: 0x04 */
+    __IO uint32_t CR2[32];                                  /*!< SAI block x configuration register 2,     Address offset: 0x08 */
+    __IO uint32_t FRCR[32];                                 /*!< SAI block x frame configuration register, Address offset: 0x0C */
+    __IO uint32_t SLOTR[32];                                /*!< SAI block x slot register,                Address offset: 0x10 */
+    __IO uint32_t IMR[32];                                  /*!< SAI block x interrupt mask register,      Address offset: 0x14 */
+    __IO uint32_t SR[32];                                   /*!< SAI block x status register,              Address offset: 0x18 */
+    __IO uint32_t CLRFR[32];                                /*!< SAI block x clear flag register,          Address offset: 0x1C */
+    __IO uint32_t DR[32];                                   /*!< SAI block x data register,                Address offset: 0x20 */
+} SAI_Block_BitBand_TypeDef;
+
+
+
+/** 
   * @brief SD host Interface
   */
 typedef struct {
@@ -4709,7 +6056,7 @@ typedef struct {
 } RNG_TypeDef;
 
 
- 
+
 /**
   * @brief USB_OTG_Core_register
   */
@@ -5706,22 +7053,25 @@ typedef struct {
 } USB_OTG_TypeDef;
 
 
-
 /**
-  * @brief Peripheral_memory_map
+  * @}
   */
-#define FLASH_BASE            0x08000000U /*!< FLASH(up to 1 MB) base address in the alias region                         */
+
+/** @addtogroup Peripheral_memory_map
+  * @{
+  */
+#define FLASH_BASE            0x08000000U /*!< FLASH(up to 2 MB) base address in the alias region                         */
 #define CCMDATARAM_BASE       0x10000000U /*!< CCM(core coupled memory) data RAM(64 KB) base address in the alias region  */
 #define SRAM1_BASE            0x20000000U /*!< SRAM1(112 KB) base address in the alias region                             */
 #define SRAM2_BASE            0x2001C000U /*!< SRAM2(16 KB) base address in the alias region                              */
 #define PERIPH_BASE           0x40000000U /*!< Peripheral base address in the alias region                                */
 #define BKPSRAM_BASE          0x40024000U /*!< Backup SRAM(4 KB) base address in the alias region                         */
-#define FSMC_R_BASE           0xA0000000U /*!< FSMC registers base address                                                */
+#define FMC_R_BASE            0xA0000000U /*!< FMC registers base address                                                 */
 #define SRAM1_BB_BASE         0x22000000U /*!< SRAM1(112 KB) base address in the bit-band region                             */
 #define SRAM2_BB_BASE         0x22380000U /*!< SRAM2(16 KB) base address in the bit-band region                              */
 #define PERIPH_BB_BASE        0x42000000U /*!< Peripheral base address in the bit-band region                                */
 #define BKPSRAM_BB_BASE       0x42480000U /*!< Backup SRAM(4 KB) base address in the bit-band region                         */
-#define FLASH_END             0x080FFFFFU /*!< FLASH end address */
+#define FLASH_END             0x081FFFFFU /*!< FLASH end address */
 #define CCMDATARAM_END        0x1000FFFFU /*!< CCM data RAM end address */
 
 /* Legacy defines */
@@ -5763,6 +7113,8 @@ typedef struct {
 #define CAN2_BASE             (APB1PERIPH_BASE + 0x6800U)
 #define PWR_BASE              (APB1PERIPH_BASE + 0x7000U)
 #define DAC_BASE              (APB1PERIPH_BASE + 0x7400U)
+#define UART7_BASE            (APB1PERIPH_BASE + 0x7800U)
+#define UART8_BASE            (APB1PERIPH_BASE + 0x7C00U)
 
 /*!< APB2 peripherals */
 #define TIM1_BASE             (APB2PERIPH_BASE + 0x0000U)
@@ -5775,11 +7127,17 @@ typedef struct {
 #define ADC_BASE              (APB2PERIPH_BASE + 0x2300U)
 #define SDIO_BASE             (APB2PERIPH_BASE + 0x2C00U)
 #define SPI1_BASE             (APB2PERIPH_BASE + 0x3000U)
+#define SPI4_BASE             (APB2PERIPH_BASE + 0x3400U)
 #define SYSCFG_BASE           (APB2PERIPH_BASE + 0x3800U)
 #define EXTI_BASE             (APB2PERIPH_BASE + 0x3C00U)
 #define TIM9_BASE             (APB2PERIPH_BASE + 0x4000U)
 #define TIM10_BASE            (APB2PERIPH_BASE + 0x4400U)
 #define TIM11_BASE            (APB2PERIPH_BASE + 0x4800U)
+#define SPI5_BASE             (APB2PERIPH_BASE + 0x5000U)
+#define SPI6_BASE             (APB2PERIPH_BASE + 0x5400U)
+#define SAI1_BASE             (APB2PERIPH_BASE + 0x5800U)
+#define SAI1_Block_A_BASE     (SAI1_BASE + 0x004U)
+#define SAI1_Block_B_BASE     (SAI1_BASE + 0x024U)
 
 /*!< AHB1 peripherals */
 #define GPIOA_BASE            (AHB1PERIPH_BASE + 0x0000U)
@@ -5791,6 +7149,8 @@ typedef struct {
 #define GPIOG_BASE            (AHB1PERIPH_BASE + 0x1800U)
 #define GPIOH_BASE            (AHB1PERIPH_BASE + 0x1C00U)
 #define GPIOI_BASE            (AHB1PERIPH_BASE + 0x2000U)
+#define GPIOJ_BASE            (AHB1PERIPH_BASE + 0x2400U)
+#define GPIOK_BASE            (AHB1PERIPH_BASE + 0x2800U)
 #define CRC_BASE              (AHB1PERIPH_BASE + 0x3000U)
 #define RCC_BASE              (AHB1PERIPH_BASE + 0x3800U)
 #define FLASH_R_BASE          (AHB1PERIPH_BASE + 0x3C00U)
@@ -5812,15 +7172,23 @@ typedef struct {
 #define DMA2_Stream5_BASE     (DMA2_BASE + 0x088U)
 #define DMA2_Stream6_BASE     (DMA2_BASE + 0x0A0U)
 #define DMA2_Stream7_BASE     (DMA2_BASE + 0x0B8U)
+#define ETH_BASE              (AHB1PERIPH_BASE + 0x8000U)
+#define ETH_MAC_BASE          (ETH_BASE)
+#define ETH_MMC_BASE          (ETH_BASE + 0x0100U)
+#define ETH_PTP_BASE          (ETH_BASE + 0x0700U)
+#define ETH_DMA_BASE          (ETH_BASE + 0x1000U)
+#define DMA2D_BASE            (AHB1PERIPH_BASE + 0xB000U)
 
 /*!< AHB2 peripherals */
+#define DCMI_BASE             (AHB2PERIPH_BASE + 0x50000U)
 #define RNG_BASE              (AHB2PERIPH_BASE + 0x60800U)
 
-/*!< FSMC Bankx registers base address */
-#define FSMC_Bank1_R_BASE     (FSMC_R_BASE + 0x0000U)
-#define FSMC_Bank1E_R_BASE    (FSMC_R_BASE + 0x0104U)
-#define FSMC_Bank2_3_R_BASE   (FSMC_R_BASE + 0x0060U)
-#define FSMC_Bank4_R_BASE     (FSMC_R_BASE + 0x00A0U)
+/*!< FMC Bankx registers base address */
+#define FMC_Bank1_R_BASE      (FMC_R_BASE + 0x0000U)
+#define FMC_Bank1E_R_BASE     (FMC_R_BASE + 0x0104U)
+#define FMC_Bank2_3_R_BASE    (FMC_R_BASE + 0x0060U)
+#define FMC_Bank4_R_BASE      (FMC_R_BASE + 0x00A0U)
+#define FMC_Bank5_6_R_BASE    (FMC_R_BASE + 0x0140U)
 
 /* Debug MCU registers base address */
 #define DBGMCU_BASE           0xE0042000U
@@ -5876,6 +7244,8 @@ typedef struct {
 #define CAN2                ((CAN_TypeDef *) CAN2_BASE)
 #define PWR                 ((PWR_TypeDef *) PWR_BASE)
 #define DAC                 ((DAC_TypeDef *) DAC_BASE)
+#define UART7               ((USART_TypeDef *) UART7_BASE)
+#define UART8               ((USART_TypeDef *) UART8_BASE)
 #define TIM1                ((TIM_TypeDef *) TIM1_BASE)
 #define TIM8                ((TIM_TypeDef *) TIM8_BASE)
 #define USART1              ((USART_TypeDef *) USART1_BASE)
@@ -5885,12 +7255,19 @@ typedef struct {
 #define ADC2                ((ADC_TypeDef *) ADC2_BASE)
 #define ADC3                ((ADC_TypeDef *) ADC3_BASE)
 #define SDIO                ((SDIO_TypeDef *) SDIO_BASE)
-#define SPI1                ((SPI_TypeDef *) SPI1_BASE)
+#define SPI1                ((SPI_TypeDef *) SPI1_BASE) 
+#define SPI4                ((SPI_TypeDef *) SPI4_BASE)
 #define SYSCFG              ((SYSCFG_TypeDef *) SYSCFG_BASE)
 #define EXTI                ((EXTI_TypeDef *) EXTI_BASE)
 #define TIM9                ((TIM_TypeDef *) TIM9_BASE)
 #define TIM10               ((TIM_TypeDef *) TIM10_BASE)
 #define TIM11               ((TIM_TypeDef *) TIM11_BASE)
+#define SPI5                ((SPI_TypeDef *) SPI5_BASE)
+#define SPI6                ((SPI_TypeDef *) SPI6_BASE)
+#define SAI1                ((SAI_TypeDef *) SAI1_BASE)
+#define SAI1_Block_A        ((SAI_Block_TypeDef *)SAI1_Block_A_BASE)
+#define SAI1_Block_B        ((SAI_Block_TypeDef *)SAI1_Block_B_BASE)
+
 #define GPIOA               ((GPIO_TypeDef *) GPIOA_BASE)
 #define GPIOB               ((GPIO_TypeDef *) GPIOB_BASE)
 #define GPIOC               ((GPIO_TypeDef *) GPIOC_BASE)
@@ -5900,6 +7277,8 @@ typedef struct {
 #define GPIOG               ((GPIO_TypeDef *) GPIOG_BASE)
 #define GPIOH               ((GPIO_TypeDef *) GPIOH_BASE)
 #define GPIOI               ((GPIO_TypeDef *) GPIOI_BASE)
+#define GPIOJ               ((GPIO_TypeDef *) GPIOJ_BASE)
+#define GPIOK               ((GPIO_TypeDef *) GPIOK_BASE)
 #define CRC                 ((CRC_TypeDef *) CRC_BASE)
 #define RCC                 ((RCC_TypeDef *) RCC_BASE)
 #define FLASH               ((FLASH_TypeDef *) FLASH_R_BASE)
@@ -5920,17 +7299,21 @@ typedef struct {
 #define DMA2_Stream4        ((DMA_Stream_TypeDef *) DMA2_Stream4_BASE)
 #define DMA2_Stream5        ((DMA_Stream_TypeDef *) DMA2_Stream5_BASE)
 #define DMA2_Stream6        ((DMA_Stream_TypeDef *) DMA2_Stream6_BASE)
-#define DMA2_Stream7        ((DMA_Stream_TypeDef *) DMA2_Stream7_BASE)  
+#define DMA2_Stream7        ((DMA_Stream_TypeDef *) DMA2_Stream7_BASE)
+#define ETH                 ((ETH_TypeDef *) ETH_BASE)  
+#define DMA2D               ((DMA2D_TypeDef *)DMA2D_BASE)
+#define DCMI                ((DCMI_TypeDef *) DCMI_BASE)
 #define RNG                 ((RNG_TypeDef *) RNG_BASE)
-#define FSMC_Bank1          ((FSMC_Bank1_TypeDef *) FSMC_Bank1_R_BASE)
-#define FSMC_Bank1E         ((FSMC_Bank1E_TypeDef *) FSMC_Bank1E_R_BASE)
-#define FSMC_Bank2_3        ((FSMC_Bank2_3_TypeDef *) FSMC_Bank2_3_R_BASE)
-#define FSMC_Bank4          ((FSMC_Bank4_TypeDef *) FSMC_Bank4_R_BASE)
+#define FMC_Bank1           ((FMC_Bank1_TypeDef *) FMC_Bank1_R_BASE)
+#define FMC_Bank1E          ((FMC_Bank1E_TypeDef *) FMC_Bank1E_R_BASE)
+#define FMC_Bank2_3         ((FMC_Bank2_3_TypeDef *) FMC_Bank2_3_R_BASE)
+#define FMC_Bank4           ((FMC_Bank4_TypeDef *) FMC_Bank4_R_BASE)
+#define FMC_Bank5_6         ((FMC_Bank5_6_TypeDef *) FMC_Bank5_6_R_BASE)
 
 #define DBGMCU              ((DBGMCU_TypeDef *) DBGMCU_BASE)
 
-#define USB_OTG_FS          ((USB_OTG_TypeDef *) USB_OTG_FS_PERIPH_BASE)
-#define USB_OTG_HS          ((USB_OTG_TypeDef *) USB_OTG_HS_PERIPH_BASE)
+#define USB_OTG_FS          ((USB_OTG_GlobalTypeDef *) USB_OTG_FS_PERIPH_BASE)
+#define USB_OTG_HS          ((USB_OTG_GlobalTypeDef *) USB_OTG_HS_PERIPH_BASE)
 
 
 #define ADC_COMMON_BB              ((ADC_Common_BitBand_TypeDef *) PERIPH_BB(ADC_BASE))
@@ -5940,6 +7323,8 @@ typedef struct {
 #define DAC_BB                     ((DAC_BitBand_TypeDef *) PERIPH_BB(DAC_BASE))
 #define DMA_Stream_BB(inst)        ((DMA_Stream_BitBand_TypeDef *) PERIPH_BB(inst))
 #define DMA_BB(inst)               ((DMA_BitBand_TypeDef *) PERIPH_BB(inst))
+#define DMA2D_BB                   ((DMA2D_BitBand_TypeDef *) PERIPH_BB(DMA2D_BASE))
+#define ETH_BB                     ((ETH_BitBand_TypeDef *) PERIPH_BB(ETH_BASE))
 #define EXTI_BB                    ((EXTI_BitBand_TypeDef *) PERIPH_BB(EXTI_BASE))
 #define FLASH_BB                   ((FLASH_BitBand_TypeDef *) PERIPH_BB(FLASH_R_BASE))
 #define GPIO_BB(inst)              ((GPIO_BitBand_TypeDef *) PERIPH_BB(inst))
@@ -5948,6 +7333,8 @@ typedef struct {
 #define PWR_BB                     ((PWR_BitBand_TypeDef *) PERIPH_BB(PWR_BASE))
 #define RCC_BB                     ((RCC_BitBand_TypeDef *) PERIPH_BB(RCC_BASE))
 #define RTC_BB                     ((RTC_BitBand_TypeDef *) PERIPH_BB(RTC_BASE))
+#define SAI_Block_BB(inst)         ((SAI_Block_BitBand_TypeDef *) PERIPH_BB(inst))
+#define SAI_BB(inst)               ((SAI_BitBand_TypeDef *) PERIPH_BB(inst))
 #define SDIO_BB                    ((SDIO_BitBand_TypeDef *) PERIPH_BB(SDIO_BASE))
 #define SPI_BB(inst)               ((SPI_BitBand_TypeDef *) PERIPH_BB(inst))
 #define SYSCFG_BB                  ((SYSCFG_BitBand_TypeDef *) PERIPH_BB(SYSCFG_BASE))
@@ -7674,7 +9061,6 @@ typedef struct {
 /********************  Bit definition for CRC_CR register  ********************/
 #define  CRC_CR_RESET                        0x01U        /*!< RESET bit */
 
-
 /******************************************************************************/
 /*                                                                            */
 /*                      Digital to Analog Converter                           */
@@ -7773,6 +9159,105 @@ typedef struct {
 /*                                 Debug MCU                                  */
 /*                                                                            */
 /******************************************************************************/
+
+/******************************************************************************/
+/*                                                                            */
+/*                                    DCMI                                    */
+/*                                                                            */
+/******************************************************************************/
+/********************  Bits definition for DCMI_CR register  ******************/
+#define DCMI_CR_CAPTURE                      0x00000001U
+#define DCMI_CR_CM                           0x00000002U
+#define DCMI_CR_CROP                         0x00000004U
+#define DCMI_CR_JPEG                         0x00000008U
+#define DCMI_CR_ESS                          0x00000010U
+#define DCMI_CR_PCKPOL                       0x00000020U
+#define DCMI_CR_HSPOL                        0x00000040U
+#define DCMI_CR_VSPOL                        0x00000080U
+#define DCMI_CR_FCRC_0                       0x00000100U
+#define DCMI_CR_FCRC_1                       0x00000200U
+#define DCMI_CR_EDM_0                        0x00000400U
+#define DCMI_CR_EDM_1                        0x00000800U
+#define DCMI_CR_CRE                          0x00001000U
+#define DCMI_CR_ENABLE                       0x00004000U
+
+/********************  Bits definition for DCMI_SR register  ******************/
+#define DCMI_SR_HSYNC                        0x00000001U
+#define DCMI_SR_VSYNC                        0x00000002U
+#define DCMI_SR_FNE                          0x00000004U
+
+/********************  Bits definition for DCMI_RIS register  *****************/
+#define DCMI_RIS_FRAME_RIS                   0x00000001U
+#define DCMI_RIS_OVR_RIS                     0x00000002U
+#define DCMI_RIS_ERR_RIS                     0x00000004U
+#define DCMI_RIS_VSYNC_RIS                   0x00000008U
+#define DCMI_RIS_LINE_RIS                    0x00000010U
+/* Legacy defines */
+#define DCMI_RISR_FRAME_RIS                  DCMI_RIS_FRAME_RIS
+#define DCMI_RISR_OVR_RIS                    DCMI_RIS_OVR_RIS
+#define DCMI_RISR_ERR_RIS                    DCMI_RIS_ERR_RIS
+#define DCMI_RISR_VSYNC_RIS                  DCMI_RIS_VSYNC_RIS
+#define DCMI_RISR_LINE_RIS                   DCMI_RIS_LINE_RIS
+#define DCMI_RISR_OVF_RIS                    DCMI_RIS_OVR_RIS
+
+/********************  Bits definition for DCMI_IER register  *****************/
+#define DCMI_IER_FRAME_IE                    0x00000001U
+#define DCMI_IER_OVR_IE                      0x00000002U
+#define DCMI_IER_ERR_IE                      0x00000004U
+#define DCMI_IER_VSYNC_IE                    0x00000008U
+#define DCMI_IER_LINE_IE                     0x00000010U
+/* Legacy defines */
+#define DCMI_IER_OVF_IE                      DCMI_IER_OVR_IE
+
+/********************  Bits definition for DCMI_MIS register  *****************/
+#define DCMI_MIS_FRAME_MIS                   0x00000001U
+#define DCMI_MIS_OVR_MIS                     0x00000002U
+#define DCMI_MIS_ERR_MIS                     0x00000004U
+#define DCMI_MIS_VSYNC_MIS                   0x00000008U
+#define DCMI_MIS_LINE_MIS                    0x00000010U
+
+/* Legacy defines */
+#define DCMI_MISR_FRAME_MIS                  DCMI_MIS_FRAME_MIS
+#define DCMI_MISR_OVF_MIS                    DCMI_MIS_OVR_MIS
+#define DCMI_MISR_ERR_MIS                    DCMI_MIS_ERR_MIS
+#define DCMI_MISR_VSYNC_MIS                  DCMI_MIS_VSYNC_MIS
+#define DCMI_MISR_LINE_MIS                   DCMI_MIS_LINE_MIS
+
+/********************  Bits definition for DCMI_ICR register  *****************/
+#define DCMI_ICR_FRAME_ISC                   0x00000001U
+#define DCMI_ICR_OVR_ISC                     0x00000002U
+#define DCMI_ICR_ERR_ISC                     0x00000004U
+#define DCMI_ICR_VSYNC_ISC                   0x00000008U
+#define DCMI_ICR_LINE_ISC                    0x00000010U
+
+/* Legacy defines */
+#define DCMI_ICR_OVF_ISC                     DCMI_ICR_OVR_ISC
+
+/********************  Bits definition for DCMI_ESCR register  ******************/
+#define DCMI_ESCR_FSC                        0x000000FFU
+#define DCMI_ESCR_LSC                        0x0000FF00U
+#define DCMI_ESCR_LEC                        0x00FF0000U
+#define DCMI_ESCR_FEC                        0xFF000000U
+
+/********************  Bits definition for DCMI_ESUR register  ******************/
+#define DCMI_ESUR_FSU                        0x000000FFU
+#define DCMI_ESUR_LSU                        0x0000FF00U
+#define DCMI_ESUR_LEU                        0x00FF0000U
+#define DCMI_ESUR_FEU                        0xFF000000U
+
+/********************  Bits definition for DCMI_CWSTRT register  ******************/
+#define DCMI_CWSTRT_HOFFCNT                  0x00003FFFU
+#define DCMI_CWSTRT_VST                      0x1FFF0000U
+
+/********************  Bits definition for DCMI_CWSIZE register  ******************/
+#define DCMI_CWSIZE_CAPCNT                   0x00003FFFU
+#define DCMI_CWSIZE_VLINE                    0x3FFF0000U
+
+/********************  Bits definition for DCMI_DR register  ******************/
+#define DCMI_DR_BYTE0                        0x000000FFU
+#define DCMI_DR_BYTE1                        0x0000FF00U
+#define DCMI_DR_BYTE2                        0x00FF0000U
+#define DCMI_DR_BYTE3                        0xFF000000U
 
 /******************************************************************************/
 /*                                                                            */
@@ -7935,6 +9420,180 @@ typedef struct {
 #define DMA_HIFCR_CTEIF4                     0x00000008U
 #define DMA_HIFCR_CDMEIF4                    0x00000004U
 #define DMA_HIFCR_CFEIF4                     0x00000001U
+
+
+/******************************************************************************/
+/*                                                                            */
+/*                         AHB Master DMA2D Controller (DMA2D)                */
+/*                                                                            */
+/******************************************************************************/
+
+/********************  Bit definition for DMA2D_CR register  ******************/
+
+#define DMA2D_CR_START                     0x00000001U               /*!< Start transfer */
+#define DMA2D_CR_SUSP                      0x00000002U               /*!< Suspend transfer */
+#define DMA2D_CR_ABORT                     0x00000004U               /*!< Abort transfer */
+#define DMA2D_CR_TEIE                      0x00000100U               /*!< Transfer Error Interrupt Enable */
+#define DMA2D_CR_TCIE                      0x00000200U               /*!< Transfer Complete Interrupt Enable */
+#define DMA2D_CR_TWIE                      0x00000400U               /*!< Transfer Watermark Interrupt Enable */
+#define DMA2D_CR_CAEIE                     0x00000800U               /*!< CLUT Access Error Interrupt Enable */
+#define DMA2D_CR_CTCIE                     0x00001000U               /*!< CLUT Transfer Complete Interrupt Enable */
+#define DMA2D_CR_CEIE                      0x00002000U               /*!< Configuration Error Interrupt Enable */
+#define DMA2D_CR_MODE                      0x00030000U               /*!< DMA2D Mode[1:0] */
+#define DMA2D_CR_MODE_0                    0x00010000U               /*!< DMA2D Mode bit 0 */
+#define DMA2D_CR_MODE_1                    0x00020000U               /*!< DMA2D Mode bit 1 */
+
+/********************  Bit definition for DMA2D_ISR register  *****************/
+
+#define DMA2D_ISR_TEIF                     0x00000001U               /*!< Transfer Error Interrupt Flag */
+#define DMA2D_ISR_TCIF                     0x00000002U               /*!< Transfer Complete Interrupt Flag */
+#define DMA2D_ISR_TWIF                     0x00000004U               /*!< Transfer Watermark Interrupt Flag */
+#define DMA2D_ISR_CAEIF                    0x00000008U               /*!< CLUT Access Error Interrupt Flag */
+#define DMA2D_ISR_CTCIF                    0x00000010U               /*!< CLUT Transfer Complete Interrupt Flag */
+#define DMA2D_ISR_CEIF                     0x00000020U               /*!< Configuration Error Interrupt Flag */
+
+/********************  Bit definition for DMA2D_IFCR register  ****************/
+
+#define DMA2D_IFCR_CTEIF                   0x00000001U               /*!< Clears Transfer Error Interrupt Flag         */
+#define DMA2D_IFCR_CTCIF                   0x00000002U               /*!< Clears Transfer Complete Interrupt Flag      */
+#define DMA2D_IFCR_CTWIF                   0x00000004U               /*!< Clears Transfer Watermark Interrupt Flag     */
+#define DMA2D_IFCR_CAECIF                  0x00000008U               /*!< Clears CLUT Access Error Interrupt Flag      */
+#define DMA2D_IFCR_CCTCIF                  0x00000010U               /*!< Clears CLUT Transfer Complete Interrupt Flag */
+#define DMA2D_IFCR_CCEIF                   0x00000020U               /*!< Clears Configuration Error Interrupt Flag    */
+
+/* Legacy defines */
+#define DMA2D_IFSR_CTEIF                   DMA2D_IFCR_CTEIF                     /*!< Clears Transfer Error Interrupt Flag         */
+#define DMA2D_IFSR_CTCIF                   DMA2D_IFCR_CTCIF                     /*!< Clears Transfer Complete Interrupt Flag      */
+#define DMA2D_IFSR_CTWIF                   DMA2D_IFCR_CTWIF                     /*!< Clears Transfer Watermark Interrupt Flag     */
+#define DMA2D_IFSR_CCAEIF                  DMA2D_IFCR_CAECIF                    /*!< Clears CLUT Access Error Interrupt Flag      */
+#define DMA2D_IFSR_CCTCIF                  DMA2D_IFCR_CCTCIF                    /*!< Clears CLUT Transfer Complete Interrupt Flag */
+#define DMA2D_IFSR_CCEIF                   DMA2D_IFCR_CCEIF                     /*!< Clears Configuration Error Interrupt Flag    */
+
+/********************  Bit definition for DMA2D_FGMAR register  ***************/
+
+#define DMA2D_FGMAR_MA                     0xFFFFFFFFU               /*!< Memory Address */
+
+/********************  Bit definition for DMA2D_FGOR register  ****************/
+
+#define DMA2D_FGOR_LO                      0x00003FFFU               /*!< Line Offset */
+
+/********************  Bit definition for DMA2D_BGMAR register  ***************/
+
+#define DMA2D_BGMAR_MA                     0xFFFFFFFFU               /*!< Memory Address */
+
+/********************  Bit definition for DMA2D_BGOR register  ****************/
+
+#define DMA2D_BGOR_LO                      0x00003FFFU               /*!< Line Offset */
+
+/********************  Bit definition for DMA2D_FGPFCCR register  *************/
+
+#define DMA2D_FGPFCCR_CM                   0x0000000FU               /*!< Input color mode CM[3:0] */
+#define DMA2D_FGPFCCR_CM_0                 0x00000001U               /*!< Input color mode CM bit 0 */
+#define DMA2D_FGPFCCR_CM_1                 0x00000002U               /*!< Input color mode CM bit 1 */
+#define DMA2D_FGPFCCR_CM_2                 0x00000004U               /*!< Input color mode CM bit 2 */
+#define DMA2D_FGPFCCR_CM_3                 0x00000008U               /*!< Input color mode CM bit 3 */
+#define DMA2D_FGPFCCR_CCM                  0x00000010U               /*!< CLUT Color mode */
+#define DMA2D_FGPFCCR_START                0x00000020U               /*!< Start */
+#define DMA2D_FGPFCCR_CS                   0x0000FF00U               /*!< CLUT size */
+#define DMA2D_FGPFCCR_AM                   0x00030000U               /*!< Alpha mode AM[1:0] */
+#define DMA2D_FGPFCCR_AM_0                 0x00010000U               /*!< Alpha mode AM bit 0 */
+#define DMA2D_FGPFCCR_AM_1                 0x00020000U               /*!< Alpha mode AM bit 1 */
+#define DMA2D_FGPFCCR_ALPHA                0xFF000000U               /*!< Alpha value */
+
+/********************  Bit definition for DMA2D_FGCOLR register  **************/
+
+#define DMA2D_FGCOLR_BLUE                  0x000000FFU               /*!< Blue Value */
+#define DMA2D_FGCOLR_GREEN                 0x0000FF00U               /*!< Green Value */
+#define DMA2D_FGCOLR_RED                   0x00FF0000U               /*!< Red Value */   
+
+/********************  Bit definition for DMA2D_BGPFCCR register  *************/
+
+#define DMA2D_BGPFCCR_CM                   0x0000000FU               /*!< Input color mode CM[3:0] */
+#define DMA2D_BGPFCCR_CM_0                 0x00000001U               /*!< Input color mode CM bit 0 */
+#define DMA2D_BGPFCCR_CM_1                 0x00000002U               /*!< Input color mode CM bit 1 */
+#define DMA2D_BGPFCCR_CM_2                 0x00000004U               /*!< Input color mode CM bit 2 */
+#define DMA2D_FGPFCCR_CM_3                 0x00000008U               /*!< Input color mode CM bit 3 */
+#define DMA2D_BGPFCCR_CCM                  0x00000010U               /*!< CLUT Color mode */
+#define DMA2D_BGPFCCR_START                0x00000020U               /*!< Start */
+#define DMA2D_BGPFCCR_CS                   0x0000FF00U               /*!< CLUT size */
+#define DMA2D_BGPFCCR_AM                   0x00030000U               /*!< Alpha mode AM[1:0] */
+#define DMA2D_BGPFCCR_AM_0                 0x00010000U               /*!< Alpha mode AM bit 0 */
+#define DMA2D_BGPFCCR_AM_1                 0x00020000U               /*!< Alpha mode AM bit 1 */
+#define DMA2D_BGPFCCR_ALPHA                0xFF000000U               /*!< background Input Alpha value */
+
+/********************  Bit definition for DMA2D_BGCOLR register  **************/
+
+#define DMA2D_BGCOLR_BLUE                  0x000000FFU               /*!< Blue Value */
+#define DMA2D_BGCOLR_GREEN                 0x0000FF00U               /*!< Green Value */
+#define DMA2D_BGCOLR_RED                   0x00FF0000U               /*!< Red Value */
+
+/********************  Bit definition for DMA2D_FGCMAR register  **************/
+
+#define DMA2D_FGCMAR_MA                    0xFFFFFFFFU               /*!< Memory Address */
+
+/********************  Bit definition for DMA2D_BGCMAR register  **************/
+
+#define DMA2D_BGCMAR_MA                    0xFFFFFFFFU               /*!< Memory Address */
+
+/********************  Bit definition for DMA2D_OPFCCR register  **************/
+
+#define DMA2D_OPFCCR_CM                    0x00000007U               /*!< Color mode CM[2:0] */
+#define DMA2D_OPFCCR_CM_0                  0x00000001U               /*!< Color mode CM bit 0 */
+#define DMA2D_OPFCCR_CM_1                  0x00000002U               /*!< Color mode CM bit 1 */
+#define DMA2D_OPFCCR_CM_2                  0x00000004U               /*!< Color mode CM bit 2 */
+
+/********************  Bit definition for DMA2D_OCOLR register  ***************/
+
+/*!<Mode_ARGB8888/RGB888 */
+
+#define DMA2D_OCOLR_BLUE_1                 0x000000FFU               /*!< BLUE Value */
+#define DMA2D_OCOLR_GREEN_1                0x0000FF00U               /*!< GREEN Value  */
+#define DMA2D_OCOLR_RED_1                  0x00FF0000U               /*!< Red Value */
+#define DMA2D_OCOLR_ALPHA_1                0xFF000000U               /*!< Alpha Channel Value */
+
+/*!<Mode_RGB565 */
+#define DMA2D_OCOLR_BLUE_2                 0x0000001FU               /*!< BLUE Value */
+#define DMA2D_OCOLR_GREEN_2                0x000007E0U               /*!< GREEN Value  */
+#define DMA2D_OCOLR_RED_2                  0x0000F800U               /*!< Red Value */
+
+/*!<Mode_ARGB1555 */
+#define DMA2D_OCOLR_BLUE_3                 0x0000001FU               /*!< BLUE Value */
+#define DMA2D_OCOLR_GREEN_3                0x000003E0U               /*!< GREEN Value  */
+#define DMA2D_OCOLR_RED_3                  0x00007C00U               /*!< Red Value */
+#define DMA2D_OCOLR_ALPHA_3                0x00008000U               /*!< Alpha Channel Value */
+
+/*!<Mode_ARGB4444 */
+#define DMA2D_OCOLR_BLUE_4                 0x0000000FU               /*!< BLUE Value */
+#define DMA2D_OCOLR_GREEN_4                0x000000F0U               /*!< GREEN Value  */
+#define DMA2D_OCOLR_RED_4                  0x00000F00U               /*!< Red Value */
+#define DMA2D_OCOLR_ALPHA_4                0x0000F000U               /*!< Alpha Channel Value */
+
+/********************  Bit definition for DMA2D_OMAR register  ****************/
+
+#define DMA2D_OMAR_MA                      0xFFFFFFFFU               /*!< Memory Address */
+
+/********************  Bit definition for DMA2D_OOR register  *****************/
+
+#define DMA2D_OOR_LO                       0x00003FFFU               /*!< Line Offset */
+
+/********************  Bit definition for DMA2D_NLR register  *****************/
+
+#define DMA2D_NLR_NL                       0x0000FFFFU               /*!< Number of Lines */
+#define DMA2D_NLR_PL                       0x3FFF0000U               /*!< Pixel per Lines */
+
+/********************  Bit definition for DMA2D_LWR register  *****************/
+
+#define DMA2D_LWR_LW                       0x0000FFFFU               /*!< Line Watermark */
+
+/********************  Bit definition for DMA2D_AMTCR register  ***************/
+
+#define DMA2D_AMTCR_EN                     0x00000001U               /*!< Enable */
+#define DMA2D_AMTCR_DT                     0x0000FF00U               /*!< Dead Time */
+
+/********************  Bit definition for DMA2D_FGCLUT register  **************/
+                                                                     
+/********************  Bit definition for DMA2D_BGCLUT register  **************/
+
 
 
 /******************************************************************************/
@@ -8107,7 +9766,14 @@ typedef struct {
 #define FLASH_ACR_LATENCY_5WS                0x00000005U
 #define FLASH_ACR_LATENCY_6WS                0x00000006U
 #define FLASH_ACR_LATENCY_7WS                0x00000007U
-
+#define FLASH_ACR_LATENCY_8WS                0x00000008U
+#define FLASH_ACR_LATENCY_9WS                0x00000009U
+#define FLASH_ACR_LATENCY_10WS               0x0000000AU
+#define FLASH_ACR_LATENCY_11WS               0x0000000BU
+#define FLASH_ACR_LATENCY_12WS               0x0000000CU
+#define FLASH_ACR_LATENCY_13WS               0x0000000DU
+#define FLASH_ACR_LATENCY_14WS               0x0000000EU
+#define FLASH_ACR_LATENCY_15WS               0x0000000FU
 #define FLASH_ACR_PRFTEN                     0x00000100U
 #define FLASH_ACR_ICEN                       0x00000200U
 #define FLASH_ACR_DCEN                       0x00000400U
@@ -8129,6 +9795,7 @@ typedef struct {
 #define FLASH_CR_PG                          0x00000001U
 #define FLASH_CR_SER                         0x00000002U
 #define FLASH_CR_MER                         0x00000004U
+#define FLASH_CR_MER1                        FLASH_CR_MER
 #define FLASH_CR_SNB                         0x000000F8U
 #define FLASH_CR_SNB_0                       0x00000008U
 #define FLASH_CR_SNB_1                       0x00000010U
@@ -8138,6 +9805,7 @@ typedef struct {
 #define FLASH_CR_PSIZE                       0x00000300U
 #define FLASH_CR_PSIZE_0                     0x00000100U
 #define FLASH_CR_PSIZE_1                     0x00000200U
+#define FLASH_CR_MER2                        0x00008000U
 #define FLASH_CR_STRT                        0x00010000U
 #define FLASH_CR_EOPIE                       0x01000000U
 #define FLASH_CR_LOCK                        0x80000000U
@@ -8148,7 +9816,7 @@ typedef struct {
 #define FLASH_OPTCR_BOR_LEV_0               0x00000004U
 #define FLASH_OPTCR_BOR_LEV_1               0x00000008U
 #define FLASH_OPTCR_BOR_LEV                 0x0000000CU
-
+#define FLASH_OPTCR_BFB2                    0x00000010U
 #define FLASH_OPTCR_WDG_SW                  0x00000020U
 #define FLASH_OPTCR_nRST_STOP               0x00000040U
 #define FLASH_OPTCR_nRST_STDBY              0x00000080U
@@ -8174,6 +9842,8 @@ typedef struct {
 #define FLASH_OPTCR_nWRP_9                  0x02000000U
 #define FLASH_OPTCR_nWRP_10                 0x04000000U
 #define FLASH_OPTCR_nWRP_11                 0x08000000U
+#define FLASH_OPTCR_DB1M                    0x40000000U 
+#define FLASH_OPTCR_SPRMOD                  0x80000000U 
                                              
 /******************  Bits definition for FLASH_OPTCR1 register  ***************/
 #define FLASH_OPTCR1_nWRP                    0x0FFF0000U
@@ -8192,832 +9862,1012 @@ typedef struct {
 
 /******************************************************************************/
 /*                                                                            */
-/*                       Flexible Static Memory Controller                    */
+/*                          Flexible Memory Controller                        */
 /*                                                                            */
 /******************************************************************************/
-/******************  Bit definition for FSMC_BCR1 register  *******************/
-#define  FSMC_BCR1_MBKEN                     0x00000001U        /*!<Memory bank enable bit                 */
-#define  FSMC_BCR1_MUXEN                     0x00000002U        /*!<Address/data multiplexing enable bit   */
-
-#define  FSMC_BCR1_MTYP                      0x0000000CU        /*!<MTYP[1:0] bits (Memory type)           */
-#define  FSMC_BCR1_MTYP_0                    0x00000004U        /*!<Bit 0 */
-#define  FSMC_BCR1_MTYP_1                    0x00000008U        /*!<Bit 1 */
-
-#define  FSMC_BCR1_MWID                      0x00000030U        /*!<MWID[1:0] bits (Memory data bus width) */
-#define  FSMC_BCR1_MWID_0                    0x00000010U        /*!<Bit 0 */
-#define  FSMC_BCR1_MWID_1                    0x00000020U        /*!<Bit 1 */
-
-#define  FSMC_BCR1_FACCEN                    0x00000040U        /*!<Flash access enable                    */
-#define  FSMC_BCR1_BURSTEN                   0x00000100U        /*!<Burst enable bit                       */
-#define  FSMC_BCR1_WAITPOL                   0x00000200U        /*!<Wait signal polarity bit               */
-#define  FSMC_BCR1_WRAPMOD                   0x00000400U        /*!<Wrapped burst mode support             */
-#define  FSMC_BCR1_WAITCFG                   0x00000800U        /*!<Wait timing configuration              */
-#define  FSMC_BCR1_WREN                      0x00001000U        /*!<Write enable bit                       */
-#define  FSMC_BCR1_WAITEN                    0x00002000U        /*!<Wait enable bit                        */
-#define  FSMC_BCR1_EXTMOD                    0x00004000U        /*!<Extended mode enable                   */
-#define  FSMC_BCR1_ASYNCWAIT                 0x00008000U        /*!<Asynchronous wait                      */
-#define  FSMC_BCR1_CPSIZE                    0x00070000U        /*!<CRAM page size */
-#define  FSMC_BCR1_CPSIZE_0                  0x00010000U        /*!<Bit 0 */
-#define  FSMC_BCR1_CPSIZE_1                  0x00020000U        /*!<Bit 1 */
-#define  FSMC_BCR1_CPSIZE_2                  0x00040000U        /*!<Bit 2 */
-#define  FSMC_BCR1_CBURSTRW                  0x00080000U        /*!<Write burst enable                     */
-
-/******************  Bit definition for FSMC_BCR2 register  *******************/
-#define  FSMC_BCR2_MBKEN                     0x00000001U        /*!<Memory bank enable bit                */
-#define  FSMC_BCR2_MUXEN                     0x00000002U        /*!<Address/data multiplexing enable bit   */
-
-#define  FSMC_BCR2_MTYP                      0x0000000CU        /*!<MTYP[1:0] bits (Memory type)           */
-#define  FSMC_BCR2_MTYP_0                    0x00000004U        /*!<Bit 0 */
-#define  FSMC_BCR2_MTYP_1                    0x00000008U        /*!<Bit 1 */
-
-#define  FSMC_BCR2_MWID                      0x00000030U        /*!<MWID[1:0] bits (Memory data bus width) */
-#define  FSMC_BCR2_MWID_0                    0x00000010U        /*!<Bit 0 */
-#define  FSMC_BCR2_MWID_1                    0x00000020U        /*!<Bit 1 */
-
-#define  FSMC_BCR2_FACCEN                    0x00000040U        /*!<Flash access enable                    */
-#define  FSMC_BCR2_BURSTEN                   0x00000100U        /*!<Burst enable bit                       */
-#define  FSMC_BCR2_WAITPOL                   0x00000200U        /*!<Wait signal polarity bit               */
-#define  FSMC_BCR2_WRAPMOD                   0x00000400U        /*!<Wrapped burst mode support             */
-#define  FSMC_BCR2_WAITCFG                   0x00000800U        /*!<Wait timing configuration              */
-#define  FSMC_BCR2_WREN                      0x00001000U        /*!<Write enable bit                       */
-#define  FSMC_BCR2_WAITEN                    0x00002000U        /*!<Wait enable bit                        */
-#define  FSMC_BCR2_EXTMOD                    0x00004000U        /*!<Extended mode enable                   */
-#define  FSMC_BCR2_ASYNCWAIT                 0x00008000U        /*!<Asynchronous wait                      */
-#define  FSMC_BCR2_CPSIZE                    0x00070000U        /*!<CRAM page size */
-#define  FSMC_BCR2_CPSIZE_0                  0x00010000U        /*!<Bit 0 */
-#define  FSMC_BCR2_CPSIZE_1                  0x00020000U        /*!<Bit 1 */
-#define  FSMC_BCR2_CPSIZE_2                  0x00040000U        /*!<Bit 2 */
-#define  FSMC_BCR2_CBURSTRW                  0x00080000U        /*!<Write burst enable                     */
-
-/******************  Bit definition for FSMC_BCR3 register  *******************/
-#define  FSMC_BCR3_MBKEN                     0x00000001U        /*!<Memory bank enable bit                 */
-#define  FSMC_BCR3_MUXEN                     0x00000002U        /*!<Address/data multiplexing enable bit   */
-
-#define  FSMC_BCR3_MTYP                      0x0000000CU        /*!<MTYP[1:0] bits (Memory type)           */
-#define  FSMC_BCR3_MTYP_0                    0x00000004U        /*!<Bit 0 */
-#define  FSMC_BCR3_MTYP_1                    0x00000008U        /*!<Bit 1 */
-
-#define  FSMC_BCR3_MWID                      0x00000030U        /*!<MWID[1:0] bits (Memory data bus width) */
-#define  FSMC_BCR3_MWID_0                    0x00000010U        /*!<Bit 0 */
-#define  FSMC_BCR3_MWID_1                    0x00000020U        /*!<Bit 1 */
-
-#define  FSMC_BCR3_FACCEN                    0x00000040U        /*!<Flash access enable                    */
-#define  FSMC_BCR3_BURSTEN                   0x00000100U        /*!<Burst enable bit                       */
-#define  FSMC_BCR3_WAITPOL                   0x00000200U        /*!<Wait signal polarity bit               */
-#define  FSMC_BCR3_WRAPMOD                   0x00000400U        /*!<Wrapped burst mode support             */
-#define  FSMC_BCR3_WAITCFG                   0x00000800U        /*!<Wait timing configuration              */
-#define  FSMC_BCR3_WREN                      0x00001000U        /*!<Write enable bit                       */
-#define  FSMC_BCR3_WAITEN                    0x00002000U        /*!<Wait enable bit                        */
-#define  FSMC_BCR3_EXTMOD                    0x00004000U        /*!<Extended mode enable                   */
-#define  FSMC_BCR3_ASYNCWAIT                 0x00008000U        /*!<Asynchronous wait                      */
-#define  FSMC_BCR3_CPSIZE                    0x00070000U        /*!<CRAM page size */
-#define  FSMC_BCR3_CPSIZE_0                  0x00010000U        /*!<Bit 0 */
-#define  FSMC_BCR3_CPSIZE_1                  0x00020000U        /*!<Bit 1 */
-#define  FSMC_BCR3_CPSIZE_2                  0x00040000U        /*!<Bit 2 */
-#define  FSMC_BCR3_CBURSTRW                  0x00080000U        /*!<Write burst enable                     */
-
-/******************  Bit definition for FSMC_BCR4 register  *******************/
-#define  FSMC_BCR4_MBKEN                     0x00000001U        /*!<Memory bank enable bit */
-#define  FSMC_BCR4_MUXEN                     0x00000002U        /*!<Address/data multiplexing enable bit   */
-
-#define  FSMC_BCR4_MTYP                      0x0000000CU        /*!<MTYP[1:0] bits (Memory type)           */
-#define  FSMC_BCR4_MTYP_0                    0x00000004U        /*!<Bit 0 */
-#define  FSMC_BCR4_MTYP_1                    0x00000008U        /*!<Bit 1 */
-
-#define  FSMC_BCR4_MWID                      0x00000030U        /*!<MWID[1:0] bits (Memory data bus width) */
-#define  FSMC_BCR4_MWID_0                    0x00000010U        /*!<Bit 0 */
-#define  FSMC_BCR4_MWID_1                    0x00000020U        /*!<Bit 1 */
-
-#define  FSMC_BCR4_FACCEN                    0x00000040U        /*!<Flash access enable                    */
-#define  FSMC_BCR4_BURSTEN                   0x00000100U        /*!<Burst enable bit                       */
-#define  FSMC_BCR4_WAITPOL                   0x00000200U        /*!<Wait signal polarity bit               */
-#define  FSMC_BCR4_WRAPMOD                   0x00000400U        /*!<Wrapped burst mode support             */
-#define  FSMC_BCR4_WAITCFG                   0x00000800U        /*!<Wait timing configuration              */
-#define  FSMC_BCR4_WREN                      0x00001000U        /*!<Write enable bit                       */
-#define  FSMC_BCR4_WAITEN                    0x00002000U        /*!<Wait enable bit                        */
-#define  FSMC_BCR4_EXTMOD                    0x00004000U        /*!<Extended mode enable                   */
-#define  FSMC_BCR4_ASYNCWAIT                 0x00008000U        /*!<Asynchronous wait                      */
-#define  FSMC_BCR4_CPSIZE                    0x00070000U        /*!<CRAM page size */
-#define  FSMC_BCR4_CPSIZE_0                  0x00010000U        /*!<Bit 0 */
-#define  FSMC_BCR4_CPSIZE_1                  0x00020000U        /*!<Bit 1 */
-#define  FSMC_BCR4_CPSIZE_2                  0x00040000U        /*!<Bit 2 */
-#define  FSMC_BCR4_CBURSTRW                  0x00080000U        /*!<Write burst enable                     */
-
-/******************  Bit definition for FSMC_BTR1 register  ******************/
-#define  FSMC_BTR1_ADDSET                    0x0000000FU        /*!<ADDSET[3:0] bits (Address setup phase duration) */
-#define  FSMC_BTR1_ADDSET_0                  0x00000001U        /*!<Bit 0 */
-#define  FSMC_BTR1_ADDSET_1                  0x00000002U        /*!<Bit 1 */
-#define  FSMC_BTR1_ADDSET_2                  0x00000004U        /*!<Bit 2 */
-#define  FSMC_BTR1_ADDSET_3                  0x00000008U        /*!<Bit 3 */
-
-#define  FSMC_BTR1_ADDHLD                    0x000000F0U        /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
-#define  FSMC_BTR1_ADDHLD_0                  0x00000010U        /*!<Bit 0 */
-#define  FSMC_BTR1_ADDHLD_1                  0x00000020U        /*!<Bit 1 */
-#define  FSMC_BTR1_ADDHLD_2                  0x00000040U        /*!<Bit 2 */
-#define  FSMC_BTR1_ADDHLD_3                  0x00000080U        /*!<Bit 3 */
-
-#define  FSMC_BTR1_DATAST                    0x0000FF00U        /*!<DATAST [7:0] bits (Data-phase duration) */
-#define  FSMC_BTR1_DATAST_0                  0x00000100U        /*!<Bit 0 */
-#define  FSMC_BTR1_DATAST_1                  0x00000200U        /*!<Bit 1 */
-#define  FSMC_BTR1_DATAST_2                  0x00000400U        /*!<Bit 2 */
-#define  FSMC_BTR1_DATAST_3                  0x00000800U        /*!<Bit 3 */
-#define  FSMC_BTR1_DATAST_4                  0x00001000U        /*!<Bit 4 */
-#define  FSMC_BTR1_DATAST_5                  0x00002000U        /*!<Bit 5 */
-#define  FSMC_BTR1_DATAST_6                  0x00004000U        /*!<Bit 6 */
-#define  FSMC_BTR1_DATAST_7                  0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_BTR1_BUSTURN                   0x000F0000U        /*!<BUSTURN[3:0] bits (Bus turnaround phase duration) */
-#define  FSMC_BTR1_BUSTURN_0                 0x00010000U        /*!<Bit 0 */
-#define  FSMC_BTR1_BUSTURN_1                 0x00020000U        /*!<Bit 1 */
-#define  FSMC_BTR1_BUSTURN_2                 0x00040000U        /*!<Bit 2 */
-#define  FSMC_BTR1_BUSTURN_3                 0x00080000U        /*!<Bit 3 */
-
-#define  FSMC_BTR1_CLKDIV                    0x00F00000U        /*!<CLKDIV[3:0] bits (Clock divide ratio) */
-#define  FSMC_BTR1_CLKDIV_0                  0x00100000U        /*!<Bit 0 */
-#define  FSMC_BTR1_CLKDIV_1                  0x00200000U        /*!<Bit 1 */
-#define  FSMC_BTR1_CLKDIV_2                  0x00400000U        /*!<Bit 2 */
-#define  FSMC_BTR1_CLKDIV_3                  0x00800000U        /*!<Bit 3 */
-
-#define  FSMC_BTR1_DATLAT                    0x0F000000U        /*!<DATLA[3:0] bits (Data latency) */
-#define  FSMC_BTR1_DATLAT_0                  0x01000000U        /*!<Bit 0 */
-#define  FSMC_BTR1_DATLAT_1                  0x02000000U        /*!<Bit 1 */
-#define  FSMC_BTR1_DATLAT_2                  0x04000000U        /*!<Bit 2 */
-#define  FSMC_BTR1_DATLAT_3                  0x08000000U        /*!<Bit 3 */
-
-#define  FSMC_BTR1_ACCMOD                    0x30000000U        /*!<ACCMOD[1:0] bits (Access mode) */
-#define  FSMC_BTR1_ACCMOD_0                  0x10000000U        /*!<Bit 0 */
-#define  FSMC_BTR1_ACCMOD_1                  0x20000000U        /*!<Bit 1 */
-
-/******************  Bit definition for FSMC_BTR2 register  *******************/
-#define  FSMC_BTR2_ADDSET                    0x0000000FU        /*!<ADDSET[3:0] bits (Address setup phase duration) */
-#define  FSMC_BTR2_ADDSET_0                  0x00000001U        /*!<Bit 0 */
-#define  FSMC_BTR2_ADDSET_1                  0x00000002U        /*!<Bit 1 */
-#define  FSMC_BTR2_ADDSET_2                  0x00000004U        /*!<Bit 2 */
-#define  FSMC_BTR2_ADDSET_3                  0x00000008U        /*!<Bit 3 */
-
-#define  FSMC_BTR2_ADDHLD                    0x000000F0U        /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
-#define  FSMC_BTR2_ADDHLD_0                  0x00000010U        /*!<Bit 0 */
-#define  FSMC_BTR2_ADDHLD_1                  0x00000020U        /*!<Bit 1 */
-#define  FSMC_BTR2_ADDHLD_2                  0x00000040U        /*!<Bit 2 */
-#define  FSMC_BTR2_ADDHLD_3                  0x00000080U        /*!<Bit 3 */
-
-#define  FSMC_BTR2_DATAST                    0x0000FF00U        /*!<DATAST [7:0] bits (Data-phase duration) */
-#define  FSMC_BTR2_DATAST_0                  0x00000100U        /*!<Bit 0 */
-#define  FSMC_BTR2_DATAST_1                  0x00000200U        /*!<Bit 1 */
-#define  FSMC_BTR2_DATAST_2                  0x00000400U        /*!<Bit 2 */
-#define  FSMC_BTR2_DATAST_3                  0x00000800U        /*!<Bit 3 */
-#define  FSMC_BTR2_DATAST_4                  0x00001000U        /*!<Bit 4 */
-#define  FSMC_BTR2_DATAST_5                  0x00002000U        /*!<Bit 5 */
-#define  FSMC_BTR2_DATAST_6                  0x00004000U        /*!<Bit 6 */
-#define  FSMC_BTR2_DATAST_7                  0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_BTR2_BUSTURN                   0x000F0000U        /*!<BUSTURN[3:0] bits (Bus turnaround phase duration) */
-#define  FSMC_BTR2_BUSTURN_0                 0x00010000U        /*!<Bit 0 */
-#define  FSMC_BTR2_BUSTURN_1                 0x00020000U        /*!<Bit 1 */
-#define  FSMC_BTR2_BUSTURN_2                 0x00040000U        /*!<Bit 2 */
-#define  FSMC_BTR2_BUSTURN_3                 0x00080000U        /*!<Bit 3 */
-
-#define  FSMC_BTR2_CLKDIV                    0x00F00000U        /*!<CLKDIV[3:0] bits (Clock divide ratio) */
-#define  FSMC_BTR2_CLKDIV_0                  0x00100000U        /*!<Bit 0 */
-#define  FSMC_BTR2_CLKDIV_1                  0x00200000U        /*!<Bit 1 */
-#define  FSMC_BTR2_CLKDIV_2                  0x00400000U        /*!<Bit 2 */
-#define  FSMC_BTR2_CLKDIV_3                  0x00800000U        /*!<Bit 3 */
-
-#define  FSMC_BTR2_DATLAT                    0x0F000000U        /*!<DATLA[3:0] bits (Data latency) */
-#define  FSMC_BTR2_DATLAT_0                  0x01000000U        /*!<Bit 0 */
-#define  FSMC_BTR2_DATLAT_1                  0x02000000U        /*!<Bit 1 */
-#define  FSMC_BTR2_DATLAT_2                  0x04000000U        /*!<Bit 2 */
-#define  FSMC_BTR2_DATLAT_3                  0x08000000U        /*!<Bit 3 */
-
-#define  FSMC_BTR2_ACCMOD                    0x30000000U        /*!<ACCMOD[1:0] bits (Access mode) */
-#define  FSMC_BTR2_ACCMOD_0                  0x10000000U        /*!<Bit 0 */
-#define  FSMC_BTR2_ACCMOD_1                  0x20000000U        /*!<Bit 1 */
-
-/*******************  Bit definition for FSMC_BTR3 register  *******************/
-#define  FSMC_BTR3_ADDSET                    0x0000000FU        /*!<ADDSET[3:0] bits (Address setup phase duration) */
-#define  FSMC_BTR3_ADDSET_0                  0x00000001U        /*!<Bit 0 */
-#define  FSMC_BTR3_ADDSET_1                  0x00000002U        /*!<Bit 1 */
-#define  FSMC_BTR3_ADDSET_2                  0x00000004U        /*!<Bit 2 */
-#define  FSMC_BTR3_ADDSET_3                  0x00000008U        /*!<Bit 3 */
-
-#define  FSMC_BTR3_ADDHLD                    0x000000F0U        /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
-#define  FSMC_BTR3_ADDHLD_0                  0x00000010U        /*!<Bit 0 */
-#define  FSMC_BTR3_ADDHLD_1                  0x00000020U        /*!<Bit 1 */
-#define  FSMC_BTR3_ADDHLD_2                  0x00000040U        /*!<Bit 2 */
-#define  FSMC_BTR3_ADDHLD_3                  0x00000080U        /*!<Bit 3 */
-
-#define  FSMC_BTR3_DATAST                    0x0000FF00U        /*!<DATAST [7:0] bits (Data-phase duration) */
-#define  FSMC_BTR3_DATAST_0                  0x00000100U        /*!<Bit 0 */
-#define  FSMC_BTR3_DATAST_1                  0x00000200U        /*!<Bit 1 */
-#define  FSMC_BTR3_DATAST_2                  0x00000400U        /*!<Bit 2 */
-#define  FSMC_BTR3_DATAST_3                  0x00000800U        /*!<Bit 3 */
-#define  FSMC_BTR3_DATAST_4                  0x00001000U        /*!<Bit 4 */
-#define  FSMC_BTR3_DATAST_5                  0x00002000U        /*!<Bit 5 */
-#define  FSMC_BTR3_DATAST_6                  0x00004000U        /*!<Bit 6 */
-#define  FSMC_BTR3_DATAST_7                  0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_BTR3_BUSTURN                   0x000F0000U        /*!<BUSTURN[3:0] bits (Bus turnaround phase duration) */
-#define  FSMC_BTR3_BUSTURN_0                 0x00010000U        /*!<Bit 0 */
-#define  FSMC_BTR3_BUSTURN_1                 0x00020000U        /*!<Bit 1 */
-#define  FSMC_BTR3_BUSTURN_2                 0x00040000U        /*!<Bit 2 */
-#define  FSMC_BTR3_BUSTURN_3                 0x00080000U        /*!<Bit 3 */
-
-#define  FSMC_BTR3_CLKDIV                    0x00F00000U        /*!<CLKDIV[3:0] bits (Clock divide ratio) */
-#define  FSMC_BTR3_CLKDIV_0                  0x00100000U        /*!<Bit 0 */
-#define  FSMC_BTR3_CLKDIV_1                  0x00200000U        /*!<Bit 1 */
-#define  FSMC_BTR3_CLKDIV_2                  0x00400000U        /*!<Bit 2 */
-#define  FSMC_BTR3_CLKDIV_3                  0x00800000U        /*!<Bit 3 */
-
-#define  FSMC_BTR3_DATLAT                    0x0F000000U        /*!<DATLA[3:0] bits (Data latency) */
-#define  FSMC_BTR3_DATLAT_0                  0x01000000U        /*!<Bit 0 */
-#define  FSMC_BTR3_DATLAT_1                  0x02000000U        /*!<Bit 1 */
-#define  FSMC_BTR3_DATLAT_2                  0x04000000U        /*!<Bit 2 */
-#define  FSMC_BTR3_DATLAT_3                  0x08000000U        /*!<Bit 3 */
-
-#define  FSMC_BTR3_ACCMOD                    0x30000000U        /*!<ACCMOD[1:0] bits (Access mode) */
-#define  FSMC_BTR3_ACCMOD_0                  0x10000000U        /*!<Bit 0 */
-#define  FSMC_BTR3_ACCMOD_1                  0x20000000U        /*!<Bit 1 */
-
-/******************  Bit definition for FSMC_BTR4 register  *******************/
-#define  FSMC_BTR4_ADDSET                    0x0000000FU        /*!<ADDSET[3:0] bits (Address setup phase duration) */
-#define  FSMC_BTR4_ADDSET_0                  0x00000001U        /*!<Bit 0 */
-#define  FSMC_BTR4_ADDSET_1                  0x00000002U        /*!<Bit 1 */
-#define  FSMC_BTR4_ADDSET_2                  0x00000004U        /*!<Bit 2 */
-#define  FSMC_BTR4_ADDSET_3                  0x00000008U        /*!<Bit 3 */
-
-#define  FSMC_BTR4_ADDHLD                    0x000000F0U        /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
-#define  FSMC_BTR4_ADDHLD_0                  0x00000010U        /*!<Bit 0 */
-#define  FSMC_BTR4_ADDHLD_1                  0x00000020U        /*!<Bit 1 */
-#define  FSMC_BTR4_ADDHLD_2                  0x00000040U        /*!<Bit 2 */
-#define  FSMC_BTR4_ADDHLD_3                  0x00000080U        /*!<Bit 3 */
-
-#define  FSMC_BTR4_DATAST                    0x0000FF00U        /*!<DATAST [7:0] bits (Data-phase duration) */
-#define  FSMC_BTR4_DATAST_0                  0x00000100U        /*!<Bit 0 */
-#define  FSMC_BTR4_DATAST_1                  0x00000200U        /*!<Bit 1 */
-#define  FSMC_BTR4_DATAST_2                  0x00000400U        /*!<Bit 2 */
-#define  FSMC_BTR4_DATAST_3                  0x00000800U        /*!<Bit 3 */
-#define  FSMC_BTR4_DATAST_4                  0x00001000U        /*!<Bit 4 */
-#define  FSMC_BTR4_DATAST_5                  0x00002000U        /*!<Bit 5 */
-#define  FSMC_BTR4_DATAST_6                  0x00004000U        /*!<Bit 6 */
-#define  FSMC_BTR4_DATAST_7                  0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_BTR4_BUSTURN                   0x000F0000U        /*!<BUSTURN[3:0] bits (Bus turnaround phase duration) */
-#define  FSMC_BTR4_BUSTURN_0                 0x00010000U        /*!<Bit 0 */
-#define  FSMC_BTR4_BUSTURN_1                 0x00020000U        /*!<Bit 1 */
-#define  FSMC_BTR4_BUSTURN_2                 0x00040000U        /*!<Bit 2 */
-#define  FSMC_BTR4_BUSTURN_3                 0x00080000U        /*!<Bit 3 */
-
-#define  FSMC_BTR4_CLKDIV                    0x00F00000U        /*!<CLKDIV[3:0] bits (Clock divide ratio) */
-#define  FSMC_BTR4_CLKDIV_0                  0x00100000U        /*!<Bit 0 */
-#define  FSMC_BTR4_CLKDIV_1                  0x00200000U        /*!<Bit 1 */
-#define  FSMC_BTR4_CLKDIV_2                  0x00400000U        /*!<Bit 2 */
-#define  FSMC_BTR4_CLKDIV_3                  0x00800000U        /*!<Bit 3 */
-
-#define  FSMC_BTR4_DATLAT                    0x0F000000U        /*!<DATLA[3:0] bits (Data latency) */
-#define  FSMC_BTR4_DATLAT_0                  0x01000000U        /*!<Bit 0 */
-#define  FSMC_BTR4_DATLAT_1                  0x02000000U        /*!<Bit 1 */
-#define  FSMC_BTR4_DATLAT_2                  0x04000000U        /*!<Bit 2 */
-#define  FSMC_BTR4_DATLAT_3                  0x08000000U        /*!<Bit 3 */
-
-#define  FSMC_BTR4_ACCMOD                    0x30000000U        /*!<ACCMOD[1:0] bits (Access mode) */
-#define  FSMC_BTR4_ACCMOD_0                  0x10000000U        /*!<Bit 0 */
-#define  FSMC_BTR4_ACCMOD_1                  0x20000000U        /*!<Bit 1 */
-
-/******************  Bit definition for FSMC_BWTR1 register  ******************/
-#define  FSMC_BWTR1_ADDSET                   0x0000000FU        /*!<ADDSET[3:0] bits (Address setup phase duration) */
-#define  FSMC_BWTR1_ADDSET_0                 0x00000001U        /*!<Bit 0 */
-#define  FSMC_BWTR1_ADDSET_1                 0x00000002U        /*!<Bit 1 */
-#define  FSMC_BWTR1_ADDSET_2                 0x00000004U        /*!<Bit 2 */
-#define  FSMC_BWTR1_ADDSET_3                 0x00000008U        /*!<Bit 3 */
-
-#define  FSMC_BWTR1_ADDHLD                   0x000000F0U        /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
-#define  FSMC_BWTR1_ADDHLD_0                 0x00000010U        /*!<Bit 0 */
-#define  FSMC_BWTR1_ADDHLD_1                 0x00000020U        /*!<Bit 1 */
-#define  FSMC_BWTR1_ADDHLD_2                 0x00000040U        /*!<Bit 2 */
-#define  FSMC_BWTR1_ADDHLD_3                 0x00000080U        /*!<Bit 3 */
-
-#define  FSMC_BWTR1_DATAST                   0x0000FF00U        /*!<DATAST [7:0] bits (Data-phase duration) */
-#define  FSMC_BWTR1_DATAST_0                 0x00000100U        /*!<Bit 0 */
-#define  FSMC_BWTR1_DATAST_1                 0x00000200U        /*!<Bit 1 */
-#define  FSMC_BWTR1_DATAST_2                 0x00000400U        /*!<Bit 2 */
-#define  FSMC_BWTR1_DATAST_3                 0x00000800U        /*!<Bit 3 */
-#define  FSMC_BWTR1_DATAST_4                 0x00001000U        /*!<Bit 4 */
-#define  FSMC_BWTR1_DATAST_5                 0x00002000U        /*!<Bit 5 */
-#define  FSMC_BWTR1_DATAST_6                 0x00004000U        /*!<Bit 6 */
-#define  FSMC_BWTR1_DATAST_7                 0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_BWTR1_BUSTURN                  0x000F0000U        /*!<BUSTURN[3:0] bits (Bus turnaround duration) */
-#define  FSMC_BWTR1_BUSTURN_0                0x00010000U        /*!<Bit 0 */
-#define  FSMC_BWTR1_BUSTURN_1                0x00020000U        /*!<Bit 1 */
-#define  FSMC_BWTR1_BUSTURN_2                0x00040000U        /*!<Bit 2 */
-#define  FSMC_BWTR1_BUSTURN_3                0x00080000U        /*!<Bit 3 */
-
-#define  FSMC_BWTR1_ACCMOD                   0x30000000U        /*!<ACCMOD[1:0] bits (Access mode) */
-#define  FSMC_BWTR1_ACCMOD_0                 0x10000000U        /*!<Bit 0 */
-#define  FSMC_BWTR1_ACCMOD_1                 0x20000000U        /*!<Bit 1 */
-
-/******************  Bit definition for FSMC_BWTR2 register  ******************/
-#define  FSMC_BWTR2_ADDSET                   0x0000000FU        /*!<ADDSET[3:0] bits (Address setup phase duration) */
-#define  FSMC_BWTR2_ADDSET_0                 0x00000001U        /*!<Bit 0 */
-#define  FSMC_BWTR2_ADDSET_1                 0x00000002U        /*!<Bit 1 */
-#define  FSMC_BWTR2_ADDSET_2                 0x00000004U        /*!<Bit 2 */
-#define  FSMC_BWTR2_ADDSET_3                 0x00000008U        /*!<Bit 3 */
-
-#define  FSMC_BWTR2_ADDHLD                   0x000000F0U        /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
-#define  FSMC_BWTR2_ADDHLD_0                 0x00000010U        /*!<Bit 0 */
-#define  FSMC_BWTR2_ADDHLD_1                 0x00000020U        /*!<Bit 1 */
-#define  FSMC_BWTR2_ADDHLD_2                 0x00000040U        /*!<Bit 2 */
-#define  FSMC_BWTR2_ADDHLD_3                 0x00000080U        /*!<Bit 3 */
-
-#define  FSMC_BWTR2_DATAST                   0x0000FF00U        /*!<DATAST [7:0] bits (Data-phase duration) */
-#define  FSMC_BWTR2_DATAST_0                 0x00000100U        /*!<Bit 0 */
-#define  FSMC_BWTR2_DATAST_1                 0x00000200U        /*!<Bit 1 */
-#define  FSMC_BWTR2_DATAST_2                 0x00000400U        /*!<Bit 2 */
-#define  FSMC_BWTR2_DATAST_3                 0x00000800U        /*!<Bit 3 */
-#define  FSMC_BWTR2_DATAST_4                 0x00001000U        /*!<Bit 4 */
-#define  FSMC_BWTR2_DATAST_5                 0x00002000U        /*!<Bit 5 */
-#define  FSMC_BWTR2_DATAST_6                 0x00004000U        /*!<Bit 6 */
-#define  FSMC_BWTR2_DATAST_7                 0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_BWTR2_BUSTURN                  0x000F0000U        /*!<BUSTURN[3:0] bits (Bus turnaround duration) */
-#define  FSMC_BWTR2_BUSTURN_0                0x00010000U        /*!<Bit 0 */
-#define  FSMC_BWTR2_BUSTURN_1                0x00020000U        /*!<Bit 1 */
-#define  FSMC_BWTR2_BUSTURN_2                0x00040000U        /*!<Bit 2 */
-#define  FSMC_BWTR2_BUSTURN_3                0x00080000U        /*!<Bit 3 */
-
-#define  FSMC_BWTR2_ACCMOD                   0x30000000U        /*!<ACCMOD[1:0] bits (Access mode) */
-#define  FSMC_BWTR2_ACCMOD_0                 0x10000000U        /*!<Bit 0 */
-#define  FSMC_BWTR2_ACCMOD_1                 0x20000000U        /*!<Bit 1 */
-
-/******************  Bit definition for FSMC_BWTR3 register  ******************/
-#define  FSMC_BWTR3_ADDSET                   0x0000000FU        /*!<ADDSET[3:0] bits (Address setup phase duration) */
-#define  FSMC_BWTR3_ADDSET_0                 0x00000001U        /*!<Bit 0 */
-#define  FSMC_BWTR3_ADDSET_1                 0x00000002U        /*!<Bit 1 */
-#define  FSMC_BWTR3_ADDSET_2                 0x00000004U        /*!<Bit 2 */
-#define  FSMC_BWTR3_ADDSET_3                 0x00000008U        /*!<Bit 3 */
-
-#define  FSMC_BWTR3_ADDHLD                   0x000000F0U        /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
-#define  FSMC_BWTR3_ADDHLD_0                 0x00000010U        /*!<Bit 0 */
-#define  FSMC_BWTR3_ADDHLD_1                 0x00000020U        /*!<Bit 1 */
-#define  FSMC_BWTR3_ADDHLD_2                 0x00000040U        /*!<Bit 2 */
-#define  FSMC_BWTR3_ADDHLD_3                 0x00000080U        /*!<Bit 3 */
-
-#define  FSMC_BWTR3_DATAST                   0x0000FF00U        /*!<DATAST [7:0] bits (Data-phase duration) */
-#define  FSMC_BWTR3_DATAST_0                 0x00000100U        /*!<Bit 0 */
-#define  FSMC_BWTR3_DATAST_1                 0x00000200U        /*!<Bit 1 */
-#define  FSMC_BWTR3_DATAST_2                 0x00000400U        /*!<Bit 2 */
-#define  FSMC_BWTR3_DATAST_3                 0x00000800U        /*!<Bit 3 */
-#define  FSMC_BWTR3_DATAST_4                 0x00001000U        /*!<Bit 4 */
-#define  FSMC_BWTR3_DATAST_5                 0x00002000U        /*!<Bit 5 */
-#define  FSMC_BWTR3_DATAST_6                 0x00004000U        /*!<Bit 6 */
-#define  FSMC_BWTR3_DATAST_7                 0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_BWTR3_BUSTURN                  0x000F0000U        /*!<BUSTURN[3:0] bits (Bus turnaround duration) */
-#define  FSMC_BWTR3_BUSTURN_0                0x00010000U        /*!<Bit 0 */
-#define  FSMC_BWTR3_BUSTURN_1                0x00020000U        /*!<Bit 1 */
-#define  FSMC_BWTR3_BUSTURN_2                0x00040000U        /*!<Bit 2 */
-#define  FSMC_BWTR3_BUSTURN_3                0x00080000U        /*!<Bit 3 */
-
-#define  FSMC_BWTR3_ACCMOD                   0x30000000U        /*!<ACCMOD[1:0] bits (Access mode) */
-#define  FSMC_BWTR3_ACCMOD_0                 0x10000000U        /*!<Bit 0 */
-#define  FSMC_BWTR3_ACCMOD_1                 0x20000000U        /*!<Bit 1 */
-
-/******************  Bit definition for FSMC_BWTR4 register  ******************/
-#define  FSMC_BWTR4_ADDSET                   0x0000000FU        /*!<ADDSET[3:0] bits (Address setup phase duration) */
-#define  FSMC_BWTR4_ADDSET_0                 0x00000001U        /*!<Bit 0 */
-#define  FSMC_BWTR4_ADDSET_1                 0x00000002U        /*!<Bit 1 */
-#define  FSMC_BWTR4_ADDSET_2                 0x00000004U        /*!<Bit 2 */
-#define  FSMC_BWTR4_ADDSET_3                 0x00000008U        /*!<Bit 3 */
-
-#define  FSMC_BWTR4_ADDHLD                   0x000000F0U        /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
-#define  FSMC_BWTR4_ADDHLD_0                 0x00000010U        /*!<Bit 0 */
-#define  FSMC_BWTR4_ADDHLD_1                 0x00000020U        /*!<Bit 1 */
-#define  FSMC_BWTR4_ADDHLD_2                 0x00000040U        /*!<Bit 2 */
-#define  FSMC_BWTR4_ADDHLD_3                 0x00000080U        /*!<Bit 3 */
-
-#define  FSMC_BWTR4_DATAST                   0x0000FF00U        /*!<DATAST [3:0] bits (Data-phase duration) */
-#define  FSMC_BWTR4_DATAST_0                 0x00000100U        /*!<Bit 0 */
-#define  FSMC_BWTR4_DATAST_1                 0x00000200U        /*!<Bit 1 */
-#define  FSMC_BWTR4_DATAST_2                 0x00000400U        /*!<Bit 2 */
-#define  FSMC_BWTR4_DATAST_3                 0x00000800U        /*!<Bit 3 */
-#define  FSMC_BWTR4_DATAST_4                 0x00001000U        /*!<Bit 4 */
-#define  FSMC_BWTR4_DATAST_5                 0x00002000U        /*!<Bit 5 */
-#define  FSMC_BWTR4_DATAST_6                 0x00004000U        /*!<Bit 6 */
-#define  FSMC_BWTR4_DATAST_7                 0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_BWTR4_BUSTURN                  0x000F0000U        /*!<BUSTURN[3:0] bits (Bus turnaround duration) */
-#define  FSMC_BWTR4_BUSTURN_0                0x00010000U        /*!<Bit 0 */
-#define  FSMC_BWTR4_BUSTURN_1                0x00020000U        /*!<Bit 1 */
-#define  FSMC_BWTR4_BUSTURN_2                0x00040000U        /*!<Bit 2 */
-#define  FSMC_BWTR4_BUSTURN_3                0x00080000U        /*!<Bit 3 */
-
-#define  FSMC_BWTR4_ACCMOD                   0x30000000U        /*!<ACCMOD[1:0] bits (Access mode) */
-#define  FSMC_BWTR4_ACCMOD_0                 0x10000000U        /*!<Bit 0 */
-#define  FSMC_BWTR4_ACCMOD_1                 0x20000000U        /*!<Bit 1 */
-
-/******************  Bit definition for FSMC_PCR2 register  *******************/
-#define  FSMC_PCR2_PWAITEN                   0x00000002U        /*!<Wait feature enable bit */
-#define  FSMC_PCR2_PBKEN                     0x00000004U        /*!<PC Card/NAND Flash memory bank enable bit */
-#define  FSMC_PCR2_PTYP                      0x00000008U        /*!<Memory type */
-
-#define  FSMC_PCR2_PWID                      0x00000030U        /*!<PWID[1:0] bits (NAND Flash databus width) */
-#define  FSMC_PCR2_PWID_0                    0x00000010U        /*!<Bit 0 */
-#define  FSMC_PCR2_PWID_1                    0x00000020U        /*!<Bit 1 */
-
-#define  FSMC_PCR2_ECCEN                     0x00000040U        /*!<ECC computation logic enable bit */
-
-#define  FSMC_PCR2_TCLR                      0x00001E00U        /*!<TCLR[3:0] bits (CLE to RE delay) */
-#define  FSMC_PCR2_TCLR_0                    0x00000200U        /*!<Bit 0 */
-#define  FSMC_PCR2_TCLR_1                    0x00000400U        /*!<Bit 1 */
-#define  FSMC_PCR2_TCLR_2                    0x00000800U        /*!<Bit 2 */
-#define  FSMC_PCR2_TCLR_3                    0x00001000U        /*!<Bit 3 */
-
-#define  FSMC_PCR2_TAR                       0x0001E000U        /*!<TAR[3:0] bits (ALE to RE delay) */
-#define  FSMC_PCR2_TAR_0                     0x00002000U        /*!<Bit 0 */
-#define  FSMC_PCR2_TAR_1                     0x00004000U        /*!<Bit 1 */
-#define  FSMC_PCR2_TAR_2                     0x00008000U        /*!<Bit 2 */
-#define  FSMC_PCR2_TAR_3                     0x00010000U        /*!<Bit 3 */
-
-#define  FSMC_PCR2_ECCPS                     0x000E0000U        /*!<ECCPS[1:0] bits (ECC page size) */
-#define  FSMC_PCR2_ECCPS_0                   0x00020000U        /*!<Bit 0 */
-#define  FSMC_PCR2_ECCPS_1                   0x00040000U        /*!<Bit 1 */
-#define  FSMC_PCR2_ECCPS_2                   0x00080000U        /*!<Bit 2 */
-
-/******************  Bit definition for FSMC_PCR3 register  *******************/
-#define  FSMC_PCR3_PWAITEN                   0x00000002U        /*!<Wait feature enable bit */
-#define  FSMC_PCR3_PBKEN                     0x00000004U        /*!<PC Card/NAND Flash memory bank enable bit */
-#define  FSMC_PCR3_PTYP                      0x00000008U        /*!<Memory type */
-
-#define  FSMC_PCR3_PWID                      0x00000030U        /*!<PWID[1:0] bits (NAND Flash databus width) */
-#define  FSMC_PCR3_PWID_0                    0x00000010U        /*!<Bit 0 */
-#define  FSMC_PCR3_PWID_1                    0x00000020U        /*!<Bit 1 */
-
-#define  FSMC_PCR3_ECCEN                     0x00000040U        /*!<ECC computation logic enable bit */
-
-#define  FSMC_PCR3_TCLR                      0x00001E00U        /*!<TCLR[3:0] bits (CLE to RE delay) */
-#define  FSMC_PCR3_TCLR_0                    0x00000200U        /*!<Bit 0 */
-#define  FSMC_PCR3_TCLR_1                    0x00000400U        /*!<Bit 1 */
-#define  FSMC_PCR3_TCLR_2                    0x00000800U        /*!<Bit 2 */
-#define  FSMC_PCR3_TCLR_3                    0x00001000U        /*!<Bit 3 */
-
-#define  FSMC_PCR3_TAR                       0x0001E000U        /*!<TAR[3:0] bits (ALE to RE delay) */
-#define  FSMC_PCR3_TAR_0                     0x00002000U        /*!<Bit 0 */
-#define  FSMC_PCR3_TAR_1                     0x00004000U        /*!<Bit 1 */
-#define  FSMC_PCR3_TAR_2                     0x00008000U        /*!<Bit 2 */
-#define  FSMC_PCR3_TAR_3                     0x00010000U        /*!<Bit 3 */
-
-#define  FSMC_PCR3_ECCPS                     0x000E0000U        /*!<ECCPS[2:0] bits (ECC page size) */
-#define  FSMC_PCR3_ECCPS_0                   0x00020000U        /*!<Bit 0 */
-#define  FSMC_PCR3_ECCPS_1                   0x00040000U        /*!<Bit 1 */
-#define  FSMC_PCR3_ECCPS_2                   0x00080000U        /*!<Bit 2 */
-
-/******************  Bit definition for FSMC_PCR4 register  *******************/
-#define  FSMC_PCR4_PWAITEN                   0x00000002U        /*!<Wait feature enable bit */
-#define  FSMC_PCR4_PBKEN                     0x00000004U        /*!<PC Card/NAND Flash memory bank enable bit */
-#define  FSMC_PCR4_PTYP                      0x00000008U        /*!<Memory type */
-
-#define  FSMC_PCR4_PWID                      0x00000030U        /*!<PWID[1:0] bits (NAND Flash databus width) */
-#define  FSMC_PCR4_PWID_0                    0x00000010U        /*!<Bit 0 */
-#define  FSMC_PCR4_PWID_1                    0x00000020U        /*!<Bit 1 */
-
-#define  FSMC_PCR4_ECCEN                     0x00000040U        /*!<ECC computation logic enable bit */
-
-#define  FSMC_PCR4_TCLR                      0x00001E00U        /*!<TCLR[3:0] bits (CLE to RE delay) */
-#define  FSMC_PCR4_TCLR_0                    0x00000200U        /*!<Bit 0 */
-#define  FSMC_PCR4_TCLR_1                    0x00000400U        /*!<Bit 1 */
-#define  FSMC_PCR4_TCLR_2                    0x00000800U        /*!<Bit 2 */
-#define  FSMC_PCR4_TCLR_3                    0x00001000U        /*!<Bit 3 */
-
-#define  FSMC_PCR4_TAR                       0x0001E000U        /*!<TAR[3:0] bits (ALE to RE delay) */
-#define  FSMC_PCR4_TAR_0                     0x00002000U        /*!<Bit 0 */
-#define  FSMC_PCR4_TAR_1                     0x00004000U        /*!<Bit 1 */
-#define  FSMC_PCR4_TAR_2                     0x00008000U        /*!<Bit 2 */
-#define  FSMC_PCR4_TAR_3                     0x00010000U        /*!<Bit 3 */
-
-#define  FSMC_PCR4_ECCPS                     0x000E0000U        /*!<ECCPS[2:0] bits (ECC page size) */
-#define  FSMC_PCR4_ECCPS_0                   0x00020000U        /*!<Bit 0 */
-#define  FSMC_PCR4_ECCPS_1                   0x00040000U        /*!<Bit 1 */
-#define  FSMC_PCR4_ECCPS_2                   0x00080000U        /*!<Bit 2 */
-
-/*******************  Bit definition for FSMC_SR2 register  *******************/
-#define  FSMC_SR2_IRS                        0x01U               /*!<Interrupt Rising Edge status                */
-#define  FSMC_SR2_ILS                        0x02U               /*!<Interrupt Level status                      */
-#define  FSMC_SR2_IFS                        0x04U               /*!<Interrupt Falling Edge status               */
-#define  FSMC_SR2_IREN                       0x08U               /*!<Interrupt Rising Edge detection Enable bit  */
-#define  FSMC_SR2_ILEN                       0x10U               /*!<Interrupt Level detection Enable bit        */
-#define  FSMC_SR2_IFEN                       0x20U               /*!<Interrupt Falling Edge detection Enable bit */
-#define  FSMC_SR2_FEMPT                      0x40U               /*!<FIFO empty */
-
-/*******************  Bit definition for FSMC_SR3 register  *******************/
-#define  FSMC_SR3_IRS                        0x01U               /*!<Interrupt Rising Edge status                */
-#define  FSMC_SR3_ILS                        0x02U               /*!<Interrupt Level status                      */
-#define  FSMC_SR3_IFS                        0x04U               /*!<Interrupt Falling Edge status               */
-#define  FSMC_SR3_IREN                       0x08U               /*!<Interrupt Rising Edge detection Enable bit  */
-#define  FSMC_SR3_ILEN                       0x10U               /*!<Interrupt Level detection Enable bit        */
-#define  FSMC_SR3_IFEN                       0x20U               /*!<Interrupt Falling Edge detection Enable bit */
-#define  FSMC_SR3_FEMPT                      0x40U               /*!<FIFO empty */
-
-/*******************  Bit definition for FSMC_SR4 register  *******************/
-#define  FSMC_SR4_IRS                        0x01U               /*!<Interrupt Rising Edge status                 */
-#define  FSMC_SR4_ILS                        0x02U               /*!<Interrupt Level status                       */
-#define  FSMC_SR4_IFS                        0x04U               /*!<Interrupt Falling Edge status                */
-#define  FSMC_SR4_IREN                       0x08U               /*!<Interrupt Rising Edge detection Enable bit   */
-#define  FSMC_SR4_ILEN                       0x10U               /*!<Interrupt Level detection Enable bit         */
-#define  FSMC_SR4_IFEN                       0x20U               /*!<Interrupt Falling Edge detection Enable bit  */
-#define  FSMC_SR4_FEMPT                      0x40U               /*!<FIFO empty */
-
-/******************  Bit definition for FSMC_PMEM2 register  ******************/
-#define  FSMC_PMEM2_MEMSET2                  0x000000FFU        /*!<MEMSET2[7:0] bits (Common memory 2 setup time) */
-#define  FSMC_PMEM2_MEMSET2_0                0x00000001U        /*!<Bit 0 */
-#define  FSMC_PMEM2_MEMSET2_1                0x00000002U        /*!<Bit 1 */
-#define  FSMC_PMEM2_MEMSET2_2                0x00000004U        /*!<Bit 2 */
-#define  FSMC_PMEM2_MEMSET2_3                0x00000008U        /*!<Bit 3 */
-#define  FSMC_PMEM2_MEMSET2_4                0x00000010U        /*!<Bit 4 */
-#define  FSMC_PMEM2_MEMSET2_5                0x00000020U        /*!<Bit 5 */
-#define  FSMC_PMEM2_MEMSET2_6                0x00000040U        /*!<Bit 6 */
-#define  FSMC_PMEM2_MEMSET2_7                0x00000080U        /*!<Bit 7 */
-
-#define  FSMC_PMEM2_MEMWAIT2                 0x0000FF00U        /*!<MEMWAIT2[7:0] bits (Common memory 2 wait time) */
-#define  FSMC_PMEM2_MEMWAIT2_0               0x00000100U        /*!<Bit 0 */
-#define  FSMC_PMEM2_MEMWAIT2_1               0x00000200U        /*!<Bit 1 */
-#define  FSMC_PMEM2_MEMWAIT2_2               0x00000400U        /*!<Bit 2 */
-#define  FSMC_PMEM2_MEMWAIT2_3               0x00000800U        /*!<Bit 3 */
-#define  FSMC_PMEM2_MEMWAIT2_4               0x00001000U        /*!<Bit 4 */
-#define  FSMC_PMEM2_MEMWAIT2_5               0x00002000U        /*!<Bit 5 */
-#define  FSMC_PMEM2_MEMWAIT2_6               0x00004000U        /*!<Bit 6 */
-#define  FSMC_PMEM2_MEMWAIT2_7               0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_PMEM2_MEMHOLD2                 0x00FF0000U        /*!<MEMHOLD2[7:0] bits (Common memory 2 hold time) */
-#define  FSMC_PMEM2_MEMHOLD2_0               0x00010000U        /*!<Bit 0 */
-#define  FSMC_PMEM2_MEMHOLD2_1               0x00020000U        /*!<Bit 1 */
-#define  FSMC_PMEM2_MEMHOLD2_2               0x00040000U        /*!<Bit 2 */
-#define  FSMC_PMEM2_MEMHOLD2_3               0x00080000U        /*!<Bit 3 */
-#define  FSMC_PMEM2_MEMHOLD2_4               0x00100000U        /*!<Bit 4 */
-#define  FSMC_PMEM2_MEMHOLD2_5               0x00200000U        /*!<Bit 5 */
-#define  FSMC_PMEM2_MEMHOLD2_6               0x00400000U        /*!<Bit 6 */
-#define  FSMC_PMEM2_MEMHOLD2_7               0x00800000U        /*!<Bit 7 */
-
-#define  FSMC_PMEM2_MEMHIZ2                  0xFF000000U        /*!<MEMHIZ2[7:0] bits (Common memory 2 databus HiZ time) */
-#define  FSMC_PMEM2_MEMHIZ2_0                0x01000000U        /*!<Bit 0 */
-#define  FSMC_PMEM2_MEMHIZ2_1                0x02000000U        /*!<Bit 1 */
-#define  FSMC_PMEM2_MEMHIZ2_2                0x04000000U        /*!<Bit 2 */
-#define  FSMC_PMEM2_MEMHIZ2_3                0x08000000U        /*!<Bit 3 */
-#define  FSMC_PMEM2_MEMHIZ2_4                0x10000000U        /*!<Bit 4 */
-#define  FSMC_PMEM2_MEMHIZ2_5                0x20000000U        /*!<Bit 5 */
-#define  FSMC_PMEM2_MEMHIZ2_6                0x40000000U        /*!<Bit 6 */
-#define  FSMC_PMEM2_MEMHIZ2_7                0x80000000U        /*!<Bit 7 */
-
-/******************  Bit definition for FSMC_PMEM3 register  ******************/
-#define  FSMC_PMEM3_MEMSET3                  0x000000FFU        /*!<MEMSET3[7:0] bits (Common memory 3 setup time) */
-#define  FSMC_PMEM3_MEMSET3_0                0x00000001U        /*!<Bit 0 */
-#define  FSMC_PMEM3_MEMSET3_1                0x00000002U        /*!<Bit 1 */
-#define  FSMC_PMEM3_MEMSET3_2                0x00000004U        /*!<Bit 2 */
-#define  FSMC_PMEM3_MEMSET3_3                0x00000008U        /*!<Bit 3 */
-#define  FSMC_PMEM3_MEMSET3_4                0x00000010U        /*!<Bit 4 */
-#define  FSMC_PMEM3_MEMSET3_5                0x00000020U        /*!<Bit 5 */
-#define  FSMC_PMEM3_MEMSET3_6                0x00000040U        /*!<Bit 6 */
-#define  FSMC_PMEM3_MEMSET3_7                0x00000080U        /*!<Bit 7 */
-
-#define  FSMC_PMEM3_MEMWAIT3                 0x0000FF00U        /*!<MEMWAIT3[7:0] bits (Common memory 3 wait time) */
-#define  FSMC_PMEM3_MEMWAIT3_0               0x00000100U        /*!<Bit 0 */
-#define  FSMC_PMEM3_MEMWAIT3_1               0x00000200U        /*!<Bit 1 */
-#define  FSMC_PMEM3_MEMWAIT3_2               0x00000400U        /*!<Bit 2 */
-#define  FSMC_PMEM3_MEMWAIT3_3               0x00000800U        /*!<Bit 3 */
-#define  FSMC_PMEM3_MEMWAIT3_4               0x00001000U        /*!<Bit 4 */
-#define  FSMC_PMEM3_MEMWAIT3_5               0x00002000U        /*!<Bit 5 */
-#define  FSMC_PMEM3_MEMWAIT3_6               0x00004000U        /*!<Bit 6 */
-#define  FSMC_PMEM3_MEMWAIT3_7               0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_PMEM3_MEMHOLD3                 0x00FF0000U        /*!<MEMHOLD3[7:0] bits (Common memory 3 hold time) */
-#define  FSMC_PMEM3_MEMHOLD3_0               0x00010000U        /*!<Bit 0 */
-#define  FSMC_PMEM3_MEMHOLD3_1               0x00020000U        /*!<Bit 1 */
-#define  FSMC_PMEM3_MEMHOLD3_2               0x00040000U        /*!<Bit 2 */
-#define  FSMC_PMEM3_MEMHOLD3_3               0x00080000U        /*!<Bit 3 */
-#define  FSMC_PMEM3_MEMHOLD3_4               0x00100000U        /*!<Bit 4 */
-#define  FSMC_PMEM3_MEMHOLD3_5               0x00200000U        /*!<Bit 5 */
-#define  FSMC_PMEM3_MEMHOLD3_6               0x00400000U        /*!<Bit 6 */
-#define  FSMC_PMEM3_MEMHOLD3_7               0x00800000U        /*!<Bit 7 */
-
-#define  FSMC_PMEM3_MEMHIZ3                  0xFF000000U        /*!<MEMHIZ3[7:0] bits (Common memory 3 databus HiZ time) */
-#define  FSMC_PMEM3_MEMHIZ3_0                0x01000000U        /*!<Bit 0 */
-#define  FSMC_PMEM3_MEMHIZ3_1                0x02000000U        /*!<Bit 1 */
-#define  FSMC_PMEM3_MEMHIZ3_2                0x04000000U        /*!<Bit 2 */
-#define  FSMC_PMEM3_MEMHIZ3_3                0x08000000U        /*!<Bit 3 */
-#define  FSMC_PMEM3_MEMHIZ3_4                0x10000000U        /*!<Bit 4 */
-#define  FSMC_PMEM3_MEMHIZ3_5                0x20000000U        /*!<Bit 5 */
-#define  FSMC_PMEM3_MEMHIZ3_6                0x40000000U        /*!<Bit 6 */
-#define  FSMC_PMEM3_MEMHIZ3_7                0x80000000U        /*!<Bit 7 */
-
-/******************  Bit definition for FSMC_PMEM4 register  ******************/
-#define  FSMC_PMEM4_MEMSET4                  0x000000FFU        /*!<MEMSET4[7:0] bits (Common memory 4 setup time) */
-#define  FSMC_PMEM4_MEMSET4_0                0x00000001U        /*!<Bit 0 */
-#define  FSMC_PMEM4_MEMSET4_1                0x00000002U        /*!<Bit 1 */
-#define  FSMC_PMEM4_MEMSET4_2                0x00000004U        /*!<Bit 2 */
-#define  FSMC_PMEM4_MEMSET4_3                0x00000008U        /*!<Bit 3 */
-#define  FSMC_PMEM4_MEMSET4_4                0x00000010U        /*!<Bit 4 */
-#define  FSMC_PMEM4_MEMSET4_5                0x00000020U        /*!<Bit 5 */
-#define  FSMC_PMEM4_MEMSET4_6                0x00000040U        /*!<Bit 6 */
-#define  FSMC_PMEM4_MEMSET4_7                0x00000080U        /*!<Bit 7 */
-
-#define  FSMC_PMEM4_MEMWAIT4                 0x0000FF00U        /*!<MEMWAIT4[7:0] bits (Common memory 4 wait time) */
-#define  FSMC_PMEM4_MEMWAIT4_0               0x00000100U        /*!<Bit 0 */
-#define  FSMC_PMEM4_MEMWAIT4_1               0x00000200U        /*!<Bit 1 */
-#define  FSMC_PMEM4_MEMWAIT4_2               0x00000400U        /*!<Bit 2 */
-#define  FSMC_PMEM4_MEMWAIT4_3               0x00000800U        /*!<Bit 3 */
-#define  FSMC_PMEM4_MEMWAIT4_4               0x00001000U        /*!<Bit 4 */
-#define  FSMC_PMEM4_MEMWAIT4_5               0x00002000U        /*!<Bit 5 */
-#define  FSMC_PMEM4_MEMWAIT4_6               0x00004000U        /*!<Bit 6 */
-#define  FSMC_PMEM4_MEMWAIT4_7               0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_PMEM4_MEMHOLD4                 0x00FF0000U        /*!<MEMHOLD4[7:0] bits (Common memory 4 hold time) */
-#define  FSMC_PMEM4_MEMHOLD4_0               0x00010000U        /*!<Bit 0 */
-#define  FSMC_PMEM4_MEMHOLD4_1               0x00020000U        /*!<Bit 1 */
-#define  FSMC_PMEM4_MEMHOLD4_2               0x00040000U        /*!<Bit 2 */
-#define  FSMC_PMEM4_MEMHOLD4_3               0x00080000U        /*!<Bit 3 */
-#define  FSMC_PMEM4_MEMHOLD4_4               0x00100000U        /*!<Bit 4 */
-#define  FSMC_PMEM4_MEMHOLD4_5               0x00200000U        /*!<Bit 5 */
-#define  FSMC_PMEM4_MEMHOLD4_6               0x00400000U        /*!<Bit 6 */
-#define  FSMC_PMEM4_MEMHOLD4_7               0x00800000U        /*!<Bit 7 */
-
-#define  FSMC_PMEM4_MEMHIZ4                  0xFF000000U        /*!<MEMHIZ4[7:0] bits (Common memory 4 databus HiZ time) */
-#define  FSMC_PMEM4_MEMHIZ4_0                0x01000000U        /*!<Bit 0 */
-#define  FSMC_PMEM4_MEMHIZ4_1                0x02000000U        /*!<Bit 1 */
-#define  FSMC_PMEM4_MEMHIZ4_2                0x04000000U        /*!<Bit 2 */
-#define  FSMC_PMEM4_MEMHIZ4_3                0x08000000U        /*!<Bit 3 */
-#define  FSMC_PMEM4_MEMHIZ4_4                0x10000000U        /*!<Bit 4 */
-#define  FSMC_PMEM4_MEMHIZ4_5                0x20000000U        /*!<Bit 5 */
-#define  FSMC_PMEM4_MEMHIZ4_6                0x40000000U        /*!<Bit 6 */
-#define  FSMC_PMEM4_MEMHIZ4_7                0x80000000U        /*!<Bit 7 */
-
-/******************  Bit definition for FSMC_PATT2 register  ******************/
-#define  FSMC_PATT2_ATTSET2                  0x000000FFU        /*!<ATTSET2[7:0] bits (Attribute memory 2 setup time) */
-#define  FSMC_PATT2_ATTSET2_0                0x00000001U        /*!<Bit 0 */
-#define  FSMC_PATT2_ATTSET2_1                0x00000002U        /*!<Bit 1 */
-#define  FSMC_PATT2_ATTSET2_2                0x00000004U        /*!<Bit 2 */
-#define  FSMC_PATT2_ATTSET2_3                0x00000008U        /*!<Bit 3 */
-#define  FSMC_PATT2_ATTSET2_4                0x00000010U        /*!<Bit 4 */
-#define  FSMC_PATT2_ATTSET2_5                0x00000020U        /*!<Bit 5 */
-#define  FSMC_PATT2_ATTSET2_6                0x00000040U        /*!<Bit 6 */
-#define  FSMC_PATT2_ATTSET2_7                0x00000080U        /*!<Bit 7 */
-
-#define  FSMC_PATT2_ATTWAIT2                 0x0000FF00U        /*!<ATTWAIT2[7:0] bits (Attribute memory 2 wait time) */
-#define  FSMC_PATT2_ATTWAIT2_0               0x00000100U        /*!<Bit 0 */
-#define  FSMC_PATT2_ATTWAIT2_1               0x00000200U        /*!<Bit 1 */
-#define  FSMC_PATT2_ATTWAIT2_2               0x00000400U        /*!<Bit 2 */
-#define  FSMC_PATT2_ATTWAIT2_3               0x00000800U        /*!<Bit 3 */
-#define  FSMC_PATT2_ATTWAIT2_4               0x00001000U        /*!<Bit 4 */
-#define  FSMC_PATT2_ATTWAIT2_5               0x00002000U        /*!<Bit 5 */
-#define  FSMC_PATT2_ATTWAIT2_6               0x00004000U        /*!<Bit 6 */
-#define  FSMC_PATT2_ATTWAIT2_7               0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_PATT2_ATTHOLD2                 0x00FF0000U        /*!<ATTHOLD2[7:0] bits (Attribute memory 2 hold time) */
-#define  FSMC_PATT2_ATTHOLD2_0               0x00010000U        /*!<Bit 0 */
-#define  FSMC_PATT2_ATTHOLD2_1               0x00020000U        /*!<Bit 1 */
-#define  FSMC_PATT2_ATTHOLD2_2               0x00040000U        /*!<Bit 2 */
-#define  FSMC_PATT2_ATTHOLD2_3               0x00080000U        /*!<Bit 3 */
-#define  FSMC_PATT2_ATTHOLD2_4               0x00100000U        /*!<Bit 4 */
-#define  FSMC_PATT2_ATTHOLD2_5               0x00200000U        /*!<Bit 5 */
-#define  FSMC_PATT2_ATTHOLD2_6               0x00400000U        /*!<Bit 6 */
-#define  FSMC_PATT2_ATTHOLD2_7               0x00800000U        /*!<Bit 7 */
-
-#define  FSMC_PATT2_ATTHIZ2                  0xFF000000U        /*!<ATTHIZ2[7:0] bits (Attribute memory 2 databus HiZ time) */
-#define  FSMC_PATT2_ATTHIZ2_0                0x01000000U        /*!<Bit 0 */
-#define  FSMC_PATT2_ATTHIZ2_1                0x02000000U        /*!<Bit 1 */
-#define  FSMC_PATT2_ATTHIZ2_2                0x04000000U        /*!<Bit 2 */
-#define  FSMC_PATT2_ATTHIZ2_3                0x08000000U        /*!<Bit 3 */
-#define  FSMC_PATT2_ATTHIZ2_4                0x10000000U        /*!<Bit 4 */
-#define  FSMC_PATT2_ATTHIZ2_5                0x20000000U        /*!<Bit 5 */
-#define  FSMC_PATT2_ATTHIZ2_6                0x40000000U        /*!<Bit 6 */
-#define  FSMC_PATT2_ATTHIZ2_7                0x80000000U        /*!<Bit 7 */
-
-/******************  Bit definition for FSMC_PATT3 register  ******************/
-#define  FSMC_PATT3_ATTSET3                  0x000000FFU        /*!<ATTSET3[7:0] bits (Attribute memory 3 setup time) */
-#define  FSMC_PATT3_ATTSET3_0                0x00000001U        /*!<Bit 0 */
-#define  FSMC_PATT3_ATTSET3_1                0x00000002U        /*!<Bit 1 */
-#define  FSMC_PATT3_ATTSET3_2                0x00000004U        /*!<Bit 2 */
-#define  FSMC_PATT3_ATTSET3_3                0x00000008U        /*!<Bit 3 */
-#define  FSMC_PATT3_ATTSET3_4                0x00000010U        /*!<Bit 4 */
-#define  FSMC_PATT3_ATTSET3_5                0x00000020U        /*!<Bit 5 */
-#define  FSMC_PATT3_ATTSET3_6                0x00000040U        /*!<Bit 6 */
-#define  FSMC_PATT3_ATTSET3_7                0x00000080U        /*!<Bit 7 */
-
-#define  FSMC_PATT3_ATTWAIT3                 0x0000FF00U        /*!<ATTWAIT3[7:0] bits (Attribute memory 3 wait time) */
-#define  FSMC_PATT3_ATTWAIT3_0               0x00000100U        /*!<Bit 0 */
-#define  FSMC_PATT3_ATTWAIT3_1               0x00000200U        /*!<Bit 1 */
-#define  FSMC_PATT3_ATTWAIT3_2               0x00000400U        /*!<Bit 2 */
-#define  FSMC_PATT3_ATTWAIT3_3               0x00000800U        /*!<Bit 3 */
-#define  FSMC_PATT3_ATTWAIT3_4               0x00001000U        /*!<Bit 4 */
-#define  FSMC_PATT3_ATTWAIT3_5               0x00002000U        /*!<Bit 5 */
-#define  FSMC_PATT3_ATTWAIT3_6               0x00004000U        /*!<Bit 6 */
-#define  FSMC_PATT3_ATTWAIT3_7               0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_PATT3_ATTHOLD3                 0x00FF0000U        /*!<ATTHOLD3[7:0] bits (Attribute memory 3 hold time) */
-#define  FSMC_PATT3_ATTHOLD3_0               0x00010000U        /*!<Bit 0 */
-#define  FSMC_PATT3_ATTHOLD3_1               0x00020000U        /*!<Bit 1 */
-#define  FSMC_PATT3_ATTHOLD3_2               0x00040000U        /*!<Bit 2 */
-#define  FSMC_PATT3_ATTHOLD3_3               0x00080000U        /*!<Bit 3 */
-#define  FSMC_PATT3_ATTHOLD3_4               0x00100000U        /*!<Bit 4 */
-#define  FSMC_PATT3_ATTHOLD3_5               0x00200000U        /*!<Bit 5 */
-#define  FSMC_PATT3_ATTHOLD3_6               0x00400000U        /*!<Bit 6 */
-#define  FSMC_PATT3_ATTHOLD3_7               0x00800000U        /*!<Bit 7 */
-
-#define  FSMC_PATT3_ATTHIZ3                  0xFF000000U        /*!<ATTHIZ3[7:0] bits (Attribute memory 3 databus HiZ time) */
-#define  FSMC_PATT3_ATTHIZ3_0                0x01000000U        /*!<Bit 0 */
-#define  FSMC_PATT3_ATTHIZ3_1                0x02000000U        /*!<Bit 1 */
-#define  FSMC_PATT3_ATTHIZ3_2                0x04000000U        /*!<Bit 2 */
-#define  FSMC_PATT3_ATTHIZ3_3                0x08000000U        /*!<Bit 3 */
-#define  FSMC_PATT3_ATTHIZ3_4                0x10000000U        /*!<Bit 4 */
-#define  FSMC_PATT3_ATTHIZ3_5                0x20000000U        /*!<Bit 5 */
-#define  FSMC_PATT3_ATTHIZ3_6                0x40000000U        /*!<Bit 6 */
-#define  FSMC_PATT3_ATTHIZ3_7                0x80000000U        /*!<Bit 7 */
-
-/******************  Bit definition for FSMC_PATT4 register  ******************/
-#define  FSMC_PATT4_ATTSET4                  0x000000FFU        /*!<ATTSET4[7:0] bits (Attribute memory 4 setup time) */
-#define  FSMC_PATT4_ATTSET4_0                0x00000001U        /*!<Bit 0 */
-#define  FSMC_PATT4_ATTSET4_1                0x00000002U        /*!<Bit 1 */
-#define  FSMC_PATT4_ATTSET4_2                0x00000004U        /*!<Bit 2 */
-#define  FSMC_PATT4_ATTSET4_3                0x00000008U        /*!<Bit 3 */
-#define  FSMC_PATT4_ATTSET4_4                0x00000010U        /*!<Bit 4 */
-#define  FSMC_PATT4_ATTSET4_5                0x00000020U        /*!<Bit 5 */
-#define  FSMC_PATT4_ATTSET4_6                0x00000040U        /*!<Bit 6 */
-#define  FSMC_PATT4_ATTSET4_7                0x00000080U        /*!<Bit 7 */
-
-#define  FSMC_PATT4_ATTWAIT4                 0x0000FF00U        /*!<ATTWAIT4[7:0] bits (Attribute memory 4 wait time) */
-#define  FSMC_PATT4_ATTWAIT4_0               0x00000100U        /*!<Bit 0 */
-#define  FSMC_PATT4_ATTWAIT4_1               0x00000200U        /*!<Bit 1 */
-#define  FSMC_PATT4_ATTWAIT4_2               0x00000400U        /*!<Bit 2 */
-#define  FSMC_PATT4_ATTWAIT4_3               0x00000800U        /*!<Bit 3 */
-#define  FSMC_PATT4_ATTWAIT4_4               0x00001000U        /*!<Bit 4 */
-#define  FSMC_PATT4_ATTWAIT4_5               0x00002000U        /*!<Bit 5 */
-#define  FSMC_PATT4_ATTWAIT4_6               0x00004000U        /*!<Bit 6 */
-#define  FSMC_PATT4_ATTWAIT4_7               0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_PATT4_ATTHOLD4                 0x00FF0000U        /*!<ATTHOLD4[7:0] bits (Attribute memory 4 hold time) */
-#define  FSMC_PATT4_ATTHOLD4_0               0x00010000U        /*!<Bit 0 */
-#define  FSMC_PATT4_ATTHOLD4_1               0x00020000U        /*!<Bit 1 */
-#define  FSMC_PATT4_ATTHOLD4_2               0x00040000U        /*!<Bit 2 */
-#define  FSMC_PATT4_ATTHOLD4_3               0x00080000U        /*!<Bit 3 */
-#define  FSMC_PATT4_ATTHOLD4_4               0x00100000U        /*!<Bit 4 */
-#define  FSMC_PATT4_ATTHOLD4_5               0x00200000U        /*!<Bit 5 */
-#define  FSMC_PATT4_ATTHOLD4_6               0x00400000U        /*!<Bit 6 */
-#define  FSMC_PATT4_ATTHOLD4_7               0x00800000U        /*!<Bit 7 */
-
-#define  FSMC_PATT4_ATTHIZ4                  0xFF000000U        /*!<ATTHIZ4[7:0] bits (Attribute memory 4 databus HiZ time) */
-#define  FSMC_PATT4_ATTHIZ4_0                0x01000000U        /*!<Bit 0 */
-#define  FSMC_PATT4_ATTHIZ4_1                0x02000000U        /*!<Bit 1 */
-#define  FSMC_PATT4_ATTHIZ4_2                0x04000000U        /*!<Bit 2 */
-#define  FSMC_PATT4_ATTHIZ4_3                0x08000000U        /*!<Bit 3 */
-#define  FSMC_PATT4_ATTHIZ4_4                0x10000000U        /*!<Bit 4 */
-#define  FSMC_PATT4_ATTHIZ4_5                0x20000000U        /*!<Bit 5 */
-#define  FSMC_PATT4_ATTHIZ4_6                0x40000000U        /*!<Bit 6 */
-#define  FSMC_PATT4_ATTHIZ4_7                0x80000000U        /*!<Bit 7 */
-
-/******************  Bit definition for FSMC_PIO4 register  *******************/
-#define  FSMC_PIO4_IOSET4                    0x000000FFU        /*!<IOSET4[7:0] bits (I/O 4 setup time) */
-#define  FSMC_PIO4_IOSET4_0                  0x00000001U        /*!<Bit 0 */
-#define  FSMC_PIO4_IOSET4_1                  0x00000002U        /*!<Bit 1 */
-#define  FSMC_PIO4_IOSET4_2                  0x00000004U        /*!<Bit 2 */
-#define  FSMC_PIO4_IOSET4_3                  0x00000008U        /*!<Bit 3 */
-#define  FSMC_PIO4_IOSET4_4                  0x00000010U        /*!<Bit 4 */
-#define  FSMC_PIO4_IOSET4_5                  0x00000020U        /*!<Bit 5 */
-#define  FSMC_PIO4_IOSET4_6                  0x00000040U        /*!<Bit 6 */
-#define  FSMC_PIO4_IOSET4_7                  0x00000080U        /*!<Bit 7 */
-
-#define  FSMC_PIO4_IOWAIT4                   0x0000FF00U        /*!<IOWAIT4[7:0] bits (I/O 4 wait time) */
-#define  FSMC_PIO4_IOWAIT4_0                 0x00000100U        /*!<Bit 0 */
-#define  FSMC_PIO4_IOWAIT4_1                 0x00000200U        /*!<Bit 1 */
-#define  FSMC_PIO4_IOWAIT4_2                 0x00000400U        /*!<Bit 2 */
-#define  FSMC_PIO4_IOWAIT4_3                 0x00000800U        /*!<Bit 3 */
-#define  FSMC_PIO4_IOWAIT4_4                 0x00001000U        /*!<Bit 4 */
-#define  FSMC_PIO4_IOWAIT4_5                 0x00002000U        /*!<Bit 5 */
-#define  FSMC_PIO4_IOWAIT4_6                 0x00004000U        /*!<Bit 6 */
-#define  FSMC_PIO4_IOWAIT4_7                 0x00008000U        /*!<Bit 7 */
-
-#define  FSMC_PIO4_IOHOLD4                   0x00FF0000U        /*!<IOHOLD4[7:0] bits (I/O 4 hold time) */
-#define  FSMC_PIO4_IOHOLD4_0                 0x00010000U        /*!<Bit 0 */
-#define  FSMC_PIO4_IOHOLD4_1                 0x00020000U        /*!<Bit 1 */
-#define  FSMC_PIO4_IOHOLD4_2                 0x00040000U        /*!<Bit 2 */
-#define  FSMC_PIO4_IOHOLD4_3                 0x00080000U        /*!<Bit 3 */
-#define  FSMC_PIO4_IOHOLD4_4                 0x00100000U        /*!<Bit 4 */
-#define  FSMC_PIO4_IOHOLD4_5                 0x00200000U        /*!<Bit 5 */
-#define  FSMC_PIO4_IOHOLD4_6                 0x00400000U        /*!<Bit 6 */
-#define  FSMC_PIO4_IOHOLD4_7                 0x00800000U        /*!<Bit 7 */
-
-#define  FSMC_PIO4_IOHIZ4                    0xFF000000U        /*!<IOHIZ4[7:0] bits (I/O 4 databus HiZ time) */
-#define  FSMC_PIO4_IOHIZ4_0                  0x01000000U        /*!<Bit 0 */
-#define  FSMC_PIO4_IOHIZ4_1                  0x02000000U        /*!<Bit 1 */
-#define  FSMC_PIO4_IOHIZ4_2                  0x04000000U        /*!<Bit 2 */
-#define  FSMC_PIO4_IOHIZ4_3                  0x08000000U        /*!<Bit 3 */
-#define  FSMC_PIO4_IOHIZ4_4                  0x10000000U        /*!<Bit 4 */
-#define  FSMC_PIO4_IOHIZ4_5                  0x20000000U        /*!<Bit 5 */
-#define  FSMC_PIO4_IOHIZ4_6                  0x40000000U        /*!<Bit 6 */
-#define  FSMC_PIO4_IOHIZ4_7                  0x80000000U        /*!<Bit 7 */
-
-/******************  Bit definition for FSMC_ECCR2 register  ******************/
-#define  FSMC_ECCR2_ECC2                     0xFFFFFFFFU        /*!<ECC result */
-
-/******************  Bit definition for FSMC_ECCR3 register  ******************/
-#define  FSMC_ECCR3_ECC3                     0xFFFFFFFFU        /*!<ECC result */
+/******************  Bit definition for FMC_BCR1 register  *******************/
+#define  FMC_BCR1_MBKEN                     0x00000001U        /*!<Memory bank enable bit                 */
+#define  FMC_BCR1_MUXEN                     0x00000002U        /*!<Address/data multiplexing enable bit   */
+
+#define  FMC_BCR1_MTYP                      0x0000000CU        /*!<MTYP[1:0] bits (Memory type)           */
+#define  FMC_BCR1_MTYP_0                    0x00000004U        /*!<Bit 0 */
+#define  FMC_BCR1_MTYP_1                    0x00000008U        /*!<Bit 1 */
+
+#define  FMC_BCR1_MWID                      0x00000030U        /*!<MWID[1:0] bits (Memory data bus width) */
+#define  FMC_BCR1_MWID_0                    0x00000010U        /*!<Bit 0 */
+#define  FMC_BCR1_MWID_1                    0x00000020U        /*!<Bit 1 */
+
+#define  FMC_BCR1_FACCEN                    0x00000040U        /*!<Flash access enable        */
+#define  FMC_BCR1_BURSTEN                   0x00000100U        /*!<Burst enable bit           */
+#define  FMC_BCR1_WAITPOL                   0x00000200U        /*!<Wait signal polarity bit   */
+#define  FMC_BCR1_WRAPMOD                   0x00000400U        /*!<Wrapped burst mode support */
+#define  FMC_BCR1_WAITCFG                   0x00000800U        /*!<Wait timing configuration  */
+#define  FMC_BCR1_WREN                      0x00001000U        /*!<Write enable bit           */
+#define  FMC_BCR1_WAITEN                    0x00002000U        /*!<Wait enable bit            */
+#define  FMC_BCR1_EXTMOD                    0x00004000U        /*!<Extended mode enable       */
+#define  FMC_BCR1_ASYNCWAIT                 0x00008000U        /*!<Asynchronous wait          */
+#define  FMC_BCR1_CPSIZE                    0x00070000U        /*!<CRAM page size */
+#define  FMC_BCR1_CPSIZE_0                  0x00010000U        /*!<Bit 0 */
+#define  FMC_BCR1_CPSIZE_1                  0x00020000U        /*!<Bit 1 */
+#define  FMC_BCR1_CPSIZE_2                  0x00040000U        /*!<Bit 2 */
+#define  FMC_BCR1_CBURSTRW                  0x00080000U        /*!<Write burst enable         */
+#define  FMC_BCR1_CCLKEN                    0x00100000U        /*!<Continous clock enable     */
+
+/******************  Bit definition for FMC_BCR2 register  *******************/
+#define  FMC_BCR2_MBKEN                     0x00000001U        /*!<Memory bank enable bit                 */
+#define  FMC_BCR2_MUXEN                     0x00000002U        /*!<Address/data multiplexing enable bit   */
+
+#define  FMC_BCR2_MTYP                      0x0000000CU        /*!<MTYP[1:0] bits (Memory type)           */
+#define  FMC_BCR2_MTYP_0                    0x00000004U        /*!<Bit 0 */
+#define  FMC_BCR2_MTYP_1                    0x00000008U        /*!<Bit 1 */
+
+#define  FMC_BCR2_MWID                      0x00000030U        /*!<MWID[1:0] bits (Memory data bus width) */
+#define  FMC_BCR2_MWID_0                    0x00000010U        /*!<Bit 0 */
+#define  FMC_BCR2_MWID_1                    0x00000020U        /*!<Bit 1 */
+
+#define  FMC_BCR2_FACCEN                    0x00000040U        /*!<Flash access enable        */
+#define  FMC_BCR2_BURSTEN                   0x00000100U        /*!<Burst enable bit           */
+#define  FMC_BCR2_WAITPOL                   0x00000200U        /*!<Wait signal polarity bit   */
+#define  FMC_BCR2_WRAPMOD                   0x00000400U        /*!<Wrapped burst mode support */
+#define  FMC_BCR2_WAITCFG                   0x00000800U        /*!<Wait timing configuration  */
+#define  FMC_BCR2_WREN                      0x00001000U        /*!<Write enable bit           */
+#define  FMC_BCR2_WAITEN                    0x00002000U        /*!<Wait enable bit            */
+#define  FMC_BCR2_EXTMOD                    0x00004000U        /*!<Extended mode enable       */
+#define  FMC_BCR2_ASYNCWAIT                 0x00008000U        /*!<Asynchronous wait          */
+#define  FMC_BCR2_CPSIZE                    0x00070000U        /*!<CRAM page size */
+#define  FMC_BCR2_CPSIZE_0                  0x00010000U        /*!<Bit 0 */
+#define  FMC_BCR2_CPSIZE_1                  0x00020000U        /*!<Bit 1 */
+#define  FMC_BCR2_CPSIZE_2                  0x00040000U        /*!<Bit 2 */
+#define  FMC_BCR2_CBURSTRW                  0x00080000U        /*!<Write burst enable         */
+
+/******************  Bit definition for FMC_BCR3 register  *******************/
+#define  FMC_BCR3_MBKEN                     0x00000001U        /*!<Memory bank enable bit                 */
+#define  FMC_BCR3_MUXEN                     0x00000002U        /*!<Address/data multiplexing enable bit   */
+
+#define  FMC_BCR3_MTYP                      0x0000000CU        /*!<MTYP[1:0] bits (Memory type)           */
+#define  FMC_BCR3_MTYP_0                    0x00000004U        /*!<Bit 0 */
+#define  FMC_BCR3_MTYP_1                    0x00000008U        /*!<Bit 1 */
+
+#define  FMC_BCR3_MWID                      0x00000030U        /*!<MWID[1:0] bits (Memory data bus width) */
+#define  FMC_BCR3_MWID_0                    0x00000010U        /*!<Bit 0 */
+#define  FMC_BCR3_MWID_1                    0x00000020U        /*!<Bit 1 */
+
+#define  FMC_BCR3_FACCEN                    0x00000040U        /*!<Flash access enable        */
+#define  FMC_BCR3_BURSTEN                   0x00000100U        /*!<Burst enable bit           */
+#define  FMC_BCR3_WAITPOL                   0x00000200U        /*!<Wait signal polarity bit   */
+#define  FMC_BCR3_WRAPMOD                   0x00000400U        /*!<Wrapped burst mode support */
+#define  FMC_BCR3_WAITCFG                   0x00000800U        /*!<Wait timing configuration  */
+#define  FMC_BCR3_WREN                      0x00001000U        /*!<Write enable bit           */
+#define  FMC_BCR3_WAITEN                    0x00002000U        /*!<Wait enable bit            */
+#define  FMC_BCR3_EXTMOD                    0x00004000U        /*!<Extended mode enable       */
+#define  FMC_BCR3_ASYNCWAIT                 0x00008000U        /*!<Asynchronous wait          */
+#define  FMC_BCR3_CPSIZE                    0x00070000U        /*!<CRAM page size */
+#define  FMC_BCR3_CPSIZE_0                  0x00010000U        /*!<Bit 0 */
+#define  FMC_BCR3_CPSIZE_1                  0x00020000U        /*!<Bit 1 */
+#define  FMC_BCR3_CPSIZE_2                  0x00040000U        /*!<Bit 2 */
+#define  FMC_BCR3_CBURSTRW                  0x00080000U        /*!<Write burst enable         */
+
+/******************  Bit definition for FMC_BCR4 register  *******************/
+#define  FMC_BCR4_MBKEN                     0x00000001U        /*!<Memory bank enable bit                 */
+#define  FMC_BCR4_MUXEN                     0x00000002U        /*!<Address/data multiplexing enable bit   */
+
+#define  FMC_BCR4_MTYP                      0x0000000CU        /*!<MTYP[1:0] bits (Memory type)           */
+#define  FMC_BCR4_MTYP_0                    0x00000004U        /*!<Bit 0 */
+#define  FMC_BCR4_MTYP_1                    0x00000008U        /*!<Bit 1 */
+
+#define  FMC_BCR4_MWID                      0x00000030U        /*!<MWID[1:0] bits (Memory data bus width) */
+#define  FMC_BCR4_MWID_0                    0x00000010U        /*!<Bit 0 */
+#define  FMC_BCR4_MWID_1                    0x00000020U        /*!<Bit 1 */
+
+#define  FMC_BCR4_FACCEN                    0x00000040U        /*!<Flash access enable        */
+#define  FMC_BCR4_BURSTEN                   0x00000100U        /*!<Burst enable bit           */
+#define  FMC_BCR4_WAITPOL                   0x00000200U        /*!<Wait signal polarity bit   */
+#define  FMC_BCR4_WRAPMOD                   0x00000400U        /*!<Wrapped burst mode support */
+#define  FMC_BCR4_WAITCFG                   0x00000800U        /*!<Wait timing configuration  */
+#define  FMC_BCR4_WREN                      0x00001000U        /*!<Write enable bit           */
+#define  FMC_BCR4_WAITEN                    0x00002000U        /*!<Wait enable bit            */
+#define  FMC_BCR4_EXTMOD                    0x00004000U        /*!<Extended mode enable       */
+#define  FMC_BCR4_ASYNCWAIT                 0x00008000U        /*!<Asynchronous wait          */
+#define  FMC_BCR4_CPSIZE                    0x00070000U        /*!<CRAM page size */
+#define  FMC_BCR4_CPSIZE_0                  0x00010000U        /*!<Bit 0 */
+#define  FMC_BCR4_CPSIZE_1                  0x00020000U        /*!<Bit 1 */
+#define  FMC_BCR4_CPSIZE_2                  0x00040000U        /*!<Bit 2 */
+#define  FMC_BCR4_CBURSTRW                  0x00080000U        /*!<Write burst enable         */
+
+/******************  Bit definition for FMC_BTR1 register  ******************/
+#define  FMC_BTR1_ADDSET                    0x0000000FU        /*!<ADDSET[3:0] bits (Address setup phase duration) */
+#define  FMC_BTR1_ADDSET_0                  0x00000001U        /*!<Bit 0 */
+#define  FMC_BTR1_ADDSET_1                  0x00000002U        /*!<Bit 1 */
+#define  FMC_BTR1_ADDSET_2                  0x00000004U        /*!<Bit 2 */
+#define  FMC_BTR1_ADDSET_3                  0x00000008U        /*!<Bit 3 */
+
+#define  FMC_BTR1_ADDHLD                    0x000000F0U        /*!<ADDHLD[3:0] bits (Address-hold phase duration)  */
+#define  FMC_BTR1_ADDHLD_0                  0x00000010U        /*!<Bit 0 */
+#define  FMC_BTR1_ADDHLD_1                  0x00000020U        /*!<Bit 1 */
+#define  FMC_BTR1_ADDHLD_2                  0x00000040U        /*!<Bit 2 */
+#define  FMC_BTR1_ADDHLD_3                  0x00000080U        /*!<Bit 3 */
+
+#define  FMC_BTR1_DATAST                    0x0000FF00U        /*!<DATAST [3:0] bits (Data-phase duration) */
+#define  FMC_BTR1_DATAST_0                  0x00000100U        /*!<Bit 0 */
+#define  FMC_BTR1_DATAST_1                  0x00000200U        /*!<Bit 1 */
+#define  FMC_BTR1_DATAST_2                  0x00000400U        /*!<Bit 2 */
+#define  FMC_BTR1_DATAST_3                  0x00000800U        /*!<Bit 3 */
+#define  FMC_BTR1_DATAST_4                  0x00001000U        /*!<Bit 4 */
+#define  FMC_BTR1_DATAST_5                  0x00002000U        /*!<Bit 5 */
+#define  FMC_BTR1_DATAST_6                  0x00004000U        /*!<Bit 6 */
+#define  FMC_BTR1_DATAST_7                  0x00008000U        /*!<Bit 7 */
+
+#define  FMC_BTR1_BUSTURN                   0x000F0000U        /*!<BUSTURN[3:0] bits (Bus turnaround phase duration) */
+#define  FMC_BTR1_BUSTURN_0                 0x00010000U        /*!<Bit 0 */
+#define  FMC_BTR1_BUSTURN_1                 0x00020000U        /*!<Bit 1 */
+#define  FMC_BTR1_BUSTURN_2                 0x00040000U        /*!<Bit 2 */
+#define  FMC_BTR1_BUSTURN_3                 0x00080000U        /*!<Bit 3 */
+
+#define  FMC_BTR1_CLKDIV                    0x00F00000U        /*!<CLKDIV[3:0] bits (Clock divide ratio) */
+#define  FMC_BTR1_CLKDIV_0                  0x00100000U        /*!<Bit 0 */
+#define  FMC_BTR1_CLKDIV_1                  0x00200000U        /*!<Bit 1 */
+#define  FMC_BTR1_CLKDIV_2                  0x00400000U        /*!<Bit 2 */
+#define  FMC_BTR1_CLKDIV_3                  0x00800000U        /*!<Bit 3 */
+
+#define  FMC_BTR1_DATLAT                    0x0F000000U        /*!<DATLA[3:0] bits (Data latency) */
+#define  FMC_BTR1_DATLAT_0                  0x01000000U        /*!<Bit 0 */
+#define  FMC_BTR1_DATLAT_1                  0x02000000U        /*!<Bit 1 */
+#define  FMC_BTR1_DATLAT_2                  0x04000000U        /*!<Bit 2 */
+#define  FMC_BTR1_DATLAT_3                  0x08000000U        /*!<Bit 3 */
+
+#define  FMC_BTR1_ACCMOD                    0x30000000U        /*!<ACCMOD[1:0] bits (Access mode) */
+#define  FMC_BTR1_ACCMOD_0                  0x10000000U        /*!<Bit 0 */
+#define  FMC_BTR1_ACCMOD_1                  0x20000000U        /*!<Bit 1 */
+
+/******************  Bit definition for FMC_BTR2 register  *******************/
+#define  FMC_BTR2_ADDSET                    0x0000000FU        /*!<ADDSET[3:0] bits (Address setup phase duration) */
+#define  FMC_BTR2_ADDSET_0                  0x00000001U        /*!<Bit 0 */
+#define  FMC_BTR2_ADDSET_1                  0x00000002U        /*!<Bit 1 */
+#define  FMC_BTR2_ADDSET_2                  0x00000004U        /*!<Bit 2 */
+#define  FMC_BTR2_ADDSET_3                  0x00000008U        /*!<Bit 3 */
+
+#define  FMC_BTR2_ADDHLD                    0x000000F0U        /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
+#define  FMC_BTR2_ADDHLD_0                  0x00000010U        /*!<Bit 0 */
+#define  FMC_BTR2_ADDHLD_1                  0x00000020U        /*!<Bit 1 */
+#define  FMC_BTR2_ADDHLD_2                  0x00000040U        /*!<Bit 2 */
+#define  FMC_BTR2_ADDHLD_3                  0x00000080U        /*!<Bit 3 */
+
+#define  FMC_BTR2_DATAST                    0x0000FF00U        /*!<DATAST [3:0] bits (Data-phase duration) */
+#define  FMC_BTR2_DATAST_0                  0x00000100U        /*!<Bit 0 */
+#define  FMC_BTR2_DATAST_1                  0x00000200U        /*!<Bit 1 */
+#define  FMC_BTR2_DATAST_2                  0x00000400U        /*!<Bit 2 */
+#define  FMC_BTR2_DATAST_3                  0x00000800U        /*!<Bit 3 */
+#define  FMC_BTR2_DATAST_4                  0x00001000U        /*!<Bit 4 */
+#define  FMC_BTR2_DATAST_5                  0x00002000U        /*!<Bit 5 */
+#define  FMC_BTR2_DATAST_6                  0x00004000U        /*!<Bit 6 */
+#define  FMC_BTR2_DATAST_7                  0x00008000U        /*!<Bit 7 */
+
+#define  FMC_BTR2_BUSTURN                   0x000F0000U        /*!<BUSTURN[3:0] bits (Bus turnaround phase duration) */
+#define  FMC_BTR2_BUSTURN_0                 0x00010000U        /*!<Bit 0 */
+#define  FMC_BTR2_BUSTURN_1                 0x00020000U        /*!<Bit 1 */
+#define  FMC_BTR2_BUSTURN_2                 0x00040000U        /*!<Bit 2 */
+#define  FMC_BTR2_BUSTURN_3                 0x00080000U        /*!<Bit 3 */
+
+#define  FMC_BTR2_CLKDIV                    0x00F00000U        /*!<CLKDIV[3:0] bits (Clock divide ratio) */
+#define  FMC_BTR2_CLKDIV_0                  0x00100000U        /*!<Bit 0 */
+#define  FMC_BTR2_CLKDIV_1                  0x00200000U        /*!<Bit 1 */
+#define  FMC_BTR2_CLKDIV_2                  0x00400000U        /*!<Bit 2 */
+#define  FMC_BTR2_CLKDIV_3                  0x00800000U        /*!<Bit 3 */
+
+#define  FMC_BTR2_DATLAT                    0x0F000000U        /*!<DATLA[3:0] bits (Data latency) */
+#define  FMC_BTR2_DATLAT_0                  0x01000000U        /*!<Bit 0 */
+#define  FMC_BTR2_DATLAT_1                  0x02000000U        /*!<Bit 1 */
+#define  FMC_BTR2_DATLAT_2                  0x04000000U        /*!<Bit 2 */
+#define  FMC_BTR2_DATLAT_3                  0x08000000U        /*!<Bit 3 */
+
+#define  FMC_BTR2_ACCMOD                    0x30000000U        /*!<ACCMOD[1:0] bits (Access mode) */
+#define  FMC_BTR2_ACCMOD_0                  0x10000000U        /*!<Bit 0 */
+#define  FMC_BTR2_ACCMOD_1                  0x20000000U        /*!<Bit 1 */
+
+/*******************  Bit definition for FMC_BTR3 register  *******************/
+#define  FMC_BTR3_ADDSET                    0x0000000FU        /*!<ADDSET[3:0] bits (Address setup phase duration) */
+#define  FMC_BTR3_ADDSET_0                  0x00000001U        /*!<Bit 0 */
+#define  FMC_BTR3_ADDSET_1                  0x00000002U        /*!<Bit 1 */
+#define  FMC_BTR3_ADDSET_2                  0x00000004U        /*!<Bit 2 */
+#define  FMC_BTR3_ADDSET_3                  0x00000008U        /*!<Bit 3 */
+
+#define  FMC_BTR3_ADDHLD                    0x000000F0U        /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
+#define  FMC_BTR3_ADDHLD_0                  0x00000010U        /*!<Bit 0 */
+#define  FMC_BTR3_ADDHLD_1                  0x00000020U        /*!<Bit 1 */
+#define  FMC_BTR3_ADDHLD_2                  0x00000040U        /*!<Bit 2 */
+#define  FMC_BTR3_ADDHLD_3                  0x00000080U        /*!<Bit 3 */
+
+#define  FMC_BTR3_DATAST                    0x0000FF00U        /*!<DATAST [3:0] bits (Data-phase duration) */
+#define  FMC_BTR3_DATAST_0                  0x00000100U        /*!<Bit 0 */
+#define  FMC_BTR3_DATAST_1                  0x00000200U        /*!<Bit 1 */
+#define  FMC_BTR3_DATAST_2                  0x00000400U        /*!<Bit 2 */
+#define  FMC_BTR3_DATAST_3                  0x00000800U        /*!<Bit 3 */
+#define  FMC_BTR3_DATAST_4                  0x00001000U        /*!<Bit 4 */
+#define  FMC_BTR3_DATAST_5                  0x00002000U        /*!<Bit 5 */
+#define  FMC_BTR3_DATAST_6                  0x00004000U        /*!<Bit 6 */
+#define  FMC_BTR3_DATAST_7                  0x00008000U        /*!<Bit 7 */
+
+#define  FMC_BTR3_BUSTURN                   0x000F0000U        /*!<BUSTURN[3:0] bits (Bus turnaround phase duration) */
+#define  FMC_BTR3_BUSTURN_0                 0x00010000U        /*!<Bit 0 */
+#define  FMC_BTR3_BUSTURN_1                 0x00020000U        /*!<Bit 1 */
+#define  FMC_BTR3_BUSTURN_2                 0x00040000U        /*!<Bit 2 */
+#define  FMC_BTR3_BUSTURN_3                 0x00080000U        /*!<Bit 3 */
+
+#define  FMC_BTR3_CLKDIV                    0x00F00000U        /*!<CLKDIV[3:0] bits (Clock divide ratio) */
+#define  FMC_BTR3_CLKDIV_0                  0x00100000U        /*!<Bit 0 */
+#define  FMC_BTR3_CLKDIV_1                  0x00200000U        /*!<Bit 1 */
+#define  FMC_BTR3_CLKDIV_2                  0x00400000U        /*!<Bit 2 */
+#define  FMC_BTR3_CLKDIV_3                  0x00800000U        /*!<Bit 3 */
+
+#define  FMC_BTR3_DATLAT                    0x0F000000U        /*!<DATLA[3:0] bits (Data latency) */
+#define  FMC_BTR3_DATLAT_0                  0x01000000U        /*!<Bit 0 */
+#define  FMC_BTR3_DATLAT_1                  0x02000000U        /*!<Bit 1 */
+#define  FMC_BTR3_DATLAT_2                  0x04000000U        /*!<Bit 2 */
+#define  FMC_BTR3_DATLAT_3                  0x08000000U        /*!<Bit 3 */
+
+#define  FMC_BTR3_ACCMOD                    0x30000000U        /*!<ACCMOD[1:0] bits (Access mode) */
+#define  FMC_BTR3_ACCMOD_0                  0x10000000U        /*!<Bit 0 */
+#define  FMC_BTR3_ACCMOD_1                  0x20000000U        /*!<Bit 1 */
+
+/******************  Bit definition for FMC_BTR4 register  *******************/
+#define  FMC_BTR4_ADDSET                    0x0000000FU        /*!<ADDSET[3:0] bits (Address setup phase duration) */
+#define  FMC_BTR4_ADDSET_0                  0x00000001U        /*!<Bit 0 */
+#define  FMC_BTR4_ADDSET_1                  0x00000002U        /*!<Bit 1 */
+#define  FMC_BTR4_ADDSET_2                  0x00000004U        /*!<Bit 2 */
+#define  FMC_BTR4_ADDSET_3                  0x00000008U        /*!<Bit 3 */
+
+#define  FMC_BTR4_ADDHLD                    0x000000F0U        /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
+#define  FMC_BTR4_ADDHLD_0                  0x00000010U        /*!<Bit 0 */
+#define  FMC_BTR4_ADDHLD_1                  0x00000020U        /*!<Bit 1 */
+#define  FMC_BTR4_ADDHLD_2                  0x00000040U        /*!<Bit 2 */
+#define  FMC_BTR4_ADDHLD_3                  0x00000080U        /*!<Bit 3 */
+
+#define  FMC_BTR4_DATAST                    0x0000FF00U        /*!<DATAST [3:0] bits (Data-phase duration) */
+#define  FMC_BTR4_DATAST_0                  0x00000100U        /*!<Bit 0 */
+#define  FMC_BTR4_DATAST_1                  0x00000200U        /*!<Bit 1 */
+#define  FMC_BTR4_DATAST_2                  0x00000400U        /*!<Bit 2 */
+#define  FMC_BTR4_DATAST_3                  0x00000800U        /*!<Bit 3 */
+#define  FMC_BTR4_DATAST_4                  0x00001000U        /*!<Bit 4 */
+#define  FMC_BTR4_DATAST_5                  0x00002000U        /*!<Bit 5 */
+#define  FMC_BTR4_DATAST_6                  0x00004000U        /*!<Bit 6 */
+#define  FMC_BTR4_DATAST_7                  0x00008000U        /*!<Bit 7 */
+
+#define  FMC_BTR4_BUSTURN                   0x000F0000U        /*!<BUSTURN[3:0] bits (Bus turnaround phase duration) */
+#define  FMC_BTR4_BUSTURN_0                 0x00010000U        /*!<Bit 0 */
+#define  FMC_BTR4_BUSTURN_1                 0x00020000U        /*!<Bit 1 */
+#define  FMC_BTR4_BUSTURN_2                 0x00040000U        /*!<Bit 2 */
+#define  FMC_BTR4_BUSTURN_3                 0x00080000U        /*!<Bit 3 */
+
+#define  FMC_BTR4_CLKDIV                    0x00F00000U        /*!<CLKDIV[3:0] bits (Clock divide ratio) */
+#define  FMC_BTR4_CLKDIV_0                  0x00100000U        /*!<Bit 0 */
+#define  FMC_BTR4_CLKDIV_1                  0x00200000U        /*!<Bit 1 */
+#define  FMC_BTR4_CLKDIV_2                  0x00400000U        /*!<Bit 2 */
+#define  FMC_BTR4_CLKDIV_3                  0x00800000U        /*!<Bit 3 */
+
+#define  FMC_BTR4_DATLAT                    0x0F000000U        /*!<DATLA[3:0] bits (Data latency) */
+#define  FMC_BTR4_DATLAT_0                  0x01000000U        /*!<Bit 0 */
+#define  FMC_BTR4_DATLAT_1                  0x02000000U        /*!<Bit 1 */
+#define  FMC_BTR4_DATLAT_2                  0x04000000U        /*!<Bit 2 */
+#define  FMC_BTR4_DATLAT_3                  0x08000000U        /*!<Bit 3 */
+
+#define  FMC_BTR4_ACCMOD                    0x30000000U        /*!<ACCMOD[1:0] bits (Access mode) */
+#define  FMC_BTR4_ACCMOD_0                  0x10000000U        /*!<Bit 0 */
+#define  FMC_BTR4_ACCMOD_1                  0x20000000U        /*!<Bit 1 */
+
+/******************  Bit definition for FMC_BWTR1 register  ******************/
+#define  FMC_BWTR1_ADDSET                   0x0000000FU        /*!<ADDSET[3:0] bits (Address setup phase duration) */
+#define  FMC_BWTR1_ADDSET_0                 0x00000001U        /*!<Bit 0 */
+#define  FMC_BWTR1_ADDSET_1                 0x00000002U        /*!<Bit 1 */
+#define  FMC_BWTR1_ADDSET_2                 0x00000004U        /*!<Bit 2 */
+#define  FMC_BWTR1_ADDSET_3                 0x00000008U        /*!<Bit 3 */
+
+#define  FMC_BWTR1_ADDHLD                   0x000000F0U        /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
+#define  FMC_BWTR1_ADDHLD_0                 0x00000010U        /*!<Bit 0 */
+#define  FMC_BWTR1_ADDHLD_1                 0x00000020U        /*!<Bit 1 */
+#define  FMC_BWTR1_ADDHLD_2                 0x00000040U        /*!<Bit 2 */
+#define  FMC_BWTR1_ADDHLD_3                 0x00000080U        /*!<Bit 3 */
+
+#define  FMC_BWTR1_DATAST                   0x0000FF00U        /*!<DATAST [3:0] bits (Data-phase duration) */
+#define  FMC_BWTR1_DATAST_0                 0x00000100U        /*!<Bit 0 */
+#define  FMC_BWTR1_DATAST_1                 0x00000200U        /*!<Bit 1 */
+#define  FMC_BWTR1_DATAST_2                 0x00000400U        /*!<Bit 2 */
+#define  FMC_BWTR1_DATAST_3                 0x00000800U        /*!<Bit 3 */
+#define  FMC_BWTR1_DATAST_4                 0x00001000U        /*!<Bit 4 */
+#define  FMC_BWTR1_DATAST_5                 0x00002000U        /*!<Bit 5 */
+#define  FMC_BWTR1_DATAST_6                 0x00004000U        /*!<Bit 6 */
+#define  FMC_BWTR1_DATAST_7                 0x00008000U        /*!<Bit 7 */
+
+#define  FMC_BWTR1_BUSTURN                  0x000F0000U        /*!<BUSTURN[3:0] bits (Bus turnaround duration) */
+#define  FMC_BWTR1_BUSTURN_0                0x00010000U        /*!<Bit 0 */
+#define  FMC_BWTR1_BUSTURN_1                0x00020000U        /*!<Bit 1 */
+#define  FMC_BWTR1_BUSTURN_2                0x00040000U        /*!<Bit 2 */
+#define  FMC_BWTR1_BUSTURN_3                0x00080000U        /*!<Bit 3 */
+
+#define  FMC_BWTR1_ACCMOD                   0x30000000U        /*!<ACCMOD[1:0] bits (Access mode) */
+#define  FMC_BWTR1_ACCMOD_0                 0x10000000U        /*!<Bit 0 */
+#define  FMC_BWTR1_ACCMOD_1                 0x20000000U        /*!<Bit 1 */
+
+/******************  Bit definition for FMC_BWTR2 register  ******************/
+#define  FMC_BWTR2_ADDSET                   0x0000000FU        /*!<ADDSET[3:0] bits (Address setup phase duration) */
+#define  FMC_BWTR2_ADDSET_0                 0x00000001U        /*!<Bit 0 */
+#define  FMC_BWTR2_ADDSET_1                 0x00000002U        /*!<Bit 1 */
+#define  FMC_BWTR2_ADDSET_2                 0x00000004U        /*!<Bit 2 */
+#define  FMC_BWTR2_ADDSET_3                 0x00000008U        /*!<Bit 3 */
+
+#define  FMC_BWTR2_ADDHLD                   0x000000F0U        /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
+#define  FMC_BWTR2_ADDHLD_0                 0x00000010U        /*!<Bit 0 */
+#define  FMC_BWTR2_ADDHLD_1                 0x00000020U        /*!<Bit 1 */
+#define  FMC_BWTR2_ADDHLD_2                 0x00000040U        /*!<Bit 2 */
+#define  FMC_BWTR2_ADDHLD_3                 0x00000080U        /*!<Bit 3 */
+
+#define  FMC_BWTR2_DATAST                   0x0000FF00U        /*!<DATAST [3:0] bits (Data-phase duration) */
+#define  FMC_BWTR2_DATAST_0                 0x00000100U        /*!<Bit 0 */
+#define  FMC_BWTR2_DATAST_1                 0x00000200U        /*!<Bit 1 */
+#define  FMC_BWTR2_DATAST_2                 0x00000400U        /*!<Bit 2 */
+#define  FMC_BWTR2_DATAST_3                 0x00000800U        /*!<Bit 3 */
+#define  FMC_BWTR2_DATAST_4                 0x00001000U        /*!<Bit 4 */
+#define  FMC_BWTR2_DATAST_5                 0x00002000U        /*!<Bit 5 */
+#define  FMC_BWTR2_DATAST_6                 0x00004000U        /*!<Bit 6 */
+#define  FMC_BWTR2_DATAST_7                 0x00008000U        /*!<Bit 7 */
+
+#define  FMC_BWTR2_BUSTURN                  0x000F0000U        /*!<BUSTURN[3:0] bits (Bus turnaround duration) */
+#define  FMC_BWTR2_BUSTURN_0                0x00010000U        /*!<Bit 0 */
+#define  FMC_BWTR2_BUSTURN_1                0x00020000U        /*!<Bit 1 */
+#define  FMC_BWTR2_BUSTURN_2                0x00040000U        /*!<Bit 2 */
+#define  FMC_BWTR2_BUSTURN_3                0x00080000U        /*!<Bit 3 */
+
+#define  FMC_BWTR2_ACCMOD                   0x30000000U        /*!<ACCMOD[1:0] bits (Access mode) */
+#define  FMC_BWTR2_ACCMOD_0                 0x10000000U        /*!<Bit 0 */
+#define  FMC_BWTR2_ACCMOD_1                 0x20000000U        /*!<Bit 1 */
+
+/******************  Bit definition for FMC_BWTR3 register  ******************/
+#define  FMC_BWTR3_ADDSET                   0x0000000FU        /*!<ADDSET[3:0] bits (Address setup phase duration) */
+#define  FMC_BWTR3_ADDSET_0                 0x00000001U        /*!<Bit 0 */
+#define  FMC_BWTR3_ADDSET_1                 0x00000002U        /*!<Bit 1 */
+#define  FMC_BWTR3_ADDSET_2                 0x00000004U        /*!<Bit 2 */
+#define  FMC_BWTR3_ADDSET_3                 0x00000008U        /*!<Bit 3 */
+
+#define  FMC_BWTR3_ADDHLD                   0x000000F0U        /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
+#define  FMC_BWTR3_ADDHLD_0                 0x00000010U        /*!<Bit 0 */
+#define  FMC_BWTR3_ADDHLD_1                 0x00000020U        /*!<Bit 1 */
+#define  FMC_BWTR3_ADDHLD_2                 0x00000040U        /*!<Bit 2 */
+#define  FMC_BWTR3_ADDHLD_3                 0x00000080U        /*!<Bit 3 */
+
+#define  FMC_BWTR3_DATAST                   0x0000FF00U        /*!<DATAST [3:0] bits (Data-phase duration) */
+#define  FMC_BWTR3_DATAST_0                 0x00000100U        /*!<Bit 0 */
+#define  FMC_BWTR3_DATAST_1                 0x00000200U        /*!<Bit 1 */
+#define  FMC_BWTR3_DATAST_2                 0x00000400U        /*!<Bit 2 */
+#define  FMC_BWTR3_DATAST_3                 0x00000800U        /*!<Bit 3 */
+#define  FMC_BWTR3_DATAST_4                 0x00001000U        /*!<Bit 4 */
+#define  FMC_BWTR3_DATAST_5                 0x00002000U        /*!<Bit 5 */
+#define  FMC_BWTR3_DATAST_6                 0x00004000U        /*!<Bit 6 */
+#define  FMC_BWTR3_DATAST_7                 0x00008000U        /*!<Bit 7 */
+
+#define  FMC_BWTR3_BUSTURN                  0x000F0000U        /*!<BUSTURN[3:0] bits (Bus turnaround duration) */
+#define  FMC_BWTR3_BUSTURN_0                0x00010000U        /*!<Bit 0 */
+#define  FMC_BWTR3_BUSTURN_1                0x00020000U        /*!<Bit 1 */
+#define  FMC_BWTR3_BUSTURN_2                0x00040000U        /*!<Bit 2 */
+#define  FMC_BWTR3_BUSTURN_3                0x00080000U        /*!<Bit 3 */
+
+#define  FMC_BWTR3_ACCMOD                   0x30000000U        /*!<ACCMOD[1:0] bits (Access mode) */
+#define  FMC_BWTR3_ACCMOD_0                 0x10000000U        /*!<Bit 0 */
+#define  FMC_BWTR3_ACCMOD_1                 0x20000000U        /*!<Bit 1 */
+
+/******************  Bit definition for FMC_BWTR4 register  ******************/
+#define  FMC_BWTR4_ADDSET                   0x0000000FU        /*!<ADDSET[3:0] bits (Address setup phase duration) */
+#define  FMC_BWTR4_ADDSET_0                 0x00000001U        /*!<Bit 0 */
+#define  FMC_BWTR4_ADDSET_1                 0x00000002U        /*!<Bit 1 */
+#define  FMC_BWTR4_ADDSET_2                 0x00000004U        /*!<Bit 2 */
+#define  FMC_BWTR4_ADDSET_3                 0x00000008U        /*!<Bit 3 */
+
+#define  FMC_BWTR4_ADDHLD                   0x000000F0U        /*!<ADDHLD[3:0] bits (Address-hold phase duration) */
+#define  FMC_BWTR4_ADDHLD_0                 0x00000010U        /*!<Bit 0 */
+#define  FMC_BWTR4_ADDHLD_1                 0x00000020U        /*!<Bit 1 */
+#define  FMC_BWTR4_ADDHLD_2                 0x00000040U        /*!<Bit 2 */
+#define  FMC_BWTR4_ADDHLD_3                 0x00000080U        /*!<Bit 3 */
+
+#define  FMC_BWTR4_DATAST                   0x0000FF00U        /*!<DATAST [3:0] bits (Data-phase duration) */
+#define  FMC_BWTR4_DATAST_0                 0x00000100U        /*!<Bit 0 */
+#define  FMC_BWTR4_DATAST_1                 0x00000200U        /*!<Bit 1 */
+#define  FMC_BWTR4_DATAST_2                 0x00000400U        /*!<Bit 2 */
+#define  FMC_BWTR4_DATAST_3                 0x00000800U        /*!<Bit 3 */
+#define  FMC_BWTR4_DATAST_4                 0x00001000U        /*!<Bit 4 */
+#define  FMC_BWTR4_DATAST_5                 0x00002000U        /*!<Bit 5 */
+#define  FMC_BWTR4_DATAST_6                 0x00004000U        /*!<Bit 6 */
+#define  FMC_BWTR4_DATAST_7                 0x00008000U        /*!<Bit 7 */
+
+#define  FMC_BWTR4_BUSTURN                  0x000F0000U        /*!<BUSTURN[3:0] bits (Bus turnaround duration) */
+#define  FMC_BWTR4_BUSTURN_0                0x00010000U        /*!<Bit 0 */
+#define  FMC_BWTR4_BUSTURN_1                0x00020000U        /*!<Bit 1 */
+#define  FMC_BWTR4_BUSTURN_2                0x00040000U        /*!<Bit 2 */
+#define  FMC_BWTR4_BUSTURN_3                0x00080000U        /*!<Bit 3 */
+
+#define  FMC_BWTR4_ACCMOD                   0x30000000U        /*!<ACCMOD[1:0] bits (Access mode) */
+#define  FMC_BWTR4_ACCMOD_0                 0x10000000U        /*!<Bit 0 */
+#define  FMC_BWTR4_ACCMOD_1                 0x20000000U        /*!<Bit 1 */
+
+/******************  Bit definition for FMC_PCR2 register  *******************/
+#define  FMC_PCR2_PWAITEN                   0x00000002U        /*!<Wait feature enable bit                   */
+#define  FMC_PCR2_PBKEN                     0x00000004U        /*!<PC Card/NAND Flash memory bank enable bit */
+#define  FMC_PCR2_PTYP                      0x00000008U        /*!<Memory type                               */
+
+#define  FMC_PCR2_PWID                      0x00000030U        /*!<PWID[1:0] bits (NAND Flash databus width) */
+#define  FMC_PCR2_PWID_0                    0x00000010U        /*!<Bit 0 */
+#define  FMC_PCR2_PWID_1                    0x00000020U        /*!<Bit 1 */
+
+#define  FMC_PCR2_ECCEN                     0x00000040U        /*!<ECC computation logic enable bit          */
+
+#define  FMC_PCR2_TCLR                      0x00001E00U        /*!<TCLR[3:0] bits (CLE to RE delay)          */
+#define  FMC_PCR2_TCLR_0                    0x00000200U        /*!<Bit 0 */
+#define  FMC_PCR2_TCLR_1                    0x00000400U        /*!<Bit 1 */
+#define  FMC_PCR2_TCLR_2                    0x00000800U        /*!<Bit 2 */
+#define  FMC_PCR2_TCLR_3                    0x00001000U        /*!<Bit 3 */
+
+#define  FMC_PCR2_TAR                       0x0001E000U        /*!<TAR[3:0] bits (ALE to RE delay)           */
+#define  FMC_PCR2_TAR_0                     0x00002000U        /*!<Bit 0 */
+#define  FMC_PCR2_TAR_1                     0x00004000U        /*!<Bit 1 */
+#define  FMC_PCR2_TAR_2                     0x00008000U        /*!<Bit 2 */
+#define  FMC_PCR2_TAR_3                     0x00010000U        /*!<Bit 3 */
+
+#define  FMC_PCR2_ECCPS                     0x000E0000U        /*!<ECCPS[1:0] bits (ECC page size)           */
+#define  FMC_PCR2_ECCPS_0                   0x00020000U        /*!<Bit 0 */
+#define  FMC_PCR2_ECCPS_1                   0x00040000U        /*!<Bit 1 */
+#define  FMC_PCR2_ECCPS_2                   0x00080000U        /*!<Bit 2 */
+
+/******************  Bit definition for FMC_PCR3 register  *******************/
+#define  FMC_PCR3_PWAITEN                   0x00000002U        /*!<Wait feature enable bit                   */
+#define  FMC_PCR3_PBKEN                     0x00000004U        /*!<PC Card/NAND Flash memory bank enable bit */
+#define  FMC_PCR3_PTYP                      0x00000008U        /*!<Memory type                               */
+
+#define  FMC_PCR3_PWID                      0x00000030U        /*!<PWID[1:0] bits (NAND Flash databus width) */
+#define  FMC_PCR3_PWID_0                    0x00000010U        /*!<Bit 0 */
+#define  FMC_PCR3_PWID_1                    0x00000020U        /*!<Bit 1 */
+
+#define  FMC_PCR3_ECCEN                     0x00000040U        /*!<ECC computation logic enable bit          */
+
+#define  FMC_PCR3_TCLR                      0x00001E00U        /*!<TCLR[3:0] bits (CLE to RE delay)          */
+#define  FMC_PCR3_TCLR_0                    0x00000200U        /*!<Bit 0 */
+#define  FMC_PCR3_TCLR_1                    0x00000400U        /*!<Bit 1 */
+#define  FMC_PCR3_TCLR_2                    0x00000800U        /*!<Bit 2 */
+#define  FMC_PCR3_TCLR_3                    0x00001000U        /*!<Bit 3 */
+
+#define  FMC_PCR3_TAR                       0x0001E000U        /*!<TAR[3:0] bits (ALE to RE delay)           */
+#define  FMC_PCR3_TAR_0                     0x00002000U        /*!<Bit 0 */
+#define  FMC_PCR3_TAR_1                     0x00004000U        /*!<Bit 1 */
+#define  FMC_PCR3_TAR_2                     0x00008000U        /*!<Bit 2 */
+#define  FMC_PCR3_TAR_3                     0x00010000U        /*!<Bit 3 */
+
+#define  FMC_PCR3_ECCPS                     0x000E0000U        /*!<ECCPS[2:0] bits (ECC page size)           */
+#define  FMC_PCR3_ECCPS_0                   0x00020000U        /*!<Bit 0 */
+#define  FMC_PCR3_ECCPS_1                   0x00040000U        /*!<Bit 1 */
+#define  FMC_PCR3_ECCPS_2                   0x00080000U        /*!<Bit 2 */
+
+/******************  Bit definition for FMC_PCR4 register  *******************/
+#define  FMC_PCR4_PWAITEN                   0x00000002U        /*!<Wait feature enable bit                   */
+#define  FMC_PCR4_PBKEN                     0x00000004U        /*!<PC Card/NAND Flash memory bank enable bit */
+#define  FMC_PCR4_PTYP                      0x00000008U        /*!<Memory type                               */
+
+#define  FMC_PCR4_PWID                      0x00000030U        /*!<PWID[1:0] bits (NAND Flash databus width) */
+#define  FMC_PCR4_PWID_0                    0x00000010U        /*!<Bit 0 */
+#define  FMC_PCR4_PWID_1                    0x00000020U        /*!<Bit 1 */
+
+#define  FMC_PCR4_ECCEN                     0x00000040U        /*!<ECC computation logic enable bit          */
+
+#define  FMC_PCR4_TCLR                      0x00001E00U        /*!<TCLR[3:0] bits (CLE to RE delay)          */
+#define  FMC_PCR4_TCLR_0                    0x00000200U        /*!<Bit 0 */
+#define  FMC_PCR4_TCLR_1                    0x00000400U        /*!<Bit 1 */
+#define  FMC_PCR4_TCLR_2                    0x00000800U        /*!<Bit 2 */
+#define  FMC_PCR4_TCLR_3                    0x00001000U        /*!<Bit 3 */
+
+#define  FMC_PCR4_TAR                       0x0001E000U        /*!<TAR[3:0] bits (ALE to RE delay)           */
+#define  FMC_PCR4_TAR_0                     0x00002000U        /*!<Bit 0 */
+#define  FMC_PCR4_TAR_1                     0x00004000U        /*!<Bit 1 */
+#define  FMC_PCR4_TAR_2                     0x00008000U        /*!<Bit 2 */
+#define  FMC_PCR4_TAR_3                     0x00010000U        /*!<Bit 3 */
+
+#define  FMC_PCR4_ECCPS                     0x000E0000U        /*!<ECCPS[2:0] bits (ECC page size)           */
+#define  FMC_PCR4_ECCPS_0                   0x00020000U        /*!<Bit 0 */
+#define  FMC_PCR4_ECCPS_1                   0x00040000U        /*!<Bit 1 */
+#define  FMC_PCR4_ECCPS_2                   0x00080000U        /*!<Bit 2 */
+
+/*******************  Bit definition for FMC_SR2 register  *******************/
+#define  FMC_SR2_IRS                        0x01U               /*!<Interrupt Rising Edge status                */
+#define  FMC_SR2_ILS                        0x02U               /*!<Interrupt Level status                      */
+#define  FMC_SR2_IFS                        0x04U               /*!<Interrupt Falling Edge status               */
+#define  FMC_SR2_IREN                       0x08U               /*!<Interrupt Rising Edge detection Enable bit  */
+#define  FMC_SR2_ILEN                       0x10U               /*!<Interrupt Level detection Enable bit        */
+#define  FMC_SR2_IFEN                       0x20U               /*!<Interrupt Falling Edge detection Enable bit */
+#define  FMC_SR2_FEMPT                      0x40U               /*!<FIFO empty                                  */
+
+/*******************  Bit definition for FMC_SR3 register  *******************/
+#define  FMC_SR3_IRS                        0x01U               /*!<Interrupt Rising Edge status                */
+#define  FMC_SR3_ILS                        0x02U               /*!<Interrupt Level status                      */
+#define  FMC_SR3_IFS                        0x04U               /*!<Interrupt Falling Edge status               */
+#define  FMC_SR3_IREN                       0x08U               /*!<Interrupt Rising Edge detection Enable bit  */
+#define  FMC_SR3_ILEN                       0x10U               /*!<Interrupt Level detection Enable bit        */
+#define  FMC_SR3_IFEN                       0x20U               /*!<Interrupt Falling Edge detection Enable bit */
+#define  FMC_SR3_FEMPT                      0x40U               /*!<FIFO empty                                  */
+
+/*******************  Bit definition for FMC_SR4 register  *******************/
+#define  FMC_SR4_IRS                        0x01U               /*!<Interrupt Rising Edge status                */
+#define  FMC_SR4_ILS                        0x02U               /*!<Interrupt Level status                      */
+#define  FMC_SR4_IFS                        0x04U               /*!<Interrupt Falling Edge status               */
+#define  FMC_SR4_IREN                       0x08U               /*!<Interrupt Rising Edge detection Enable bit  */
+#define  FMC_SR4_ILEN                       0x10U               /*!<Interrupt Level detection Enable bit        */
+#define  FMC_SR4_IFEN                       0x20U               /*!<Interrupt Falling Edge detection Enable bit */
+#define  FMC_SR4_FEMPT                      0x40U               /*!<FIFO empty                                  */
+
+/******************  Bit definition for FMC_PMEM2 register  ******************/
+#define  FMC_PMEM2_MEMSET2                  0x000000FFU        /*!<MEMSET2[7:0] bits (Common memory 2 setup time) */
+#define  FMC_PMEM2_MEMSET2_0                0x00000001U        /*!<Bit 0 */
+#define  FMC_PMEM2_MEMSET2_1                0x00000002U        /*!<Bit 1 */
+#define  FMC_PMEM2_MEMSET2_2                0x00000004U        /*!<Bit 2 */
+#define  FMC_PMEM2_MEMSET2_3                0x00000008U        /*!<Bit 3 */
+#define  FMC_PMEM2_MEMSET2_4                0x00000010U        /*!<Bit 4 */
+#define  FMC_PMEM2_MEMSET2_5                0x00000020U        /*!<Bit 5 */
+#define  FMC_PMEM2_MEMSET2_6                0x00000040U        /*!<Bit 6 */
+#define  FMC_PMEM2_MEMSET2_7                0x00000080U        /*!<Bit 7 */
+
+#define  FMC_PMEM2_MEMWAIT2                 0x0000FF00U        /*!<MEMWAIT2[7:0] bits (Common memory 2 wait time) */
+#define  FMC_PMEM2_MEMWAIT2_0               0x00000100U        /*!<Bit 0 */
+#define  FMC_PMEM2_MEMWAIT2_1               0x00000200U        /*!<Bit 1 */
+#define  FMC_PMEM2_MEMWAIT2_2               0x00000400U        /*!<Bit 2 */
+#define  FMC_PMEM2_MEMWAIT2_3               0x00000800U        /*!<Bit 3 */
+#define  FMC_PMEM2_MEMWAIT2_4               0x00001000U        /*!<Bit 4 */
+#define  FMC_PMEM2_MEMWAIT2_5               0x00002000U        /*!<Bit 5 */
+#define  FMC_PMEM2_MEMWAIT2_6               0x00004000U        /*!<Bit 6 */
+#define  FMC_PMEM2_MEMWAIT2_7               0x00008000U        /*!<Bit 7 */
+
+#define  FMC_PMEM2_MEMHOLD2                 0x00FF0000U        /*!<MEMHOLD2[7:0] bits (Common memory 2 hold time) */
+#define  FMC_PMEM2_MEMHOLD2_0               0x00010000U        /*!<Bit 0 */
+#define  FMC_PMEM2_MEMHOLD2_1               0x00020000U        /*!<Bit 1 */
+#define  FMC_PMEM2_MEMHOLD2_2               0x00040000U        /*!<Bit 2 */
+#define  FMC_PMEM2_MEMHOLD2_3               0x00080000U        /*!<Bit 3 */
+#define  FMC_PMEM2_MEMHOLD2_4               0x00100000U        /*!<Bit 4 */
+#define  FMC_PMEM2_MEMHOLD2_5               0x00200000U        /*!<Bit 5 */
+#define  FMC_PMEM2_MEMHOLD2_6               0x00400000U        /*!<Bit 6 */
+#define  FMC_PMEM2_MEMHOLD2_7               0x00800000U        /*!<Bit 7 */
+
+#define  FMC_PMEM2_MEMHIZ2                  0xFF000000U        /*!<MEMHIZ2[7:0] bits (Common memory 2 databus HiZ time) */
+#define  FMC_PMEM2_MEMHIZ2_0                0x01000000U        /*!<Bit 0 */
+#define  FMC_PMEM2_MEMHIZ2_1                0x02000000U        /*!<Bit 1 */
+#define  FMC_PMEM2_MEMHIZ2_2                0x04000000U        /*!<Bit 2 */
+#define  FMC_PMEM2_MEMHIZ2_3                0x08000000U        /*!<Bit 3 */
+#define  FMC_PMEM2_MEMHIZ2_4                0x10000000U        /*!<Bit 4 */
+#define  FMC_PMEM2_MEMHIZ2_5                0x20000000U        /*!<Bit 5 */
+#define  FMC_PMEM2_MEMHIZ2_6                0x40000000U        /*!<Bit 6 */
+#define  FMC_PMEM2_MEMHIZ2_7                0x80000000U        /*!<Bit 7 */
+
+/******************  Bit definition for FMC_PMEM3 register  ******************/
+#define  FMC_PMEM3_MEMSET3                  0x000000FFU        /*!<MEMSET3[7:0] bits (Common memory 3 setup time) */
+#define  FMC_PMEM3_MEMSET3_0                0x00000001U        /*!<Bit 0 */
+#define  FMC_PMEM3_MEMSET3_1                0x00000002U        /*!<Bit 1 */
+#define  FMC_PMEM3_MEMSET3_2                0x00000004U        /*!<Bit 2 */
+#define  FMC_PMEM3_MEMSET3_3                0x00000008U        /*!<Bit 3 */
+#define  FMC_PMEM3_MEMSET3_4                0x00000010U        /*!<Bit 4 */
+#define  FMC_PMEM3_MEMSET3_5                0x00000020U        /*!<Bit 5 */
+#define  FMC_PMEM3_MEMSET3_6                0x00000040U        /*!<Bit 6 */
+#define  FMC_PMEM3_MEMSET3_7                0x00000080U        /*!<Bit 7 */
+
+#define  FMC_PMEM3_MEMWAIT3                 0x0000FF00U        /*!<MEMWAIT3[7:0] bits (Common memory 3 wait time) */
+#define  FMC_PMEM3_MEMWAIT3_0               0x00000100U        /*!<Bit 0 */
+#define  FMC_PMEM3_MEMWAIT3_1               0x00000200U        /*!<Bit 1 */
+#define  FMC_PMEM3_MEMWAIT3_2               0x00000400U        /*!<Bit 2 */
+#define  FMC_PMEM3_MEMWAIT3_3               0x00000800U        /*!<Bit 3 */
+#define  FMC_PMEM3_MEMWAIT3_4               0x00001000U        /*!<Bit 4 */
+#define  FMC_PMEM3_MEMWAIT3_5               0x00002000U        /*!<Bit 5 */
+#define  FMC_PMEM3_MEMWAIT3_6               0x00004000U        /*!<Bit 6 */
+#define  FMC_PMEM3_MEMWAIT3_7               0x00008000U        /*!<Bit 7 */
+
+#define  FMC_PMEM3_MEMHOLD3                 0x00FF0000U        /*!<MEMHOLD3[7:0] bits (Common memory 3 hold time) */
+#define  FMC_PMEM3_MEMHOLD3_0               0x00010000U        /*!<Bit 0 */
+#define  FMC_PMEM3_MEMHOLD3_1               0x00020000U        /*!<Bit 1 */
+#define  FMC_PMEM3_MEMHOLD3_2               0x00040000U        /*!<Bit 2 */
+#define  FMC_PMEM3_MEMHOLD3_3               0x00080000U        /*!<Bit 3 */
+#define  FMC_PMEM3_MEMHOLD3_4               0x00100000U        /*!<Bit 4 */
+#define  FMC_PMEM3_MEMHOLD3_5               0x00200000U        /*!<Bit 5 */
+#define  FMC_PMEM3_MEMHOLD3_6               0x00400000U        /*!<Bit 6 */
+#define  FMC_PMEM3_MEMHOLD3_7               0x00800000U        /*!<Bit 7 */
+
+#define  FMC_PMEM3_MEMHIZ3                  0xFF000000U        /*!<MEMHIZ3[7:0] bits (Common memory 3 databus HiZ time) */
+#define  FMC_PMEM3_MEMHIZ3_0                0x01000000U        /*!<Bit 0 */
+#define  FMC_PMEM3_MEMHIZ3_1                0x02000000U        /*!<Bit 1 */
+#define  FMC_PMEM3_MEMHIZ3_2                0x04000000U        /*!<Bit 2 */
+#define  FMC_PMEM3_MEMHIZ3_3                0x08000000U        /*!<Bit 3 */
+#define  FMC_PMEM3_MEMHIZ3_4                0x10000000U        /*!<Bit 4 */
+#define  FMC_PMEM3_MEMHIZ3_5                0x20000000U        /*!<Bit 5 */
+#define  FMC_PMEM3_MEMHIZ3_6                0x40000000U        /*!<Bit 6 */
+#define  FMC_PMEM3_MEMHIZ3_7                0x80000000U        /*!<Bit 7 */
+
+/******************  Bit definition for FMC_PMEM4 register  ******************/
+#define  FMC_PMEM4_MEMSET4                  0x000000FFU        /*!<MEMSET4[7:0] bits (Common memory 4 setup time) */
+#define  FMC_PMEM4_MEMSET4_0                0x00000001U        /*!<Bit 0 */
+#define  FMC_PMEM4_MEMSET4_1                0x00000002U        /*!<Bit 1 */
+#define  FMC_PMEM4_MEMSET4_2                0x00000004U        /*!<Bit 2 */
+#define  FMC_PMEM4_MEMSET4_3                0x00000008U        /*!<Bit 3 */
+#define  FMC_PMEM4_MEMSET4_4                0x00000010U        /*!<Bit 4 */
+#define  FMC_PMEM4_MEMSET4_5                0x00000020U        /*!<Bit 5 */
+#define  FMC_PMEM4_MEMSET4_6                0x00000040U        /*!<Bit 6 */
+#define  FMC_PMEM4_MEMSET4_7                0x00000080U        /*!<Bit 7 */
+
+#define  FMC_PMEM4_MEMWAIT4                 0x0000FF00U        /*!<MEMWAIT4[7:0] bits (Common memory 4 wait time) */
+#define  FMC_PMEM4_MEMWAIT4_0               0x00000100U        /*!<Bit 0 */
+#define  FMC_PMEM4_MEMWAIT4_1               0x00000200U        /*!<Bit 1 */
+#define  FMC_PMEM4_MEMWAIT4_2               0x00000400U        /*!<Bit 2 */
+#define  FMC_PMEM4_MEMWAIT4_3               0x00000800U        /*!<Bit 3 */
+#define  FMC_PMEM4_MEMWAIT4_4               0x00001000U        /*!<Bit 4 */
+#define  FMC_PMEM4_MEMWAIT4_5               0x00002000U        /*!<Bit 5 */
+#define  FMC_PMEM4_MEMWAIT4_6               0x00004000U        /*!<Bit 6 */
+#define  FMC_PMEM4_MEMWAIT4_7               0x00008000U        /*!<Bit 7 */
+
+#define  FMC_PMEM4_MEMHOLD4                 0x00FF0000U        /*!<MEMHOLD4[7:0] bits (Common memory 4 hold time) */
+#define  FMC_PMEM4_MEMHOLD4_0               0x00010000U        /*!<Bit 0 */
+#define  FMC_PMEM4_MEMHOLD4_1               0x00020000U        /*!<Bit 1 */
+#define  FMC_PMEM4_MEMHOLD4_2               0x00040000U        /*!<Bit 2 */
+#define  FMC_PMEM4_MEMHOLD4_3               0x00080000U        /*!<Bit 3 */
+#define  FMC_PMEM4_MEMHOLD4_4               0x00100000U        /*!<Bit 4 */
+#define  FMC_PMEM4_MEMHOLD4_5               0x00200000U        /*!<Bit 5 */
+#define  FMC_PMEM4_MEMHOLD4_6               0x00400000U        /*!<Bit 6 */
+#define  FMC_PMEM4_MEMHOLD4_7               0x00800000U        /*!<Bit 7 */
+
+#define  FMC_PMEM4_MEMHIZ4                  0xFF000000U        /*!<MEMHIZ4[7:0] bits (Common memory 4 databus HiZ time) */
+#define  FMC_PMEM4_MEMHIZ4_0                0x01000000U        /*!<Bit 0 */
+#define  FMC_PMEM4_MEMHIZ4_1                0x02000000U        /*!<Bit 1 */
+#define  FMC_PMEM4_MEMHIZ4_2                0x04000000U        /*!<Bit 2 */
+#define  FMC_PMEM4_MEMHIZ4_3                0x08000000U        /*!<Bit 3 */
+#define  FMC_PMEM4_MEMHIZ4_4                0x10000000U        /*!<Bit 4 */
+#define  FMC_PMEM4_MEMHIZ4_5                0x20000000U        /*!<Bit 5 */
+#define  FMC_PMEM4_MEMHIZ4_6                0x40000000U        /*!<Bit 6 */
+#define  FMC_PMEM4_MEMHIZ4_7                0x80000000U        /*!<Bit 7 */
+
+/******************  Bit definition for FMC_PATT2 register  ******************/
+#define  FMC_PATT2_ATTSET2                  0x000000FFU        /*!<ATTSET2[7:0] bits (Attribute memory 2 setup time) */
+#define  FMC_PATT2_ATTSET2_0                0x00000001U        /*!<Bit 0 */
+#define  FMC_PATT2_ATTSET2_1                0x00000002U        /*!<Bit 1 */
+#define  FMC_PATT2_ATTSET2_2                0x00000004U        /*!<Bit 2 */
+#define  FMC_PATT2_ATTSET2_3                0x00000008U        /*!<Bit 3 */
+#define  FMC_PATT2_ATTSET2_4                0x00000010U        /*!<Bit 4 */
+#define  FMC_PATT2_ATTSET2_5                0x00000020U        /*!<Bit 5 */
+#define  FMC_PATT2_ATTSET2_6                0x00000040U        /*!<Bit 6 */
+#define  FMC_PATT2_ATTSET2_7                0x00000080U        /*!<Bit 7 */
+
+#define  FMC_PATT2_ATTWAIT2                 0x0000FF00U        /*!<ATTWAIT2[7:0] bits (Attribute memory 2 wait time) */
+#define  FMC_PATT2_ATTWAIT2_0               0x00000100U        /*!<Bit 0 */
+#define  FMC_PATT2_ATTWAIT2_1               0x00000200U        /*!<Bit 1 */
+#define  FMC_PATT2_ATTWAIT2_2               0x00000400U        /*!<Bit 2 */
+#define  FMC_PATT2_ATTWAIT2_3               0x00000800U        /*!<Bit 3 */
+#define  FMC_PATT2_ATTWAIT2_4               0x00001000U        /*!<Bit 4 */
+#define  FMC_PATT2_ATTWAIT2_5               0x00002000U        /*!<Bit 5 */
+#define  FMC_PATT2_ATTWAIT2_6               0x00004000U        /*!<Bit 6 */
+#define  FMC_PATT2_ATTWAIT2_7               0x00008000U        /*!<Bit 7 */
+
+#define  FMC_PATT2_ATTHOLD2                 0x00FF0000U        /*!<ATTHOLD2[7:0] bits (Attribute memory 2 hold time) */
+#define  FMC_PATT2_ATTHOLD2_0               0x00010000U        /*!<Bit 0 */
+#define  FMC_PATT2_ATTHOLD2_1               0x00020000U        /*!<Bit 1 */
+#define  FMC_PATT2_ATTHOLD2_2               0x00040000U        /*!<Bit 2 */
+#define  FMC_PATT2_ATTHOLD2_3               0x00080000U        /*!<Bit 3 */
+#define  FMC_PATT2_ATTHOLD2_4               0x00100000U        /*!<Bit 4 */
+#define  FMC_PATT2_ATTHOLD2_5               0x00200000U        /*!<Bit 5 */
+#define  FMC_PATT2_ATTHOLD2_6               0x00400000U        /*!<Bit 6 */
+#define  FMC_PATT2_ATTHOLD2_7               0x00800000U        /*!<Bit 7 */
+
+#define  FMC_PATT2_ATTHIZ2                  0xFF000000U        /*!<ATTHIZ2[7:0] bits (Attribute memory 2 databus HiZ time) */
+#define  FMC_PATT2_ATTHIZ2_0                0x01000000U        /*!<Bit 0 */
+#define  FMC_PATT2_ATTHIZ2_1                0x02000000U        /*!<Bit 1 */
+#define  FMC_PATT2_ATTHIZ2_2                0x04000000U        /*!<Bit 2 */
+#define  FMC_PATT2_ATTHIZ2_3                0x08000000U        /*!<Bit 3 */
+#define  FMC_PATT2_ATTHIZ2_4                0x10000000U        /*!<Bit 4 */
+#define  FMC_PATT2_ATTHIZ2_5                0x20000000U        /*!<Bit 5 */
+#define  FMC_PATT2_ATTHIZ2_6                0x40000000U        /*!<Bit 6 */
+#define  FMC_PATT2_ATTHIZ2_7                0x80000000U        /*!<Bit 7 */
+
+/******************  Bit definition for FMC_PATT3 register  ******************/
+#define  FMC_PATT3_ATTSET3                  0x000000FFU        /*!<ATTSET3[7:0] bits (Attribute memory 3 setup time) */
+#define  FMC_PATT3_ATTSET3_0                0x00000001U        /*!<Bit 0 */
+#define  FMC_PATT3_ATTSET3_1                0x00000002U        /*!<Bit 1 */
+#define  FMC_PATT3_ATTSET3_2                0x00000004U        /*!<Bit 2 */
+#define  FMC_PATT3_ATTSET3_3                0x00000008U        /*!<Bit 3 */
+#define  FMC_PATT3_ATTSET3_4                0x00000010U        /*!<Bit 4 */
+#define  FMC_PATT3_ATTSET3_5                0x00000020U        /*!<Bit 5 */
+#define  FMC_PATT3_ATTSET3_6                0x00000040U        /*!<Bit 6 */
+#define  FMC_PATT3_ATTSET3_7                0x00000080U        /*!<Bit 7 */
+
+#define  FMC_PATT3_ATTWAIT3                 0x0000FF00U        /*!<ATTWAIT3[7:0] bits (Attribute memory 3 wait time) */
+#define  FMC_PATT3_ATTWAIT3_0               0x00000100U        /*!<Bit 0 */
+#define  FMC_PATT3_ATTWAIT3_1               0x00000200U        /*!<Bit 1 */
+#define  FMC_PATT3_ATTWAIT3_2               0x00000400U        /*!<Bit 2 */
+#define  FMC_PATT3_ATTWAIT3_3               0x00000800U        /*!<Bit 3 */
+#define  FMC_PATT3_ATTWAIT3_4               0x00001000U        /*!<Bit 4 */
+#define  FMC_PATT3_ATTWAIT3_5               0x00002000U        /*!<Bit 5 */
+#define  FMC_PATT3_ATTWAIT3_6               0x00004000U        /*!<Bit 6 */
+#define  FMC_PATT3_ATTWAIT3_7               0x00008000U        /*!<Bit 7 */
+
+#define  FMC_PATT3_ATTHOLD3                 0x00FF0000U        /*!<ATTHOLD3[7:0] bits (Attribute memory 3 hold time) */
+#define  FMC_PATT3_ATTHOLD3_0               0x00010000U        /*!<Bit 0 */
+#define  FMC_PATT3_ATTHOLD3_1               0x00020000U        /*!<Bit 1 */
+#define  FMC_PATT3_ATTHOLD3_2               0x00040000U        /*!<Bit 2 */
+#define  FMC_PATT3_ATTHOLD3_3               0x00080000U        /*!<Bit 3 */
+#define  FMC_PATT3_ATTHOLD3_4               0x00100000U        /*!<Bit 4 */
+#define  FMC_PATT3_ATTHOLD3_5               0x00200000U        /*!<Bit 5 */
+#define  FMC_PATT3_ATTHOLD3_6               0x00400000U        /*!<Bit 6 */
+#define  FMC_PATT3_ATTHOLD3_7               0x00800000U        /*!<Bit 7 */
+
+#define  FMC_PATT3_ATTHIZ3                  0xFF000000U        /*!<ATTHIZ3[7:0] bits (Attribute memory 3 databus HiZ time) */
+#define  FMC_PATT3_ATTHIZ3_0                0x01000000U        /*!<Bit 0 */
+#define  FMC_PATT3_ATTHIZ3_1                0x02000000U        /*!<Bit 1 */
+#define  FMC_PATT3_ATTHIZ3_2                0x04000000U        /*!<Bit 2 */
+#define  FMC_PATT3_ATTHIZ3_3                0x08000000U        /*!<Bit 3 */
+#define  FMC_PATT3_ATTHIZ3_4                0x10000000U        /*!<Bit 4 */
+#define  FMC_PATT3_ATTHIZ3_5                0x20000000U        /*!<Bit 5 */
+#define  FMC_PATT3_ATTHIZ3_6                0x40000000U        /*!<Bit 6 */
+#define  FMC_PATT3_ATTHIZ3_7                0x80000000U        /*!<Bit 7 */
+
+/******************  Bit definition for FMC_PATT4 register  ******************/
+#define  FMC_PATT4_ATTSET4                  0x000000FFU        /*!<ATTSET4[7:0] bits (Attribute memory 4 setup time) */
+#define  FMC_PATT4_ATTSET4_0                0x00000001U        /*!<Bit 0 */
+#define  FMC_PATT4_ATTSET4_1                0x00000002U        /*!<Bit 1 */
+#define  FMC_PATT4_ATTSET4_2                0x00000004U        /*!<Bit 2 */
+#define  FMC_PATT4_ATTSET4_3                0x00000008U        /*!<Bit 3 */
+#define  FMC_PATT4_ATTSET4_4                0x00000010U        /*!<Bit 4 */
+#define  FMC_PATT4_ATTSET4_5                0x00000020U        /*!<Bit 5 */
+#define  FMC_PATT4_ATTSET4_6                0x00000040U        /*!<Bit 6 */
+#define  FMC_PATT4_ATTSET4_7                0x00000080U        /*!<Bit 7 */
+
+#define  FMC_PATT4_ATTWAIT4                 0x0000FF00U        /*!<ATTWAIT4[7:0] bits (Attribute memory 4 wait time) */
+#define  FMC_PATT4_ATTWAIT4_0               0x00000100U        /*!<Bit 0 */
+#define  FMC_PATT4_ATTWAIT4_1               0x00000200U        /*!<Bit 1 */
+#define  FMC_PATT4_ATTWAIT4_2               0x00000400U        /*!<Bit 2 */
+#define  FMC_PATT4_ATTWAIT4_3               0x00000800U        /*!<Bit 3 */
+#define  FMC_PATT4_ATTWAIT4_4               0x00001000U        /*!<Bit 4 */
+#define  FMC_PATT4_ATTWAIT4_5               0x00002000U        /*!<Bit 5 */
+#define  FMC_PATT4_ATTWAIT4_6               0x00004000U        /*!<Bit 6 */
+#define  FMC_PATT4_ATTWAIT4_7               0x00008000U        /*!<Bit 7 */
+
+#define  FMC_PATT4_ATTHOLD4                 0x00FF0000U        /*!<ATTHOLD4[7:0] bits (Attribute memory 4 hold time) */
+#define  FMC_PATT4_ATTHOLD4_0               0x00010000U        /*!<Bit 0 */
+#define  FMC_PATT4_ATTHOLD4_1               0x00020000U        /*!<Bit 1 */
+#define  FMC_PATT4_ATTHOLD4_2               0x00040000U        /*!<Bit 2 */
+#define  FMC_PATT4_ATTHOLD4_3               0x00080000U        /*!<Bit 3 */
+#define  FMC_PATT4_ATTHOLD4_4               0x00100000U        /*!<Bit 4 */
+#define  FMC_PATT4_ATTHOLD4_5               0x00200000U        /*!<Bit 5 */
+#define  FMC_PATT4_ATTHOLD4_6               0x00400000U        /*!<Bit 6 */
+#define  FMC_PATT4_ATTHOLD4_7               0x00800000U        /*!<Bit 7 */
+
+#define  FMC_PATT4_ATTHIZ4                  0xFF000000U        /*!<ATTHIZ4[7:0] bits (Attribute memory 4 databus HiZ time) */
+#define  FMC_PATT4_ATTHIZ4_0                0x01000000U        /*!<Bit 0 */
+#define  FMC_PATT4_ATTHIZ4_1                0x02000000U        /*!<Bit 1 */
+#define  FMC_PATT4_ATTHIZ4_2                0x04000000U        /*!<Bit 2 */
+#define  FMC_PATT4_ATTHIZ4_3                0x08000000U        /*!<Bit 3 */
+#define  FMC_PATT4_ATTHIZ4_4                0x10000000U        /*!<Bit 4 */
+#define  FMC_PATT4_ATTHIZ4_5                0x20000000U        /*!<Bit 5 */
+#define  FMC_PATT4_ATTHIZ4_6                0x40000000U        /*!<Bit 6 */
+#define  FMC_PATT4_ATTHIZ4_7                0x80000000U        /*!<Bit 7 */
+
+/******************  Bit definition for FMC_PIO4 register  *******************/
+#define  FMC_PIO4_IOSET4                    0x000000FFU        /*!<IOSET4[7:0] bits (I/O 4 setup time) */
+#define  FMC_PIO4_IOSET4_0                  0x00000001U        /*!<Bit 0 */
+#define  FMC_PIO4_IOSET4_1                  0x00000002U        /*!<Bit 1 */
+#define  FMC_PIO4_IOSET4_2                  0x00000004U        /*!<Bit 2 */
+#define  FMC_PIO4_IOSET4_3                  0x00000008U        /*!<Bit 3 */
+#define  FMC_PIO4_IOSET4_4                  0x00000010U        /*!<Bit 4 */
+#define  FMC_PIO4_IOSET4_5                  0x00000020U        /*!<Bit 5 */
+#define  FMC_PIO4_IOSET4_6                  0x00000040U        /*!<Bit 6 */
+#define  FMC_PIO4_IOSET4_7                  0x00000080U        /*!<Bit 7 */
+
+#define  FMC_PIO4_IOWAIT4                   0x0000FF00U        /*!<IOWAIT4[7:0] bits (I/O 4 wait time) */
+#define  FMC_PIO4_IOWAIT4_0                 0x00000100U        /*!<Bit 0 */
+#define  FMC_PIO4_IOWAIT4_1                 0x00000200U        /*!<Bit 1 */
+#define  FMC_PIO4_IOWAIT4_2                 0x00000400U        /*!<Bit 2 */
+#define  FMC_PIO4_IOWAIT4_3                 0x00000800U        /*!<Bit 3 */
+#define  FMC_PIO4_IOWAIT4_4                 0x00001000U        /*!<Bit 4 */
+#define  FMC_PIO4_IOWAIT4_5                 0x00002000U        /*!<Bit 5 */
+#define  FMC_PIO4_IOWAIT4_6                 0x00004000U        /*!<Bit 6 */
+#define  FMC_PIO4_IOWAIT4_7                 0x00008000U        /*!<Bit 7 */
+
+#define  FMC_PIO4_IOHOLD4                   0x00FF0000U        /*!<IOHOLD4[7:0] bits (I/O 4 hold time) */
+#define  FMC_PIO4_IOHOLD4_0                 0x00010000U        /*!<Bit 0 */
+#define  FMC_PIO4_IOHOLD4_1                 0x00020000U        /*!<Bit 1 */
+#define  FMC_PIO4_IOHOLD4_2                 0x00040000U        /*!<Bit 2 */
+#define  FMC_PIO4_IOHOLD4_3                 0x00080000U        /*!<Bit 3 */
+#define  FMC_PIO4_IOHOLD4_4                 0x00100000U        /*!<Bit 4 */
+#define  FMC_PIO4_IOHOLD4_5                 0x00200000U        /*!<Bit 5 */
+#define  FMC_PIO4_IOHOLD4_6                 0x00400000U        /*!<Bit 6 */
+#define  FMC_PIO4_IOHOLD4_7                 0x00800000U        /*!<Bit 7 */
+
+#define  FMC_PIO4_IOHIZ4                    0xFF000000U        /*!<IOHIZ4[7:0] bits (I/O 4 databus HiZ time) */
+#define  FMC_PIO4_IOHIZ4_0                  0x01000000U        /*!<Bit 0 */
+#define  FMC_PIO4_IOHIZ4_1                  0x02000000U        /*!<Bit 1 */
+#define  FMC_PIO4_IOHIZ4_2                  0x04000000U        /*!<Bit 2 */
+#define  FMC_PIO4_IOHIZ4_3                  0x08000000U        /*!<Bit 3 */
+#define  FMC_PIO4_IOHIZ4_4                  0x10000000U        /*!<Bit 4 */
+#define  FMC_PIO4_IOHIZ4_5                  0x20000000U        /*!<Bit 5 */
+#define  FMC_PIO4_IOHIZ4_6                  0x40000000U        /*!<Bit 6 */
+#define  FMC_PIO4_IOHIZ4_7                  0x80000000U        /*!<Bit 7 */
+
+/******************  Bit definition for FMC_ECCR2 register  ******************/
+#define  FMC_ECCR2_ECC2                     0xFFFFFFFFU        /*!<ECC result */
+
+/******************  Bit definition for FMC_ECCR3 register  ******************/
+#define  FMC_ECCR3_ECC3                     0xFFFFFFFFU        /*!<ECC result */
+
+/******************  Bit definition for FMC_SDCR1 register  ******************/
+#define  FMC_SDCR1_NC                       0x00000003U        /*!<NC[1:0] bits (Number of column bits) */
+#define  FMC_SDCR1_NC_0                     0x00000001U        /*!<Bit 0 */
+#define  FMC_SDCR1_NC_1                     0x00000002U        /*!<Bit 1 */
+
+#define  FMC_SDCR1_NR                       0x0000000CU        /*!<NR[1:0] bits (Number of row bits) */
+#define  FMC_SDCR1_NR_0                     0x00000004U        /*!<Bit 0 */
+#define  FMC_SDCR1_NR_1                     0x00000008U        /*!<Bit 1 */
+
+#define  FMC_SDCR1_MWID                     0x00000030U        /*!<NR[1:0] bits (Number of row bits) */
+#define  FMC_SDCR1_MWID_0                   0x00000010U        /*!<Bit 0 */
+#define  FMC_SDCR1_MWID_1                   0x00000020U        /*!<Bit 1 */
+
+#define  FMC_SDCR1_NB                       0x00000040U        /*!<Number of internal bank */
+
+#define  FMC_SDCR1_CAS                      0x00000180U        /*!<CAS[1:0] bits (CAS latency) */
+#define  FMC_SDCR1_CAS_0                    0x00000080U        /*!<Bit 0 */
+#define  FMC_SDCR1_CAS_1                    0x00000100U        /*!<Bit 1 */
+
+#define  FMC_SDCR1_WP                       0x00000200U        /*!<Write protection */
+
+#define  FMC_SDCR1_SDCLK                    0x00000C00U        /*!<SDRAM clock configuration */
+#define  FMC_SDCR1_SDCLK_0                  0x00000400U        /*!<Bit 0 */
+#define  FMC_SDCR1_SDCLK_1                  0x00000800U        /*!<Bit 1 */
+
+#define  FMC_SDCR1_RBURST                   0x00001000U        /*!<Read burst */
+
+#define  FMC_SDCR1_RPIPE                    0x00006000U        /*!<Write protection */
+#define  FMC_SDCR1_RPIPE_0                  0x00002000U        /*!<Bit 0 */
+#define  FMC_SDCR1_RPIPE_1                  0x00004000U        /*!<Bit 1 */
+
+/******************  Bit definition for FMC_SDCR2 register  ******************/
+#define  FMC_SDCR2_NC                       0x00000003U        /*!<NC[1:0] bits (Number of column bits) */
+#define  FMC_SDCR2_NC_0                     0x00000001U        /*!<Bit 0 */
+#define  FMC_SDCR2_NC_1                     0x00000002U        /*!<Bit 1 */
+
+#define  FMC_SDCR2_NR                       0x0000000CU        /*!<NR[1:0] bits (Number of row bits) */
+#define  FMC_SDCR2_NR_0                     0x00000004U        /*!<Bit 0 */
+#define  FMC_SDCR2_NR_1                     0x00000008U        /*!<Bit 1 */
+
+#define  FMC_SDCR2_MWID                     0x00000030U        /*!<NR[1:0] bits (Number of row bits) */
+#define  FMC_SDCR2_MWID_0                   0x00000010U        /*!<Bit 0 */
+#define  FMC_SDCR2_MWID_1                   0x00000020U        /*!<Bit 1 */
+
+#define  FMC_SDCR2_NB                       0x00000040U        /*!<Number of internal bank */
+
+#define  FMC_SDCR2_CAS                      0x00000180U        /*!<CAS[1:0] bits (CAS latency) */
+#define  FMC_SDCR2_CAS_0                    0x00000080U        /*!<Bit 0 */
+#define  FMC_SDCR2_CAS_1                    0x00000100U        /*!<Bit 1 */
+
+#define  FMC_SDCR2_WP                       0x00000200U        /*!<Write protection */
+
+#define  FMC_SDCR2_SDCLK                    0x00000C00U        /*!<SDCLK[1:0] (SDRAM clock configuration) */
+#define  FMC_SDCR2_SDCLK_0                  0x00000400U        /*!<Bit 0 */
+#define  FMC_SDCR2_SDCLK_1                  0x00000800U        /*!<Bit 1 */
+
+#define  FMC_SDCR2_RBURST                   0x00001000U        /*!<Read burst */
+
+#define  FMC_SDCR2_RPIPE                    0x00006000U        /*!<RPIPE[1:0](Read pipe) */
+#define  FMC_SDCR2_RPIPE_0                  0x00002000U        /*!<Bit 0 */
+#define  FMC_SDCR2_RPIPE_1                  0x00004000U        /*!<Bit 1 */
+
+/******************  Bit definition for FMC_SDTR1 register  ******************/
+#define  FMC_SDTR1_TMRD                     0x0000000FU        /*!<TMRD[3:0] bits (Load mode register to active) */
+#define  FMC_SDTR1_TMRD_0                   0x00000001U        /*!<Bit 0 */
+#define  FMC_SDTR1_TMRD_1                   0x00000002U        /*!<Bit 1 */
+#define  FMC_SDTR1_TMRD_2                   0x00000004U        /*!<Bit 2 */
+#define  FMC_SDTR1_TMRD_3                   0x00000008U        /*!<Bit 3 */
+                                            
+#define  FMC_SDTR1_TXSR                     0x000000F0U        /*!<TXSR[3:0] bits (Exit self refresh) */
+#define  FMC_SDTR1_TXSR_0                   0x00000010U        /*!<Bit 0 */
+#define  FMC_SDTR1_TXSR_1                   0x00000020U        /*!<Bit 1 */
+#define  FMC_SDTR1_TXSR_2                   0x00000040U        /*!<Bit 2 */
+#define  FMC_SDTR1_TXSR_3                   0x00000080U        /*!<Bit 3 */
+
+#define  FMC_SDTR1_TRAS                     0x00000F00U        /*!<TRAS[3:0] bits (Self refresh time) */
+#define  FMC_SDTR1_TRAS_0                   0x00000100U        /*!<Bit 0 */
+#define  FMC_SDTR1_TRAS_1                   0x00000200U        /*!<Bit 1 */
+#define  FMC_SDTR1_TRAS_2                   0x00000400U        /*!<Bit 2 */
+#define  FMC_SDTR1_TRAS_3                   0x00000800U        /*!<Bit 3 */
+
+#define  FMC_SDTR1_TRC                      0x0000F000U        /*!<TRC[2:0] bits (Row cycle delay) */
+#define  FMC_SDTR1_TRC_0                    0x00001000U        /*!<Bit 0 */
+#define  FMC_SDTR1_TRC_1                    0x00002000U        /*!<Bit 1 */
+#define  FMC_SDTR1_TRC_2                    0x00004000U        /*!<Bit 2 */
+
+#define  FMC_SDTR1_TWR                      0x000F0000U        /*!<TRC[2:0] bits (Write recovery delay) */
+#define  FMC_SDTR1_TWR_0                    0x00010000U        /*!<Bit 0 */
+#define  FMC_SDTR1_TWR_1                    0x00020000U        /*!<Bit 1 */
+#define  FMC_SDTR1_TWR_2                    0x00040000U        /*!<Bit 2 */
+
+#define  FMC_SDTR1_TRP                      0x00F00000U        /*!<TRP[2:0] bits (Row precharge delay) */
+#define  FMC_SDTR1_TRP_0                    0x00100000U        /*!<Bit 0 */
+#define  FMC_SDTR1_TRP_1                    0x00200000U        /*!<Bit 1 */
+#define  FMC_SDTR1_TRP_2                    0x00400000U        /*!<Bit 2 */
+
+#define  FMC_SDTR1_TRCD                     0x0F000000U        /*!<TRP[2:0] bits (Row to column delay) */
+#define  FMC_SDTR1_TRCD_0                   0x01000000U        /*!<Bit 0 */
+#define  FMC_SDTR1_TRCD_1                   0x02000000U        /*!<Bit 1 */
+#define  FMC_SDTR1_TRCD_2                   0x04000000U        /*!<Bit 2 */
+
+/******************  Bit definition for FMC_SDTR2 register  ******************/
+#define  FMC_SDTR2_TMRD                     0x0000000FU        /*!<TMRD[3:0] bits (Load mode register to active) */
+#define  FMC_SDTR2_TMRD_0                   0x00000001U        /*!<Bit 0 */
+#define  FMC_SDTR2_TMRD_1                   0x00000002U        /*!<Bit 1 */
+#define  FMC_SDTR2_TMRD_2                   0x00000004U        /*!<Bit 2 */
+#define  FMC_SDTR2_TMRD_3                   0x00000008U        /*!<Bit 3 */
+                                            
+#define  FMC_SDTR2_TXSR                     0x000000F0U        /*!<TXSR[3:0] bits (Exit self refresh) */
+#define  FMC_SDTR2_TXSR_0                   0x00000010U        /*!<Bit 0 */
+#define  FMC_SDTR2_TXSR_1                   0x00000020U        /*!<Bit 1 */
+#define  FMC_SDTR2_TXSR_2                   0x00000040U        /*!<Bit 2 */
+#define  FMC_SDTR2_TXSR_3                   0x00000080U        /*!<Bit 3 */
+
+#define  FMC_SDTR2_TRAS                     0x00000F00U        /*!<TRAS[3:0] bits (Self refresh time) */
+#define  FMC_SDTR2_TRAS_0                   0x00000100U        /*!<Bit 0 */
+#define  FMC_SDTR2_TRAS_1                   0x00000200U        /*!<Bit 1 */
+#define  FMC_SDTR2_TRAS_2                   0x00000400U        /*!<Bit 2 */
+#define  FMC_SDTR2_TRAS_3                   0x00000800U        /*!<Bit 3 */
+
+#define  FMC_SDTR2_TRC                      0x0000F000U        /*!<TRC[2:0] bits (Row cycle delay) */
+#define  FMC_SDTR2_TRC_0                    0x00001000U        /*!<Bit 0 */
+#define  FMC_SDTR2_TRC_1                    0x00002000U        /*!<Bit 1 */
+#define  FMC_SDTR2_TRC_2                    0x00004000U        /*!<Bit 2 */
+
+#define  FMC_SDTR2_TWR                      0x000F0000U        /*!<TRC[2:0] bits (Write recovery delay) */
+#define  FMC_SDTR2_TWR_0                    0x00010000U        /*!<Bit 0 */
+#define  FMC_SDTR2_TWR_1                    0x00020000U        /*!<Bit 1 */
+#define  FMC_SDTR2_TWR_2                    0x00040000U        /*!<Bit 2 */
+
+#define  FMC_SDTR2_TRP                      0x00F00000U        /*!<TRP[2:0] bits (Row precharge delay) */
+#define  FMC_SDTR2_TRP_0                    0x00100000U        /*!<Bit 0 */
+#define  FMC_SDTR2_TRP_1                    0x00200000U        /*!<Bit 1 */
+#define  FMC_SDTR2_TRP_2                    0x00400000U        /*!<Bit 2 */
+
+#define  FMC_SDTR2_TRCD                     0x0F000000U        /*!<TRP[2:0] bits (Row to column delay) */
+#define  FMC_SDTR2_TRCD_0                   0x01000000U        /*!<Bit 0 */
+#define  FMC_SDTR2_TRCD_1                   0x02000000U        /*!<Bit 1 */
+#define  FMC_SDTR2_TRCD_2                   0x04000000U        /*!<Bit 2 */
+
+/******************  Bit definition for FMC_SDCMR register  ******************/
+#define  FMC_SDCMR_MODE                     0x00000007U        /*!<MODE[2:0] bits (Command mode) */
+#define  FMC_SDCMR_MODE_0                   0x00000001U        /*!<Bit 0 */
+#define  FMC_SDCMR_MODE_1                   0x00000002U        /*!<Bit 1 */
+#define  FMC_SDCMR_MODE_2                   0x00000004U        /*!<Bit 2 */
+                                            
+#define  FMC_SDCMR_CTB2                     0x00000008U        /*!<Command target 2 */
+
+#define  FMC_SDCMR_CTB1                     0x00000010U        /*!<Command target 1 */
+
+#define  FMC_SDCMR_NRFS                     0x000001E0U        /*!<NRFS[3:0] bits (Number of auto-refresh) */
+#define  FMC_SDCMR_NRFS_0                   0x00000020U        /*!<Bit 0 */
+#define  FMC_SDCMR_NRFS_1                   0x00000040U        /*!<Bit 1 */
+#define  FMC_SDCMR_NRFS_2                   0x00000080U        /*!<Bit 2 */
+#define  FMC_SDCMR_NRFS_3                   0x00000100U        /*!<Bit 3 */
+
+#define  FMC_SDCMR_MRD                      0x003FFE00U        /*!<MRD[12:0] bits (Mode register definition) */
+
+/******************  Bit definition for FMC_SDRTR register  ******************/
+#define  FMC_SDRTR_CRE                      0x00000001U        /*!<Clear refresh error flag */
+
+#define  FMC_SDRTR_COUNT                    0x00003FFEU        /*!<COUNT[12:0] bits (Refresh timer count) */
+
+#define  FMC_SDRTR_REIE                     0x00004000U        /*!<RES interupt enable */
+
+/******************  Bit definition for FMC_SDSR register  ******************/
+#define  FMC_SDSR_RE                        0x00000001U        /*!<Refresh error flag */
+
+#define  FMC_SDSR_MODES1                    0x00000006U        /*!<MODES1[1:0]bits (Status mode for bank 1) */
+#define  FMC_SDSR_MODES1_0                  0x00000002U        /*!<Bit 0 */
+#define  FMC_SDSR_MODES1_1                  0x00000004U        /*!<Bit 1 */
+
+#define  FMC_SDSR_MODES2                    0x00000018U        /*!<MODES2[1:0]bits (Status mode for bank 2) */
+#define  FMC_SDSR_MODES2_0                  0x00000008U        /*!<Bit 0 */
+#define  FMC_SDSR_MODES2_1                  0x00000010U        /*!<Bit 1 */
+#define  FMC_SDSR_BUSY                      0x00000020U        /*!<Busy status */
+
+
 
 /******************************************************************************/
 /*                                                                            */
@@ -9506,13 +11356,24 @@ typedef struct {
 #define  PWR_CR_PLS_LEV5                     0x000000A0U     /*!< PVD level 5 */
 #define  PWR_CR_PLS_LEV6                     0x000000C0U     /*!< PVD level 6 */
 #define  PWR_CR_PLS_LEV7                     0x000000E0U     /*!< PVD level 7 */
-
-#define  PWR_CR_DBP                          0x00000100U     /*!< Disable Backup Domain write protection               */
-#define  PWR_CR_FPDS                         0x00000200U     /*!< Flash power down in Stop mode                        */
-#define  PWR_CR_VOS                          0x00004000U     /*!< VOS bit (Regulator voltage scaling output selection) */
+#define  PWR_CR_DBP                          0x00000100U     /*!< Disable Backup Domain write protection                     */
+#define  PWR_CR_FPDS                         0x00000200U     /*!< Flash power down in Stop mode                              */
+#define  PWR_CR_LPLVDS                       0x00000400U     /*!< Low-Power Regulator Low Voltage Scaling in Stop mode       */
+#define  PWR_CR_MRLVDS                       0x00000800U     /*!< Main regulator Low Voltage Scaling in Stop mode            */
+#define  PWR_CR_ADCDC1                       0x00002000U     /*!< Refer to AN4073 on how to use this bit */ 
+#define  PWR_CR_VOS                          0x0000C000U     /*!< VOS[1:0] bits (Regulator voltage scaling output selection) */
+#define  PWR_CR_VOS_0                        0x00004000U     /*!< Bit 0 */
+#define  PWR_CR_VOS_1                        0x00008000U     /*!< Bit 1 */
+#define  PWR_CR_ODEN                         0x00010000U     /*!< Over Drive enable                   */
+#define  PWR_CR_ODSWEN                       0x00020000U     /*!< Over Drive switch enabled           */
+#define  PWR_CR_UDEN                         0x000C0000U     /*!< Under Drive enable in stop mode     */
+#define  PWR_CR_UDEN_0                       0x00040000U     /*!< Bit 0                               */
+#define  PWR_CR_UDEN_1                       0x00080000U     /*!< Bit 1                               */
 
 /* Legacy define */
 #define  PWR_CR_PMODE                        PWR_CR_VOS
+#define  PWR_CR_LPUDS                        PWR_CR_LPLVDS     /*!< Low-Power Regulator in deepsleep under-drive mode          */
+#define  PWR_CR_MRUDS                        PWR_CR_MRLVDS     /*!< Main regulator in deepsleep under-drive mode               */
 
 /*******************  Bit definition for PWR_CSR register  ********************/
 #define  PWR_CSR_WUF                         0x00000001U     /*!< Wakeup Flag                                      */
@@ -9522,6 +11383,9 @@ typedef struct {
 #define  PWR_CSR_EWUP                        0x00000100U     /*!< Enable WKUP pin                                  */
 #define  PWR_CSR_BRE                         0x00000200U     /*!< Backup regulator enable                          */
 #define  PWR_CSR_VOSRDY                      0x00004000U     /*!< Regulator voltage scaling output selection ready */
+#define  PWR_CSR_ODRDY                       0x00010000U     /*!< Over Drive generator ready                       */
+#define  PWR_CSR_ODSWRDY                     0x00020000U     /*!< Over Drive Switch ready                          */
+#define  PWR_CSR_UDSWRDY                     0x000C0000U     /*!< Under Drive ready                                */
 
 /* Legacy define */
 #define  PWR_CSR_REGRDY                      PWR_CSR_VOSRDY
@@ -9560,6 +11424,8 @@ typedef struct {
 #define  RCC_CR_PLLRDY                       0x02000000U
 #define  RCC_CR_PLLI2SON                     0x04000000U
 #define  RCC_CR_PLLI2SRDY                    0x08000000U
+#define  RCC_CR_PLLSAION                     0x10000000U
+#define  RCC_CR_PLLSAIRDY                    0x20000000U
 
 /********************  Bit definition for RCC_PLLCFGR register  ***************/
 #define  RCC_PLLCFGR_PLLM                    0x0000003FU
@@ -9691,7 +11557,7 @@ typedef struct {
 #define  RCC_CIR_HSERDYF                     0x00000008U
 #define  RCC_CIR_PLLRDYF                     0x00000010U
 #define  RCC_CIR_PLLI2SRDYF                  0x00000020U
-
+#define  RCC_CIR_PLLSAIRDYF                  0x00000040U
 #define  RCC_CIR_CSSF                        0x00000080U
 #define  RCC_CIR_LSIRDYIE                    0x00000100U
 #define  RCC_CIR_LSERDYIE                    0x00000200U
@@ -9699,14 +11565,14 @@ typedef struct {
 #define  RCC_CIR_HSERDYIE                    0x00000800U
 #define  RCC_CIR_PLLRDYIE                    0x00001000U
 #define  RCC_CIR_PLLI2SRDYIE                 0x00002000U
-
+#define  RCC_CIR_PLLSAIRDYIE                 0x00004000U
 #define  RCC_CIR_LSIRDYC                     0x00010000U
 #define  RCC_CIR_LSERDYC                     0x00020000U
 #define  RCC_CIR_HSIRDYC                     0x00040000U
 #define  RCC_CIR_HSERDYC                     0x00080000U
 #define  RCC_CIR_PLLRDYC                     0x00100000U
 #define  RCC_CIR_PLLI2SRDYC                  0x00200000U
-
+#define  RCC_CIR_PLLSAIRDYC                  0x00400000U
 #define  RCC_CIR_CSSC                        0x00800000U
 
 /********************  Bit definition for RCC_AHB1RSTR register  **************/
@@ -9719,18 +11585,22 @@ typedef struct {
 #define  RCC_AHB1RSTR_GPIOGRST               0x00000040U
 #define  RCC_AHB1RSTR_GPIOHRST               0x00000080U
 #define  RCC_AHB1RSTR_GPIOIRST               0x00000100U
+#define  RCC_AHB1RSTR_GPIOJRST               0x00000200U
+#define  RCC_AHB1RSTR_GPIOKRST               0x00000400U
 #define  RCC_AHB1RSTR_CRCRST                 0x00001000U
 #define  RCC_AHB1RSTR_DMA1RST                0x00200000U
 #define  RCC_AHB1RSTR_DMA2RST                0x00400000U
+#define  RCC_AHB1RSTR_DMA2DRST               0x00800000U
+#define  RCC_AHB1RSTR_ETHMACRST              0x02000000U
 #define  RCC_AHB1RSTR_OTGHRST                0x20000000U
 
 /********************  Bit definition for RCC_AHB2RSTR register  **************/
+#define  RCC_AHB2RSTR_DCMIRST                0x00000001U
 #define  RCC_AHB2RSTR_RNGRST                 0x00000040U
 #define  RCC_AHB2RSTR_OTGFSRST               0x00000080U
 
 /********************  Bit definition for RCC_AHB3RSTR register  **************/
-
-#define  RCC_AHB3RSTR_FSMCRST                0x00000001U
+#define  RCC_AHB3RSTR_FMCRST                0x00000001U
 
 /********************  Bit definition for RCC_APB1RSTR register  **************/
 #define  RCC_APB1RSTR_TIM2RST                0x00000001U
@@ -9756,6 +11626,8 @@ typedef struct {
 #define  RCC_APB1RSTR_CAN2RST                0x04000000U
 #define  RCC_APB1RSTR_PWRRST                 0x10000000U
 #define  RCC_APB1RSTR_DACRST                 0x20000000U
+#define  RCC_APB1RSTR_UART7RST               0x40000000U
+#define  RCC_APB1RSTR_UART8RST               0x80000000U
 
 /********************  Bit definition for RCC_APB2RSTR register  **************/
 #define  RCC_APB2RSTR_TIM1RST                0x00000001U
@@ -9765,10 +11637,14 @@ typedef struct {
 #define  RCC_APB2RSTR_ADCRST                 0x00000100U
 #define  RCC_APB2RSTR_SDIORST                0x00000800U
 #define  RCC_APB2RSTR_SPI1RST                0x00001000U
+#define  RCC_APB2RSTR_SPI4RST                0x00002000U
 #define  RCC_APB2RSTR_SYSCFGRST              0x00004000U
 #define  RCC_APB2RSTR_TIM9RST                0x00010000U
 #define  RCC_APB2RSTR_TIM10RST               0x00020000U
 #define  RCC_APB2RSTR_TIM11RST               0x00040000U
+#define  RCC_APB2RSTR_SPI5RST                0x00100000U
+#define  RCC_APB2RSTR_SPI6RST                0x00200000U
+#define  RCC_APB2RSTR_SAI1RST                0x00400000U
 
 /* Old SPI1RST bit definition, maintained for legacy purpose */
 #define  RCC_APB2RSTR_SPI1                   RCC_APB2RSTR_SPI1RST
@@ -9783,22 +11659,30 @@ typedef struct {
 #define  RCC_AHB1ENR_GPIOGEN                 0x00000040U
 #define  RCC_AHB1ENR_GPIOHEN                 0x00000080U
 #define  RCC_AHB1ENR_GPIOIEN                 0x00000100U
+#define  RCC_AHB1ENR_GPIOJEN                 0x00000200U
+#define  RCC_AHB1ENR_GPIOKEN                 0x00000400U
+
 #define  RCC_AHB1ENR_CRCEN                   0x00001000U
 #define  RCC_AHB1ENR_BKPSRAMEN               0x00040000U
 #define  RCC_AHB1ENR_CCMDATARAMEN            0x00100000U
 #define  RCC_AHB1ENR_DMA1EN                  0x00200000U
 #define  RCC_AHB1ENR_DMA2EN                  0x00400000U
+#define  RCC_AHB1ENR_DMA2DEN                 0x00800000U
 
+#define  RCC_AHB1ENR_ETHMACEN                0x02000000U
+#define  RCC_AHB1ENR_ETHMACTXEN              0x04000000U
+#define  RCC_AHB1ENR_ETHMACRXEN              0x08000000U
+#define  RCC_AHB1ENR_ETHMACPTPEN             0x10000000U
 #define  RCC_AHB1ENR_OTGHSEN                 0x20000000U
 #define  RCC_AHB1ENR_OTGHSULPIEN             0x40000000U
 
 /********************  Bit definition for RCC_AHB2ENR register  ***************/
+#define  RCC_AHB2ENR_DCMIEN                  0x00000001U
 #define  RCC_AHB2ENR_RNGEN                   0x00000040U
 #define  RCC_AHB2ENR_OTGFSEN                 0x00000080U
 
 /********************  Bit definition for RCC_AHB3ENR register  ***************/
-
-#define  RCC_AHB3ENR_FSMCEN                  0x00000001U
+#define  RCC_AHB3ENR_FMCEN                  0x00000001U
 
 /********************  Bit definition for RCC_APB1ENR register  ***************/
 #define  RCC_APB1ENR_TIM2EN                  0x00000001U
@@ -9824,6 +11708,8 @@ typedef struct {
 #define  RCC_APB1ENR_CAN2EN                  0x04000000U
 #define  RCC_APB1ENR_PWREN                   0x10000000U
 #define  RCC_APB1ENR_DACEN                   0x20000000U
+#define  RCC_APB1ENR_UART7EN                 0x40000000U
+#define  RCC_APB1ENR_UART8EN                 0x80000000U
 
 /********************  Bit definition for RCC_APB2ENR register  ***************/
 #define  RCC_APB2ENR_TIM1EN                  0x00000001U
@@ -9835,12 +11721,14 @@ typedef struct {
 #define  RCC_APB2ENR_ADC3EN                  0x00000400U
 #define  RCC_APB2ENR_SDIOEN                  0x00000800U
 #define  RCC_APB2ENR_SPI1EN                  0x00001000U
+#define  RCC_APB2ENR_SPI4EN                  0x00002000U
 #define  RCC_APB2ENR_SYSCFGEN                0x00004000U
 #define  RCC_APB2ENR_TIM9EN                  0x00010000U
 #define  RCC_APB2ENR_TIM10EN                 0x00020000U
 #define  RCC_APB2ENR_TIM11EN                 0x00040000U
 #define  RCC_APB2ENR_SPI5EN                  0x00100000U
 #define  RCC_APB2ENR_SPI6EN                  0x00200000U
+#define  RCC_APB2ENR_SAI1EN                  0x00400000U
 
 /********************  Bit definition for RCC_AHB1LPENR register  *************/
 #define  RCC_AHB1LPENR_GPIOALPEN             0x00000001U
@@ -9852,6 +11740,9 @@ typedef struct {
 #define  RCC_AHB1LPENR_GPIOGLPEN             0x00000040U
 #define  RCC_AHB1LPENR_GPIOHLPEN             0x00000080U
 #define  RCC_AHB1LPENR_GPIOILPEN             0x00000100U
+#define  RCC_AHB1LPENR_GPIOJLPEN             0x00000200U
+#define  RCC_AHB1LPENR_GPIOKLPEN             0x00000400U
+
 #define  RCC_AHB1LPENR_CRCLPEN               0x00001000U
 #define  RCC_AHB1LPENR_FLITFLPEN             0x00008000U
 #define  RCC_AHB1LPENR_SRAM1LPEN             0x00010000U
@@ -9859,16 +11750,22 @@ typedef struct {
 #define  RCC_AHB1LPENR_BKPSRAMLPEN           0x00040000U
 #define  RCC_AHB1LPENR_DMA1LPEN              0x00200000U
 #define  RCC_AHB1LPENR_DMA2LPEN              0x00400000U
+#define  RCC_AHB1LPENR_DMA2DLPEN             0x00800000U
+
+#define  RCC_AHB1LPENR_ETHMACLPEN            0x02000000U
+#define  RCC_AHB1LPENR_ETHMACTXLPEN          0x04000000U
+#define  RCC_AHB1LPENR_ETHMACRXLPEN          0x08000000U
+#define  RCC_AHB1LPENR_ETHMACPTPLPEN         0x10000000U
 #define  RCC_AHB1LPENR_OTGHSLPEN             0x20000000U
 #define  RCC_AHB1LPENR_OTGHSULPILPEN         0x40000000U
 
 /********************  Bit definition for RCC_AHB2LPENR register  *************/
+#define  RCC_AHB2LPENR_DCMILPEN              0x00000001U
 #define  RCC_AHB2LPENR_RNGLPEN               0x00000040U
 #define  RCC_AHB2LPENR_OTGFSLPEN             0x00000080U
 
 /********************  Bit definition for RCC_AHB3LPENR register  *************/
-
-#define  RCC_AHB3LPENR_FSMCLPEN              0x00000001U
+#define  RCC_AHB3LPENR_FMCLPEN              0x00000001U
 
 /********************  Bit definition for RCC_APB1LPENR register  *************/
 #define  RCC_APB1LPENR_TIM2LPEN              0x00000001U
@@ -9894,6 +11791,8 @@ typedef struct {
 #define  RCC_APB1LPENR_CAN2LPEN              0x04000000U
 #define  RCC_APB1LPENR_PWRLPEN               0x10000000U
 #define  RCC_APB1LPENR_DACLPEN               0x20000000U
+#define  RCC_APB1LPENR_UART7LPEN             0x40000000U
+#define  RCC_APB1LPENR_UART8LPEN             0x80000000U
 
 /********************  Bit definition for RCC_APB2LPENR register  *************/
 #define  RCC_APB2LPENR_TIM1LPEN              0x00000001U
@@ -9905,10 +11804,14 @@ typedef struct {
 #define  RCC_APB2LPENR_ADC3LPEN              0x00000400U
 #define  RCC_APB2LPENR_SDIOLPEN              0x00000800U
 #define  RCC_APB2LPENR_SPI1LPEN              0x00001000U
+#define  RCC_APB2LPENR_SPI4LPEN              0x00002000U
 #define  RCC_APB2LPENR_SYSCFGLPEN            0x00004000U
 #define  RCC_APB2LPENR_TIM9LPEN              0x00010000U
 #define  RCC_APB2LPENR_TIM10LPEN             0x00020000U
 #define  RCC_APB2LPENR_TIM11LPEN             0x00040000U
+#define  RCC_APB2LPENR_SPI5LPEN              0x00100000U
+#define  RCC_APB2LPENR_SPI6LPEN              0x00200000U
+#define  RCC_APB2LPENR_SAI1LPEN              0x00400000U
 
 /********************  Bit definition for RCC_BDCR register  ******************/
 #define  RCC_BDCR_LSEON                      0x00000001U
@@ -9952,10 +11855,53 @@ typedef struct {
 #define  RCC_PLLI2SCFGR_PLLI2SN_7            0x00002000U
 #define  RCC_PLLI2SCFGR_PLLI2SN_8            0x00004000U
 
+#define  RCC_PLLI2SCFGR_PLLI2SQ              0x0F000000U
+#define  RCC_PLLI2SCFGR_PLLI2SQ_0            0x01000000U
+#define  RCC_PLLI2SCFGR_PLLI2SQ_1            0x02000000U
+#define  RCC_PLLI2SCFGR_PLLI2SQ_2            0x04000000U
+#define  RCC_PLLI2SCFGR_PLLI2SQ_3            0x08000000U
+
 #define  RCC_PLLI2SCFGR_PLLI2SR              0x70000000U
 #define  RCC_PLLI2SCFGR_PLLI2SR_0            0x10000000U
 #define  RCC_PLLI2SCFGR_PLLI2SR_1            0x20000000U
 #define  RCC_PLLI2SCFGR_PLLI2SR_2            0x40000000U
+
+
+/********************  Bit definition for RCC_PLLSAICFGR register  ************/
+#define  RCC_PLLSAICFGR_PLLSAIN              0x00007FC0U
+#define  RCC_PLLSAICFGR_PLLSAIN_0            0x00000040U
+#define  RCC_PLLSAICFGR_PLLSAIN_1            0x00000080U
+#define  RCC_PLLSAICFGR_PLLSAIN_2            0x00000100U
+#define  RCC_PLLSAICFGR_PLLSAIN_3            0x00000200U
+#define  RCC_PLLSAICFGR_PLLSAIN_4            0x00000400U
+#define  RCC_PLLSAICFGR_PLLSAIN_5            0x00000800U
+#define  RCC_PLLSAICFGR_PLLSAIN_6            0x00001000U
+#define  RCC_PLLSAICFGR_PLLSAIN_7            0x00002000U
+#define  RCC_PLLSAICFGR_PLLSAIN_8            0x00004000U
+
+#define  RCC_PLLSAICFGR_PLLSAIQ              0x0F000000U
+#define  RCC_PLLSAICFGR_PLLSAIQ_0            0x01000000U
+#define  RCC_PLLSAICFGR_PLLSAIQ_1            0x02000000U
+#define  RCC_PLLSAICFGR_PLLSAIQ_2            0x04000000U
+#define  RCC_PLLSAICFGR_PLLSAIQ_3            0x08000000U
+
+#define  RCC_PLLSAICFGR_PLLSAIR              0x70000000U
+#define  RCC_PLLSAICFGR_PLLSAIR_0            0x10000000U
+#define  RCC_PLLSAICFGR_PLLSAIR_1            0x20000000U
+#define  RCC_PLLSAICFGR_PLLSAIR_2            0x40000000U
+
+/********************  Bit definition for RCC_DCKCFGR register  ***************/
+#define  RCC_DCKCFGR_PLLI2SDIVQ              0x0000001FU
+#define  RCC_DCKCFGR_PLLSAIDIVQ              0x00001F00U
+#define  RCC_DCKCFGR_PLLSAIDIVR              0x00030000U
+#define  RCC_DCKCFGR_SAI1ASRC                0x00300000U
+#define  RCC_DCKCFGR_SAI1ASRC_0              0x00100000U
+#define  RCC_DCKCFGR_SAI1ASRC_1              0x00200000U
+#define  RCC_DCKCFGR_SAI1BSRC                0x00C00000U
+#define  RCC_DCKCFGR_SAI1BSRC_0              0x00400000U
+#define  RCC_DCKCFGR_SAI1BSRC_1              0x00800000U
+#define  RCC_DCKCFGR_TIMPRE                  0x01000000U
+
 
 /******************************************************************************/
 /*                                                                            */
@@ -10353,6 +12299,158 @@ typedef struct {
 /********************  Bits definition for RTC_BKP19R register  ***************/
 #define RTC_BKP19R                           0xFFFFFFFFU
 
+/******************************************************************************/
+/*                                                                            */
+/*                          Serial Audio Interface                            */
+/*                                                                            */
+/******************************************************************************/
+/********************  Bit definition for SAI_GCR register  *******************/
+#define  SAI_GCR_SYNCIN                  0x00000003U        /*!<SYNCIN[1:0] bits (Synchronization Inputs)   */
+#define  SAI_GCR_SYNCIN_0                0x00000001U        /*!<Bit 0 */
+#define  SAI_GCR_SYNCIN_1                0x00000002U        /*!<Bit 1 */
+
+#define  SAI_GCR_SYNCOUT                 0x00000030U        /*!<SYNCOUT[1:0] bits (Synchronization Outputs) */
+#define  SAI_GCR_SYNCOUT_0               0x00000010U        /*!<Bit 0 */
+#define  SAI_GCR_SYNCOUT_1               0x00000020U        /*!<Bit 1 */
+
+/*******************  Bit definition for SAI_xCR1 register  *******************/
+#define  SAI_xCR1_MODE                    0x00000003U        /*!<MODE[1:0] bits (Audio Block Mode)           */
+#define  SAI_xCR1_MODE_0                  0x00000001U        /*!<Bit 0 */
+#define  SAI_xCR1_MODE_1                  0x00000002U        /*!<Bit 1 */
+
+#define  SAI_xCR1_PRTCFG                  0x0000000CU        /*!<PRTCFG[1:0] bits (Protocol Configuration)   */
+#define  SAI_xCR1_PRTCFG_0                0x00000004U        /*!<Bit 0 */
+#define  SAI_xCR1_PRTCFG_1                0x00000008U        /*!<Bit 1 */
+
+#define  SAI_xCR1_DS                      0x000000E0U        /*!<DS[1:0] bits (Data Size) */
+#define  SAI_xCR1_DS_0                    0x00000020U        /*!<Bit 0 */
+#define  SAI_xCR1_DS_1                    0x00000040U        /*!<Bit 1 */
+#define  SAI_xCR1_DS_2                    0x00000080U        /*!<Bit 2 */
+
+#define  SAI_xCR1_LSBFIRST                0x00000100U        /*!<LSB First Configuration  */
+#define  SAI_xCR1_CKSTR                   0x00000200U        /*!<ClocK STRobing edge      */
+
+#define  SAI_xCR1_SYNCEN                  0x00000C00U        /*!<SYNCEN[1:0](SYNChronization ENable) */
+#define  SAI_xCR1_SYNCEN_0                0x00000400U        /*!<Bit 0 */
+#define  SAI_xCR1_SYNCEN_1                0x00000800U        /*!<Bit 1 */
+
+#define  SAI_xCR1_MONO                    0x00001000U        /*!<Mono mode                  */
+#define  SAI_xCR1_OUTDRIV                 0x00002000U        /*!<Output Drive               */
+#define  SAI_xCR1_SAIEN                   0x00010000U        /*!<Audio Block enable         */
+#define  SAI_xCR1_DMAEN                   0x00020000U        /*!<DMA enable                 */
+#define  SAI_xCR1_NODIV                   0x00080000U        /*!<No Divider Configuration   */
+
+#define  SAI_xCR1_MCKDIV                  0x00F00000U        /*!<MCKDIV[3:0] (Master ClocK Divider)  */
+#define  SAI_xCR1_MCKDIV_0                0x00100000U        /*!<Bit 0  */
+#define  SAI_xCR1_MCKDIV_1                0x00200000U        /*!<Bit 1  */
+#define  SAI_xCR1_MCKDIV_2                0x00400000U        /*!<Bit 2  */
+#define  SAI_xCR1_MCKDIV_3                0x00800000U        /*!<Bit 3  */
+
+/*******************  Bit definition for SAI_xCR2 register  *******************/
+#define  SAI_xCR2_FTH                     0x00000007U        /*!<FTH[2:0](Fifo THreshold)  */
+#define  SAI_xCR2_FTH_0                   0x00000001U        /*!<Bit 0 */
+#define  SAI_xCR2_FTH_1                   0x00000002U        /*!<Bit 1 */
+#define  SAI_xCR2_FTH_2                   0x00000004U        /*!<Bit 2 */
+
+#define  SAI_xCR2_FFLUSH                  0x00000008U        /*!<Fifo FLUSH                       */
+#define  SAI_xCR2_TRIS                    0x00000010U        /*!<TRIState Management on data line */
+#define  SAI_xCR2_MUTE                    0x00000020U        /*!<Mute mode                        */
+#define  SAI_xCR2_MUTEVAL                 0x00000040U        /*!<Muate value                      */
+
+#define  SAI_xCR2_MUTECNT                  0x00001F80U       /*!<MUTECNT[5:0] (MUTE counter) */
+#define  SAI_xCR2_MUTECNT_0               0x00000080U        /*!<Bit 0 */
+#define  SAI_xCR2_MUTECNT_1               0x00000100U        /*!<Bit 1 */
+#define  SAI_xCR2_MUTECNT_2               0x00000200U        /*!<Bit 2 */
+#define  SAI_xCR2_MUTECNT_3               0x00000400U        /*!<Bit 3 */
+#define  SAI_xCR2_MUTECNT_4               0x00000800U        /*!<Bit 4 */
+#define  SAI_xCR2_MUTECNT_5               0x00001000U        /*!<Bit 5 */
+
+#define  SAI_xCR2_CPL                     0x00002000U        /*!< Complement Bit             */
+
+#define  SAI_xCR2_COMP                    0x0000C000U        /*!<COMP[1:0] (Companding mode) */
+#define  SAI_xCR2_COMP_0                  0x00004000U        /*!<Bit 0 */
+#define  SAI_xCR2_COMP_1                  0x00008000U        /*!<Bit 1 */
+
+/******************  Bit definition for SAI_xFRCR register  *******************/
+#define  SAI_xFRCR_FRL                    0x000000FFU        /*!<FRL[1:0](Frame length)  */
+#define  SAI_xFRCR_FRL_0                  0x00000001U        /*!<Bit 0 */
+#define  SAI_xFRCR_FRL_1                  0x00000002U        /*!<Bit 1 */
+#define  SAI_xFRCR_FRL_2                  0x00000004U        /*!<Bit 2 */
+#define  SAI_xFRCR_FRL_3                  0x00000008U        /*!<Bit 3 */
+#define  SAI_xFRCR_FRL_4                  0x00000010U        /*!<Bit 4 */
+#define  SAI_xFRCR_FRL_5                  0x00000020U        /*!<Bit 5 */
+#define  SAI_xFRCR_FRL_6                  0x00000040U        /*!<Bit 6 */
+#define  SAI_xFRCR_FRL_7                  0x00000080U        /*!<Bit 7 */
+
+#define  SAI_xFRCR_FSALL                  0x00007F00U        /*!<FRL[1:0] (Frame synchronization active level length)  */
+#define  SAI_xFRCR_FSALL_0                0x00000100U        /*!<Bit 0 */
+#define  SAI_xFRCR_FSALL_1                0x00000200U        /*!<Bit 1 */
+#define  SAI_xFRCR_FSALL_2                0x00000400U        /*!<Bit 2 */
+#define  SAI_xFRCR_FSALL_3                0x00000800U        /*!<Bit 3 */
+#define  SAI_xFRCR_FSALL_4                0x00001000U        /*!<Bit 4 */
+#define  SAI_xFRCR_FSALL_5                0x00002000U        /*!<Bit 5 */
+#define  SAI_xFRCR_FSALL_6                0x00004000U        /*!<Bit 6 */
+
+#define  SAI_xFRCR_FSDEF                  0x00010000U        /*!< Frame Synchronization Definition */
+#define  SAI_xFRCR_FSPOL                  0x00020000U        /*!<Frame Synchronization POLarity    */
+#define  SAI_xFRCR_FSOFF                  0x00040000U        /*!<Frame Synchronization OFFset      */
+/* Legacy defines */
+#define  SAI_xFRCR_FSPO                   SAI_xFRCR_FSPOL
+
+/******************  Bit definition for SAI_xSLOTR register  *******************/
+#define  SAI_xSLOTR_FBOFF                 0x0000001FU        /*!<FRL[4:0](First Bit Offset)  */
+#define  SAI_xSLOTR_FBOFF_0               0x00000001U        /*!<Bit 0 */
+#define  SAI_xSLOTR_FBOFF_1               0x00000002U        /*!<Bit 1 */
+#define  SAI_xSLOTR_FBOFF_2               0x00000004U        /*!<Bit 2 */
+#define  SAI_xSLOTR_FBOFF_3               0x00000008U        /*!<Bit 3 */
+#define  SAI_xSLOTR_FBOFF_4               0x00000010U        /*!<Bit 4 */
+
+#define  SAI_xSLOTR_SLOTSZ                0x000000C0U        /*!<SLOTSZ[1:0] (Slot size)  */
+#define  SAI_xSLOTR_SLOTSZ_0              0x00000040U        /*!<Bit 0 */
+#define  SAI_xSLOTR_SLOTSZ_1              0x00000080U        /*!<Bit 1 */
+
+#define  SAI_xSLOTR_NBSLOT                0x00000F00U        /*!<NBSLOT[3:0] (Number of Slot in audio Frame)  */
+#define  SAI_xSLOTR_NBSLOT_0              0x00000100U        /*!<Bit 0 */
+#define  SAI_xSLOTR_NBSLOT_1              0x00000200U        /*!<Bit 1 */
+#define  SAI_xSLOTR_NBSLOT_2              0x00000400U        /*!<Bit 2 */
+#define  SAI_xSLOTR_NBSLOT_3              0x00000800U        /*!<Bit 3 */
+
+#define  SAI_xSLOTR_SLOTEN                0xFFFF0000U        /*!<SLOTEN[15:0] (Slot Enable)  */
+
+/*******************  Bit definition for SAI_xIMR register  *******************/
+#define  SAI_xIMR_OVRUDRIE                0x00000001U        /*!<Overrun underrun interrupt enable                              */
+#define  SAI_xIMR_MUTEDETIE               0x00000002U        /*!<Mute detection interrupt enable                                */
+#define  SAI_xIMR_WCKCFGIE                0x00000004U        /*!<Wrong Clock Configuration interrupt enable                     */
+#define  SAI_xIMR_FREQIE                  0x00000008U        /*!<FIFO request interrupt enable                                  */
+#define  SAI_xIMR_CNRDYIE                 0x00000010U        /*!<Codec not ready interrupt enable                               */
+#define  SAI_xIMR_AFSDETIE                0x00000020U        /*!<Anticipated frame synchronization detection interrupt enable   */
+#define  SAI_xIMR_LFSDETIE                0x00000040U        /*!<Late frame synchronization detection interrupt enable          */
+
+/********************  Bit definition for SAI_xSR register  *******************/
+#define  SAI_xSR_OVRUDR                   0x00000001U         /*!<Overrun underrun                               */
+#define  SAI_xSR_MUTEDET                  0x00000002U         /*!<Mute detection                                 */
+#define  SAI_xSR_WCKCFG                   0x00000004U         /*!<Wrong Clock Configuration                      */
+#define  SAI_xSR_FREQ                     0x00000008U         /*!<FIFO request                                   */
+#define  SAI_xSR_CNRDY                    0x00000010U         /*!<Codec not ready                                */
+#define  SAI_xSR_AFSDET                   0x00000020U         /*!<Anticipated frame synchronization detection    */
+#define  SAI_xSR_LFSDET                   0x00000040U         /*!<Late frame synchronization detection           */
+
+#define  SAI_xSR_FLVL                     0x00070000U         /*!<FLVL[2:0] (FIFO Level Threshold)               */
+#define  SAI_xSR_FLVL_0                   0x00010000U         /*!<Bit 0 */
+#define  SAI_xSR_FLVL_1                   0x00020000U         /*!<Bit 1 */
+#define  SAI_xSR_FLVL_2                   0x00040000U         /*!<Bit 2 */
+
+/******************  Bit definition for SAI_xCLRFR register  ******************/
+#define  SAI_xCLRFR_COVRUDR               0x00000001U        /*!<Clear Overrun underrun                               */
+#define  SAI_xCLRFR_CMUTEDET              0x00000002U        /*!<Clear Mute detection                                 */
+#define  SAI_xCLRFR_CWCKCFG               0x00000004U        /*!<Clear Wrong Clock Configuration                      */
+#define  SAI_xCLRFR_CFREQ                 0x00000008U        /*!<Clear FIFO request                                   */
+#define  SAI_xCLRFR_CCNRDY                0x00000010U        /*!<Clear Codec not ready                                */
+#define  SAI_xCLRFR_CAFSDET               0x00000020U        /*!<Clear Anticipated frame synchronization detection    */
+#define  SAI_xCLRFR_CLFSDET               0x00000040U        /*!<Clear Late frame synchronization detection           */
+
+/******************  Bit definition for SAI_xDR register  ******************/
+#define  SAI_xDR_DATA                     0xFFFFFFFFU        
 
 
 /******************************************************************************/
@@ -10609,7 +12707,15 @@ typedef struct {
 #define SYSCFG_MEMRMP_MEM_MODE_1        0x00000002U
 #define SYSCFG_MEMRMP_MEM_MODE_2        0x00000004U
 
+#define SYSCFG_MEMRMP_UFB_MODE          0x00000100U /*!< User Flash Bank mode    */
+#define SYSCFG_SWP_FMC                  0x00000C00U /*!< FMC memory mapping swap */
+
 /******************  Bit definition for SYSCFG_PMC register  ******************/
+#define SYSCFG_PMC_ADCxDC2              0x00070000U /*!< Refer to AN4073 on how to use this bit  */
+#define SYSCFG_PMC_ADC1DC2              0x00010000U /*!< Refer to AN4073 on how to use this bit  */
+#define SYSCFG_PMC_ADC2DC2              0x00020000U /*!< Refer to AN4073 on how to use this bit  */
+#define SYSCFG_PMC_ADC3DC2              0x00040000U /*!< Refer to AN4073 on how to use this bit  */
+
 #define SYSCFG_PMC_MII_RMII_SEL         0x00800000U /*!<Ethernet PHY interface selection */
 /* Old MII_RMII_SEL bit definition, maintained for legacy purpose */
 #define SYSCFG_PMC_MII_RMII             SYSCFG_PMC_MII_RMII_SEL
@@ -10631,6 +12737,8 @@ typedef struct {
 #define SYSCFG_EXTICR1_EXTI0_PG         0x0006U /*!<PG[0] pin */
 #define SYSCFG_EXTICR1_EXTI0_PH         0x0007U /*!<PH[0] pin */
 #define SYSCFG_EXTICR1_EXTI0_PI         0x0008U /*!<PI[0] pin */
+#define SYSCFG_EXTICR1_EXTI0_PJ         0x0009U /*!<PJ[0] pin */
+#define SYSCFG_EXTICR1_EXTI0_PK         0x000AU /*!<PK[0] pin */
 
 /** 
   * @brief   EXTI1 configuration  
@@ -10644,6 +12752,9 @@ typedef struct {
 #define SYSCFG_EXTICR1_EXTI1_PG         0x0060U /*!<PG[1] pin */
 #define SYSCFG_EXTICR1_EXTI1_PH         0x0070U /*!<PH[1] pin */
 #define SYSCFG_EXTICR1_EXTI1_PI         0x0080U /*!<PI[1] pin */
+#define SYSCFG_EXTICR1_EXTI1_PJ         0x0090U /*!<PJ[1] pin */
+#define SYSCFG_EXTICR1_EXTI1_PK         0x00A0U /*!<PK[1] pin */
+
 
 /** 
   * @brief   EXTI2 configuration  
@@ -10657,6 +12768,9 @@ typedef struct {
 #define SYSCFG_EXTICR1_EXTI2_PG         0x0600U /*!<PG[2] pin */
 #define SYSCFG_EXTICR1_EXTI2_PH         0x0700U /*!<PH[2] pin */
 #define SYSCFG_EXTICR1_EXTI2_PI         0x0800U /*!<PI[2] pin */
+#define SYSCFG_EXTICR1_EXTI2_PJ         0x0900U /*!<PJ[2] pin */
+#define SYSCFG_EXTICR1_EXTI2_PK         0x0A00U /*!<PK[2] pin */
+
 
 /** 
   * @brief   EXTI3 configuration  
@@ -10670,6 +12784,9 @@ typedef struct {
 #define SYSCFG_EXTICR1_EXTI3_PG         0x6000U /*!<PG[3] pin */
 #define SYSCFG_EXTICR1_EXTI3_PH         0x7000U /*!<PH[3] pin */
 #define SYSCFG_EXTICR1_EXTI3_PI         0x8000U /*!<PI[3] pin */
+#define SYSCFG_EXTICR1_EXTI3_PJ         0x9000U /*!<PJ[3] pin */
+#define SYSCFG_EXTICR1_EXTI3_PK         0xA000U /*!<PK[3] pin */
+
 
 /*****************  Bit definition for SYSCFG_EXTICR2 register  ***************/
 #define SYSCFG_EXTICR2_EXTI4            0x000FU /*!<EXTI 4 configuration */
@@ -10688,6 +12805,8 @@ typedef struct {
 #define SYSCFG_EXTICR2_EXTI4_PG         0x0006U /*!<PG[4] pin */
 #define SYSCFG_EXTICR2_EXTI4_PH         0x0007U /*!<PH[4] pin */
 #define SYSCFG_EXTICR2_EXTI4_PI         0x0008U /*!<PI[4] pin */
+#define SYSCFG_EXTICR2_EXTI4_PJ         0x0009U /*!<PJ[4] pin */
+#define SYSCFG_EXTICR2_EXTI4_PK         0x000AU /*!<PK[4] pin */
 
 /** 
   * @brief   EXTI5 configuration  
@@ -10701,6 +12820,8 @@ typedef struct {
 #define SYSCFG_EXTICR2_EXTI5_PG         0x0060U /*!<PG[5] pin */
 #define SYSCFG_EXTICR2_EXTI5_PH         0x0070U /*!<PH[5] pin */
 #define SYSCFG_EXTICR2_EXTI5_PI         0x0080U /*!<PI[5] pin */
+#define SYSCFG_EXTICR2_EXTI5_PJ         0x0090U /*!<PJ[5] pin */
+#define SYSCFG_EXTICR2_EXTI5_PK         0x00A0U /*!<PK[5] pin */
 
 /** 
   * @brief   EXTI6 configuration  
@@ -10714,6 +12835,9 @@ typedef struct {
 #define SYSCFG_EXTICR2_EXTI6_PG         0x0600U /*!<PG[6] pin */
 #define SYSCFG_EXTICR2_EXTI6_PH         0x0700U /*!<PH[6] pin */
 #define SYSCFG_EXTICR2_EXTI6_PI         0x0800U /*!<PI[6] pin */
+#define SYSCFG_EXTICR2_EXTI6_PJ         0x0900U /*!<PJ[6] pin */
+#define SYSCFG_EXTICR2_EXTI6_PK         0x0A00U /*!<PK[6] pin */
+
 
 /** 
   * @brief   EXTI7 configuration  
@@ -10727,7 +12851,8 @@ typedef struct {
 #define SYSCFG_EXTICR2_EXTI7_PG         0x6000U /*!<PG[7] pin */
 #define SYSCFG_EXTICR2_EXTI7_PH         0x7000U /*!<PH[7] pin */
 #define SYSCFG_EXTICR2_EXTI7_PI         0x8000U /*!<PI[7] pin */
-
+#define SYSCFG_EXTICR2_EXTI7_PJ         0x9000U /*!<PJ[7] pin */
+#define SYSCFG_EXTICR2_EXTI7_PK         0xA000U /*!<PK[7] pin */
 
 /*****************  Bit definition for SYSCFG_EXTICR3 register  ***************/
 #define SYSCFG_EXTICR3_EXTI8            0x000FU /*!<EXTI 8 configuration */
@@ -10747,6 +12872,7 @@ typedef struct {
 #define SYSCFG_EXTICR3_EXTI8_PG         0x0006U /*!<PG[8] pin */
 #define SYSCFG_EXTICR3_EXTI8_PH         0x0007U /*!<PH[8] pin */
 #define SYSCFG_EXTICR3_EXTI8_PI         0x0008U /*!<PI[8] pin */
+#define SYSCFG_EXTICR3_EXTI8_PJ         0x0009U /*!<PJ[8] pin */
 
 /** 
   * @brief   EXTI9 configuration  
@@ -10760,6 +12886,8 @@ typedef struct {
 #define SYSCFG_EXTICR3_EXTI9_PG         0x0060U /*!<PG[9] pin */
 #define SYSCFG_EXTICR3_EXTI9_PH         0x0070U /*!<PH[9] pin */
 #define SYSCFG_EXTICR3_EXTI9_PI         0x0080U /*!<PI[9] pin */
+#define SYSCFG_EXTICR3_EXTI9_PJ         0x0090U /*!<PJ[9] pin */
+
 
 /** 
   * @brief   EXTI10 configuration  
@@ -10773,6 +12901,8 @@ typedef struct {
 #define SYSCFG_EXTICR3_EXTI10_PG        0x0600U /*!<PG[10] pin */
 #define SYSCFG_EXTICR3_EXTI10_PH        0x0700U /*!<PH[10] pin */
 #define SYSCFG_EXTICR3_EXTI10_PI        0x0800U /*!<PI[10] pin */
+#define SYSCFG_EXTICR3_EXTI10_PJ        0x0900U /*!<PJ[10] pin */
+
 
 /** 
   * @brief   EXTI11 configuration  
@@ -10786,6 +12916,8 @@ typedef struct {
 #define SYSCFG_EXTICR3_EXTI11_PG        0x6000U /*!<PG[11] pin */
 #define SYSCFG_EXTICR3_EXTI11_PH        0x7000U /*!<PH[11] pin */
 #define SYSCFG_EXTICR3_EXTI11_PI        0x8000U /*!<PI[11] pin */
+#define SYSCFG_EXTICR3_EXTI11_PJ        0x9000U /*!<PJ[11] pin */
+
 
 /*****************  Bit definition for SYSCFG_EXTICR4 register  ***************/
 #define SYSCFG_EXTICR4_EXTI12           0x000FU /*!<EXTI 12 configuration */
@@ -10803,6 +12935,9 @@ typedef struct {
 #define SYSCFG_EXTICR4_EXTI12_PF        0x0005U /*!<PF[12] pin */
 #define SYSCFG_EXTICR4_EXTI12_PG        0x0006U /*!<PG[12] pin */
 #define SYSCFG_EXTICR4_EXTI12_PH        0x0007U /*!<PH[12] pin */
+#define SYSCFG_EXTICR4_EXTI12_PI        0x0008U /*!<PI[12] pin */
+#define SYSCFG_EXTICR4_EXTI12_PJ        0x0009U /*!<PJ[12] pin */
+
 
 /** 
   * @brief   EXTI13 configuration  
@@ -10815,6 +12950,9 @@ typedef struct {
 #define SYSCFG_EXTICR4_EXTI13_PF        0x0050U /*!<PF[13] pin */
 #define SYSCFG_EXTICR4_EXTI13_PG        0x0060U /*!<PG[13] pin */
 #define SYSCFG_EXTICR4_EXTI13_PH        0x0070U /*!<PH[13] pin */
+#define SYSCFG_EXTICR4_EXTI13_PI        0x0008U /*!<PI[13] pin */
+#define SYSCFG_EXTICR4_EXTI13_PJ        0x0009U /*!<PJ[13] pin */
+
 
 /** 
   * @brief   EXTI14 configuration  
@@ -10827,6 +12965,9 @@ typedef struct {
 #define SYSCFG_EXTICR4_EXTI14_PF        0x0500U /*!<PF[14] pin */
 #define SYSCFG_EXTICR4_EXTI14_PG        0x0600U /*!<PG[14] pin */
 #define SYSCFG_EXTICR4_EXTI14_PH        0x0700U /*!<PH[14] pin */
+#define SYSCFG_EXTICR4_EXTI14_PI        0x0800U /*!<PI[14] pin */
+#define SYSCFG_EXTICR4_EXTI14_PJ        0x0900U /*!<PJ[14] pin */
+
 
 /** 
   * @brief   EXTI15 configuration  
@@ -10839,6 +12980,8 @@ typedef struct {
 #define SYSCFG_EXTICR4_EXTI15_PF        0x5000U /*!<PF[15] pin */
 #define SYSCFG_EXTICR4_EXTI15_PG        0x6000U /*!<PG[15] pin */
 #define SYSCFG_EXTICR4_EXTI15_PH        0x7000U /*!<PH[15] pin */
+#define SYSCFG_EXTICR4_EXTI15_PI        0x8000U /*!<PI[15] pin */
+#define SYSCFG_EXTICR4_EXTI15_PJ        0x9000U /*!<PJ[15] pin */
 
 /******************  Bit definition for SYSCFG_CMPCR register  ****************/  
 #define SYSCFG_CMPCR_CMP_PD             0x00000001U /*!<Compensation cell ready flag */
@@ -11332,24 +13475,457 @@ typedef struct {
 
 /******************************************************************************/
 /*                                                                            */
+/*                Ethernet MAC Registers bits definitions                     */
+/*                                                                            */
+/******************************************************************************/
+/* Bit definition for Ethernet MAC Control Register register */
+#define ETH_MACCR_WD      0x00800000U  /* Watchdog disable */
+#define ETH_MACCR_JD      0x00400000U  /* Jabber disable */
+#define ETH_MACCR_IFG     0x000E0000U  /* Inter-frame gap */
+#define ETH_MACCR_IFG_96Bit     0x00000000U  /* Minimum IFG between frames during transmission is 96Bit */
+  #define ETH_MACCR_IFG_88Bit     0x00020000U  /* Minimum IFG between frames during transmission is 88Bit */
+  #define ETH_MACCR_IFG_80Bit     0x00040000U  /* Minimum IFG between frames during transmission is 80Bit */
+  #define ETH_MACCR_IFG_72Bit     0x00060000U  /* Minimum IFG between frames during transmission is 72Bit */
+  #define ETH_MACCR_IFG_64Bit     0x00080000U  /* Minimum IFG between frames during transmission is 64Bit */        
+  #define ETH_MACCR_IFG_56Bit     0x000A0000U  /* Minimum IFG between frames during transmission is 56Bit */
+  #define ETH_MACCR_IFG_48Bit     0x000C0000U  /* Minimum IFG between frames during transmission is 48Bit */
+  #define ETH_MACCR_IFG_40Bit     0x000E0000U  /* Minimum IFG between frames during transmission is 40Bit */              
+#define ETH_MACCR_CSD     0x00010000U  /* Carrier sense disable (during transmission) */
+#define ETH_MACCR_FES     0x00004000U  /* Fast ethernet speed */
+#define ETH_MACCR_ROD     0x00002000U  /* Receive own disable */
+#define ETH_MACCR_LM      0x00001000U  /* loopback mode */
+#define ETH_MACCR_DM      0x00000800U  /* Duplex mode */
+#define ETH_MACCR_IPCO    0x00000400U  /* IP Checksum offload */
+#define ETH_MACCR_RD      0x00000200U  /* Retry disable */
+#define ETH_MACCR_APCS    0x00000080U  /* Automatic Pad/CRC stripping */
+#define ETH_MACCR_BL      0x00000060U  /* Back-off limit: random integer number (r) of slot time delays before rescheduling
+                                                       a transmission attempt during retries after a collision: 0 =< r <2^k */
+  #define ETH_MACCR_BL_10    0x00000000U  /* k = min (n, 10) */
+  #define ETH_MACCR_BL_8     0x00000020U  /* k = min (n, 8) */
+  #define ETH_MACCR_BL_4     0x00000040U  /* k = min (n, 4) */
+  #define ETH_MACCR_BL_1     0x00000060U  /* k = min (n, 1) */ 
+#define ETH_MACCR_DC      0x00000010U  /* Defferal check */
+#define ETH_MACCR_TE      0x00000008U  /* Transmitter enable */
+#define ETH_MACCR_RE      0x00000004U  /* Receiver enable */
+
+/* Bit definition for Ethernet MAC Frame Filter Register */
+#define ETH_MACFFR_RA     0x80000000U  /* Receive all */ 
+#define ETH_MACFFR_HPF    0x00000400U  /* Hash or perfect filter */ 
+#define ETH_MACFFR_SAF    0x00000200U  /* Source address filter enable */ 
+#define ETH_MACFFR_SAIF   0x00000100U  /* SA inverse filtering */ 
+#define ETH_MACFFR_PCF    0x000000C0U  /* Pass control frames: 3 cases */
+  #define ETH_MACFFR_PCF_BlockAll                0x00000040U  /* MAC filters all control frames from reaching the application */
+  #define ETH_MACFFR_PCF_ForwardAll              0x00000080U  /* MAC forwards all control frames to application even if they fail the Address Filter */
+  #define ETH_MACFFR_PCF_ForwardPassedAddrFilter 0x000000C0U  /* MAC forwards control frames that pass the Address Filter. */ 
+#define ETH_MACFFR_BFD    0x00000020U  /* Broadcast frame disable */ 
+#define ETH_MACFFR_PAM    0x00000010U  /* Pass all mutlicast */ 
+#define ETH_MACFFR_DAIF   0x00000008U  /* DA Inverse filtering */ 
+#define ETH_MACFFR_HM     0x00000004U  /* Hash multicast */ 
+#define ETH_MACFFR_HU     0x00000002U  /* Hash unicast */
+#define ETH_MACFFR_PM     0x00000001U  /* Promiscuous mode */
+
+/* Bit definition for Ethernet MAC Hash Table High Register */
+#define ETH_MACHTHR_HTH   0xFFFFFFFFU  /* Hash table high */
+
+/* Bit definition for Ethernet MAC Hash Table Low Register */
+#define ETH_MACHTLR_HTL   0xFFFFFFFFU  /* Hash table low */
+
+/* Bit definition for Ethernet MAC MII Address Register */
+#define ETH_MACMIIAR_PA   0x0000F800U  /* Physical layer address */ 
+#define ETH_MACMIIAR_MR   0x000007C0U  /* MII register in the selected PHY */ 
+#define ETH_MACMIIAR_CR   0x0000001CU  /* CR clock range: 6 cases */ 
+  #define ETH_MACMIIAR_CR_Div42   0x00000000U  /* HCLK:60-100 MHz; MDC clock= HCLK/42 */
+  #define ETH_MACMIIAR_CR_Div62   0x00000004U  /* HCLK:100-150 MHz; MDC clock= HCLK/62 */
+  #define ETH_MACMIIAR_CR_Div16   0x00000008U  /* HCLK:20-35 MHz; MDC clock= HCLK/16 */
+  #define ETH_MACMIIAR_CR_Div26   0x0000000CU  /* HCLK:35-60 MHz; MDC clock= HCLK/26 */
+  #define ETH_MACMIIAR_CR_Div102  0x00000010U  /* HCLK:150-168 MHz; MDC clock= HCLK/102 */  
+#define ETH_MACMIIAR_MW   0x00000002U  /* MII write */ 
+#define ETH_MACMIIAR_MB   0x00000001U  /* MII busy */ 
+  
+/* Bit definition for Ethernet MAC MII Data Register */
+#define ETH_MACMIIDR_MD   0x0000FFFFU  /* MII data: read/write data from/to PHY */
+
+/* Bit definition for Ethernet MAC Flow Control Register */
+#define ETH_MACFCR_PT     0xFFFF0000U  /* Pause time */
+#define ETH_MACFCR_ZQPD   0x00000080U  /* Zero-quanta pause disable */
+#define ETH_MACFCR_PLT    0x00000030U  /* Pause low threshold: 4 cases */
+  #define ETH_MACFCR_PLT_Minus4   0x00000000U  /* Pause time minus 4 slot times */
+  #define ETH_MACFCR_PLT_Minus28  0x00000010U  /* Pause time minus 28 slot times */
+  #define ETH_MACFCR_PLT_Minus144 0x00000020U  /* Pause time minus 144 slot times */
+  #define ETH_MACFCR_PLT_Minus256 0x00000030U  /* Pause time minus 256 slot times */      
+#define ETH_MACFCR_UPFD   0x00000008U  /* Unicast pause frame detect */
+#define ETH_MACFCR_RFCE   0x00000004U  /* Receive flow control enable */
+#define ETH_MACFCR_TFCE   0x00000002U  /* Transmit flow control enable */
+#define ETH_MACFCR_FCBBPA 0x00000001U  /* Flow control busy/backpressure activate */
+
+/* Bit definition for Ethernet MAC VLAN Tag Register */
+#define ETH_MACVLANTR_VLANTC 0x00010000U  /* 12-bit VLAN tag comparison */
+#define ETH_MACVLANTR_VLANTI 0x0000FFFFU  /* VLAN tag identifier (for receive frames) */
+
+/* Bit definition for Ethernet MAC Remote Wake-UpFrame Filter Register */ 
+#define ETH_MACRWUFFR_D   0xFFFFFFFFU  /* Wake-up frame filter register data */
+/* Eight sequential Writes to this address (offset 0x28) will write all Wake-UpFrame Filter Registers.
+   Eight sequential Reads from this address (offset 0x28) will read all Wake-UpFrame Filter Registers. */
+/* Wake-UpFrame Filter Reg0 : Filter 0 Byte Mask
+   Wake-UpFrame Filter Reg1 : Filter 1 Byte Mask
+   Wake-UpFrame Filter Reg2 : Filter 2 Byte Mask
+   Wake-UpFrame Filter Reg3 : Filter 3 Byte Mask
+   Wake-UpFrame Filter Reg4 : RSVD - Filter3 Command - RSVD - Filter2 Command - 
+                              RSVD - Filter1 Command - RSVD - Filter0 Command
+   Wake-UpFrame Filter Re5 : Filter3 Offset - Filter2 Offset - Filter1 Offset - Filter0 Offset
+   Wake-UpFrame Filter Re6 : Filter1 CRC16 - Filter0 CRC16
+   Wake-UpFrame Filter Re7 : Filter3 CRC16 - Filter2 CRC16 */
+
+/* Bit definition for Ethernet MAC PMT Control and Status Register */ 
+#define ETH_MACPMTCSR_WFFRPR 0x80000000U  /* Wake-Up Frame Filter Register Pointer Reset */
+#define ETH_MACPMTCSR_GU     0x00000200U  /* Global Unicast */
+#define ETH_MACPMTCSR_WFR    0x00000040U  /* Wake-Up Frame Received */
+#define ETH_MACPMTCSR_MPR    0x00000020U  /* Magic Packet Received */
+#define ETH_MACPMTCSR_WFE    0x00000004U  /* Wake-Up Frame Enable */
+#define ETH_MACPMTCSR_MPE    0x00000002U  /* Magic Packet Enable */
+#define ETH_MACPMTCSR_PD     0x00000001U  /* Power Down */
+
+/* Bit definition for Ethernet MAC Status Register */
+#define ETH_MACSR_TSTS      0x00000200U  /* Time stamp trigger status */
+#define ETH_MACSR_MMCTS     0x00000040U  /* MMC transmit status */
+#define ETH_MACSR_MMMCRS    0x00000020U  /* MMC receive status */
+#define ETH_MACSR_MMCS      0x00000010U  /* MMC status */
+#define ETH_MACSR_PMTS      0x00000008U  /* PMT status */
+
+/* Bit definition for Ethernet MAC Interrupt Mask Register */
+#define ETH_MACIMR_TSTIM     0x00000200U  /* Time stamp trigger interrupt mask */
+#define ETH_MACIMR_PMTIM     0x00000008U  /* PMT interrupt mask */
+
+/* Bit definition for Ethernet MAC Address0 High Register */
+#define ETH_MACA0HR_MACA0H   0x0000FFFFU  /* MAC address0 high */
+
+/* Bit definition for Ethernet MAC Address0 Low Register */
+#define ETH_MACA0LR_MACA0L   0xFFFFFFFFU  /* MAC address0 low */
+
+/* Bit definition for Ethernet MAC Address1 High Register */
+#define ETH_MACA1HR_AE       0x80000000U  /* Address enable */
+#define ETH_MACA1HR_SA       0x40000000U  /* Source address */
+#define ETH_MACA1HR_MBC      0x3F000000U  /* Mask byte control: bits to mask for comparison of the MAC Address bytes */
+  #define ETH_MACA1HR_MBC_HBits15_8    0x20000000U  /* Mask MAC Address high reg bits [15:8] */
+  #define ETH_MACA1HR_MBC_HBits7_0     0x10000000U  /* Mask MAC Address high reg bits [7:0] */
+  #define ETH_MACA1HR_MBC_LBits31_24   0x08000000U  /* Mask MAC Address low reg bits [31:24] */
+  #define ETH_MACA1HR_MBC_LBits23_16   0x04000000U  /* Mask MAC Address low reg bits [23:16] */
+  #define ETH_MACA1HR_MBC_LBits15_8    0x02000000U  /* Mask MAC Address low reg bits [15:8] */
+  #define ETH_MACA1HR_MBC_LBits7_0     0x01000000U  /* Mask MAC Address low reg bits [7:0] */ 
+#define ETH_MACA1HR_MACA1H   0x0000FFFFU  /* MAC address1 high */
+
+/* Bit definition for Ethernet MAC Address1 Low Register */
+#define ETH_MACA1LR_MACA1L   0xFFFFFFFFU  /* MAC address1 low */
+
+/* Bit definition for Ethernet MAC Address2 High Register */
+#define ETH_MACA2HR_AE       0x80000000U  /* Address enable */
+#define ETH_MACA2HR_SA       0x40000000U  /* Source address */
+#define ETH_MACA2HR_MBC      0x3F000000U  /* Mask byte control */
+  #define ETH_MACA2HR_MBC_HBits15_8    0x20000000U  /* Mask MAC Address high reg bits [15:8] */
+  #define ETH_MACA2HR_MBC_HBits7_0     0x10000000U  /* Mask MAC Address high reg bits [7:0] */
+  #define ETH_MACA2HR_MBC_LBits31_24   0x08000000U  /* Mask MAC Address low reg bits [31:24] */
+  #define ETH_MACA2HR_MBC_LBits23_16   0x04000000U  /* Mask MAC Address low reg bits [23:16] */
+  #define ETH_MACA2HR_MBC_LBits15_8    0x02000000U  /* Mask MAC Address low reg bits [15:8] */
+  #define ETH_MACA2HR_MBC_LBits7_0     0x01000000U  /* Mask MAC Address low reg bits [70] */
+#define ETH_MACA2HR_MACA2H   0x0000FFFFU  /* MAC address1 high */
+
+/* Bit definition for Ethernet MAC Address2 Low Register */
+#define ETH_MACA2LR_MACA2L   0xFFFFFFFFU  /* MAC address2 low */
+
+/* Bit definition for Ethernet MAC Address3 High Register */
+#define ETH_MACA3HR_AE       0x80000000U  /* Address enable */
+#define ETH_MACA3HR_SA       0x40000000U  /* Source address */
+#define ETH_MACA3HR_MBC      0x3F000000U  /* Mask byte control */
+  #define ETH_MACA3HR_MBC_HBits15_8    0x20000000U  /* Mask MAC Address high reg bits [15:8] */
+  #define ETH_MACA3HR_MBC_HBits7_0     0x10000000U  /* Mask MAC Address high reg bits [7:0] */
+  #define ETH_MACA3HR_MBC_LBits31_24   0x08000000U  /* Mask MAC Address low reg bits [31:24] */
+  #define ETH_MACA3HR_MBC_LBits23_16   0x04000000U  /* Mask MAC Address low reg bits [23:16] */
+  #define ETH_MACA3HR_MBC_LBits15_8    0x02000000U  /* Mask MAC Address low reg bits [15:8] */
+  #define ETH_MACA3HR_MBC_LBits7_0     0x01000000U  /* Mask MAC Address low reg bits [70] */
+#define ETH_MACA3HR_MACA3H   0x0000FFFFU  /* MAC address3 high */
+
+/* Bit definition for Ethernet MAC Address3 Low Register */
+#define ETH_MACA3LR_MACA3L   0xFFFFFFFFU  /* MAC address3 low */
+
+/******************************************************************************/
+/*                Ethernet MMC Registers bits definition                      */
+/******************************************************************************/
+
+/* Bit definition for Ethernet MMC Contol Register */
+#define ETH_MMCCR_MCFHP      0x00000020U  /* MMC counter Full-Half preset */
+#define ETH_MMCCR_MCP        0x00000010U  /* MMC counter preset */
+#define ETH_MMCCR_MCF        0x00000008U  /* MMC Counter Freeze */
+#define ETH_MMCCR_ROR        0x00000004U  /* Reset on Read */
+#define ETH_MMCCR_CSR        0x00000002U  /* Counter Stop Rollover */
+#define ETH_MMCCR_CR         0x00000001U  /* Counters Reset */
+
+/* Bit definition for Ethernet MMC Receive Interrupt Register */
+#define ETH_MMCRIR_RGUFS     0x00020000U  /* Set when Rx good unicast frames counter reaches half the maximum value */
+#define ETH_MMCRIR_RFAES     0x00000040U  /* Set when Rx alignment error counter reaches half the maximum value */
+#define ETH_MMCRIR_RFCES     0x00000020U  /* Set when Rx crc error counter reaches half the maximum value */
+
+/* Bit definition for Ethernet MMC Transmit Interrupt Register */
+#define ETH_MMCTIR_TGFS      0x00200000U  /* Set when Tx good frame count counter reaches half the maximum value */
+#define ETH_MMCTIR_TGFMSCS   0x00008000U  /* Set when Tx good multi col counter reaches half the maximum value */
+#define ETH_MMCTIR_TGFSCS    0x00004000U  /* Set when Tx good single col counter reaches half the maximum value */
+
+/* Bit definition for Ethernet MMC Receive Interrupt Mask Register */
+#define ETH_MMCRIMR_RGUFM    0x00020000U  /* Mask the interrupt when Rx good unicast frames counter reaches half the maximum value */
+#define ETH_MMCRIMR_RFAEM    0x00000040U  /* Mask the interrupt when when Rx alignment error counter reaches half the maximum value */
+#define ETH_MMCRIMR_RFCEM    0x00000020U  /* Mask the interrupt when Rx crc error counter reaches half the maximum value */
+
+/* Bit definition for Ethernet MMC Transmit Interrupt Mask Register */
+#define ETH_MMCTIMR_TGFM     0x00200000U  /* Mask the interrupt when Tx good frame count counter reaches half the maximum value */
+#define ETH_MMCTIMR_TGFMSCM  0x00008000U  /* Mask the interrupt when Tx good multi col counter reaches half the maximum value */
+#define ETH_MMCTIMR_TGFSCM   0x00004000U  /* Mask the interrupt when Tx good single col counter reaches half the maximum value */
+
+/* Bit definition for Ethernet MMC Transmitted Good Frames after Single Collision Counter Register */
+#define ETH_MMCTGFSCCR_TGFSCC     0xFFFFFFFFU  /* Number of successfully transmitted frames after a single collision in Half-duplex mode. */
+
+/* Bit definition for Ethernet MMC Transmitted Good Frames after More than a Single Collision Counter Register */
+#define ETH_MMCTGFMSCCR_TGFMSCC   0xFFFFFFFFU  /* Number of successfully transmitted frames after more than a single collision in Half-duplex mode. */
+
+/* Bit definition for Ethernet MMC Transmitted Good Frames Counter Register */
+#define ETH_MMCTGFCR_TGFC    0xFFFFFFFFU  /* Number of good frames transmitted. */
+
+/* Bit definition for Ethernet MMC Received Frames with CRC Error Counter Register */
+#define ETH_MMCRFCECR_RFCEC  0xFFFFFFFFU  /* Number of frames received with CRC error. */
+
+/* Bit definition for Ethernet MMC Received Frames with Alignement Error Counter Register */
+#define ETH_MMCRFAECR_RFAEC  0xFFFFFFFFU  /* Number of frames received with alignment (dribble) error */
+
+/* Bit definition for Ethernet MMC Received Good Unicast Frames Counter Register */
+#define ETH_MMCRGUFCR_RGUFC  0xFFFFFFFFU  /* Number of good unicast frames received. */
+
+/******************************************************************************/
+/*               Ethernet PTP Registers bits definition                       */
+/******************************************************************************/
+
+/* Bit definition for Ethernet PTP Time Stamp Contol Register */
+#define ETH_PTPTSCR_TSCNT       0x00030000U  /* Time stamp clock node type */
+#define ETH_PTPTSSR_TSSMRME     0x00008000U  /* Time stamp snapshot for message relevant to master enable */
+#define ETH_PTPTSSR_TSSEME      0x00004000U  /* Time stamp snapshot for event message enable */
+#define ETH_PTPTSSR_TSSIPV4FE   0x00002000U  /* Time stamp snapshot for IPv4 frames enable */
+#define ETH_PTPTSSR_TSSIPV6FE   0x00001000U  /* Time stamp snapshot for IPv6 frames enable */
+#define ETH_PTPTSSR_TSSPTPOEFE  0x00000800U  /* Time stamp snapshot for PTP over ethernet frames enable */
+#define ETH_PTPTSSR_TSPTPPSV2E  0x00000400U  /* Time stamp PTP packet snooping for version2 format enable */
+#define ETH_PTPTSSR_TSSSR       0x00000200U  /* Time stamp Sub-seconds rollover */
+#define ETH_PTPTSSR_TSSARFE     0x00000100U  /* Time stamp snapshot for all received frames enable */
+
+#define ETH_PTPTSCR_TSARU    0x00000020U  /* Addend register update */
+#define ETH_PTPTSCR_TSITE    0x00000010U  /* Time stamp interrupt trigger enable */
+#define ETH_PTPTSCR_TSSTU    0x00000008U  /* Time stamp update */
+#define ETH_PTPTSCR_TSSTI    0x00000004U  /* Time stamp initialize */
+#define ETH_PTPTSCR_TSFCU    0x00000002U  /* Time stamp fine or coarse update */
+#define ETH_PTPTSCR_TSE      0x00000001U  /* Time stamp enable */
+
+/* Bit definition for Ethernet PTP Sub-Second Increment Register */
+#define ETH_PTPSSIR_STSSI    0x000000FFU  /* System time Sub-second increment value */
+
+/* Bit definition for Ethernet PTP Time Stamp High Register */
+#define ETH_PTPTSHR_STS      0xFFFFFFFFU  /* System Time second */
+
+/* Bit definition for Ethernet PTP Time Stamp Low Register */
+#define ETH_PTPTSLR_STPNS    0x80000000U  /* System Time Positive or negative time */
+#define ETH_PTPTSLR_STSS     0x7FFFFFFFU  /* System Time sub-seconds */
+
+/* Bit definition for Ethernet PTP Time Stamp High Update Register */
+#define ETH_PTPTSHUR_TSUS    0xFFFFFFFFU  /* Time stamp update seconds */
+
+/* Bit definition for Ethernet PTP Time Stamp Low Update Register */
+#define ETH_PTPTSLUR_TSUPNS  0x80000000U  /* Time stamp update Positive or negative time */
+#define ETH_PTPTSLUR_TSUSS   0x7FFFFFFFU  /* Time stamp update sub-seconds */
+
+/* Bit definition for Ethernet PTP Time Stamp Addend Register */
+#define ETH_PTPTSAR_TSA      0xFFFFFFFFU  /* Time stamp addend */
+
+/* Bit definition for Ethernet PTP Target Time High Register */
+#define ETH_PTPTTHR_TTSH     0xFFFFFFFFU  /* Target time stamp high */
+
+/* Bit definition for Ethernet PTP Target Time Low Register */
+#define ETH_PTPTTLR_TTSL     0xFFFFFFFFU  /* Target time stamp low */
+
+/* Bit definition for Ethernet PTP Time Stamp Status Register */
+#define ETH_PTPTSSR_TSTTR    0x00000020U  /* Time stamp target time reached */
+#define ETH_PTPTSSR_TSSO     0x00000010U  /* Time stamp seconds overflow */
+
+/******************************************************************************/
+/*                 Ethernet DMA Registers bits definition                     */
+/******************************************************************************/
+
+/* Bit definition for Ethernet DMA Bus Mode Register */
+#define ETH_DMABMR_AAB       0x02000000U  /* Address-Aligned beats */
+#define ETH_DMABMR_FPM        0x01000000U  /* 4xPBL mode */
+#define ETH_DMABMR_USP       0x00800000U  /* Use separate PBL */
+#define ETH_DMABMR_RDP       0x007E0000U  /* RxDMA PBL */
+  #define ETH_DMABMR_RDP_1Beat    0x00020000U  /* maximum number of beats to be transferred in one RxDMA transaction is 1 */
+  #define ETH_DMABMR_RDP_2Beat    0x00040000U  /* maximum number of beats to be transferred in one RxDMA transaction is 2 */
+  #define ETH_DMABMR_RDP_4Beat    0x00080000U  /* maximum number of beats to be transferred in one RxDMA transaction is 4 */
+  #define ETH_DMABMR_RDP_8Beat    0x00100000U  /* maximum number of beats to be transferred in one RxDMA transaction is 8 */
+  #define ETH_DMABMR_RDP_16Beat   0x00200000U  /* maximum number of beats to be transferred in one RxDMA transaction is 16 */
+  #define ETH_DMABMR_RDP_32Beat   0x00400000U  /* maximum number of beats to be transferred in one RxDMA transaction is 32 */                
+  #define ETH_DMABMR_RDP_4xPBL_4Beat   0x01020000U  /* maximum number of beats to be transferred in one RxDMA transaction is 4 */
+  #define ETH_DMABMR_RDP_4xPBL_8Beat   0x01040000U  /* maximum number of beats to be transferred in one RxDMA transaction is 8 */
+  #define ETH_DMABMR_RDP_4xPBL_16Beat  0x01080000U  /* maximum number of beats to be transferred in one RxDMA transaction is 16 */
+  #define ETH_DMABMR_RDP_4xPBL_32Beat  0x01100000U  /* maximum number of beats to be transferred in one RxDMA transaction is 32 */
+  #define ETH_DMABMR_RDP_4xPBL_64Beat  0x01200000U  /* maximum number of beats to be transferred in one RxDMA transaction is 64 */
+  #define ETH_DMABMR_RDP_4xPBL_128Beat 0x01400000U  /* maximum number of beats to be transferred in one RxDMA transaction is 128 */  
+#define ETH_DMABMR_FB        0x00010000U  /* Fixed Burst */
+#define ETH_DMABMR_RTPR      0x0000C000U  /* Rx Tx priority ratio */
+  #define ETH_DMABMR_RTPR_1_1     0x00000000U  /* Rx Tx priority ratio */
+  #define ETH_DMABMR_RTPR_2_1     0x00004000U  /* Rx Tx priority ratio */
+  #define ETH_DMABMR_RTPR_3_1     0x00008000U  /* Rx Tx priority ratio */
+  #define ETH_DMABMR_RTPR_4_1     0x0000C000U  /* Rx Tx priority ratio */  
+#define ETH_DMABMR_PBL    0x00003F00U  /* Programmable burst length */
+  #define ETH_DMABMR_PBL_1Beat    0x00000100U  /* maximum number of beats to be transferred in one TxDMA (or both) transaction is 1 */
+  #define ETH_DMABMR_PBL_2Beat    0x00000200U  /* maximum number of beats to be transferred in one TxDMA (or both) transaction is 2 */
+  #define ETH_DMABMR_PBL_4Beat    0x00000400U  /* maximum number of beats to be transferred in one TxDMA (or both) transaction is 4 */
+  #define ETH_DMABMR_PBL_8Beat    0x00000800U  /* maximum number of beats to be transferred in one TxDMA (or both) transaction is 8 */
+  #define ETH_DMABMR_PBL_16Beat   0x00001000U  /* maximum number of beats to be transferred in one TxDMA (or both) transaction is 16 */
+  #define ETH_DMABMR_PBL_32Beat   0x00002000U  /* maximum number of beats to be transferred in one TxDMA (or both) transaction is 32 */                
+  #define ETH_DMABMR_PBL_4xPBL_4Beat   0x01000100U  /* maximum number of beats to be transferred in one TxDMA (or both) transaction is 4 */
+  #define ETH_DMABMR_PBL_4xPBL_8Beat   0x01000200U  /* maximum number of beats to be transferred in one TxDMA (or both) transaction is 8 */
+  #define ETH_DMABMR_PBL_4xPBL_16Beat  0x01000400U  /* maximum number of beats to be transferred in one TxDMA (or both) transaction is 16 */
+  #define ETH_DMABMR_PBL_4xPBL_32Beat  0x01000800U  /* maximum number of beats to be transferred in one TxDMA (or both) transaction is 32 */
+  #define ETH_DMABMR_PBL_4xPBL_64Beat  0x01001000U  /* maximum number of beats to be transferred in one TxDMA (or both) transaction is 64 */
+  #define ETH_DMABMR_PBL_4xPBL_128Beat 0x01002000U  /* maximum number of beats to be transferred in one TxDMA (or both) transaction is 128 */
+#define ETH_DMABMR_EDE       0x00000080U  /* Enhanced Descriptor Enable */
+#define ETH_DMABMR_DSL       0x0000007CU  /* Descriptor Skip Length */
+#define ETH_DMABMR_DA        0x00000002U  /* DMA arbitration scheme */
+#define ETH_DMABMR_SR        0x00000001U  /* Software reset */
+
+/* Bit definition for Ethernet DMA Transmit Poll Demand Register */
+#define ETH_DMATPDR_TPD      0xFFFFFFFFU  /* Transmit poll demand */
+
+/* Bit definition for Ethernet DMA Receive Poll Demand Register */
+#define ETH_DMARPDR_RPD      0xFFFFFFFFU  /* Receive poll demand  */
+
+/* Bit definition for Ethernet DMA Receive Descriptor List Address Register */
+#define ETH_DMARDLAR_SRL     0xFFFFFFFFU  /* Start of receive list */
+
+/* Bit definition for Ethernet DMA Transmit Descriptor List Address Register */
+#define ETH_DMATDLAR_STL     0xFFFFFFFFU  /* Start of transmit list */
+
+/* Bit definition for Ethernet DMA Status Register */
+#define ETH_DMASR_TSTS       0x20000000U  /* Time-stamp trigger status */
+#define ETH_DMASR_PMTS       0x10000000U  /* PMT status */
+#define ETH_DMASR_MMCS       0x08000000U  /* MMC status */
+#define ETH_DMASR_EBS        0x03800000U  /* Error bits status */
+  /* combination with EBS[2:0] for GetFlagStatus function */
+  #define ETH_DMASR_EBS_DescAccess      0x02000000U  /* Error bits 0-data buffer, 1-desc. access */
+  #define ETH_DMASR_EBS_ReadTransf      0x01000000U  /* Error bits 0-write trnsf, 1-read transfr */
+  #define ETH_DMASR_EBS_DataTransfTx    0x00800000U  /* Error bits 0-Rx DMA, 1-Tx DMA */
+#define ETH_DMASR_TPS         0x00700000U  /* Transmit process state */
+  #define ETH_DMASR_TPS_Stopped         0x00000000U  /* Stopped - Reset or Stop Tx Command issued  */
+  #define ETH_DMASR_TPS_Fetching        0x00100000U  /* Running - fetching the Tx descriptor */
+  #define ETH_DMASR_TPS_Waiting         0x00200000U  /* Running - waiting for status */
+  #define ETH_DMASR_TPS_Reading         0x00300000U  /* Running - reading the data from host memory */
+  #define ETH_DMASR_TPS_Suspended       0x00600000U  /* Suspended - Tx Descriptor unavailabe */
+  #define ETH_DMASR_TPS_Closing         0x00700000U  /* Running - closing Rx descriptor */
+#define ETH_DMASR_RPS         0x000E0000U  /* Receive process state */
+  #define ETH_DMASR_RPS_Stopped         0x00000000U  /* Stopped - Reset or Stop Rx Command issued */
+  #define ETH_DMASR_RPS_Fetching        0x00020000U  /* Running - fetching the Rx descriptor */
+  #define ETH_DMASR_RPS_Waiting         0x00060000U  /* Running - waiting for packet */
+  #define ETH_DMASR_RPS_Suspended       0x00080000U  /* Suspended - Rx Descriptor unavailable */
+  #define ETH_DMASR_RPS_Closing         0x000A0000U  /* Running - closing descriptor */
+  #define ETH_DMASR_RPS_Queuing         0x000E0000U  /* Running - queuing the recieve frame into host memory */
+#define ETH_DMASR_NIS        0x00010000U  /* Normal interrupt summary */
+#define ETH_DMASR_AIS        0x00008000U  /* Abnormal interrupt summary */
+#define ETH_DMASR_ERS        0x00004000U  /* Early receive status */
+#define ETH_DMASR_FBES       0x00002000U  /* Fatal bus error status */
+#define ETH_DMASR_ETS        0x00000400U  /* Early transmit status */
+#define ETH_DMASR_RWTS       0x00000200U  /* Receive watchdog timeout status */
+#define ETH_DMASR_RPSS       0x00000100U  /* Receive process stopped status */
+#define ETH_DMASR_RBUS       0x00000080U  /* Receive buffer unavailable status */
+#define ETH_DMASR_RS         0x00000040U  /* Receive status */
+#define ETH_DMASR_TUS        0x00000020U  /* Transmit underflow status */
+#define ETH_DMASR_ROS        0x00000010U  /* Receive overflow status */
+#define ETH_DMASR_TJTS       0x00000008U  /* Transmit jabber timeout status */
+#define ETH_DMASR_TBUS       0x00000004U  /* Transmit buffer unavailable status */
+#define ETH_DMASR_TPSS       0x00000002U  /* Transmit process stopped status */
+#define ETH_DMASR_TS         0x00000001U  /* Transmit status */
+
+/* Bit definition for Ethernet DMA Operation Mode Register */
+#define ETH_DMAOMR_DTCEFD    0x04000000U  /* Disable Dropping of TCP/IP checksum error frames */
+#define ETH_DMAOMR_RSF       0x02000000U  /* Receive store and forward */
+#define ETH_DMAOMR_DFRF      0x01000000U  /* Disable flushing of received frames */
+#define ETH_DMAOMR_TSF       0x00200000U  /* Transmit store and forward */
+#define ETH_DMAOMR_FTF       0x00100000U  /* Flush transmit FIFO */
+#define ETH_DMAOMR_TTC       0x0001C000U  /* Transmit threshold control */
+  #define ETH_DMAOMR_TTC_64Bytes       0x00000000U  /* threshold level of the MTL Transmit FIFO is 64 Bytes */
+  #define ETH_DMAOMR_TTC_128Bytes      0x00004000U  /* threshold level of the MTL Transmit FIFO is 128 Bytes */
+  #define ETH_DMAOMR_TTC_192Bytes      0x00008000U  /* threshold level of the MTL Transmit FIFO is 192 Bytes */
+  #define ETH_DMAOMR_TTC_256Bytes      0x0000C000U  /* threshold level of the MTL Transmit FIFO is 256 Bytes */
+  #define ETH_DMAOMR_TTC_40Bytes       0x00010000U  /* threshold level of the MTL Transmit FIFO is 40 Bytes */
+  #define ETH_DMAOMR_TTC_32Bytes       0x00014000U  /* threshold level of the MTL Transmit FIFO is 32 Bytes */
+  #define ETH_DMAOMR_TTC_24Bytes       0x00018000U  /* threshold level of the MTL Transmit FIFO is 24 Bytes */
+  #define ETH_DMAOMR_TTC_16Bytes       0x0001C000U  /* threshold level of the MTL Transmit FIFO is 16 Bytes */
+#define ETH_DMAOMR_ST        0x00002000U  /* Start/stop transmission command */
+#define ETH_DMAOMR_FEF       0x00000080U  /* Forward error frames */
+#define ETH_DMAOMR_FUGF      0x00000040U  /* Forward undersized good frames */
+#define ETH_DMAOMR_RTC       0x00000018U  /* receive threshold control */
+  #define ETH_DMAOMR_RTC_64Bytes       0x00000000U  /* threshold level of the MTL Receive FIFO is 64 Bytes */
+  #define ETH_DMAOMR_RTC_32Bytes       0x00000008U  /* threshold level of the MTL Receive FIFO is 32 Bytes */
+  #define ETH_DMAOMR_RTC_96Bytes       0x00000010U  /* threshold level of the MTL Receive FIFO is 96 Bytes */
+  #define ETH_DMAOMR_RTC_128Bytes      0x00000018U  /* threshold level of the MTL Receive FIFO is 128 Bytes */
+#define ETH_DMAOMR_OSF       0x00000004U  /* operate on second frame */
+#define ETH_DMAOMR_SR        0x00000002U  /* Start/stop receive */
+
+/* Bit definition for Ethernet DMA Interrupt Enable Register */
+#define ETH_DMAIER_NISE      0x00010000U  /* Normal interrupt summary enable */
+#define ETH_DMAIER_AISE      0x00008000U  /* Abnormal interrupt summary enable */
+#define ETH_DMAIER_ERIE      0x00004000U  /* Early receive interrupt enable */
+#define ETH_DMAIER_FBEIE     0x00002000U  /* Fatal bus error interrupt enable */
+#define ETH_DMAIER_ETIE      0x00000400U  /* Early transmit interrupt enable */
+#define ETH_DMAIER_RWTIE     0x00000200U  /* Receive watchdog timeout interrupt enable */
+#define ETH_DMAIER_RPSIE     0x00000100U  /* Receive process stopped interrupt enable */
+#define ETH_DMAIER_RBUIE     0x00000080U  /* Receive buffer unavailable interrupt enable */
+#define ETH_DMAIER_RIE       0x00000040U  /* Receive interrupt enable */
+#define ETH_DMAIER_TUIE      0x00000020U  /* Transmit Underflow interrupt enable */
+#define ETH_DMAIER_ROIE      0x00000010U  /* Receive Overflow interrupt enable */
+#define ETH_DMAIER_TJTIE     0x00000008U  /* Transmit jabber timeout interrupt enable */
+#define ETH_DMAIER_TBUIE     0x00000004U  /* Transmit buffer unavailable interrupt enable */
+#define ETH_DMAIER_TPSIE     0x00000002U  /* Transmit process stopped interrupt enable */
+#define ETH_DMAIER_TIE       0x00000001U  /* Transmit interrupt enable */
+
+/* Bit definition for Ethernet DMA Missed Frame and Buffer Overflow Counter Register */
+#define ETH_DMAMFBOCR_OFOC   0x10000000U  /* Overflow bit for FIFO overflow counter */
+#define ETH_DMAMFBOCR_MFA    0x0FFE0000U  /* Number of frames missed by the application */
+#define ETH_DMAMFBOCR_OMFC   0x00010000U  /* Overflow bit for missed frame counter */
+#define ETH_DMAMFBOCR_MFC    0x0000FFFFU  /* Number of frames missed by the controller */
+
+/* Bit definition for Ethernet DMA Current Host Transmit Descriptor Register */
+#define ETH_DMACHTDR_HTDAP   0xFFFFFFFFU  /* Host transmit descriptor address pointer */
+
+/* Bit definition for Ethernet DMA Current Host Receive Descriptor Register */
+#define ETH_DMACHRDR_HRDAP   0xFFFFFFFFU  /* Host receive descriptor address pointer */
+
+/* Bit definition for Ethernet DMA Current Host Transmit Buffer Address Register */
+#define ETH_DMACHTBAR_HTBAP  0xFFFFFFFFU  /* Host transmit buffer address pointer */
+
+/* Bit definition for Ethernet DMA Current Host Receive Buffer Address Register */
+#define ETH_DMACHRBAR_HRBAP  0xFFFFFFFFU  /* Host receive buffer address pointer */
+
+/******************************************************************************/
+/*                                                                            */
 /*                                       USB_OTG			                        */
 /*                                                                            */
 /******************************************************************************/
 /********************  Bit definition forUSB_OTG_GOTGCTL register  ********************/
-#define USB_OTG_GOTGCTL_SRQSCS                  0x00000001U            /*!< Session request success */
-#define USB_OTG_GOTGCTL_SRQ                     0x00000002U            /*!< Session request */
+#define USB_OTG_GOTGCTL_SRQSCS                  0x00000001U            /*!< Session request success  */
+#define USB_OTG_GOTGCTL_SRQ                     0x00000002U            /*!< Session request          */
 #define USB_OTG_GOTGCTL_HNGSCS                  0x00000100U            /*!< Host negotiation success */
-#define USB_OTG_GOTGCTL_HNPRQ                   0x00000200U            /*!< HNP request */
-#define USB_OTG_GOTGCTL_HSHNPEN                 0x00000400U            /*!< Host set HNP enable */
-#define USB_OTG_GOTGCTL_DHNPEN                  0x00000800U            /*!< Device HNP enabled */
-#define USB_OTG_GOTGCTL_CIDSTS                  0x00010000U            /*!< Connector ID status */
+#define USB_OTG_GOTGCTL_HNPRQ                   0x00000200U            /*!< HNP request              */
+#define USB_OTG_GOTGCTL_HSHNPEN                 0x00000400U            /*!< Host set HNP enable      */
+#define USB_OTG_GOTGCTL_DHNPEN                  0x00000800U            /*!< Device HNP enabled       */
+#define USB_OTG_GOTGCTL_CIDSTS                  0x00010000U            /*!< Connector ID status      */
 #define USB_OTG_GOTGCTL_DBCT                    0x00020000U            /*!< Long/short debounce time */
-#define USB_OTG_GOTGCTL_ASVLD                   0x00040000U            /*!< A-session valid */
-#define USB_OTG_GOTGCTL_BSVLD                   0x00080000U            /*!< B-session valid */
+#define USB_OTG_GOTGCTL_ASVLD                   0x00040000U            /*!< A-session valid          */
+#define USB_OTG_GOTGCTL_BSVLD                   0x00080000U            /*!< B-session valid          */
 
 /********************  Bit definition forUSB_OTG_HCFG register  ********************/
 
-#define USB_OTG_HCFG_FSLSPCS                 0x00000003U            /*!< FS/LS PHY clock select */
+#define USB_OTG_HCFG_FSLSPCS                 0x00000003U            /*!< FS/LS PHY clock select  */
 #define USB_OTG_HCFG_FSLSPCS_0               0x00000001U            /*!<Bit 0 */
 #define USB_OTG_HCFG_FSLSPCS_1               0x00000002U            /*!<Bit 1 */
 #define USB_OTG_HCFG_FSLSS                   0x00000004U            /*!< FS- and LS-only support */
@@ -11384,43 +13960,43 @@ typedef struct {
 #define USB_OTG_PCGCR_PHYSUSP                 0x00000010U            /*!< PHY suspended */
 
 /********************  Bit definition forUSB_OTG_GOTGINT register  ********************/
-#define USB_OTG_GOTGINT_SEDET                   0x00000004U            /*!< Session end detected */
-#define USB_OTG_GOTGINT_SRSSCHG                 0x00000100U            /*!< Session request success status change */
+#define USB_OTG_GOTGINT_SEDET                   0x00000004U            /*!< Session end detected                   */
+#define USB_OTG_GOTGINT_SRSSCHG                 0x00000100U            /*!< Session request success status change  */
 #define USB_OTG_GOTGINT_HNSSCHG                 0x00000200U            /*!< Host negotiation success status change */
-#define USB_OTG_GOTGINT_HNGDET                  0x00020000U            /*!< Host negotiation detected */
-#define USB_OTG_GOTGINT_ADTOCHG                 0x00040000U            /*!< A-device timeout change */
-#define USB_OTG_GOTGINT_DBCDNE                  0x00080000U            /*!< Debounce done */
+#define USB_OTG_GOTGINT_HNGDET                  0x00020000U            /*!< Host negotiation detected              */
+#define USB_OTG_GOTGINT_ADTOCHG                 0x00040000U            /*!< A-device timeout change                */
+#define USB_OTG_GOTGINT_DBCDNE                  0x00080000U            /*!< Debounce done                          */
 
 /********************  Bit definition forUSB_OTG_DCTL register  ********************/
 #define USB_OTG_DCTL_RWUSIG                  0x00000001U            /*!< Remote wakeup signaling */
-#define USB_OTG_DCTL_SDIS                    0x00000002U            /*!< Soft disconnect */
-#define USB_OTG_DCTL_GINSTS                  0x00000004U            /*!< Global IN NAK status */
-#define USB_OTG_DCTL_GONSTS                  0x00000008U            /*!< Global OUT NAK status */
+#define USB_OTG_DCTL_SDIS                    0x00000002U            /*!< Soft disconnect         */
+#define USB_OTG_DCTL_GINSTS                  0x00000004U            /*!< Global IN NAK status    */
+#define USB_OTG_DCTL_GONSTS                  0x00000008U            /*!< Global OUT NAK status   */
 
 #define USB_OTG_DCTL_TCTL                    0x00000070U            /*!< Test control */
 #define USB_OTG_DCTL_TCTL_0                  0x00000010U            /*!<Bit 0 */
 #define USB_OTG_DCTL_TCTL_1                  0x00000020U            /*!<Bit 1 */
 #define USB_OTG_DCTL_TCTL_2                  0x00000040U            /*!<Bit 2 */
-#define USB_OTG_DCTL_SGINAK                  0x00000080U            /*!< Set global IN NAK */
-#define USB_OTG_DCTL_CGINAK                  0x00000100U            /*!< Clear global IN NAK */
-#define USB_OTG_DCTL_SGONAK                  0x00000200U            /*!< Set global OUT NAK */
-#define USB_OTG_DCTL_CGONAK                  0x00000400U            /*!< Clear global OUT NAK */
+#define USB_OTG_DCTL_SGINAK                  0x00000080U            /*!< Set global IN NAK         */
+#define USB_OTG_DCTL_CGINAK                  0x00000100U            /*!< Clear global IN NAK       */
+#define USB_OTG_DCTL_SGONAK                  0x00000200U            /*!< Set global OUT NAK        */
+#define USB_OTG_DCTL_CGONAK                  0x00000400U            /*!< Clear global OUT NAK      */
 #define USB_OTG_DCTL_POPRGDNE                0x00000800U            /*!< Power-on programming done */
 
 /********************  Bit definition forUSB_OTG_HFIR register  ********************/
 #define USB_OTG_HFIR_FRIVL                   0x0000FFFFU            /*!< Frame interval */
 
 /********************  Bit definition forUSB_OTG_HFNUM register  ********************/
-#define USB_OTG_HFNUM_FRNUM                   0x0000FFFFU            /*!< Frame number */
+#define USB_OTG_HFNUM_FRNUM                   0x0000FFFFU            /*!< Frame number         */
 #define USB_OTG_HFNUM_FTREM                   0xFFFF0000U            /*!< Frame time remaining */
 
 /********************  Bit definition forUSB_OTG_DSTS register  ********************/
-#define USB_OTG_DSTS_SUSPSTS                 0x00000001U            /*!< Suspend status */
+#define USB_OTG_DSTS_SUSPSTS                 0x00000001U            /*!< Suspend status   */
 
 #define USB_OTG_DSTS_ENUMSPD                 0x00000006U            /*!< Enumerated speed */
 #define USB_OTG_DSTS_ENUMSPD_0               0x00000002U            /*!<Bit 0 */
 #define USB_OTG_DSTS_ENUMSPD_1               0x00000004U            /*!<Bit 1 */
-#define USB_OTG_DSTS_EERR                    0x00000008U            /*!< Erratic error */
+#define USB_OTG_DSTS_EERR                    0x00000008U            /*!< Erratic error     */
 #define USB_OTG_DSTS_FNSOF                   0x003FFF00U            /*!< Frame number of the received SOF */
 
 /********************  Bit definition forUSB_OTG_GAHBCFG register  ********************/
@@ -11451,25 +14027,25 @@ typedef struct {
 #define USB_OTG_GUSBCFG_TRDT_2                  0x00001000U            /*!<Bit 2 */
 #define USB_OTG_GUSBCFG_TRDT_3                  0x00002000U            /*!<Bit 3 */
 #define USB_OTG_GUSBCFG_PHYLPCS                 0x00008000U            /*!< PHY Low-power clock select */
-#define USB_OTG_GUSBCFG_ULPIFSLS                0x00020000U            /*!< ULPI FS/LS select */
-#define USB_OTG_GUSBCFG_ULPIAR                  0x00040000U            /*!< ULPI Auto-resume */
-#define USB_OTG_GUSBCFG_ULPICSM                 0x00080000U            /*!< ULPI Clock SuspendM */
-#define USB_OTG_GUSBCFG_ULPIEVBUSD              0x00100000U            /*!< ULPI External VBUS Drive */
-#define USB_OTG_GUSBCFG_ULPIEVBUSI              0x00200000U            /*!< ULPI external VBUS indicator */
+#define USB_OTG_GUSBCFG_ULPIFSLS                0x00020000U            /*!< ULPI FS/LS select               */
+#define USB_OTG_GUSBCFG_ULPIAR                  0x00040000U            /*!< ULPI Auto-resume                */
+#define USB_OTG_GUSBCFG_ULPICSM                 0x00080000U            /*!< ULPI Clock SuspendM             */
+#define USB_OTG_GUSBCFG_ULPIEVBUSD              0x00100000U            /*!< ULPI External VBUS Drive        */
+#define USB_OTG_GUSBCFG_ULPIEVBUSI              0x00200000U            /*!< ULPI external VBUS indicator    */
 #define USB_OTG_GUSBCFG_TSDPS                   0x00400000U            /*!< TermSel DLine pulsing selection */
-#define USB_OTG_GUSBCFG_PCCI                    0x00800000U            /*!< Indicator complement */
-#define USB_OTG_GUSBCFG_PTCI                    0x01000000U            /*!< Indicator pass through */
-#define USB_OTG_GUSBCFG_ULPIIPD                 0x02000000U            /*!< ULPI interface protect disable */
-#define USB_OTG_GUSBCFG_FHMOD                   0x20000000U            /*!< Forced host mode */
-#define USB_OTG_GUSBCFG_FDMOD                   0x40000000U            /*!< Forced peripheral mode */
-#define USB_OTG_GUSBCFG_CTXPKT                  0x80000000U            /*!< Corrupt Tx packet */
+#define USB_OTG_GUSBCFG_PCCI                    0x00800000U            /*!< Indicator complement            */
+#define USB_OTG_GUSBCFG_PTCI                    0x01000000U            /*!< Indicator pass through          */
+#define USB_OTG_GUSBCFG_ULPIIPD                 0x02000000U            /*!< ULPI interface protect disable  */
+#define USB_OTG_GUSBCFG_FHMOD                   0x20000000U            /*!< Forced host mode                */
+#define USB_OTG_GUSBCFG_FDMOD                   0x40000000U            /*!< Forced peripheral mode          */
+#define USB_OTG_GUSBCFG_CTXPKT                  0x80000000U            /*!< Corrupt Tx packet               */
 
 /********************  Bit definition forUSB_OTG_GRSTCTL register  ********************/
-#define USB_OTG_GRSTCTL_CSRST                   0x00000001U            /*!< Core soft reset */
-#define USB_OTG_GRSTCTL_HSRST                   0x00000002U            /*!< HCLK soft reset */
+#define USB_OTG_GRSTCTL_CSRST                   0x00000001U            /*!< Core soft reset          */
+#define USB_OTG_GRSTCTL_HSRST                   0x00000002U            /*!< HCLK soft reset          */
 #define USB_OTG_GRSTCTL_FCRST                   0x00000004U            /*!< Host frame counter reset */
-#define USB_OTG_GRSTCTL_RXFFLSH                 0x00000010U            /*!< RxFIFO flush */
-#define USB_OTG_GRSTCTL_TXFFLSH                 0x00000020U            /*!< TxFIFO flush */
+#define USB_OTG_GRSTCTL_RXFFLSH                 0x00000010U            /*!< RxFIFO flush             */
+#define USB_OTG_GRSTCTL_TXFFLSH                 0x00000020U            /*!< TxFIFO flush             */
 
 #define USB_OTG_GRSTCTL_TXFNUM                  0x000007C0U            /*!< TxFIFO number */
 #define USB_OTG_GRSTCTL_TXFNUM_0                0x00000040U            /*!<Bit 0 */
@@ -11481,17 +14057,17 @@ typedef struct {
 #define USB_OTG_GRSTCTL_AHBIDL                  0x80000000U            /*!< AHB master idle */
 
 /********************  Bit definition forUSB_OTG_DIEPMSK register  ********************/
-#define USB_OTG_DIEPMSK_XFRCM                   0x00000001U            /*!< Transfer completed interrupt mask */
-#define USB_OTG_DIEPMSK_EPDM                    0x00000002U            /*!< Endpoint disabled interrupt mask */
+#define USB_OTG_DIEPMSK_XFRCM                   0x00000001U            /*!< Transfer completed interrupt mask                 */
+#define USB_OTG_DIEPMSK_EPDM                    0x00000002U            /*!< Endpoint disabled interrupt mask                  */
 #define USB_OTG_DIEPMSK_TOM                     0x00000008U            /*!< Timeout condition mask (nonisochronous endpoints) */
-#define USB_OTG_DIEPMSK_ITTXFEMSK               0x00000010U            /*!< IN token received when TxFIFO empty mask */
-#define USB_OTG_DIEPMSK_INEPNMM                 0x00000020U            /*!< IN token received with EP mismatch mask */
-#define USB_OTG_DIEPMSK_INEPNEM                 0x00000040U            /*!< IN endpoint NAK effective mask */
-#define USB_OTG_DIEPMSK_TXFURM                  0x00000100U            /*!< FIFO underrun mask */
-#define USB_OTG_DIEPMSK_BIM                     0x00000200U            /*!< BNA interrupt mask */
+#define USB_OTG_DIEPMSK_ITTXFEMSK               0x00000010U            /*!< IN token received when TxFIFO empty mask          */
+#define USB_OTG_DIEPMSK_INEPNMM                 0x00000020U            /*!< IN token received with EP mismatch mask           */
+#define USB_OTG_DIEPMSK_INEPNEM                 0x00000040U            /*!< IN endpoint NAK effective mask                    */
+#define USB_OTG_DIEPMSK_TXFURM                  0x00000100U            /*!< FIFO underrun mask                                */
+#define USB_OTG_DIEPMSK_BIM                     0x00000200U            /*!< BNA interrupt mask                                */
 
 /********************  Bit definition forUSB_OTG_HPTXSTS register  ********************/
-#define USB_OTG_HPTXSTS_PTXFSAVL                0x0000FFFFU            /*!< Periodic transmit data FIFO space available */
+#define USB_OTG_HPTXSTS_PTXFSAVL                0x0000FFFFU            /*!< Periodic transmit data FIFO space available     */
 
 #define USB_OTG_HPTXSTS_PTXQSAV                 0x00FF0000U            /*!< Periodic transmit request queue space available */
 #define USB_OTG_HPTXSTS_PTXQSAV_0               0x00010000U            /*!<Bit 0 */
@@ -11518,78 +14094,78 @@ typedef struct {
 
 /********************  Bit definition forUSB_OTG_DOEPMSK register  ********************/
 #define USB_OTG_DOEPMSK_XFRCM                   0x00000001U            /*!< Transfer completed interrupt mask */
-#define USB_OTG_DOEPMSK_EPDM                    0x00000002U            /*!< Endpoint disabled interrupt mask */
-#define USB_OTG_DOEPMSK_STUPM                   0x00000008U            /*!< SETUP phase done mask */
+#define USB_OTG_DOEPMSK_EPDM                    0x00000002U            /*!< Endpoint disabled interrupt mask               */
+#define USB_OTG_DOEPMSK_STUPM                   0x00000008U            /*!< SETUP phase done mask                          */
 #define USB_OTG_DOEPMSK_OTEPDM                  0x00000010U            /*!< OUT token received when endpoint disabled mask */
-#define USB_OTG_DOEPMSK_B2BSTUP                 0x00000040U            /*!< Back-to-back SETUP packets received mask */
-#define USB_OTG_DOEPMSK_OPEM                    0x00000100U            /*!< OUT packet error mask */
-#define USB_OTG_DOEPMSK_BOIM                    0x00000200U            /*!< BNA interrupt mask */
+#define USB_OTG_DOEPMSK_B2BSTUP                 0x00000040U            /*!< Back-to-back SETUP packets received mask       */
+#define USB_OTG_DOEPMSK_OPEM                    0x00000100U            /*!< OUT packet error mask                          */
+#define USB_OTG_DOEPMSK_BOIM                    0x00000200U            /*!< BNA interrupt mask                             */
 
 /********************  Bit definition forUSB_OTG_GINTSTS register  ********************/
-#define USB_OTG_GINTSTS_CMOD                    0x00000001U            /*!< Current mode of operation */
-#define USB_OTG_GINTSTS_MMIS                    0x00000002U            /*!< Mode mismatch interrupt */
-#define USB_OTG_GINTSTS_OTGINT                  0x00000004U            /*!< OTG interrupt */
-#define USB_OTG_GINTSTS_SOF                     0x00000008U            /*!< Start of frame */
-#define USB_OTG_GINTSTS_RXFLVL                  0x00000010U            /*!< RxFIFO nonempty */
-#define USB_OTG_GINTSTS_NPTXFE                  0x00000020U            /*!< Nonperiodic TxFIFO empty */
+#define USB_OTG_GINTSTS_CMOD                    0x00000001U            /*!< Current mode of operation           */
+#define USB_OTG_GINTSTS_MMIS                    0x00000002U            /*!< Mode mismatch interrupt             */
+#define USB_OTG_GINTSTS_OTGINT                  0x00000004U            /*!< OTG interrupt                       */
+#define USB_OTG_GINTSTS_SOF                     0x00000008U            /*!< Start of frame                      */
+#define USB_OTG_GINTSTS_RXFLVL                  0x00000010U            /*!< RxFIFO nonempty                     */
+#define USB_OTG_GINTSTS_NPTXFE                  0x00000020U            /*!< Nonperiodic TxFIFO empty            */
 #define USB_OTG_GINTSTS_GINAKEFF                0x00000040U            /*!< Global IN nonperiodic NAK effective */
-#define USB_OTG_GINTSTS_BOUTNAKEFF              0x00000080U            /*!< Global OUT NAK effective */
-#define USB_OTG_GINTSTS_ESUSP                   0x00000400U            /*!< Early suspend */
-#define USB_OTG_GINTSTS_USBSUSP                 0x00000800U            /*!< USB suspend */
-#define USB_OTG_GINTSTS_USBRST                  0x00001000U            /*!< USB reset */
-#define USB_OTG_GINTSTS_ENUMDNE                 0x00002000U            /*!< Enumeration done */
+#define USB_OTG_GINTSTS_BOUTNAKEFF              0x00000080U            /*!< Global OUT NAK effective            */
+#define USB_OTG_GINTSTS_ESUSP                   0x00000400U            /*!< Early suspend                            */
+#define USB_OTG_GINTSTS_USBSUSP                 0x00000800U            /*!< USB suspend                              */
+#define USB_OTG_GINTSTS_USBRST                  0x00001000U            /*!< USB reset                                */
+#define USB_OTG_GINTSTS_ENUMDNE                 0x00002000U            /*!< Enumeration done                         */
 #define USB_OTG_GINTSTS_ISOODRP                 0x00004000U            /*!< Isochronous OUT packet dropped interrupt */
-#define USB_OTG_GINTSTS_EOPF                    0x00008000U            /*!< End of periodic frame interrupt */
-#define USB_OTG_GINTSTS_IEPINT                  0x00040000U            /*!< IN endpoint interrupt */
-#define USB_OTG_GINTSTS_OEPINT                  0x00080000U            /*!< OUT endpoint interrupt */
-#define USB_OTG_GINTSTS_IISOIXFR                0x00100000U            /*!< Incomplete isochronous IN transfer */
-#define USB_OTG_GINTSTS_PXFR_INCOMPISOOUT       0x00200000U            /*!< Incomplete periodic transfer */
-#define USB_OTG_GINTSTS_DATAFSUSP               0x00400000U            /*!< Data fetch suspended */
-#define USB_OTG_GINTSTS_HPRTINT                 0x01000000U            /*!< Host port interrupt */
-#define USB_OTG_GINTSTS_HCINT                   0x02000000U            /*!< Host channels interrupt */
-#define USB_OTG_GINTSTS_PTXFE                   0x04000000U            /*!< Periodic TxFIFO empty */
-#define USB_OTG_GINTSTS_CIDSCHG                 0x10000000U            /*!< Connector ID status change */
-#define USB_OTG_GINTSTS_DISCINT                 0x20000000U            /*!< Disconnect detected interrupt */
+#define USB_OTG_GINTSTS_EOPF                    0x00008000U            /*!< End of periodic frame interrupt          */
+#define USB_OTG_GINTSTS_IEPINT                  0x00040000U            /*!< IN endpoint interrupt                          */
+#define USB_OTG_GINTSTS_OEPINT                  0x00080000U            /*!< OUT endpoint interrupt                         */
+#define USB_OTG_GINTSTS_IISOIXFR                0x00100000U            /*!< Incomplete isochronous IN transfer             */
+#define USB_OTG_GINTSTS_PXFR_INCOMPISOOUT       0x00200000U            /*!< Incomplete periodic transfer                   */
+#define USB_OTG_GINTSTS_DATAFSUSP               0x00400000U            /*!< Data fetch suspended                           */
+#define USB_OTG_GINTSTS_HPRTINT                 0x01000000U            /*!< Host port interrupt                            */
+#define USB_OTG_GINTSTS_HCINT                   0x02000000U            /*!< Host channels interrupt                        */
+#define USB_OTG_GINTSTS_PTXFE                   0x04000000U            /*!< Periodic TxFIFO empty                          */
+#define USB_OTG_GINTSTS_CIDSCHG                 0x10000000U            /*!< Connector ID status change                     */
+#define USB_OTG_GINTSTS_DISCINT                 0x20000000U            /*!< Disconnect detected interrupt                  */
 #define USB_OTG_GINTSTS_SRQINT                  0x40000000U            /*!< Session request/new session detected interrupt */
-#define USB_OTG_GINTSTS_WKUINT                  0x80000000U            /*!< Resume/remote wakeup detected interrupt */
+#define USB_OTG_GINTSTS_WKUINT                  0x80000000U            /*!< Resume/remote wakeup detected interrupt        */
 
 /********************  Bit definition forUSB_OTG_GINTMSK register  ********************/
-#define USB_OTG_GINTMSK_MMISM                   0x00000002U            /*!< Mode mismatch interrupt mask */
-#define USB_OTG_GINTMSK_OTGINT                  0x00000004U            /*!< OTG interrupt mask */
-#define USB_OTG_GINTMSK_SOFM                    0x00000008U            /*!< Start of frame mask */
-#define USB_OTG_GINTMSK_RXFLVLM                 0x00000010U            /*!< Receive FIFO nonempty mask */
-#define USB_OTG_GINTMSK_NPTXFEM                 0x00000020U            /*!< Nonperiodic TxFIFO empty mask */
-#define USB_OTG_GINTMSK_GINAKEFFM               0x00000040U            /*!< Global nonperiodic IN NAK effective mask */
-#define USB_OTG_GINTMSK_GONAKEFFM               0x00000080U            /*!< Global OUT NAK effective mask */
-#define USB_OTG_GINTMSK_ESUSPM                  0x00000400U            /*!< Early suspend mask */
-#define USB_OTG_GINTMSK_USBSUSPM                0x00000800U            /*!< USB suspend mask */
-#define USB_OTG_GINTMSK_USBRST                  0x00001000U            /*!< USB reset mask */
-#define USB_OTG_GINTMSK_ENUMDNEM                0x00002000U            /*!< Enumeration done mask */
-#define USB_OTG_GINTMSK_ISOODRPM                0x00004000U            /*!< Isochronous OUT packet dropped interrupt mask */
-#define USB_OTG_GINTMSK_EOPFM                   0x00008000U            /*!< End of periodic frame interrupt mask */
-#define USB_OTG_GINTMSK_EPMISM                  0x00020000U            /*!< Endpoint mismatch interrupt mask */
-#define USB_OTG_GINTMSK_IEPINT                  0x00040000U            /*!< IN endpoints interrupt mask */
-#define USB_OTG_GINTMSK_OEPINT                  0x00080000U            /*!< OUT endpoints interrupt mask */
-#define USB_OTG_GINTMSK_IISOIXFRM               0x00100000U            /*!< Incomplete isochronous IN transfer mask */
-#define USB_OTG_GINTMSK_PXFRM_IISOOXFRM         0x00200000U            /*!< Incomplete periodic transfer mask */
-#define USB_OTG_GINTMSK_FSUSPM                  0x00400000U            /*!< Data fetch suspended mask */
-#define USB_OTG_GINTMSK_PRTIM                   0x01000000U            /*!< Host port interrupt mask */
-#define USB_OTG_GINTMSK_HCIM                    0x02000000U            /*!< Host channels interrupt mask */
-#define USB_OTG_GINTMSK_PTXFEM                  0x04000000U            /*!< Periodic TxFIFO empty mask */
-#define USB_OTG_GINTMSK_CIDSCHGM                0x10000000U            /*!< Connector ID status change mask */
-#define USB_OTG_GINTMSK_DISCINT                 0x20000000U            /*!< Disconnect detected interrupt mask */
+#define USB_OTG_GINTMSK_MMISM                   0x00000002U            /*!< Mode mismatch interrupt mask                        */
+#define USB_OTG_GINTMSK_OTGINT                  0x00000004U            /*!< OTG interrupt mask                                  */
+#define USB_OTG_GINTMSK_SOFM                    0x00000008U            /*!< Start of frame mask                                 */
+#define USB_OTG_GINTMSK_RXFLVLM                 0x00000010U            /*!< Receive FIFO nonempty mask                          */
+#define USB_OTG_GINTMSK_NPTXFEM                 0x00000020U            /*!< Nonperiodic TxFIFO empty mask                       */
+#define USB_OTG_GINTMSK_GINAKEFFM               0x00000040U            /*!< Global nonperiodic IN NAK effective mask            */
+#define USB_OTG_GINTMSK_GONAKEFFM               0x00000080U            /*!< Global OUT NAK effective mask                       */
+#define USB_OTG_GINTMSK_ESUSPM                  0x00000400U            /*!< Early suspend mask                                  */
+#define USB_OTG_GINTMSK_USBSUSPM                0x00000800U            /*!< USB suspend mask                                    */
+#define USB_OTG_GINTMSK_USBRST                  0x00001000U            /*!< USB reset mask                                      */
+#define USB_OTG_GINTMSK_ENUMDNEM                0x00002000U            /*!< Enumeration done mask                               */
+#define USB_OTG_GINTMSK_ISOODRPM                0x00004000U            /*!< Isochronous OUT packet dropped interrupt mask       */
+#define USB_OTG_GINTMSK_EOPFM                   0x00008000U            /*!< End of periodic frame interrupt mask                */
+#define USB_OTG_GINTMSK_EPMISM                  0x00020000U            /*!< Endpoint mismatch interrupt mask                    */
+#define USB_OTG_GINTMSK_IEPINT                  0x00040000U            /*!< IN endpoints interrupt mask                         */
+#define USB_OTG_GINTMSK_OEPINT                  0x00080000U            /*!< OUT endpoints interrupt mask                        */
+#define USB_OTG_GINTMSK_IISOIXFRM               0x00100000U            /*!< Incomplete isochronous IN transfer mask             */
+#define USB_OTG_GINTMSK_PXFRM_IISOOXFRM         0x00200000U            /*!< Incomplete periodic transfer mask                   */
+#define USB_OTG_GINTMSK_FSUSPM                  0x00400000U            /*!< Data fetch suspended mask                           */
+#define USB_OTG_GINTMSK_PRTIM                   0x01000000U            /*!< Host port interrupt mask                            */
+#define USB_OTG_GINTMSK_HCIM                    0x02000000U            /*!< Host channels interrupt mask                        */
+#define USB_OTG_GINTMSK_PTXFEM                  0x04000000U            /*!< Periodic TxFIFO empty mask                          */
+#define USB_OTG_GINTMSK_CIDSCHGM                0x10000000U            /*!< Connector ID status change mask                     */
+#define USB_OTG_GINTMSK_DISCINT                 0x20000000U            /*!< Disconnect detected interrupt mask                  */
 #define USB_OTG_GINTMSK_SRQIM                   0x40000000U            /*!< Session request/new session detected interrupt mask */
-#define USB_OTG_GINTMSK_WUIM                    0x80000000U            /*!< Resume/remote wakeup detected interrupt mask */
+#define USB_OTG_GINTMSK_WUIM                    0x80000000U            /*!< Resume/remote wakeup detected interrupt mask        */
 
 /********************  Bit definition forUSB_OTG_DAINT register  ********************/
-#define USB_OTG_DAINT_IEPINT                  0x0000FFFFU            /*!< IN endpoint interrupt bits */
+#define USB_OTG_DAINT_IEPINT                  0x0000FFFFU            /*!< IN endpoint interrupt bits  */
 #define USB_OTG_DAINT_OEPINT                  0xFFFF0000U            /*!< OUT endpoint interrupt bits */
 
 /********************  Bit definition forUSB_OTG_HAINTMSK register  ********************/
 #define USB_OTG_HAINTMSK_HAINTM                  0x0000FFFFU            /*!< Channel interrupt mask */
 
 /********************  Bit definition for USB_OTG_GRXSTSP register  ********************/
-#define USB_OTG_GRXSTSP_EPNUM                    0x0000000FU            /*!< IN EP interrupt mask bits */
+#define USB_OTG_GRXSTSP_EPNUM                    0x0000000FU            /*!< IN EP interrupt mask bits  */
 #define USB_OTG_GRXSTSP_BCNT                     0x00007FF0U            /*!< OUT EP interrupt mask bits */
 #define USB_OTG_GRXSTSP_DPID                     0x00018000U            /*!< OUT EP interrupt mask bits */
 #define USB_OTG_GRXSTSP_PKTSTS                   0x001E0000U            /*!< OUT EP interrupt mask bits */
@@ -11661,16 +14237,16 @@ typedef struct {
 #define USB_OTG_FRMNUM_3                0x01000000U            /*!<Bit 3 */
 
 /********************  Bit definition forUSB_OTG_GRXFSIZ register  ********************/
-#define USB_OTG_GRXFSIZ_RXFD                    0x0000FFFFU            /*!< RxFIFO depth */
+#define USB_OTG_GRXFSIZ_RXFD            0x0000FFFFU            /*!< RxFIFO depth */
 
 /********************  Bit definition forUSB_OTG_DVBUSDIS register  ********************/
-#define USB_OTG_DVBUSDIS_VBUSDT                  0x0000FFFFU            /*!< Device VBUS discharge time */
+#define USB_OTG_DVBUSDIS_VBUSDT         0x0000FFFFU            /*!< Device VBUS discharge time */
 
 /********************  Bit definition for OTG register  ********************/
 #define USB_OTG_NPTXFSA                 0x0000FFFFU            /*!< Nonperiodic transmit RAM start address */
-#define USB_OTG_NPTXFD                  0xFFFF0000U            /*!< Nonperiodic TxFIFO depth */
-#define USB_OTG_TX0FSA                  0x0000FFFFU            /*!< Endpoint 0 transmit RAM start address */
-#define USB_OTG_TX0FD                   0xFFFF0000U            /*!< Endpoint 0 TxFIFO depth */
+#define USB_OTG_NPTXFD                  0xFFFF0000U            /*!< Nonperiodic TxFIFO depth               */
+#define USB_OTG_TX0FSA                  0x0000FFFFU            /*!< Endpoint 0 transmit RAM start address  */
+#define USB_OTG_TX0FD                   0xFFFF0000U            /*!< Endpoint 0 TxFIFO depth                */
 
 /********************  Bit definition forUSB_OTG_DVBUSPULSE register  ********************/
 #define USB_OTG_DVBUSPULSE_DVBUSP                  0x00000FFFU            /*!< Device VBUS pulsing time */
@@ -11729,45 +14305,45 @@ typedef struct {
 #define USB_OTG_DIEPEMPMSK_INEPTXFEM               0x0000FFFFU            /*!< IN EP Tx FIFO empty interrupt mask bits */
 
 /********************  Bit definition forUSB_OTG_DEACHINT register  ********************/
-#define USB_OTG_DEACHINT_IEP1INT                 0x00000002U            /*!< IN endpoint 1interrupt bit */
+#define USB_OTG_DEACHINT_IEP1INT                 0x00000002U            /*!< IN endpoint 1interrupt bit   */
 #define USB_OTG_DEACHINT_OEP1INT                 0x00020000U            /*!< OUT endpoint 1 interrupt bit */
 
 /********************  Bit definition forUSB_OTG_GCCFG register  ********************/
 #define USB_OTG_GCCFG_PWRDWN                  0x00010000U            /*!< Power down */
 #define USB_OTG_GCCFG_I2CPADEN                0x00020000U            /*!< Enable I2C bus connection for the external I2C PHY interface */
-#define USB_OTG_GCCFG_VBUSASEN                0x00040000U            /*!< Enable the VBUS sensing device */
-#define USB_OTG_GCCFG_VBUSBSEN                0x00080000U            /*!< Enable the VBUS sensing device */
-#define USB_OTG_GCCFG_SOFOUTEN                0x00100000U            /*!< SOF output enable */
-#define USB_OTG_GCCFG_NOVBUSSENS              0x00200000U            /*!< VBUS sensing disable option */
+#define USB_OTG_GCCFG_VBUSASEN                0x00040000U            /*!< Enable the VBUS sensing device                               */
+#define USB_OTG_GCCFG_VBUSBSEN                0x00080000U            /*!< Enable the VBUS sensing device                               */
+#define USB_OTG_GCCFG_SOFOUTEN                0x00100000U            /*!< SOF output enable                                            */
+#define USB_OTG_GCCFG_NOVBUSSENS              0x00200000U            /*!< VBUS sensing disable option                                  */
 
 /********************  Bit definition forUSB_OTG_DEACHINTMSK register  ********************/
-#define USB_OTG_DEACHINTMSK_IEP1INTM                0x00000002U            /*!< IN Endpoint 1 interrupt mask bit */
+#define USB_OTG_DEACHINTMSK_IEP1INTM                0x00000002U            /*!< IN Endpoint 1 interrupt mask bit  */
 #define USB_OTG_DEACHINTMSK_OEP1INTM                0x00020000U            /*!< OUT Endpoint 1 interrupt mask bit */
 
 /********************  Bit definition forUSB_OTG_CID register  ********************/
 #define USB_OTG_CID_PRODUCT_ID              0xFFFFFFFFU            /*!< Product ID field */
 
 /********************  Bit definition forUSB_OTG_DIEPEACHMSK1 register  ********************/
-#define USB_OTG_DIEPEACHMSK1_XFRCM                   0x00000001U            /*!< Transfer completed interrupt mask */
-#define USB_OTG_DIEPEACHMSK1_EPDM                    0x00000002U            /*!< Endpoint disabled interrupt mask */
+#define USB_OTG_DIEPEACHMSK1_XFRCM                   0x00000001U            /*!< Transfer completed interrupt mask                 */
+#define USB_OTG_DIEPEACHMSK1_EPDM                    0x00000002U            /*!< Endpoint disabled interrupt mask                  */
 #define USB_OTG_DIEPEACHMSK1_TOM                     0x00000008U            /*!< Timeout condition mask (nonisochronous endpoints) */
-#define USB_OTG_DIEPEACHMSK1_ITTXFEMSK               0x00000010U            /*!< IN token received when TxFIFO empty mask */
-#define USB_OTG_DIEPEACHMSK1_INEPNMM                 0x00000020U            /*!< IN token received with EP mismatch mask */
-#define USB_OTG_DIEPEACHMSK1_INEPNEM                 0x00000040U            /*!< IN endpoint NAK effective mask */
+#define USB_OTG_DIEPEACHMSK1_ITTXFEMSK               0x00000010U            /*!< IN token received when TxFIFO empty mask          */
+#define USB_OTG_DIEPEACHMSK1_INEPNMM                 0x00000020U            /*!< IN token received with EP mismatch mask           */
+#define USB_OTG_DIEPEACHMSK1_INEPNEM                 0x00000040U            /*!< IN endpoint NAK effective mask                    */
 #define USB_OTG_DIEPEACHMSK1_TXFURM                  0x00000100U            /*!< FIFO underrun mask */
 #define USB_OTG_DIEPEACHMSK1_BIM                     0x00000200U            /*!< BNA interrupt mask */
 #define USB_OTG_DIEPEACHMSK1_NAKM                    0x00002000U            /*!< NAK interrupt mask */
 
 /********************  Bit definition forUSB_OTG_HPRT register  ********************/
-#define USB_OTG_HPRT_PCSTS                   0x00000001U            /*!< Port connect status */
-#define USB_OTG_HPRT_PCDET                   0x00000002U            /*!< Port connect detected */
-#define USB_OTG_HPRT_PENA                    0x00000004U            /*!< Port enable */
+#define USB_OTG_HPRT_PCSTS                   0x00000001U            /*!< Port connect status        */
+#define USB_OTG_HPRT_PCDET                   0x00000002U            /*!< Port connect detected      */
+#define USB_OTG_HPRT_PENA                    0x00000004U            /*!< Port enable                */
 #define USB_OTG_HPRT_PENCHNG                 0x00000008U            /*!< Port enable/disable change */
-#define USB_OTG_HPRT_POCA                    0x00000010U            /*!< Port overcurrent active */
-#define USB_OTG_HPRT_POCCHNG                 0x00000020U            /*!< Port overcurrent change */
-#define USB_OTG_HPRT_PRES                    0x00000040U            /*!< Port resume */
-#define USB_OTG_HPRT_PSUSP                   0x00000080U            /*!< Port suspend */
-#define USB_OTG_HPRT_PRST                    0x00000100U            /*!< Port reset */
+#define USB_OTG_HPRT_POCA                    0x00000010U            /*!< Port overcurrent active    */
+#define USB_OTG_HPRT_POCCHNG                 0x00000020U            /*!< Port overcurrent change    */
+#define USB_OTG_HPRT_PRES                    0x00000040U            /*!< Port resume   */
+#define USB_OTG_HPRT_PSUSP                   0x00000080U            /*!< Port suspend  */
+#define USB_OTG_HPRT_PRST                    0x00000100U            /*!< Port reset    */
 
 #define USB_OTG_HPRT_PLSTS                   0x00000C00U            /*!< Port line status */
 #define USB_OTG_HPRT_PLSTS_0                 0x00000400U            /*!<Bit 0 */
@@ -11940,7 +14516,7 @@ typedef struct {
 #define USB_OTG_HCDMA_DMAADDR                    0xFFFFFFFFU            /*!< DMA address */
 
 /********************  Bit definition forUSB_OTG_DTXFSTS register  ********************/
-#define USB_OTG_DTXFSTS_INEPTFSAV                0x0000FFFFU            /*!< IN endpoint TxFIFO space avail */
+#define USB_OTG_DTXFSTS_INEPTFSAV                0x0000FFFFU            /*!< IN endpoint TxFIFO space available */
 
 /********************  Bit definition forUSB_OTG_DIEPTXF register  ********************/
 #define USB_OTG_DIEPTXF_INEPTXSA                 0x0000FFFFU            /*!< IN endpoint FIFOx transmit RAM start address */
@@ -11985,6 +14561,7 @@ typedef struct {
 #define USB_OTG_PCGCCTL_GATECLK                 0x00000002U            /*!<Bit 0 */
 #define USB_OTG_PCGCCTL_PHYSUSP                 0x00000010U            /*!<Bit 1 */
 
+
 /**
   * @}
   */ 
@@ -11996,7 +14573,7 @@ typedef struct {
 /** @addtogroup Exported_macros
   * @{
   */
- 
+
 /******************************* ADC Instances ********************************/
 #define IS_ADC_ALL_INSTANCE(INSTANCE) (((INSTANCE) == ADC1) || \
                                        ((INSTANCE) == ADC2) || \
@@ -12011,6 +14588,12 @@ typedef struct {
 
 /******************************* DAC Instances ********************************/
 #define IS_DAC_ALL_INSTANCE(INSTANCE) ((INSTANCE) == DAC)
+
+/******************************* DCMI Instances *******************************/
+#define IS_DCMI_ALL_INSTANCE(INSTANCE) ((INSTANCE) == DCMI)
+
+/******************************* DMA2D Instances *******************************/
+#define IS_DMA2D_ALL_INSTANCE(INSTANCE) ((INSTANCE) == DMA2D)
 
 /******************************** DMA Instances *******************************/
 #define IS_DMA_STREAM_ALL_INSTANCE(INSTANCE) (((INSTANCE) == DMA1_Stream0) || \
@@ -12039,7 +14622,9 @@ typedef struct {
                                         ((INSTANCE) == GPIOF) || \
                                         ((INSTANCE) == GPIOG) || \
                                         ((INSTANCE) == GPIOH) || \
-                                        ((INSTANCE) == GPIOI))
+                                        ((INSTANCE) == GPIOI) || \
+                                        ((INSTANCE) == GPIOJ) || \
+                                        ((INSTANCE) == GPIOK))
 
 /******************************** I2C Instances *******************************/
 #define IS_I2C_ALL_INSTANCE(INSTANCE) (((INSTANCE) == I2C1) || \
@@ -12062,15 +14647,27 @@ typedef struct {
 /****************************** RTC Instances *********************************/
 #define IS_RTC_ALL_INSTANCE(INSTANCE)  ((INSTANCE) == RTC)
 
+/******************************* SAI Instances ********************************/
+#define IS_SAI_ALL_INSTANCE(PERIPH) (((PERIPH) == SAI1_Block_A) || \
+                                     ((PERIPH) == SAI1_Block_B))
+/* Legacy define */
+#define IS_SAI_BLOCK_PERIPH IS_SAI_ALL_INSTANCE
+
 /******************************** SPI Instances *******************************/
 #define IS_SPI_ALL_INSTANCE(INSTANCE) (((INSTANCE) == SPI1) || \
                                        ((INSTANCE) == SPI2) || \
-                                       ((INSTANCE) == SPI3))
+                                       ((INSTANCE) == SPI3) || \
+                                       ((INSTANCE) == SPI4) || \
+                                       ((INSTANCE) == SPI5) || \
+                                       ((INSTANCE) == SPI6))
 
 /*************************** SPI Extended Instances ***************************/
 #define IS_SPI_ALL_INSTANCE_EXT(INSTANCE) (((INSTANCE) == SPI1)    || \
                                            ((INSTANCE) == SPI2)    || \
                                            ((INSTANCE) == SPI3)    || \
+                                           ((INSTANCE) == SPI4)    || \
+                                           ((INSTANCE) == SPI5)    || \
+                                           ((INSTANCE) == SPI6)    || \
                                            ((INSTANCE) == I2S2ext) || \
                                            ((INSTANCE) == I2S3ext))
 
@@ -12297,7 +14894,9 @@ typedef struct {
                                     ((INSTANCE) == USART3) || \
                                     ((INSTANCE) == UART4)  || \
                                     ((INSTANCE) == UART5)  || \
-                                    ((INSTANCE) == USART6))
+                                    ((INSTANCE) == USART6) || \
+                                    ((INSTANCE) == UART7)  || \
+                                    ((INSTANCE) == UART8))
 
 /****************** UART Instances : Hardware Flow control ********************/
 #define IS_UART_HWFLOW_INSTANCE(INSTANCE) (((INSTANCE) == USART1) || \
@@ -12317,7 +14916,9 @@ typedef struct {
                                     ((INSTANCE) == USART3) || \
                                     ((INSTANCE) == UART4)  || \
                                     ((INSTANCE) == UART5)  || \
-                                    ((INSTANCE) == USART6))     
+                                    ((INSTANCE) == USART6) || \
+                                    ((INSTANCE) == UART7)  || \
+                                    ((INSTANCE) == UART8))     
 
 /*********************** PCD Instances ****************************************/
 #define IS_PCD_ALL_INSTANCE(INSTANCE) (((INSTANCE) == USB_OTG_FS) || \
@@ -12356,10 +14957,10 @@ typedef struct {
 /******************************************************************************/
 
 /* Aliases for __IRQn */
-#define FMC_IRQn              FSMC_IRQn
+#define FSMC_IRQn              FMC_IRQn
 
 /* Aliases for __IRQHandler */
-#define FMC_IRQHandler        FSMC_IRQHandler
+#define FSMC_IRQHandler        FMC_IRQHandler
 
 
 /** @defgroup ADC_Internal_Channels ADC Internal Channels
@@ -12388,7 +14989,7 @@ typedef struct
 
 #define ADC_VREFINT_CAL      (*((__I uint16_t *)((uint32_t)0x1FFF7A2AU)))
 
-#define ADC_VBAT_SCALER      2
+#define ADC_VBAT_SCALER      4
 
 /**
   * @}
@@ -12449,11 +15050,16 @@ typedef struct
 /* AF 5 selection */
 #define GPIO_SPI1_AF5          ((uint8_t)0x05)  /* SPI1 Alternate Function mapping        */
 #define GPIO_SPI2_AF5          ((uint8_t)0x05)  /* SPI2/I2S2 Alternate Function mapping   */
+#define GPIO_SPI3_AF5          ((uint8_t)0x05)  /* SPI3/I2S3 Alternate Function mapping   */
+#define GPIO_SPI4_AF5          ((uint8_t)0x05)  /* SPI4 Alternate Function mapping        */
+#define GPIO_SPI5_AF5          ((uint8_t)0x05)  /* SPI5 Alternate Function mapping        */
+#define GPIO_SPI6_AF5          ((uint8_t)0x05)  /* SPI6 Alternate Function mapping        */
 #define GPIO_I2S3ext_AF5       ((uint8_t)0x05)  /* I2S3ext_SD Alternate Function mapping  */
 
 /* AF 6 selection */
 #define GPIO_SPI3_AF6          ((uint8_t)0x06)  /* SPI3/I2S3 Alternate Function mapping  */
 #define GPIO_I2S2ext_AF6       ((uint8_t)0x06)  /* I2S2ext_SD Alternate Function mapping */
+#define GPIO_SAI1_AF6          ((uint8_t)0x06)  /* SAI1 Alternate Function mapping       */
 
 /* AF 7 selection */
 #define GPIO_USART1_AF7        ((uint8_t)0x07)  /* USART1 Alternate Function mapping     */
@@ -12465,6 +15071,8 @@ typedef struct
 #define GPIO_UART4_AF8         ((uint8_t)0x08)  /* UART4 Alternate Function mapping  */
 #define GPIO_UART5_AF8         ((uint8_t)0x08)  /* UART5 Alternate Function mapping  */
 #define GPIO_USART6_AF8        ((uint8_t)0x08)  /* USART6 Alternate Function mapping */
+#define GPIO_UART7_AF8         ((uint8_t)0x08)  /* UART7 Alternate Function mapping  */
+#define GPIO_UART8_AF8         ((uint8_t)0x08)  /* UART8 Alternate Function mapping  */
 
 /* AF 9 selection */
 #define GPIO_CAN1_AF9          ((uint8_t)0x09)  /* CAN1 Alternate Function mapping  */
@@ -12477,10 +15085,16 @@ typedef struct
 #define GPIO_OTG_FS_AF10       ((uint8_t)0x0A)  /* OTG_FS Alternate Function mapping */
 #define GPIO_OTG_HS_AF10       ((uint8_t)0x0A)  /* OTG_HS Alternate Function mapping */
 
+/* AF 11 selection */
+#define GPIO_ETH_AF11          ((uint8_t)0x0B)  /* ETHERNET Alternate Function mapping */
+
 /* AF 12 selection */
-#define GPIO_FSMC_AF12         ((uint8_t)0x0C)  /* FSMC Alternate Function mapping                     */
+#define GPIO_FMC_AF12          ((uint8_t)0x0C)  /* FMC Alternate Function mapping                      */
 #define GPIO_OTG_HS_FS_AF12    ((uint8_t)0x0C)  /* OTG HS configured in FS, Alternate Function mapping */
 #define GPIO_SDIO_AF12         ((uint8_t)0x0C)  /* SDIO Alternate Function mapping                     */
+
+/* AF 13 selection */
+#define GPIO_DCMI_AF13         ((uint8_t)0x0D)  /* DCMI Alternate Function mapping */
 
 /* AF 15 selection */
 #define GPIO_EVENTOUT_AF15     ((uint8_t)0x0F)  /* EVENTOUT Alternate Function mapping */
@@ -12513,7 +15127,7 @@ typedef struct
 }
 #endif /* __cplusplus */
 
-#endif /* __STM32F405xx_H */
+#endif /* __stm32f427xx_H */
 
 
 

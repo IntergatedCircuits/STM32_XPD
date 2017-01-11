@@ -1284,6 +1284,9 @@ typedef struct {
              uint32_t __RESERVED1[24];
     } FCR;                                                  /*!< DMA stream x FIFO control register       */
 } DMA_Stream_BitBand_TypeDef;
+
+
+
 typedef struct {
     union {
         struct {
@@ -4881,7 +4884,6 @@ typedef struct {
 } RNG_TypeDef;
 
 
-
  
 /**
   * @brief USB_OTG_Core_register
@@ -5464,6 +5466,8 @@ typedef struct {
          uint32_t __RESERVED0[2];
 } USB_OTG_HostChannelTypeDef;
 
+
+
 /**
   * @brief USB_OTG
   */
@@ -5877,6 +5881,7 @@ typedef struct {
 } USB_OTG_TypeDef;
 
 
+
 /**
   * @brief Peripheral_memory_map
   */
@@ -6153,12 +6158,12 @@ typedef struct {
 /*                                                                            */
 /******************************************************************************/
 /********************  Bit definition for ADC_SR register  ********************/
-#define  ADC_SR_AWD                          0x00000001U       /*!<Analog watchdog flag */
-#define  ADC_SR_EOC                          0x00000002U       /*!<End of conversion */
-#define  ADC_SR_JEOC                         0x00000004U       /*!<Injected channel end of conversion */
-#define  ADC_SR_JSTRT                        0x00000008U       /*!<Injected channel Start flag */
-#define  ADC_SR_STRT                         0x00000010U       /*!<Regular channel Start flag */
-#define  ADC_SR_OVR                          0x00000020U       /*!<Overrun flag */
+#define  ADC_SR_AWD                          0x00000001U        /*!<Analog watchdog flag */
+#define  ADC_SR_EOC                          0x00000002U        /*!<End of conversion */
+#define  ADC_SR_JEOC                         0x00000004U        /*!<Injected channel end of conversion */
+#define  ADC_SR_JSTRT                        0x00000008U        /*!<Injected channel Start flag */
+#define  ADC_SR_STRT                         0x00000010U        /*!<Regular channel Start flag */
+#define  ADC_SR_OVR                          0x00000020U        /*!<Overrun flag */
 
 /*******************  Bit definition for ADC_CR1 register  ********************/
 #define  ADC_CR1_AWDCH                       0x0000001FU        /*!<AWDCH[4:0] bits (Analog watchdog channel select bits) */
@@ -12338,7 +12343,7 @@ typedef struct {
 
 /******************************** I2S Instances *******************************/
 #define IS_I2S_ALL_INSTANCE(INSTANCE)  (((INSTANCE) == SPI2) || \
-                                    ((INSTANCE) == SPI3))
+                                        ((INSTANCE) == SPI3))
 
 /*************************** I2S Extended Instances ***************************/
 #define IS_I2S_ALL_INSTANCE_EXT(PERIPH)  (((INSTANCE) == SPI2)    || \
@@ -12610,13 +12615,8 @@ typedef struct {
                                     ((INSTANCE) == USART6))     
 
 /*********************** PCD Instances ****************************************/
-/*********************** PCD Instances ****************************************/
 #define IS_PCD_ALL_INSTANCE(INSTANCE) (((INSTANCE) == USB_OTG_FS) || \
                                         ((INSTANCE) == USB_OTG_HS))
-
-/*********************** HCD Instances ****************************************/
-#define IS_HCD_ALL_INSTANCE(INSTANCE) (((INSTANCE) == USB_OTG_FS) || \
-                                       ((INSTANCE) == USB_OTG_HS))
 
 /*********************** HCD Instances ****************************************/
 #define IS_HCD_ALL_INSTANCE(INSTANCE) (((INSTANCE) == USB_OTG_FS) || \
@@ -12682,6 +12682,8 @@ typedef struct
 #define ADC_TEMPSENSOR       ((ADC_TempSensorCalibrationTypeDef *)((uint32_t)0x1FFF7A2CU))
 
 #define ADC_VREFINT_CAL      (*((__I uint16_t *)((uint32_t)0x1FFF7A2AU)))
+
+#define ADC_VBAT_SCALER      2
 
 /**
   * @}
@@ -12776,7 +12778,7 @@ typedef struct
 #define GPIO_SDIO_AF12         ((uint8_t)0x0C)  /* SDIO Alternate Function mapping                     */
 
 /* AF 15 selection */
-#define GPIO_EVENTOUT_AF15      ((uint8_t)0x0F)  /* EVENTOUT Alternate Function mapping */
+#define GPIO_EVENTOUT_AF15     ((uint8_t)0x0F)  /* EVENTOUT Alternate Function mapping */
 
 /**
   * @}

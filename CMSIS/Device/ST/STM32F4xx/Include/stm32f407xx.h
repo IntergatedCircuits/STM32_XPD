@@ -1242,7 +1242,7 @@ typedef struct {
                  uint32_t __RESERVED0 : 27;
         } b;
         __IO uint32_t w;
-    } RISR;                                                 /*!< DCMI raw interrupt status register,            Address offset: 0x08 */
+    } RIS;                                                 /*!< DCMI raw interrupt status register,            Address offset: 0x08 */
     union {
         struct {
             __IO uint32_t FRAME_IE : 1;
@@ -1264,7 +1264,7 @@ typedef struct {
                  uint32_t __RESERVED0 : 27;
         } b;
         __IO uint32_t w;
-    } MISR;                                                 /*!< DCMI masked interrupt status register,         Address offset: 0x10 */
+    } MIS;                                                 /*!< DCMI masked interrupt status register,         Address offset: 0x10 */
     union {
         struct {
             __IO uint32_t FRAME_ISC : 1;
@@ -1404,7 +1404,6 @@ typedef struct {
              uint32_t __RESERVED1[24];
     } FCR;                                                  /*!< DMA stream x FIFO control register       */
 } DMA_Stream_BitBand_TypeDef;
-
 
 
 
@@ -2763,7 +2762,7 @@ typedef struct {
 
 
 
-/** 
+/**
   * @brief General Purpose I/O
   */
 typedef struct {
@@ -5572,7 +5571,6 @@ typedef struct {
 } RNG_TypeDef;
 
 
-
  
 /**
   * @brief USB_OTG_Core_register
@@ -6571,7 +6569,6 @@ typedef struct {
 
 
 
-
 /**
   * @brief Peripheral_memory_map
   */
@@ -6851,12 +6848,12 @@ typedef struct {
 /*                                                                            */
 /******************************************************************************/
 /********************  Bit definition for ADC_SR register  ********************/
-#define  ADC_SR_AWD                          0x00000001U       /*!<Analog watchdog flag */
-#define  ADC_SR_EOC                          0x00000002U       /*!<End of conversion */
-#define  ADC_SR_JEOC                         0x00000004U       /*!<Injected channel end of conversion */
-#define  ADC_SR_JSTRT                        0x00000008U       /*!<Injected channel Start flag */
-#define  ADC_SR_STRT                         0x00000010U       /*!<Regular channel Start flag */
-#define  ADC_SR_OVR                          0x00000020U       /*!<Overrun flag */
+#define  ADC_SR_AWD                          0x00000001U        /*!<Analog watchdog flag */
+#define  ADC_SR_EOC                          0x00000002U        /*!<End of conversion */
+#define  ADC_SR_JEOC                         0x00000004U        /*!<Injected channel end of conversion */
+#define  ADC_SR_JSTRT                        0x00000008U        /*!<Injected channel Start flag */
+#define  ADC_SR_STRT                         0x00000010U        /*!<Regular channel Start flag */
+#define  ADC_SR_OVR                          0x00000020U        /*!<Overrun flag */
 
 /*******************  Bit definition for ADC_CR1 register  ********************/
 #define  ADC_CR1_AWDCH                       0x0000001FU        /*!<AWDCH[4:0] bits (Analog watchdog channel select bits) */
@@ -13808,6 +13805,8 @@ typedef struct
 #define ADC_TEMPSENSOR       ((ADC_TempSensorCalibrationTypeDef *)((uint32_t)0x1FFF7A2CU))
 
 #define ADC_VREFINT_CAL      (*((__I uint16_t *)((uint32_t)0x1FFF7A2AU)))
+
+#define ADC_VBAT_SCALER      2
 
 /**
   * @}
