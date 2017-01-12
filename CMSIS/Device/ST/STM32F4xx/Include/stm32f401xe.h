@@ -1137,8 +1137,6 @@ typedef struct {
 /**
   * @brief General Purpose I/O
   */
-
-
 typedef struct {
     __IO uint32_t MODER;                                    /*!< GPIO port mode register,               Address offset: 0x00      */
     __IO uint32_t OTYPER;                                   /*!< GPIO port output type register,        Address offset: 0x04      */
@@ -1765,8 +1763,7 @@ typedef struct {
             __IO uint32_t CRCEN : 1;
                  uint32_t __RESERVED2 : 5;
             __IO uint32_t BKPSRAMEN : 1;
-                 uint32_t __RESERVED3 : 1;
-            __IO uint32_t CCMDATARAMEN : 1;
+                 uint32_t __RESERVED3 : 2;
             __IO uint32_t DMA1EN : 1;
             __IO uint32_t DMA2EN : 1;
                  uint32_t __RESERVED4 : 9;
@@ -2112,8 +2109,7 @@ typedef struct {
         __IO uint32_t CRCEN;
              uint32_t __RESERVED2[5];
         __IO uint32_t BKPSRAMEN;
-             uint32_t __RESERVED3;
-        __IO uint32_t CCMDATARAMEN;
+             uint32_t __RESERVED3[2];
         __IO uint32_t DMA1EN;
         __IO uint32_t DMA2EN;
              uint32_t __RESERVED4[9];
@@ -4113,9 +4109,9 @@ typedef struct {
     } DEACHINT;                                             /*!< dedicated EP interrupt       Address offset : 0x838 */
     __IO uint32_t DEACHMSK;                                 /*!< dedicated EP msk             Address offset : 0x83C */
          uint32_t __RESERVED2;
-    __IO uint32_t DINEP1MSK;                 /*!< dedicated EP mask            Address offset : 0x844 */
+    __IO uint32_t DINEP1MSK;                                /*!< dedicated EP mask            Address offset : 0x844 */
          uint32_t __RESERVED3[15];
-    __IO uint32_t DOUTEP1MSK;                /*!< dedicated EP msk             Address offset : 0x884 */
+    __IO uint32_t DOUTEP1MSK;                               /*!< dedicated EP msk             Address offset : 0x884 */
 } USB_OTG_DeviceTypeDef;
 
 
@@ -4959,6 +4955,7 @@ typedef struct {
 #define TIM_BB(inst)               ((TIM_BitBand_TypeDef *) PERIPH_BB(inst))
 #define USART_BB(inst)             ((USART_BitBand_TypeDef *) PERIPH_BB(inst))
 #define WWDG_BB                    ((WWDG_BitBand_TypeDef *) PERIPH_BB(WWDG_BASE))
+
 /**
   * @}
   */
@@ -8940,7 +8937,7 @@ typedef struct
 
 #define ADC_VREFINT_CAL      (*((__I uint16_t *)((uint32_t)0x1FFF7A2AU)))
 
-#define ADC_VBAT_SCALER      4U
+#define ADC_VBAT_SCALER      4
 /**
   * @}
   */

@@ -5746,7 +5746,7 @@ typedef struct {
 } RNG_TypeDef;
 
 
- 
+
 /**
   * @brief USB_OTG_Core_register
   */
@@ -5931,7 +5931,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } GRXSTSP;                                              /*!<  Receive Sts Q Read & POP Register      Address offset : 0x20      */
-    __IO uint32_t GRXFSIZ;                                  /* Receive FIFO Size Register                Address offset : 0x24      */
+    __IO uint32_t GRXFSIZ;                                  /*!<  Receive FIFO Size Register             Address offset : 0x24      */
     __IO uint32_t DIEPTXF0_HNPTXFSIZ;                       /*!<  EP0 / Non Periodic Tx FIFO Size Register Address offset : 0x28    */
     __IO uint32_t HNPTXSTS;                                 /*!<  Non Periodic Tx FIFO/Queue Sts reg     Address offset : 0x2C      */
          uint32_t __RESERVED0[2];
@@ -6029,7 +6029,7 @@ typedef struct {
                  uint32_t __RESERVED2 : 22;
         } b;
         __IO uint32_t w;
-    } DIEPMSK;                                              /* !< dev IN Endpoint Mask        Address offset : 0x810 */
+    } DIEPMSK;                                              /*!< dev IN Endpoint Mask        Address offset : 0x810 */
     union {
         struct {
             __IO uint32_t XFRCM : 1;                        /*!< Transfer completed interrupt mask */
@@ -6090,9 +6090,9 @@ typedef struct {
     } DEACHINT;                                             /*!< dedicated EP interrupt       Address offset : 0x838 */
     __IO uint32_t DEACHMSK;                                 /*!< dedicated EP msk             Address offset : 0x83C */
          uint32_t __RESERVED2;
-    __IO uint32_t DINEP1MSK;                 /*!< dedicated EP mask            Address offset : 0x844 */
+    __IO uint32_t DINEP1MSK;                                /*!< dedicated EP mask            Address offset : 0x844 */
          uint32_t __RESERVED3[15];
-    __IO uint32_t DOUTEP1MSK;                /*!< dedicated EP msk             Address offset : 0x884 */
+    __IO uint32_t DOUTEP1MSK;                               /*!< dedicated EP msk             Address offset : 0x884 */
 } USB_OTG_DeviceTypeDef;
 
 
@@ -6153,7 +6153,7 @@ typedef struct {
         __IO uint32_t w;
     } DIEPTSIZ;                                             /* IN Endpoint Txfer Size   900h + (ep_num * 20h) + 10h        */
     __IO uint32_t DIEPDMA;                                  /* IN Endpoint DMA Address Reg    900h + (ep_num * 20h) + 14h  */
-    __IO uint32_t DTXFSTS;                                  /*IN Endpoint Tx FIFO Status Reg 900h + (ep_num * 20h) + 18h   */
+    __IO uint32_t DTXFSTS;                                  /* IN Endpoint Tx FIFO Status Reg 900h + (ep_num * 20h) + 18h  */
          uint32_t __RESERVED2;
 } USB_OTG_INEndpointTypeDef;
 
