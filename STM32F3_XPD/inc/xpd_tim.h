@@ -199,6 +199,55 @@ typedef struct
 #define         XPD_TIM_ClearFlag(HANDLE,FLAG_NAME) \
     (TIM_REG_BIT((HANDLE),SR,FLAG_NAME##IF) = 0)
 
+/**
+ * @brief  Generate a TIM event.
+ * @param  HANDLE: specifies the TIM Handle.
+ * @param  FLAG_NAME: specifies the event to generate.
+ *         This parameter can be one of the following values:
+ *            @arg U:       Update
+ *            @arg CC1:     Capture/Compare channel 1
+ *            @arg CC2:     Capture/Compare channel 2
+ *            @arg CC3:     Capture/Compare channel 3
+ *            @arg CC4:     Capture/Compare channel 4
+ *            @arg COM:     Commutation
+ *            @arg T:       Trigger
+ *            @arg B:       Break
+ */
+#define         XPD_TIM_GenerateEvent(HANDLE,FLAG_NAME) \
+    (TIM_REG_BIT((HANDLE),EGR,FLAG_NAME##G) = 1)
+
+/**
+ * @brief Gets the TIM counter direction.
+ * @param htim: pointer to the TIM handle structure
+ * @return The current counter direction (up/down)
+ */
+#define         XPD_TIM_Counter_Direction(HANDLE)       \
+    (TIM_REG_BIT((HANDLE), CR1, DIR))
+
+/**
+ * @brief Gets the current TIM counter value.
+ * @param htim: pointer to the TIM handle structure
+ * @return The value of the counter
+ */
+#define         XPD_TIM_Counter_Value(HANDLE)           \
+    ((HANDLE)->Inst->CNT)
+
+/**
+ * @brief Gets the current TIM reload value.
+ * @param htim: pointer to the TIM handle structure
+ * @return The value of the reload register
+ */
+#define         XPD_TIM_Counter_Reload(HANDLE)          \
+    ((HANDLE)->Inst->ARR)
+
+/**
+ * @brief Gets the current TIM repetition counter value.
+ * @param htim: pointer to the TIM handle structure
+ * @return The value of the repetition counter
+ */
+#define         XPD_TIM_Counter_Repetition(HANDLE)      \
+    ((HANDLE)->Inst->RCR)
+
 
 #define         XPD_TIM_Channel_GetFlag(HANDLE, CH)  \
     ((HANDLE)->Inst->SR.w & (TIM_SR_CC1IF << (CH)))
@@ -237,11 +286,6 @@ void            XPD_TIM_Counter_Start_IT    (TIM_HandleType * htim);
 void            XPD_TIM_Counter_Stop_IT     (TIM_HandleType * htim);
 XPD_ReturnType  XPD_TIM_Counter_Start_DMA   (TIM_HandleType * htim, void * Address, uint16_t Length);
 void            XPD_TIM_Counter_Stop_DMA    (TIM_HandleType * htim);
-
-TIM_CounterType XPD_TIM_Counter_GetDirection(TIM_HandleType * htim);
-
-uint32_t        XPD_TIM_Counter_GetValue    (TIM_HandleType * htim);
-void            XPD_TIM_Counter_SetValue    (TIM_HandleType * htim, uint32_t Value);
 
 TIM_ChannelType XPD_TIM_Channel_GetActive   (TIM_HandleType * htim);
 

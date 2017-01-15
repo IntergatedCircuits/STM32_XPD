@@ -132,7 +132,7 @@ XPD_ReturnType XPD_TIM_Init(TIM_HandleType * htim, TIM_Counter_InitType * Config
 
     /* Generate an update event to reload the prescaler
      and the repetition counter (only for TIM1 and TIM8) value immediately */
-    TIM_REG_BIT(htim,EGR,UG) = 1;
+    XPD_TIM_GenerateEvent(htim, U);
 
     return XPD_OK;
 }
@@ -254,36 +254,6 @@ void XPD_TIM_Counter_Stop_DMA(TIM_HandleType * htim)
 
     /* disable the counter */
     XPD_TIM_Counter_Stop(htim);
-}
-
-/**
- * @brief Gets the TIM counter direction.
- * @param htim: pointer to the TIM handle structure
- * @return The current counter direction (up/down)
- */
-TIM_CounterType XPD_TIM_Counter_GetDirection(TIM_HandleType * htim)
-{
-    return TIM_REG_BIT(htim, CR1, DIR);
-}
-
-/**
- * @brief Gets the current TIM counter value.
- * @param htim: pointer to the TIM handle structure
- * @return The value of the counter
- */
-uint32_t XPD_TIM_Counter_GetValue(TIM_HandleType * htim)
-{
-    return htim->Inst->CNT;
-}
-
-/**
- * @brief Sets the TIM counter value.
- * @param htim: pointer to the TIM handle structure
- * @param Value: the new value of the counter
- */
-void XPD_TIM_Counter_SetValue(TIM_HandleType * htim, uint32_t Value)
-{
-    htim->Inst->CNT = Value;
 }
 
 /**
