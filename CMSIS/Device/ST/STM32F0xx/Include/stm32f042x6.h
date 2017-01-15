@@ -12562,7 +12562,7 @@ typedef struct {
 typedef struct
 {
     __I uint16_t CAL30;
-    const uint16_t __RESERVED[5];
+    const uint16_t __RESERVED[4];
     __I uint16_t CAL110;
 }ADC_TempSensorCalibrationTypeDef;
 
