@@ -22,6 +22,7 @@
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
 #include "xpd_rcc.h"
+#include "xpd_utils.h"
 
 #if defined(USE_XPD_ADC)
 
@@ -42,6 +43,8 @@ void XPD_ADC_ClockConfig(ADC_ClockSourceType ClockSource)
 {
     if (ClockSource == ADC_CLOCKSOURCE_HSI14)
     {
+        uint32_t timeout = RCC_HSI14_TIMEOUT;
+
         /* Disable ADC control of the oscillator */
         RCC_REG_BIT(CR2, HSI14DIS) = 1;
 
@@ -49,7 +52,7 @@ void XPD_ADC_ClockConfig(ADC_ClockSourceType ClockSource)
         RCC_REG_BIT(CR2, HSI14ON) = 1;
 
         /* Wait until HSI14 is ready */
-        if (XPD_OK == XPD_WaitForMatch(&RCC->CR2.w, RCC_CR2_HSI14RDY, RCC_CR2_HSI14RDY, RCC_HSI14_TIMEOUT))
+        if (XPD_OK == XPD_WaitForMatch(&RCC->CR2.w, RCC_CR2_HSI14RDY, RCC_CR2_HSI14RDY, &timeout))
         {
             /* Enable ADC control of the oscillator */
             RCC_REG_BIT(CR2, HSI14DIS) = 0;
@@ -61,9 +64,14 @@ void XPD_ADC_ClockConfig(ADC_ClockSourceType ClockSource)
         RCC_REG_BIT(CR2, HSI14DIS) = 1;
         RCC_REG_BIT(CR2, HSI14ON) = 0;
     }
+
     XPD_ADC1_ClockCtrl(ENABLE);
 
-    ADC1->CFGR2.b.CKMODE = ClockSource;
+    /* Peripheral configuration can only be applied when ADC is in OFF state */
+    if ((ADC1->CR.w & (ADC_CR_ADSTART | ADC_CR_ADEN)) == 0)
+    {
+        ADC1->CFGR2.b.CKMODE = ClockSource;
+    }
 }
 
 /**

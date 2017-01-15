@@ -55,20 +55,34 @@ void XPD_ADC_ClockConfig(ADC_ClockSourceType ClockSource)
 #if defined(RCC_CFGR2_ADCPRE12)
         XPD_ADC12_ClockCtrl(ENABLE);
 
-        ADC12_COMMON->CCR.b.CKMODE = ClockSource;
+        /* Peripheral configuration can only be applied when ADC is in OFF state */
+        if (   ((ADC1->CR.w & (ADC_CR_ADSTART | ADC_CR_ADEN)) == 0)
+            && ((ADC2->CR.w & (ADC_CR_ADSTART | ADC_CR_ADEN)) == 0))
+        {
+            ADC12_COMMON->CCR.b.CKMODE = ClockSource;
+        }
 
         RCC->CFGR2.b.ADCPRE12 = 0;
 #if defined(RCC_CFGR2_ADCPRE34)
         XPD_ADC34_ClockCtrl(ENABLE);
 
-        ADC34_COMMON->CCR.b.CKMODE = ClockSource;
+        /* Peripheral configuration can only be applied when ADC is in OFF state */
+        if (   ((ADC3->CR.w & (ADC_CR_ADSTART | ADC_CR_ADEN)) == 0)
+            && ((ADC4->CR.w & (ADC_CR_ADSTART | ADC_CR_ADEN)) == 0))
+        {
+            ADC34_COMMON->CCR.b.CKMODE = ClockSource;
+        }
 
         RCC->CFGR2.b.ADCPRE34 = 0;
 #endif
 #elif defined(RCC_CFGR2_ADCPRES)
         XPD_ADC1_ClockCtrl(ENABLE);
 
-        ADC1_COMMON->CCR.b.CKMODE = ClockSource;
+        /* Peripheral configuration can only be applied when ADC is in OFF state */
+        if (   ((ADC1->CR.w & (ADC_CR_ADSTART | ADC_CR_ADEN)) == 0))
+        {
+            ADC1_COMMON->CCR.b.CKMODE = ClockSource;
+        }
 
         RCC->CFGR2.b.ADCPRES = 0;
 #endif
@@ -78,20 +92,34 @@ void XPD_ADC_ClockConfig(ADC_ClockSourceType ClockSource)
 #if defined(RCC_CFGR2_ADCPRE12)
         XPD_ADC12_ClockCtrl(ENABLE);
 
-        ADC12_COMMON->CCR.b.CKMODE = 0;
+        /* Peripheral configuration can only be applied when ADC is in OFF state */
+        if (   ((ADC1->CR.w & (ADC_CR_ADSTART | ADC_CR_ADEN)) == 0)
+            && ((ADC2->CR.w & (ADC_CR_ADSTART | ADC_CR_ADEN)) == 0))
+        {
+            ADC12_COMMON->CCR.b.CKMODE = 0;
+        }
 
         RCC->CFGR2.b.ADCPRE12 = ClockSource;
 #if defined(RCC_CFGR2_ADCPRE34)
         XPD_ADC34_ClockCtrl(ENABLE);
 
-        ADC34_COMMON->CCR.b.CKMODE = 0;
+        /* Peripheral configuration can only be applied when ADC is in OFF state */
+        if (   ((ADC3->CR.w & (ADC_CR_ADSTART | ADC_CR_ADEN)) == 0)
+            && ((ADC4->CR.w & (ADC_CR_ADSTART | ADC_CR_ADEN)) == 0))
+        {
+            ADC34_COMMON->CCR.b.CKMODE = 0;
+        }
 
         RCC->CFGR2.b.ADCPRE34 = ClockSource;
 #endif
 #elif defined(RCC_CFGR2_ADCPRES)
         XPD_ADC1_ClockCtrl(ENABLE);
 
-        ADC1_COMMON->CCR.b.CKMODE = 0;
+        /* Peripheral configuration can only be applied when ADC is in OFF state */
+        if (   ((ADC1->CR.w & (ADC_CR_ADSTART | ADC_CR_ADEN)) == 0))
+        {
+            ADC1_COMMON->CCR.b.CKMODE = 0;
+        }
 
         RCC->CFGR2.b.ADCPRES = ClockSource;
 #endif
