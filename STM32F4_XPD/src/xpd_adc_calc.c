@@ -38,7 +38,7 @@
 static int32_t VDDA_mV = (int32_t)VDD_VALUE;
 
 #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
-static float   VDDA_V  = (float)VDD_VALUE;
+static float   VDDA_V  = ((float)VDD_VALUE) / 1000.0;
 
 /**
  * @brief Returns the VDDA value in voltage.

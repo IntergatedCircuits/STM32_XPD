@@ -96,26 +96,72 @@ static void adc_dmaErrorRedirect(void *hdma)
 }
 #endif
 
-static void adc_sampleTimeConfig(ADC_HandleType * hadc, uint8_t Channel, ADC_SampleTimeType SampleTime)
+static void adc_sequencerConfig(ADC_HandleType * hadc, uint8_t Channel, uint8_t Rank)
 {
-    /* sample time configuration */
-    if (Channel < 10)
-    {
-        uint32_t sampleOffset = Channel * 3;
-        uint32_t sampleMask   = ADC_SMPR2_SMP0 << sampleOffset;
-        uint32_t sampleVal    = SampleTime << sampleOffset;
+    uint32_t regoffset, rankm, choffset;
 
-        /* set the sample time */
-        MODIFY_REG(hadc->Inst->SMPR2.w, sampleMask, sampleVal);
+    /* channel configuration for a given rank */
+    if (Rank < 7)
+    {
+        regoffset = 2;
+        rankm = 1;
+    }
+    else if (Rank < 13)
+    {
+        regoffset = 1;
+        rankm = 7;
     }
     else
     {
-        uint32_t sampleOffset = (uint32_t)((uint8_t)Channel - 10) * 3;
-        uint32_t sampleMask   = ADC_SMPR2_SMP0 << sampleOffset;
-        uint32_t sampleVal    = SampleTime << sampleOffset;
+        regoffset = 0;
+        rankm = 13;
+    }
 
-        /* set the sample time */
-        MODIFY_REG(hadc->Inst->SMPR1.w, sampleMask, sampleVal);
+    /* set the channel for the selected rank */
+    choffset = (Rank - rankm) * 5;
+    MODIFY_REG((&hadc->Inst->SQR1.w)[regoffset], ADC_SQR3_SQ1 << choffset, Channel << choffset);
+}
+
+static void adc_sampleTimeConfig(ADC_HandleType * hadc, uint8_t Channel, ADC_SampleTimeType SampleTime)
+{
+    uint32_t regoffset = 1;
+
+    /* Channel sampling time configuration */
+    if (Channel > 10)
+    {
+        regoffset = 0;
+        Channel -= 10;
+    }
+    Channel *= 3;
+
+    /* set the sample time */
+    MODIFY_REG((&hadc->Inst->SMPR1.w)[regoffset], ADC_SMPR2_SMP0  << Channel, SampleTime << Channel);
+}
+
+/* Enables an internal channel for conversion */
+static void adc_initInternalChannel(ADC_HandleType * hadc, uint32_t Channel)
+{
+    /* Only ADC1 has access to internal measurement channels */
+    if (hadc->Inst == ADC1)
+    {
+        /* if ADC1 channel 18 is selected, enable VBAT */
+        if (Channel == ADC_VBAT_CHANNEL)
+        {
+            /* enable the VBAT input */
+            ADC_COMMON_REG_BIT(CCR, VBATE) = 1;
+        }
+        /* if ADC1 channel 16 or 17 is selected, enable Temperature sensor and VREFINT */
+        else if ((Channel == ADC_TEMPSENSOR_CHANNEL) || (Channel == ADC_VREFINT_CHANNEL))
+        {
+            /* enable the TS-VREF input */
+            ADC_COMMON_REG_BIT(CCR,TSVREFE) = 1;
+
+            if (Channel == ADC_TEMPSENSOR_CHANNEL)
+            {
+                /* wait temperature sensor stabilization */
+                XPD_Delay_us(ADC_TEMPSENSOR_DELAY_US);
+            }
+        }
     }
 }
 
@@ -202,60 +248,14 @@ XPD_ReturnType XPD_ADC_Deinit(ADC_HandleType * hadc)
  */
 void XPD_ADC_ChannelConfig(ADC_HandleType * hadc, ADC_ChannelInitType * Config)
 {
-    /* channel configuration for a given rank */
-    if (Config->Rank < 7)
-    {
-        uint32_t channelOffset = (Config->Rank - 1) * 5;
-        uint32_t channelMask   = ADC_SQR3_SQ1 << channelOffset;
-        uint32_t channelVal    = Config->Channel << channelOffset;
-
-        /* set the channel for the selected rank */
-        MODIFY_REG(hadc->Inst->SQR3.w, channelMask, channelVal);
-    }
-    else if (Config->Rank < 13)
-    {
-        uint32_t channelOffset = (Config->Rank - 7) * 5;
-        uint32_t channelMask   = ADC_SQR3_SQ1 << channelOffset;
-        uint32_t channelVal    = Config->Channel << channelOffset;
-
-        /* set the channel for the selected rank */
-        MODIFY_REG(hadc->Inst->SQR2.w, channelMask, channelVal);
-    }
-    else
-    {
-        uint32_t channelOffset = (Config->Rank - 13) * 5;
-        uint32_t channelMask   = ADC_SQR3_SQ1 << channelOffset;
-        uint32_t channelVal    = Config->Channel << channelOffset;
-
-        /* set the channel for the selected rank */
-        MODIFY_REG(hadc->Inst->SQR1.w, channelMask, channelVal);
-    }
+    /* sequencer rank configuration */
+    adc_sequencerConfig(hadc, Config->Channel, Config->Rank);
 
     /* sample time configuration */
     adc_sampleTimeConfig(hadc, Config->Channel, Config->SampleTime);
 
-    /* Only ADC1 has access to internal measurement channels */
-    if (hadc->Inst == ADC1)
-    {
-        /* if ADC1 channel 18 is selected, enable VBAT */
-        if (Config->Channel == ADC_VBAT_CHANNEL)
-        {
-            /* enable the VBAT input */
-            ADC_COMMON_REG_BIT(CCR, VBATE) = 1;
-        }
-        /* if ADC1 channel 16 or 17 is selected, enable Temperature sensor and VREFINT */
-        else if ((Config->Channel == ADC_TEMPSENSOR_CHANNEL) || (Config->Channel == ADC_VREFINT_CHANNEL))
-        {
-            /* enable the TS-VREF input */
-            ADC_COMMON_REG_BIT(CCR,TSVREFE) = 1;
-
-            if (Config->Channel == ADC_TEMPSENSOR_CHANNEL)
-            {
-                /* wait temperature sensor stabilization */
-                XPD_Delay_us(ADC_TEMPSENSOR_DELAY_US);
-            }
-        }
-    }
+    /* Internal channel configuration (if applicable) */
+    adc_initInternalChannel(hadc, Config->Channel);
 }
 
 /**
@@ -317,6 +317,7 @@ XPD_ReturnType XPD_ADC_PollStatus(ADC_HandleType * hadc, ADC_OperationType Opera
     }
     else
     {
+        /* Wait until operation flag is set */
         result = XPD_WaitForMatch(&hadc->Inst->SR.w, Operation, Operation, &Timeout);
         if (result == XPD_OK)
         {
@@ -478,6 +479,9 @@ XPD_ReturnType XPD_ADC_Start_DMA(ADC_HandleType * hadc, void * Address)
         hadc->DMA.Conversion->Callbacks.HalfComplete = adc_dmaHalfConversionRedirect;
 #ifdef USE_XPD_DMA_ERROR_DETECT
         hadc->DMA.Conversion->Callbacks.Error        = adc_dmaErrorRedirect;
+
+        /* Enable ADC overrun interrupt */
+        XPD_ADC_EnableIT(hadc, OVR);
 #endif
 
         /* Enable ADC DMA mode */
@@ -733,6 +737,9 @@ XPD_ReturnType XPD_ADC_MultiMode_Start_DMA(ADC_HandleType * hadc, void * Address
         hadc->DMA.Conversion->Callbacks.HalfComplete = adc_dmaHalfConversionRedirect;
 #ifdef USE_XPD_DMA_ERROR_DETECT
         hadc->DMA.Conversion->Callbacks.Error        = adc_dmaErrorRedirect;
+
+        /* Enable ADC overrun interrupt */
+        XPD_ADC_EnableIT(hadc, OVR);
 #endif
 
         /* pass the continuous DMA request setting to the common config */
