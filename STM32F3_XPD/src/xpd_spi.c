@@ -29,6 +29,8 @@
 /** @addtogroup SPI
  * @{ */
 
+#define SPI_BUSY_TIMEOUT    1000
+
 #define SPI_MASTER_RXONLY(HANDLE) \
     (((HANDLE)->Inst->CR1.w & (SPI_CR1_MSTR | SPI_CR1_BIDIMODE | SPI_CR1_RXONLY)) > SPI_CR1_MSTR)
 
@@ -75,7 +77,7 @@ static XPD_ReturnType spi_receiveCRC(SPI_HandleType * hspi, uint32_t * timeout)
     if (result == XPD_OK)
     {
         /* read CRC data from data register */
-        uint32_t temp = hspi->Inst->DR;
+        uint16_t temp = SPI_REG_BY_SIZE(&hspi->Inst->DR, hspi->RxStream.size);
     }
 
 #ifdef SPI_SR_FRLVL
@@ -94,7 +96,6 @@ static XPD_ReturnType spi_receiveCRC(SPI_HandleType * hspi, uint32_t * timeout)
     return result;
 }
 #endif
-
 
 static void spi_dmaTransmitRedirect(void * hdma)
 {
@@ -204,6 +205,21 @@ static void spi_dmaErrorRedirect(void * hdma)
     XPD_SAFE_CALLBACK(hspi->Callbacks.Error, hspi);
 }
 #endif
+
+static XPD_ReturnType spi_waitFinished(SPI_HandleType * hspi, uint32_t * timeout)
+{
+    XPD_ReturnType result;
+
+    /* While SPI is still busy with previous transfer, new one is not started */
+    result = XPD_WaitForMatch(&hspi->Inst->SR.w, SPI_SR_BSY, 0, timeout);
+
+    while (XPD_SPI_GetFlag(hspi, RXNE) != 0)
+    {
+        /* empty received data from data register */
+        uint16_t temp = SPI_REG_BY_SIZE(&hspi->Inst->DR, hspi->RxStream.size);
+    }
+    return result;
+}
 
 /** @defgroup SPI_Exported_Functions SPI Exported Functions
  * @{ */
@@ -425,7 +441,7 @@ XPD_ReturnType XPD_SPI_Transmit(SPI_HandleType * hspi, void * TxData, uint16_t L
         bool duplex = TRUE;
 
         /* While SPI is still busy with previous transfer, new one is not started */
-        result = XPD_WaitForMatch(&hspi->Inst->SR.w, SPI_SR_BSY, 0, &Timeout);
+        result = spi_waitFinished(hspi, &Timeout);
         if (result != XPD_OK)
         {
             return result;
@@ -519,7 +535,7 @@ XPD_ReturnType XPD_SPI_Receive(SPI_HandleType * hspi, void * RxData, uint16_t Le
         }
 
         /* While SPI is still busy with previous transfer, new one is not started */
-        result = XPD_WaitForMatch(&hspi->Inst->SR.w, SPI_SR_BSY, 0, &Timeout);
+        result = spi_waitFinished(hspi, &Timeout);
         if (result != XPD_OK)
         {
             return result;
@@ -606,7 +622,7 @@ XPD_ReturnType XPD_SPI_TransmitReceive(SPI_HandleType * hspi, void * TxData, voi
         bool duplex = TRUE, exclMaster = FALSE;
 
         /* While SPI is still busy with previous transfer, new one is not started */
-        result = XPD_WaitForMatch(&hspi->Inst->SR.w, SPI_SR_BSY, 0, &Timeout);
+        result = spi_waitFinished(hspi, &Timeout);
         if (result != XPD_OK)
         {
             return result;
@@ -682,8 +698,9 @@ void XPD_SPI_Transmit_IT(SPI_HandleType * hspi, void * TxData, uint16_t Length)
 {
     if (Length > 0)
     {
+        uint32_t timeout = SPI_BUSY_TIMEOUT;
         /* While SPI is still busy with previous transfer, new one is not started */
-        while (XPD_SPI_GetFlag(hspi, BSY) != 0) { }
+        (void)spi_waitFinished(hspi, &timeout);
 
         /* save stream info */
         hspi->TxStream.buffer = TxData;
@@ -722,6 +739,8 @@ void XPD_SPI_Receive_IT(SPI_HandleType * hspi, void * RxData, uint16_t Length)
 {
     if (Length > 0)
     {
+        uint32_t timeout = SPI_BUSY_TIMEOUT;
+
         /* If master mode, and full duplex communication */
         if (SPI_MASTER_FULL_DUPLEX(hspi))
         {
@@ -731,7 +750,7 @@ void XPD_SPI_Receive_IT(SPI_HandleType * hspi, void * RxData, uint16_t Length)
         }
 
         /* While SPI is still busy with previous transfer, new one is not started */
-        while (XPD_SPI_GetFlag(hspi, BSY) != 0) { }
+        (void)spi_waitFinished(hspi, &timeout);
 
         /* save stream info */
         hspi->RxStream.buffer = RxData;
@@ -774,8 +793,9 @@ void XPD_SPI_TransmitReceive_IT(SPI_HandleType * hspi, void * TxData, void * RxD
 {
     if (Length > 0)
     {
+        uint32_t timeout = SPI_BUSY_TIMEOUT;
         /* While SPI is still busy with previous transfer, new one is not started */
-        while (XPD_SPI_GetFlag(hspi, BSY) != 0) { }
+        (void)spi_waitFinished(hspi, &timeout);
 
         /* save stream info */
         hspi->TxStream.buffer = TxData;
@@ -968,8 +988,9 @@ XPD_ReturnType XPD_SPI_Transmit_DMA(SPI_HandleType * hspi, void * TxData, uint16
 
     if (Length > 0)
     {
+        uint32_t timeout = SPI_BUSY_TIMEOUT;
         /* While SPI is still busy with previous transfer, new one is not started */
-        while (XPD_SPI_GetFlag(hspi, BSY) != 0) { }
+        (void)spi_waitFinished(hspi, &timeout);
 
         /* save stream info */
         hspi->TxStream.buffer = TxData;
@@ -1037,8 +1058,9 @@ XPD_ReturnType XPD_SPI_Receive_DMA(SPI_HandleType * hspi, void * RxData, uint16_
 
     else if (Length > 0)
     {
+        uint32_t timeout = SPI_BUSY_TIMEOUT;
         /* While SPI is still busy with previous transfer, new one is not started */
-        while (XPD_SPI_GetFlag(hspi, BSY) != 0) { }
+        (void)spi_waitFinished(hspi, &timeout);
 
         /* save stream info */
         hspi->RxStream.buffer = RxData;
@@ -1099,8 +1121,9 @@ XPD_ReturnType XPD_SPI_TransmitReceive_DMA(SPI_HandleType * hspi, void * TxData,
 
     if (Length > 0)
     {
+        uint32_t timeout = SPI_BUSY_TIMEOUT;
         /* While SPI is still busy with previous transfer, new one is not started */
-        while (XPD_SPI_GetFlag(hspi, BSY) != 0) { }
+        (void)spi_waitFinished(hspi, &timeout);
 
         /* save stream info */
         hspi->TxStream.buffer = TxData;
