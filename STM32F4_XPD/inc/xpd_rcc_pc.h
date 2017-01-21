@@ -41,9 +41,13 @@
 typedef enum
 {
     RTC_CLOCKSOURCE_NOCLOCK = 0, /*!< no clock source */
+#ifdef LSE_VALUE
     RTC_CLOCKSOURCE_LSE     = 1, /*!< LSE clock source */
+#endif
     RTC_CLOCKSOURCE_LSI     = 2, /*!< LSI clock source */
+#ifdef HSE_VALUE
     RTC_CLOCKSOURCE_HSE     = 3, /*!< HSE clock source */
+#endif
 }RTC_ClockSourceType;
 /** @} */
 

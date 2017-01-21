@@ -82,6 +82,7 @@ XPD_ReturnType XPD_RTC_ClockConfig(RTC_ClockSourceType ClockSource)
             }
         }
 
+#ifdef HSE_VALUE
         /* if HSE is clock source, must set divider in order to get 1 MHz */
         if (ClockSource == RTC_CLOCKSOURCE_HSE)
         {
@@ -97,6 +98,7 @@ XPD_ReturnType XPD_RTC_ClockConfig(RTC_ClockSourceType ClockSource)
                 RCC->CFGR.b.RTCPRE = tmp;
             }
         }
+#endif
 
         /* set clock source if no error was encountered */
         RCC->BDCR.b.RTCSEL = ClockSource;

@@ -268,10 +268,16 @@ void XPD_CEC_ClockConfig(CEC_ClockSourceType ClockSource)
  */
 uint32_t XPD_CEC_GetClockFreq(void)
 {
-    if (RCC_REG_BIT(CFGR3,CECSW) == CEC_CLOCKSOURCE_HSI_DIV244)
-        return HSI_VALUE / 244;
-    else
+#ifdef LSE_VALUE
+    if (RCC_REG_BIT(CFGR3,CECSW) != CEC_CLOCKSOURCE_HSI_DIV244)
+    {
         return LSE_VALUE;
+    }
+    else
+#endif
+    {
+        return HSI_VALUE / 244;
+    }
 }
 
 /** @} */
@@ -492,21 +498,26 @@ uint32_t XPD_RTC_GetClockFreq(void)
     /* Get the current RTC source */
     srcclk = RCC->BDCR.b.RTCSEL;
 
+#ifdef LSE_VALUE
     /* Check if LSE is ready and if RTC clock selection is LSE */
     if ((srcclk == RTC_CLOCKSOURCE_LSE) && (RCC_REG_BIT(BDCR,LSERDY) != 0))
     {
         return LSE_VALUE;
     }
+    else
+#endif
     /* Check if LSI is ready and if RTC clock selection is LSI */
-    else if ((srcclk == RTC_CLOCKSOURCE_LSI) && (RCC_REG_BIT(CSR,LSIRDY) != 0))
+    if ((srcclk == RTC_CLOCKSOURCE_LSI) && (RCC_REG_BIT(CSR,LSIRDY) != 0))
     {
         return LSI_VALUE;
     }
+#ifdef HSE_VALUE
     /* Check if HSE is ready  and if RTC clock selection is HSE / x */
     else if ((srcclk == RTC_CLOCKSOURCE_HSE_DIV32) && (RCC_REG_BIT(CR,HSERDY) != 0))
     {
         return HSE_VALUE / 32;
     }
+#endif
     /* Clock not enabled for RTC */
     else
     {
@@ -861,8 +872,10 @@ uint32_t XPD_USART_GetClockFreq(USART_HandleType * husart)
         case USART_CLOCKSOURCE_HSI:
             return HSI_VALUE;
 
+#ifdef LSE_VALUE
         case USART_CLOCKSOURCE_LSE:
             return LSE_VALUE;
+#endif
 
         default:
             return XPD_RCC_GetClockFreq((((uint32_t)husart->Inst) < APB2PERIPH_BASE) ? PCLK1 : PCLK2);

@@ -40,13 +40,17 @@
 typedef enum
 {
     HSI    = 0, /*!< High speed internal oscillator */
+#ifdef HSE_VALUE
     HSE    = 1, /*!< High speed external oscillator */
+#endif
     PLL    = 2, /*!< Phase locked loop */
 #if defined(RCC_CFGR_SW_HSI48)
     HSI48  = 3, /*!< 48 MHz internal oscillator */
 #endif
     LSI    = 4, /*!< Low speed internal oscillator */
+#ifdef LSE_VALUE
     LSE    = 5, /*!< Low speed external oscillator */
+#endif
     HSI14  = 6, /*!< 14 MHz internal oscillator */
 }RCC_OscType;
 
@@ -58,6 +62,7 @@ typedef enum
     OSC_BYPASS = 3  /*!< External oscillator BYPASS state (external clock source) */
 }RCC_OscStateType;
 
+#ifdef HSE_VALUE
 /** @brief HSE setup structure */
 typedef struct
 {
@@ -66,6 +71,7 @@ typedef struct
     uint8_t          Predivider; /*!< HSE predivision value [1..16] */
 #endif
 }RCC_HSE_InitType;
+#endif
 
 /** @brief HSI setup structure */
 typedef struct
@@ -82,7 +88,7 @@ typedef struct
     RCC_OscType      Source;     /*!< PLL input source selection. Permitted values:
                                       @arg @ref RCC_OscType::HSI
                                       @arg @ref RCC_OscType::HSE */
-#ifdef RCC_CFGR_PLLSRC_HSI_PREDIV
+#if defined(RCC_CFGR_PLLSRC_HSI_PREDIV)
     uint8_t          Predivider; /*!< PLL predivider value [1..16] */
 #endif
 }RCC_PLL_InitType;
@@ -101,10 +107,14 @@ typedef enum
 {
     MCO1_CLOCKSOURCE_NOCLOCK     = 0,
     MCO1_CLOCKSOURCE_LSI         = 2,
+#ifdef LSE_VALUE
     MCO1_CLOCKSOURCE_LSE         = 3, /*!< LSE clock source */
+#endif
     MCO1_CLOCKSOURCE_SYSCLK      = 4,
     MCO1_CLOCKSOURCE_HSI         = 5, /*!< HSI clock source */
+#ifdef HSE_VALUE
     MCO1_CLOCKSOURCE_HSE         = 6, /*!< HSE clock source */
+#endif
     MCO1_CLOCKSOURCE_PLLCLK_DIV2 = 7, /*!< PLL / 2 clock source */
 #ifdef RCC_CFGR_MCOPRE
     MCO1_CLOCKSOURCE_PLLCLK      = 0XF, /*!< PLL clock source */
@@ -196,10 +206,14 @@ XPD_ReturnType      XPD_RCC_HSIConfig           (RCC_HSI_InitType * Config);
 #if defined(RCC_CFGR_SW_HSI48)
 XPD_ReturnType      XPD_RCC_HSI48Config         (RCC_HSI_InitType * Config);
 #endif
-XPD_ReturnType      XPD_RCC_HSEConfig           (RCC_HSE_InitType * Config);
-XPD_ReturnType      XPD_RCC_PLLConfig           (RCC_PLL_InitType * Config);
 XPD_ReturnType      XPD_RCC_LSIConfig           (RCC_OscStateType NewState);
+XPD_ReturnType      XPD_RCC_PLLConfig           (RCC_PLL_InitType * Config);
+#ifdef HSE_VALUE
+XPD_ReturnType      XPD_RCC_HSEConfig           (RCC_HSE_InitType * Config);
+#endif
+#ifdef LSE_VALUE
 XPD_ReturnType      XPD_RCC_LSEConfig           (RCC_OscStateType NewState);
+#endif
 
 uint32_t            XPD_RCC_GetOscFreq          (RCC_OscType Oscillator);
 

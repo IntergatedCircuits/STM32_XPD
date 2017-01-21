@@ -105,7 +105,9 @@ uint32_t        XPD_ADC34_GetClockFreq      (void);
 typedef enum
 {
     CEC_CLOCKSOURCE_HSI_DIV244 = 0, /*!< HSI / 244 clock source */
+#ifdef LSE_VALUE
     CEC_CLOCKSOURCE_LSE        = 1  /*!< LSE clock source */
+#endif
 }CEC_ClockSourceType;
 /** @} */
 
@@ -168,7 +170,9 @@ uint32_t        XPD_I2C_GetClockFreq        (I2C_HandleType * hi2c);
 typedef enum
 {
     I2S_CLOCKSOURCE_SYSCLK = 0, /*!< SYSCLK clock source */
+#ifdef EXTERNAL_CLOCK_VALUE
     I2S_CLOCKSOURCE_EXT    = 1, /*!< external clock source */
+#endif
 }I2S_ClockSourceType;
 /** @} */
 #endif
@@ -200,9 +204,13 @@ uint32_t        XPD_I2S_GetClockFreq        (void);
 typedef enum
 {
     RTC_CLOCKSOURCE_NOCLOCK   = 0, /*!< no clock source */
+#ifdef LSE_VALUE
     RTC_CLOCKSOURCE_LSE       = 1, /*!< LSE clock source */
+#endif
     RTC_CLOCKSOURCE_LSI       = 2, /*!< LSI clock source */
+#ifdef HSE_VALUE
     RTC_CLOCKSOURCE_HSE_DIV32 = 3, /*!< HSE / 32 clock source */
+#endif
 }RTC_ClockSourceType;
 /** @} */
 
@@ -310,15 +318,17 @@ typedef enum
 {
     USART_CLOCKSOURCE_PCLKx   = 0, /*!< default clock source */
     USART_CLOCKSOURCE_SYSCLK  = 1, /*!< SYSCLK clock source */
+#ifdef LSE_VALUE
     USART_CLOCKSOURCE_LSE     = 2, /*!< LSE clock source */
+#endif
     USART_CLOCKSOURCE_HSI     = 3, /*!< HSI clock source */
 }USART_ClockSourceType;
 /** @} */
 
 /** @addtogroup USART_Clock_Source_Exported_Functions
  * @{ */
-void            XPD_USART_ClockConfig       (USART_ClockSourceType ClockSource);
-uint32_t        XPD_USART_GetClockFreq      (void);
+void            XPD_USART_ClockConfig       (USART_HandleType * husart, USART_ClockSourceType ClockSource);
+uint32_t        XPD_USART_GetClockFreq      (USART_HandleType * husart);
 /** @} */
 
 /** @} */

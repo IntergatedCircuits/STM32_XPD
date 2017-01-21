@@ -120,6 +120,7 @@ XPD_ReturnType XPD_RCC_HSIConfig(RCC_HSI_InitType * Config)
     return result;
 }
 
+#ifdef HSE_VALUE
 /**
  * Configures the high speed external oscillator.
  * @param Config: pointer to the configuration parameters
@@ -155,18 +156,8 @@ XPD_ReturnType XPD_RCC_HSEConfig(RCC_HSE_InitType * Config)
 
         if ((result == XPD_OK) && (Config->State != OSC_OFF))
         {
-            switch(Config->State)
-            {
-            case OSC_ON:
-            default:
-                RCC_REG_BIT(CR,HSEON) = 1;
-                break;
-
-            case OSC_BYPASS:
-                RCC_REG_BIT(CR,HSEON) = 1;
-                RCC_REG_BIT(CR,HSEBYP) = 1;
-                break;
-            }
+            RCC_REG_BIT(CR,HSEON) = 1;
+            RCC_REG_BIT(CR,HSEBYP) = Config->State >> 1;
 
             /* Wait until HSE is ready */
             result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_HSERDY, RCC_CR_HSERDY, &timeout);
@@ -174,6 +165,7 @@ XPD_ReturnType XPD_RCC_HSEConfig(RCC_HSE_InitType * Config)
     }
     return result;
 }
+#endif
 
 /**
  * Configures the phase locked loop.
@@ -182,15 +174,11 @@ XPD_ReturnType XPD_RCC_HSEConfig(RCC_HSE_InitType * Config)
  */
 XPD_ReturnType XPD_RCC_PLLConfig(RCC_PLL_InitType * Config)
 {
-    XPD_ReturnType result;
+    XPD_ReturnType result = XPD_ERROR;
     RCC_OscType sysclock = XPD_RCC_GetSYSCLKSource();
 
     /* Check if the PLL is used as system clock or not */
-    if (sysclock == PLL)
-    {
-        result = XPD_ERROR;
-    }
-    else
+    if (sysclock != PLL)
     {
         uint32_t timeout = RCC_PLL_TIMEOUT;
         /* Disable the main PLL. */
@@ -252,6 +240,7 @@ XPD_ReturnType XPD_RCC_LSIConfig(RCC_OscStateType NewState)
     return result;
 }
 
+#ifdef LSE_VALUE
 /**
  * Sets the new state of the low speed external oscillator.
  * @param NewState: the new operation state
@@ -286,24 +275,15 @@ XPD_ReturnType XPD_RCC_LSEConfig(RCC_OscStateType NewState)
     /* Check the LSE State */
     if ((result == XPD_OK) && (NewState != OSC_OFF))
     {
-        switch(NewState)
-        {
-        case OSC_ON:
-        default:
-            RCC_REG_BIT(BDCR,LSEON) = 1;
-            break;
-
-        case OSC_BYPASS:
-            RCC_REG_BIT(BDCR,LSEON) = 1;
-            RCC_REG_BIT(BDCR,LSEBYP) = 1;
-            break;
-        }
+        RCC_REG_BIT(BDCR,LSEON) = 1;
+        RCC_REG_BIT(BDCR,LSEBYP) = NewState >> 1;
 
         /* Wait until LSE is ready */
         result = XPD_WaitForMatch(&RCC->BDCR.w, RCC_BDCR_LSERDY, RCC_BDCR_LSERDY, &timeout);
     }
     return result;
 }
+#endif
 
 /**
  * @brief Gets the input oscillator of the PLL.
@@ -334,8 +314,10 @@ uint32_t XPD_RCC_GetOscFreq(RCC_OscType Oscillator)
 
     switch (Oscillator)
     {
+#ifdef HSE_VALUE
         case HSE:
             return HSE_VALUE;
+#endif
 
         case HSI:
             return HSI_VALUE;
@@ -346,11 +328,13 @@ uint32_t XPD_RCC_GetOscFreq(RCC_OscType Oscillator)
             n = RCC->PLLCFGR.b.PLLN;
             p = (RCC->PLLCFGR.b.PLLP + 1) * 2;
 
+#ifdef HSE_VALUE
             if (XPD_RCC_GetPLLSource() != HSI)
             {
                 return HSE_VALUE / m * n / p;
             }
             else
+#endif
             {
                 return HSI_VALUE / m * n / p;
             }
@@ -362,11 +346,13 @@ uint32_t XPD_RCC_GetOscFreq(RCC_OscType Oscillator)
             n = RCC->PLLCFGR.b.PLLN;
             p = RCC->PLLCFGR.b.PLLR;
 
+#ifdef HSE_VALUE
             if (XPD_RCC_GetPLLSource() != HSI)
             {
                 return HSE_VALUE / m * n / p;
             }
             else
+#endif
             {
                 return HSI_VALUE / m * n / p;
             }
@@ -376,8 +362,10 @@ uint32_t XPD_RCC_GetOscFreq(RCC_OscType Oscillator)
         case LSI:
             return LSI_VALUE;
 
+#ifdef LSE_VALUE
         case LSE:
             return LSE_VALUE;
+#endif
 
         default:
             return 0;
@@ -402,6 +390,7 @@ void XPD_RCC_IRQHandler(void)
 {
     uint32_t cir = RCC->CIR.w;
 
+#ifdef LSE_VALUE
     /* Check RCC LSERDY flag  */
     if ((cir & (RCC_CIR_LSERDYF | RCC_CIR_LSERDYIE)) == (RCC_CIR_LSERDYF | RCC_CIR_LSERDYIE))
     {
@@ -412,6 +401,7 @@ void XPD_RCC_IRQHandler(void)
         rcc_readyOscillator = LSE;
         XPD_SAFE_CALLBACK(XPD_RCC_Callbacks.OscReady,);
     }
+#endif
     /* Check RCC LSIRDY flag  */
     if ((cir & (RCC_CIR_LSIRDYF | RCC_CIR_LSIRDYIE)) == (RCC_CIR_LSIRDYF | RCC_CIR_LSIRDYIE))
     {
@@ -432,6 +422,7 @@ void XPD_RCC_IRQHandler(void)
         rcc_readyOscillator = PLL;
         XPD_SAFE_CALLBACK(XPD_RCC_Callbacks.OscReady,);
     }
+#ifdef HSE_VALUE
     /* Check RCC HSERDY flag  */
     if ((cir & (RCC_CIR_HSERDYF | RCC_CIR_HSERDYIE)) == (RCC_CIR_HSERDYF | RCC_CIR_HSERDYIE))
     {
@@ -442,6 +433,7 @@ void XPD_RCC_IRQHandler(void)
         rcc_readyOscillator = HSE;
         XPD_SAFE_CALLBACK(XPD_RCC_Callbacks.OscReady,);
     }
+#endif
     /* Check RCC HSIRDY flag  */
     if ((cir & (RCC_CIR_HSIRDYF | RCC_CIR_HSIRDYIE)) == (RCC_CIR_HSIRDYF | RCC_CIR_HSIRDYIE))
     {
@@ -547,6 +539,7 @@ XPD_ReturnType XPD_RCC_HCLKConfig(RCC_OscType SYSCLK_Source, ClockDividerType HC
             }
             break;
 
+#ifdef HSE_VALUE
         case HSE:
             /* Check the HSE ready flag */
             if (RCC_REG_BIT(CR,HSERDY) == 0)
@@ -554,6 +547,7 @@ XPD_ReturnType XPD_RCC_HCLKConfig(RCC_OscType SYSCLK_Source, ClockDividerType HC
                 return XPD_ERROR;
             }
             break;
+#endif
 
         case PLL:
 #ifdef RCC_CFGR_SWS_PLLR
