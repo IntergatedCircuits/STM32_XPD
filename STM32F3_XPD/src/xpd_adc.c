@@ -85,10 +85,6 @@
         ((ADC_TypeDef *)(((uint32_t)(HANDLE)->Inst) & (~0x100))) : \
         ((ADC_TypeDef *)(((uint32_t)(HANDLE)->Inst) | 0x100)))
 
-#define ADC_MULTI_CFGR(HANDLE, DUAL)    \
-    ((((DUAL) == ADC_MULTIMODE_SINGE) || (IS_ADC_MULTIMODE_MASTER_INSTANCE((HANDLE)->Inst))) ? \
-        (HANDLE)->Inst->CFGR.w : ADC_PAIR(HANDLE)->CFGR.w)
-
 #elif defined(ADC1_COMMON)
 
 #define ADC_COUNT 1
@@ -149,6 +145,23 @@ static void adc_clockCtrl(ADC_HandleType * hadc, FunctionalState ClockState)
     XPD_ADC1_ClockCtrl(ClockState);
 }
 #endif
+
+__STATIC_INLINE uint32_t adc_getMultiCfgr(ADC_HandleType * hadc, uint32_t dual)
+{
+    uint32_t cfgr;
+    /* Get relevant register CFGR in ADC instance of ADC master or slave
+     * in function of multimode state (for devices with multimode available). */
+    if (    (dual == ADC_MULTIMODE_SINGE)
+         || (IS_ADC_MULTIMODE_MASTER_INSTANCE(hadc->Inst)))
+    {
+        cfgr = hadc->Inst->CFGR.w;
+    }
+    else
+    {
+        cfgr = ADC_PAIR(hadc)->CFGR.w;
+    }
+    return cfgr;
+}
 
 static void adc_dmaConversionRedirect(void *hdma)
 {
@@ -518,7 +531,7 @@ XPD_ReturnType XPD_ADC_Deinit(ADC_HandleType * hadc)
     ADC_REG_BIT(hadc, CFGR, JQM) = 1;
 
     /* Disable the ADC peripheral */
-    XPD_ADC_Disable(hadc);
+    adcx_disable(hadc->Inst);
 
     /* Reset register IER */
     hadc->Inst->IER.w = 0;
@@ -832,7 +845,7 @@ void XPD_ADC_IRQHandler(ADC_HandleType * hadc)
     if (    ((isr & (ADC_ISR_EOC | ADC_ISR_EOS)) != 0)
          && ((ier & (ADC_IER_EOCIE | ADC_IER_EOSIE)) != 0))
     {
-        uint32_t cfgr = ADC_MULTI_CFGR(hadc, dual);
+        uint32_t cfgr = adc_getMultiCfgr(hadc, dual);
 
         /* If the conversion is not continuous / external triggered */
         if ((cfgr & (ADC_CFGR_CONT | ADC_CFGR_EXTEN)) == 0)
@@ -865,7 +878,7 @@ void XPD_ADC_IRQHandler(ADC_HandleType * hadc)
     if (    ((isr & (ADC_ISR_JEOC | ADC_ISR_JEOS)) != 0)
          && ((ier & (ADC_IER_JEOCIE | ADC_IER_JEOSIE)) != 0))
     {
-        uint32_t cfgr = ADC_MULTI_CFGR(&hadc, dual);
+        uint32_t cfgr = adc_getMultiCfgr(&hadc, dual);
 
         /* Injected conversion is not continuous or not automatic, and software triggered */
         if (    (hadc->Inst->JSQR.b.JEXTEN == 0)
