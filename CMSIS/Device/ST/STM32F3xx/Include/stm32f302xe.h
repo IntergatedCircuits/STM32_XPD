@@ -956,17 +956,14 @@ typedef struct {
             __IO uint32_t SW1 : 1;                          /*!< COMPx SW1 switch control */
                  uint32_t __RESERVED0 : 2;
             __IO uint32_t INSEL : 3;                        /*!< COMPx inverting input select */
-            __IO uint32_t NONINSEL : 1;                     /*!< COMPx non inverting input select */
-                 uint32_t __RESERVED1 : 1;
+                 uint32_t __RESERVED1 : 2;
             __IO uint32_t WNDWEN : 1;                       /*!< COMPx window mode enable */
             __IO uint32_t OUTSEL : 4;                       /*!< COMPx output select */
                  uint32_t __RESERVED2 : 1;
             __IO uint32_t POL : 1;                          /*!< COMPx output polarity */
                  uint32_t __RESERVED3 : 2;
-            __IO uint32_t BLANKING : 2;                     /*!< COMPx blanking */
-                 uint32_t __RESERVED4 : 2;
-            __IO uint32_t INSEL1 : 1;                       /*!< COMPx inverting input select */
-                 uint32_t __RESERVED5 : 7;
+            __IO uint32_t BLANKING : 3;                     /*!< COMPx blanking */
+                 uint32_t __RESERVED4 : 9;
             __IO uint32_t OUT : 1;                          /*!< COMPx output level */
             __IO uint32_t LOCK : 1;                         /*!< COMPx lock */
         } b;
@@ -981,21 +978,19 @@ typedef struct {
         __IO uint32_t SW1;                                  /*!< COMPx SW1 switch control */
              uint32_t __RESERVED0[2];
         __IO uint32_t INSEL[3];                             /*!< COMPx inverting input select */
-        __IO uint32_t NONINSEL;                             /*!< COMPx non inverting input select */
-             uint32_t __RESERVED1;
+             uint32_t __RESERVED1[2];
         __IO uint32_t WNDWEN;                               /*!< COMPx window mode enable */
         __IO uint32_t OUTSEL[4];                            /*!< COMPx output select */
              uint32_t __RESERVED2;
         __IO uint32_t POL;                                  /*!< COMPx output polarity */
              uint32_t __RESERVED3[2];
-        __IO uint32_t BLANKING[2];                          /*!< COMPx blanking */
-             uint32_t __RESERVED4[2];
-        __IO uint32_t INSEL1;                               /*!< COMPx inverting input select */
-             uint32_t __RESERVED5[7];
+        __IO uint32_t BLANKING[3];                          /*!< COMPx blanking */
+             uint32_t __RESERVED4[9];
         __IO uint32_t OUT;                                  /*!< COMPx output level */
         __IO uint32_t LOCK;                                 /*!< COMPx lock */
     } CSR;                                                  /*!< COMP control and status register, Address offset: 0x00 */
 } COMP_BitBand_TypeDef;
+
 
 
 /**
@@ -1236,7 +1231,6 @@ typedef struct {
     __IO uint32_t CPAR[32];                                 /*!< DMA channel x peripheral address register                                      */
     __IO uint32_t CMAR[32];                                 /*!< DMA channel x memory address register                                          */
 } DMA_Channel_BitBand_TypeDef;
-
 
 
 
@@ -5119,6 +5113,7 @@ typedef struct {
 #define FMC_Bank1E          ((FMC_Bank1E_TypeDef *) FMC_Bank1E_R_BASE)
 #define FMC_Bank2_3         ((FMC_Bank2_3_TypeDef *) FMC_Bank2_3_R_BASE)
 #define FMC_Bank4           ((FMC_Bank4_TypeDef *) FMC_Bank4_R_BASE)
+
 
 #define CAN_BB(inst)               ((CAN_BitBand_TypeDef *) PERIPH_BB(inst))
 #define COMP_BB(inst)              ((COMP_BitBand_TypeDef *) PERIPH_BB(inst))
@@ -18592,6 +18587,7 @@ typedef struct
 #define GPIO_TIM4_AF2          ((uint8_t)0x02)  /* TIM4 Alternate Function mapping */
 #define GPIO_TIM15_AF2         ((uint8_t)0x02)  /* TIM15 Alternate Function mapping */
 #define GPIO_COMP1_AF2         ((uint8_t)0x02)  /* COMP1 Alternate Function mapping */
+#define GPIO_I2C3_AF2          ((uint8_t)0x02)  /* I2C3 Alternate Function mapping */
 
 /* AF 3 selection */
 #define GPIO_TSC_AF3           ((uint8_t)0x03)  /* TSC Alternate Function mapping  */
@@ -18633,6 +18629,7 @@ typedef struct
 #define GPIO_COMP2_AF8         ((uint8_t)0x08)  /* COMP2 Alternate Function mapping  */
 #define GPIO_COMP4_AF8         ((uint8_t)0x08)  /* COMP4 Alternate Function mapping  */
 #define GPIO_COMP6_AF8         ((uint8_t)0x08)  /* COMP6 Alternate Function mapping  */
+#define GPIO_I2C3_AF8          ((uint8_t)0x08)  /* I2C3 Alternate Function mapping */
 
 /* AF 9 selection */
 #define GPIO_CAN_AF9           ((uint8_t)0x09)  /* CAN Alternate Function mapping  */
@@ -18650,6 +18647,8 @@ typedef struct
 
 /* AF 12 selection */
 #define GPIO_TIM1_AF12         ((uint8_t)0x0C)  /* TIM1 Alternate Function mapping */
+#define GPIO_FMC_AF12          ((uint8_t)0x0C)  /* FMC Alternate Function mapping  */
+#define GPIO_SDIO_AF12         ((uint8_t)0x0C)  /* SDIO Alternate Function mapping */
 
 /* AF 14 selection */
 #define GPIO_USB_AF14          ((uint8_t)0x0E)  /* USB Alternate Function mapping */

@@ -949,8 +949,8 @@ typedef struct {
                  uint32_t __RESERVED2 : 1;
             __IO uint32_t POL : 1;                          /*!< COMPx output polarity */
                  uint32_t __RESERVED3 : 2;
-            __IO uint32_t BLANKING : 2;                     /*!< COMPx blanking */
-                 uint32_t __RESERVED4 : 10;
+            __IO uint32_t BLANKING : 3;                     /*!< COMPx blanking */
+                 uint32_t __RESERVED4 : 9;
             __IO uint32_t OUT : 1;                          /*!< COMPx output level */
             __IO uint32_t LOCK : 1;                         /*!< COMPx lock */
         } b;
@@ -965,14 +965,13 @@ typedef struct {
         __IO uint32_t SW1;                                  /*!< COMPx SW1 switch control */
              uint32_t __RESERVED0[2];
         __IO uint32_t INSEL[3];                             /*!< COMPx inverting input select */
-        __IO uint32_t NONINSEL;                             /*!< COMPx non inverting input select */
-             uint32_t __RESERVED1[2];
+             uint32_t __RESERVED1[3];
         __IO uint32_t OUTSEL[4];                            /*!< COMPx output select */
              uint32_t __RESERVED2;
         __IO uint32_t POL;                                  /*!< COMPx output polarity */
              uint32_t __RESERVED3[2];
-        __IO uint32_t BLANKING[2];                          /*!< COMPx blanking */
-             uint32_t __RESERVED4[10];
+        __IO uint32_t BLANKING[3];                          /*!< COMPx blanking */
+             uint32_t __RESERVED4[9];
         __IO uint32_t OUT;                                  /*!< COMPx output level */
         __IO uint32_t LOCK;                                 /*!< COMPx lock */
     } CSR;                                                  /*!< COMP control and status register, Address offset: 0x00 */
@@ -1719,7 +1718,9 @@ typedef struct {
         __IO uint32_t TIM1_ITR3_RMP;                        /*!< Timer 1 ITR3 selection */
         __IO uint32_t DAC1_TRIG1_RMP;                       /*!< DAC1 Trigger1 remap */
              uint32_t __RESERVED1[3];
-        __IO uint32_t DMA_RMP[3];                           /*!< DMA remap mask */
+        __IO uint32_t TIM16_DMA_RMP;                        /*!< Timer 16 DMA remap */
+        __IO uint32_t TIM17_DMA_RMP;                        /*!< Timer 17 DMA remap */
+        __IO uint32_t TIM6DAC1Ch1_DMA_RMP;                  /*!< Timer 6 / DAC1 Ch1 DMA remap */
              uint32_t __RESERVED2[2];
         __IO uint32_t I2C_PB6_FMP;                          /*!< I2C PB6 Fast mode plus */
         __IO uint32_t I2C_PB7_FMP;                          /*!< I2C PB7 Fast mode plus */
@@ -2557,7 +2558,7 @@ typedef struct {
              uint32_t __RESERVED1;
         __IO uint32_t TIM1SW;                               /*!< TIM1SW bits */
              uint32_t __RESERVED2;
-        __IO uint32_t TIM15SW_PLL;                          /*!< PLL clock used as TIM15 clock source */
+        __IO uint32_t TIM15SW;                              /*!< TIM15SW bits */
         __IO uint32_t TIM16SW;                              /*!< TIM16SW bits */
              uint32_t __RESERVED3;
         __IO uint32_t TIM17SW;                              /*!< TIM17SW bits */
@@ -4749,27 +4750,28 @@ typedef struct {
 #define USB                 ((USB_TypeDef *) USB_BASE)
 
 
-#define CAN_BB(inst)              ((CAN_BitBand_TypeDef *) PERIPH_BB(inst))
-#define COMP_BB(inst)             ((COMP_BitBand_TypeDef *) PERIPH_BB(inst))
-#define CRC_BB                    ((CRC_BitBand_TypeDef *) PERIPH_BB(CRC_BASE))
-#define DAC_BB(inst)              ((DAC_BitBand_TypeDef *) PERIPH_BB(inst))
-#define DMA_Channel_BB(inst)      ((DMA_Channel_BitBand_TypeDef *) PERIPH_BB(inst))
-#define DMA_BB(inst)              ((DMA_BitBand_TypeDef *) PERIPH_BB(inst))
-#define EXTI_BB                   ((EXTI_BitBand_TypeDef *) PERIPH_BB(EXTI_BASE))
-#define FLASH_BB                  ((FLASH_BitBand_TypeDef *) PERIPH_BB(FLASH_R_BASE))
-#define I2C_BB(inst)              ((I2C_BitBand_TypeDef *) PERIPH_BB(inst))
-#define IWDG_BB                   ((IWDG_BitBand_TypeDef *) PERIPH_BB(IWDG_BASE))
-#define OPAMP_BB(inst)            ((OPAMP_BitBand_TypeDef *) PERIPH_BB(inst))
-#define PWR_BB                    ((PWR_BitBand_TypeDef *) PERIPH_BB(PWR_BASE))
-#define RCC_BB                    ((RCC_BitBand_TypeDef *) PERIPH_BB(RCC_BASE))
-#define RTC_BB                    ((RTC_BitBand_TypeDef *) PERIPH_BB(RTC_BASE))
-#define SPI_BB(inst)              ((SPI_BitBand_TypeDef *) PERIPH_BB(inst))
-#define SYSCFG_BB                 ((SYSCFG_BitBand_TypeDef *) PERIPH_BB(SYSCFG_BASE))
-#define TIM_BB(inst)              ((TIM_BitBand_TypeDef *) PERIPH_BB(inst))
-#define TSC_BB                    ((TSC_BitBand_TypeDef *) PERIPH_BB(TSC_BASE))
-#define USART_BB(inst)            ((USART_BitBand_TypeDef *) PERIPH_BB(inst))
-#define USB_BB                    ((USB_BitBand_TypeDef *) PERIPH_BB(USB_BASE))
-#define WWDG_BB                   ((WWDG_BitBand_TypeDef *) PERIPH_BB(WWDG_BASE))
+#define CAN_BB(inst)               ((CAN_BitBand_TypeDef *) PERIPH_BB(inst))
+#define COMP_BB(inst)              ((COMP_BitBand_TypeDef *) PERIPH_BB(inst))
+#define CRC_BB                     ((CRC_BitBand_TypeDef *) PERIPH_BB(CRC_BASE))
+#define DAC_BB(inst)               ((DAC_BitBand_TypeDef *) PERIPH_BB(inst))
+#define DMA_Channel_BB(inst)       ((DMA_Channel_BitBand_TypeDef *) PERIPH_BB(inst))
+#define DMA_BB(inst)               ((DMA_BitBand_TypeDef *) PERIPH_BB(inst))
+#define EXTI_BB                    ((EXTI_BitBand_TypeDef *) PERIPH_BB(EXTI_BASE))
+#define FLASH_BB                   ((FLASH_BitBand_TypeDef *) PERIPH_BB(FLASH_R_BASE))
+#define I2C_BB(inst)               ((I2C_BitBand_TypeDef *) PERIPH_BB(inst))
+#define IWDG_BB                    ((IWDG_BitBand_TypeDef *) PERIPH_BB(IWDG_BASE))
+#define OPAMP_BB(inst)             ((OPAMP_BitBand_TypeDef *) PERIPH_BB(inst))
+#define PWR_BB                     ((PWR_BitBand_TypeDef *) PERIPH_BB(PWR_BASE))
+#define RCC_BB                     ((RCC_BitBand_TypeDef *) PERIPH_BB(RCC_BASE))
+#define RTC_BB                     ((RTC_BitBand_TypeDef *) PERIPH_BB(RTC_BASE))
+#define SPI_BB(inst)               ((SPI_BitBand_TypeDef *) PERIPH_BB(inst))
+#define SYSCFG_BB                  ((SYSCFG_BitBand_TypeDef *) PERIPH_BB(SYSCFG_BASE))
+#define TIM_BB(inst)               ((TIM_BitBand_TypeDef *) PERIPH_BB(inst))
+#define TSC_BB                     ((TSC_BitBand_TypeDef *) PERIPH_BB(TSC_BASE))
+#define USART_BB(inst)             ((USART_BitBand_TypeDef *) PERIPH_BB(inst))
+#define USB_BB                     ((USB_BitBand_TypeDef *) PERIPH_BB(USB_BASE))
+#define WWDG_BB                    ((WWDG_BitBand_TypeDef *) PERIPH_BB(WWDG_BASE))
+
 /**
   * @}
   */

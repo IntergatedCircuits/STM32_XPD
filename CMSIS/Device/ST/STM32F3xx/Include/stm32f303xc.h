@@ -967,8 +967,8 @@ typedef struct {
                  uint32_t __RESERVED1 : 1;
             __IO uint32_t POL : 1;                          /*!< COMPx output polarity */
             __IO uint32_t HYST : 2;                         /*!< COMPx hysteresis */
-            __IO uint32_t BLANKING : 2;                     /*!< COMPx blanking */
-                 uint32_t __RESERVED2 : 2;
+            __IO uint32_t BLANKING : 3;                     /*!< COMPx blanking */
+                 uint32_t __RESERVED2 : 1;
             __IO uint32_t INSEL1 : 1;                       /*!< COMPx inverting input select */
                  uint32_t __RESERVED3 : 7;
             __IO uint32_t OUT : 1;                          /*!< COMPx output level */
@@ -992,14 +992,15 @@ typedef struct {
              uint32_t __RESERVED1;
         __IO uint32_t POL;                                  /*!< COMPx output polarity */
         __IO uint32_t HYST[2];                              /*!< COMPx hysteresis */
-        __IO uint32_t BLANKING[2];                          /*!< COMPx blanking */
-             uint32_t __RESERVED2[2];
+        __IO uint32_t BLANKING[3];                          /*!< COMPx blanking */
+             uint32_t __RESERVED2[1];
         __IO uint32_t INSEL1;                               /*!< COMPx inverting input select */
              uint32_t __RESERVED3[7];
         __IO uint32_t OUT;                                  /*!< COMPx output level */
         __IO uint32_t LOCK;                                 /*!< COMPx lock */
     } CSR;                                                  /*!< COMP control and status register, Address offset: 0x00 */
 } COMP_BitBand_TypeDef;
+
 
 
 /**
@@ -1271,7 +1272,6 @@ typedef struct {
     __IO uint32_t CPAR[32];                                 /*!< DMA channel x peripheral address register                                      */
     __IO uint32_t CMAR[32];                                 /*!< DMA channel x memory address register                                          */
 } DMA_Channel_BitBand_TypeDef;
-
 
 
 
@@ -3313,7 +3313,7 @@ typedef struct {
             __IO uint32_t ETPS : 2;                         /*!<ETPS[1:0] bits (External trigger prescaler) */
             __IO uint32_t ECE : 1;                          /*!<External clock enable */
             __IO uint32_t ETP : 1;                          /*!<External trigger polarity */
-            __IO uint32_t SMS1 : 1;                         /*!<SMS[3] bits (Slave mode selection) */
+            __IO uint32_t SMS1 : 1;                         /*!<SMS[3] bit (Slave mode selection) */
                  uint32_t __RESERVED0 : 15;
         } b;
         __IO uint32_t w;
@@ -4511,7 +4511,7 @@ typedef struct {
                  uint32_t __RESERVED1 : 16;
         } b;
         __IO uint32_t w;
-    } EP[8];                                                /*!< USB endpoint register */
+    } EP[8];                                                /*!< USB Endpoint register,                  Address offset: 0x00 */
          uint32_t __RESERVED0[8];
     union {
         struct {
@@ -4885,6 +4885,7 @@ typedef struct {
 #define ADC12_COMMON        ((ADC_Common_TypeDef *) ADC1_2_COMMON_BASE)
 #define ADC34_COMMON        ((ADC_Common_TypeDef *) ADC3_4_COMMON_BASE)
 #define USB                 ((USB_TypeDef *) USB_BASE)
+
 
 #define CAN_BB(inst)               ((CAN_BitBand_TypeDef *) PERIPH_BB(inst))
 #define COMP_BB(inst)              ((COMP_BitBand_TypeDef *) PERIPH_BB(inst))
