@@ -548,7 +548,7 @@ XPD_ReturnType XPD_RCC_HCLKConfig(RCC_OscType SYSCLK_Source, ClockDividerType HC
     RCC->CFGR.b.SW   = SYSCLK_Source;
 
     /* wait until the settings have been processed */
-    result = XPD_WaitForMatch(&RCC->CFGR.w, RCC_CFGR_SWS, SYSCLK_Source << 2, &timeout);s
+    result = XPD_WaitForMatch(&RCC->CFGR.w, RCC_CFGR_SWS, SYSCLK_Source << 2, &timeout);
 
     /* Decreasing the CPU frequency */
     if (FlashLatency != XPD_FLASH_GetLatency())
