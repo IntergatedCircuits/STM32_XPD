@@ -77,7 +77,8 @@ XPD_ReturnType XPD_RCC_HSIConfig(RCC_HSI_InitType * Config)
     XPD_ReturnType result = XPD_OK;
     RCC_OscType sysclock = XPD_RCC_GetSYSCLKSource();
 
-    /* Check if HSI is used as system clock or as PLL source when PLL is selected as system clock */
+    /* When the HSI is used as system clock or clock source for PLL
+     * it is not allowed to be disabled */
     if (     (sysclock == HSI)
          || ((sysclock == PLL) && (XPD_RCC_GetPLLSource() == HSI))
 #ifdef RCC_PLLCFGR_PLLR
@@ -86,7 +87,7 @@ XPD_ReturnType XPD_RCC_HSIConfig(RCC_HSI_InitType * Config)
     )
     {
         /* When HSI is used as system clock it will not disabled */
-        if ((RCC_REG_BIT(CR,HSIRDY) != 0) && (Config->State != OSC_ON))
+        if ((RCC_REG_BIT(CR,HSIRDY) != 0) && (Config->State == OSC_OFF))
         {
             result = XPD_ERROR;
         }
@@ -131,7 +132,8 @@ XPD_ReturnType XPD_RCC_HSEConfig(RCC_HSE_InitType * Config)
     XPD_ReturnType result = XPD_OK;
     RCC_OscType sysclock = XPD_RCC_GetSYSCLKSource();
 
-    /* When the HSE is used as system clock or clock source for PLL in these cases it is not allowed to be disabled */
+    /* When the HSE is used as system clock or clock source for PLL
+     * it is not allowed to be disabled */
     if (     (sysclock == HSE)
          || ((sysclock == PLL) && (XPD_RCC_GetPLLSource() == HSE))
 #ifdef RCC_PLLCFGR_PLLR
@@ -510,25 +512,10 @@ static const uint8_t AHBPrescTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6,
 XPD_ReturnType XPD_RCC_HCLKConfig(RCC_OscType SYSCLK_Source, ClockDividerType HCLK_Divider, uint8_t FlashLatency)
 {
     XPD_ReturnType result;
-    uint32_t clkDiv = rcc_convertClockDivider(HCLK, HCLK_Divider);
+    uint32_t clkDiv;
     uint32_t timeout = RCC_CLOCKSWITCH_TIMEOUT;
 
-    /* Increasing the CPU frequency */
-    if (FlashLatency > XPD_FLASH_GetLatency())
-    {
-        /* Program the new number of wait states to the LATENCY bits in the FLASH_ACR register */
-        XPD_FLASH_SetLatency(FlashLatency);
-
-        /* Check that the new number of wait states is taken into account to access the Flash
-         memory by reading the FLASH_ACR register */
-        if (XPD_FLASH_GetLatency() != FlashLatency)
-        {
-            return XPD_ERROR;
-        }
-    }
-
-    RCC->CFGR.b.HPRE = clkDiv;
-
+    /* Checking whether the SYSCLK source is ready to be used */
     switch (SYSCLK_Source)
     {
         case HSI:
@@ -564,14 +551,27 @@ XPD_ReturnType XPD_RCC_HCLKConfig(RCC_OscType SYSCLK_Source, ClockDividerType HC
             return XPD_ERROR;
     }
 
-    RCC->CFGR.b.SW = SYSCLK_Source;
+    /* Increasing the CPU frequency */
+    if (FlashLatency > XPD_FLASH_GetLatency())
+    {
+        /* Program the new number of wait states to the LATENCY bits in the FLASH_ACR register */
+        XPD_FLASH_SetLatency(FlashLatency);
+
+        /* Check that the new number of wait states is taken into account to access the Flash
+         memory by reading the FLASH_ACR register */
+        if (XPD_FLASH_GetLatency() != FlashLatency)
+        {
+            return XPD_ERROR;
+        }
+    }
+
+    /* Set SYSCLK source and HCLK prescaler */
+    clkDiv = rcc_convertClockDivider(HCLK, HCLK_Divider);
+    RCC->CFGR.b.HPRE = clkDiv;
+    RCC->CFGR.b.SW   = SYSCLK_Source;
 
     /* wait until the settings have been processed */
     result = XPD_WaitForMatch(&RCC->CFGR.w, RCC_CFGR_SWS, SYSCLK_Source << 2, &timeout);
-    if (result != XPD_OK)
-    {
-        return result;
-    }
 
     /* Decreasing the CPU frequency */
     if (FlashLatency != XPD_FLASH_GetLatency())

@@ -345,6 +345,48 @@ uint32_t XPD_RTC_GetClockFreq(void)
 /** @} */
 #endif /* USE_XPD_RTC */
 
+#if defined(USE_XPD_TIM)
+
+/** @addtogroup TIM
+ * @{ */
+
+/** @addtogroup TIM_Clock_Source
+ * @{ */
+
+/** @defgroup TIM_Clock_Source_Exported_Functions TIM Clock Source Exported Functions
+ * @{ */
+
+/**
+ * @brief Returns the input clock frequency of the timer.
+ * @param htim: pointer to the TIM handle structure
+ * @return The clock frequency of the timer in Hz
+ */
+uint32_t XPD_TIM_GetClockFreq(TIM_HandleType * htim)
+{
+    uint32_t freq;
+
+    {
+        {
+            freq = XPD_RCC_GetClockFreq(PCLK1);
+
+            /* if APB clock is divided, timer frequency is doubled */
+            if ((RCC->CFGR.w & RCC_CFGR_PPRE) != 0)
+            {
+                freq *= 2;
+            }
+        }
+    }
+    return freq;
+}
+
+/** @} */
+
+/** @} */
+
+/** @} */
+
+#endif /* USE_XPD_TIM */
+
 #if defined(USE_XPD_USART)
 
 /** @addtogroup USART
