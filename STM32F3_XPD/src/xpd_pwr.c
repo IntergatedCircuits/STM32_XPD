@@ -26,21 +26,21 @@
 /** @addtogroup PWR
  * @{ */
 
-/** @addtogroup PWR_Core PWR Core
+/** @addtogroup PWR_Core
  * @{ */
 
 /** @defgroup PWR_Exported_Functions PWR Exported Functions
  * @{ */
 
 /**
- * @brief Enters Sleep mode
+ * @brief Enters Sleep mode.
  * @note  In Sleep mode, all I/O pins keep the same state as in Run mode.
  * @param WakeUpOn: Specifies if SLEEP mode is exited with WFI or WFE instruction
  *           This parameter can be one of the following values:
  *            @arg REACTION_IT: enter SLEEP mode with WFI instruction
  *            @arg REACTION_EVENT: enter SLEEP mode with WFE instruction
  */
-void XPD_PWR_EnterSleep(ReactionType WakeUpOn)
+void XPD_PWR_SleepMode(ReactionType WakeUpOn)
 {
     /* Clear SLEEPDEEP bit of Cortex System Control Register */
     SCB->SCR.b.SLEEPDEEP = 0;
@@ -60,7 +60,7 @@ void XPD_PWR_EnterSleep(ReactionType WakeUpOn)
 }
 
 /**
- * @brief Enters STOP mode
+ * @brief Enters STOP mode.
  * @note  In Stop mode, all I/O pins keep the same state as in Run mode.
  * @note  When exiting Stop mode by issuing an interrupt or a wakeup event,
  *         the HSI RC oscillator is selected as system clock.
@@ -74,7 +74,7 @@ void XPD_PWR_EnterSleep(ReactionType WakeUpOn)
  *            @arg REACTION_EVENT: enter SLEEP mode with WFE instruction
  * @param Regulator: Specifies the regulator state in STOP mode
  */
-void XPD_PWR_EnterStop(ReactionType WakeUpOn, PWR_RegulatorType Regulator)
+void XPD_PWR_StopMode(ReactionType WakeUpOn, PWR_RegulatorType Regulator)
 {
     /* Clear PDDS bit */
     PWR_REG_BIT(CR,PDDS) = 0;
@@ -104,14 +104,14 @@ void XPD_PWR_EnterStop(ReactionType WakeUpOn, PWR_RegulatorType Regulator)
 }
 
 /**
- * @brief Enters STANDBY mode
+ * @brief Enters STANDBY mode.
  * @note  In Standby mode, all I/O pins are high impedance except for:
  *          - Reset pad (still available),
  *          - RTC alternate function pins if configured for tamper, time-stamp, RTC
  *            Alarm out, or RTC clock calibration out,
  *          - WKUP pins if enabled.
  */
-void XPD_PWR_EnterStandby(void)
+void XPD_PWR_StandbyMode(void)
 {
     /* Select STANDBY mode */
     PWR_REG_BIT(CR,PDDS) = 1;
@@ -128,25 +128,15 @@ void XPD_PWR_EnterStandby(void)
 }
 
 /**
- * @brief Enables access to the backup domain (RTC registers, RTC
- *         backup data registers when present)
+ * @brief Enables or disables access to the backup domain (RTC registers, RTC
+ *         backup data registers when present).
+ * @param NewState: the new backup access state to set
  * @note  If the HSE divided by 32 is used as the RTC clock, the
  *         Backup Domain Access should be kept enabled.
  */
-void XPD_PWR_UnlockBackup(void)
+void XPD_PWR_BackupAccessCtrl(FunctionalState NewState)
 {
-    PWR_REG_BIT(CR,DBP) = 1;
-}
-
-/**
- * @brief Disables access to the backup domain (RTC registers, RTC
- *         backup data registers when present)
- * @note  If the HSE divided by 32 is used as the RTC clock, the
- *         Backup Domain Access should be kept enabled.
- */
-void XPD_PWR_LockBackup(void)
-{
-    PWR_REG_BIT(CR,DBP) = 0;
+    PWR_REG_BIT(CR,DBP) = NewState;
 }
 
 /**
@@ -154,13 +144,10 @@ void XPD_PWR_LockBackup(void)
  * @param WakeUpPin: Specifies the Power Wake-Up pin to enable.
  *         Check CSR register for the available EWUP bits.
  */
-void XPD_PWR_EnableWakeUpPin(uint8_t WakeUpPin)
+void XPD_PWR_WakeUpPin_Enable(uint8_t WakeUpPin)
 {
 #ifdef PWR_BB
-    __IO uint32_t * tmp = &PWR_BB->CSR.EWUP1;
-    tmp += WakeUpPin - 1;
-
-    *tmp = 1;
+    *(__IO uint32_t *)(&PWR_BB->CSR.EWUP1 + WakeUpPin - 1) = ENABLE;
 #else
     SET_BIT(PWR->CSR.w, (PWR_CSR_EWUP1 << (WakeUpPin - 1)));
 #endif
@@ -168,26 +155,24 @@ void XPD_PWR_EnableWakeUpPin(uint8_t WakeUpPin)
 
 /**
  * @brief Disables the WakeUp PINx functionality.
- * @param WakeUpPin: Specifies the Power Wake-Up pin to enable.
+ * @param WakeUpPin: Specifies the Power Wake-Up pin to disable.
  *         Check CSR register for the available EWUP bits.
  */
-void XPD_PWR_DisableWakeUpPin(uint8_t WakeUpPin)
+void XPD_PWR_WakeUpPin_Disable(uint8_t WakeUpPin)
 {
 #ifdef PWR_BB
-    __IO uint32_t * tmp = &PWR_BB->CSR.EWUP1;
-    tmp += WakeUpPin - 1;
-
-    *tmp = 0;
+    *(__IO uint32_t *)(&PWR_BB->CSR.EWUP1 + WakeUpPin - 1) = DISABLE;
 #else
-    SET_BIT(PWR->CSR.w, (PWR_CSR_EWUP1 << (WakeUpPin - 1)));
+    CLEAR_BIT(PWR->CSR.w, (PWR_CSR_EWUP1 << (WakeUpPin - 1)));
 #endif
 }
+
 /** @} */
 
 /** @} */
 
 #ifdef PWR_CR_PLS
-/** @addtogroup PWR_Voltage_Detector PWR Voltage Detector
+/** @addtogroup PWR_Voltage_Detector
  * @{ */
 
 /** @defgroup PWR_PVD_Exported_Functions PWR PVD Exported Functions
@@ -198,7 +183,7 @@ void XPD_PWR_DisableWakeUpPin(uint8_t WakeUpPin)
  * @param Config: configuration structure that contains the monitored voltage level
  *         and the EXTI configuration.
  */
-void XPD_PWR_InitPVD(PWR_PVDInitType * Config)
+void XPD_PWR_PVD_Init(PWR_PVD_InitType * Config)
 {
     /* Set PLS bits according to PVDLevel value */
     PWR->CR.b.PLS = Config->Level;
@@ -208,17 +193,17 @@ void XPD_PWR_InitPVD(PWR_PVDInitType * Config)
 }
 
 /**
- * @brief Enables the Power Voltage Detector(PVD)
+ * @brief Enables the Power Voltage Detector(PVD).
  */
-void XPD_PWR_EnablePVD(void)
+void XPD_PWR_PVD_Enable(void)
 {
     PWR_REG_BIT(CR,PVDE) = 1;
 }
 
 /**
- * @brief Disables the Power Voltage Detector(PVD)
+ * @brief Disables the Power Voltage Detector(PVD).
  */
-void XPD_PWR_DisablePVD(void)
+void XPD_PWR_PVD_Disable(void)
 {
     PWR_REG_BIT(CR,PVDE) = 0;
 }

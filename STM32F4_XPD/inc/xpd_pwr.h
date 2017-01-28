@@ -3,7 +3,7 @@
   * @file    xpd_pwr.h
   * @author  Benedek Kupper
   * @version V0.1
-  * @date    2016-11-01
+  * @date    2017-01-28
   * @brief   STM32 eXtensible Peripheral Drivers Power Module Header file.
   *
   *  This file is part of STM32_XPD.
@@ -41,6 +41,10 @@ typedef enum
 {
     PWR_MAINREGULATOR     = 0, /*!< Main regulator ON in Sleep/Stop mode */
     PWR_LOWPOWERREGULATOR = 1, /*!< Low Power regulator ON in Sleep/Stop mode */
+#ifdef PWR_CR_UDEN
+    PWR_MAINREGULATOR_UNDERDRIVE_ON     = PWR_CR_MRUDS,     /*!< Main regulator ON in Underdrive mode */
+    PWR_LOWPOWERREGULATOR_UNDERDRIVE_ON = PWR_CR_LPUDS | 1, /*!< Low Power regulator ON in Underdrive mode */
+#endif
 }PWR_RegulatorType;
 
 /** @} */
@@ -55,7 +59,8 @@ typedef enum
  *            @arg WUF:         Wake up flag
  *            @arg SBF:         Standby flag
  *            @arg PVDO:        Power Voltage Detector output flag
- *            @arg VREFINTRDYF: VREFINT reference voltage ready
+ *            @arg BRR:         Backup regulator ready flag
+ *            @arg VOSRDY:      Regulator voltage scaling output selection ready flag
  */
 #define         XPD_PWR_GetFlag(FLAG_NAME)      \
     (PWR_REG_BIT(CSR,FLAG_NAME))
@@ -85,9 +90,17 @@ void            XPD_PWR_StopMode            (ReactionType WakeUpOn, PWR_Regulato
 void            XPD_PWR_StandbyMode         (void);
 
 void            XPD_PWR_BackupAccessCtrl    (FunctionalState NewState);
+XPD_ReturnType  XPD_PWR_BackupRegulatorCtrl (FunctionalState NewState);
+
+#ifdef PWR_CR_FPDS
+void            XPD_PWR_FlashPowerDownCtrl  (FunctionalState NewState);
+#endif
 
 void            XPD_PWR_WakeUpPin_Enable    (uint8_t WakeUpPin);
 void            XPD_PWR_WakeUpPin_Disable   (uint8_t WakeUpPin);
+#ifdef PWR_CSR_WUPP
+void            XPD_PWR_WakeUpPin_Polarity  (EdgeType RisingOrFalling);
+#endif
 /** @} */
 
 /** @} */
@@ -104,9 +117,9 @@ void            XPD_PWR_WakeUpPin_Disable   (uint8_t WakeUpPin);
 /** @brief PVD levels */
 typedef enum
 {
-    PWR_PVDLEVEL_2V2 = 0, /*!< 2.2V voltage detector level */
-    PWR_PVDLEVEL_2V3 = 1, /*!< 2.3V voltage detector level */
-    PWR_PVDLEVEL_2V4 = 2, /*!< 2.4V voltage detector level */
+    PWR_PVDLEVEL_2V0 = 0, /*!< 2.0V voltage detector level */
+    PWR_PVDLEVEL_2V1 = 1, /*!< 2.1V voltage detector level */
+    PWR_PVDLEVEL_2V3 = 2, /*!< 2.3V voltage detector level */
     PWR_PVDLEVEL_2V5 = 3, /*!< 2.5V voltage detector level */
     PWR_PVDLEVEL_2V6 = 4, /*!< 2.6V voltage detector level */
     PWR_PVDLEVEL_2V7 = 5, /*!< 2.7V voltage detector level */
@@ -139,6 +152,54 @@ void            XPD_PWR_PVD_Disable         (void);
 
 /** @} */
 #endif /* PWR_CR_PLS */
+
+/** @defgroup PWR_Regulator_Voltage_Scaling PWR Regulator Voltage Scaling
+ * @{ */
+
+/** @defgroup PWR_Regulator_Voltage_Scaling_Exported_Types PWR Regulator Voltage Scaling Exported Types
+ * @{ */
+
+/** @brief Regulator Voltage Scaling modes */
+typedef enum
+{
+#ifdef PWR_CR_VOS_1
+    PWR_REGVOLT_SCALE1 = 3, /*!< Scale 1 mode(default value at reset): the maximum value of fHCLK is 168 MHz. It can be extended to
+                                 180 MHz by activating the over-drive mode. */
+    PWR_REGVOLT_SCALE2 = 2, /*!< Scale 2 mode: the maximum value of fHCLK is 144 MHz. It can be extended to
+                                 168 MHz by activating the over-drive mode. */
+    PWR_REGVOLT_SCALE3 = 1  /*!< Scale 3 mode: the maximum value of fHCLK is 120 MHz. */
+#else
+    PWR_REGVOLT_SCALE1 = 1, /*!< Scale 1 mode(default value at reset): the maximum value of fHCLK = 168 MHz. */
+    PWR_REGVOLT_SCALE2 = 0  /*!< Scale 2 mode: the maximum value of fHCLK = 144 MHz. */
+#endif
+}PWR_RegVoltScaleType;
+
+/** @} */
+
+/** @addtogroup PWR_Regulator_Voltage_Scaling_Exported_Functions
+ * @{ */
+XPD_ReturnType  XPD_PWR_VoltageScaleConfig  (PWR_RegVoltScaleType Scaling);
+PWR_RegVoltScaleType
+                XPD_PWR_GetVoltageScale     (void);
+#if defined(PWR_CR_MRLVDS) && defined(PWR_CR_LPLVDS)
+void            XPD_PWR_RegLowVoltageConfig (PWR_RegulatorType Regulator, FunctionalState NewState);
+#endif
+/** @} */
+
+/** @} */
+
+#ifdef PWR_CR_ODEN
+/** @defgroup PWR_OverDrive_Mode PWR OverDrive Mode
+ * @{ */
+
+/** @addtogroup PWR_OverDrive_Mode_Exported_Functions
+ * @{ */
+XPD_ReturnType  XPD_PWR_OverDrive_Enable    (void);
+XPD_ReturnType  XPD_PWR_OverDrive_Disable   (void);
+/** @} */
+
+/** @} */
+#endif /* PWR_CR_ODEN */
 
 /** @} */
 
