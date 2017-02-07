@@ -26,6 +26,7 @@
 
 #include "xpd_common.h"
 #include "xpd_config.h"
+#include "xpd_rcc.h"
 
 #if defined(CAN2)
 #define __DUAL_CAN_DEVICE
@@ -149,6 +150,7 @@ typedef struct
 #ifdef CAN_BB
 	CAN_BitBand_TypeDef *Inst_BB;          /*!< The address of the peripheral instance in the bit-band region */
 #endif
+    XPD_CtrlFnType ClockCtrl;              /*!< Function pointer for RCC clock control */
 	struct {
 	    XPD_HandleCallbackType DepInit;    /*!< Callback to initialize module dependencies (GPIOs, IRQs) */
 	    XPD_HandleCallbackType DepDeinit;  /*!< Callback to restore module dependencies (GPIOs, IRQs) */
@@ -173,7 +175,8 @@ typedef struct
  */
 #define         NEW_CAN_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)      \
     {.Inst      = (INSTANCE),                                   \
-     .Callbacks = {(INIT_FN),(DEINIT_FN),NULL,{NULL,NULL},NULL}}
+     .Callbacks = {(INIT_FN),(DEINIT_FN),NULL,{NULL,NULL},NULL} \
+     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl}
 
 /**
  * @brief  Enable the specified CAN interrupt.

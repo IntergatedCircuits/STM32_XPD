@@ -26,6 +26,7 @@
 
 #include "xpd_common.h"
 #include "xpd_config.h"
+#include "xpd_rcc.h"
 #include "xpd_dma.h"
 
 /** @defgroup SPI

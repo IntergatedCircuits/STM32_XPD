@@ -22,7 +22,6 @@
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
 #include "xpd_can.h"
-#include "xpd_rcc.h"
 #include "xpd_utils.h"
 
 #if defined(USE_XPD_CAN) && defined(CAN_MASTER)
@@ -183,18 +182,7 @@ XPD_ReturnType XPD_CAN_Init(CAN_HandleType* hcan, CAN_InitType* Config)
     uint32_t timeout = INAK_TIMEOUT;
 
     /* enable peripheral clock */
-#ifdef __DUAL_CAN_DEVICE
-    if (hcan->Inst == CAN1)
-    {
-        XPD_CAN1_ClockCtrl(ENABLE);
-    }
-    else
-    {
-        XPD_CAN2_ClockCtrl(ENABLE);
-    }
-#else
-    XPD_CAN_ClockCtrl(ENABLE);
-#endif
+    hcan->ClockCtrl(ENABLE);
 
 #ifdef CAN_BB
     hcan->Inst_BB = CAN_BB(hcan->Inst);
@@ -258,18 +246,12 @@ XPD_ReturnType XPD_CAN_Deinit(CAN_HandleType* hcan)
 
     /* disable peripheral clock */
 #ifdef __DUAL_CAN_DEVICE
-    if (hcan->Inst == CAN2)
-    {
-        XPD_CAN2_ClockCtrl(DISABLE);
-    }
     /* master clock is only off when no filters are used */
-    else if(can_slaveFiltersUnused())
-    {
-        XPD_CAN1_ClockCtrl(DISABLE);
-    }
-#else
-    XPD_CAN_ClockCtrl(DISABLE);
+    if ((hcan->Inst != CAN1) || can_slaveFiltersUnused())
 #endif
+    {
+        hcan->ClockCtrl(DISABLE);
+    }
 
     /* Deinitialize peripheral dependencies */
     XPD_SAFE_CALLBACK(hcan->Callbacks.DepDeinit, hcan);

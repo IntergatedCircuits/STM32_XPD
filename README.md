@@ -106,14 +106,15 @@ Apart from a core set of peripherals (DMA, GPIO, RCC, etc.), the user can config
 
 ### Getting started
 
-For a supported device all necessary files are available within the CMSIS folder of the repository. The XPD drivers are standalone and (supposed to be) device dependent, so only a project-specific **xpd_config.h** file has to be created. This header specifies - among other things - which device header and XPD modules shall be used and what are the external oscillator values and startup configuration settings.
+For a supported device all necessary files are available within the CMSIS folder of the repository. The XPD drivers are standalone and (supposed to be) device dependent, so only a project-specific **xpd_config.h** file has to be created. This header specifies - among other things - which device header and XPD modules shall be used and what are the used external oscillator values and startup configuration settings.
 
 After the XPD configuration, the user code development can begin. For reference, check the Projects folder, where you can find example code that shows the basic use of the XPD API, and it can be directly compiled and run on the target.
 
 ### Hints
 
-1. To ensure safe operation make sure that all the handles are created using their initializer macro: `XXX_HandleType hxxx = NEW_XXX_HANDLE(XXX2, xxx2_init_fn, xxx2_deinit_fn);`
-
+1. To ensure safe operation make sure that all the handles are created using their initializer macro: `XXX_HandleType hxxx = NEW_XXX_HANDLE(XXX2, xxx2_depinit_fn, xxx2_depdeinit_fn);`
+Where the parameter functions serve to initialize the peripheral related GPIO, interrupt and DMA settings.
+2. Make sure to implement * SysTick_Handler() * , and call * XPD_SysTick_IRQHandler() * from it. This provides a callback that the user can subsribe to by setting the  * XPD_Callbacks.Tick * function pointer.
 * * *
 
 ## Contact and Feedback <a name="feedback"></a>

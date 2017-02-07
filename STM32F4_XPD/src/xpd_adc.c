@@ -23,7 +23,6 @@
   */
 
 #include "xpd_adc.h"
-#include "xpd_rcc.h"
 #include "xpd_utils.h"
 
 #if defined(USE_XPD_ADC)

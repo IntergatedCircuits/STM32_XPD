@@ -139,7 +139,7 @@ typedef struct
 /** @defgroup PWR_PVD_Exported_Macros PWR PVD Exported Macros
  * @{ */
 
-/** @brief PVD EXI line number */
+/** @brief PVD EXTI line number */
 #define PWR_PVD_EXTI_LINE               16
 /** @} */
 
