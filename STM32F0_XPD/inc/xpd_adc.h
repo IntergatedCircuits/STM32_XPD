@@ -307,4 +307,8 @@ XPD_ReturnType  XPD_ADC_Calibrate           (ADC_HandleType * hadc, bool Differe
 
 /** @} */
 
+#define XPD_ADC_API
+#include "xpd_rcc_pc.h"
+#undef XPD_ADC_API
+
 #endif /* XPD_ADC_H_ */

@@ -26,7 +26,6 @@
 
 #include "xpd_common.h"
 #include "xpd_config.h"
-#include "xpd_rcc.h"
 
 #if defined(CAN2)
 #define __DUAL_CAN_DEVICE
@@ -175,7 +174,7 @@ typedef struct
  */
 #define         NEW_CAN_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)      \
     {.Inst      = (INSTANCE),                                   \
-     .Callbacks = {(INIT_FN),(DEINIT_FN),NULL,{NULL,NULL},NULL} \
+     .Callbacks = {(INIT_FN),(DEINIT_FN),NULL,{NULL,NULL},NULL},\
      .ClockCtrl = XPD_##INSTANCE##_ClockCtrl}
 
 /**
@@ -395,6 +394,10 @@ XPD_ReturnType  XPD_CAN_Receive_IT          (CAN_HandleType * hcan, CAN_FrameTyp
 /** @} */
 
 /** @} */
+
+#define XPD_CAN_API
+#include "xpd_rcc_gen.h"
+#undef XPD_CAN_API
 
 #endif /* CAN_MASTER */
 

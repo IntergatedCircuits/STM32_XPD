@@ -21,14 +21,8 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef XPD_RCC_PC_H_
-#define XPD_RCC_PC_H_
 
-#include "xpd_common.h"
-#include "xpd_config.h"
-
-#if defined(USE_XPD_ADC)
-#include "xpd_adc.h"
+#if   defined(XPD_ADC_API)
 
 /** @addtogroup ADC
  * @{ */
@@ -87,10 +81,8 @@ uint32_t        XPD_ADC34_GetClockFreq      (void);
 /** @} */
 
 /** @} */
-#endif /* USE_XPD_ADC */
 
-#if defined(USE_XPD_CEC) && defined(RCC_CFGR3_CECSW)
-#include "xpd_cec.h"
+#elif defined(XPD_CEC_API)
 
 /** @addtogroup CEC
  * @{ */
@@ -120,10 +112,8 @@ uint32_t        XPD_CEC_GetClockFreq        (void);
 /** @} */
 
 /** @} */
-#endif /* USE_XPD_CEC */
 
-#if defined(USE_XPD_I2C)
-#include "xpd_i2c.h"
+#elif defined(XPD_I2C_API)
 
 /** @addtogroup I2C
  * @{ */
@@ -151,10 +141,8 @@ uint32_t        XPD_I2C_GetClockFreq        (I2C_HandleType * hi2c);
 /** @} */
 
 /** @} */
-#endif /* USE_XPD_I2C */
 
-#if defined(USE_XPD_I2S)
-#include "xpd_i2s.h"
+#elif defined(XPD_I2S_API)
 
 /** @addtogroup I2S
  * @{ */
@@ -188,9 +176,8 @@ uint32_t        XPD_I2S_GetClockFreq        (void);
 /** @} */
 
 /** @} */
-#endif
 
-#if defined(USE_XPD_RTC)
+#elif defined(XPD_RTC_API)
 /** @addtogroup RTC
  * @{ */
 
@@ -223,10 +210,8 @@ uint32_t        XPD_RTC_GetClockFreq        (void);
 /** @} */
 
 /** @} */
-#endif /* USE_XPD_RTC */
 
-#if defined(USE_XPD_SDADC) && defined(RCC_CFGR_SDADCPRE)
-#include "xpd_sdadc.h"
+#elif defined(XPD_SDADC_API)
 /** @addtogroup SDADC
  * @{ */
 
@@ -268,10 +253,8 @@ uint32_t        XPD_SDADC_GetClockFreq      (void);
 /** @} */
 
 /** @} */
-#endif /* USE_XPD_SDADC */
 
-#if defined(USE_XPD_TIM)
-#include "xpd_tim.h"
+#elif defined(XPD_TIM_API)
 
 /** @addtogroup TIM
  * @{ */
@@ -299,10 +282,8 @@ uint32_t        XPD_TIM_GetClockFreq        (TIM_HandleType * htim);
 /** @} */
 
 /** @} */
-#endif /* USE_XPD_TIM */
 
-#if defined(USE_XPD_USART)
-#include "xpd_usart.h"
+#elif defined(XPD_USART_API)
 
 /** @addtogroup USART
  * @{ */
@@ -334,10 +315,8 @@ uint32_t        XPD_USART_GetClockFreq      (USART_HandleType * husart);
 /** @} */
 
 /** @} */
-#endif /* USE_XPD_USART */
 
-#if defined(USE_XPD_USB) && defined(RCC_CFGR_USBPRE)
-#include "xpd_usb.h"
+#elif defined(XPD_USB_API)
 
 /** @addtogroup USB
  * @{ */
@@ -364,6 +343,4 @@ void            XPD_USB_ClockConfig         (USB_ClockSourceType ClockSource);
 /** @} */
 
 /** @} */
-#endif /* USE_XPD_USB */
-
-#endif /* XPD_RCC_PC_H_ */
+#endif

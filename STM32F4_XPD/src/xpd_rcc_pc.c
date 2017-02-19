@@ -25,6 +25,7 @@
 
 #if defined(USE_XPD_RTC)
 #include "xpd_pwr.h"
+#include "xpd_rtc.h"
 #include "xpd_utils.h"
 
 /** @addtogroup RTC
@@ -147,6 +148,7 @@ uint32_t XPD_RTC_GetClockFreq(void)
 #endif /* USE_XPD_RTC */
 
 #if defined(USE_XPD_TIM)
+#include "xpd_tim.h"
 
 /** @addtogroup TIM
  * @{ */
@@ -246,6 +248,7 @@ uint32_t XPD_TIM_GetClockFreq(TIM_HandleType * htim)
 #endif /* USE_XPD_TIM */
 
 #if defined(USE_XPD_USART)
+#include "xpd_usart.h"
 
 /** @addtogroup USART
  * @{ */

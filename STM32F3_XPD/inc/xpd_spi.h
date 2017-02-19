@@ -26,7 +26,6 @@
 
 #include "xpd_common.h"
 #include "xpd_config.h"
-#include "xpd_rcc.h"
 #include "xpd_dma.h"
 
 /** @defgroup SPI
@@ -253,5 +252,10 @@ void            XPD_SPI_Stop_DMA            (SPI_HandleType * hspi);
 /** @} */
 
 /** @} */
+
+#define XPD_SPI_API
+#include "xpd_rcc_gen.h"
+#include "xpd_rcc_pc.h"
+#undef XPD_SPI_API
 
 #endif /* XPD_SPI_H_ */

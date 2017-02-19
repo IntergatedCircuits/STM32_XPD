@@ -26,7 +26,6 @@
 
 #include "xpd_common.h"
 #include "xpd_config.h"
-#include "xpd_rcc.h"
 #include "xpd_dma.h"
 
 /** @defgroup TIM
@@ -421,4 +420,10 @@ void            XPD_TIM_MasterConfig        (TIM_HandleType * htim, TIM_MasterCo
 /** @} */
 
 /** @} */
+
+#define XPD_TIM_API
+#include "xpd_rcc_gen.h"
+#include "xpd_rcc_pc.h"
+#undef XPD_TIM_API
+
 #endif /* XPD_TIM_H_ */

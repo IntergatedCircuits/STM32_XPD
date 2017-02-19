@@ -218,4 +218,8 @@ void            XPD_DMA_IRQHandler      (DMA_HandleType * hdma);
 
 /** @} */
 
+#define XPD_DMA_API
+#include "xpd_syscfg.h"
+#undef XPD_DMA_API
+
 #endif /* XPD_DMA_H_ */

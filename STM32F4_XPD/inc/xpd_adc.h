@@ -27,7 +27,6 @@
 #include "xpd_common.h"
 #include "xpd_config.h"
 #include "xpd_adc_calc.h"
-#include "xpd_rcc.h"
 #include "xpd_dma.h"
 
 /** @defgroup ADC
@@ -448,5 +447,9 @@ uint32_t        XPD_ADC_MultiMode_GetValues     (ADC_HandleType * hadc);
 /** @} */
 
 /** @} */
+
+#define XPD_ADC_API
+#include "xpd_rcc_gen.h"
+#undef XPD_ADC_API
 
 #endif /* XPD_ADC_H_ */

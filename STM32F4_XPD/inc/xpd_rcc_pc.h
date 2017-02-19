@@ -21,13 +21,8 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef XPD_RCC_PC_H_
-#define XPD_RCC_PC_H_
 
-#include "xpd_common.h"
-#include "xpd_config.h"
-
-#if defined(USE_XPD_RTC)
+#if   defined(XPD_RTC_API)
 /** @addtogroup RTC
  * @{ */
 
@@ -60,10 +55,8 @@ uint32_t        XPD_RTC_GetClockFreq        (void);
 /** @} */
 
 /** @} */
-#endif /* USE_XPD_RTC */
 
-#if defined(USE_XPD_TIM)
-#include "xpd_tim.h"
+#elif defined(XPD_TIM_API)
 
 /** @addtogroup TIM
  * @{ */
@@ -97,10 +90,8 @@ uint32_t        XPD_TIM_GetClockFreq        (TIM_HandleType * htim);
 /** @} */
 
 /** @} */
-#endif /* USE_XPD_TIM */
 
-#if defined(USE_XPD_USART)
-#include "xpd_usart.h"
+#elif defined(XPD_USART_API)
 
 /** @addtogroup USART
  * @{ */
@@ -116,6 +107,4 @@ uint32_t        XPD_USART_GetClockFreq      (USART_HandleType * husart);
 /** @} */
 
 /** @} */
-#endif /* USE_XPD_USART */
-
-#endif /* XPD_RCC_PC_H_ */
+#endif

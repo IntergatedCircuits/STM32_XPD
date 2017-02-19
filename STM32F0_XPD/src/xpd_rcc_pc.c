@@ -22,9 +22,9 @@
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
 #include "xpd_rcc.h"
-#include "xpd_utils.h"
 
 #if defined(USE_XPD_ADC)
+#include "xpd_adc.h"
 
 /** @addtogroup ADC
  * @{ */
@@ -99,7 +99,8 @@ uint32_t XPD_ADC_GetClockFreq(void)
 /** @} */
 #endif /* USE_XPD_ADC */
 
-#if defined(USE_XPD_CEC) && defined(RCC_CFGR3_CECSW)
+#if defined(USE_XPD_CEC)
+#include "xpd_cec.h"
 
 /** @addtogroup CEC
  * @{ */
@@ -146,6 +147,7 @@ uint32_t XPD_CEC_GetClockFreq(void)
 #endif /* USE_XPD_CEC */
 
 #if defined(USE_XPD_I2C)
+#include "xpd_i2c.h"
 
 /** @addtogroup I2C
  * @{ */
@@ -237,6 +239,7 @@ uint32_t XPD_I2C_GetClockFreq(I2C_HandleType * hi2c)
 
 #if defined(USE_XPD_RTC)
 #include "xpd_pwr.h"
+#include "xpd_rtc.h"
 #include "xpd_utils.h"
 
 /** @addtogroup RTC
@@ -346,6 +349,7 @@ uint32_t XPD_RTC_GetClockFreq(void)
 #endif /* USE_XPD_RTC */
 
 #if defined(USE_XPD_TIM)
+#include "xpd_tim.h"
 
 /** @addtogroup TIM
  * @{ */
@@ -388,6 +392,7 @@ uint32_t XPD_TIM_GetClockFreq(TIM_HandleType * htim)
 #endif /* USE_XPD_TIM */
 
 #if defined(USE_XPD_USART)
+#include "xpd_usart.h"
 
 /** @addtogroup USART
  * @{ */
@@ -505,7 +510,8 @@ uint32_t XPD_USART_GetClockFreq(USART_HandleType * husart)
 
 #endif /* USE_XPD_USART */
 
-#if defined(USE_XPD_USB) && defined(RCC_CFGR3_USBSW)
+#if defined(USE_XPD_USB)
+#include "xpd_usb.h"
 
 /** @addtogroup USB
  * @{ */
