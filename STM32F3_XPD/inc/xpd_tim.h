@@ -28,6 +28,12 @@
 #include "xpd_config.h"
 #include "xpd_dma.h"
 
+#if defined(TIM_CCR5_CCR5) && defined(TIM_CCR6_CCR6)
+#define TIM_SUPPORTED_CHANNEL_COUNT   6
+#else
+#define TIM_SUPPORTED_CHANNEL_COUNT   4
+#endif
+
 /** @defgroup TIM
  * @{ */
 
@@ -69,8 +75,10 @@ typedef enum
     TIM_CHANNEL_2 = 1, /*!< TIM channel 2 */
     TIM_CHANNEL_3 = 2, /*!< TIM channel 3 */
     TIM_CHANNEL_4 = 3, /*!< TIM channel 4 */
+#if TIM_SUPPORTED_CHANNEL_COUNT > 5
     TIM_CHANNEL_5 = 4, /*!< TIM channel 5 (limited capabilities: no IT or DMA) */
     TIM_CHANNEL_6 = 5  /*!< TIM channel 6 (limited capabilities: no IT or DMA) */
+#endif
 }TIM_ChannelType;
 
 /** @brief TIM Handle structure */
@@ -315,20 +323,22 @@ void            XPD_TIM_IRQHandler          (TIM_HandleType * htim);
 /** @brief TIM output modes */
 typedef enum
 {
-    TIM_OUTPUT_TIMING             = 0,        /*!< Output channel is frozen, use for timing base generation */
-    TIM_OUTPUT_ACTIVE             = 1,        /*!< Output channel is active on match */
-    TIM_OUTPUT_INACTIVE           = 2,        /*!< Output channel is inactive on match */
-    TIM_OUTPUT_TOGGLE             = 3,        /*!< Output channel is toggled on match */
-    TIM_OUTPUT_FORCEDINACTIVE     = 4,        /*!< Output channel is forced low */
-    TIM_OUTPUT_FORCEDACTIVE       = 5,        /*!< Output channel is forced high */
-    TIM_OUTPUT_PWM1               = 6,        /*!< Output channel is active when CNT < CCR */
-    TIM_OUTPUT_PWM2               = 7,        /*!< Output channel is active when CNT > CCR */
-    TIM_OUTPUT_RETRIGERRABLE_OPM1 = 0x10 | 0, /*!< Output channel is active after CNT < CCR at the time of trigger reception */
-    TIM_OUTPUT_RETRIGERRABLE_OPM2 = 0x10 | 1, /*!< Output channel is active after CNT > CCR at the time of trigger reception */
-    TIM_OUTPUT_COMBINED_PWM1      = 0x10 | 4, /*!< As in PWM1, but OC1REFC is the logical OR between OC1REF and OC2REF */
-    TIM_OUTPUT_COMBINED_PWM2      = 0x10 | 5, /*!< As in PWM2, but OC1REFC is the logical AND between OC1REF and OC2REF */
-    TIM_OUTPUT_ASYMMETRIC_PWM1    = 0x10 | 6, /*!< Output channel is active when CNT > CCR */
-    TIM_OUTPUT_ASYMMETRIC_PWM2    = 0x10 | 7, /*!< Output channel is active when CNT > CCR */
+    TIM_OUTPUT_TIMING             = 0,     /*!< Output channel is frozen, use for timing base generation */
+    TIM_OUTPUT_ACTIVE             = 1,     /*!< Output channel is active on match */
+    TIM_OUTPUT_INACTIVE           = 2,     /*!< Output channel is inactive on match */
+    TIM_OUTPUT_TOGGLE             = 3,     /*!< Output channel is toggled on match */
+    TIM_OUTPUT_FORCEDINACTIVE     = 4,     /*!< Output channel is forced low */
+    TIM_OUTPUT_FORCEDACTIVE       = 5,     /*!< Output channel is forced high */
+    TIM_OUTPUT_PWM1               = 6,     /*!< Output channel is active when CNT < CCR */
+    TIM_OUTPUT_PWM2               = 7,     /*!< Output channel is active when CNT > CCR */
+#if (TIM_CCMR1_OC1M > 0xFFFF)
+    TIM_OUTPUT_RETRIGERRABLE_OPM1 = 0x100, /*!< Output channel is active after CNT < CCR at the time of trigger reception */
+    TIM_OUTPUT_RETRIGERRABLE_OPM2 = 0x101, /*!< Output channel is active after CNT > CCR at the time of trigger reception */
+    TIM_OUTPUT_COMBINED_PWM1      = 0x104, /*!< As in PWM1, but OC1REFC is the logical OR between OC1REF and OC2REF */
+    TIM_OUTPUT_COMBINED_PWM2      = 0x105, /*!< As in PWM2, but OC1REFC is the logical AND between OC1REF and OC2REF */
+    TIM_OUTPUT_ASYMMETRIC_PWM1    = 0x106, /*!< Output channel is active when CNT > CCR */
+    TIM_OUTPUT_ASYMMETRIC_PWM2    = 0x107, /*!< Output channel is active when CNT > CCR */
+#endif
 }TIM_Output_ModeType;
 
 /** @brief TIM output channel setup structure */
@@ -366,16 +376,18 @@ typedef struct
                                           @note Cannot be modified from LockLevel 1 */
         ActiveLevelType Polarity;    /*!< Break input polarity
                                           @note Cannot be modified from LockLevel 1 */
+#ifdef TIM_BDTR_BKF
         uint8_t         Filter;      /*!< Break input capture filter
                                           @note Cannot be modified from LockLevel 1 */
+#endif
     }Break;
 #ifdef TIM_BDTR_BK2E
     struct {
-        FunctionalState State;       /*!< Break function state
+        FunctionalState State;       /*!< Break2 function state
                                           @note Cannot be modified from LockLevel 1 */
-        ActiveLevelType Polarity;    /*!< Break input polarity
+        ActiveLevelType Polarity;    /*!< Break2 input polarity
                                           @note Cannot be modified from LockLevel 1 */
-        uint8_t         Filter;      /*!< Break input capture filter
+        uint8_t         Filter;      /*!< Break2 input capture filter
                                           @note Cannot be modified from LockLevel 1 */
     }Break2;
 #endif

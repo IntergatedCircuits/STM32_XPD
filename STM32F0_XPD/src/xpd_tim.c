@@ -33,8 +33,13 @@
 /** @addtogroup TIM_Common
  * @{ */
 
+#if TIM_SUPPORTED_CHANNEL_COUNT > 5
+#define TIM_ALL_CHANNELS (TIM_CCER_CC1E | TIM_CCER_CC2E | TIM_CCER_CC3E | TIM_CCER_CC4E |\
+                          TIM_CCER_CC1NE | TIM_CCER_CC2NE | TIM_CCER_CC3NE | TIM_CCER_CC5E | TIM_CCER_CC6E)
+#else
 #define TIM_ALL_CHANNELS (TIM_CCER_CC1E | TIM_CCER_CC2E | TIM_CCER_CC3E | TIM_CCER_CC4E |\
                           TIM_CCER_CC1NE | TIM_CCER_CC2NE | TIM_CCER_CC3NE)
+#endif
 
 #define TIM_ACTIVE_CHANNELS(HANDLE) (HANDLE->Inst->CCER.w & TIM_ALL_CHANNELS)
 
@@ -303,7 +308,16 @@ void XPD_TIM_Channel_Disable(TIM_HandleType *htim, TIM_ChannelType Channel)
  */
 void XPD_TIM_Channel_SetPulse(TIM_HandleType * htim, TIM_ChannelType Channel, uint32_t Pulse)
 {
-    (&htim->Inst->CCR1)[Channel] = Pulse;
+#if TIM_SUPPORTED_CHANNEL_COUNT > 5
+    if (Channel > TIM_CHANNEL_4)
+    {
+        (&htim->Inst->CCR5)[Channel - TIM_CHANNEL_5] = Pulse;
+    }
+    else
+#endif
+    {
+        (&htim->Inst->CCR1)[Channel] = Pulse;
+    }
 }
 
 /**
@@ -314,7 +328,16 @@ void XPD_TIM_Channel_SetPulse(TIM_HandleType * htim, TIM_ChannelType Channel, ui
  */
 uint32_t XPD_TIM_Channel_GetPulse(TIM_HandleType * htim, TIM_ChannelType Channel)
 {
-    return (&htim->Inst->CCR1)[Channel];
+#if TIM_SUPPORTED_CHANNEL_COUNT > 5
+    if (Channel > TIM_CHANNEL_4)
+    {
+        return (&htim->Inst->CCR5)[Channel - TIM_CHANNEL_5];
+    }
+    else
+#endif
+    {
+        return (&htim->Inst->CCR1)[Channel];
+    }
 }
 
 /**
@@ -499,36 +522,39 @@ void XPD_TIM_Output_Init(TIM_HandleType * htim, TIM_ChannelType Channel, TIM_Out
     }
     /* output mode configuration */
     {
-        __IO uint8_t pccmr[6];
+        __IO uint32_t * pccmr;
+        uint32_t chcfg, choffset = (Channel & 1) * 8;
 
-        /* copy CCMR registers to unaligned array */
+        /* get related CCMR register */
+#if TIM_SUPPORTED_CHANNEL_COUNT > 5
+        if (Channel < TIM_CHANNEL_5)
+        {
+            pccmr = &htim->Inst->CCMR3.w;
+        }
+        else
+#endif
         if (Channel < TIM_CHANNEL_3)
         {
-            *((uint32_t *)&pccmr[0]) = htim->Inst->CCMR1.w;
+            pccmr = &htim->Inst->CCMR1.w;
         }
         else
         {
-            *((uint32_t *)&pccmr[2]) = htim->Inst->CCMR2.w;
+            pccmr = &htim->Inst->CCMR2.w;
         }
 
         /* add output configuration */
-        pccmr[Channel] = (Config->Output << 4);
+        chcfg = (Config->Output << 4);
 
         /* for PWM modes, enable preload and fast mode */
         if (Config->Output >= TIM_OUTPUT_PWM1)
         {
-            pccmr[Channel] |= TIM_CCMR1_OC1PE | TIM_CCMR1_OC1FE;
+            chcfg |= TIM_CCMR1_OC1PE | TIM_CCMR1_OC1FE;
         }
 
         /* apply configuration */
-        if (Channel < TIM_CHANNEL_3)
-        {
-            htim->Inst->CCMR1.w = *((uint32_t *)&pccmr[0]);
-        }
-        else
-        {
-            htim->Inst->CCMR2.w = *((uint32_t *)&pccmr[2]);
-        }
+        *pccmr = (*pccmr
+                & ((TIM_CCMR1_CC2S | TIM_CCMR1_OC2CE | TIM_CCMR1_OC2FE | TIM_CCMR1_OC2M | TIM_CCMR1_OC2PE) >> choffset))
+                | (chcfg << choffset);
     }
 
     /* Set the Output Idle states */
@@ -723,6 +749,16 @@ void XPD_TIM_Output_DriveConfig(TIM_HandleType * htim, TIM_Output_DriveType * Co
     /* break configuration */
     TIM_REG_BIT(htim, BDTR, BKE) = Config->Break.State;
     TIM_REG_BIT(htim, BDTR, BKP) = 1 - Config->Break.Polarity;
+#ifdef TIM_BDTR_BKF
+    htim->Inst->BDTR.b.BKF       = Config->Break.Filter;
+#endif
+
+#ifdef TIM_BDTR_BK2E
+    /* break2 configuration */
+    TIM_REG_BIT(htim, BDTR, BK2E) = Config->Break2.State;
+    TIM_REG_BIT(htim, BDTR, BK2P) = 1 - Config->Break2.Polarity;
+    htim->Inst->BDTR.b.BK2F       = Config->Break2.Filter;
+#endif
 
     /* final step, set lock level */
     htim->Inst->BDTR.b.LOCK = Config->LockLevel;
@@ -747,6 +783,11 @@ void XPD_TIM_MasterConfig(TIM_HandleType * htim, TIM_MasterConfigType * Config)
 {
     /* select the TRGO source */
     htim->Inst->CR2.b.MMS = Config->MasterTrigger;
+
+#ifdef TIM_CR2_MMS2
+    /* select the TRGO2 source */
+    htim->Inst->CR2.b.MMS2 = Config->MasterTrigger2;
+#endif
 
     /* configure the MSM bit */
     TIM_REG_BIT(htim,SMCR,MSM) = Config->MasterMode;

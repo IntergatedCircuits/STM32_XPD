@@ -3,7 +3,7 @@
   * @file    xpd_tim.h
   * @author  Benedek Kupper
   * @version V0.1
-  * @date    2016-01-26
+  * @date    2016-04-30
   * @brief   STM32 eXtensible Peripheral Drivers Timer Module
   *
   *  This file is part of STM32_XPD.
@@ -27,6 +27,12 @@
 #include "xpd_common.h"
 #include "xpd_config.h"
 #include "xpd_dma.h"
+
+#if defined(TIM_CCR5_CCR5) && defined(TIM_CCR6_CCR6)
+#define TIM_SUPPORTED_CHANNEL_COUNT   6
+#else
+#define TIM_SUPPORTED_CHANNEL_COUNT   4
+#endif
 
 /** @defgroup TIM
  * @{ */
@@ -68,7 +74,11 @@ typedef enum
     TIM_CHANNEL_1 = 0, /*!< TIM channel 1 */
     TIM_CHANNEL_2 = 1, /*!< TIM channel 2 */
     TIM_CHANNEL_3 = 2, /*!< TIM channel 3 */
-    TIM_CHANNEL_4 = 3  /*!< TIM channel 4 */
+    TIM_CHANNEL_4 = 3, /*!< TIM channel 4 */
+#if TIM_SUPPORTED_CHANNEL_COUNT > 5
+    TIM_CHANNEL_5 = 4, /*!< TIM channel 5 (limited capabilities: no IT or DMA) */
+    TIM_CHANNEL_6 = 5  /*!< TIM channel 6 (limited capabilities: no IT or DMA) */
+#endif
 }TIM_ChannelType;
 
 /** @brief TIM Handle structure */
@@ -313,14 +323,22 @@ void            XPD_TIM_IRQHandler          (TIM_HandleType * htim);
 /** @brief TIM output modes */
 typedef enum
 {
-    TIM_OUTPUT_TIMING         = 0, /*!< Output channel is frozen, use for timing base generation */
-    TIM_OUTPUT_ACTIVE         = 1, /*!< Output channel is active on match */
-    TIM_OUTPUT_INACTIVE       = 2, /*!< Output channel is inactive on match */
-    TIM_OUTPUT_TOGGLE         = 3, /*!< Output channel is toggled on match */
-    TIM_OUTPUT_FORCEDINACTIVE = 4, /*!< Output channel is forced low */
-    TIM_OUTPUT_FORCEDACTIVE   = 5, /*!< Output channel is forced high */
-    TIM_OUTPUT_PWM1           = 6, /*!< Output channel is active when CNT < CCR */
-    TIM_OUTPUT_PWM2           = 7  /*!< Output channel is active when CNT > CCR */
+    TIM_OUTPUT_TIMING             = 0,     /*!< Output channel is frozen, use for timing base generation */
+    TIM_OUTPUT_ACTIVE             = 1,     /*!< Output channel is active on match */
+    TIM_OUTPUT_INACTIVE           = 2,     /*!< Output channel is inactive on match */
+    TIM_OUTPUT_TOGGLE             = 3,     /*!< Output channel is toggled on match */
+    TIM_OUTPUT_FORCEDINACTIVE     = 4,     /*!< Output channel is forced low */
+    TIM_OUTPUT_FORCEDACTIVE       = 5,     /*!< Output channel is forced high */
+    TIM_OUTPUT_PWM1               = 6,     /*!< Output channel is active when CNT < CCR */
+    TIM_OUTPUT_PWM2               = 7,     /*!< Output channel is active when CNT > CCR */
+#if (TIM_CCMR1_OC1M > 0xFFFF)
+    TIM_OUTPUT_RETRIGERRABLE_OPM1 = 0x100, /*!< Output channel is active after CNT < CCR at the time of trigger reception */
+    TIM_OUTPUT_RETRIGERRABLE_OPM2 = 0x101, /*!< Output channel is active after CNT > CCR at the time of trigger reception */
+    TIM_OUTPUT_COMBINED_PWM1      = 0x104, /*!< As in PWM1, but OC1REFC is the logical OR between OC1REF and OC2REF */
+    TIM_OUTPUT_COMBINED_PWM2      = 0x105, /*!< As in PWM2, but OC1REFC is the logical AND between OC1REF and OC2REF */
+    TIM_OUTPUT_ASYMMETRIC_PWM1    = 0x106, /*!< Output channel is active when CNT > CCR */
+    TIM_OUTPUT_ASYMMETRIC_PWM2    = 0x107, /*!< Output channel is active when CNT > CCR */
+#endif
 }TIM_Output_ModeType;
 
 /** @brief TIM output channel setup structure */
@@ -358,7 +376,21 @@ typedef struct
                                           @note Cannot be modified from LockLevel 1 */
         ActiveLevelType Polarity;    /*!< Break input polarity
                                           @note Cannot be modified from LockLevel 1 */
+#ifdef TIM_BDTR_BKF
+        uint8_t         Filter;      /*!< Break input capture filter
+                                          @note Cannot be modified from LockLevel 1 */
+#endif
     }Break;
+#ifdef TIM_BDTR_BK2E
+    struct {
+        FunctionalState State;       /*!< Break2 function state
+                                          @note Cannot be modified from LockLevel 1 */
+        ActiveLevelType Polarity;    /*!< Break2 input polarity
+                                          @note Cannot be modified from LockLevel 1 */
+        uint8_t         Filter;      /*!< Break2 input capture filter
+                                          @note Cannot be modified from LockLevel 1 */
+    }Break2;
+#endif
 }TIM_Output_DriveType;
 
 /** @} */
@@ -403,11 +435,37 @@ typedef enum
     TIM_TRGO_OC4REF = 7  /*!< OC4REF is used for TRGO */
 }TIM_TriggerOutputType;
 
+#ifdef TIM_CR2_MMS2
+/** @brief TIM trigger out 2 types */
+typedef enum
+{
+    TIM_TRGO2_RESET                        = 0,  /*!< TRGO2 is connected to EGR.UG */
+    TIM_TRGO2_ENABLE                       = 1,  /*!< TRGO2 is connected to the timer enable bit CR1.EN */
+    TIM_TRGO2_UPDATE                       = 2,  /*!< TRGO2 is connected to the timer update */
+    TIM_TRGO2_OC1                          = 3,  /*!< TRGO2 is connected to the Channel 1 comparator on match */
+    TIM_TRGO2_OC1REF                       = 4,  /*!< OC1REF is used for TRGO2 */
+    TIM_TRGO2_OC2REF                       = 5,  /*!< OC2REF is used for TRGO2 */
+    TIM_TRGO2_OC3REF                       = 6,  /*!< OC3REF is used for TRGO2 */
+    TIM_TRGO2_OC4REF                       = 7,  /*!< OC4REF is used for TRGO2 */
+    TIM_TRGO2_OC5REF                       = 8,  /*!< OC5REF is used for TRGO2 */
+    TIM_TRGO2_OC6REF                       = 9,  /*!< OC6REF is used for TRGO2 */
+    TIM_TRGO2_OC4REF_RISING_FALLING        = 10, /*!< OC4REF is used for TRGO2 with both edges */
+    TIM_TRGO2_OC6REF_RISING_FALLING        = 11, /*!< OC6REF is used for TRGO2 with both edges */
+    TIM_TRGO2_OC4REF_RISING_OC6REF_RISING  = 12, /*!< OC4REF with OC6REF is used for TRGO2 */
+    TIM_TRGO2_OC4REF_RISING_OC6REF_FALLING = 13, /*!< OC4REF with !OC6REF is used for TRGO2 */
+    TIM_TRGO2_OC5REF_RISING_OC6REF_RISING  = 14, /*!< OC5REF with OC6REF is used for TRGO2 */
+    TIM_TRGO2_OC5REF_RISING_OC6REF_FALLING = 15, /*!< OC5REF with !OC6REF is used for TRGO2 */
+}TIM_TriggerOutput2Type;
+#endif
+
 /** @brief TIM master setup structure */
 typedef struct
 {
-    FunctionalState       MasterMode;    /*!< Master mode configuration */
-    TIM_TriggerOutputType MasterTrigger; /*!< Trigger output (TRGO) selection */
+    FunctionalState        MasterMode;     /*!< Master mode configuration */
+    TIM_TriggerOutputType  MasterTrigger;  /*!< Trigger output (TRGO) selection */
+#ifdef TIM_CR2_MMS2
+    TIM_TriggerOutput2Type MasterTrigger2; /*!< Trigger output 2 (TRGO2) selection */
+#endif
 }TIM_MasterConfigType;
 
 /** @} */

@@ -22,6 +22,7 @@
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
 #include "xpd_rcc.h"
+#include "xpd_utils.h"
 
 #if defined(USE_XPD_ADC)
 #include "xpd_adc.h"

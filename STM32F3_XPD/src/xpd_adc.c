@@ -878,7 +878,7 @@ void XPD_ADC_IRQHandler(ADC_HandleType * hadc)
     if (    ((isr & (ADC_ISR_JEOC | ADC_ISR_JEOS)) != 0)
          && ((ier & (ADC_IER_JEOCIE | ADC_IER_JEOSIE)) != 0))
     {
-        uint32_t cfgr = adc_getMultiCfgr(&hadc, dual);
+        uint32_t cfgr = adc_getMultiCfgr(hadc, dual);
 
         /* Injected conversion is not continuous or not automatic, and software triggered */
         if (    (hadc->Inst->JSQR.b.JEXTEN == 0)
