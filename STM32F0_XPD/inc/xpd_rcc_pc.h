@@ -212,7 +212,9 @@ uint32_t        XPD_USART_GetClockFreq      (USART_HandleType * husart);
 typedef enum
 {
     USB_CLOCKSOURCE_PLL         = 1, /*!< PLL clock source */
+#ifdef RCC_CFGR_SW_HSI48
     USB_CLOCKSOURCE_HSI48       = 0, /*!< 48 MHz HSI clock source */
+#endif
 }USB_ClockSourceType;
 /** @} */
 

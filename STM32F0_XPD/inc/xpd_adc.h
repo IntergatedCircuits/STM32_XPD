@@ -300,7 +300,7 @@ uint16_t        XPD_ADC_GetValue            (ADC_HandleType * hadc);
 
 /** @addtogroup ADC_Calibration_Exported_Functions
  * @{ */
-XPD_ReturnType  XPD_ADC_Calibrate           (ADC_HandleType * hadc, bool Differential);
+XPD_ReturnType  XPD_ADC_Calibrate           (ADC_HandleType * hadc, boolean_t Differential);
 /** @} */
 
 /** @} */

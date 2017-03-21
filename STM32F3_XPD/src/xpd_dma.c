@@ -279,7 +279,7 @@ XPD_ReturnType XPD_DMA_PollStatus(DMA_HandleType * hdma, DMA_OperationType Opera
 {
     XPD_ReturnType result;
     uint32_t tickstart;
-    bool success;
+    boolean_t success;
 
     /* Get tick */
     tickstart = XPD_GetTimer();

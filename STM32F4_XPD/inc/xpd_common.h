@@ -45,11 +45,7 @@
  * @{ */
 
 /** @brief Boolean type */
-typedef enum
-{
-    FALSE = 0, /*!< False value */
-    TRUE  = 1  /*!< True value */
-} bool;
+typedef uint8_t boolean_t;
 
 /** @brief Flag status type */
 typedef enum
@@ -167,6 +163,13 @@ typedef void ( *XPD_HandleCallbackType )    ( void * Handle );
 
 #ifndef NULL
 #define NULL      ((void *)0)
+#endif
+
+#ifndef FALSE
+#define FALSE     0
+#endif
+#ifndef TRUE
+#define TRUE      (!FALSE)
 #endif
 
 /**

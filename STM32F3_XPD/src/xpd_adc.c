@@ -189,11 +189,11 @@ static void adc_dmaErrorRedirect(void *hdma)
 #endif
 
 /* Enables the peripheral */
-bool adcx_enable(ADC_TypeDef * ADCx)
+boolean_t adcx_enable(ADC_TypeDef * ADCx)
 {
     /* Requirements:
      * ADCAL, ADSTP, JADSTP, ADSTART, JADSTART, ADDIS, ADEN = 0 */
-    bool success = (0 == (ADCx->CR.w & (ADC_CR_ADEN | ADC_STARTCTRL | ADC_STOPCTRL | ADC_CR_ADCAL | ADC_CR_ADDIS)));
+    boolean_t success = (0 == (ADCx->CR.w & (ADC_CR_ADEN | ADC_STARTCTRL | ADC_STOPCTRL | ADC_CR_ADCAL | ADC_CR_ADDIS)));
     if (success)
     {
         SET_BIT(ADCx->CR.w, ADC_CR_ADEN);
@@ -202,11 +202,11 @@ bool adcx_enable(ADC_TypeDef * ADCx)
 }
 
 /* Disables the peripheral */
-bool adcx_disable(ADC_TypeDef * ADCx)
+boolean_t adcx_disable(ADC_TypeDef * ADCx)
 {
     /* Requirements:
      * ADEN = 1, ADSTART, JADSTART = 0 */
-    bool success = (ADC_CR_ADEN == (ADCx->CR.w & (ADC_CR_ADEN | ADC_STARTCTRL)));
+    boolean_t success = (ADC_CR_ADEN == (ADCx->CR.w & (ADC_CR_ADEN | ADC_STARTCTRL)));
     if (success)
     {
         SET_BIT(ADCx->CR.w, ADC_CR_ADDIS);
@@ -1591,7 +1591,7 @@ uint32_t XPD_ADC_MultiMode_GetValues(ADC_HandleType * hadc)
 /** @defgroup ADC_Calibration_Exported_Functions ADC Calibration Exported Functions
  * @{ */
 
-XPD_ReturnType XPD_ADC_Calibrate(ADC_HandleType * hadc, bool Differential)
+XPD_ReturnType XPD_ADC_Calibrate(ADC_HandleType * hadc, boolean_t Differential)
 {
     XPD_ReturnType result = XPD_ERROR;
 

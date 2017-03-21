@@ -53,7 +53,7 @@
 #define CAN_TRANSMIT_INTERRUPTS  CAN_IER_TMEIE
 
 #ifdef __DUAL_CAN_DEVICE
-static bool can_slaveFiltersUnused();
+static boolean_t can_slaveFiltersUnused();
 #endif
 
 /** @defgroup CAN_Private_Functions CAN Private Functions
@@ -685,7 +685,7 @@ typedef union
 }FilterRegister;
 
 #ifdef __DUAL_CAN_DEVICE
-static bool can_slaveFiltersUnused()
+static boolean_t can_slaveFiltersUnused()
 {
     return FilterInfo[CAN_MASTER->FMR.b.CAN2SB].type == FILTERTYPE_INVALID;
 }

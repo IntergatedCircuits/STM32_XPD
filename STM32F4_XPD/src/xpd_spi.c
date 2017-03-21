@@ -438,7 +438,7 @@ XPD_ReturnType XPD_SPI_Transmit(SPI_HandleType * hspi, void * TxData, uint16_t L
 
     if (Length > 0)
     {
-        bool duplex = TRUE;
+        boolean_t duplex = TRUE;
 
         /* While SPI is still busy with previous transfer, new one is not started */
         result = spi_waitFinished(hspi, &Timeout);
@@ -619,7 +619,7 @@ XPD_ReturnType XPD_SPI_TransmitReceive(SPI_HandleType * hspi, void * TxData, voi
 
     if (Length > 0)
     {
-        bool duplex = TRUE, exclMaster = FALSE;
+        boolean_t duplex = TRUE, exclMaster = FALSE;
 
         /* While SPI is still busy with previous transfer, new one is not started */
         result = spi_waitFinished(hspi, &Timeout);
