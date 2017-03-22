@@ -54,6 +54,15 @@ void XPD_ADC3_ClockCtrl(FunctionalState NewState);
 #ifdef RCC_APB2LPENR_ADC3LPEN
 void XPD_ADC3_SleepClockCtrl(FunctionalState NewState);
 #endif
+#ifdef RCC_AHB2ENR_AESEN
+void XPD_AES_ClockCtrl(FunctionalState NewState);
+#endif
+#ifdef RCC_AHB2LPENR_AESLPEN
+void XPD_AES_SleepClockCtrl(FunctionalState NewState);
+#endif
+#ifdef RCC_AHB2RSTR_AESRST
+void XPD_AES_Reset(void);
+#endif
 #ifdef RCC_AHB1ENR_BKPSRAMEN
 void XPD_BKPSRAM_ClockCtrl(FunctionalState NewState);
 #endif
@@ -77,6 +86,15 @@ void XPD_CAN2_SleepClockCtrl(FunctionalState NewState);
 #endif
 #ifdef RCC_APB1RSTR_CAN2RST
 void XPD_CAN2_Reset(void);
+#endif
+#ifdef RCC_APB1ENR_CAN3EN
+void XPD_CAN3_ClockCtrl(FunctionalState NewState);
+#endif
+#ifdef RCC_APB1LPENR_CAN3LPEN
+void XPD_CAN3_SleepClockCtrl(FunctionalState NewState);
+#endif
+#ifdef RCC_APB1RSTR_CAN3RST
+void XPD_CAN3_Reset(void);
 #endif
 #ifdef RCC_AHB1ENR_CCMDATARAMEN
 void XPD_CCMDATARAM_ClockCtrl(FunctionalState NewState);
@@ -134,6 +152,15 @@ void XPD_DFSDM1_SleepClockCtrl(FunctionalState NewState);
 #endif
 #ifdef RCC_APB2RSTR_DFSDM1RST
 void XPD_DFSDM1_Reset(void);
+#endif
+#ifdef RCC_APB2ENR_DFSDM2EN
+void XPD_DFSDM2_ClockCtrl(FunctionalState NewState);
+#endif
+#ifdef RCC_APB2LPENR_DFSDM2LPEN
+void XPD_DFSDM2_SleepClockCtrl(FunctionalState NewState);
+#endif
+#ifdef RCC_APB2RSTR_DFSDM2RST
+void XPD_DFSDM2_Reset(void);
 #endif
 #ifdef RCC_AHB1ENR_DMA1EN
 void XPD_DMA1_ClockCtrl(FunctionalState NewState);
@@ -429,10 +456,10 @@ void XPD_QSPI_SleepClockCtrl(FunctionalState NewState);
 #ifdef RCC_AHB3RSTR_QSPIRST
 void XPD_QSPI_Reset(void);
 #endif
-#ifdef RCC_AHB2ENR_RNGEN
+#ifdef RCC_AHB1ENR_RNGEN
 void XPD_RNG_ClockCtrl(FunctionalState NewState);
 #endif
-#ifdef RCC_AHB1ENR_RNGEN
+#ifdef RCC_AHB2ENR_RNGEN
 void XPD_RNG_ClockCtrl(FunctionalState NewState);
 #endif
 #ifdef RCC_AHB2LPENR_RNGLPEN
@@ -441,10 +468,10 @@ void XPD_RNG_SleepClockCtrl(FunctionalState NewState);
 #ifdef RCC_AHB1LPENR_RNGLPEN
 void XPD_RNG_SleepClockCtrl(FunctionalState NewState);
 #endif
-#ifdef RCC_AHB2RSTR_RNGRST
+#ifdef RCC_AHB1RSTR_RNGRST
 void XPD_RNG_Reset(void);
 #endif
-#ifdef RCC_AHB1RSTR_RNGRST
+#ifdef RCC_AHB2RSTR_RNGRST
 void XPD_RNG_Reset(void);
 #endif
 #ifdef RCC_APB1ENR_RTCAPBEN
@@ -687,6 +714,15 @@ void XPD_TIM9_SleepClockCtrl(FunctionalState NewState);
 #ifdef RCC_APB2RSTR_TIM9RST
 void XPD_TIM9_Reset(void);
 #endif
+#ifdef RCC_APB2ENR_UART10EN
+void XPD_UART10_ClockCtrl(FunctionalState NewState);
+#endif
+#ifdef RCC_APB2LPENR_UART10LPEN
+void XPD_UART10_SleepClockCtrl(FunctionalState NewState);
+#endif
+#ifdef RCC_APB2RSTR_UART10RST
+void XPD_UART10_Reset(void);
+#endif
 #ifdef RCC_APB1ENR_UART4EN
 void XPD_UART4_ClockCtrl(FunctionalState NewState);
 #endif
@@ -722,6 +758,15 @@ void XPD_UART8_SleepClockCtrl(FunctionalState NewState);
 #endif
 #ifdef RCC_APB1RSTR_UART8RST
 void XPD_UART8_Reset(void);
+#endif
+#ifdef RCC_APB2ENR_UART9EN
+void XPD_UART9_ClockCtrl(FunctionalState NewState);
+#endif
+#ifdef RCC_APB2LPENR_UART9LPEN
+void XPD_UART9_SleepClockCtrl(FunctionalState NewState);
+#endif
+#ifdef RCC_APB2RSTR_UART9RST
+void XPD_UART9_Reset(void);
 #endif
 #ifdef RCC_APB2ENR_USART1EN
 void XPD_USART1_ClockCtrl(FunctionalState NewState);
