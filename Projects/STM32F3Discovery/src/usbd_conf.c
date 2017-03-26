@@ -36,7 +36,9 @@ USB_HandleType husb = NEW_USB_HANDLE(USB);
 
 void usb_setConnectionState(FunctionalState state)
 {
+#ifdef USB_DISCONNECT_PIN
     XPD_GPIO_WritePin(USB_DISCONNECT_PORT, USB_DISCONNECT_PIN, state);
+#endif
 }
 
 #if defined (USE_USB_INTERRUPT_REMAPPED)
@@ -81,8 +83,10 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
     XPD_GPIO_InitPin(GPIOA, 11, &gpioInit);
     XPD_GPIO_InitPin(GPIOA, 12, &gpioInit);
 
+#ifdef USB_DISCONNECT_PIN
     gpioInit.Mode = GPIO_MODE_OUTPUT;
     XPD_GPIO_InitPin(USB_DISCONNECT_PORT, USB_DISCONNECT_PIN, &gpioInit);
+#endif
 
     /* USB clock configuration - must be operated from 48 MHz */
     {
