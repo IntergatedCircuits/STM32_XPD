@@ -28,12 +28,36 @@
 #include "xpd_rcc.h"
 #include "xpd_gpio.h"
 
+#define USB_DISCONNECT_PORT                 GPIOA
+#define USB_DISCONNECT_PIN                  9
+#define USE_USB_INTERRUPT_REMAPPED
+
 USB_HandleType husb = NEW_USB_HANDLE(USB);
 
-void USB_IRQHandler(void)
+void usb_setConnectionState(FunctionalState state)
+{
+    XPD_GPIO_WritePin(USB_DISCONNECT_PORT, USB_DISCONNECT_PIN, state);
+}
+
+#if defined (USE_USB_INTERRUPT_REMAPPED)
+void USB_HP_IRQHandler(void)
 {
     XPD_USB_IRQHandler(&husb);
 }
+void USB_LP_IRQHandler(void)
+{
+    XPD_USB_IRQHandler(&husb);
+}
+#else
+void USB_HP_CAN_TX_IRQHandler(void)
+{
+    XPD_USB_IRQHandler(&husb);
+}
+void USB_LP_CAN_RX0_IRQHandler(void)
+{
+    XPD_USB_IRQHandler(&husb);
+}
+#endif
 
 /*******************************************************************************
  LL Driver Interface (USB Device Library --> XPD)
@@ -49,7 +73,7 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
     GPIO_InitType gpioInit;
 
     /* Configure USB DM and DP pins */
-    gpioInit.AlternateMap = GPIO_USB_AF2;
+    gpioInit.AlternateMap = GPIO_USB_AF14;
     gpioInit.Mode = GPIO_MODE_ALTERNATE;
     gpioInit.Output.Speed = VERY_HIGH;
     gpioInit.Output.Type  = GPIO_OUTPUT_PUSHPULL;
@@ -57,16 +81,49 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
     XPD_GPIO_InitPin(GPIOA, 11, &gpioInit);
     XPD_GPIO_InitPin(GPIOA, 12, &gpioInit);
 
-#ifdef XPD_GPIOA_PinRemap
-    XPD_GPIOA_PinRemap(11);
-#endif
+    gpioInit.Mode = GPIO_MODE_OUTPUT;
+    XPD_GPIO_InitPin(USB_DISCONNECT_PORT, USB_DISCONNECT_PIN, &gpioInit);
 
     /* USB clock configuration - must be operated from 48 MHz */
-    XPD_USB_ClockConfig(USB_CLOCKSOURCE_HSI48);
+    {
+        uint32_t i = XPD_RCC_GetOscFreq(PLL);
+        switch (XPD_RCC_GetOscFreq(PLL))
+        {
+            case 72000000:
+                XPD_USB_ClockConfig(USB_CLOCKSOURCE_PLL_DIV1p5);
+                break;
 
-    /* Enable USB FS Interrupt */
-    XPD_NVIC_SetPriorityConfig(USB_IRQn, 0, 0);
-    XPD_NVIC_EnableIRQ(USB_IRQn);
+            case 48000000:
+                XPD_USB_ClockConfig(USB_CLOCKSOURCE_PLL);
+                break;
+
+            default: /* disable USB clock when no acceptable configuration is available */
+                return USBD_FAIL;
+        }
+    }
+
+#if defined (USE_USB_INTERRUPT_REMAPPED)
+    /*USB interrupt remapping enable */
+    XPD_USB_ITRemap(ENABLE);
+#endif
+
+#if defined (USE_USB_INTERRUPT_REMAPPED)
+    /* Set USB Remapped FS Interrupt priority */
+    XPD_NVIC_SetPriorityConfig(USB_HP_IRQn, 2, 0);
+    XPD_NVIC_EnableIRQ(USB_HP_IRQn);
+
+    /* Set USB Remapped FS Interrupt priority */
+    XPD_NVIC_SetPriorityConfig(USB_LP_IRQn, 2, 0);
+    XPD_NVIC_EnableIRQ(USB_LP_IRQn);
+#else
+    /* Set USB Default FS Interrupt priority */
+    XPD_NVIC_SetPriorityConfig(USB_LP_CAN_RX0_IRQn, 2, 0);
+    XPD_NVIC_EnableIRQ(USB_LP_CAN_RX0_IRQn);
+
+    /* Set USB Default FS Interrupt priority */
+    XPD_NVIC_SetPriorityConfig(USB_HP_CAN_TX_IRQn, 2, 0);
+    XPD_NVIC_EnableIRQ(USB_HP_CAN_TX_IRQn);
+#endif
 
     /* Link driver to user */
     pdev->pData = &husb;
