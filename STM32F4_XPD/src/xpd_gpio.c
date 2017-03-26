@@ -234,9 +234,6 @@ void XPD_GPIO_InitPin(GPIO_TypeDef * GPIOx, uint8_t Pin, GPIO_InitType * Config)
     /* EXTI configuration */
     if (Config->Mode == GPIO_MODE_EXTI)
     {
-        /* enable SYSCFG clock */
-        XPD_SYSCFG_ClockCtrl(ENABLE);
-
         /* set EXTI source */
         shifter = (Pin & 0x03) * 4;
         MODIFY_REG(SYSCFG->EXTICR[Pin >> 2], ((uint32_t) 0x0F) << shifter, GPIO_PORT_OFFSET(GPIOx) << shifter);

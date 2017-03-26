@@ -27,6 +27,17 @@
 #define SYSCFG_REG_BIT(_REG_NAME_, _BIT_NAME_) (SYSCFG_BB->_REG_NAME_._BIT_NAME_)
 #else
 #define SYSCFG_REG_BIT(_REG_NAME_, _BIT_NAME_) (SYSCFG->_REG_NAME_.b._BIT_NAME_)
+
+#ifdef SYSCFG_CFGR1_PA11_PA12_RMP
+
+/**
+ * @brief  Sets the PA9 & 10 pins to PA11 & 12 or back.
+ * @param  PIN_NUMBER: number of the pin that is selected for mapping
+ */
+#define XPD_GPIOA_PinRemap(PIN_NUMBER)     \
+    (SYSCFG_REG_BIT(CFGR1, PA11_PA12_RMP) = (uint32_t)(PIN_NUMBER > 10))
+#endif /* SYSCFG_CFGR1_PA11_PA12_RMP */
+
 #endif /* SYSCFG_BB */
 
 #endif /* SYSCFG_REG_BIT */
