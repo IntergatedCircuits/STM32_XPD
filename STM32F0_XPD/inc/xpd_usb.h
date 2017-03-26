@@ -97,12 +97,21 @@ typedef struct
 /** @defgroup USB_Exported_Macros USB Exported Macros
  * @{ */
 
+#ifdef USB_BCDR_DPPU
 /**
  * @brief  USB Handle initializer macro
  * @param  INSTANCE: specifies the USB peripheral instance.
  */
 #define         NEW_USB_HANDLE(INSTANCE)    \
      {.Callbacks = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL}}
+#else
+/**
+ * @brief  USB Handle initializer macro
+ * @param  INSTANCE: specifies the USB peripheral instance.
+ */
+#define         NEW_USB_HANDLE(INSTANCE)    \
+     {.Callbacks = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL}}
+#endif
 
 #ifdef USB_BB
 #define USB_REG_BIT(_REG_NAME_, _BIT_NAME_) (USB_BB->_REG_NAME_._BIT_NAME_)
@@ -110,11 +119,39 @@ typedef struct
 #define USB_REG_BIT(_REG_NAME_, _BIT_NAME_) (USB->_REG_NAME_.b._BIT_NAME_)
 #endif /* USB_BB */
 
-#define         XPD_USB_ClearFlag(FLAG_NAME) \
-    (USB_REG_BIT(ISTR,FLAG_NAME) = 0)
-
-#define         XPD_USB_GetFlag(FLAG_NAME) \
+/**
+ * @brief  Get the specified USB flag.
+ * @param  HANDLE: specifies the USB Handle.
+ * @param  FLAG_NAME: specifies the flag to return.
+ *         This parameter can be one of the following values:
+ *            @arg ESOF:    Expected start of frame
+ *            @arg SOF:     Start of frame
+ *            @arg RESET:   Reset
+ *            @arg SUSP:    Suspend
+ *            @arg WKUP:    Wake up
+ *            @arg ERR:     Error
+ *            @arg PMAOVR:  DMA overrun
+ *            @arg CTR:     Correct transfer
+ */
+#define         XPD_USB_GetFlag(FLAG_NAME)      \
     (USB_REG_BIT(ISTR,FLAG_NAME))
+
+/**
+ * @brief  Clear the specified USB flag.
+ * @param  HANDLE: specifies the USB Handle.
+ * @param  FLAG_NAME: specifies the flag to clear.
+ *         This parameter can be one of the following values:
+ *            @arg ESOF:    Expected start of frame
+ *            @arg SOF:     Start of frame
+ *            @arg RESET:   Reset
+ *            @arg SUSP:    Suspend
+ *            @arg WKUP:    Wake up
+ *            @arg ERR:     Error
+ *            @arg PMAOVR:  DMA overrun
+ *            @arg CTR:     Correct transfer
+ */
+#define         XPD_USB_ClearFlag(FLAG_NAME)    \
+    (USB_REG_BIT(ISTR,FLAG_NAME) = 0)
 
 /** @brief USB Wake up line number */
 #define USB_WAKEUP_EXTI_LINE            18
