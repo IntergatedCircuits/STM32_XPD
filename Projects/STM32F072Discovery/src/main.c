@@ -11,21 +11,19 @@ void SysTick_Handler(void)
 
 void ClockConfiguration(void)
 {
-    /* PLL configuration */
+    /* HSI48 configuration */
     {
-        RCC_PLL_InitType pll = {
+        RCC_HSI_InitType hsi = {
             .State = OSC_ON,
-            .Source = HSI48,
-            .Multiplier = 1,
-            .Predivider = 1
+            .CalibrationValue = 16
         };
 
-        XPD_RCC_PLLConfig(&pll);
+        XPD_RCC_HSI48Config(&hsi);
     }
 
     /* System clocks configuration */
     {
-        XPD_RCC_HCLKConfig(PLL, CLK_DIV1, 1);
+        XPD_RCC_HCLKConfig(HSI48, CLK_DIV1, 1);
 
         XPD_RCC_PCLKConfig(PCLK1, CLK_DIV1);
     }
