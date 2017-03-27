@@ -196,7 +196,7 @@ typedef struct
  * @brief  SPI Handle initializer macro
  * @param  INSTANCE: specifies the SPI peripheral instance.
  * @param  INIT_FN: specifies the dependency initialization function to call back.
- * @param  _DEINIT_FN_: specifies the dependency deinitialization function to call back.
+ * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
  */
 #define         NEW_SPI_HANDLE(INSTANCE, INIT_FN, DEINIT_FN)    \
     {.Inst      = (INSTANCE),                                   \
@@ -208,7 +208,7 @@ typedef struct
  * @brief  SPI Handle initializer macro
  * @param  INSTANCE: specifies the SPI peripheral instance.
  * @param  INIT_FN: specifies the dependency initialization function to call back.
- * @param  _DEINIT_FN_: specifies the dependency deinitialization function to call back.
+ * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
  */
 #define         NEW_SPI_HANDLE(INSTANCE, INIT_FN, DEINIT_FN)    \
     {.Inst      = (INSTANCE),                                   \
