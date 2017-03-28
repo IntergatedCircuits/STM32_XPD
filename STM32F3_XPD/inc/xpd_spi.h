@@ -100,10 +100,10 @@ typedef struct
 typedef enum
 {
     SPI_ERROR_NONE      = 0,   /*!< No error */
-    SPI_ERROR_MODF      = 1,   /*!< Mode fault */
+    SPI_ERROR_MODE      = 1,   /*!< Mode fault */
     SPI_ERROR_CRC       = 2,   /*!< CRC error flag */
-    SPI_ERROR_OVR       = 4,   /*!< Overrun flag */
-    SPI_ERROR_FRE       = 8,   /*!< Frame format error */
+    SPI_ERROR_OVERRUN   = 4,   /*!< Overrun flag */
+    SPI_ERROR_FRAME     = 8,   /*!< Frame format error */
     SPI_ERROR_DMA       = 16,  /*!< DMA transfer error */
 }SPI_ErrorType;
 
@@ -234,20 +234,24 @@ void            XPD_SPI_Disable             (SPI_HandleType * hspi);
 XPD_ReturnType  XPD_SPI_GetStatus           (SPI_HandleType * hspi);
 XPD_ReturnType  XPD_SPI_PollStatus          (SPI_HandleType * hspi, uint32_t Timeout);
 
-XPD_ReturnType  XPD_SPI_Transmit            (SPI_HandleType * hspi, void * TxData, uint16_t Length, uint32_t Timeout);
-XPD_ReturnType  XPD_SPI_Receive             (SPI_HandleType * hspi, void * RxData, uint16_t Length, uint32_t Timeout);
+XPD_ReturnType  XPD_SPI_Transmit            (SPI_HandleType * hspi, void * TxData,
+                                             uint16_t Length, uint32_t Timeout);
+XPD_ReturnType  XPD_SPI_Receive             (SPI_HandleType * hspi, void * RxData,
+                                             uint16_t Length, uint32_t Timeout);
 XPD_ReturnType  XPD_SPI_TransmitReceive     (SPI_HandleType * hspi, void * TxData, void * RxData,
                                              uint16_t Length, uint32_t Timeout);
 
 void            XPD_SPI_Transmit_IT         (SPI_HandleType * hspi, void * TxData, uint16_t Length);
 void            XPD_SPI_Receive_IT          (SPI_HandleType * hspi, void * RxData, uint16_t Length);
-void            XPD_SPI_TransmitReceive_IT  (SPI_HandleType * hspi, void * TxData, void * RxData, uint16_t Length);
+void            XPD_SPI_TransmitReceive_IT  (SPI_HandleType * hspi, void * TxData,
+                                             void * RxData, uint16_t Length);
 
 void            XPD_SPI_IRQHandler          (SPI_HandleType * hspi);
 
 XPD_ReturnType  XPD_SPI_Transmit_DMA        (SPI_HandleType * hspi, void * TxData, uint16_t Length);
 XPD_ReturnType  XPD_SPI_Receive_DMA         (SPI_HandleType * hspi, void * RxData, uint16_t Length);
-XPD_ReturnType  XPD_SPI_TransmitReceive_DMA (SPI_HandleType * hspi, void * TxData, void * RxData, uint16_t Length);
+XPD_ReturnType  XPD_SPI_TransmitReceive_DMA (SPI_HandleType * hspi, void * TxData,
+                                             void * RxData, uint16_t Length);
 void            XPD_SPI_Stop_DMA            (SPI_HandleType * hspi);
 /** @} */
 

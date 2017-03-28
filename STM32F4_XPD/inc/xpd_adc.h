@@ -67,7 +67,7 @@ uint32_t        XPD_ADC_GetClockFreq        (void);
 typedef enum
 {
     ADC_ERROR_NONE      = 0,   /*!< No error */
-    ADC_ERROR_OVR       = 1,   /*!< Overrun flag */
+    ADC_ERROR_OVERRUN   = 1,   /*!< Overrun flag */
     ADC_ERROR_DMA       = 4,   /*!< DMA transfer error */
 }ADC_ErrorType;
 
@@ -193,9 +193,7 @@ typedef struct
         XPD_HandleCallbackType DepInit;             /*!< Callback to initialize module dependencies (GPIOs, IRQs, DMAs) */
         XPD_HandleCallbackType DepDeinit;           /*!< Callback to restore module dependencies (GPIOs, IRQs, DMAs) */
         XPD_HandleCallbackType ConvComplete;        /*!< Conversion(s) complete callback */
-        XPD_HandleCallbackType HalfConvComplete;    /*!< Half of the conversions complete callback */
         XPD_HandleCallbackType InjConvComplete;     /*!< Injected conversion(s) complete callback */
-        XPD_HandleCallbackType HalfInjConvComplete; /*!< Half of the injected conversions complete callback */
         XPD_HandleCallbackType Watchdog;            /*!< Watchdog alert callback */
 #if defined(USE_XPD_ADC_ERROR_DETECT) || defined(USE_XPD_DMA_ERROR_DETECT)
         XPD_HandleCallbackType Error;               /*!< DMA transfer or overrun error callback */
@@ -221,10 +219,10 @@ typedef struct
  * @param  INIT_FN: specifies the dependency initialization function to call back.
  * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
  */
-#define         NEW_ADC_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)               \
-    {.Inst      = (INSTANCE),                                            \
-     .Callbacks = {(INIT_FN),(DEINIT_FN),NULL,NULL,NULL,NULL,NULL,NULL}, \
-     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,                            \
+#define         NEW_ADC_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)          \
+    {.Inst      = (INSTANCE),                                       \
+     .Callbacks = {(INIT_FN),(DEINIT_FN),NULL,NULL,NULL,NULL},      \
+     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,                       \
      .Errors    = ADC_ERROR_NONE}
 #else
 /**
@@ -233,9 +231,9 @@ typedef struct
  * @param  INIT_FN: specifies the dependency initialization function to call back.
  * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
  */
-#define         NEW_ADC_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)               \
-    {.Inst      = (INSTANCE),                                            \
-     .Callbacks = {(INIT_FN),(DEINIT_FN),NULL,NULL,NULL,NULL,NULL},      \
+#define         NEW_ADC_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)          \
+    {.Inst      = (INSTANCE),                                       \
+     .Callbacks = {(INIT_FN),(DEINIT_FN),NULL,NULL,NULL},           \
      .ClockCtrl = XPD_##INSTANCE##_ClockCtrl}
 #endif
 

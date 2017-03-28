@@ -131,8 +131,8 @@ static void spi_dmaReceiveRedirect(void * hdma)
 
     if (XPD_DMA_CircularMode((DMA_HandleType*)hdma) == 0)
     {
-        /* Disable DMA Requests */
-        CLEAR_BIT(hspi->Inst->CR2.w, SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN);
+        /* Disable Rx DMA Request */
+        SPI_REG_BIT(hspi, CR2, RXDMAEN) = 0;
 
         /* Update stream status */
         hspi->RxStream.buffer += hspi->RxStream.length * hspi->RxStream.size;
@@ -379,7 +379,7 @@ XPD_ReturnType XPD_SPI_PollStatus(SPI_HandleType * hspi, uint32_t Timeout)
     if (XPD_SPI_GetFlag(hspi, OVR))
     {
         /* Update error code */
-        hspi->Errors |= SPI_ERROR_OVR;
+        hspi->Errors |= SPI_ERROR_OVERRUN;
 
         /* Clear the transfer error flag */
         XPD_SPI_ClearFlag(hspi, OVR);
@@ -389,7 +389,7 @@ XPD_ReturnType XPD_SPI_PollStatus(SPI_HandleType * hspi, uint32_t Timeout)
     if (XPD_SPI_GetFlag(hspi, MODF))
     {
         /* Update error code */
-        hspi->Errors |= SPI_ERROR_MODF;
+        hspi->Errors |= SPI_ERROR_MODE;
 
         /* Clear the transfer error flag */
         XPD_SPI_ClearFlag(hspi, MODF);
@@ -409,7 +409,7 @@ XPD_ReturnType XPD_SPI_PollStatus(SPI_HandleType * hspi, uint32_t Timeout)
     if (XPD_SPI_GetFlag(hspi, FRE))
     {
         /* Update error code */
-        hspi->Errors |= SPI_ERROR_FRE;
+        hspi->Errors |= SPI_ERROR_FRAME;
 
         /* Clear the transfer error flag */
         XPD_SPI_ClearFlag(hspi, FRE);
@@ -434,77 +434,73 @@ XPD_ReturnType XPD_SPI_PollStatus(SPI_HandleType * hspi, uint32_t Timeout)
  */
 XPD_ReturnType XPD_SPI_Transmit(SPI_HandleType * hspi, void * TxData, uint16_t Length, uint32_t Timeout)
 {
-    XPD_ReturnType result = XPD_OK;
+    XPD_ReturnType result;
+    boolean_t duplex = TRUE;
 
-    if (Length > 0)
+    /* While SPI is still busy with previous transfer, new one is not started */
+    result = spi_waitFinished(hspi, &Timeout);
+    if (result != XPD_OK)
     {
-        boolean_t duplex = TRUE;
+        return result;
+    }
 
-        /* While SPI is still busy with previous transfer, new one is not started */
-        result = spi_waitFinished(hspi, &Timeout);
+    /* save stream info */
+    hspi->TxStream.buffer = TxData;
+    hspi->TxStream.length = Length;
+    SPI_RESET_ERRORS(hspi);
+
+    /* Configure communication direction : 1Line */
+    if (SPI_REG_BIT(hspi, CR1, BIDIMODE) != 0)
+    {
+        SPI_REG_BIT(hspi, CR1, BIDIOE) = 1;
+        duplex = FALSE;
+    }
+
+#ifdef USE_XPD_SPI_ERROR_DETECT
+    /* Reset CRC Calculation */
+    if (hspi->CRCSize > 0)
+    {
+        spi_initCRC(hspi);
+    }
+#endif
+
+    /* Check if the SPI is already enabled */
+    XPD_SPI_Enable(hspi);
+
+    while (hspi->TxStream.length > 0)
+    {
+        /* wait for empty transmit buffer */
+        result = XPD_WaitForDiff(&hspi->Inst->SR.w, SPI_SR_TXE, 0, &Timeout);
         if (result != XPD_OK)
         {
             return result;
         }
 
-        /* save stream info */
-        hspi->TxStream.buffer = TxData;
-        hspi->TxStream.length = Length;
-        SPI_RESET_ERRORS(hspi);
-
-        /* Configure communication direction : 1Line */
-        if (SPI_REG_BIT(hspi, CR1, BIDIMODE) != 0)
-        {
-            SPI_REG_BIT(hspi, CR1, BIDIOE) = 1;
-            duplex = FALSE;
-        }
+        XPD_WriteFromStream(&hspi->Inst->DR, &hspi->TxStream);
+    }
+    /* wait for the last transmission to finish */
+    result = XPD_WaitForDiff(&hspi->Inst->SR.w, SPI_SR_TXE, 0, &Timeout);
 
 #ifdef USE_XPD_SPI_ERROR_DETECT
-        /* Reset CRC Calculation */
-        if (hspi->CRCSize > 0)
-        {
-            spi_initCRC(hspi);
-        }
+    /* Enable CRC Transmission */
+    if (hspi->CRCSize > 0)
+    {
+        SPI_REG_BIT(hspi, CR1, CRCNEXT) = 1;
+    }
 #endif
 
-        /* Check if the SPI is already enabled */
-        XPD_SPI_Enable(hspi);
+    /* Control the BSY flag */
+    result = XPD_WaitForMatch(&hspi->Inst->SR.w, SPI_SR_BSY, 0, &Timeout);
 
-        while (hspi->TxStream.length > 0)
+    /* Clear overrun flag in 2 Lines communication mode because received data is not read */
+    if (duplex)
+    {
+        while (XPD_SPI_GetFlag(hspi, RXNE) != 0)
         {
-            /* wait for empty transmit buffer */
-            result = XPD_WaitForDiff(&hspi->Inst->SR.w, SPI_SR_TXE, 0, &Timeout);
-            if (result != XPD_OK)
-            {
-                return result;
-            }
-
-            XPD_WriteFromStream(&hspi->Inst->DR, &hspi->TxStream);
+            /* empty received data from data register */
+            uint16_t temp = SPI_REG_BY_SIZE(&hspi->Inst->DR, hspi->RxStream.size);
         }
-        /* wait for the last transmission to finish */
-        result = XPD_WaitForDiff(&hspi->Inst->SR.w, SPI_SR_TXE, 0, &Timeout);
-
-#ifdef USE_XPD_SPI_ERROR_DETECT
-        /* Enable CRC Transmission */
-        if (hspi->CRCSize > 0)
-        {
-            SPI_REG_BIT(hspi, CR1, CRCNEXT) = 1;
-        }
-#endif
-
-        /* Control the BSY flag */
-        result = XPD_WaitForMatch(&hspi->Inst->SR.w, SPI_SR_BSY, 0, &Timeout);
-
-        /* Clear overrun flag in 2 Lines communication mode because received data is not read */
-        if (duplex)
-        {
-            while (XPD_SPI_GetFlag(hspi, RXNE) != 0)
-            {
-                /* empty received data from data register */
-                uint16_t temp = SPI_REG_BY_SIZE(&hspi->Inst->DR, hspi->RxStream.size);
-            }
-            XPD_SPI_ClearFlag(hspi, OVR);
-        }
+        XPD_SPI_ClearFlag(hspi, OVR);
     }
 
     return result;
@@ -522,81 +518,78 @@ XPD_ReturnType XPD_SPI_Transmit(SPI_HandleType * hspi, void * TxData, uint16_t L
  */
 XPD_ReturnType XPD_SPI_Receive(SPI_HandleType * hspi, void * RxData, uint16_t Length, uint32_t Timeout)
 {
-    XPD_ReturnType result = XPD_OK;
+    XPD_ReturnType result;
 
-    if (Length > 0)
+    /* If master mode, and full duplex communication */
+    if (SPI_MASTER_FULL_DUPLEX(hspi))
     {
-        /* If master mode, and full duplex communication */
-        if (SPI_MASTER_FULL_DUPLEX(hspi))
-        {
-            /* the receive process is not supported in 2Lines direction master mode */
-            /* in this case we call the TransmitReceive process                     */
-            return XPD_SPI_TransmitReceive(hspi, RxData, RxData, Length, Timeout);
-        }
+        /* the receive process is not supported in 2Lines direction master mode */
+        /* in this case we call the TransmitReceive process                     */
+        return XPD_SPI_TransmitReceive(hspi, RxData, RxData, Length, Timeout);
+    }
 
-        /* While SPI is still busy with previous transfer, new one is not started */
-        result = spi_waitFinished(hspi, &Timeout);
+    /* While SPI is still busy with previous transfer, new one is not started */
+    result = spi_waitFinished(hspi, &Timeout);
+    if (result != XPD_OK)
+    {
+        return result;
+    }
+
+    /* save stream info */
+    hspi->RxStream.buffer = RxData;
+    hspi->RxStream.length = Length;
+    SPI_RESET_ERRORS(hspi);
+
+#ifdef USE_XPD_SPI_ERROR_DETECT
+    /* Reset CRC Calculation */
+    if (hspi->CRCSize > 0)
+    {
+        spi_initCRC(hspi);
+    }
+#endif
+
+    /* Configure communication direction 1Line and enabled SPI if needed */
+    if (SPI_REG_BIT(hspi, CR1, BIDIMODE) != 0)
+    {
+        SPI_REG_BIT(hspi, CR1, BIDIOE) = 0;
+    }
+
+    /* Check if the SPI is already enabled */
+    XPD_SPI_Enable(hspi);
+
+    while (hspi->RxStream.length > 0)
+    {
+        /* Wait for not empty receive buffer */
+        result = XPD_WaitForDiff(&hspi->Inst->SR.w, SPI_SR_RXNE, 0, &Timeout);
         if (result != XPD_OK)
         {
             return result;
         }
 
-        /* save stream info */
-        hspi->RxStream.buffer = RxData;
-        hspi->RxStream.length = Length;
-        SPI_RESET_ERRORS(hspi);
+        XPD_ReadToStream(&hspi->Inst->DR, &hspi->RxStream);
 
 #ifdef USE_XPD_SPI_ERROR_DETECT
-        /* Reset CRC Calculation */
-        if (hspi->CRCSize > 0)
+        /* This is done to handle the CRCNEXT before the last data */
+        if ((hspi->CRCSize > 0) && (hspi->RxStream.length == 1))
         {
-            spi_initCRC(hspi);
+            SPI_REG_BIT(hspi, CR1, CRCNEXT) = 1;
         }
 #endif
-
-        /* Configure communication direction 1Line and enabled SPI if needed */
-        if (SPI_REG_BIT(hspi, CR1, BIDIMODE) != 0)
-        {
-            SPI_REG_BIT(hspi, CR1, BIDIOE) = 0;
-        }
-
-        /* Check if the SPI is already enabled */
-        XPD_SPI_Enable(hspi);
-
-        while (hspi->RxStream.length > 0)
-        {
-            /* Wait for not empty receive buffer */
-            result = XPD_WaitForDiff(&hspi->Inst->SR.w, SPI_SR_RXNE, 0, &Timeout);
-            if (result != XPD_OK)
-            {
-                return result;
-            }
-
-            XPD_ReadToStream(&hspi->Inst->DR, &hspi->RxStream);
+    }
 
 #ifdef USE_XPD_SPI_ERROR_DETECT
-            /* This is done to handle the CRCNEXT before the last data */
-            if ((hspi->CRCSize > 0) && (hspi->RxStream.length == 1))
-            {
-                SPI_REG_BIT(hspi, CR1, CRCNEXT) = 1;
-            }
-#endif
-        }
-
-#ifdef USE_XPD_SPI_ERROR_DETECT
-        /* Handle the CRC Reception */
-        if (hspi->CRCSize > 0)
-        {
-            result = spi_receiveCRC(hspi, &Timeout);
-        }
+    /* Handle the CRC Reception */
+    if (hspi->CRCSize > 0)
+    {
+        result = spi_receiveCRC(hspi, &Timeout);
+    }
 #endif
 
-        /* If master mode, and either simplex, or half duplex communication */
-        if (SPI_MASTER_RXONLY(hspi))
-        {
-            /* Disable SPI peripheral */
-            XPD_SPI_Disable(hspi);
-        }
+    /* If master mode, and either simplex, or half duplex communication */
+    if (SPI_MASTER_RXONLY(hspi))
+    {
+        /* Disable SPI peripheral */
+        XPD_SPI_Disable(hspi);
     }
     return result;
 }
@@ -615,75 +608,71 @@ XPD_ReturnType XPD_SPI_Receive(SPI_HandleType * hspi, void * RxData, uint16_t Le
 XPD_ReturnType XPD_SPI_TransmitReceive(SPI_HandleType * hspi, void * TxData, void * RxData,
         uint16_t Length, uint32_t Timeout)
 {
-    XPD_ReturnType result = XPD_OK;
+    XPD_ReturnType result;
+    boolean_t duplex = TRUE, exclMaster = FALSE;
 
-    if (Length > 0)
+    /* While SPI is still busy with previous transfer, new one is not started */
+    result = spi_waitFinished(hspi, &Timeout);
+    if (result != XPD_OK)
     {
-        boolean_t duplex = TRUE, exclMaster = FALSE;
+        return result;
+    }
 
-        /* While SPI is still busy with previous transfer, new one is not started */
-        result = spi_waitFinished(hspi, &Timeout);
+    /* save stream info */
+    hspi->TxStream.buffer = TxData;
+    hspi->TxStream.length = Length;
+    hspi->RxStream.buffer = RxData;
+    hspi->RxStream.length = Length;
+    SPI_RESET_ERRORS(hspi);
+
+#ifdef USE_XPD_SPI_ERROR_DETECT
+    /* Reset CRC Calculation */
+    if (hspi->CRCSize > 0)
+    {
+        spi_initCRC(hspi);
+    }
+#endif
+
+    /* Check if the SPI is already enabled */
+    XPD_SPI_Enable(hspi);
+
+    while ((hspi->TxStream.length + hspi->RxStream.length) > 0)
+    {
+        /* wait for buffer change */
+        result = XPD_WaitForDiff(&hspi->Inst->SR.w, SPI_SR_TXE | SPI_SR_RXNE, 0, &Timeout);
         if (result != XPD_OK)
         {
             return result;
         }
 
-        /* save stream info */
-        hspi->TxStream.buffer = TxData;
-        hspi->TxStream.length = Length;
-        hspi->RxStream.buffer = RxData;
-        hspi->RxStream.length = Length;
-        SPI_RESET_ERRORS(hspi);
+        /* Time to transmit */
+        if ((hspi->TxStream.length > 0) && (XPD_SPI_GetFlag(hspi, TXE)))
+        {
+            XPD_WriteFromStream(&hspi->Inst->DR, &hspi->TxStream);
 
 #ifdef USE_XPD_SPI_ERROR_DETECT
-        /* Reset CRC Calculation */
-        if (hspi->CRCSize > 0)
-        {
-            spi_initCRC(hspi);
-        }
+            /* Enable CRC Transmission */
+            if ((hspi->CRCSize > 0) && (hspi->TxStream.length == 0))
+            {
+                SPI_REG_BIT(hspi, CR1, CRCNEXT) = 1;
+            }
 #endif
-
-        /* Check if the SPI is already enabled */
-        XPD_SPI_Enable(hspi);
-
-        while ((hspi->TxStream.length + hspi->RxStream.length) > 0)
-        {
-            /* wait for empty transmit buffer */
-            result = XPD_WaitForDiff(&hspi->Inst->SR.w, SPI_SR_TXE | SPI_SR_RXNE, 0, &Timeout);
-            if (result != XPD_OK)
-            {
-                return result;
-            }
-
-            /* Time to transmit */
-            if ((hspi->TxStream.length > 0) && (XPD_SPI_GetFlag(hspi, TXE)))
-            {
-                XPD_WriteFromStream(&hspi->Inst->DR, &hspi->TxStream);
-
-#ifdef USE_XPD_SPI_ERROR_DETECT
-                /* Enable CRC Transmission */
-                if ((hspi->CRCSize > 0) && (hspi->TxStream.length == 0))
-                {
-                    SPI_REG_BIT(hspi, CR1, CRCNEXT) = 1;
-                }
-#endif
-            }
-
-            /* Time to receive */
-            if ((hspi->RxStream.length > 0) && (XPD_SPI_GetFlag(hspi, RXNE)))
-            {
-                XPD_ReadToStream(&hspi->Inst->DR, &hspi->RxStream);
-            }
         }
 
-#ifdef USE_XPD_SPI_ERROR_DETECT
-        /* Handle the CRC Reception */
-        if (hspi->CRCSize > 0)
+        /* Time to receive */
+        if ((hspi->RxStream.length > 0) && (XPD_SPI_GetFlag(hspi, RXNE)))
         {
-            result = spi_receiveCRC(hspi, &Timeout);
+            XPD_ReadToStream(&hspi->Inst->DR, &hspi->RxStream);
         }
-#endif
     }
+
+#ifdef USE_XPD_SPI_ERROR_DETECT
+    /* Handle the CRC Reception */
+    if (hspi->CRCSize > 0)
+    {
+        result = spi_receiveCRC(hspi, &Timeout);
+    }
+#endif
     return result;
 }
 
@@ -696,36 +685,33 @@ XPD_ReturnType XPD_SPI_TransmitReceive(SPI_HandleType * hspi, void * TxData, voi
  */
 void XPD_SPI_Transmit_IT(SPI_HandleType * hspi, void * TxData, uint16_t Length)
 {
-    if (Length > 0)
+    uint32_t timeout = SPI_BUSY_TIMEOUT;
+    /* While SPI is still busy with previous transfer, new one is not started */
+    (void)spi_waitFinished(hspi, &timeout);
+
+    /* save stream info */
+    hspi->TxStream.buffer = TxData;
+    hspi->TxStream.length = Length;
+    SPI_RESET_ERRORS(hspi);
+
+    /* Configure communication direction : 1Line */
+    if (SPI_REG_BIT(hspi, CR1, BIDIMODE) != 0)
     {
-        uint32_t timeout = SPI_BUSY_TIMEOUT;
-        /* While SPI is still busy with previous transfer, new one is not started */
-        (void)spi_waitFinished(hspi, &timeout);
-
-        /* save stream info */
-        hspi->TxStream.buffer = TxData;
-        hspi->TxStream.length = Length;
-        SPI_RESET_ERRORS(hspi);
-
-        /* Configure communication direction : 1Line */
-        if (SPI_REG_BIT(hspi, CR1, BIDIMODE) != 0)
-        {
-            SPI_REG_BIT(hspi, CR1, BIDIOE) = 1;
-        }
+        SPI_REG_BIT(hspi, CR1, BIDIOE) = 1;
+    }
 
 #ifdef USE_XPD_SPI_ERROR_DETECT
-        /* Reset CRC Calculation */
-        if (hspi->CRCSize > 0)
-        {
-            spi_initCRC(hspi);
-        }
-#endif
-        /* Enable TXE and ERR interrupt */
-        XPD_SPI_EnableIT(hspi, TXE);
-
-        /* Check if the SPI is already enabled */
-        XPD_SPI_Enable(hspi);
+    /* Reset CRC Calculation */
+    if (hspi->CRCSize > 0)
+    {
+        spi_initCRC(hspi);
     }
+#endif
+    /* Enable TXE and ERR interrupt */
+    XPD_SPI_EnableIT(hspi, TXE);
+
+    /* Check if the SPI is already enabled */
+    XPD_SPI_Enable(hspi);
 }
 
 /**
@@ -737,48 +723,45 @@ void XPD_SPI_Transmit_IT(SPI_HandleType * hspi, void * TxData, uint16_t Length)
  */
 void XPD_SPI_Receive_IT(SPI_HandleType * hspi, void * RxData, uint16_t Length)
 {
-    if (Length > 0)
+    uint32_t timeout = SPI_BUSY_TIMEOUT;
+
+    /* If master mode, and full duplex communication */
+    if (SPI_MASTER_FULL_DUPLEX(hspi))
     {
-        uint32_t timeout = SPI_BUSY_TIMEOUT;
+        /* the receive process is not supported in 2Lines direction master mode */
+        /* in this case we call the TransmitReceive process                     */
+        XPD_SPI_TransmitReceive_IT(hspi, RxData, RxData, Length);
+    }
 
-        /* If master mode, and full duplex communication */
-        if (SPI_MASTER_FULL_DUPLEX(hspi))
-        {
-            /* the receive process is not supported in 2Lines direction master mode */
-            /* in this case we call the TransmitReceive process                     */
-            XPD_SPI_TransmitReceive_IT(hspi, RxData, RxData, Length);
-        }
+    /* While SPI is still busy with previous transfer, new one is not started */
+    (void)spi_waitFinished(hspi, &timeout);
 
-        /* While SPI is still busy with previous transfer, new one is not started */
-        (void)spi_waitFinished(hspi, &timeout);
+    /* save stream info */
+    hspi->RxStream.buffer = RxData;
+    hspi->RxStream.length = Length;
+    SPI_RESET_ERRORS(hspi);
 
-        /* save stream info */
-        hspi->RxStream.buffer = RxData;
-        hspi->RxStream.length = Length;
-        SPI_RESET_ERRORS(hspi);
-
-        /* Configure communication direction 1Line and enabled SPI if needed */
-        if (SPI_REG_BIT(hspi, CR1, BIDIMODE) != 0)
-        {
-            SPI_REG_BIT(hspi, CR1, BIDIOE) = 0;
-        }
+    /* Configure communication direction 1Line and enabled SPI if needed */
+    if (SPI_REG_BIT(hspi, CR1, BIDIMODE) != 0)
+    {
+        SPI_REG_BIT(hspi, CR1, BIDIOE) = 0;
+    }
 
 #ifdef USE_XPD_SPI_ERROR_DETECT
-        /* Reset CRC Calculation */
-        if (hspi->CRCSize > 0)
-        {
-            spi_initCRC(hspi);
-        }
-        /* Enable RXNE and ERR interrupt */
-        SET_BIT(hspi->Inst->CR2.w, SPI_CR2_RXNEIE | SPI_CR2_ERRIE);
+    /* Reset CRC Calculation */
+    if (hspi->CRCSize > 0)
+    {
+        spi_initCRC(hspi);
+    }
+    /* Enable RXNE and ERR interrupt */
+    SET_BIT(hspi->Inst->CR2.w, SPI_CR2_RXNEIE | SPI_CR2_ERRIE);
 #else
-        /* Enable RXNE interrupt */
-        XPD_SPI_EnableIT(hspi, RXNE);
+    /* Enable RXNE interrupt */
+    XPD_SPI_EnableIT(hspi, RXNE);
 #endif
 
-        /* Check if the SPI is already enabled */
-        XPD_SPI_Enable(hspi);
-    }
+    /* Check if the SPI is already enabled */
+    XPD_SPI_Enable(hspi);
 }
 
 /**
@@ -791,35 +774,32 @@ void XPD_SPI_Receive_IT(SPI_HandleType * hspi, void * RxData, uint16_t Length)
  */
 void XPD_SPI_TransmitReceive_IT(SPI_HandleType * hspi, void * TxData, void * RxData, uint16_t Length)
 {
-    if (Length > 0)
-    {
-        uint32_t timeout = SPI_BUSY_TIMEOUT;
-        /* While SPI is still busy with previous transfer, new one is not started */
-        (void)spi_waitFinished(hspi, &timeout);
+    uint32_t timeout = SPI_BUSY_TIMEOUT;
+    /* While SPI is still busy with previous transfer, new one is not started */
+    (void)spi_waitFinished(hspi, &timeout);
 
-        /* save stream info */
-        hspi->TxStream.buffer = TxData;
-        hspi->TxStream.length = Length;
-        hspi->RxStream.buffer = RxData;
-        hspi->RxStream.length = Length;
-        SPI_RESET_ERRORS(hspi);
+    /* save stream info */
+    hspi->TxStream.buffer = TxData;
+    hspi->TxStream.length = Length;
+    hspi->RxStream.buffer = RxData;
+    hspi->RxStream.length = Length;
+    SPI_RESET_ERRORS(hspi);
 
 #ifdef USE_XPD_SPI_ERROR_DETECT
-        /* Reset CRC Calculation */
-        if (hspi->CRCSize > 0)
-        {
-            spi_initCRC(hspi);
-        }
-        /* Enable TXE, RXNE and ERR interrupt */
-        SET_BIT(hspi->Inst->CR2.w, SPI_CR2_TXEIE | SPI_CR2_RXNEIE | SPI_CR2_ERRIE);
+    /* Reset CRC Calculation */
+    if (hspi->CRCSize > 0)
+    {
+        spi_initCRC(hspi);
+    }
+    /* Enable TXE, RXNE and ERR interrupt */
+    SET_BIT(hspi->Inst->CR2.w, SPI_CR2_TXEIE | SPI_CR2_RXNEIE | SPI_CR2_ERRIE);
 #else
-        /* Enable TXE, RXNE interrupt */
-        SET_BIT(hspi->Inst->CR2.w, SPI_CR2_TXEIE | SPI_CR2_RXNEIE);
+    /* Enable TXE, RXNE interrupt */
+    SET_BIT(hspi->Inst->CR2.w, SPI_CR2_TXEIE | SPI_CR2_RXNEIE);
 #endif
 
-        /* Check if the SPI is already enabled */
-        XPD_SPI_Enable(hspi);
-    }
+    /* Check if the SPI is already enabled */
+    XPD_SPI_Enable(hspi);
 }
 
 /**
@@ -953,17 +933,17 @@ void XPD_SPI_IRQHandler(SPI_HandleType * hspi)
     {
         if ((sr & SPI_SR_OVR) != 0)
         {
-            hspi->Errors |= SPI_ERROR_OVR;
+            hspi->Errors |= SPI_ERROR_OVERRUN;
             XPD_SPI_ClearFlag(hspi, OVR);
         }
         if ((sr & SPI_SR_MODF) != 0)
         {
-            hspi->Errors |= SPI_ERROR_MODF;
+            hspi->Errors |= SPI_ERROR_MODE;
             XPD_SPI_ClearFlag(hspi, MODF);
         }
         if ((sr & SPI_SR_FRE) != 0)
         {
-            hspi->Errors |= SPI_ERROR_FRE;
+            hspi->Errors |= SPI_ERROR_FRAME;
             XPD_SPI_ClearFlag(hspi, FRE);
         }
         /* Clear interrupt enable bits */
@@ -984,54 +964,49 @@ void XPD_SPI_IRQHandler(SPI_HandleType * hspi)
  */
 XPD_ReturnType XPD_SPI_Transmit_DMA(SPI_HandleType * hspi, void * TxData, uint16_t Length)
 {
-    XPD_ReturnType result = XPD_OK;
+    XPD_ReturnType result;
+    uint32_t timeout = SPI_BUSY_TIMEOUT;
+    /* While SPI is still busy with previous transfer, new one is not started */
+    (void)spi_waitFinished(hspi, &timeout);
 
-    if (Length > 0)
+    /* save stream info */
+    hspi->TxStream.buffer = TxData;
+    hspi->TxStream.length = Length;
+
+    /* Set up DMA for transfer */
+    result = XPD_DMA_Start_IT(hspi->DMA.Transmit, (void*) &hspi->Inst->DR, TxData, Length);
+
+    if (result == XPD_OK)
     {
-        uint32_t timeout = SPI_BUSY_TIMEOUT;
-        /* While SPI is still busy with previous transfer, new one is not started */
-        (void)spi_waitFinished(hspi, &timeout);
+        /* Set the callback owner */
+        hspi->DMA.Transmit->Owner = hspi;
 
-        /* save stream info */
-        hspi->TxStream.buffer = TxData;
-        hspi->TxStream.length = Length;
-
-        /* Set up DMA for transfer */
-        result = XPD_DMA_Start_IT(hspi->DMA.Transmit, (void*) &hspi->Inst->DR, TxData, Length);
-
-        if (result == XPD_OK)
-        {
-            /* Set the callback owner */
-            hspi->DMA.Transmit->Owner = hspi;
-
-            /* Set the DMA transfer callbacks */
-            hspi->DMA.Transmit->Callbacks.Complete     = spi_dmaTransmitRedirect;
-            hspi->DMA.Transmit->Callbacks.HalfComplete = NULL;
+        /* Set the DMA transfer callbacks */
+        hspi->DMA.Transmit->Callbacks.Complete     = spi_dmaTransmitRedirect;
 #ifdef USE_XPD_DMA_ERROR_DETECT
-            hspi->DMA.Transmit->Callbacks.Error        = spi_dmaErrorRedirect;
+        hspi->DMA.Transmit->Callbacks.Error        = spi_dmaErrorRedirect;
 #endif
-            SPI_RESET_ERRORS(hspi);
+        SPI_RESET_ERRORS(hspi);
 
 #ifdef USE_XPD_SPI_ERROR_DETECT
-            /* Reset CRC Calculation */
-            if (hspi->CRCSize > 0)
-            {
-                spi_initCRC(hspi);
-            }
+        /* Reset CRC Calculation */
+        if (hspi->CRCSize > 0)
+        {
+            spi_initCRC(hspi);
+        }
 #endif
 
-            /* Configure communication direction : 1Line */
-            if (SPI_REG_BIT(hspi, CR1, BIDIMODE) != 0)
-            {
-                SPI_REG_BIT(hspi, CR1, BIDIOE) = 1;
-            }
-
-            /* Enable Tx DMA Request */
-            SPI_REG_BIT(hspi, CR2, TXDMAEN) = 1;
-
-            /* Check if the SPI is already enabled */
-            XPD_SPI_Enable(hspi);
+        /* Configure communication direction : 1Line */
+        if (SPI_REG_BIT(hspi, CR1, BIDIMODE) != 0)
+        {
+            SPI_REG_BIT(hspi, CR1, BIDIOE) = 1;
         }
+
+        /* Enable Tx DMA Request */
+        SPI_REG_BIT(hspi, CR2, TXDMAEN) = 1;
+
+        /* Check if the SPI is already enabled */
+        XPD_SPI_Enable(hspi);
     }
     return result;
 }
@@ -1046,7 +1021,7 @@ XPD_ReturnType XPD_SPI_Transmit_DMA(SPI_HandleType * hspi, void * TxData, uint16
  */
 XPD_ReturnType XPD_SPI_Receive_DMA(SPI_HandleType * hspi, void * RxData, uint16_t Length)
 {
-    XPD_ReturnType result = XPD_OK;
+    XPD_ReturnType result;
 
     /* If master mode, and full duplex communication */
     if (SPI_MASTER_FULL_DUPLEX(hspi))
@@ -1055,8 +1030,7 @@ XPD_ReturnType XPD_SPI_Receive_DMA(SPI_HandleType * hspi, void * RxData, uint16_
          * in this case we call the TransmitReceive process */
         result = XPD_SPI_TransmitReceive_DMA(hspi, NULL, RxData, Length);
     }
-
-    else if (Length > 0)
+    else
     {
         uint32_t timeout = SPI_BUSY_TIMEOUT;
         /* While SPI is still busy with previous transfer, new one is not started */
@@ -1076,7 +1050,6 @@ XPD_ReturnType XPD_SPI_Receive_DMA(SPI_HandleType * hspi, void * RxData, uint16_
 
             /* Set the DMA transfer callbacks */
             hspi->DMA.Receive->Callbacks.Complete     = spi_dmaReceiveRedirect;
-            hspi->DMA.Receive->Callbacks.HalfComplete = NULL;
 #ifdef USE_XPD_DMA_ERROR_DETECT
             hspi->DMA.Receive->Callbacks.Error        = spi_dmaErrorRedirect;
 #endif
@@ -1117,84 +1090,78 @@ XPD_ReturnType XPD_SPI_Receive_DMA(SPI_HandleType * hspi, void * RxData, uint16_
  */
 XPD_ReturnType XPD_SPI_TransmitReceive_DMA(SPI_HandleType * hspi, void * TxData, void * RxData, uint16_t Length)
 {
-    XPD_ReturnType result = XPD_OK;
+    XPD_ReturnType result;
+    uint32_t timeout = SPI_BUSY_TIMEOUT;
+    /* While SPI is still busy with previous transfer, new one is not started */
+    (void)spi_waitFinished(hspi, &timeout);
 
-    if (Length > 0)
+    /* save stream info */
+    hspi->TxStream.buffer = TxData;
+    hspi->TxStream.length = Length;
+    hspi->RxStream.buffer = RxData;
+    hspi->RxStream.length = Length;
+
+    /* In case there is no actual data transmission, send dummy from receive buffer */
+    if (TxData == NULL)
     {
-        uint32_t timeout = SPI_BUSY_TIMEOUT;
-        /* While SPI is still busy with previous transfer, new one is not started */
-        (void)spi_waitFinished(hspi, &timeout);
+        TxData = RxData;
+    }
 
-        /* save stream info */
-        hspi->TxStream.buffer = TxData;
-        hspi->TxStream.length = Length;
-        hspi->RxStream.buffer = RxData;
-        hspi->RxStream.length = Length;
+    /* Set up DMAs for transfers */
+    result = XPD_DMA_Start_IT(hspi->DMA.Receive, (void*) &hspi->Inst->DR, RxData, Length);
 
-        /* In case there is no actual data transmission, send dummy from receive buffer */
-        if (TxData == NULL)
+    if (result == XPD_OK)
+    {
+        result = XPD_DMA_Start_IT(hspi->DMA.Transmit, (void*) &hspi->Inst->DR, TxData, Length);
+
+        /* If one DMA allocation failed, reset the other and exit */
+        if (result != XPD_OK)
         {
-            TxData = RxData;
+            XPD_DMA_Stop_IT(hspi->DMA.Receive);
+            return result;
         }
 
-        /* Set up DMAs for transfers */
-        result = XPD_DMA_Start_IT(hspi->DMA.Receive, (void*) &hspi->Inst->DR, RxData, Length);
+        /* Set the callback owner */
+        hspi->DMA.Receive->Owner = hspi;
 
-        if (result == XPD_OK)
+        /* Set the DMA transfer callbacks */
+        if (hspi->TxStream.buffer == NULL)
         {
-            result = XPD_DMA_Start_IT(hspi->DMA.Transmit, (void*) &hspi->Inst->DR, TxData, Length);
-
-            /* If one DMA allocation failed, reset the other and exit */
-            if (result != XPD_OK)
-            {
-                XPD_DMA_Stop_IT(hspi->DMA.Receive);
-                return result;
-            }
-
-            /* Set the callback owner */
-            hspi->DMA.Receive->Owner = hspi;
-
-            /* Set the DMA transfer callbacks */
-            if (hspi->TxStream.buffer == NULL)
-            {
-                hspi->DMA.Receive->Callbacks.Complete  = spi_dmaReceiveRedirect;
-            }
-            else
-            {
-                hspi->DMA.Receive->Callbacks.Complete  = spi_dmaTransmitReceiveRedirect;
-            }
-            hspi->DMA.Receive->Callbacks.HalfComplete  = NULL;
+            hspi->DMA.Receive->Callbacks.Complete  = spi_dmaReceiveRedirect;
+        }
+        else
+        {
+            hspi->DMA.Receive->Callbacks.Complete  = spi_dmaTransmitReceiveRedirect;
+        }
 #ifdef USE_XPD_DMA_ERROR_DETECT
-            /* Set the DMA error callback */
-            hspi->DMA.Receive->Callbacks.Error         = spi_dmaErrorRedirect;
+        /* Set the DMA error callback */
+        hspi->DMA.Receive->Callbacks.Error         = spi_dmaErrorRedirect;
 #endif
 
-            /* Set the callback owner */
-            hspi->DMA.Transmit->Owner = hspi;
+        /* Set the callback owner */
+        hspi->DMA.Transmit->Owner = hspi;
 
-            /* Set the SPI Tx DMA transfer complete callback as NULL because the communication closing
-            is performed in DMA reception complete callback  */
-            hspi->DMA.Transmit->Callbacks.Complete     = NULL;
-            hspi->DMA.Transmit->Callbacks.HalfComplete = NULL;
+        /* Set the SPI Tx DMA transfer complete callback as NULL because the communication closing
+        is performed in DMA reception complete callback  */
+        hspi->DMA.Transmit->Callbacks.Complete     = NULL;
 #ifdef USE_XPD_DMA_ERROR_DETECT
-            hspi->DMA.Transmit->Callbacks.Error        = spi_dmaErrorRedirect;
+        hspi->DMA.Transmit->Callbacks.Error        = spi_dmaErrorRedirect;
 #endif
-            SPI_RESET_ERRORS(hspi);
+        SPI_RESET_ERRORS(hspi);
 
 #ifdef USE_XPD_SPI_ERROR_DETECT
-            /* Reset CRC Calculation */
-            if (hspi->CRCSize > 0)
-            {
-                spi_initCRC(hspi);
-            }
+        /* Reset CRC Calculation */
+        if (hspi->CRCSize > 0)
+        {
+            spi_initCRC(hspi);
+        }
 #endif
 
-            /* Enable DMA Requests */
-            SET_BIT(hspi->Inst->CR2.w, SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN);
+        /* Enable DMA Requests */
+        SET_BIT(hspi->Inst->CR2.w, SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN);
 
-            /* Check if the SPI is already enabled */
-            XPD_SPI_Enable(hspi);
-        }
+        /* Check if the SPI is already enabled */
+        XPD_SPI_Enable(hspi);
     }
     return result;
 }

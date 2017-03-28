@@ -147,13 +147,6 @@ static void adc_dmaConversionRedirect(void *hdma)
     XPD_SAFE_CALLBACK(hadc->Callbacks.ConvComplete, hadc);
 }
 
-static void adc_dmaHalfConversionRedirect(void *hdma)
-{
-    ADC_HandleType* hadc = (ADC_HandleType*) ((DMA_HandleType*) hdma)->Owner;
-
-    XPD_SAFE_CALLBACK(hadc->Callbacks.HalfConvComplete, hadc);
-}
-
 #ifdef USE_XPD_DMA_ERROR_DETECT
 static void adc_dmaErrorRedirect(void *hdma)
 {
@@ -583,7 +576,7 @@ void XPD_ADC_IRQHandler(ADC_HandleType * hadc)
          && ((ier & ADC_IER_OVRIE) != 0))
     {
         /* Update error code */
-        hadc->Errors |= ADC_ERROR_OVR;
+        hadc->Errors |= ADC_ERROR_OVERRUN;
 
         /* Clear the Overrun flag */
         XPD_ADC_ClearFlag(hadc, OVR);
@@ -616,7 +609,6 @@ XPD_ReturnType XPD_ADC_Start_DMA(ADC_HandleType * hadc, void * Address)
 
             /* Set the DMA transfer callbacks */
             hadc->DMA.Conversion->Callbacks.Complete     = adc_dmaConversionRedirect;
-            hadc->DMA.Conversion->Callbacks.HalfComplete = adc_dmaHalfConversionRedirect;
 #ifdef USE_XPD_DMA_ERROR_DETECT
             hadc->DMA.Conversion->Callbacks.Error        = adc_dmaErrorRedirect;
 

@@ -231,7 +231,6 @@ XPD_ReturnType XPD_TIM_Counter_Start_DMA(TIM_HandleType * htim, void * Address, 
 
         /* Set the DMA transfer callbacks */
         htim->DMA.Update->Callbacks.Complete     = tim_dmaUpdateRedirect;
-        htim->DMA.Update->Callbacks.HalfComplete = NULL;
 #ifdef USE_XPD_DMA_ERROR_DETECT
         htim->DMA.Update->Callbacks.Error        = tim_dmaErrorRedirect;
 #endif
@@ -670,7 +669,6 @@ XPD_ReturnType XPD_TIM_Output_Start_DMA(TIM_HandleType * htim, TIM_ChannelType C
 
         /* set the DMA complete callback */
         htim->DMA.Channel[Channel]->Callbacks.Complete     = tim_dmaChannelEventRedirects[Channel];
-        htim->DMA.Channel[Channel]->Callbacks.HalfComplete = NULL;
 #ifdef USE_XPD_DMA_ERROR_DETECT
         htim->DMA.Channel[Channel]->Callbacks.Error        = tim_dmaErrorRedirect;
 #endif
