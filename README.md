@@ -1,6 +1,6 @@
 # STM32 eXtensible Peripheral Drivers
 
-This project aims to provide a convenient and efficient C programming toolset and API to handle Cortex M - and more specifically, STM32 - series microcontrollers. The main benefits of this library that it provides bit-fields for all registers and bit-band alias mapped fields for affected registers of the controller. The peripheral drivers are designed for maximum portability within the STM32 device family.
+This project aims to provide a convenient and efficient peripheral library with a common API to handle STM32 series microcontrollers. The goal is to achieve a higher level of user code portability than the STM32 HAL drivers, while significantly reducing the unnecessary overhead that the drivers introduce (e.g. handle locks, states). Another optimization of this library that it uses bit-fields for all registers and bit-band alias mapped fields for affected registers of the controller.
 
 #### Table of contents
 
@@ -14,19 +14,20 @@ This project aims to provide a convenient and efficient C programming toolset an
 
 ## Project scope <a name="scope"></a>
 
-The core motivation of this library is to make register manipulation as straightforward and efficient as possible. As the CMSIS standard requires only the register level specification for peripherals, those structures needed to be replaced in their original location. Therefore the CMSIS folder of this repository should be considered as a partial replacement (upgrade) of the existing one.
+A core motivation of this library is to make register manipulation as straightforward and efficient as possible. As the CMSIS standard requires only the register level specification for peripherals, those structures needed to be replaced in their original location. Therefore the CMSIS folder of this repository should be considered as a partial replacement (upgrade) of the existing one.
 The affected files are the following:
 - The Include/core_cm[X].h headers contain core registers which have their bit fields added.
 - The Include/core_cmBitband.h header introduces bit-band alias address calculating macros.
 - The Device/ST/STM32[XX]XX/Include/stm32[xxxxxx].h headers contain peripheral registers which have their bit fields added, and bit-band alias accessible peripherals also have their register maps created for the alias addressing mode.
 
-As these changes make all existing peripheral drivers incompatible, a new, extensible driver development begun for the preferred target controllers. The development is currently only a free-time hobby, but it can be extended with joint effort, please contact me if you are interested.
+As these changes make all existing peripheral drivers incompatible, a new, extensible driver development begun for the preferred target controllers. The development is currently a one-man operation, but it can be extended with joint effort.
 
 
 ## Benefits of bit fields <a name="fields"></a>
 
 The C programming language enables the use of bit fields in the following general syntax:
->```C
+
+```C
 typedef union {
     struct {
         uint32_t EN : 1; /* Enable bit             */
@@ -40,25 +41,27 @@ typedef union {
 The bit fields of the structure are accessed the same way as of any other structure, it is the compiler which applies the necessary masking, shifting and setting operations. Therefore a big deal of programmer effort can be saved by using the introduced bit fields, as these compiler actions are otherwise required to be explicitly written in the source code. Examples for both read and write operations follow.
 
 ### Bit field write
-Using word access: 
->```C
+Using word access:
+
+```C
 REG.w &= ~REG_IG_Msk;
 REG.w |= newValue << REG_IG_Pos;
 ```
 
 Using bit access:
->```C
+
+```C
 REG.b.IG = newValue;
 ```
 
 ### Bit field read
 Using word access:
->```C
+```C
 newValue = (REG.w & REG_IG_Msk) >> REG_IG_Pos;
 ```
 
 Using bit access:
->```C
+```C
 newValue = REG.b.IG;
 ```
 
@@ -67,12 +70,12 @@ As these examples clearly demonstrate, bit field access is highly beneficial for
 ## Benefits of bit-band support <a name="bitband"></a>
 
 The Cortex M3, M4 and M7 cores enable the first 1MB of the SRAM and peripheral address space to be addressed bitwise, using a bit remapping address space called the *alias region*. A complete explanation on the subject is available [here](/BitBanding.md). This project provides structures that make it possible to execute atomic bit reading and writing operations on the peripherals that are in the specified address region. The address transformation to bit-band alias can done in compile-time as long as the peripheral (address) is fixed. Therefore peripheral types with a single instance have a direct bit-band address, e.g.
->```C
+```C
 #define RCC_BB    ((RCC_BitBand_TypeDef *) PERIPH_BB(RCC_BASE))
 ```
 
 The XPD drivers use the following macro to switch between bit-banding and regular bit manipulation:
->```C
+```C
 #ifdef RCC_BB
 #define RCC_REG_BIT(REG_NAME, BIT_NAME) (RCC_BB->REG_NAME.BIT_NAME)
 #else
@@ -81,7 +84,7 @@ The XPD drivers use the following macro to switch between bit-banding and regula
 ```
 
 Peripheral types which have multiple instances are accessed through *handles*. If bit-banding addressing is possible, a bit-band alias address field is added to this structure, and the address is calculated in the Init() function of the driver. A very similar macro is used for switching between addressing modes as the above one:
->```C
+```C
 #ifdef TIM_BB
 #define TIM_REG_BIT(HANDLE, REG_NAME, BIT_NAME) ((HANDLE)->Inst_BB->REG_NAME.BIT_NAME)
 #else
