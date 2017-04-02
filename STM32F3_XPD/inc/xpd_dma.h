@@ -165,7 +165,7 @@ typedef struct
  *            @arg TE:      Transfer Error
  */
 #define         XPD_DMA_GetFlag(  HANDLE, FLAG_NAME)        \
-    ((HANDLE)->Base->ISR.w & (DMA_ISR_##FLAG_NAME##IF1 << (uint32_t)((HANDLE)->ChannelOffset)))
+    (((HANDLE)->Base->ISR.w >> (DMA_ISR_##FLAG_NAME##IF1_Pos + (uint32_t)((HANDLE)->ChannelOffset))) & 1)
 
 /**
  * @brief  Clear the specified DMA flag.

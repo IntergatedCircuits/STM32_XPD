@@ -499,7 +499,7 @@ uint32_t XPD_USART_GetClockFreq(USART_HandleType * husart)
 #endif
 
         default:
-            return XPD_RCC_GetClockFreq((((uint32_t)husart->Inst) < APB2PERIPH_BASE) ? PCLK1 : PCLK2);
+            return XPD_RCC_GetClockFreq(PCLK1);
     }
 }
 

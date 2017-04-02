@@ -197,7 +197,7 @@ typedef struct
  *            @arg WKU:     Wakeup Interrupt
  *            @arg SLK:     Sleep Interrupt
  */
-#define         XPD_CAN_EnableIT(HANDLE,IT_NAME)          	\
+#define         XPD_CAN_EnableIT(   HANDLE, IT_NAME)            \
     (CAN_REG_BIT((HANDLE),IER,IT_NAME##IE) = 1)
 
 /**
@@ -220,21 +220,8 @@ typedef struct
  *            @arg WKU:     Wakeup Interrupt
  *            @arg SLK:     Sleep Interrupt
  */
-#define         XPD_CAN_DisableIT(HANDLE,IT_NAME)           \
+#define         XPD_CAN_DisableIT(  HANDLE, IT_NAME)            \
     (CAN_REG_BIT((HANDLE),IER,IT_NAME##IE) = 0)
-
-/**
- * @brief  Clear the specified CAN receive flag.
- * @param  HANDLE: specifies the CAN Handle.
- * @param  FIFO: specifies the CAN receive FIFO.
- * @param  FLAG_NAME: specifies the flag to clear.
- *         This parameter can be one of the following values:
- *            @arg FMP:     FIFO Message Pending
- *            @arg FULL:    FIFO Full
- *            @arg FOV:     FIFO Overrun
- */
-#define         XPD_CAN_ClearRxFlag(HANDLE,FIFO,FLAG_NAME)  \
-    ((HANDLE)->Inst->RFR[FIFO].w = CAN_RF0R_##FLAG_NAME##0)
 
 /**
  * @brief  Get the specified CAN receive flag.
@@ -244,26 +231,24 @@ typedef struct
  *         This parameter can be one of the following values:
  *            @arg FMP:     FIFO Message Pending
  *            @arg FULL:    FIFO Full
- *            @arg FOV:     FIFO Overrun
+ *            @arg FOVR:    FIFO Overrun
  * @return The state of the flag.
  */
-#define         XPD_CAN_GetRxFlag(HANDLE,FIFO,FLAG_NAME)    \
-    (CAN_REG_BIT((HANDLE),RFR[(FIFO)],FLAG_NAME))
+#define         XPD_CAN_GetRxFlag(  HANDLE, FIFO, FLAG_NAME)    \
+    (CAN_REG_BIT((HANDLE),RFR[FIFO],FLAG_NAME))
 
 /**
- * @brief  Clear the specified CAN transmit flag.
+ * @brief  Clear the specified CAN receive flag.
  * @param  HANDLE: specifies the CAN Handle.
- * @param  MB: specifies the mailbox index.
+ * @param  FIFO: specifies the CAN receive FIFO.
  * @param  FLAG_NAME: specifies the flag to clear.
  *         This parameter can be one of the following values:
- *            @arg RQCP:    Request Completed
- *            @arg TXOK:    Transmission OK
- *            @arg ALST:    Arbitration Lost
- *            @arg TERR:    Transmission Error
- *            @arg ABRQ:    Abort Request
+ *            @arg FMP:     FIFO Message Pending
+ *            @arg FULL:    FIFO Full
+ *            @arg FOVR:    FIFO Overrun
  */
-#define         XPD_CAN_ClearTxFlag(HANDLE,MB,FLAG_NAME)    \
-        ((HANDLE)->Inst->TSR.w = CAN_TSR_##FLAG_NAME##0 << (8 * (MB)))
+#define         XPD_CAN_ClearRxFlag(HANDLE, FIFO, FLAG_NAME)    \
+    ((HANDLE)->Inst->RFR[FIFO].w = CAN_RF0R_##FLAG_NAME##0)
 
 /**
  * @brief  Get the specified CAN transmit flag.
@@ -278,20 +263,23 @@ typedef struct
  *            @arg ABRQ:    Abort Request
  * @return The state of the flag.
  */
-#define         XPD_CAN_GetTxFlag(HANDLE,MB,FLAG_NAME)      \
+#define         XPD_CAN_GetTxFlag(  HANDLE, MB, FLAG_NAME)      \
         (((HANDLE)->Inst->TSR.w & (CAN_TSR_##FLAG_NAME##0 << (8 * (MB)))) != 0 ? 1 : 0)
 
 /**
- * @brief  Clear the specified CAN error flag.
+ * @brief  Clear the specified CAN transmit flag.
  * @param  HANDLE: specifies the CAN Handle.
+ * @param  MB: specifies the mailbox index.
  * @param  FLAG_NAME: specifies the flag to clear.
  *         This parameter can be one of the following values:
- *            @arg EWG:     Error Warning
- *            @arg EPV:     Error Passive
- *            @arg BOF:     Bus Off
+ *            @arg RQCP:    Request Completed
+ *            @arg TXOK:    Transmission OK
+ *            @arg ALST:    Arbitration Lost
+ *            @arg TERR:    Transmission Error
+ *            @arg ABRQ:    Abort Request
  */
-#define         XPD_CAN_ClearErrorFlag(HANDLE,FLAG_NAME)    \
-    ((HANDLE)->Inst->ESR.w = CAN_ESR_##FLAG_NAME)
+#define         XPD_CAN_ClearTxFlag(HANDLE, MB, FLAG_NAME)      \
+        ((HANDLE)->Inst->TSR.w = CAN_TSR_##FLAG_NAME##0 << (8 * (MB)))
 
 /**
  * @brief  Get the specified CAN error flag.
@@ -303,22 +291,20 @@ typedef struct
  *            @arg BOF:     Bus Off
  * @return The state of the flag.
  */
-#define         XPD_CAN_GetErrorFlag(HANDLE,FLAG_NAME)      \
-    (CAN_REG_BIT((HANDLE),ESR,FLAG_NAME))
+#define         XPD_CAN_GetErrorFlag(   HANDLE, FLAG_NAME)      \
+    (CAN_REG_BIT((HANDLE),ESR,FLAG_NAME##F))
 
 /**
- * @brief  Clear the specified CAN state flag.
+ * @brief  Clear the specified CAN error flag.
  * @param  HANDLE: specifies the CAN Handle.
  * @param  FLAG_NAME: specifies the flag to clear.
  *         This parameter can be one of the following values:
- *            @arg WKUI:    Wakeup Interrupt
- *            @arg SLAKI:   Sleep Acknowledge Interrupt
- *            @arg ERRI:    Error Interrupt
- *            @arg SLAK:    Sleep Acknowledge
- *            @arg INAK:    Initialization Acknowledge
+ *            @arg EWG:     Error Warning
+ *            @arg EPV:     Error Passive
+ *            @arg BOF:     Bus Off
  */
-#define         XPD_CAN_ClearFlag(HANDLE,FLAG_NAME)         \
-    ((HANDLE)->Inst->MSR.w = CAN_MSR_##FLAG_NAME)
+#define         XPD_CAN_ClearErrorFlag( HANDLE, FLAG_NAME)      \
+    ((HANDLE)->Inst->ESR.w = CAN_ESR_##FLAG_NAME##F)
 
 /**
  * @brief  Get the specified CAN state flag.
@@ -332,9 +318,22 @@ typedef struct
  *            @arg INAK:    Initialization Acknowledge
  * @return The state of the flag.
  */
-#define         XPD_CAN_GetFlag(HANDLE,FLAG_NAME)           \
+#define         XPD_CAN_GetFlag(    HANDLE, FLAG_NAME)          \
     (CAN_REG_BIT((HANDLE),MSR,FLAG_NAME))
 
+/**
+ * @brief  Clear the specified CAN state flag.
+ * @param  HANDLE: specifies the CAN Handle.
+ * @param  FLAG_NAME: specifies the flag to clear.
+ *         This parameter can be one of the following values:
+ *            @arg WKUI:    Wakeup Interrupt
+ *            @arg SLAKI:   Sleep Acknowledge Interrupt
+ *            @arg ERRI:    Error Interrupt
+ *            @arg SLAK:    Sleep Acknowledge
+ *            @arg INAK:    Initialization Acknowledge
+ */
+#define         XPD_CAN_ClearFlag(  HANDLE, FLAG_NAME)          \
+    ((HANDLE)->Inst->MSR.w = CAN_MSR_##FLAG_NAME)
 
 #ifdef CAN_BB
 #define CAN_REG_BIT(HANDLE, REG_NAME, BIT_NAME) ((HANDLE)->Inst_BB->REG_NAME.BIT_NAME)

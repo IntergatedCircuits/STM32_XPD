@@ -148,7 +148,6 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
  *            @arg HSIRDY:     Low Speed Internal oscillator ready
  *            @arg HSERDY:     Low Speed Internal oscillator ready
  *            @arg PLLRDY:     Phase Locked Loop ready
- *            @arg CSS:        Clock Security System
  */
 #define             XPD_RCC_EnableIT(IT_NAME)        \
     (RCC_REG_BIT(CIR,IT_NAME##IE) = 1)
@@ -162,7 +161,6 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
  *            @arg HSIRDY:     Low Speed Internal oscillator ready
  *            @arg HSERDY:     Low Speed Internal oscillator ready
  *            @arg PLLRDY:     Phase Locked Loop ready
- *            @arg CSS:        Clock Security System
  */
 #define             XPD_RCC_DisableIT(IT_NAME)       \
     (RCC_REG_BIT(CIR,IT_NAME##IE) = 0)

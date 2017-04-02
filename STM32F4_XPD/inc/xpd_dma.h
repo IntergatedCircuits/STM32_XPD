@@ -188,7 +188,7 @@ typedef struct
  *            @arg FE:      FIFO Error
  */
 #define         XPD_DMA_GetFlag(  HANDLE, FLAG_NAME)        \
-    ((HANDLE)->Base->LISR.w & (DMA_LISR_##FLAG_NAME##IF0 << (uint32_t)((HANDLE)->StreamOffset)))
+    (((HANDLE)->Base->LISR.w >> (DMA_LISR_##FLAG_NAME##IF0 + (uint32_t)((HANDLE)->StreamOffset))) & 1)
 
 /**
  * @brief  Clear the specified DMA flag.

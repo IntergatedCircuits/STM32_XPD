@@ -161,7 +161,6 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
  *            @arg PLLRDY:     Phase Locked Loop ready
  *            @arg PLLI2SRDY:  Phase Locked Loop for I2S ready
  *            @arg PLLSAIRDY:  Phase Locked Loop for SAI ready
- *            @arg CSS:        Clock Security System
  */
 #define             XPD_RCC_EnableIT(IT_NAME)        \
     (RCC_REG_BIT(CIR,IT_NAME##IE) = 1)
@@ -177,7 +176,6 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
  *            @arg PLLRDY:     Phase Locked Loop ready
  *            @arg PLLI2SRDY:  Phase Locked Loop for I2S ready
  *            @arg PLLSAIRDY:  Phase Locked Loop for SAI ready
- *            @arg CSS:        Clock Security System
  */
 #define             XPD_RCC_DisableIT(IT_NAME)       \
     (RCC_REG_BIT(CIR,IT_NAME##IE) = 0)

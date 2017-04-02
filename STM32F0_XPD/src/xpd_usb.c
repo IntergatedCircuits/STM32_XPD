@@ -805,7 +805,7 @@ void XPD_USB_IRQHandler(USB_HandleType * husb)
 
     if ((istr & USB_ISTR_RESET) != 0)
     {
-        XPD_USB_ClearFlag(RESET);
+        XPD_USB_ClearFlag(husb, RESET);
         XPD_SAFE_CALLBACK(husb->Callbacks.Reset, husb->User);
         XPD_USB_SetAddress(husb, 0);
     }
@@ -817,18 +817,18 @@ void XPD_USB_IRQHandler(USB_HandleType * husb)
 
         XPD_SAFE_CALLBACK(husb->Callbacks.Resume, husb->User);
 
-        XPD_USB_ClearFlag(WKUP);
+        XPD_USB_ClearFlag(husb, WKUP);
     }
 
     if ((istr & USB_ISTR_SUSP) != 0)
     {
         /* clear of the ISTR bit must be done after setting of CNTR_FSUSP */
-        XPD_USB_ClearFlag(SUSP);
+        XPD_USB_ClearFlag(husb, SUSP);
 
         /* Force low-power mode in the macrocell */
         USB->CNTR.w |= USB_CNTR_FSUSP | USB_CNTR_LPMODE;
 
-        if (XPD_USB_GetFlag(WKUP) == 0)
+        if (XPD_USB_GetFlag(husb, WKUP) == 0)
         {
             XPD_SAFE_CALLBACK(husb->Callbacks.Suspend, husb->User);
         }
@@ -836,23 +836,23 @@ void XPD_USB_IRQHandler(USB_HandleType * husb)
 
     if ((istr & USB_ISTR_SOF) != 0)
     {
-        XPD_USB_ClearFlag(SOF);
+        XPD_USB_ClearFlag(husb, SOF);
         XPD_SAFE_CALLBACK(husb->Callbacks.SOF, husb->User);
     }
 
     if ((istr & USB_ISTR_PMAOVR) != 0)
     {
-        XPD_USB_ClearFlag(PMAOVR);
+        XPD_USB_ClearFlag(husb, PMAOVR);
     }
 
     if ((istr & USB_ISTR_ERR) != 0)
     {
-        XPD_USB_ClearFlag(ERR);
+        XPD_USB_ClearFlag(husb, ERR);
     }
 
     if ((istr & USB_ISTR_ESOF) != 0)
     {
-        XPD_USB_ClearFlag(ESOF);
+        XPD_USB_ClearFlag(husb, ESOF);
     }
 }
 

@@ -133,7 +133,7 @@ typedef struct
  *            @arg PMAOVR:  DMA overrun
  *            @arg CTR:     Correct transfer
  */
-#define         XPD_USB_GetFlag(FLAG_NAME)      \
+#define         XPD_USB_GetFlag( HANDLE, FLAG_NAME)     \
     (USB_REG_BIT(ISTR,FLAG_NAME))
 
 /**
@@ -150,7 +150,7 @@ typedef struct
  *            @arg PMAOVR:  DMA overrun
  *            @arg CTR:     Correct transfer
  */
-#define         XPD_USB_ClearFlag(FLAG_NAME)    \
+#define         XPD_USB_ClearFlag(HANDLE, FLAG_NAME)    \
     (USB_REG_BIT(ISTR,FLAG_NAME) = 0)
 
 /** @brief USB Wake up line number */
