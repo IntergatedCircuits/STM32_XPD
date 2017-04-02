@@ -183,7 +183,7 @@ void XPD_PWR_WakeUpPin_Disable(uint8_t WakeUpPin)
  * @param Config: configuration structure that contains the monitored voltage level
  *         and the EXTI configuration.
  */
-void XPD_PWR_PVD_Init(PWR_PVD_InitType * Config)
+void XPD_PWR_PVD_Init(const PWR_PVD_InitType * Config)
 {
     /* Set PLS bits according to PVDLevel value */
     PWR->CR.b.PLS = Config->Level;

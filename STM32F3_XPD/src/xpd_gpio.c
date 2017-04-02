@@ -92,7 +92,7 @@ static const XPD_CtrlFnType gpio_clockCtrl[] = {
  * @param GPIOx: pointer to the GPIO peripheral
  * @param Config: pointer to the setup parameters
  */
-void XPD_GPIO_InitPort(GPIO_TypeDef *GPIOx, GPIO_InitType *Config)
+void XPD_GPIO_InitPort(GPIO_TypeDef * GPIOx, const GPIO_InitType * Config)
 {
     uint32_t temp = 0;
     uint32_t reg;
@@ -194,7 +194,7 @@ void XPD_GPIO_InitPort(GPIO_TypeDef *GPIOx, GPIO_InitType *Config)
  * @param Pin: selected pin of the port [0 .. 15]
  * @param Config: pointer to the setup parameters
  */
-void XPD_GPIO_InitPin(GPIO_TypeDef * GPIOx, uint8_t Pin, GPIO_InitType * Config)
+void XPD_GPIO_InitPin(GPIO_TypeDef * GPIOx, uint8_t Pin, const GPIO_InitType * Config)
 {
     uint32_t temp;
     uint32_t shifter;

@@ -285,7 +285,7 @@ typedef struct
 
 /** @addtogroup TIM_Common_Exported_Functions
  * @{ */
-XPD_ReturnType  XPD_TIM_Init                (TIM_HandleType * htim, TIM_Counter_InitType * Config);
+XPD_ReturnType  XPD_TIM_Init                (TIM_HandleType * htim, const TIM_Counter_InitType * Config);
 XPD_ReturnType  XPD_TIM_Deinit              (TIM_HandleType * htim);
 
 void            XPD_TIM_Counter_Start       (TIM_HandleType * htim);
@@ -401,7 +401,7 @@ void            XPD_TIM_Output_Enable       (TIM_HandleType * htim);
 void            XPD_TIM_Output_Disable      (TIM_HandleType * htim);
 
 void            XPD_TIM_Output_Init         (TIM_HandleType * htim, TIM_ChannelType Channel,
-                                             TIM_Output_InitType * Config);
+                                             const TIM_Output_InitType * Config);
 void            XPD_TIM_Output_Start        (TIM_HandleType * htim, TIM_ChannelType Channel);
 void            XPD_TIM_Output_Stop         (TIM_HandleType * htim, TIM_ChannelType Channel);
 void            XPD_TIM_Output_Start_IT     (TIM_HandleType * htim, TIM_ChannelType Channel);
@@ -411,7 +411,7 @@ XPD_ReturnType  XPD_TIM_Output_Start_DMA    (TIM_HandleType * htim, TIM_ChannelT
 void            XPD_TIM_Output_Stop_DMA     (TIM_HandleType * htim, TIM_ChannelType Channel);
 
 void            XPD_TIM_Output_SetDeadtime  (TIM_HandleType * htim, uint32_t DeadCounts);
-void            XPD_TIM_Output_DriveConfig  (TIM_HandleType * htim, TIM_Output_DriveType * Config);
+void            XPD_TIM_Output_DriveConfig  (TIM_HandleType * htim, const TIM_Output_DriveType * Config);
 /** @} */
 
 /** @} */
@@ -472,7 +472,7 @@ typedef struct
 
 /** @addtogroup TIM_MasterSlave_Exported_Functions
  * @{ */
-void            XPD_TIM_MasterConfig        (TIM_HandleType * htim, TIM_MasterConfigType * Config);
+void            XPD_TIM_MasterConfig        (TIM_HandleType * htim, const TIM_MasterConfigType * Config);
 /** @} */
 
 /** @} */

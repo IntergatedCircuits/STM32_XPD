@@ -146,7 +146,7 @@ static uint16_t usb_epConvertRxCount(uint16_t count)
  * @param Config: USB setup configuration
  * @return ERROR if input is incorrect, OK if success
  */
-XPD_ReturnType XPD_USB_Init(USB_HandleType * husb, USB_InitType * Config)
+XPD_ReturnType XPD_USB_Init(USB_HandleType * husb, const USB_InitType * Config)
 {
     uint32_t i = 0;
 

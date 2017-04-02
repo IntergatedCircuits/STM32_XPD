@@ -4,7 +4,7 @@
   * @author  Benedek Kupper
   * @version V0.1
   * @date    2016-02-04
-  * @brief   STM32 eXtensible Peripheral Drivers ADC Module
+  * @brief   STM32 eXtensible Peripheral Drivers Analog Digital Converter Module
   *
   *  This file is part of STM32_XPD.
   *
@@ -306,16 +306,11 @@ static void adc_stopConversion(ADC_HandleType * hadc, uint32_t convFlag)
 {
     uint32_t timeout = ADC_STOP_CONVERSION_TIMEOUT;
 
-    /* Verification if ADC is not already stopped (on regular and injected      *
-     * groups) to bypass this function if not needed.                           */
+    /* Verification if ADC is not already stopped */
     if ((hadc->Inst->CR.w & ADC_STARTCTRL) != 0)
     {
-        /* Particular case of continuous auto-injection mode combined with        *
-         * auto-delay mode.                                                       *
-         * In auto-injection mode, regular group stop ADC_CR_ADSTP is used (not   *
-         * injected group stop ADC_CR_JADSTP).                                    *
-         * Procedure to be followed: Wait until JEOS=1, clear JEOS, set ADSTP=1   *
-         * (see reference manual).                                                */
+        /* In auto-injection mode, regular group stop ADC_CR_ADSTP is used (not 
+         * injected group stop ADC_CR_JADSTP) */
         if ((hadc->Inst->CFGR.w & (ADC_CFGR_JAUTO | ADC_CFGR_CONT | ADC_CFGR_AUTDLY))
                                == (ADC_CFGR_JAUTO | ADC_CFGR_CONT | ADC_CFGR_AUTDLY))
         {
@@ -373,7 +368,7 @@ static void adc_stopConversion(ADC_HandleType * hadc, uint32_t convFlag)
  * @param Config: pointer to ADC setup configuration
  * @return ERROR if input is incorrect, OK if success
  */
-XPD_ReturnType XPD_ADC_Init(ADC_HandleType * hadc, ADC_InitType * Config)
+XPD_ReturnType XPD_ADC_Init(ADC_HandleType * hadc, const ADC_InitType * Config)
 {
     XPD_ReturnType result = XPD_ERROR;
 
@@ -405,45 +400,24 @@ XPD_ReturnType XPD_ADC_Init(ADC_HandleType * hadc, ADC_InitType * Config)
     /* Enable voltage regulator (if disabled at this step) */
     if (hadc->Inst->CR.b.ADVREGEN != 1)
     {
-        /* Note: The software must wait for the startup time of the ADC       *
-         *       voltage regulator before launching a calibration or          *
-         *       enabling the ADC. This temporization must be implemented by  *
-         *       software and is equal to 10 us in the worst case             *
-         *       process/temperature/power supply.                            */
-
         /* Disable the ADC (if not already disabled) */
         (void)adcx_disable(hadc->Inst);
 
-        /* Check if ADC is effectively disabled *
-         * Configuration of ADC parameters if previous preliminary actions    *
-        /* are correctly completed.                                           */
+        /* Check if ADC is effectively disabled */
         if (ADC_REG_BIT(hadc, CR, ADEN) == 0)
         {
-            /* Set the intermediate state before moving the ADC voltage         *
-             * regulator to state enable.                                       */
+            /* ADC voltage regulator enable sequence */
             hadc->Inst->CR.b.ADVREGEN = 0;
-            /* Set ADVREGEN bits to 0x01 */
             hadc->Inst->CR.b.ADVREGEN = 1;
 
-            /* Delay for ADC stabilization time.                                */
+            /* Delay for ADC stabilization time */
             XPD_Delay_us(ADC_STAB_DELAY_US);
         }
     }
 
-    /* Configuration of ADC parameters if previous preliminary actions are      *
-     * correctly completed and if there is no conversion on going on regular    *
-     * group (ADC may already be enabled at this point if HAL_ADC_Init() is     *
-     * called to update a parameter on the fly).                                */
+    /* ADC regular conversion stopped */
     if (ADC_REG_BIT(hadc, CR, ADSTART) == 0)
     {
-        /* Configuration of ADC:                   *
-         *  - resolution                           *
-         *  - data alignment                       *
-         *  - external trigger to start conversion *
-         *  - external trigger polarity            *
-         *  - continuous conversion mode           *
-         *  - overrun                              *
-         *  - discontinuous mode                   */
         ADC_REG_BIT(hadc, CFGR, CONT)  = Config->ContinuousMode;
         ADC_REG_BIT(hadc, CFGR, ALIGN) = Config->LeftAlignment;
         hadc->Inst->CFGR.b.RES         = Config->Resolution;
@@ -472,25 +446,14 @@ XPD_ReturnType XPD_ADC_Init(ADC_HandleType * hadc, ADC_InitType * Config)
             CLEAR_BIT(hadc->Inst->CFGR.w, ADC_CFGR_DISCEN | ADC_CFGR_DISCNUM);
         }
 
-        /* Parameters update conditioned to ADC state:                            *
-         * Parameters that can be updated when ADC is disabled or enabled without *
-         * conversion on going on regular and injected groups:                    *
-         *  - DMA continuous request                                              *
-         *  - LowPowerAutoWait feature                                            */
+        /* No injected or regular conversion ongoing */
         if ((hadc->Inst->CR.w & ADC_STARTCTRL) == 0)
         {
             ADC_REG_BIT(hadc, CFGR, AUTDLY) = Config->LPAutoWait;
             ADC_REG_BIT(hadc, CFGR, DMACFG) = Config->ContinuousDMARequests;
         }
 
-        /* Configuration of regular group sequencer:                              *
-         * - if scan mode is disabled, regular channels sequence length is set to *
-         *   0x00: 1 channel converted (channel on regular rank 1)                *
-         *   Parameter "NbrOfConversion" is discarded.                            *
-         *   Note: Scan mode is not present by hardware on this device, but       *
-         *   emulated by software for alignment over all STM32 devices.           *
-         * - if scan mode is enabled, regular channels sequence length is set to  *
-         *   parameter "NbrOfConversion"                                          */
+        /* Sequencer configured if scan mode is used */
         if (Config->ScanMode == ENABLE)
         {
             /* Set number of ranks in regular group sequencer */
@@ -517,10 +480,7 @@ XPD_ReturnType XPD_ADC_Deinit(ADC_HandleType * hadc)
     /* Stop potential conversion on going, on regular and injected groups */
     adc_stopConversion(hadc, ADC_STARTCTRL);
 
-    /* Disable ADC peripheral if conversions are effectively stopped */
-    /* Flush register JSQR: queue sequencer reset when injected queue         */
-    /* sequencer is enabled and ADC disabled.                                 */
-    /* Enable injected queue sequencer after injected conversion stop         */
+    /* Enable injected queue sequencer after injected conversion stop */
     ADC_REG_BIT(hadc, CFGR, JQM) = 1;
 
     /* Disable the ADC peripheral */
@@ -538,19 +498,8 @@ XPD_ReturnType XPD_ADC_Deinit(ADC_HandleType * hadc)
     hadc->Inst->OFR3.w = 0;
     hadc->Inst->OFR4.w = 0;
 
-    /* Reset register CR */
-    /* Bits ADC_CR_JADSTP, ADC_CR_ADSTP, ADC_CR_JADSTART, ADC_CR_ADSTART are  */
-    /* in access mode "read-set": no direct reset applicable.                 */
-    /* Reset Calibration mode to default setting (single ended):              */
-    /* Disable voltage regulator:                                             */
-    /* Note: Voltage regulator disable is conditioned to ADC state disabled:  */
-    /*       already done above.                                              */
-    /* Note: Voltage regulator disable is intended for power saving.          */
-    /* Sequence to disable voltage regulator:                                 */
-    /* 1. Set the intermediate state before moving the ADC voltage regulator  */
-    /*    to disable state.                                                   */
+    /* Disable voltage regulator */
     CLEAR_BIT(hadc->Inst->CR.w, ADC_CR_ADVREGEN | ADC_CR_ADCALDIF);
-    /* 2. Set ADVREGEN bits to 0x10 */
     SET_BIT(hadc->Inst->CR.w, ADC_CR_ADVREGEN_1);
 
     /* Reset register CFGR */
@@ -570,40 +519,23 @@ XPD_ReturnType XPD_ADC_Deinit(ADC_HandleType * hadc)
  * @param hadc: pointer to the ADC handle structure
  * @param Config: pointer to ADC regular channel setup configuration
  */
-void XPD_ADC_ChannelConfig(ADC_HandleType * hadc, ADC_ChannelInitType * Config)
+void XPD_ADC_ChannelConfig(ADC_HandleType * hadc, const ADC_ChannelInitType * Config)
 {
-    /* Parameters update conditioned to ADC state:                              */
-    /* Parameters that can be updated when ADC is disabled or enabled without   */
-    /* conversion on going on regular group:                                    */
-    /*  - Channel number                                                        */
-    /*  - Channel rank                                                          */
-    if (ADC_REG_BIT(hadc, CR, ADSTART) == 0)
+
+    /* No regular conversion ongoing */    if (ADC_REG_BIT(hadc, CR, ADSTART) == 0)
     {
         /* sequencer rank configuration */
         adc_sequencerConfig(hadc, Config->Channel, Config->Rank);
 
-        /* Parameters update conditioned to ADC state:                              */
-        /* Parameters that can be updated when ADC is disabled or enabled without   */
-        /* conversion on going on regular group:                                    */
-        /*  - Channel sampling time                                                 */
-        /*  - Channel offset                                                        */
-        if (ADC_REG_BIT(hadc, CR, JADSTART) == 0)
+        /* No injected conversion ongoing */        if (ADC_REG_BIT(hadc, CR, JADSTART) == 0)
         {
             /* Channel sampling time configuration */
             adc_sampleTimeConfig(hadc, Config->Channel, Config->SampleTime);
         }
 
-        /* Parameters update conditioned to ADC state:                              */
-        /* Parameters that can be updated only when ADC is disabled:                */
-        /*  - Single or differential mode                                           */
-        /*  - Internal measurement channels: Vbat/VrefInt/TempSensor                */
+        /* ADC disabled */
         if (hadc->Inst->CR.b.ADEN == 0)
         {
-            /* Management of internal measurement channels: VrefInt/TempSensor/Vbat   */
-            /* internal measurement paths enable: If internal channel selected,       */
-            /* enable dedicated internal buffers and path.                            */
-            /* Note: these internal measurement paths can be disabled using           */
-            /* HAL_ADC_DeInit().                                                      */
             adc_initInternalChannel(hadc, Config->Channel);
 
             /* Configuration of differential mode */
@@ -612,8 +544,7 @@ void XPD_ADC_ChannelConfig(ADC_HandleType * hadc, ADC_ChannelInitType * Config)
                 /* Enable differential mode */
                 SET_BIT(hadc->Inst->DIFSEL.w, 1 << Config->Channel);
 
-                /* Channel sampling time configuration (channel ADC_INx +1              */
-                /* corresponding to differential negative input).                       */
+                /* Channel sampling time configuration */
                 adc_sampleTimeConfig(hadc, Config->Channel + 1, Config->SampleTime);
             }
             else
@@ -894,12 +825,6 @@ void XPD_ADC_IRQHandler(ADC_HandleType * hadc)
                     cfgr = ADC_PAIR(hadc)->CFGR.w;
                 }
 
-                /* Particular case if injected contexts queue is enabled:             *
-                 * when the last context has been fully processed, JSQR is reset      *
-                 * by the hardware. Even if no injected conversion is planned to come *
-                 * (queue empty, triggers are ignored), it can start again            *
-                 * immediately after setting a new context (JADSTART is still set).   *
-                /* Therefore, state of HAL ADC injected group is kept to busy.        */
                 if ((cfgr & ADC_CFGR_JQM) == 0)
                 {
                     if (ADC_REG_BIT(hadc, CR, JADSTART) == 0)
@@ -1053,47 +978,31 @@ void XPD_ADC_Stop_DMA(ADC_HandleType * hadc)
  * @param Channel: the ADC channel to monitor (only used when single channel monitoring is configured)
  * @param Config: pointer to analog watchdog setup configuration
  */
-void XPD_ADC_WatchdogConfig(ADC_HandleType * hadc, uint8_t Channel, ADC_WatchdogInitType * Config)
+void XPD_ADC_WatchdogConfig(ADC_HandleType * hadc, uint8_t Channel, const ADC_WatchdogInitType * Config)
 {
-    /* Parameters update conditioned to ADC state:                              *
-     * Parameters that can be updated when ADC is disabled or enabled without   *
-     * conversion on going on regular and injected groups:                      *
-     *  - Analog watchdog channels                                              *
-     *  - Analog watchdog thresholds                                            */
-    if ((hadc->Inst->CR.w & ADC_STARTCTRL) == 0)
+        /* No injected or regular conversion ongoing */    if ((hadc->Inst->CR.w & ADC_STARTCTRL) == 0)
     {
         uint32_t scaling = hadc->Inst->CFGR.b.RES * 2;
 
-        /* Analog watchdogs configuration */
+        /* AWD1 */
         if (Config->Number == 1)
         {
-            /* Configuration of analog watchdog:                                    *
-             *  - Set the analog watchdog enable mode: regular and or injected      *
-             *    groups, one or overall group of channels.                         *
-             *  - Set the Analog watchdog channel (is not used if watchdog          *
-             *    mode "all channels": ADC_CFGR_AWD1SGL=0).                         */
+            /* Set channels selection */
             MODIFY_REG(hadc->Inst->CFGR.w, (ADC_CFGR_AWD1SGL | ADC_CFGR_JAWD1EN | ADC_CFGR_AWD1EN), Config->Mode);
             hadc->Inst->CFGR.b.AWD1CH = Channel;
 
-            /* Shift the offset in function of the selected ADC resolution:         *
-             * Thresholds have to be left-aligned on bit 11, the LSB (right bits)   *
-             * are set to 0                                                         */
             hadc->Inst->TR1.w = (Config->Threshold.High  << (16 + scaling)) | (Config->Threshold.Low  << scaling);
 
-            /* Clear the ADC Analog watchdog flag (in case of left enabled by       *
-             * previous ADC operations) to be ready to use for HAL_ADC_IRQHandler() *
-             * or HAL_ADC_PollForEvent().                                           */
             XPD_ADC_ClearFlag(hadc, AWD1);
 
             /* Configure ADC Analog watchdog interrupt */
             XPD_ADC_EnableIT(hadc, AWD1);
         }
-        /* Case of ADC_ANALOGWATCHDOG_2 and ADC_ANALOGWATCHDOG_3 */
         else
         {
             uint32_t thr;
-            /* Shift the threshold in function of the selected ADC resolution *
-             * have to be left-aligned on bit 7, the LSB (right bits) are set to 0    */
+            /* Shift the threshold in function of the selected ADC resolution
+             * have to be left-aligned on bit 7, the LSB (right bits) are set to 0 */
             if (4 < scaling)
             {
                 thr = (Config->Threshold.High  << (20 - scaling)) | (Config->Threshold.Low  >> (scaling - 4));
@@ -1103,17 +1012,15 @@ void XPD_ADC_WatchdogConfig(ADC_HandleType * hadc, uint8_t Channel, ADC_Watchdog
                 thr = (Config->Threshold.High  << (20 - scaling)) | (Config->Threshold.Low  << (4 - scaling));
             }
 
+            /* AWD2 */
             if (Config->Number == 2)
             {
-                /* Set the Analog watchdog channel or group of channels. This also    *
-                 * enables the watchdog.                                              *
-                 * Note: Conditionnal register reset, because several channels can be *
-                 *       set by successive calls of this function.                    */
                 if (Config->Mode != ADC_WATCHDOG_NONE)
                 {
                     /* Set the high and low thresholds */
                     hadc->Inst->TR2.w = thr;
 
+                    /* All channels selection */
                     if ((Config->Mode & ADC_CFGR_AWD1SGL) == 0)
                     {
                         hadc->Inst->AWD2CR.w = ADC_AWD2CR_AWD2CH;
@@ -1125,30 +1032,25 @@ void XPD_ADC_WatchdogConfig(ADC_HandleType * hadc, uint8_t Channel, ADC_Watchdog
                 }
                 else
                 {
+                    /* Disable watchdog */
                     hadc->Inst->TR2.w = 0;
                     hadc->Inst->AWD2CR.w = 0;
                 }
 
-                /* Clear the ADC Analog watchdog flag (in case of left enabled by       *
-                 * previous ADC operations) to be ready to use for HAL_ADC_IRQHandler() *
-                 * or HAL_ADC_PollForEvent().                                           */
                 XPD_ADC_ClearFlag(hadc, AWD2);
 
                 /* Configure ADC Analog watchdog interrupt */
                 XPD_ADC_EnableIT(hadc, AWD2);
             }
-            /* (AnalogWDGConfig->WatchdogNumber == ADC_ANALOGWATCHDOG_3) */
+            /* AWD3 */
             else
             {
-                /* Set the Analog watchdog channel or group of channels. This also    *
-                 * enables the watchdog.                                              *
-                 * Note: Conditionnal register reset, because several channels can be *
-                 *       set by successive calls of this function.                    */
                 if (Config->Mode != ADC_WATCHDOG_NONE)
                 {
                     /* Set the high and low thresholds */
                     hadc->Inst->TR3.w = thr;
 
+                    /* All channels selection */
                     if ((Config->Mode & ADC_CFGR_AWD1SGL) == 0)
                     {
                         hadc->Inst->AWD3CR.w = ADC_AWD3CR_AWD3CH;
@@ -1160,13 +1062,11 @@ void XPD_ADC_WatchdogConfig(ADC_HandleType * hadc, uint8_t Channel, ADC_Watchdog
                 }
                 else
                 {
+                    /* Disable watchdog */
                     hadc->Inst->TR3.w = 0;
                     hadc->Inst->AWD3CR.w = 0;
                 }
 
-                /* Clear the ADC Analog watchdog flag (in case of left enabled by       *
-                 * previous ADC operations) to be ready to use for HAL_ADC_IRQHandler() *
-                 * or HAL_ADC_PollForEvent().                                           */
                 XPD_ADC_ClearFlag(hadc, AWD3);
 
                 /* Configure ADC Analog watchdog interrupt */
@@ -1213,7 +1113,7 @@ uint16_t XPD_ADC_GetValue(ADC_HandleType * hadc)
  * @param hadc: pointer to the ADC handle structure
  * @param Config: pointer to ADC injected channel setup configuration
  */
-void XPD_ADC_Injected_Init(ADC_HandleType * hadc, ADC_Injected_InitType * Config)
+void XPD_ADC_Injected_Init(ADC_HandleType * hadc, const ADC_Injected_InitType * Config)
 {
     /* Scan mode disabled, or injected conversion is single */
     if ((hadc->Inst->SQR1.b.L == 0) || (Config->ConversionCount == 1))
@@ -1234,32 +1134,17 @@ void XPD_ADC_Injected_Init(ADC_HandleType * hadc, ADC_Injected_InitType * Config
     }
     else
     {
-        /* Case of scan mode enabled, several channels to set into injected group *
-         * sequencer.                                                             *
-         * Procedure to define injected context register JSQR over successive     *
-         * calls of this function, for each injected channel rank:                */
-
-        /* 1. Start new context and set parameters related to all injected        *
-         *    channels: injected sequence length and trigger                      */
+        /* 1. Start new context and set parameters related to all injected
+         *    channels: injected sequence length and trigger */
         if (hadc->InjectedSetup.ChannelCount == 0)
         {
-            /* Initialize number of channels that will be configured on the context *
-             *  being built                                                         */
+            /* Initialize number of channels that will be configured on the context
+             *  being built */
             hadc->InjectedSetup.ChannelCount = Config->ConversionCount - 1;
 
             /* Initialize value that will be set into register JSQR */
             hadc->InjectedSetup.ContextQueue = Config->ConversionCount - 1;
 
-            /* Configuration of context register JSQR:                              *
-             *  - number of ranks in injected group sequencer                       *
-             *  - external trigger to start conversion                              *
-             *  - external trigger polarity                                         */
-
-            /* Enable external trigger if trigger selection is different of         *
-             * software start.                                                      *
-             * Note: This configuration keeps the hardware feature of parameter     *
-             *       ExternalTrigInjecConvEdge "trigger edge none" equivalent to    *
-             *       software start.                                                */
             if (Config->Trigger.InjSource != ADC_INJTRIGGER_SOFTWARE)
             {
                 MODIFY_REG(hadc->InjectedSetup.ContextQueue,
@@ -1268,8 +1153,8 @@ void XPD_ADC_Injected_Init(ADC_HandleType * hadc, ADC_Injected_InitType * Config
             }
         }
 
-        /* 2. Continue setting of context under definition with parameter       *
-         *    related to each channel: channel rank sequence                    */
+        /* 2. Continue setting of context under definition with parameter
+         *    related to each channel: channel rank sequence */
         {
             uint32_t channelOffset = (Config->Rank * 6) + 2;
             uint32_t channelMask   = ADC_SQR3_SQ10 << channelOffset;
@@ -1290,36 +1175,18 @@ void XPD_ADC_Injected_Init(ADC_HandleType * hadc, ADC_Injected_InitType * Config
         }
     }
 
-    /* Parameters update conditioned to ADC state:                              *
-     * Parameters that can be updated when ADC is disabled or enabled without   *
-     * conversion on going on injected group:                                   *
-     *  - Injected context queue: Queue disable (active context is kept) or     *
-     *    enable (context decremented, up to 2 contexts queued)                 *
-     *  - Injected discontinuous mode: can be enabled only if auto-injected     *
-     *    mode is disabled.                                                     */
     if (ADC_REG_BIT(hadc, CR, JADSTART) == 0)
     {
         hadc->Inst->CFGR.b.JQM     = Config->ContextQueue;
         hadc->Inst->CFGR.b.JDISCEN = Config->DiscontinuousMode & (!Config->AutoInjection);
     }
 
-    /* Parameters update conditioned to ADC state:                              *
-     * Parameters that can be updated when ADC is disabled or enabled without   *
-     * conversion on going on regular and injected groups:                      *
-     *  - Automatic injected conversion: can be enabled if injected group       *
-     *    external triggers are disabled.                                       *
-     *  - Channel sampling time                                                 *
-     *  - Channel offset                                                        */
     if ((hadc->Inst->CR.w & ADC_STARTCTRL) == 0)
     {
-        /* If injected group external triggers are disabled (set to injected      *
-         * software start): no constraint                                         */
         if (Config->Trigger.InjSource == ADC_INJTRIGGER_SOFTWARE)
         {
             hadc->Inst->CFGR.b.JAUTO = Config->AutoInjection;
         }
-        /* If Automatic injected conversion was intended to be set and could not  *
-         * due to injected group external triggers enabled, error is reported.    */
         else
         {
             hadc->Inst->CFGR.b.JAUTO = 0;
@@ -1328,10 +1195,6 @@ void XPD_ADC_Injected_Init(ADC_HandleType * hadc, ADC_Injected_InitType * Config
         /* Channel sampling time configuration */
         adc_sampleTimeConfig(hadc, Config->Channel, Config->SampleTime);
 
-        /* Parameters update conditioned to ADC state:                              *
-         * Parameters that can be updated only when ADC is disabled:                *
-         *  - Single or differential mode                                           *
-         *  - Internal measurement channels: Vbat/VrefInt/TempSensor                */
         if (ADC_REG_BIT(hadc, CR, ADEN) == 0)
         {
             /* Configuration of differential mode */
@@ -1345,16 +1208,9 @@ void XPD_ADC_Injected_Init(ADC_HandleType * hadc, ADC_Injected_InitType * Config
                 /* Enable differential mode */
                 SET_BIT(hadc->Inst->DIFSEL.w, 1 << Config->Channel);
 
-                /* Channel sampling time configuration (channel ADC_INx +1              *
-                 * corresponding to differential negative input).                       */
                 adc_sampleTimeConfig(hadc, Config->Channel + 1, Config->SampleTime);
             }
 
-            /* Management of internal measurement channels: VrefInt/TempSensor/Vbat   *
-             * internal measurement paths enable: If internal channel selected,       *
-             * enable dedicated internal buffers and path.                            *
-             * Note: these internal measurement paths can be disabled using           *
-             * HAL_ADC_deInit().                                                      */
             adc_initInternalChannel(hadc, Config->Channel);
         }
     }
@@ -1441,53 +1297,22 @@ uint16_t XPD_ADC_Injected_GetValue(ADC_HandleType * hadc, uint8_t Rank)
  * @param hadc: pointer to the ADC handle structure
  * @param Config: pointer to the multi ADC setup configuration
  */
-void XPD_ADC_MultiMode_Init(ADC_HandleType * hadc, ADC_MultiMode_InitType * Config)
+void XPD_ADC_MultiMode_Init(ADC_HandleType * hadc, const ADC_MultiMode_InitType * Config)
 {
     __IO uint32_t * pCR = &ADC_PAIR(hadc)->CR.w;
     ADC_Common_TypeDef *common = ADC_COMMON(hadc);
 
-    /* Parameters update conditioned to ADC state:                              *
-     * Parameters that can be updated when ADC is disabled or enabled without   *
-     * conversion on going on regular group:                                    *
-     *  - Multimode DMA configuration                                           *
-     *  - Multimode DMA mode                                                    */
+    /* Neither ADC should be running regular conversion */
     if (    ((hadc->Inst->CR.w & ADC_CR_ADSTART) == 0)
          && ((            *pCR & ADC_CR_ADSTART) == 0))
     {
-        /* Pointer to the common control register to which is belonging hadc      *
-         * (Depending on STM32F3 product, there may have up to 4 ADC and 2 common *
-         * control registers)                                                     */
-
-        /* Configuration of ADC common group ADC1&ADC2, ADC3&ADC4 if available    *
-         * (ADC2, ADC3, ADC4 availability depends on STM32 product)               *
-         *  - DMA access mode                                                     */
         common->CCR.b.MDMA = Config->DMAAccessMode;
         common->CCR.b.DMACFG = hadc->Inst->CFGR.b.DMACFG;
 
-        /* Parameters that can be updated only when ADC is disabled:              *
-         *  - Multimode mode selection                                            *
-         *  - Multimode delay                                                     *
-         * Note: If ADC is not in the appropriate state to modify these           *
-         *       parameters, their setting is bypassed without error reporting    *
-         *       (as it can be the expected behaviour in case of intended action  *
-         *       to update parameter above (which fulfills the ADC state          *
-         *       condition: no conversion on going on group regular)              *
-         *       on the fly).                                                     */
+        /* Neither ADC should be on */
         if (    ((hadc->Inst->CR.w & ADC_CR_ADEN) == 0)
              && ((            *pCR & ADC_CR_ADEN) == 0))
         {
-            /* Configuration of ADC common group ADC1&ADC2, ADC3&ADC4 if available    *
-             * (ADC2, ADC3, ADC4 availability depends on STM32 product)               *
-             *  - set the selected multimode                                          *
-             *  - DMA access mode                                                     *
-             *  - Set delay between two sampling phases                               *
-             *    Note: Delay range depends on selected resolution:                   *
-             *      from 1 to 12 clock cycles for 12 bits                             *
-             *      from 1 to 10 clock cycles for 10 bits,                            *
-             *      from 1 to 8 clock cycles for 8 bits                               *
-             *      from 1 to 6 clock cycles for 6 bits                               *
-             *    If a higher delay is selected, it will be clamped to maximum delay  *
-             *    range                                                               */
             common->CCR.b.DUAL  = Config->Mode;
             common->CCR.b.DELAY = Config->InterSamplingDelay;
         }

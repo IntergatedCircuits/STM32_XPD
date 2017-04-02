@@ -53,7 +53,7 @@ extern XPD_ValueCallbackType XPD_EXTI_Callbacks[];
 
 /** @addtogroup EXTI_Exported_Functions
  * @{ */
-void            XPD_EXTI_Init           (uint8_t Line, EXTI_InitType * Config);
+void            XPD_EXTI_Init           (uint8_t Line, const EXTI_InitType * Config);
 void            XPD_EXTI_Deinit         (uint8_t Line);
 
 /**

@@ -176,7 +176,7 @@ static void can_frameReceive(CAN_HandleType * hcan, uint8_t FIFONumber)
  * @param Config: pointer to CAN setup configuration
  * @return ERROR if input is incorrect, TIMEOUT if initialization failed, OK if success
  */
-XPD_ReturnType XPD_CAN_Init(CAN_HandleType* hcan, CAN_InitType* Config)
+XPD_ReturnType XPD_CAN_Init(CAN_HandleType * hcan, const CAN_InitType * Config)
 {
     XPD_ReturnType result = XPD_OK;
     uint32_t timeout = INAK_TIMEOUT;
@@ -236,7 +236,7 @@ XPD_ReturnType XPD_CAN_Init(CAN_HandleType* hcan, CAN_InitType* Config)
  * @param hcan: pointer to the CAN handle structure
  * @return ERROR if input is incorrect, OK if success
  */
-XPD_ReturnType XPD_CAN_Deinit(CAN_HandleType* hcan)
+XPD_ReturnType XPD_CAN_Deinit(CAN_HandleType * hcan)
 {
     /* disable all interrupt requests */
     hcan->Inst->IER.w = 0;
@@ -264,7 +264,7 @@ XPD_ReturnType XPD_CAN_Deinit(CAN_HandleType* hcan)
  * @param hcan: pointer to the CAN handle structure
  * @return TIMEOUT if timed out, OK if sleep mode is entered
  */
-XPD_ReturnType XPD_CAN_Sleep(CAN_HandleType* hcan)
+XPD_ReturnType XPD_CAN_Sleep(CAN_HandleType * hcan)
 {
     uint32_t timeout = SLAK_TIMEOUT;
     CAN_REG_BIT(hcan, MCR, INRQ) = 0;
@@ -278,7 +278,7 @@ XPD_ReturnType XPD_CAN_Sleep(CAN_HandleType* hcan)
  * @param hcan: pointer to the CAN handle structure
  * @return TIMEOUT if timed out, OK if sleep mode is left
  */
-XPD_ReturnType XPD_CAN_WakeUp(CAN_HandleType* hcan)
+XPD_ReturnType XPD_CAN_WakeUp(CAN_HandleType * hcan)
 {
     uint32_t timeout = SLAK_TIMEOUT;
     CAN_REG_BIT(hcan, MCR, SLEEP) = 0;
@@ -409,7 +409,7 @@ XPD_ReturnType XPD_CAN_Transmit_IT(CAN_HandleType * hcan, CAN_FrameType * Frame)
  * @param Timeout: available time for frame reception
  * @return BUSY if FIFO is already in use, TIMEOUT if timed out, OK if frame is received
  */
-XPD_ReturnType XPD_CAN_Receive(CAN_HandleType* hcan, CAN_FrameType* Frame, uint8_t FIFONumber, uint32_t Timeout)
+XPD_ReturnType XPD_CAN_Receive(CAN_HandleType * hcan, CAN_FrameType* Frame, uint8_t FIFONumber, uint32_t Timeout)
 {
     XPD_ReturnType result;
     uint8_t recState = CAN_STATE_RECEIVE0 << FIFONumber;
@@ -484,7 +484,7 @@ XPD_ReturnType XPD_CAN_Receive_IT(CAN_HandleType * hcan, CAN_FrameType * Frame, 
  * @brief CAN transmit interrupt handler that provides handle callbacks.
  * @param hcan: pointer to the CAN handle structure
  */
-void XPD_CAN_TX_IRQHandler(CAN_HandleType* hcan)
+void XPD_CAN_TX_IRQHandler(CAN_HandleType * hcan)
 {
     uint32_t temp, i;
 
@@ -523,7 +523,7 @@ void XPD_CAN_TX_IRQHandler(CAN_HandleType* hcan)
  * @brief CAN receive FIFO 0 interrupt handler that provides handle callbacks.
  * @param hcan: pointer to the CAN handle structure
  */
-void XPD_CAN_RX0_IRQHandler(CAN_HandleType* hcan)
+void XPD_CAN_RX0_IRQHandler(CAN_HandleType * hcan)
 {
     uint32_t temp;
 
@@ -556,7 +556,7 @@ void XPD_CAN_RX0_IRQHandler(CAN_HandleType* hcan)
  * @brief CAN receive FIFO 1 interrupt handler that provides handle callbacks.
  * @param hcan: pointer to the CAN handle structure
  */
-void XPD_CAN_RX1_IRQHandler(CAN_HandleType* hcan)
+void XPD_CAN_RX1_IRQHandler(CAN_HandleType * hcan)
 {
     uint32_t temp;
 
@@ -589,7 +589,7 @@ void XPD_CAN_RX1_IRQHandler(CAN_HandleType* hcan)
  * @brief CAN state change and error interrupt handler that provides handle callbacks.
  * @param hcan: pointer to the CAN handle structure
  */
-void XPD_CAN_SCE_IRQHandler(CAN_HandleType* hcan)
+void XPD_CAN_SCE_IRQHandler(CAN_HandleType * hcan)
 {
     /* check if errors are configured for interrupt and present */
     if (    ((hcan->Inst->IER.w & (CAN_IER_BOFIE | CAN_IER_EPVIE | CAN_IER_EWGIE | CAN_IER_LECIE)) != 0)

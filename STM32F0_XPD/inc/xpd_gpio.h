@@ -80,12 +80,12 @@ typedef struct
 
 /** @addtogroup GPIO_Exported_Functions_Port
  * @{ */
-void            XPD_GPIO_InitPort   (GPIO_TypeDef * GPIOx, GPIO_InitType * Config);
+void            XPD_GPIO_InitPort   (GPIO_TypeDef * GPIOx, const GPIO_InitType * Config);
 /** @} */
 
 /** @addtogroup GPIO_Exported_Functions_Pin
  * @{ */
-void            XPD_GPIO_InitPin    (GPIO_TypeDef * GPIOx, uint8_t Pin, GPIO_InitType * Config);
+void            XPD_GPIO_InitPin    (GPIO_TypeDef * GPIOx, uint8_t Pin, const GPIO_InitType * Config);
 void            XPD_GPIO_DeinitPin  (GPIO_TypeDef * GPIOx, uint8_t Pin);
 void            XPD_GPIO_LockPin    (GPIO_TypeDef * GPIOx, uint8_t Pin);
 /** @} */

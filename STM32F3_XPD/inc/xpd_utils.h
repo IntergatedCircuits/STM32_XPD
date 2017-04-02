@@ -56,8 +56,7 @@ extern XPD_CallbacksType XPD_Callbacks;
  * @brief Enters a critical section by disabling interrupts. [overrideable]
  * @param HANDLE: pointer to the requester handle
  */
-#define XPD_ENTER_CRITICAL(HANDLE)       \
-    __disable_irq()
+#define XPD_ENTER_CRITICAL(HANDLE)
 #endif
 
 #ifndef XPD_EXIT_CRITICAL
@@ -65,8 +64,7 @@ extern XPD_CallbacksType XPD_Callbacks;
  * @brief Leaves a critical section by enabling interrupts. [overrideable]
  * @param HANDLE: pointer to the requester handle
  */
-#define XPD_EXIT_CRITICAL(HANDLE)        \
-    __enable_irq()
+#define XPD_EXIT_CRITICAL(HANDLE)
 #endif
 
 /** @brief Timeout value for indefinite waiting */

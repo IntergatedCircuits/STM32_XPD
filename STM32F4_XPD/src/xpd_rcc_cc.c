@@ -72,7 +72,7 @@ static uint32_t rcc_convertClockDivider(RCC_ClockType clockType, ClockDividerTyp
  * @param Config: pointer to the configuration parameters
  * @return Result of the operation
  */
-XPD_ReturnType XPD_RCC_HSIConfig(RCC_HSI_InitType * Config)
+XPD_ReturnType XPD_RCC_HSIConfig(const RCC_HSI_InitType * Config)
 {
     XPD_ReturnType result = XPD_OK;
     RCC_OscType sysclock = XPD_RCC_GetSYSCLKSource();
@@ -127,7 +127,7 @@ XPD_ReturnType XPD_RCC_HSIConfig(RCC_HSI_InitType * Config)
  * @param Config: pointer to the configuration parameters
  * @return Result of the operation
  */
-XPD_ReturnType XPD_RCC_HSEConfig(RCC_HSE_InitType * Config)
+XPD_ReturnType XPD_RCC_HSEConfig(const RCC_HSE_InitType * Config)
 {
     XPD_ReturnType result = XPD_OK;
     RCC_OscType sysclock = XPD_RCC_GetSYSCLKSource();
@@ -174,7 +174,7 @@ XPD_ReturnType XPD_RCC_HSEConfig(RCC_HSE_InitType * Config)
  * @param Config: pointer to the configuration parameters
  * @return Result of the operation
  */
-XPD_ReturnType XPD_RCC_PLLConfig(RCC_PLL_InitType * Config)
+XPD_ReturnType XPD_RCC_PLLConfig(const RCC_PLL_InitType * Config)
 {
     XPD_ReturnType result = XPD_ERROR;
     RCC_OscType sysclock = XPD_RCC_GetSYSCLKSource();

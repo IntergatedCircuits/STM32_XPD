@@ -145,7 +145,7 @@ typedef struct
 
 /** @addtogroup PWR_PVD_Exported_Functions
  * @{ */
-void            XPD_PWR_PVD_Init            (PWR_PVD_InitType * Config);
+void            XPD_PWR_PVD_Init            (const PWR_PVD_InitType * Config);
 void            XPD_PWR_PVD_Enable          (void);
 void            XPD_PWR_PVD_Disable         (void);
 /** @} */

@@ -114,7 +114,7 @@ static void tim_dmaCommutationCallbackRedirect(void *hdma)
  * @param Config: pointer to TIM setup configuration
  * @return ERROR if input is incorrect, OK if success
  */
-XPD_ReturnType XPD_TIM_Init(TIM_HandleType * htim, TIM_Counter_InitType * Config)
+XPD_ReturnType XPD_TIM_Init(TIM_HandleType * htim, const TIM_Counter_InitType * Config)
 {
     /* enable clock */
     XPD_SAFE_CALLBACK(htim->ClockCtrl, ENABLE);
@@ -502,7 +502,7 @@ void XPD_TIM_IRQHandler(TIM_HandleType * htim)
  * @param Channel: the selected compare channel to use
  * @param Config: pointer to TIM compare channel setup configuration
  */
-void XPD_TIM_Output_Init(TIM_HandleType * htim, TIM_ChannelType Channel, TIM_Output_InitType * Config)
+void XPD_TIM_Output_Init(TIM_HandleType * htim, TIM_ChannelType Channel, const TIM_Output_InitType * Config)
 {
     /* set the output compare polarities (0 is active high) */
     {
@@ -738,7 +738,7 @@ void XPD_TIM_Output_SetDeadtime(TIM_HandleType * htim, uint32_t DeadCounts)
  * @param htim: pointer to the TIM handle structure
  * @param Config: pointer to TIM break setup configuration
  */
-void XPD_TIM_Output_DriveConfig(TIM_HandleType * htim, TIM_Output_DriveType * Config)
+void XPD_TIM_Output_DriveConfig(TIM_HandleType * htim, const TIM_Output_DriveType * Config)
 {
     TIM_REG_BIT(htim, BDTR, AOE)  = Config->AutomaticOutput;
     TIM_REG_BIT(htim, BDTR, OSSI) = Config->IdleOffState;
@@ -777,7 +777,7 @@ void XPD_TIM_Output_DriveConfig(TIM_HandleType * htim, TIM_Output_DriveType * Co
  * @param htim: pointer to the TIM handle structure
  * @param Config: pointer to TIM master setup configuration
  */
-void XPD_TIM_MasterConfig(TIM_HandleType * htim, TIM_MasterConfigType * Config)
+void XPD_TIM_MasterConfig(TIM_HandleType * htim, const TIM_MasterConfigType * Config)
 {
     /* select the TRGO source */
     htim->Inst->CR2.b.MMS = Config->MasterTrigger;

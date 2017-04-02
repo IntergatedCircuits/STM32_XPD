@@ -109,10 +109,14 @@ static void spi_dmaTransmitRedirect(void * hdma)
         /* Clear overrun flag in 2 Lines communication mode because received data is not read */
         if (SPI_REG_BIT(hspi, CR1, BIDIMODE) == 0)
         {
-            while (XPD_SPI_GetFlag(hspi, RXNE) != 0)
+            /* Nothing to receive */
+            if (hspi->RxStream.length == 0)
             {
-                /* empty received data from data register */
-                uint16_t temp = SPI_REG_BY_SIZE(&hspi->Inst->DR, hspi->RxStream.size);
+                /* Empty previously received data from data register  */
+                while (XPD_SPI_GetFlag(hspi, RXNE) != 0)
+                {
+                    uint16_t temp = SPI_REG_BY_SIZE(&hspi->Inst->DR, hspi->RxStream.size);
+                }
             }
             XPD_SPI_ClearFlag(hspi, OVR);
         }
@@ -206,21 +210,6 @@ static void spi_dmaErrorRedirect(void * hdma)
 }
 #endif
 
-static XPD_ReturnType spi_waitFinished(SPI_HandleType * hspi, uint32_t * timeout)
-{
-    XPD_ReturnType result;
-
-    /* While SPI is still busy with previous transfer, new one is not started */
-    result = XPD_WaitForMatch(&hspi->Inst->SR.w, SPI_SR_BSY, 0, timeout);
-
-    while (XPD_SPI_GetFlag(hspi, RXNE) != 0)
-    {
-        /* empty received data from data register */
-        uint16_t temp = SPI_REG_BY_SIZE(&hspi->Inst->DR, hspi->RxStream.size);
-    }
-    return result;
-}
-
 /** @defgroup SPI_Exported_Functions SPI Exported Functions
  * @{ */
 
@@ -230,7 +219,7 @@ static XPD_ReturnType spi_waitFinished(SPI_HandleType * hspi, uint32_t * timeout
  * @param Config: SPI setup configuration
  * @return ERROR if input is incorrect, OK if success
  */
-XPD_ReturnType XPD_SPI_Init(SPI_HandleType * hspi, SPI_InitType * Config)
+XPD_ReturnType XPD_SPI_Init(SPI_HandleType * hspi, const SPI_InitType * Config)
 {
     /* enable clock */
     XPD_SAFE_CALLBACK(hspi->ClockCtrl, ENABLE);
@@ -437,13 +426,6 @@ XPD_ReturnType XPD_SPI_Transmit(SPI_HandleType * hspi, void * TxData, uint16_t L
     XPD_ReturnType result;
     boolean_t duplex = TRUE;
 
-    /* While SPI is still busy with previous transfer, new one is not started */
-    result = spi_waitFinished(hspi, &Timeout);
-    if (result != XPD_OK)
-    {
-        return result;
-    }
-
     /* save stream info */
     hspi->TxStream.buffer = TxData;
     hspi->TxStream.length = Length;
@@ -495,9 +477,9 @@ XPD_ReturnType XPD_SPI_Transmit(SPI_HandleType * hspi, void * TxData, uint16_t L
     /* Clear overrun flag in 2 Lines communication mode because received data is not read */
     if (duplex)
     {
+        /* Empty previously received data from data register  */
         while (XPD_SPI_GetFlag(hspi, RXNE) != 0)
         {
-            /* empty received data from data register */
             uint16_t temp = SPI_REG_BY_SIZE(&hspi->Inst->DR, hspi->RxStream.size);
         }
         XPD_SPI_ClearFlag(hspi, OVR);
@@ -526,13 +508,6 @@ XPD_ReturnType XPD_SPI_Receive(SPI_HandleType * hspi, void * RxData, uint16_t Le
         /* the receive process is not supported in 2Lines direction master mode */
         /* in this case we call the TransmitReceive process                     */
         return XPD_SPI_TransmitReceive(hspi, RxData, RxData, Length, Timeout);
-    }
-
-    /* While SPI is still busy with previous transfer, new one is not started */
-    result = spi_waitFinished(hspi, &Timeout);
-    if (result != XPD_OK)
-    {
-        return result;
     }
 
     /* save stream info */
@@ -611,13 +586,6 @@ XPD_ReturnType XPD_SPI_TransmitReceive(SPI_HandleType * hspi, void * TxData, voi
     XPD_ReturnType result;
     boolean_t duplex = TRUE, exclMaster = FALSE;
 
-    /* While SPI is still busy with previous transfer, new one is not started */
-    result = spi_waitFinished(hspi, &Timeout);
-    if (result != XPD_OK)
-    {
-        return result;
-    }
-
     /* save stream info */
     hspi->TxStream.buffer = TxData;
     hspi->TxStream.length = Length;
@@ -678,17 +646,15 @@ XPD_ReturnType XPD_SPI_TransmitReceive(SPI_HandleType * hspi, void * TxData, voi
 
 /**
  * @brief Starts interrupt-driven data transmission over SPI.
- * @note  The function indefinitely waits for the end of the previous transfer (BSY flag)
+ * @note  The Transmit callback will be called when the last data is written to buffer,
+ *        the user has to wait for the end of that transfer by XPD_SPI_PollStatus() before
+ *        switching ChipSelect or starting a new reception.
  * @param hspi: pointer to the SPI handle structure
  * @param TxData: pointer to the data buffer
  * @param Length: amount of data transfers
  */
 void XPD_SPI_Transmit_IT(SPI_HandleType * hspi, void * TxData, uint16_t Length)
 {
-    uint32_t timeout = SPI_BUSY_TIMEOUT;
-    /* While SPI is still busy with previous transfer, new one is not started */
-    (void)spi_waitFinished(hspi, &timeout);
-
     /* save stream info */
     hspi->TxStream.buffer = TxData;
     hspi->TxStream.length = Length;
@@ -716,15 +682,12 @@ void XPD_SPI_Transmit_IT(SPI_HandleType * hspi, void * TxData, uint16_t Length)
 
 /**
  * @brief Starts interrupt-driven data reception over SPI.
- * @note  The function indefinitely waits for the end of the previous transfer (BSY flag)
  * @param hspi: pointer to the SPI handle structure
  * @param TxData: pointer to the data buffer
  * @param Length: amount of data transfers
  */
 void XPD_SPI_Receive_IT(SPI_HandleType * hspi, void * RxData, uint16_t Length)
 {
-    uint32_t timeout = SPI_BUSY_TIMEOUT;
-
     /* If master mode, and full duplex communication */
     if (SPI_MASTER_FULL_DUPLEX(hspi))
     {
@@ -732,9 +695,6 @@ void XPD_SPI_Receive_IT(SPI_HandleType * hspi, void * RxData, uint16_t Length)
         /* in this case we call the TransmitReceive process                     */
         XPD_SPI_TransmitReceive_IT(hspi, RxData, RxData, Length);
     }
-
-    /* While SPI is still busy with previous transfer, new one is not started */
-    (void)spi_waitFinished(hspi, &timeout);
 
     /* save stream info */
     hspi->RxStream.buffer = RxData;
@@ -766,7 +726,8 @@ void XPD_SPI_Receive_IT(SPI_HandleType * hspi, void * RxData, uint16_t Length)
 
 /**
  * @brief Starts interrupt-driven full-duplex data transfer over SPI.
- * @note  The function indefinitely waits for the end of the previous transfer (BSY flag)
+ * @note  Only the Receive callback is called at the end of the communication,
+ *        the Transmit callback will be called when the last data is written to buffer.
  * @param hspi: pointer to the SPI handle structure
  * @param TxData: pointer to the transmitted data buffer
  * @param RxData: pointer to the received data buffer
@@ -774,10 +735,6 @@ void XPD_SPI_Receive_IT(SPI_HandleType * hspi, void * RxData, uint16_t Length)
  */
 void XPD_SPI_TransmitReceive_IT(SPI_HandleType * hspi, void * TxData, void * RxData, uint16_t Length)
 {
-    uint32_t timeout = SPI_BUSY_TIMEOUT;
-    /* While SPI is still busy with previous transfer, new one is not started */
-    (void)spi_waitFinished(hspi, &timeout);
-
     /* save stream info */
     hspi->TxStream.buffer = TxData;
     hspi->TxStream.length = Length;
@@ -915,10 +872,14 @@ void XPD_SPI_IRQHandler(SPI_HandleType * hspi)
             /* Clear overrun flag in 2 Lines communication mode because received is not read */
             if (SPI_REG_BIT(hspi, CR1, BIDIMODE) == 0)
             {
-                while (XPD_SPI_GetFlag(hspi, RXNE) != 0)
+                /* Nothing to receive */
+                if (hspi->RxStream.length == 0)
                 {
-                    /* empty received data from data register */
-                    uint16_t temp = SPI_REG_BY_SIZE(&hspi->Inst->DR, hspi->RxStream.size);
+                    /* Empty previously received data from data register  */
+                    while (XPD_SPI_GetFlag(hspi, RXNE) != 0)
+                    {
+                        uint16_t temp = SPI_REG_BY_SIZE(&hspi->Inst->DR, hspi->RxStream.size);
+                    }
                 }
                 XPD_SPI_ClearFlag(hspi, OVR);
             }
@@ -956,7 +917,9 @@ void XPD_SPI_IRQHandler(SPI_HandleType * hspi)
 
 /**
  * @brief Starts DMA-managed data transmission over SPI.
- * @note  The function indefinitely waits for the end of the previous transfer (BSY flag)
+ * @note  The Transmit callback will be called when the last data is written to buffer,
+ *        the user has to wait for the end of that transfer by XPD_SPI_PollStatus() before
+ *        switching ChipSelect or starting a new reception.
  * @param hspi: pointer to the SPI handle structure
  * @param TxData: pointer to the data buffer
  * @param Length: amount of data transfers
@@ -965,9 +928,6 @@ void XPD_SPI_IRQHandler(SPI_HandleType * hspi)
 XPD_ReturnType XPD_SPI_Transmit_DMA(SPI_HandleType * hspi, void * TxData, uint16_t Length)
 {
     XPD_ReturnType result;
-    uint32_t timeout = SPI_BUSY_TIMEOUT;
-    /* While SPI is still busy with previous transfer, new one is not started */
-    (void)spi_waitFinished(hspi, &timeout);
 
     /* save stream info */
     hspi->TxStream.buffer = TxData;
@@ -1013,7 +973,6 @@ XPD_ReturnType XPD_SPI_Transmit_DMA(SPI_HandleType * hspi, void * TxData, uint16
 
 /**
  * @brief Starts DMA-managed data reception over SPI.
- * @note  The function indefinitely waits for the end of the previous transfer (BSY flag)
  * @param hspi: pointer to the SPI handle structure
  * @param RxData: pointer to the data buffer
  * @param Length: amount of data transfers
@@ -1032,10 +991,6 @@ XPD_ReturnType XPD_SPI_Receive_DMA(SPI_HandleType * hspi, void * RxData, uint16_
     }
     else
     {
-        uint32_t timeout = SPI_BUSY_TIMEOUT;
-        /* While SPI is still busy with previous transfer, new one is not started */
-        (void)spi_waitFinished(hspi, &timeout);
-
         /* save stream info */
         hspi->RxStream.buffer = RxData;
         hspi->RxStream.length = Length;
@@ -1081,7 +1036,6 @@ XPD_ReturnType XPD_SPI_Receive_DMA(SPI_HandleType * hspi, void * RxData, uint16_
 
 /**
  * @brief Starts DMA-managed full-duplex data transfer over SPI.
- * @note  The function indefinitely waits for the end of the previous transfer (BSY flag)
  * @param hspi: pointer to the SPI handle structure
  * @param TxData: pointer to the transmitted data buffer
  * @param RxData: pointer to the received data buffer

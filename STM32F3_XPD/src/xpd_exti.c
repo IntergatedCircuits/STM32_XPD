@@ -48,7 +48,7 @@ XPD_ValueCallbackType XPD_EXTI_Callbacks[] = {
  * @param Line: the selected EXTI line
  * @param Config: pointer to the setup structure
  */
-void XPD_EXTI_Init(uint8_t Line, EXTI_InitType * Config)
+void XPD_EXTI_Init(uint8_t Line, const EXTI_InitType * Config)
 {
     if (Config->Reaction & REACTION_IT)
     {

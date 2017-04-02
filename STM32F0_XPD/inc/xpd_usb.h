@@ -160,7 +160,7 @@ typedef struct
 
 /** @addtogroup USB_Exported_Functions
  * @{ */
-XPD_ReturnType  XPD_USB_Init                    (USB_HandleType * husb, USB_InitType * Config);
+XPD_ReturnType  XPD_USB_Init                    (USB_HandleType * husb, const USB_InitType * Config);
 XPD_ReturnType  XPD_USB_Deinit                  (USB_HandleType * husb);
 void            XPD_USB_Start                   (USB_HandleType * husb);
 void            XPD_USB_Stop                    (USB_HandleType * husb);

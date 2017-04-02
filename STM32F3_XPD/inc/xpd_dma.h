@@ -196,7 +196,7 @@ typedef struct
 
 /** @addtogroup DMA_Exported_Functions
  * @{ */
-XPD_ReturnType  XPD_DMA_Init            (DMA_HandleType * hdma, DMA_InitType * Config);
+XPD_ReturnType  XPD_DMA_Init            (DMA_HandleType * hdma, const DMA_InitType * Config);
 XPD_ReturnType  XPD_DMA_Deinit          (DMA_HandleType * hdma);
 
 void            XPD_DMA_Enable          (DMA_HandleType * hdma);

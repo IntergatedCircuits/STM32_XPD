@@ -229,7 +229,7 @@ typedef struct
 
 /** @addtogroup SPI_Exported_Functions
  * @{ */
-XPD_ReturnType  XPD_SPI_Init                (SPI_HandleType * hspi, SPI_InitType * Config);
+XPD_ReturnType  XPD_SPI_Init                (SPI_HandleType * hspi, const SPI_InitType * Config);
 XPD_ReturnType  XPD_SPI_Deinit              (SPI_HandleType * hspi);
 void            XPD_SPI_Enable              (SPI_HandleType * hspi);
 void            XPD_SPI_Disable             (SPI_HandleType * hspi);

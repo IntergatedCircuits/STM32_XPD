@@ -358,7 +358,7 @@ void            XPD_CAN_SCE_IRQHandler      (CAN_HandleType * hcan);
 
 /** @addtogroup CAN_Exported_Functions_State
  * @{ */
-XPD_ReturnType  XPD_CAN_Init                (CAN_HandleType * hcan, CAN_InitType * Config);
+XPD_ReturnType  XPD_CAN_Init                (CAN_HandleType * hcan, const CAN_InitType * Config);
 XPD_ReturnType  XPD_CAN_Deinit              (CAN_HandleType * hcan);
 
 XPD_ReturnType  XPD_CAN_Sleep               (CAN_HandleType * hcan);

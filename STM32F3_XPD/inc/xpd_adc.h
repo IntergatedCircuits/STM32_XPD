@@ -4,7 +4,7 @@
   * @author  Benedek Kupper
   * @version V0.1
   * @date    2016-02-04
-  * @brief   STM32 eXtensible Peripheral Drivers TODO Module
+  * @brief   STM32 eXtensible Peripheral Drivers Analog Digital Converter Module
   *
   *  This file is part of STM32_XPD.
   *
@@ -343,9 +343,9 @@ typedef struct
 
 /** @defgroup ADC_Core_Exported_Functions ADC Core Exported Functions
  * @{ */
-XPD_ReturnType  XPD_ADC_Init                (ADC_HandleType * hadc, ADC_InitType * Config);
+XPD_ReturnType  XPD_ADC_Init                (ADC_HandleType * hadc, const ADC_InitType * Config);
 XPD_ReturnType  XPD_ADC_Deinit              (ADC_HandleType * hadc);
-void            XPD_ADC_ChannelConfig       (ADC_HandleType * hadc, ADC_ChannelInitType * Config);
+void            XPD_ADC_ChannelConfig       (ADC_HandleType * hadc, const ADC_ChannelInitType * Config);
 XPD_ReturnType  XPD_ADC_ChannelOffsetConfig (ADC_HandleType * hadc, uint32_t Channel, uint16_t Offset);
 
 void            XPD_ADC_Start               (ADC_HandleType * hadc);
@@ -359,7 +359,9 @@ void            XPD_ADC_IRQHandler          (ADC_HandleType * hadc);
 XPD_ReturnType  XPD_ADC_Start_DMA           (ADC_HandleType * hadc, void * Address);
 void            XPD_ADC_Stop_DMA            (ADC_HandleType * hadc);
 
-void            XPD_ADC_WatchdogConfig      (ADC_HandleType * hadc, uint8_t Channel, ADC_WatchdogInitType * Config);
+void            XPD_ADC_WatchdogConfig      (ADC_HandleType * hadc, uint8_t Channel,
+                                             const ADC_WatchdogInitType * Config);
+uint8_t         XPD_ADC_WatchdogStatus      (ADC_HandleType * hadc);
 
 uint16_t        XPD_ADC_GetValue            (ADC_HandleType * hadc);
 /** @} */
@@ -449,7 +451,7 @@ typedef struct
 
 /** @addtogroup ADC_Injected_Exported_Functions
  * @{ */
-void            XPD_ADC_Injected_Init       (ADC_HandleType * hadc, ADC_Injected_InitType * Config);
+void            XPD_ADC_Injected_Init       (ADC_HandleType * hadc, const ADC_Injected_InitType * Config);
 void            XPD_ADC_Injected_Start      (ADC_HandleType * hadc);
 void            XPD_ADC_Injected_Start_IT   (ADC_HandleType * hadc);
 uint16_t        XPD_ADC_Injected_GetValue   (ADC_HandleType * hadc, uint8_t Rank);
@@ -499,7 +501,7 @@ typedef struct
 
 /** @addtogroup ADC_MultiMode_Exported_Functions
  * @{ */
-void            XPD_ADC_MultiMode_Init      (ADC_HandleType * hadc, ADC_MultiMode_InitType * Config);
+void            XPD_ADC_MultiMode_Init      (ADC_HandleType * hadc, const ADC_MultiMode_InitType * Config);
 XPD_ReturnType  XPD_ADC_MultiMode_Start_DMA (ADC_HandleType * hadc, void * Address);
 void            XPD_ADC_MultiMode_Stop_DMA  (ADC_HandleType * hadc);
 uint32_t        XPD_ADC_MultiMode_GetValues (ADC_HandleType * hadc);

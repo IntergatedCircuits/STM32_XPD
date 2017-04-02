@@ -82,7 +82,7 @@ static void dma_calcBase(DMA_HandleType * hdma)
  * @param Config: DMA stream setup configuration
  * @return ERROR if input is incorrect, OK if success
  */
-XPD_ReturnType XPD_DMA_Init(DMA_HandleType * hdma, DMA_InitType * Config)
+XPD_ReturnType XPD_DMA_Init(DMA_HandleType * hdma, const DMA_InitType * Config)
 {
     /* enable DMA clock */
     dma_clockCtrl(hdma, ENABLE);

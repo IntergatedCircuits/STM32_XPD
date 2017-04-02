@@ -4,7 +4,7 @@
   * @author  Benedek Kupper
   * @version V0.1
   * @date    2016-02-04
-  * @brief   STM32 eXtensible Peripheral Drivers ADC Module
+  * @brief   STM32 eXtensible Peripheral Drivers Analog Digital Converter Module
   *
   *  This file is part of STM32_XPD.
   *
@@ -169,7 +169,7 @@ static void adc_initInternalChannel(ADC_HandleType * hadc, uint32_t Channel)
  * @param Config: pointer to ADC setup configuration
  * @return ERROR if input is incorrect, OK if success
  */
-XPD_ReturnType XPD_ADC_Init(ADC_HandleType * hadc, ADC_InitType * Config)
+XPD_ReturnType XPD_ADC_Init(ADC_HandleType * hadc, const ADC_InitType * Config)
 {
     /* enable clock */
     XPD_SAFE_CALLBACK(hadc->ClockCtrl, ENABLE);
@@ -241,7 +241,7 @@ XPD_ReturnType XPD_ADC_Deinit(ADC_HandleType * hadc)
  * @param hadc: pointer to the ADC handle structure
  * @param Config: pointer to ADC regular channel setup configuration
  */
-void XPD_ADC_ChannelConfig(ADC_HandleType * hadc, ADC_ChannelInitType * Config)
+void XPD_ADC_ChannelConfig(ADC_HandleType * hadc, const ADC_ChannelInitType * Config)
 {
     /* sequencer rank configuration */
     adc_sequencerConfig(hadc, Config->Channel, Config->Rank);
@@ -508,7 +508,7 @@ void XPD_ADC_Stop_DMA(ADC_HandleType * hadc)
  * @param Channel: the ADC channel to monitor (only used when single channel monitoring is configured)
  * @param Config: pointer to analog watchdog setup configuration
  */
-void XPD_ADC_WatchdogConfig(ADC_HandleType * hadc, uint8_t Channel, ADC_WatchdogInitType * Config)
+void XPD_ADC_WatchdogConfig(ADC_HandleType * hadc, uint8_t Channel, const ADC_WatchdogInitType * Config)
 {
     /* set the analog watchdog mode */
     MODIFY_REG(hadc->Inst->CR1.w, (ADC_CR1_AWDSGL | ADC_CR1_JAWDEN | ADC_CR1_AWDEN), Config->Mode);
@@ -700,7 +700,7 @@ uint16_t XPD_ADC_Injected_GetValue(ADC_HandleType * hadc, uint8_t Rank)
  * @param hadc: pointer to the ADC handle structure
  * @param Config: pointer to the multi ADC setup configuration
  */
-void XPD_ADC_MultiMode_Init(ADC_HandleType * hadc, ADC_MultiMode_InitType * Config)
+void XPD_ADC_MultiMode_Init(ADC_HandleType * hadc, const ADC_MultiMode_InitType * Config)
 {
     ADC->CCR.b.MULTI = Config->Mode;
     ADC->CCR.b.DMA   = Config->DMAAccessMode;

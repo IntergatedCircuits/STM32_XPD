@@ -70,6 +70,9 @@ typedef enum
 #define         XPD_PWR_ClearFlag(FLAG_NAME)    \
     (PWR_REG_BIT(CR,C##FLAG_NAME) = 1)
 
+/** @brief PWR VDDIO2 EXTI line number */
+#define PWR_VDDIO2_EXTI_LINE            31
+
 #ifdef PWR_BB
 #define PWR_REG_BIT(_REG_NAME_, _BIT_NAME_) (PWR_BB->_REG_NAME_._BIT_NAME_)
 #else
@@ -132,7 +135,7 @@ typedef struct
 
 /** @addtogroup PWR_PVD_Exported_Functions
  * @{ */
-void            XPD_PWR_PVD_Init            (PWR_PVD_InitType * Config);
+void            XPD_PWR_PVD_Init            (const PWR_PVD_InitType * Config);
 void            XPD_PWR_PVD_Enable          (void);
 void            XPD_PWR_PVD_Disable         (void);
 /** @} */

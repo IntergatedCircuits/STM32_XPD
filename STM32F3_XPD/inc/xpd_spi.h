@@ -174,7 +174,12 @@ typedef struct
  *         This parameter can be one of the following values:
  *            @arg TXE:     Transmit empty
  *            @arg RXNE:    Receive not empty
- *            @arg ERR:     Error
+ *            @arg UDR:     Underrun
+ *            @arg CRCERR:  CRC error
+ *            @arg MODF:    Mode fault
+ *            @arg OVR:     Overrun
+ *            @arg BSY:     Busy
+ *            @arg FRE:     TI frame format error
  */
 #define         XPD_SPI_GetFlag(HANDLE, FLAG_NAME)      \
     (SPI_REG_BIT((HANDLE),SR,FLAG_NAME))
@@ -184,9 +189,7 @@ typedef struct
  * @param  HANDLE: specifies the SPI Handle.
  * @param  FLAG_NAME: specifies the flag to clear.
  *         This parameter can be one of the following values:
- *            @arg TXE:     Transmit empty
- *            @arg RXNE:    Receive not empty
- *            @arg ERR:     Error
+ *            @arg CRCERR:  CRC error
  */
 #define         XPD_SPI_ClearFlag(HANDLE, FLAG_NAME)    \
     (SPI_REG_BIT((HANDLE),SR,FLAG_NAME) = 0)
@@ -226,7 +229,7 @@ typedef struct
 
 /** @addtogroup SPI_Exported_Functions
  * @{ */
-XPD_ReturnType  XPD_SPI_Init                (SPI_HandleType * hspi, SPI_InitType * Config);
+XPD_ReturnType  XPD_SPI_Init                (SPI_HandleType * hspi, const SPI_InitType * Config);
 XPD_ReturnType  XPD_SPI_Deinit              (SPI_HandleType * hspi);
 void            XPD_SPI_Enable              (SPI_HandleType * hspi);
 void            XPD_SPI_Disable             (SPI_HandleType * hspi);

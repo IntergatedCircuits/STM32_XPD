@@ -200,14 +200,14 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
 
 /** @addtogroup RCC_Core_Clocks_Exported_Functions_Oscillators
  * @{ */
-XPD_ReturnType      XPD_RCC_HSIConfig           (RCC_HSI_InitType * Config);
+XPD_ReturnType      XPD_RCC_HSIConfig           (const RCC_HSI_InitType * Config);
 #if defined(RCC_CFGR_SW_HSI48)
-XPD_ReturnType      XPD_RCC_HSI48Config         (RCC_HSI_InitType * Config);
+XPD_ReturnType      XPD_RCC_HSI48Config         (const RCC_HSI_InitType * Config);
 #endif
 XPD_ReturnType      XPD_RCC_LSIConfig           (RCC_OscStateType NewState);
-XPD_ReturnType      XPD_RCC_PLLConfig           (RCC_PLL_InitType * Config);
+XPD_ReturnType      XPD_RCC_PLLConfig           (const RCC_PLL_InitType * Config);
 #ifdef HSE_VALUE
-XPD_ReturnType      XPD_RCC_HSEConfig           (RCC_HSE_InitType * Config);
+XPD_ReturnType      XPD_RCC_HSEConfig           (const RCC_HSE_InitType * Config);
 #endif
 #ifdef LSE_VALUE
 XPD_ReturnType      XPD_RCC_LSEConfig           (RCC_OscStateType NewState);
