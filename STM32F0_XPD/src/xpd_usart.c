@@ -162,9 +162,6 @@ static XPD_ReturnType usart_init1(USART_HandleType * husart, const USART_InitTyp
     husart->Inst_BB = USART_BB(husart->Inst);
 #endif
 
-    /* Dependencies initialization */
-    XPD_SAFE_CALLBACK(husart->Callbacks.DepInit, husart);
-
     husart->Inst->CR1.w = 0;
     husart->Inst->CR2.w = 0;
     husart->Inst->CR3.w = 0;
@@ -237,6 +234,9 @@ static XPD_ReturnType usart_init2(USART_HandleType * husart, const USART_InitTyp
 
     XPD_USART_Enable(husart);
 
+    /* Dependencies initialization */
+    XPD_SAFE_CALLBACK(husart->Callbacks.DepInit, husart);
+
 #ifdef IS_UART_WAKEUP_FROMSTOP_INSTANCE
     if (IS_UART_WAKEUP_FROMSTOP_INSTANCE(husart->Inst))
     {
@@ -261,11 +261,11 @@ XPD_ReturnType XPD_USART_Deinit(USART_HandleType * husart)
 {
     XPD_USART_Disable(husart);
 
+    /* Deinitialize peripheral dependencies */
+    XPD_SAFE_CALLBACK(husart->Callbacks.DepDeinit, husart);
+
     /* disable clock */
     XPD_SAFE_CALLBACK(husart->ClockCtrl, DISABLE);
-
-	/* Deinitialize peripheral dependencies */
-    XPD_SAFE_CALLBACK(husart->Callbacks.DepDeinit, husart);
 
 	return XPD_OK;
 }

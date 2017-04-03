@@ -178,8 +178,6 @@ XPD_ReturnType XPD_ADC_Init(ADC_HandleType * hadc, const ADC_InitType * Config)
     hadc->Inst_BB = ADC_BB(hadc->Inst);
 #endif
 
-    XPD_SAFE_CALLBACK(hadc->Callbacks.DepInit, hadc);
-
     ADC_REG_BIT(hadc,CR1,SCAN)  = Config->ScanMode;
     ADC_REG_BIT(hadc,CR2,ALIGN) = Config->LeftAlignment;
     ADC_REG_BIT(hadc,CR2,CONT)  = Config->ContinuousMode;
@@ -215,6 +213,9 @@ XPD_ReturnType XPD_ADC_Init(ADC_HandleType * hadc, const ADC_InitType * Config)
         CLEAR_BIT(hadc->Inst->CR1.w, ADC_CR1_DISCEN | ADC_CR1_DISCNUM);
     }
 
+    /* dependencies initialization */
+    XPD_SAFE_CALLBACK(hadc->Callbacks.DepInit, hadc);
+
     return XPD_OK;
 }
 
@@ -227,11 +228,11 @@ XPD_ReturnType XPD_ADC_Deinit(ADC_HandleType * hadc)
 {
     ADC_REG_BIT(hadc,CR2,ADON) = 0;
 
-    /* disable clock */
-    XPD_SAFE_CALLBACK(hadc->ClockCtrl, DISABLE);
-
     /* Deinitialize peripheral dependencies */
     XPD_SAFE_CALLBACK(hadc->Callbacks.DepDeinit, hadc);
+
+    /* disable clock */
+    XPD_SAFE_CALLBACK(hadc->ClockCtrl, DISABLE);
 
     return XPD_OK;
 }

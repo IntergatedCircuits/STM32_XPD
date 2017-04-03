@@ -270,8 +270,6 @@ XPD_ReturnType XPD_ADC_Init(ADC_HandleType * hadc, const ADC_InitType * Config)
     hadc->Inst_BB = ADC_BB(hadc->Inst);
 #endif
 
-    XPD_SAFE_CALLBACK(hadc->Callbacks.DepInit, hadc);
-
     hadc->ActiveConversions = 0;
 
     /* Set used EndFlag */
@@ -330,6 +328,9 @@ XPD_ReturnType XPD_ADC_Init(ADC_HandleType * hadc, const ADC_InitType * Config)
         result = XPD_OK;
     }
 
+    /* dependencies initialization */
+    XPD_SAFE_CALLBACK(hadc->Callbacks.DepInit, hadc);
+
     return result;
 }
 
@@ -355,11 +356,11 @@ XPD_ReturnType XPD_ADC_Deinit(ADC_HandleType * hadc)
     /* Reset register CFGR1 */
     hadc->Inst->CFGR1.w = 0;
 
-    /* disable clock */
-    adc_clockCtrl(hadc, DISABLE);
-
     /* Deinitialize peripheral dependencies */
     XPD_SAFE_CALLBACK(hadc->Callbacks.DepDeinit, hadc);
+
+    /* disable clock */
+    adc_clockCtrl(hadc, DISABLE);
 
     return XPD_OK;
 }

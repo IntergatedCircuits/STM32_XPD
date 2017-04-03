@@ -228,9 +228,6 @@ XPD_ReturnType XPD_SPI_Init(SPI_HandleType * hspi, const SPI_InitType * Config)
     hspi->Inst_BB = SPI_BB(hspi->Inst);
 #endif
 
-    /* Dependencies initialization */
-    XPD_SAFE_CALLBACK(hspi->Callbacks.DepInit, hspi);
-
     XPD_SPI_Disable(hspi);
 
     /* Set bits related to Channel and NSS behavior */
@@ -301,6 +298,9 @@ XPD_ReturnType XPD_SPI_Init(SPI_HandleType * hspi, const SPI_InitType * Config)
     hspi->TxStream.length = hspi->RxStream.length = 0;
     hspi->TxStream.size   = hspi->RxStream.size   = (Config->DataSize <= 8) ? 1 : 2;
 
+    /* Dependencies initialization */
+    XPD_SAFE_CALLBACK(hspi->Callbacks.DepInit, hspi);
+
     return XPD_OK;
 }
 
@@ -313,11 +313,11 @@ XPD_ReturnType XPD_SPI_Deinit(SPI_HandleType * hspi)
 {
     XPD_SPI_Disable(hspi);
 
-    /* Disable clock */
-    XPD_SAFE_CALLBACK(hspi->ClockCtrl, DISABLE);
-
     /* Deinitialize peripheral dependencies */
     XPD_SAFE_CALLBACK(hspi->Callbacks.DepDeinit, hspi);
+
+    /* Disable clock */
+    XPD_SAFE_CALLBACK(hspi->ClockCtrl, DISABLE);
 
     return XPD_OK;
 }
