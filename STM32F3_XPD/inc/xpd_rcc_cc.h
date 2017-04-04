@@ -48,6 +48,7 @@ typedef enum
 #ifdef LSE_VALUE
     LSE    = 5, /*!< Low speed external oscillator */
 #endif
+    NO_OSC = -1,/*!< No oscillator available */
 }RCC_OscType;
 
 /** @brief RCC oscillator state types */

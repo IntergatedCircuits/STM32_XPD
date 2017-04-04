@@ -555,7 +555,7 @@ void XPD_RCC_DisableCSS(void)
 void XPD_NMI_IRQHandler(void)
 {
     /* Check RCC CSSF flag  */
-    if (RCC_REG_BIT(CIR,CSSF) != 0)
+    if (XPD_RCC_GetFlag(CSS) != 0)
     {
         /* Clear RCC CSS pending bit */
         XPD_RCC_ClearFlag(CSS);
