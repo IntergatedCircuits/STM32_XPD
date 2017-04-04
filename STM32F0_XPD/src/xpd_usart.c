@@ -914,18 +914,6 @@ void XPD_UART_BaudrateModeConfig(USART_HandleType * husart, UART_BaudrateModeTyp
 }
 #endif
 
-#if (USART_PERIPHERAL_VERSION > 2)
-/**
- * @brief Sets the baudrate detection strategy for the UART
- * @param husart: pointer to the USART handle structure
- * @param Mode: the selected detection strategy
- */
-void XPD_UART_BaudrateModeConfig(USART_HandleType * husart, UART_BaudrateModeType Mode)
-{
-    USART_APPLY_CONFIG(husart, CR2, USART_CR2_ABREN | USART_CR2_ABRMODE, Mode);
-}
-#endif
-
 /** @} */
 
 /** @} */
