@@ -394,8 +394,7 @@ typedef union
 /**
   \brief  Structure type to access the Nested Vectored Interrupt Controller (NVIC).
  */
-typedef struct
-{
+typedef struct {
     __IO uint32_t ISER[8];                                  /*!< Offset: 0x000 (R/W)  Interrupt Set Enable Register */
          uint32_t __RESERVED0[24];
     __IO uint32_t ICER[8];                                  /*!< Offset: 0x080 (R/W)  Interrupt Clear Enable Register */
@@ -429,8 +428,7 @@ typedef struct
 /**
   \brief  Structure type to access the System Control Block (SCB).
  */
-typedef struct
-{
+typedef struct {
     union {
         struct {
             __I  uint32_t REVISION : 4;                     /*!< SCB CPUID: REVISION Mask */
@@ -810,9 +808,8 @@ typedef struct
 /**
   \brief  Structure type to access the System Control and ID Register not in the SCB.
  */
-typedef struct
-{
-        uint32_t RESERVED0[1U];
+typedef struct {
+         uint32_t __RESERVED0;
     union {
         struct {
             __I  uint32_t INTLINESNUM : 4;                  /*!< ICTR: INTLINESNUM Mask */
@@ -860,8 +857,7 @@ typedef struct
 /**
   \brief  Structure type to access the System Timer (SysTick).
  */
-typedef struct
-{
+typedef struct {
     union {
         struct {
             __IO uint32_t ENABLE : 1;                       /*!< SysTick CTRL: ENABLE Mask */
@@ -931,8 +927,7 @@ typedef struct
 /**
   \brief  Structure type to access the Instrumentation Trace Macrocell Register (ITM).
  */
-typedef struct
-{
+typedef struct {
     union {
         __O  uint8_t    u8;                                 /*!< Offset: 0x000 ( /W)  ITM Stimulus Port 8-bit */
         __O  uint16_t   u16;                                /*!< Offset: 0x000 ( /W)  ITM Stimulus Port 16-bit */
@@ -1081,8 +1076,7 @@ typedef struct
 /**
   \brief  Structure type to access the Data Watchpoint and Trace Register (DWT).
  */
-typedef struct
-{
+typedef struct {
     union {
         struct {
             __IO uint32_t CYCCNTENA : 1;                    /*!< DWT CTRL: CYCCNTENA Mask */
@@ -1327,8 +1321,7 @@ typedef struct
 /**
   \brief  Structure type to access the Trace Port Interface Register (TPI).
  */
-typedef struct
-{
+typedef struct {
     __IO uint32_t SSPSR;                                    /*!< Offset: 0x000 (R/ )  Supported Parallel Port Size Register */
     __IO uint32_t CSPSR;                                    /*!< Offset: 0x004 (R/W)  Current Parallel Port Size Register */
          uint32_t __RESERVED0[2];
@@ -1574,8 +1567,7 @@ typedef struct
 /**
   \brief  Structure type to access the Memory Protection Unit (MPU).
  */
-typedef struct
-{
+typedef struct {
     union {
         struct {
             __I  uint32_t SEPARATE : 1;                     /*!< MPU TYPE: SEPARATE Mask */
@@ -1609,7 +1601,6 @@ typedef struct
             __IO uint32_t ENABLE : 1;                       /*!< MPU RASR: Region enable bit Disable Mask */
                  uint32_t __RESERVED0 : 7;
             __IO uint32_t SRD : 8;                          /*!< MPU RASR: Sub-Region Disable Mask */
-            __IO uint32_t ATTRS : 16;                       /*!< MPU RASR: MPU Region Attribute field Mask */
             __IO uint32_t B : 1;                            /*!< MPU RASR: ATTRS.B Mask */
             __IO uint32_t C : 1;                            /*!< MPU RASR: ATTRS.C Mask */
             __IO uint32_t S : 1;                            /*!< MPU RASR: ATTRS.S Mask */
@@ -1710,8 +1701,7 @@ typedef struct
 /**
   \brief  Structure type to access the Core Debug Register (CoreDebug).
  */
-typedef struct
-{
+typedef struct {
     union {
         struct {
             __IO uint32_t C_DEBUGEN : 1;                    /*!< CoreDebug DHCSR: C_DEBUGEN Mask */
@@ -1721,7 +1711,6 @@ typedef struct
                  uint32_t __RESERVED0 : 1;
             __IO uint32_t C_SNAPSTALL : 1;                  /*!< CoreDebug DHCSR: C_SNAPSTALL Mask */
                  uint32_t __RESERVED1 : 10;
-            __IO uint32_t DBGKEY : 16;                      /*!< CoreDebug DHCSR: DBGKEY Mask */
             __IO uint32_t S_REGRDY : 1;                     /*!< CoreDebug DHCSR: S_REGRDY Mask */
             __IO uint32_t S_HALT : 1;                       /*!< CoreDebug DHCSR: S_HALT Mask */
             __IO uint32_t S_SLEEP : 1;                      /*!< CoreDebug DHCSR: S_SLEEP Mask */

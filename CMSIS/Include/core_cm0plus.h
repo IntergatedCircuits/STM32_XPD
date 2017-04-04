@@ -386,8 +386,7 @@ typedef union
 /**
   \brief  Structure type to access the Nested Vectored Interrupt Controller (NVIC).
  */
-typedef struct
-{
+typedef struct {
     __IO uint32_t ISER;                                     /*!< Offset: 0x000 (R/W)  Interrupt Set Enable Register */
          uint32_t __RESERVED0[31];
     __IO uint32_t ICER;                                     /*!< Offset: 0x080 (R/W)  Interrupt Clear Enable Register */
@@ -413,8 +412,7 @@ typedef struct
 /**
   \brief  Structure type to access the System Control Block (SCB).
  */
-typedef struct
-{
+typedef struct {
     union {
         struct {
             __I  uint32_t REVISION : 4;                     /*!< SCB CPUID: REVISION Mask */
@@ -599,8 +597,7 @@ typedef struct
 /**
   \brief  Structure type to access the System Timer (SysTick).
  */
-typedef struct
-{
+typedef struct {
     union {
         struct {
             __IO uint32_t ENABLE : 1;                       /*!< SysTick CTRL: ENABLE Mask */
@@ -705,7 +702,6 @@ typedef struct {
             __IO uint32_t ENABLE : 1;                       /*!< MPU RASR: Region enable bit Disable Mask */
                  uint32_t __RESERVED0 : 7;
             __IO uint32_t SRD : 8;                          /*!< MPU RASR: Sub-Region Disable Mask */
-            __IO uint32_t ATTRS : 16;                       /*!< MPU RASR: MPU Region Attribute field Mask */
             __IO uint32_t B : 1;                            /*!< MPU RASR: ATTRS.B Mask */
             __IO uint32_t C : 1;                            /*!< MPU RASR: ATTRS.C Mask */
             __IO uint32_t S : 1;                            /*!< MPU RASR: ATTRS.S Mask */

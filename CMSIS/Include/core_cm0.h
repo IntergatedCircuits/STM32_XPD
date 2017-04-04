@@ -399,8 +399,7 @@ typedef struct
 /**
   \brief  Structure type to access the System Control Block (SCB).
  */
-typedef struct
-{
+typedef struct {
     union {
         struct {
             __I  uint32_t REVISION : 4;                     /*!< SCB CPUID: REVISION Mask */
@@ -569,8 +568,7 @@ typedef struct
 /**
   \brief  Structure type to access the System Timer (SysTick).
  */
-typedef struct
-{
+typedef struct {
     union {
         struct {
             __IO uint32_t ENABLE : 1;                       /*!< SysTick CTRL: ENABLE Mask */

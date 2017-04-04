@@ -462,8 +462,7 @@ typedef union
 /**
   \brief  Structure type to access the Nested Vectored Interrupt Controller (NVIC).
  */
-typedef struct
-{
+typedef struct {
     __IO uint32_t ISER[8];                                  /*!< Offset: 0x000 (R/W)  Interrupt Set Enable Register */
          uint32_t __RESERVED0[24];
     __IO uint32_t ICER[8];                                  /*!< Offset: 0x080 (R/W)  Interrupt Clear Enable Register */
@@ -478,6 +477,7 @@ typedef struct
          uint32_t __RESERVED5[644];
     __O  uint32_t STIR;                                     /*!< Offset: 0xE00 ( /W)  Software Trigger Interrupt Register */
 } NVIC_Type;
+
 
 /* Software Triggered Interrupt Register Definitions */
 #define NVIC_STIR_INTID_Pos                 0U                                         /*!< STIR: INTLINESNUM Position */
@@ -496,8 +496,7 @@ typedef struct
 /**
   \brief  Structure type to access the System Control Block (SCB).
  */
-typedef struct
-{
+typedef struct {
     union {
         struct {
             __I  uint32_t REVISION : 4;                     /*!< SCB CPUID: REVISION Mask */
@@ -675,6 +674,7 @@ typedef struct
         __IO uint32_t w;
     } CPACR;                                                /*!< Offset: 0x088 (R/W)  Coprocessor Access Control Register */
 } SCB_Type;
+
 
 /* SCB CPUID Register Definitions */
 #define SCB_CPUID_IMPLEMENTER_Pos          24U                                            /*!< SCB CPUID: IMPLEMENTER Position */
@@ -870,9 +870,8 @@ typedef struct
 /**
   \brief  Structure type to access the System Control and ID Register not in the SCB.
  */
-typedef struct
-{
-        uint32_t RESERVED0[1U];
+typedef struct {
+         uint32_t __RESERVED0;
     union {
         struct {
             __I  uint32_t INTLINESNUM : 4;                  /*!< ICTR: INTLINESNUM Mask */
@@ -893,6 +892,7 @@ typedef struct
         __IO uint32_t w;
     } ACTLR;                                                /*!< Offset: 0x008 (R/W)  Auxiliary Control Register */
 } SCnSCB_Type;
+
 
 /* Interrupt Controller Type Register Definitions */
 #define SCnSCB_ICTR_INTLINESNUM_Pos         0U                                         /*!< ICTR: INTLINESNUM Position */
@@ -927,8 +927,7 @@ typedef struct
 /**
   \brief  Structure type to access the System Timer (SysTick).
  */
-typedef struct
-{
+typedef struct {
     union {
         struct {
             __IO uint32_t ENABLE : 1;                       /*!< SysTick CTRL: ENABLE Mask */
@@ -952,6 +951,7 @@ typedef struct
         __I  uint32_t w;
     } CALIB;                                                /*!< Offset: 0x00C (R/ )  SysTick Calibration Register */
 } SysTick_Type;
+
 
 /* SysTick Control / Status Register Definitions */
 #define SysTick_CTRL_COUNTFLAG_Pos         16U                                            /*!< SysTick CTRL: COUNTFLAG Position */
@@ -1147,8 +1147,7 @@ typedef struct
 /**
   \brief  Structure type to access the Data Watchpoint and Trace Register (DWT).
  */
-typedef struct
-{
+typedef struct {
     union {
         struct {
             __IO uint32_t CYCCNTENA : 1;                    /*!< DWT CTRL: CYCCNTENA Mask */
@@ -1272,6 +1271,7 @@ typedef struct
     } FUNCTION3;                                            /*!< Offset: 0x058 (R/W)  Function Register 3 */
 } DWT_Type;
 
+
 /* DWT Control Register Definitions */
 #define DWT_CTRL_NUMCOMP_Pos               28U                                         /*!< DWT CTRL: NUMCOMP Position */
 #define DWT_CTRL_NUMCOMP_Msk               (0xFUL << DWT_CTRL_NUMCOMP_Pos)             /*!< DWT CTRL: NUMCOMP Mask */
@@ -1392,8 +1392,7 @@ typedef struct
 /**
   \brief  Structure type to access the Trace Port Interface Register (TPI).
  */
-typedef struct
-{
+typedef struct {
     __IO uint32_t SSPSR;                                    /*!< Offset: 0x000 (R/ )  Supported Parallel Port Size Register */
     __IO uint32_t CSPSR;                                    /*!< Offset: 0x004 (R/W)  Current Parallel Port Size Register */
          uint32_t __RESERVED0[2];
@@ -1509,6 +1508,7 @@ typedef struct
         __I  uint32_t w;
     } DEVTYPE;                                              /*!< Offset: 0xFCC (R/ )  TPIU_DEVTYPE */
 } TPI_Type;
+
 
 /* TPI Asynchronous Clock Prescaler Register Definitions */
 #define TPI_ACPR_PRESCALER_Pos              0U                                         /*!< TPI ACPR: PRESCALER Position */
@@ -1638,8 +1638,7 @@ typedef struct
 /**
   \brief  Structure type to access the Memory Protection Unit (MPU).
  */
-typedef struct
-{
+typedef struct {
     union {
         struct {
             __I  uint32_t SEPARATE : 1;                     /*!< MPU TYPE: SEPARATE Mask */
@@ -1673,7 +1672,6 @@ typedef struct
             __IO uint32_t ENABLE : 1;                       /*!< MPU RASR: Region enable bit Disable Mask */
                  uint32_t __RESERVED0 : 7;
             __IO uint32_t SRD : 8;                          /*!< MPU RASR: Sub-Region Disable Mask */
-            __IO uint32_t ATTRS : 16;                       /*!< MPU RASR: MPU Region Attribute field Mask */
             __IO uint32_t B : 1;                            /*!< MPU RASR: ATTRS.B Mask */
             __IO uint32_t C : 1;                            /*!< MPU RASR: ATTRS.C Mask */
             __IO uint32_t S : 1;                            /*!< MPU RASR: ATTRS.S Mask */
@@ -1693,6 +1691,7 @@ typedef struct
     __IO uint32_t RBAR_A3;                                  /*!< Offset: 0x024 (R/W)  MPU Alias 3 Region Base Address Register */
     __IO uint32_t RASR_A3;                                  /*!< Offset: 0x028 (R/W)  MPU Alias 3 Region Attribute and Size Register */
 } MPU_Type;
+
 
 /* MPU Type Register Definitions */
 #define MPU_TYPE_IREGION_Pos               16U                                            /*!< MPU TYPE: IREGION Position */
@@ -1774,8 +1773,7 @@ typedef struct
 /**
   \brief  Structure type to access the Floating Point Unit (FPU).
  */
-typedef struct
-{
+typedef struct {
          uint32_t __RESERVED0;
     union {
         struct {
@@ -1836,6 +1834,7 @@ typedef struct
         __I  uint32_t w;
     } MVFR1;                                                /*!< Offset: 0x014 (R/ )  Media and FP Feature Register 1 */
 } FPU_Type;
+
 
 /* Floating-Point Context Control Register Definitions */
 #define FPU_FPCCR_ASPEN_Pos                31U                                            /*!< FPCCR: ASPEN bit Position */
@@ -1934,8 +1933,7 @@ typedef struct
 /**
   \brief  Structure type to access the Core Debug Register (CoreDebug).
  */
-typedef struct
-{
+typedef struct {
     union {
         struct {
             __IO uint32_t C_DEBUGEN : 1;                    /*!< CoreDebug DHCSR: C_DEBUGEN Mask */
@@ -1945,7 +1943,6 @@ typedef struct
                  uint32_t __RESERVED0 : 1;
             __IO uint32_t C_SNAPSTALL : 1;                  /*!< CoreDebug DHCSR: C_SNAPSTALL Mask */
                  uint32_t __RESERVED1 : 10;
-            __IO uint32_t DBGKEY : 16;                      /*!< CoreDebug DHCSR: DBGKEY Mask */
             __IO uint32_t S_REGRDY : 1;                     /*!< CoreDebug DHCSR: S_REGRDY Mask */
             __IO uint32_t S_HALT : 1;                       /*!< CoreDebug DHCSR: S_HALT Mask */
             __IO uint32_t S_SLEEP : 1;                      /*!< CoreDebug DHCSR: S_SLEEP Mask */
@@ -1990,6 +1987,7 @@ typedef struct
         __IO uint32_t w;
     } DEMCR;                                                /*!< Offset: 0x00C (R/W)  Debug Exception and Monitor Control Register */
 } CoreDebug_Type;
+
 
 /* Debug Halting Control and Status Register Definitions */
 #define CoreDebug_DHCSR_DBGKEY_Pos         16U                                            /*!< CoreDebug DHCSR: DBGKEY Position */
