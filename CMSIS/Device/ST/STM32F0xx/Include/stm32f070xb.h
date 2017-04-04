@@ -609,9 +609,7 @@ typedef struct {
     union {
         struct {
             __IO uint32_t MEM_MODE : 2;                     /*!< SYSCFG_Memory Remap Config */
-                 uint32_t __RESERVED0 : 2;
-            __IO uint32_t PA11_PA12_RMP : 1;                /*!< PA11 and PA12 remap on QFN28 and TSSOP20 packages */
-                 uint32_t __RESERVED1 : 3;
+                 uint32_t __RESERVED0 : 6;
             __IO uint32_t ADC_DMA_RMP : 1;                  /*!< ADC DMA remap */
             __IO uint32_t USART1TX_DMA_RMP : 1;             /*!< USART1 TX DMA remap */
             __IO uint32_t USART1RX_DMA_RMP : 1;             /*!< USART1 RX DMA remap */
@@ -1167,7 +1165,7 @@ typedef struct {
     } CR;                                                   /*!< RTC control register,                                      Address offset: 0x08 */
     union {
         struct {
-            __IO uint32_t ALRAWF : 1;                       /********************  Bits definition for RTC_PRER register  ****************/
+            __IO uint32_t ALRAWF : 1;
                  uint32_t __RESERVED0 : 1;
             __IO uint32_t WUTWF : 1;
             __IO uint32_t SHPF : 1;
@@ -1190,7 +1188,7 @@ typedef struct {
     } ISR;                                                  /*!< RTC initialization and status register,                    Address offset: 0x0C */
     union {
         struct {
-            __IO uint32_t PREDIV_S : 15;                    /********************  Bits definition for RTC_ALRMAR register  **************/
+            __IO uint32_t PREDIV_S : 15;
                  uint32_t __RESERVED0 : 1;
             __IO uint32_t PREDIV_A : 7;
                  uint32_t __RESERVED1 : 9;

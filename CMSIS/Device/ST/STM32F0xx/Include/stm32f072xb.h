@@ -602,7 +602,7 @@ typedef struct {
             __IO uint32_t COMP1POL : 1;                     /*!< COMP1 output polarity */
             __IO uint32_t COMP1HYST : 2;                    /*!< COMP1 hysteresis */
             __IO uint32_t COMP1OUT : 1;                     /*!< COMP1 output level */
-            __IO uint32_t COMP1LOCK : 1;                    /*!< COMPx lock */
+            __IO uint32_t COMP1LOCK : 1;                    /*!< COMP1 lock */
             __IO uint32_t COMP2EN : 1;                      /*!< COMP2 enable */
                  uint32_t __RESERVED1 : 1;
             __IO uint32_t COMP2MODE : 2;                    /*!< COMP2 power mode */
@@ -615,9 +615,10 @@ typedef struct {
             __IO uint32_t COMP2LOCK : 1;                    /*!< COMP2 lock */
         } b;
         __IO uint32_t w;
-    } CSR;                                                  /*!< COMP control and status register,                                                 Address offset: 0x00 */
-} COMP_TypeDef;
+    } CSR;                                                  /*!< COMP control and status register, used for bits common to several COMP instances, Address offset: 0x00 */
+} COMP_Common_TypeDef;
 
+typedef COMP_Common_TypeDef COMP_TypeDef;
 
 /**
   * @brief CRC calculation unit

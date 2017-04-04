@@ -1088,7 +1088,7 @@ typedef struct {
     union {
         struct {
                  uint32_t __RESERVED0 : 3;
-            __IO uint32_t TSEDGE : 1;                       /********************  Bits definition for RTC_ISR register  *****************/
+            __IO uint32_t TSEDGE : 1;
             __IO uint32_t REFCKON : 1;
             __IO uint32_t BYPSHAD : 1;
             __IO uint32_t FMT : 1;
@@ -1112,7 +1112,7 @@ typedef struct {
     } CR;                                                   /*!< RTC control register,                                      Address offset: 0x08 */
     union {
         struct {
-            __IO uint32_t ALRAWF : 1;                       /********************  Bits definition for RTC_PRER register  ****************/
+            __IO uint32_t ALRAWF : 1;
                  uint32_t __RESERVED0 : 2;
             __IO uint32_t SHPF : 1;
             __IO uint32_t INITS : 1;
@@ -1133,7 +1133,7 @@ typedef struct {
     } ISR;                                                  /*!< RTC initialization and status register,                    Address offset: 0x0C */
     union {
         struct {
-            __IO uint32_t PREDIV_S : 15;                    /********************  Bits definition for RTC_ALRMAR register  **************/
+            __IO uint32_t PREDIV_S : 15;
                  uint32_t __RESERVED0 : 1;
             __IO uint32_t PREDIV_A : 7;
                  uint32_t __RESERVED1 : 9;

@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    stm32f072xb.h
+  * @file    stm32f042x6.h
   * @author  Benedek Kupper
   * @version V0.1
   * @date    2017-01-08
@@ -533,13 +533,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } CFGR;                                                 /*!< CEC configuration register,                                 Address offset:0x04 */
-    union {
-        struct {
-            __IO uint32_t TXD : 8;                          /*!< CEC Tx Data                        */
-                 uint32_t __RESERVED0 : 24;
-        } b;
-        __IO uint32_t w;
-    } TXDR;                                                 /*!< CEC Tx data register ,                                      Address offset:0x08 */
+    __IO uint32_t TXDR;                                     /*!< CEC Tx data register ,                                      Address offset:0x08 */
     __IO uint32_t RXDR;                                     /*!< CEC Rx Data Register,                                       Address offset:0x0C */
     union {
         struct {
