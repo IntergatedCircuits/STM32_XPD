@@ -89,6 +89,7 @@ typedef struct
         USB_EndPointType        OUT[8];                         /*!< OUT endpoint status */
     }EP;                                                        /*   Endpoint management */
     volatile uint8_t            DeviceAddress;                  /*!< USB Address */
+    FunctionalState             LowPowerMode;                   /*!< Low power mode activation */
 }USB_HandleType;
 
 
