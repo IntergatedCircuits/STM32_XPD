@@ -683,7 +683,7 @@ void XPD_RCC_Deinit(void)
 {
     /* Set HSION bit, HSITRIM[4:0] bits to the reset value*/
     RCC_REG_BIT(CR, HSION) = 1;
-    RCC->CR.b.HSITRIM = 0x10;
+    RCC->CR.b.HSITRIM = HSI_CALIBRATION_DEFAULT_VALUE;
 
     /* Reset CFGR register */
     RCC->CFGR.w = 0;

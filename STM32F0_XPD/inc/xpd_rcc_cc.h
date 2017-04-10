@@ -140,6 +140,9 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
 /** @defgroup RCC_Core_Exported_Macros RCC Core Exported Macros
  * @{ */
 
+/** @brief Default HSI calibration value */
+#define HSI_CALIBRATION_DEFAULT_VALUE   0x10
+
 /**
  * @brief  Enable the specified RCC interrupt.
  * @param  IT_NAME: specifies the interrupt to enable.
