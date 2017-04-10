@@ -2,9 +2,9 @@
   ******************************************************************************
   * @file    xpd_gpio.c
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2015-12-30
-  * @brief   STM32 eXtensible Peripheral Drivers GPIO Module
+  * @version V0.2
+  * @date    2017-04-10
+  * @brief   STM32 eXtensible Peripheral Drivers General Purpose I/O Module
   *
   *  This file is part of STM32_XPD.
   *
@@ -25,6 +25,20 @@
 #include "xpd_rcc.h"
 
 #define GPIO_PORT_OFFSET(__GPIOx__) (((uint32_t)(__GPIOx__) - (uint32_t)GPIOA_BASE) >> 10)
+
+#ifdef PWR_CR3_APC
+static struct {
+    __IO uint32_t PUCR;
+    __IO uint32_t PDCR;
+} * const pwr_pullConfig = &PWR->PUCRA;
+
+#ifdef PWR_BB
+static struct {
+    __IO uint32_t PUC[32];
+    __IO uint32_t PDC[32];
+} * const pwr_pullPinConfig = PERIPH_BB(&PWR->PUCRA);
+#endif
+#endif
 
 static const XPD_CtrlFnType gpio_clockCtrl[] = {
 #ifdef GPIOA
@@ -94,11 +108,30 @@ static const XPD_CtrlFnType gpio_clockCtrl[] = {
  */
 void XPD_GPIO_InitPort(GPIO_TypeDef * GPIOx, const GPIO_InitType * Config)
 {
-    uint32_t temp = 0;
+    uint32_t temp;
     uint32_t reg;
 
     /* enable GPIO clock */
     gpio_clockCtrl[GPIO_PORT_OFFSET(GPIOx)](ENABLE);
+
+#ifdef PWR_CR3_APC
+    switch (Config->PowerDownPull)
+    {
+        case GPIO_PULL_UP:
+            pwr_pullConfig[GPIO_PORT_OFFSET(GPIOx)].PUCR = 0xFFFF;
+            pwr_pullConfig[GPIO_PORT_OFFSET(GPIOx)].PDCR = 0;
+            break;
+        case GPIO_PULL_DOWN:
+            pwr_pullConfig[GPIO_PORT_OFFSET(GPIOx)].PUCR = 0;
+            pwr_pullConfig[GPIO_PORT_OFFSET(GPIOx)].PDCR = 0xFFFF;
+            break;
+        case GPIO_PULL_FLOAT:
+        default:
+            pwr_pullConfig[GPIO_PORT_OFFSET(GPIOx)].PUCR = 0;
+            pwr_pullConfig[GPIO_PORT_OFFSET(GPIOx)].PDCR = 0;
+            break;
+    }
+#endif
 
     /* alternate function mapping */
     if ((Config->Mode == GPIO_MODE_ALTERNATE) && (Config->AlternateMap != 0))
@@ -119,11 +152,6 @@ void XPD_GPIO_InitPort(GPIO_TypeDef * GPIOx, const GPIO_InitType * Config)
     /* IO direction setup */
     switch (Config->Mode)
     {
-        case GPIO_MODE_INPUT:
-        case GPIO_MODE_EXTI:
-        default:
-            GPIOx->MODER = 0;
-            break;
         case GPIO_MODE_OUTPUT:
             GPIOx->MODER = 0x55555555;
             break;
@@ -133,7 +161,24 @@ void XPD_GPIO_InitPort(GPIO_TypeDef * GPIOx, const GPIO_InitType * Config)
         case GPIO_MODE_ANALOG:
             GPIOx->MODER = 0xFFFFFFFF;
             break;
+        case GPIO_MODE_INPUT:
+        case GPIO_MODE_EXTI:
+        default:
+            GPIOx->MODER = 0;
+            break;
     }
+
+#ifdef GPIO_ASCR_ASC0
+    /* Set the ADC connection bit if GPIO_ADC_AF is selected */
+    if (Config->AlternateMap == GPIO_ADC_AF)
+    {
+        GPIOx->ASCR = 0xFFFF;
+    }
+    else
+    {
+        GPIOx->ASCR = 0x0000;
+    }
+#endif
 
     /* output stage configuration */
     if ((Config->Mode == GPIO_MODE_OUTPUT) || (Config->Mode == GPIO_MODE_ALTERNATE))
@@ -141,10 +186,6 @@ void XPD_GPIO_InitPort(GPIO_TypeDef * GPIOx, const GPIO_InitType * Config)
         /* speed */
         switch (Config->Output.Speed)
         {
-            case LOW:
-            default:
-                GPIOx->OSPEEDR = 0;
-                break;
             case MEDIUM:
                 GPIOx->OSPEEDR = 0x55555555;
                 break;
@@ -153,6 +194,10 @@ void XPD_GPIO_InitPort(GPIO_TypeDef * GPIOx, const GPIO_InitType * Config)
                 break;
             case VERY_HIGH:
                 GPIOx->OSPEEDR = 0xFFFFFFFF;
+                break;
+            case LOW:
+            default:
+                GPIOx->OSPEEDR = 0;
                 break;
         }
 
@@ -166,15 +211,15 @@ void XPD_GPIO_InitPort(GPIO_TypeDef * GPIOx, const GPIO_InitType * Config)
     /* pull */
     switch (Config->Pull)
     {
-        case GPIO_PULL_FLOAT:
-        default:
-            GPIOx->PUPDR = 0;
-            break;
         case GPIO_PULL_UP:
             GPIOx->PUPDR = 0x55555555;
             break;
         case GPIO_PULL_DOWN:
             GPIOx->PUPDR = 0xAAAAAAAA;
+            break;
+        case GPIO_PULL_FLOAT:
+        default:
+            GPIOx->PUPDR = 0;
             break;
     }
 
@@ -204,6 +249,17 @@ void XPD_GPIO_InitPin(GPIO_TypeDef * GPIOx, uint8_t Pin, const GPIO_InitType * C
     /* enable GPIO clock */
     gpio_clockCtrl[GPIO_PORT_OFFSET(GPIOx)](ENABLE);
 
+#ifdef PWR_CR3_APC
+    /* configure pull direction in power down */
+#ifdef PWR_BB
+    pwr_pullPinConfig[GPIO_PORT_OFFSET(GPIOx)].PUC[Pin] = Config->PowerDownPull;
+    pwr_pullPinConfig[GPIO_PORT_OFFSET(GPIOx)].PDC[Pin] = Config->PowerDownPull >> 1;
+#else
+    MODIFY_REG(pwr_pullConfig[GPIO_PORT_OFFSET(GPIOx)].PUCR, 1 << Pin, (uin32_t)Config->PowerDownPull << Pin);
+    MODIFY_REG(pwr_pullConfig[GPIO_PORT_OFFSET(GPIOx)].PDCR, 1 << Pin, ((uin32_t)Config->PowerDownPull >> 1) << Pin);
+#endif
+#endif
+
     /* alternate mapping */
     if (Config->Mode == GPIO_MODE_ALTERNATE)
     {
@@ -216,6 +272,11 @@ void XPD_GPIO_InitPin(GPIO_TypeDef * GPIOx, uint8_t Pin, const GPIO_InitType * C
     shifter = Pin * 2;
 
     MODIFY_REG(GPIOx->MODER, 0x0003 << shifter, Config->Mode << shifter);
+
+#ifdef GPIO_ASCR_ASC0
+    /* Set the ADC connection bit if GPIO_ADC_AF is selected */
+    MODIFY_REG(GPIOx->ASCR, 0x0001 << Pin, (uint32_t)(Config->AlternateMap >> 4) << Pin);
+#endif
 
     /* output stage configuration */
     if (    (Config->Mode == GPIO_MODE_OUTPUT)
@@ -251,6 +312,17 @@ void XPD_GPIO_InitPin(GPIO_TypeDef * GPIOx, uint8_t Pin, const GPIO_InitType * C
 void XPD_GPIO_DeinitPin(GPIO_TypeDef * GPIOx, uint8_t Pin)
 {
     (uint32_t)Pin;
+
+#ifdef PWR_CR3_APC
+    /* configure pull direction in power down */
+#ifdef PWR_BB
+    pwr_pullPinConfig[GPIO_PORT_OFFSET(GPIOx)].PUC[Pin] = 0;
+    pwr_pullPinConfig[GPIO_PORT_OFFSET(GPIOx)].PDC[Pin] = 0;
+#else
+    CLEAR_BIT(pwr_pullConfig[GPIO_PORT_OFFSET(GPIOx)].PUCR, 1 << Pin);
+    CLEAR_BIT(pwr_pullConfig[GPIO_PORT_OFFSET(GPIOx)].PDCR, 1 << Pin);
+#endif
+#endif
 
     /* GPIO Mode Configuration */
     /* Configure IO Direction in Input Floating Mode */
@@ -297,4 +369,3 @@ void XPD_GPIO_LockPin(GPIO_TypeDef * GPIOx, uint8_t Pin)
 /** @} */
 
 /** @} */
-

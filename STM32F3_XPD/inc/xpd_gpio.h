@@ -2,9 +2,9 @@
   ******************************************************************************
   * @file    xpd_gpio.h
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2015-12-30
-  * @brief   STM32 eXtensible Peripheral Drivers GPIO Module
+  * @version V0.2
+  * @date    2017-04-10
+  * @brief   STM32 eXtensible Peripheral Drivers General Purpose I/O Module
   *
   *  This file is part of STM32_XPD.
   *
@@ -27,7 +27,6 @@
 #include "xpd_common.h"
 #include "xpd_config.h"
 #include "xpd_exti.h"
-
 
 /** @defgroup GPIO
  * @{ */
@@ -71,8 +70,17 @@ typedef struct
     }Output;
     EXTI_InitType ExtI;         /*!< EXTI configuration if this mode is selected */
     uint8_t       AlternateMap; /*!< Mapping to alternate function @ref GPIO_Alternate_function_map */
+#ifdef PWR_CR3_APC
+    GPIO_PullType PowerDownPull;/*!< GPIO resistor pull direction during Standby or Shutdown mode
+                                     @note This configuration is globally controlled by PWR/CR3/APC bit */
+#endif
 }GPIO_InitType;
 
+/** @} */
+
+/** @addtogroup GPIO_Alternate_function_map
+ * @{ */
+#define GPIO_ADC_AF ((uint8_t)0x10) /*!< Use this macro with ANALOG mode to set the ASC bit (connect to ADC) */
 /** @} */
 
 /** @addtogroup GPIO_Exported_Functions
