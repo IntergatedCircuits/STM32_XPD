@@ -507,7 +507,7 @@ uint16_t XPD_USB_EP_GetRxCount(USB_HandleType * husb, uint8_t EpNumber)
  */
 void XPD_USB_EP_Transmit(USB_HandleType * husb, uint8_t EpNumber, uint8_t * Data, uint16_t Length)
 {
-    USB_EndPointType * ep = &husb->EP.IN[EpNumber & 0x7F];
+    USB_EndPointType * ep = &husb->EP.IN[EpNumber &= 0x7F];
     uint16_t pmabuffer = 0;
 
     /*setup and start the Xfer */
