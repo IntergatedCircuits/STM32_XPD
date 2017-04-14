@@ -264,7 +264,7 @@ typedef struct
 #ifdef ADC_BB
 #define ADC_REG_BIT(HANDLE, REG_NAME, BIT_NAME) ((HANDLE)->Inst_BB->REG_NAME.BIT_NAME)
 #else
-#define ADC_REG_BIT(HANDLE, REG_NAME, BIT_NAME) (HANDLE->Inst->REG_NAME.b.BIT_NAME)
+#define ADC_REG_BIT(HANDLE, REG_NAME, BIT_NAME) ((HANDLE)->Inst->REG_NAME.b.BIT_NAME)
 #endif
 
 /** @} */

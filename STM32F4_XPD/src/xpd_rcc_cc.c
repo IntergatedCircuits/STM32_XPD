@@ -123,11 +123,11 @@ XPD_ReturnType XPD_RCC_HSIConfig(const RCC_HSI_InitType * Config)
 
 #ifdef HSE_VALUE
 /**
- * Configures the high speed external oscillator.
- * @param Config: pointer to the configuration parameters
+ * Sets the new state of the high speed external oscillator.
+ * @param NewState: the new operation state
  * @return Result of the operation
  */
-XPD_ReturnType XPD_RCC_HSEConfig(const RCC_HSE_InitType * Config)
+XPD_ReturnType XPD_RCC_HSEConfig(RCC_OscStateType NewState)
 {
     XPD_ReturnType result = XPD_OK;
     RCC_OscType sysclock = XPD_RCC_GetSYSCLKSource();
@@ -141,7 +141,7 @@ XPD_ReturnType XPD_RCC_HSEConfig(const RCC_HSE_InitType * Config)
 #endif
     )
     {
-        if ((RCC_REG_BIT(CR,HSERDY) != 0) && (Config->State == OSC_OFF))
+        if ((RCC_REG_BIT(CR,HSERDY) != 0) && (NewState == OSC_OFF))
         {
             result = XPD_ERROR;
         }
@@ -150,16 +150,16 @@ XPD_ReturnType XPD_RCC_HSEConfig(const RCC_HSE_InitType * Config)
     {
         uint32_t timeout = RCC_HSE_TIMEOUT;
         /* Reset HSEON and HSEBYP bits before configuring the HSE */
-        RCC_REG_BIT(CR,HSEON) = 0;
+        RCC_REG_BIT(CR,HSEON)  = 0;
         RCC_REG_BIT(CR,HSEBYP) = 0;
 
         /* Wait until HSE is disabled */
         result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_HSERDY, 0, &timeout);
 
-        if ((result == XPD_OK) && (Config->State != OSC_OFF))
+        if ((result == XPD_OK) && (NewState != OSC_OFF))
         {
-            RCC_REG_BIT(CR,HSEON) = 1;
-            RCC_REG_BIT(CR,HSEBYP) = Config->State >> 1;
+            RCC_REG_BIT(CR,HSEON)  = 1;
+            RCC_REG_BIT(CR,HSEBYP) = NewState >> 1;
 
             /* Wait until HSE is ready */
             result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_HSERDY, RCC_CR_HSERDY, &timeout);
@@ -267,7 +267,7 @@ XPD_ReturnType XPD_RCC_LSEConfig(RCC_OscStateType NewState)
     }
 
     /* Reset LSEON and LSEBYP bits before configuring the LSE */
-    RCC_REG_BIT(BDCR,LSEON) = 0;
+    RCC_REG_BIT(BDCR,LSEON)  = 0;
     RCC_REG_BIT(BDCR,LSEBYP) = 0;
 
     timeout = RCC_LSE_TIMEOUT;
@@ -277,7 +277,7 @@ XPD_ReturnType XPD_RCC_LSEConfig(RCC_OscStateType NewState)
     /* Check the LSE State */
     if ((result == XPD_OK) && (NewState != OSC_OFF))
     {
-        RCC_REG_BIT(BDCR,LSEON) = 1;
+        RCC_REG_BIT(BDCR,LSEON)  = 1;
         RCC_REG_BIT(BDCR,LSEBYP) = NewState >> 1;
 
         /* Wait until LSE is ready */
@@ -631,7 +631,7 @@ uint32_t XPD_RCC_GetClockFreq(RCC_ClockType SelectedClock)
  *        @arg For MCO2 configuration, use @ref RCC_MCO2_ClockSourceType
  * @param MCODiv: the clock division to be applied for the MCO
  */
-void XPD_RCC_MCOConfig(uint8_t MCOx, uint8_t MCOSource, ClockDividerType MCODiv)
+void XPD_RCC_MCO_Init(uint8_t MCOx, uint8_t MCOSource, ClockDividerType MCODiv)
 {
     const GPIO_InitType gpio = {
         .Mode = GPIO_MODE_ALTERNATE,
@@ -641,53 +641,29 @@ void XPD_RCC_MCOConfig(uint8_t MCOx, uint8_t MCOSource, ClockDividerType MCODiv)
         .Pull = GPIO_PULL_FLOAT,
     };
 
-    switch (MCOx)
+    if (MCOx == 2)
     {
-    case 1:
-        /* MCO1 map: PA8 */
-        XPD_GPIO_InitPin(GPIOA, 8, &gpio);
-
-        RCC->CFGR.b.MCO1 = MCOSource;
-        RCC->CFGR.b.MCO1PRE = rcc_convertClockDivider(0xFF, MCODiv);
-
-#ifdef RCC_CFGR_MCO1EN
-        RCC_REG_BIT(CFGR,MCO1EN) = 1;
-#endif
-        break;
-
-    case 2:
         /* MCO2 map: PC9 */
         XPD_GPIO_InitPin(GPIOC, 9, &gpio);
 
-        RCC->CFGR.b.MCO2 = MCOSource;
+        RCC->CFGR.b.MCO2    = MCOSource;
         RCC->CFGR.b.MCO2PRE = rcc_convertClockDivider(0xFF, MCODiv);
 
 #ifdef RCC_CFGR_MCO2EN
         RCC_REG_BIT(CFGR,MCO2EN) = 1;
 #endif
-        break;
-
-    default:
-        break;
-    }
-}
-
-#ifdef RCC_CFGR_MCO1EN
-/**
- * @brief Enables a master clock output
- * @param MCOx: the number of the MCO
- */
-void XPD_RCC_EnableMCO(uint8_t MCOx)
-{
-#ifdef RCC_CFGR_MCO2EN
-    if (MCOx == 2)
-    {
-        RCC_REG_BIT(CFGR,MCO2EN) = 1;
     }
     else
-#endif
     {
+        /* MCO1 map: PA8 */
+        XPD_GPIO_InitPin(GPIOA, 8, &gpio);
+
+        RCC->CFGR.b.MCO1    = MCOSource;
+        RCC->CFGR.b.MCO1PRE = rcc_convertClockDivider(0xFF, MCODiv);
+
+#ifdef RCC_CFGR_MCO1EN
         RCC_REG_BIT(CFGR,MCO1EN) = 1;
+#endif
     }
 }
 
@@ -695,20 +671,27 @@ void XPD_RCC_EnableMCO(uint8_t MCOx)
  * @brief Disables a master clock output
  * @param MCOx: the number of the MCO
  */
-void XPD_RCC_DisableMCO(uint8_t MCOx)
+void XPD_RCC_MCO_Deinit(uint8_t MCOx)
 {
-#ifdef RCC_CFGR_MCO2EN
     if (MCOx == 2)
     {
+        /* MCO2 map: PC9 */
+        XPD_GPIO_DeinitPin(GPIOC, 9);
+
+#ifdef RCC_CFGR_MCO2EN
         RCC_REG_BIT(CFGR,MCO2EN) = 0;
+#endif
     }
     else
-#endif
     {
+        /* MCO1 map: PA8 */
+        XPD_GPIO_DeinitPin(GPIOA, 8);
+
+#ifdef RCC_CFGR_MCO1EN
         RCC_REG_BIT(CFGR,MCO1EN) = 0;
+#endif
     }
 }
-#endif /* RCC_CFGR_MCO1EN */
 
 /** @} */
 

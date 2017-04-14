@@ -88,14 +88,6 @@ typedef struct
     RCC_OscStateType State;            /*!< MSI state */
 }RCC_MSI_InitType;
 
-#ifdef HSE_VALUE
-/** @brief HSE setup structure */
-typedef struct
-{
-    RCC_OscStateType State; /*!< HSE state */
-}RCC_HSE_InitType;
-#endif
-
 /** @brief HSI setup structure */
 typedef struct
 {
@@ -152,10 +144,21 @@ typedef enum
 #endif
 }RCC_MCO1_ClockSourceType;
 
+/** @brief RCC low-speed clock output clock source types */
+typedef enum
+{
+    LSCO_CLOCKSOURCE_NONE   = 0, /*!< no clock source */
+    LSCO_CLOCKSOURCE_LSI    = 1, /*!< LSI clock source */
+#ifdef LSE_VALUE
+    LSCO_CLOCKSOURCE_LSE    = 3, /*!< LSE clock source */
+#endif
+}RCC_LSCO_ClockSourceType;
+
 /** @brief RCC callbacks container structure */
 typedef struct {
     XPD_SimpleCallbackType OscReady; /*!< Oscillator ready callback */
     XPD_SimpleCallbackType CSS;      /*!< Clock Security System callback */
+    XPD_SimpleCallbackType LS_CSS;   /*!< LSE Dedicated Clock Security System callback */
 } XPD_RCC_CallbacksType;
 /** @} */
 
@@ -172,6 +175,9 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
 
 /** @brief Default HSI calibration value */
 #define HSI_CALIBRATION_DEFAULT_VALUE   0x10
+
+/** @brief Default HSI calibration value */
+#define HSI48_CALIBRATION_DEFAULT_VALUE 0x10
 
 /** @brief Default MSI calibration value */
 #define MSI_CALIBRATION_DEFAULT_VALUE   0x10
@@ -259,7 +265,7 @@ XPD_ReturnType      XPD_RCC_PLLSAI1Config       (const RCC_PLL_InitType * Config
 XPD_ReturnType      XPD_RCC_PLLSAI2Config       (const RCC_PLL_InitType * Config);
 #endif
 #ifdef HSE_VALUE
-XPD_ReturnType      XPD_RCC_HSEConfig           (const RCC_HSE_InitType * Config);
+XPD_ReturnType      XPD_RCC_HSEConfig           (RCC_OscStateType NewState);
 #endif
 #ifdef LSE_VALUE
 XPD_ReturnType      XPD_RCC_LSEConfig           (RCC_OscStateType NewState);
@@ -287,7 +293,9 @@ uint32_t            XPD_RCC_GetClockFreq        (RCC_ClockType SelectedClock);
 
 /** @addtogroup RCC_Core_Clocks_Exported_Functions_MCO
  * @{ */
-void                XPD_RCC_MCOConfig           (uint8_t MCOx, uint8_t MCOSource, ClockDividerType MCODiv);
+void                XPD_RCC_MCO_Init            (uint8_t MCOx, RCC_MCO1_ClockSourceType MCOSource,
+                                                 ClockDividerType MCODiv);
+void                XPD_RCC_MCO_Deinit          (uint8_t MCOx);
 /** @} */
 
 /** @defgroup RCC_Core_Clocks_Exported_Functions_CSS RCC Clock Security System
@@ -308,6 +316,15 @@ __STATIC_INLINE void XPD_NMI_IRQHandler(void)
 
         /* RCC Clock Security System interrupt user callback */
         XPD_SAFE_CALLBACK(XPD_RCC_Callbacks.CSS,);
+    }
+    /* Check RCC LSECSSF flag  */
+    if (XPD_RCC_GetFlag(LSECSS) != 0)
+    {
+        /* Clear RCC LSECSS pending bit */
+        XPD_RCC_ClearFlag(LSECSS);
+
+        /* RCC Low Speed Clock Security System interrupt user callback */
+        XPD_SAFE_CALLBACK(XPD_RCC_Callbacks.LS_CSS,);
     }
 }
 

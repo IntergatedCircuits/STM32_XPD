@@ -62,14 +62,6 @@ typedef enum
     OSC_BYPASS = 3  /*!< External oscillator BYPASS state (external clock source) */
 }RCC_OscStateType;
 
-#ifdef HSE_VALUE
-/** @brief HSE setup structure */
-typedef struct
-{
-    RCC_OscStateType State; /*!< HSE state */
-}RCC_HSE_InitType;
-#endif
-
 /** @brief HSI setup structure */
 typedef struct
 {
@@ -227,7 +219,7 @@ XPD_ReturnType      XPD_RCC_HSIConfig           (const RCC_HSI_InitType * Config
 XPD_ReturnType      XPD_RCC_LSIConfig           (RCC_OscStateType NewState);
 XPD_ReturnType      XPD_RCC_PLLConfig           (const RCC_PLL_InitType * Config);
 #ifdef HSE_VALUE
-XPD_ReturnType      XPD_RCC_HSEConfig           (const RCC_HSE_InitType * Config);
+XPD_ReturnType      XPD_RCC_HSEConfig           (RCC_OscStateType NewState);
 #endif
 #ifdef LSE_VALUE
 XPD_ReturnType      XPD_RCC_LSEConfig           (RCC_OscStateType NewState);
@@ -248,6 +240,13 @@ XPD_ReturnType      XPD_RCC_HCLKConfig          (RCC_OscType SYSCLK_Source, Cloc
                                                  uint8_t FlashLatency);
 void                XPD_RCC_PCLKConfig          (RCC_ClockType PCLKx, ClockDividerType PCLK_Divider);
 uint32_t            XPD_RCC_GetClockFreq        (RCC_ClockType SelectedClock);
+/** @} */
+
+/** @addtogroup RCC_Core_Clocks_Exported_Functions_MCO
+ * @{ */
+void                XPD_RCC_MCO_Init            (uint8_t MCOx, uint8_t MCOSource,
+                                                 ClockDividerType MCODiv);
+void                XPD_RCC_MCO_Deinit          (uint8_t MCOx);
 /** @} */
 
 /** @defgroup RCC_Core_Clocks_Exported_Functions_CSS RCC Clock Security System
@@ -282,14 +281,6 @@ __STATIC_INLINE void XPD_RCC_CSS(FunctionalState NewState)
 
 /** @} */
 
-/** @addtogroup RCC_Core_Clocks_Exported_Functions_MCO
- * @{ */
-void                XPD_RCC_MCOConfig           (uint8_t MCOx, uint8_t MCOSource, ClockDividerType MCODiv);
-#ifdef RCC_CFGR_MCO1EN
-void                XPD_RCC_EnableMCO           (uint8_t MCOx);
-void                XPD_RCC_DisableMCO          (uint8_t MCOx);
-#endif
-/** @} */
 /** @addtogroup RCC_Core_Clocks_Exported_Functions_Reset
  * @{ */
 void                XPD_RCC_Deinit              (void);

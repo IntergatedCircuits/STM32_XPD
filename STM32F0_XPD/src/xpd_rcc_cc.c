@@ -117,7 +117,7 @@ XPD_ReturnType XPD_RCC_HSIConfig(const RCC_HSI_InitType * Config)
     }
     return result;
 }
-#if defined(RCC_CFGR_SW_HSI48)
+#ifdef RCC_HSI48_SUPPORT
 /**
  * Configures the high speed internal oscillator.
  * @param Config: pointer to the configuration parameters
@@ -172,11 +172,11 @@ XPD_ReturnType XPD_RCC_HSI48Config(const RCC_HSI_InitType * Config)
 
 #ifdef HSE_VALUE
 /**
- * Configures the high speed external oscillator.
- * @param Config: pointer to the configuration parameters
+ * Sets the new state of the high speed external oscillator.
+ * @param NewState: the new operation state
  * @return Result of the operation
  */
-XPD_ReturnType XPD_RCC_HSEConfig(const RCC_HSE_InitType * Config)
+XPD_ReturnType XPD_RCC_HSEConfig(RCC_OscStateType NewState)
 {
     XPD_ReturnType result = XPD_OK;
     RCC_OscType sysclock = XPD_RCC_GetSYSCLKSource();
@@ -186,7 +186,7 @@ XPD_ReturnType XPD_RCC_HSEConfig(const RCC_HSE_InitType * Config)
     if (     (sysclock == HSE)
          || ((sysclock == PLL) && (XPD_RCC_GetPLLSource() == HSE)))
     {
-        if ((RCC_REG_BIT(CR,HSERDY) != 0) && (Config->State == OSC_OFF))
+        if ((RCC_REG_BIT(CR,HSERDY) != 0) && (NewState == OSC_OFF))
         {
             result = XPD_ERROR;
         }
@@ -195,20 +195,16 @@ XPD_ReturnType XPD_RCC_HSEConfig(const RCC_HSE_InitType * Config)
     {
         uint32_t timeout = RCC_HSE_TIMEOUT;
         /* Reset HSEON and HSEBYP bits before configuring the HSE */
-        RCC_REG_BIT(CR,HSEON) = 0;
+        RCC_REG_BIT(CR,HSEON)  = 0;
         RCC_REG_BIT(CR,HSEBYP) = 0;
 
         /* Wait until HSE is disabled */
         result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_HSERDY, 0, &timeout);
 
-        if ((result == XPD_OK) && (Config->State != OSC_OFF))
+        if ((result == XPD_OK) && (NewState != OSC_OFF))
         {
-#if defined(RCC_CFGR_PLLSRC_HSI_DIV2)
-            /* set HSE predivider value */
-            RCC->CFGR2.b.PREDIV = Config->Predivider - 1;
-#endif
-            RCC_REG_BIT(CR,HSEON) = 1;
-            RCC_REG_BIT(CR,HSEBYP) = Config->State >> 1;
+            RCC_REG_BIT(CR,HSEON)  = 1;
+            RCC_REG_BIT(CR,HSEBYP) = NewState >> 1;
 
             /* Wait until HSE is ready */
             result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_HSERDY, RCC_CR_HSERDY, &timeout);
@@ -241,15 +237,13 @@ XPD_ReturnType XPD_RCC_PLLConfig(const RCC_PLL_InitType * Config)
         if ((result == XPD_OK) && (Config->State != OSC_OFF))
         {
             /* Configure the main PLL clock source and multiplication factor. */
-            RCC->CFGR.b.PLLMUL = Config->Multiplier - 2;
-
 #if defined(RCC_CFGR_PLLSRC_HSI_PREDIV)
             RCC->CFGR2.b.PREDIV = Config->Predivider - 1;
 
-#if defined(RCC_CFGR_SW_HSI48)
+#ifdef RCC_HSI48_SUPPORT
             if (Config->Source == HSI48)
             {
-                RCC->CFGR.b.PLLSRC = HSI48;
+                RCC->CFGR.b.PLLSRC = 3;
             }
             else
 #endif
@@ -257,8 +251,15 @@ XPD_ReturnType XPD_RCC_PLLConfig(const RCC_PLL_InitType * Config)
                 RCC->CFGR.b.PLLSRC = Config->Source + 1;
             }
 #else
+            /* HSI can only be predivided by fixed 2, otherwise throw error */
+            if ((Config->Source == HSI) && (Config->Predivider != 2))
+            {
+                return XPD_ERROR;
+            }
+
             RCC_REG_BIT(CFGR,PLLSRC) = Config->Source;
 #endif
+            RCC->CFGR.b.PLLMUL = Config->Multiplier - 2;
 
             /* Enable the main PLL. */
             RCC_REG_BIT(CR,PLLON) = OSC_ON;
@@ -325,7 +326,7 @@ XPD_ReturnType XPD_RCC_LSEConfig(RCC_OscStateType NewState)
     }
 
     /* Reset LSEON and LSEBYP bits before configuring the LSE */
-    RCC_REG_BIT(BDCR,LSEON) = 0;
+    RCC_REG_BIT(BDCR,LSEON)  = 0;
     RCC_REG_BIT(BDCR,LSEBYP) = 0;
 
     timeout = RCC_LSE_TIMEOUT;
@@ -335,7 +336,7 @@ XPD_ReturnType XPD_RCC_LSEConfig(RCC_OscStateType NewState)
     /* Check the LSE State */
     if ((result == XPD_OK) && (NewState != OSC_OFF))
     {
-        RCC_REG_BIT(BDCR,LSEON) = 1;
+        RCC_REG_BIT(BDCR,LSEON)  = 1;
         RCC_REG_BIT(BDCR,LSEBYP) = NewState >> 1;
 
         /* Wait until LSE is ready */
@@ -353,10 +354,11 @@ RCC_OscType XPD_RCC_GetPLLSource(void)
 {
 #if defined(RCC_CFGR_PLLSRC_HSI_PREDIV)
     RCC_OscType osc = RCC->CFGR.b.PLLSRC;
-#if defined(RCC_CFGR_SW_HSI48)
-    if (osc != HSI48)
+    if ((osc != HSI)
+#ifdef RCC_HSI48_SUPPORT
+     && (osc != HSI48)
 #endif
-    { osc--; }
+    ){ osc--; }
     return osc;
 #else
     return RCC_REG_BIT(CFGR,PLLSRC);
@@ -389,31 +391,48 @@ uint32_t XPD_RCC_GetOscFreq(RCC_OscType Oscillator)
         case HSI:
             return HSI_VALUE;
 
-#if defined(RCC_CFGR_SW_HSI48)
+#ifdef RCC_HSI48_SUPPORT
         case HSI48:
             return HSI48_VALUE;
 #endif
 
         case PLL:
         {
-            switch (XPD_RCC_GetPLLSource())
+            uint32_t freq = HSI_VALUE, pllsrc = RCC->CFGR.b.PLLSRC;
+
+            switch (RCC->CFGR.b.PLLSRC)
             {
+#ifdef RCC_CFGR_PLLSRC_HSI_PREDIV
+#ifdef RCC_HSI48_SUPPORT
+                case 3:
+                    freq = HSI48_VALUE;
+                    break;
+#endif /* RCC_HSI48_SUPPORT */
 #ifdef HSE_VALUE
-                case HSE:
-                    return (HSE_VALUE * (RCC->CFGR.b.PLLMUL + 2)) / (RCC->CFGR2.b.PREDIV + 1);
-#endif
-#if defined(RCC_CFGR_SW_HSI48)
-                case HSI48:
-                    return (HSI48_VALUE * (RCC->CFGR.b.PLLMUL + 2)) / (RCC->CFGR2.b.PREDIV + 1);
+                case 2:
+                    freq = HSE_VALUE;
+                    break;
+#endif /* HSE_VALUE */
+#else
+#ifdef HSE_VALUE
+                case 1:
+                    freq = HSE_VALUE;
+                    break;
+#endif /* HSE_VALUE */
 #endif
                 default:
                     break;
             }
-#ifdef RCC_CFGR_PLLSRC_HSI_DIV2
-            return (HSI_VALUE * (RCC->CFGR.b.PLLMUL + 2)) / 2;
-#else
-            return (HSI_VALUE * (RCC->CFGR.b.PLLMUL + 2)) / (RCC->CFGR2.b.PREDIV + 1);
-#endif
+
+            if (pllsrc > 0)
+            {
+                return (freq * (RCC->CFGR.b.PLLMUL + 2)) / (RCC->CFGR2.b.PREDIV + 1);
+            }
+            else
+            {
+                /* HSI/2 is PLL input */
+                return (freq * (RCC->CFGR.b.PLLMUL + 2)) / 2;
+            }
         }
 
         case LSI:
@@ -513,7 +532,7 @@ void XPD_RCC_IRQHandler(void)
         rcc_readyOscillator = HSI14;
         XPD_SAFE_CALLBACK(XPD_RCC_Callbacks.OscReady,);
     }
-#if defined(RCC_CFGR_SW_HSI48)
+#ifdef RCC_HSI48_SUPPORT
     if ((cir & (RCC_CIR_HSI48RDYF | RCC_CIR_HSI48RDYIE)) == (RCC_CIR_HSI48RDYF | RCC_CIR_HSI48RDYIE))
     {
         /* Clear RCC HSIRDY pending bit */
@@ -574,7 +593,7 @@ XPD_ReturnType XPD_RCC_HCLKConfig(RCC_OscType SYSCLK_Source, ClockDividerType HC
             break;
 #endif
 
-#if defined(RCC_CFGR_SW_HSI48)
+#ifdef RCC_HSI48_SUPPORT
         case HSI48:
             /* Check the HSI ready flag */
             if (RCC_REG_BIT(CR2,HSI48RDY) == 0)
@@ -693,12 +712,9 @@ uint32_t XPD_RCC_GetClockFreq(RCC_ClockType SelectedClock)
  * @brief Configures a master clock output
  * @param MCOx: the number of the MCO
  * @param MCOSource: clock source of the MCO
- *        This parameter has different value sets for different MCO selections:
- *        @arg For MCO1 configuration, use @ref RCC_MCO1_ClockSourceType
- *        @arg For MCO2 configuration, use @ref RCC_MCO2_ClockSourceType
  * @param MCODiv: the clock division to be applied for the MCO
  */
-void XPD_RCC_MCOConfig(uint8_t MCOx, uint8_t MCOSource, ClockDividerType MCODiv)
+void XPD_RCC_MCO_Init(uint8_t MCOx, RCC_MCO1_ClockSourceType MCOSource, ClockDividerType MCODiv)
 {
     const GPIO_InitType gpio = {
         .Mode = GPIO_MODE_ALTERNATE,
@@ -713,12 +729,24 @@ void XPD_RCC_MCOConfig(uint8_t MCOx, uint8_t MCOSource, ClockDividerType MCODiv)
         XPD_GPIO_InitPin(GPIOA, 8, &gpio);
 
         RCC->CFGR.b.MCO = MCOSource;
+#ifdef RCC_CFGR_PLLNODIV
+        RCC_REG_BIT(CFGR,PLLNODIV) = MCOSource >> 4;
+#endif
 #ifdef RCC_CFGR_MCOPRE
         RCC->CFGR.b.MCOPRE = rcc_convertClockDivider(0xFF, MCODiv);
 #endif
     }
 }
 
+/**
+ * @brief Disables a master clock output
+ * @param MCOx: the number of the MCO
+ */
+void XPD_RCC_MCO_Deinit(uint8_t MCOx)
+{
+        /* MCO1 map: PA8 */
+        XPD_GPIO_DeinitPin(GPIOA, 8);
+}
 
 /** @} */
 

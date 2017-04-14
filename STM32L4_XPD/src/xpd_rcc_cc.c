@@ -260,11 +260,11 @@ XPD_ReturnType XPD_RCC_HSIConfig(const RCC_HSI_InitType * Config)
 
 #ifdef HSE_VALUE
 /**
- * Configures the high speed external oscillator.
- * @param Config: pointer to the configuration parameters
+ * Sets the new state of the high speed external oscillator.
+ * @param NewState: the new operation state
  * @return Result of the operation
  */
-XPD_ReturnType XPD_RCC_HSEConfig(const RCC_HSE_InitType * Config)
+XPD_ReturnType XPD_RCC_HSEConfig(RCC_OscStateType NewState)
 {
     XPD_ReturnType result = XPD_OK;
     RCC_OscType sysclock = XPD_RCC_GetSYSCLKSource();
@@ -275,7 +275,7 @@ XPD_ReturnType XPD_RCC_HSEConfig(const RCC_HSE_InitType * Config)
          || ((sysclock == PLL) && (XPD_RCC_GetPLLSource() == HSE))
     )
     {
-        if ((RCC_REG_BIT(CR,HSERDY) != 0) && (Config->State == OSC_OFF))
+        if ((RCC_REG_BIT(CR,HSERDY) != 0) && (NewState == OSC_OFF))
         {
             result = XPD_ERROR;
         }
@@ -284,16 +284,16 @@ XPD_ReturnType XPD_RCC_HSEConfig(const RCC_HSE_InitType * Config)
     {
         uint32_t timeout = RCC_HSE_TIMEOUT;
         /* Reset HSEON and HSEBYP bits before configuring the HSE */
-        RCC_REG_BIT(CR,HSEON) = 0;
+        RCC_REG_BIT(CR,HSEON)  = 0;
         RCC_REG_BIT(CR,HSEBYP) = 0;
 
         /* Wait until HSE is disabled */
         result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_HSERDY, 0, &timeout);
 
-        if ((result == XPD_OK) && (Config->State != OSC_OFF))
+        if ((result == XPD_OK) && (NewState != OSC_OFF))
         {
-            RCC_REG_BIT(CR,HSEON) = 1;
-            RCC_REG_BIT(CR,HSEBYP) = Config->State >> 1;
+            RCC_REG_BIT(CR,HSEON)  = 1;
+            RCC_REG_BIT(CR,HSEBYP) = NewState >> 1;
 
             /* Wait until HSE is ready */
             result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_HSERDY, RCC_CR_HSERDY, &timeout);
@@ -512,7 +512,7 @@ XPD_ReturnType XPD_RCC_LSEConfig(RCC_OscStateType NewState)
     }
 
     /* Reset LSEON and LSEBYP bits before configuring the LSE */
-    RCC_REG_BIT(BDCR,LSEON) = 0;
+    RCC_REG_BIT(BDCR,LSEON)  = 0;
     RCC_REG_BIT(BDCR,LSEBYP) = 0;
 
     timeout = RCC_LSE_TIMEOUT;
@@ -522,12 +522,20 @@ XPD_ReturnType XPD_RCC_LSEConfig(RCC_OscStateType NewState)
     /* Check the LSE State */
     if ((result == XPD_OK) && (NewState != OSC_OFF))
     {
-        RCC_REG_BIT(BDCR,LSEON) = 1;
+        RCC_REG_BIT(BDCR,LSEON)  = 1;
         RCC_REG_BIT(BDCR,LSEBYP) = NewState >> 1;
 
         /* Wait until LSE is ready */
         result = XPD_WaitForMatch(&RCC->BDCR.w, RCC_BDCR_LSERDY, RCC_BDCR_LSERDY, &timeout);
     }
+#if defined(RCC_CR_MSIPLLEN) && (LSE_VALUE == 32768)
+    if ((result == XPD_OK) && (XPD_RCC_GetFlag(MSIRDY) != 0))
+    {
+        /* When the LSE is ready and at 32.768kHz,
+         * enable MSI calibration based on LSE */
+        RCC_REG_BIT(CR,MSIPLLEN) = ENABLE;
+    }
+#endif
     return result;
 }
 #endif
@@ -570,8 +578,6 @@ XPD_ReturnType XPD_RCC_HSI48Config(RCC_OscStateType NewState)
  */
 RCC_OscType XPD_RCC_GetPLLSource(void)
 {
-    uint32_t pllsrc = RCC->PLLCFGR.b.PLLSRC;
-
     return RCC->PLLCFGR.b.PLLSRC - 1;
 }
 
@@ -905,11 +911,9 @@ uint32_t XPD_RCC_GetClockFreq(RCC_ClockType SelectedClock)
  * @brief Configures a master clock output
  * @param MCOx: the number of the MCO
  * @param MCOSource: clock source of the MCO
- *        This parameter has different value sets for different MCO selections:
- *        @arg For MCO1 configuration, use @ref RCC_MCO1_ClockSourceType
  * @param MCODiv: the clock division to be applied for the MCO
  */
-void XPD_RCC_MCOConfig(uint8_t MCOx, uint8_t MCOSource, ClockDividerType MCODiv)
+void XPD_RCC_MCO_Init(uint8_t MCOx, RCC_MCO1_ClockSourceType MCOSource, ClockDividerType MCODiv)
 {
     static const GPIO_InitType gpio = {
         .Mode = GPIO_MODE_ALTERNATE,
@@ -925,6 +929,39 @@ void XPD_RCC_MCOConfig(uint8_t MCOx, uint8_t MCOSource, ClockDividerType MCODiv)
 
         RCC->CFGR.b.MCOSEL = MCOSource;
         RCC->CFGR.b.MCOPRE = rcc_convertClockDivider(0xFF, MCODiv);
+    }
+}
+
+/**
+ * @brief Disables a master clock output
+ * @param MCOx: the number of the MCO
+ */
+void XPD_RCC_MCO_Deinit(uint8_t MCOx)
+{
+        /* MCO1 map: PA8 */
+        XPD_GPIO_DeinitPin(GPIOA, 8);
+}
+
+/**
+ * @brief Configures the dedicated low-speed clock output
+ * @param LSCOSource: clock source of the LSCO
+ */
+void XPD_RCC_LSCO_Init(RCC_LSCO_ClockSourceType LSCOSource)
+{
+    static const GPIO_InitType gpio = {
+        .Mode = GPIO_MODE_ALTERNATE,
+        .AlternateMap = GPIO_MCO_AF0,
+        .Output.Speed = VERY_HIGH,
+        .Output.Type = GPIO_OUTPUT_PUSHPULL,
+        .Pull = GPIO_PULL_FLOAT,
+    };
+
+    {
+        /* LSCO map: PA8 */
+        XPD_GPIO_InitPin(GPIOA, 8, &gpio);
+
+        RCC_REG_BIT(BDCR,LSCOSEL) = LSCOSource >> 1;
+        RCC_REG_BIT(BDCR,LSCOEN)  = LSCOSource;
     }
 }
 
@@ -1030,7 +1067,7 @@ void XPD_RCC_ResetAPB2(void)
 
 /** @} */
 
-XPD_RCC_CallbacksType XPD_RCC_Callbacks = { NULL, NULL };
+XPD_RCC_CallbacksType XPD_RCC_Callbacks = { NULL, NULL, NULL };
 
 /** @} */
 

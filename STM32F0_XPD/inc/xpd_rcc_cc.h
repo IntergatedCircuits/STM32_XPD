@@ -44,7 +44,7 @@ typedef enum
     HSE    = 1, /*!< High speed external oscillator */
 #endif
     PLL    = 2, /*!< Phase locked loop */
-#if defined(RCC_CFGR_SW_HSI48)
+#ifdef RCC_HSI48_SUPPORT
     HSI48  = 3, /*!< 48 MHz internal oscillator */
 #endif
     LSI    = 4, /*!< Low speed internal oscillator */
@@ -63,17 +63,6 @@ typedef enum
     OSC_BYPASS = 3  /*!< External oscillator BYPASS state (external clock source) */
 }RCC_OscStateType;
 
-#ifdef HSE_VALUE
-/** @brief HSE setup structure */
-typedef struct
-{
-    RCC_OscStateType State;      /*!< HSE state */
-#if defined(RCC_CFGR_PLLSRC_HSI_DIV2)
-    uint8_t          Predivider; /*!< HSE predivision value [1..16] */
-#endif
-}RCC_HSE_InitType;
-#endif
-
 /** @brief HSI setup structure */
 typedef struct
 {
@@ -89,9 +78,8 @@ typedef struct
     RCC_OscType      Source;     /*!< PLL input source selection. Permitted values:
                                       @arg @ref RCC_OscType::HSI
                                       @arg @ref RCC_OscType::HSE */
-#if defined(RCC_CFGR_PLLSRC_HSI_PREDIV)
-    uint8_t          Predivider; /*!< PLL predivider value [1..16] */
-#endif
+    uint8_t          Predivider; /*!< PLL predivider value [1..16]
+                                      @note In some cases PREDIV is only used for HSE */
 }RCC_PLL_InitType;
 
 /** @brief RCC core clock types */
@@ -106,8 +94,9 @@ typedef enum
 /** @brief RCC master clock output 1 clock source types */
 typedef enum
 {
-    MCO1_CLOCKSOURCE_NOCLOCK     = 0,
-    MCO1_CLOCKSOURCE_LSI         = 2,
+    MCO1_CLOCKSOURCE_NOCLOCK     = 0, /*!< MCO clock disabled */
+    MCO1_CLOCKSOURCE_HSI14       = 1, /*!< HSI14 clock source */
+    MCO1_CLOCKSOURCE_LSI         = 2, /*!< LSI clock source */
 #ifdef LSE_VALUE
     MCO1_CLOCKSOURCE_LSE         = 3, /*!< LSE clock source */
 #endif
@@ -117,8 +106,11 @@ typedef enum
     MCO1_CLOCKSOURCE_HSE         = 6, /*!< HSE clock source */
 #endif
     MCO1_CLOCKSOURCE_PLLCLK_DIV2 = 7, /*!< PLL / 2 clock source */
-#ifdef RCC_CFGR_MCOPRE
-    MCO1_CLOCKSOURCE_PLLCLK      = 0XF, /*!< PLL clock source */
+#ifdef RCC_HSI48_SUPPORT
+    MCO1_CLOCKSOURCE_HSI48       = 8, /*!< HSE clock source */
+#endif
+#ifdef RCC_CFGR_PLLNODIV
+    MCO1_CLOCKSOURCE_PLLCLK      = 0X17, /*!< PLL clock source */
 #endif
 }RCC_MCO1_ClockSourceType;
 
@@ -205,13 +197,13 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
 /** @addtogroup RCC_Core_Clocks_Exported_Functions_Oscillators
  * @{ */
 XPD_ReturnType      XPD_RCC_HSIConfig           (const RCC_HSI_InitType * Config);
-#if defined(RCC_CFGR_SW_HSI48)
+#ifdef RCC_HSI48_SUPPORT
 XPD_ReturnType      XPD_RCC_HSI48Config         (const RCC_HSI_InitType * Config);
 #endif
 XPD_ReturnType      XPD_RCC_LSIConfig           (RCC_OscStateType NewState);
 XPD_ReturnType      XPD_RCC_PLLConfig           (const RCC_PLL_InitType * Config);
 #ifdef HSE_VALUE
-XPD_ReturnType      XPD_RCC_HSEConfig           (const RCC_HSE_InitType * Config);
+XPD_ReturnType      XPD_RCC_HSEConfig           (RCC_OscStateType NewState);
 #endif
 #ifdef LSE_VALUE
 XPD_ReturnType      XPD_RCC_LSEConfig           (RCC_OscStateType NewState);
@@ -236,7 +228,9 @@ uint32_t            XPD_RCC_GetClockFreq        (RCC_ClockType SelectedClock);
 
 /** @addtogroup RCC_Core_Clocks_Exported_Functions_MCO
  * @{ */
-void                XPD_RCC_MCOConfig           (uint8_t MCOx, uint8_t MCOSource, ClockDividerType MCODiv);
+void                XPD_RCC_MCO_Init            (uint8_t MCOx, RCC_MCO1_ClockSourceType MCOSource,
+                                                 ClockDividerType MCODiv);
+void                XPD_RCC_MCO_Deinit          (uint8_t MCOx);
 /** @} */
 
 /** @defgroup RCC_Core_Clocks_Exported_Functions_CSS RCC Clock Security System
