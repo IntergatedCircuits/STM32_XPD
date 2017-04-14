@@ -222,6 +222,10 @@ XPD_ReturnType XPD_DMA_Start(DMA_HandleType * hdma, void * PeriphAddress, void *
 
         XPD_DMA_Enable(hdma);
     }
+    else
+    {
+        result = XPD_BUSY;
+    }
 
     XPD_EXIT_CRITICAL(hdma);
 
@@ -291,13 +295,13 @@ void XPD_DMA_Stop_IT(DMA_HandleType *hdma)
 }
 
 /**
- * @brief Determines the transfer status of the DMA stream.
+ * @brief Gets the remaining transfer length of the DMA stream.
  * @param hdma: pointer to the DMA stream handle structure
- * @return BUSY if the DMA is currently engaged in transfer, OK otherwise
+ * @return The number of transfers left until completion
  */
-XPD_ReturnType XPD_DMA_GetStatus(DMA_HandleType * hdma)
+uint16_t XPD_DMA_GetStatus(DMA_HandleType * hdma)
 {
-    return ((DMA_REG_BIT(hdma, CR, EN) != 0) && (hdma->Inst->NDTR > 0)) ? XPD_BUSY : XPD_OK;
+    return DMA_REG_BIT(hdma, CR, EN) * hdma->Inst->NDTR;
 }
 
 /**

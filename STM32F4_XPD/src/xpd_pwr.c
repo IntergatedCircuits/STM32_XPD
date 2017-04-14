@@ -71,9 +71,9 @@ void XPD_PWR_SleepMode(ReactionType WakeUpOn)
  * @note  In Stop mode, all I/O pins keep the same state as in Run mode.
  * @note  When exiting Stop mode by issuing an interrupt or a wakeup event,
  *         the HSI RC oscillator is selected as system clock.
- * @note  When the voltage regulator operates in low power mode, an additional
+ * @note  When the voltage regulator operates in low power mode (Stop 1), an additional
  *         startup delay is incurred when waking up from Stop mode.
- *         By keeping the internal regulator ON during Stop mode, the consumption
+ *         By keeping the internal regulator ON during Stop mode (Stop 0), the consumption
  *         is higher although the startup time is reduced.
  * @param WakeUpOn: Specifies if STOP mode is exited with WFI or WFE instruction
  *           This parameter can be one of the following values:
@@ -157,18 +157,6 @@ void XPD_PWR_StandbyMode(void)
 }
 
 /**
- * @brief Enables or disables access to the backup domain (RTC registers, RTC
- *         backup data registers when present).
- * @param NewState: the new backup access state to set
- * @note  If the HSE divided by 2, 3, ..31 is used as the RTC clock, the
- *         Backup Domain Access should be kept enabled.
- */
-void XPD_PWR_BackupAccessCtrl(FunctionalState NewState)
-{
-    PWR_REG_BIT(CR,DBP) = NewState;
-}
-
-/**
  * @brief Sets the Backup Regulator state.
  * @param NewState: the new backup regulator state to set
  * @retval ERROR if backup access is locked, TIMEOUT when setting timed out, OK when successful
@@ -188,17 +176,6 @@ XPD_ReturnType XPD_PWR_BackupRegulatorCtrl(FunctionalState NewState)
     }
     return result;
 }
-
-#ifdef PWR_CR_FPDS
-/**
- * @brief Sets the Flash Power Down state in Stop mode.
- * @param NewState: the new Flash power down state to set
- */
-void XPD_PWR_FlashPowerDownCtrl(FunctionalState NewState)
-{
-    PWR_REG_BIT(CR, FPDS) = NewState;
-}
-#endif
 
 /**
  * @brief Enables the WakeUp PINx functionality.
@@ -258,12 +235,13 @@ void XPD_PWR_WakeUpPin_Disable(uint8_t WakeUpPin)
 
 #ifdef PWR_CSR_WUPP
 /**
- * @brief Sets the WakeUp Pins polarity.
+ * @brief Sets the WakeUp Pin polarity.
+ * @param WakeUpPin: Specifies the Wake-Up pin to configure.
  * @param RisingOrFalling: the polarity. Permitted values:
              @arg @ref EdgeType::EDGE_RISING
              @arg @ref EdgeType::EDGE_FALLING
  */
-void XPD_PWR_WakeUpPin_SetPolarity(EdgeType RisingOrFalling)
+void XPD_PWR_WakeUpPin_SetPolarity(uint8_t WakeUpPin, EdgeType RisingOrFalling)
 {
     if (RisingOrFalling == EDGE_FALLING)
     {
@@ -280,63 +258,12 @@ void XPD_PWR_WakeUpPin_SetPolarity(EdgeType RisingOrFalling)
 
 /** @} */
 
-#ifdef PWR_CR_PLS
-/** @addtogroup PWR_Voltage_Detector
- * @{ */
-
-/** @defgroup PWR_PVD_Exported_Functions PWR PVD Exported Functions
- * @{ */
-
-/**
- * @brief Configures the voltage threshold monitoring by the Power Voltage Detector(PVD).
- * @param Config: configuration structure that contains the monitored voltage level
- *         and the EXTI configuration.
- */
-void XPD_PWR_PVD_Init(const PWR_PVD_InitType * Config)
-{
-    /* Set PLS bits according to PVDLevel value */
-    PWR->CR.b.PLS = Config->Level;
-
-    /* External interrupt line 16 Connected to the PVD EXTI Line */
-    XPD_EXTI_Init(PWR_PVD_EXTI_LINE, &Config->ExtI);
-}
-
-/**
- * @brief Enables the Power Voltage Detector(PVD).
- */
-void XPD_PWR_PVD_Enable(void)
-{
-    PWR_REG_BIT(CR,PVDE) = 1;
-}
-
-/**
- * @brief Disables the Power Voltage Detector(PVD).
- */
-void XPD_PWR_PVD_Disable(void)
-{
-    PWR_REG_BIT(CR,PVDE) = 0;
-}
-
-/** @} */
-
-/** @} */
-
-#endif /* PWR_CR_PLS */
-
+#ifdef PWR_CR_VOS
 /** @addtogroup PWR_Regulator_Voltage_Scaling
  * @{ */
 
 /** @defgroup PWR_Regulator_Voltage_Scaling_Exported_Functions PWR Regulator Voltage Scaling Exported Functions
  * @{ */
-
-/**
- * @brief Returns the current Regulator Voltage Scaling configuration.
- * @return The active voltage scaling
- */
-PWR_RegVoltScaleType XPD_PWR_GetVoltageScale(void)
-{
-    return PWR->CR.b.VOS;
-}
 
 /**
  * @brief Sets the new Regulator Voltage Scaling configuration.
@@ -416,6 +343,7 @@ void XPD_PWR_RegLowVoltageConfig(PWR_RegulatorType Regulator, FunctionalState Ne
 /** @} */
 
 /** @} */
+#endif /* PWR_CR_VOS */
 
 #ifdef PWR_CR_ODEN
 

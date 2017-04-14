@@ -291,8 +291,10 @@ XPD_ReturnType XPD_SPI_Init(SPI_HandleType * hspi, const SPI_InitType * Config)
     SPI_REG_BIT(hspi, CR1, DFF)   = (uint32_t)(Config->DataSize > 8);
 #endif
 
+#ifdef SPI_I2SCFGR_I2SMOD
     /* Activate the SPI mode (Make sure that I2SMOD bit in I2SCFGR register is reset) */
     SPI_REG_BIT(hspi, I2SCFGR, I2SMOD) = 0;
+#endif
 
     /* Initialize handle variables */
     hspi->TxStream.length = hspi->RxStream.length = 0;

@@ -4,7 +4,7 @@
   * @author  Benedek Kupper
   * @version V0.1
   * @date    2017-01-28
-  * @brief   STM32 eXtensible Peripheral Drivers Power Module Header file.
+  * @brief   STM32 eXtensible Peripheral Drivers Power Module
   *
   *  This file is part of STM32_XPD.
   *
@@ -89,18 +89,46 @@ void            XPD_PWR_SleepMode           (ReactionType WakeUpOn);
 void            XPD_PWR_StopMode            (ReactionType WakeUpOn, PWR_RegulatorType Regulator);
 void            XPD_PWR_StandbyMode         (void);
 
-void            XPD_PWR_BackupAccessCtrl    (FunctionalState NewState);
 XPD_ReturnType  XPD_PWR_BackupRegulatorCtrl (FunctionalState NewState);
-
-#ifdef PWR_CR_FPDS
-void            XPD_PWR_FlashPowerDownCtrl  (FunctionalState NewState);
-#endif
 
 void            XPD_PWR_WakeUpPin_Enable    (uint8_t WakeUpPin);
 void            XPD_PWR_WakeUpPin_Disable   (uint8_t WakeUpPin);
 #ifdef PWR_CSR_WUPP
-void            XPD_PWR_WakeUpPin_Polarity  (EdgeType RisingOrFalling);
+void            XPD_PWR_WakeUpPin_Polarity  (uint8_t WakeUpPin, EdgeType RisingOrFalling);
 #endif
+/** @} */
+
+/** @} */
+
+/** @defgroup PWR_Peripherals PWR Peripherals
+ * @{ */
+
+/** @defgroup PWR_Peripherals_Exported_Functions PWR Peripherals Exported Functions
+ * @{ */
+
+/**
+ * @brief Enables or disables access to the backup domain
+ *        (RTC registers, RTC backup data registers when present).
+ * @param NewState: the new backup access state to set
+ * @note  If the HSE divided by 32 is used as the RTC clock, the
+ *         Backup Domain Access should be kept enabled.
+ */
+__STATIC_INLINE void XPD_PWR_BackupAccess(FunctionalState NewState)
+{
+    PWR_REG_BIT(CR,DBP) = NewState;
+}
+
+#ifdef PWR_CR_FPDS
+/**
+ * @brief Sets the Flash Power Down state in Stop mode.
+ * @param NewState: the new Flash power down state to set
+ */
+__STATIC_INLINE void XPD_PWR_FlashPowerDown(FunctionalState NewState)
+{
+    PWR_REG_BIT(CR, FPDS) = NewState;
+}
+#endif /* PWR_CR_FPDS */
+
 /** @} */
 
 /** @} */
@@ -143,16 +171,45 @@ typedef struct
 #define PWR_PVD_EXTI_LINE               16
 /** @} */
 
-/** @addtogroup PWR_PVD_Exported_Functions
+/** @defgroup PWR_PVD_Exported_Functions PWR PVD Exported Functions
  * @{ */
-void            XPD_PWR_PVD_Init            (const PWR_PVD_InitType * Config);
-void            XPD_PWR_PVD_Enable          (void);
-void            XPD_PWR_PVD_Disable         (void);
+
+/**
+ * @brief Configures the voltage threshold monitoring by the Power Voltage Detector(PVD).
+ * @param Config: configuration structure that contains the monitored voltage level
+ *         and the EXTI configuration.
+ */
+__STATIC_INLINE void XPD_PWR_PVD_Init(const PWR_PVD_InitType * Config)
+{
+    /* Set PLS bits according to PVDLevel value */
+    PWR->CR.b.PLS = Config->Level;
+
+    /* External interrupt line 16 Connected to the PVD EXTI Line */
+    XPD_EXTI_Init(PWR_PVD_EXTI_LINE, &Config->ExtI);
+}
+
+/**
+ * @brief Enables the Power Voltage Detector (PVD).
+ */
+__STATIC_INLINE void XPD_PWR_PVD_Enable(void)
+{
+    PWR_REG_BIT(CR,PVDE) = ENABLE;
+}
+
+/**
+ * @brief Disables the Power Voltage Detector (PVD).
+ */
+__STATIC_INLINE void XPD_PWR_PVD_Disable(void)
+{
+    PWR_REG_BIT(CR,PVDE) = DISABLE;
+}
+
 /** @} */
 
 /** @} */
 #endif /* PWR_CR_PLS */
 
+#ifdef PWR_CR_VOS
 /** @defgroup PWR_Regulator_Voltage_Scaling PWR Regulator Voltage Scaling
  * @{ */
 
@@ -179,14 +236,23 @@ typedef enum
 /** @addtogroup PWR_Regulator_Voltage_Scaling_Exported_Functions
  * @{ */
 XPD_ReturnType  XPD_PWR_VoltageScaleConfig  (PWR_RegVoltScaleType Scaling);
-PWR_RegVoltScaleType
-                XPD_PWR_GetVoltageScale     (void);
 #if defined(PWR_CR_MRLVDS) && defined(PWR_CR_LPLVDS)
 void            XPD_PWR_RegLowVoltageConfig (PWR_RegulatorType Regulator, FunctionalState NewState);
 #endif
+
+/**
+ * @brief Returns the current Regulator Voltage Scaling configuration.
+ * @return The active voltage scaling
+ */
+__STATIC_INLINE PWR_RegVoltScaleType XPD_PWR_GetVoltageScale(void)
+{
+    return PWR->CR.b.VOS;
+}
+
 /** @} */
 
 /** @} */
+#endif /* PWR_CR_VOS */
 
 #ifdef PWR_CR_ODEN
 /** @defgroup PWR_OverDrive_Mode PWR OverDrive Mode

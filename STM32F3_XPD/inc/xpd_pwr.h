@@ -4,7 +4,7 @@
   * @author  Benedek Kupper
   * @version V0.1
   * @date    2016-11-01
-  * @brief   STM32 eXtensible Peripheral Drivers Power Module Header file.
+  * @brief   STM32 eXtensible Peripheral Drivers Power Module
   *
   *  This file is part of STM32_XPD.
   *
@@ -70,9 +70,6 @@ typedef enum
 #define         XPD_PWR_ClearFlag(FLAG_NAME)    \
     (PWR_REG_BIT(CR,C##FLAG_NAME) = 1)
 
-/** @brief PWR VDDIO2 EXTI line number */
-#define PWR_VDDIO2_EXTI_LINE            31
-
 #ifdef PWR_BB
 #define PWR_REG_BIT(_REG_NAME_, _BIT_NAME_) (PWR_BB->_REG_NAME_._BIT_NAME_)
 #else
@@ -87,10 +84,30 @@ void            XPD_PWR_SleepMode           (ReactionType WakeUpOn);
 void            XPD_PWR_StopMode            (ReactionType WakeUpOn, PWR_RegulatorType Regulator);
 void            XPD_PWR_StandbyMode         (void);
 
-void            XPD_PWR_BackupAccessCtrl    (FunctionalState NewState);
-
 void            XPD_PWR_WakeUpPin_Enable    (uint8_t WakeUpPin);
 void            XPD_PWR_WakeUpPin_Disable   (uint8_t WakeUpPin);
+/** @} */
+
+/** @} */
+
+/** @defgroup PWR_Peripherals PWR Peripherals
+ * @{ */
+
+/** @defgroup PWR_Peripherals_Exported_Functions PWR Peripherals Exported Functions
+ * @{ */
+
+/**
+ * @brief Enables or disables access to the backup domain
+ *        (RTC registers, RTC backup data registers when present).
+ * @param NewState: the new backup access state to set
+ * @note  If the HSE divided by 32 is used as the RTC clock, the
+ *         Backup Domain Access should be kept enabled.
+ */
+__STATIC_INLINE void XPD_PWR_BackupAccess(FunctionalState NewState)
+{
+    PWR_REG_BIT(CR,DBP) = NewState;
+}
+
 /** @} */
 
 /** @} */
@@ -133,11 +150,39 @@ typedef struct
 #define PWR_PVD_EXTI_LINE               16
 /** @} */
 
-/** @addtogroup PWR_PVD_Exported_Functions
+/** @defgroup PWR_PVD_Exported_Functions PWR PVD Exported Functions
  * @{ */
-void            XPD_PWR_PVD_Init            (const PWR_PVD_InitType * Config);
-void            XPD_PWR_PVD_Enable          (void);
-void            XPD_PWR_PVD_Disable         (void);
+
+/**
+ * @brief Configures the voltage threshold monitoring by the Power Voltage Detector(PVD).
+ * @param Config: configuration structure that contains the monitored voltage level
+ *         and the EXTI configuration.
+ */
+__STATIC_INLINE void XPD_PWR_PVD_Init(const PWR_PVD_InitType * Config)
+{
+    /* Set PLS bits according to PVDLevel value */
+    PWR->CR.b.PLS = Config->Level;
+
+    /* External interrupt line 16 Connected to the PVD EXTI Line */
+    XPD_EXTI_Init(PWR_PVD_EXTI_LINE, &Config->ExtI);
+}
+
+/**
+ * @brief Enables the Power Voltage Detector (PVD).
+ */
+__STATIC_INLINE void XPD_PWR_PVD_Enable(void)
+{
+    PWR_REG_BIT(CR,PVDE) = ENABLE;
+}
+
+/**
+ * @brief Disables the Power Voltage Detector (PVD).
+ */
+__STATIC_INLINE void XPD_PWR_PVD_Disable(void)
+{
+    PWR_REG_BIT(CR,PVDE) = DISABLE;
+}
+
 /** @} */
 
 /** @} */

@@ -450,45 +450,6 @@ void XPD_RCC_IRQHandler(void)
 
 /** @} */
 
-/** @defgroup RCC_Core_Clocks_Exported_Functions_CSS RCC Clock Security System
- *  @brief    RCC Clock Security System
- * @{
- */
-
-/**
- * @brief Enables the Clock Security System
- */
-void XPD_RCC_EnableCSS(void)
-{
-    RCC_REG_BIT(CR,CSSON) = 1;
-}
-
-/**
- * @brief Disables the Clock Security System
- */
-void XPD_RCC_DisableCSS(void)
-{
-    RCC_REG_BIT(CR,CSSON) = 0;
-}
-
-/**
- * @brief RCC interrupt handler that provides Clock Security System callback.
- */
-void XPD_NMI_IRQHandler(void)
-{
-    /* Check RCC CSSF flag  */
-    if (XPD_RCC_GetFlag(CSS) != 0)
-    {
-        /* Clear RCC CSS pending bit */
-        XPD_RCC_ClearFlag(CSS);
-
-        /* RCC Clock Security System interrupt user callback */
-        XPD_SAFE_CALLBACK(XPD_RCC_Callbacks.CSS,);
-    }
-}
-
-/** @} */
-
 /** @defgroup RCC_Core_Clocks_Exported_Functions_Clocks RCC Core Clocks Functions
  *  @brief    RCC core clocks control
  * @{
@@ -672,13 +633,13 @@ uint32_t XPD_RCC_GetClockFreq(RCC_ClockType SelectedClock)
  */
 void XPD_RCC_MCOConfig(uint8_t MCOx, uint8_t MCOSource, ClockDividerType MCODiv)
 {
-    GPIO_InitType gpio;
-
-    gpio.Mode = GPIO_MODE_ALTERNATE;
-    gpio.AlternateMap = GPIO_MCO_AF0;
-    gpio.Output.Speed = VERY_HIGH;
-    gpio.Output.Type = GPIO_OUTPUT_PUSHPULL;
-    gpio.Pull = GPIO_PULL_FLOAT;
+    const GPIO_InitType gpio = {
+        .Mode = GPIO_MODE_ALTERNATE,
+        .AlternateMap = GPIO_MCO_AF0,
+        .Output.Speed = VERY_HIGH,
+        .Output.Type = GPIO_OUTPUT_PUSHPULL,
+        .Pull = GPIO_PULL_FLOAT,
+    };
 
     switch (MCOx)
     {

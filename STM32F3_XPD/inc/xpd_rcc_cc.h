@@ -220,14 +220,6 @@ void                XPD_RCC_IRQHandler          (void);
 RCC_OscType         XPD_RCC_GetReadyOsc         (void);
 /** @} */
 
-/** @addtogroup RCC_Core_Clocks_Exported_Functions_CSS
- * @{ */
-void                XPD_RCC_EnableCSS           (void);
-void                XPD_RCC_DisableCSS          (void);
-
-void                XPD_NMI_IRQHandler          (void);
-/** @} */
-
 /** @addtogroup RCC_Core_Clocks_Exported_Functions_Clocks
  * @{ */
 XPD_ReturnType      XPD_RCC_HCLKConfig          (RCC_OscType SYSCLK_Source, ClockDividerType HCLK_Divider,
@@ -240,6 +232,39 @@ uint32_t            XPD_RCC_GetClockFreq        (RCC_ClockType SelectedClock);
  * @{ */
 void                XPD_RCC_MCOConfig           (uint8_t MCOx, uint8_t MCOSource, ClockDividerType MCODiv);
 /** @} */
+
+/** @defgroup RCC_Core_Clocks_Exported_Functions_CSS RCC Clock Security System
+ *  @brief    RCC Clock Security System
+ * @{
+ */
+
+/**
+ * @brief RCC interrupt handler that provides Clock Security System callback.
+ */
+__STATIC_INLINE void XPD_NMI_IRQHandler(void)
+{
+    /* Check RCC CSSF flag  */
+    if (XPD_RCC_GetFlag(CSS) != 0)
+    {
+        /* Clear RCC CSS pending bit */
+        XPD_RCC_ClearFlag(CSS);
+
+        /* RCC Clock Security System interrupt user callback */
+        XPD_SAFE_CALLBACK(XPD_RCC_Callbacks.CSS,);
+    }
+}
+
+/**
+ * @brief Enables or disables the Clock Security System
+ * @param NewState: the CSS activation
+ */
+__STATIC_INLINE void XPD_RCC_CSS(FunctionalState NewState)
+{
+    RCC_REG_BIT(CR,CSSON) = NewState;
+}
+
+/** @} */
+
 /** @addtogroup RCC_Core_Clocks_Exported_Functions_Reset
  * @{ */
 void                XPD_RCC_Deinit              (void);

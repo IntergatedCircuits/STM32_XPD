@@ -64,9 +64,9 @@ void XPD_PWR_SleepMode(ReactionType WakeUpOn)
  * @note  In Stop mode, all I/O pins keep the same state as in Run mode.
  * @note  When exiting Stop mode by issuing an interrupt or a wakeup event,
  *         the HSI RC oscillator is selected as system clock.
- * @note  When the voltage regulator operates in low power mode, an additional
+ * @note  When the voltage regulator operates in low power mode (Stop 1), an additional
  *         startup delay is incurred when waking up from Stop mode.
- *         By keeping the internal regulator ON during Stop mode, the consumption
+ *         By keeping the internal regulator ON during Stop mode (Stop 0), the consumption
  *         is higher although the startup time is reduced.
  * @param WakeUpOn: Specifies if STOP mode is exited with WFI or WFE instruction
  *           This parameter can be one of the following values:
@@ -128,18 +128,6 @@ void XPD_PWR_StandbyMode(void)
 }
 
 /**
- * @brief Enables or disables access to the backup domain (RTC registers, RTC
- *         backup data registers when present).
- * @param NewState: the new backup access state to set
- * @note  If the HSE divided by 32 is used as the RTC clock, the
- *         Backup Domain Access should be kept enabled.
- */
-void XPD_PWR_BackupAccessCtrl(FunctionalState NewState)
-{
-    PWR_REG_BIT(CR,DBP) = NewState;
-}
-
-/**
  * @brief Enables the WakeUp PINx functionality.
  * @param WakeUpPin: Specifies the Power Wake-Up pin to enable.
  *         Check CSR register for the available EWUP bits.
@@ -170,48 +158,5 @@ void XPD_PWR_WakeUpPin_Disable(uint8_t WakeUpPin)
 /** @} */
 
 /** @} */
-
-#ifdef PWR_CR_PLS
-/** @addtogroup PWR_Voltage_Detector
- * @{ */
-
-/** @defgroup PWR_PVD_Exported_Functions PWR PVD Exported Functions
- * @{ */
-
-/**
- * @brief Configures the voltage threshold monitoring by the Power Voltage Detector(PVD).
- * @param Config: configuration structure that contains the monitored voltage level
- *         and the EXTI configuration.
- */
-void XPD_PWR_PVD_Init(const PWR_PVD_InitType * Config)
-{
-    /* Set PLS bits according to PVDLevel value */
-    PWR->CR.b.PLS = Config->Level;
-
-    /* External interrupt line 16 Connected to the PVD EXTI Line */
-    XPD_EXTI_Init(PWR_PVD_EXTI_LINE, &Config->ExtI);
-}
-
-/**
- * @brief Enables the Power Voltage Detector(PVD).
- */
-void XPD_PWR_PVD_Enable(void)
-{
-    PWR_REG_BIT(CR,PVDE) = 1;
-}
-
-/**
- * @brief Disables the Power Voltage Detector(PVD).
- */
-void XPD_PWR_PVD_Disable(void)
-{
-    PWR_REG_BIT(CR,PVDE) = 0;
-}
-
-/** @} */
-
-/** @} */
-
-#endif /* PWR_CR_PLS */
 
 /** @} */

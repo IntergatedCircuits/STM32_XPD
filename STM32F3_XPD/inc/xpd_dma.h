@@ -209,7 +209,7 @@ XPD_ReturnType  XPD_DMA_Start_IT        (DMA_HandleType * hdma, void * PeriphAdd
 XPD_ReturnType  XPD_DMA_Stop            (DMA_HandleType * hdma);
 void            XPD_DMA_Stop_IT         (DMA_HandleType * hdma);
 
-XPD_ReturnType  XPD_DMA_GetStatus       (DMA_HandleType * hdma);
+uint16_t        XPD_DMA_GetStatus       (DMA_HandleType * hdma);
 XPD_ReturnType  XPD_DMA_PollStatus      (DMA_HandleType * hdma, DMA_OperationType Operation, uint32_t Timeout);
 DMA_ErrorType   XPD_DMA_GetError        (DMA_HandleType * hdma);
 

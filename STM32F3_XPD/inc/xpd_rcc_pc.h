@@ -190,7 +190,7 @@ uint32_t        XPD_I2S_GetClockFreq        (void);
 /** @brief RTC clock source types */
 typedef enum
 {
-    RTC_CLOCKSOURCE_NOCLOCK   = 0, /*!< no clock source */
+    RTC_CLOCKSOURCE_NONE      = 0, /*!< no clock source */
 #ifdef LSE_VALUE
     RTC_CLOCKSOURCE_LSE       = 1, /*!< LSE clock source */
 #endif

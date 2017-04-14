@@ -35,7 +35,7 @@
 #if defined(RCC_CFGR2_ADC1PRES) || defined(RCC_CFGR2_ADCPRE12)
 
 /* gets the clock division value from the prescaler configuration */
-static const uint16_t adc_clkPreTable[] = { 1, 2, 4, 6, 8, 10, 12, 16, 32, 64, 128, 256 };
+static const uint8_t adc_clkPreTable[] = { 0, 1, 3, 5, 7, 9, 11, 15, 31, 63, 127, 255 };
 
 #endif
 
@@ -146,7 +146,7 @@ uint32_t XPD_ADC_GetClockFreq(void)
 #endif
     if (source != 0)
     {
-        return XPD_RCC_GetOscFreq(PLL) / (uint32_t)adc_clkPreTable[source & 0xF];
+        return XPD_RCC_GetOscFreq(PLL) / ((uint32_t)adc_clkPreTable[source & 0xF] + 1);
     }
     else if (mode != 0)
     {
@@ -224,7 +224,7 @@ uint32_t XPD_ADC34_GetClockFreq(void)
 
     if (source != 0)
     {
-        return XPD_RCC_GetOscFreq(PLL) / (uint32_t)adc_clkPreTable[source & 0xF];
+        return XPD_RCC_GetOscFreq(PLL) / ((uint32_t)adc_clkPreTable[source & 0xF] + 1);
     }
     else if (mode != 0)
     {
@@ -449,9 +449,6 @@ XPD_ReturnType XPD_RTC_ClockConfig(RTC_ClockSourceType ClockSource)
 {
     uint32_t bdcr;
     XPD_ReturnType result;
-
-    /* enable power clock*/
-    XPD_PWR_ClockCtrl(ENABLE);
 
     /* enable write access to backup domain */
     PWR_REG_BIT(CR,DBP) = 1;
