@@ -915,12 +915,13 @@ uint32_t XPD_RCC_GetClockFreq(RCC_ClockType SelectedClock)
  */
 void XPD_RCC_MCO_Init(uint8_t MCOx, RCC_MCO1_ClockSourceType MCOSource, ClockDividerType MCODiv)
 {
-    static const GPIO_InitType gpio = {
+    const GPIO_InitType gpio = {
         .Mode = GPIO_MODE_ALTERNATE,
         .AlternateMap = GPIO_MCO_AF0,
         .Output.Speed = VERY_HIGH,
         .Output.Type = GPIO_OUTPUT_PUSHPULL,
         .Pull = GPIO_PULL_FLOAT,
+        .PowerDownPull = GPIO_PULL_FLOAT,
     };
 
     {
@@ -948,20 +949,31 @@ void XPD_RCC_MCO_Deinit(uint8_t MCOx)
  */
 void XPD_RCC_LSCO_Init(RCC_LSCO_ClockSourceType LSCOSource)
 {
-    static const GPIO_InitType gpio = {
-        .Mode = GPIO_MODE_ALTERNATE,
-        .AlternateMap = GPIO_MCO_AF0,
-        .Output.Speed = VERY_HIGH,
-        .Output.Type = GPIO_OUTPUT_PUSHPULL,
+    const GPIO_InitType gpio = {
+        .Mode = GPIO_MODE_ANALOG,
+        .AlternateMap = 0,
         .Pull = GPIO_PULL_FLOAT,
+        .PowerDownPull = GPIO_PULL_FLOAT,
     };
 
     {
-        /* LSCO map: PA8 */
-        XPD_GPIO_InitPin(GPIOA, 8, &gpio);
+        /* LSCO map: PA2 */
+        XPD_GPIO_InitPin(GPIOA, 2, &gpio);
 
         RCC_REG_BIT(BDCR,LSCOSEL) = LSCOSource >> 1;
         RCC_REG_BIT(BDCR,LSCOEN)  = LSCOSource;
+    }
+}
+
+/**
+ * @brief Disables the dedicated low-speed clock output
+ */
+void XPD_RCC_LSCO_Deinit(void)
+{
+    {
+        /* LSCO map: PA2 */
+
+        RCC_REG_BIT(BDCR,LSCOEN)  = DISABLE;
     }
 }
 

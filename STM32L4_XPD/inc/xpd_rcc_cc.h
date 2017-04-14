@@ -296,6 +296,9 @@ uint32_t            XPD_RCC_GetClockFreq        (RCC_ClockType SelectedClock);
 void                XPD_RCC_MCO_Init            (uint8_t MCOx, RCC_MCO1_ClockSourceType MCOSource,
                                                  ClockDividerType MCODiv);
 void                XPD_RCC_MCO_Deinit          (uint8_t MCOx);
+
+void                XPD_RCC_LSCO_Init           (RCC_LSCO_ClockSourceType LSCOSource);
+void                XPD_RCC_LSCO_Deinit         (void);
 /** @} */
 
 /** @defgroup RCC_Core_Clocks_Exported_Functions_CSS RCC Clock Security System
