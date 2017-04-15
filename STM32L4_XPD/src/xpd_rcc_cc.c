@@ -955,14 +955,20 @@ void XPD_RCC_LSCO_Init(RCC_LSCO_ClockSourceType LSCOSource)
         .Pull = GPIO_PULL_FLOAT,
         .PowerDownPull = GPIO_PULL_FLOAT,
     };
+    uint32_t access = PWR_REG_BIT(CR1,DBP);
 
+    /* Access must be granted first */
+    PWR_REG_BIT(CR1,DBP) = ENABLE;
     {
+
         /* LSCO map: PA2 */
         XPD_GPIO_InitPin(GPIOA, 2, &gpio);
 
-        RCC_REG_BIT(BDCR,LSCOSEL) = LSCOSource >> 1;
-        RCC_REG_BIT(BDCR,LSCOEN)  = LSCOSource;
+        RCC_REG_BIT(BDCR,LSCOSEL) = LSCOSource;
+        RCC_REG_BIT(BDCR,LSCOEN)  = ENABLE;
     }
+    /* Restore access state */
+    PWR_REG_BIT(CR1,DBP) = access;
 }
 
 /**
@@ -970,11 +976,17 @@ void XPD_RCC_LSCO_Init(RCC_LSCO_ClockSourceType LSCOSource)
  */
 void XPD_RCC_LSCO_Deinit(void)
 {
+    uint32_t access = PWR_REG_BIT(CR1,DBP);
+
+    /* Access must be granted first */
+    PWR_REG_BIT(CR1,DBP) = ENABLE;
     {
         /* LSCO map: PA2 */
 
         RCC_REG_BIT(BDCR,LSCOEN)  = DISABLE;
     }
+    /* Restore access state */
+    PWR_REG_BIT(CR1,DBP) = access;
 }
 
 /** @} */

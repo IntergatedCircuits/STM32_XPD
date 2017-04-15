@@ -147,10 +147,9 @@ typedef enum
 /** @brief RCC low-speed clock output clock source types */
 typedef enum
 {
-    LSCO_CLOCKSOURCE_NONE   = 0, /*!< no clock source */
-    LSCO_CLOCKSOURCE_LSI    = 1, /*!< LSI clock source */
+    LSCO_CLOCKSOURCE_LSI    = 0, /*!< LSI clock source */
 #ifdef LSE_VALUE
-    LSCO_CLOCKSOURCE_LSE    = 3, /*!< LSE clock source */
+    LSCO_CLOCKSOURCE_LSE    = 1, /*!< LSE clock source */
 #endif
 }RCC_LSCO_ClockSourceType;
 
