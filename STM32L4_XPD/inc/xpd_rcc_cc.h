@@ -83,9 +83,9 @@ typedef enum
 /** @brief MSI setup structure */
 typedef struct
 {
-    RCC_MSIFreqType  ClockFreq;        /*!< MSI clock frequency */
     uint8_t          CalibrationValue; /*!< MSI calibration value [0..31] (default is 16) */
     RCC_OscStateType State;            /*!< MSI state */
+    RCC_MSIFreqType  ClockFreq;        /*!< MSI clock frequency */
 }RCC_MSI_InitType;
 
 /** @brief HSI setup structure */
