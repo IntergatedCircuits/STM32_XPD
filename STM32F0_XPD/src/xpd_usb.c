@@ -39,6 +39,8 @@ typedef struct {
         __IO uint16_t RX_COUNT;
     }BDT[8];
 }USB_BufferDescriptorTable_TypeDef;
+
+typedef uint16_t USB_PacketBufferType;
 #else
 typedef struct {
     struct {
@@ -48,6 +50,8 @@ typedef struct {
         __IO uint32_t RX_COUNT;
     }BDT[8];
 }USB_BufferDescriptorTable_TypeDef;
+
+typedef uint32_t USB_PacketBufferType;
 #endif
 
 #define USB_EP_BDT(EP_NUM) (((USB_BufferDescriptorTable_TypeDef *)(USB_PMAADDR + USB->BTABLE))->BDT[EP_NUM])
@@ -81,34 +85,55 @@ static const uint16_t usb_epTypeRemap[4] = {USB_EP_CONTROL, USB_EP_ISOCHRONOUS, 
 static void usb_writePMA(uint8_t * sourceBuf, uint16_t pmaAddress, uint16_t dataCount)
 {
     /* PMA stores data in 16 bit elements */
-    uint16_t i = (dataCount + 1) / 2;
-#ifdef USB_LPMCSR_LMPEN
-    uint16_t * dest = (uint16_t *)(USB_PMAADDR + pmaAddress);
-#else
-    uint32_t * dest = (uint32_t *)(USB_PMAADDR + pmaAddress * 2);
-#endif
+    USB_PacketBufferType * dest = (USB_PacketBufferType *)(USB_PMAADDR + pmaAddress);
 
-    while (i--)
+    /* Check if input data is aligned */
+    if ((((uint32_t)sourceBuf) & 1) == 3)
     {
-        *dest = (uint16_t)(sourceBuf[0]) | ((uint16_t)(sourceBuf[1]) << 8);
-        dest++;
-        sourceBuf += 2;
+        uint16_t i;
+
+        for (i = 0; i < ((dataCount + 1) / 2); i++)
+        {
+            dest[i] = ((uint16_t*)sourceBuf)[i];
+        }
+    }
+    else
+    {
+        dataCount = (dataCount + 1) / 2;
+        while (dataCount--)
+        {
+            *dest = ((uint16_t)(sourceBuf[1]) << 8) | (uint16_t)(sourceBuf[0]);
+            dest++;
+            sourceBuf += 2;
+        }
     }
 }
 
 static void usb_readPMA(uint8_t * destBuf, uint16_t pmaAddress, uint16_t dataCount)
 {
-    uint16_t i = (dataCount + 1) / 2;
-#ifdef USB_LPMCSR_LMPEN
-    uint16_t * source = (uint16_t *)(USB_PMAADDR + pmaAddress);
-#else
-    uint32_t * source = (uint32_t *)(USB_PMAADDR + pmaAddress * 2);
-#endif
-    while (i--)
+    /* PMA stores data in 16 bit elements */
+    USB_PacketBufferType * source = (USB_PacketBufferType *)(USB_PMAADDR + pmaAddress);
+
+    /* Check if input data is aligned */
+    if ((((uint32_t)destBuf) & 1) == 0)
     {
-        *(uint16_t*) destBuf = *source;
-        source++;
-        destBuf += 2;
+        uint16_t i;
+        for (i = 0; i < ((dataCount + 1) / 2); i++)
+        {
+            ((uint16_t*)destBuf)[i] = source[i];
+        }
+    }
+    else
+    {
+        dataCount = (dataCount + 1) / 2;
+        while (dataCount--)
+        {
+            *destBuf = *source;
+            destBuf++;
+            *destBuf = (*source) >> 8;
+            destBuf++;
+            source++;
+        }
     }
 }
 
