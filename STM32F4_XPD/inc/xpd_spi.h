@@ -21,8 +21,8 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef XPD_SPI_H_
-#define XPD_SPI_H_
+#ifndef __XPD_SPI_H_
+#define __XPD_SPI_H_
 
 #include "xpd_common.h"
 #include "xpd_config.h"
@@ -265,4 +265,4 @@ void            XPD_SPI_Stop_DMA            (SPI_HandleType * hspi);
 #include "xpd_rcc_pc.h"
 #undef XPD_SPI_API
 
-#endif /* XPD_SPI_H_ */
+#endif /* __XPD_SPI_H_ */

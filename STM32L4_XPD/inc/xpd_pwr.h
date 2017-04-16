@@ -21,8 +21,8 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef XPD_PWR_H_
-#define XPD_PWR_H_
+#ifndef __XPD_PWR_H_
+#define __XPD_PWR_H_
 
 #include "xpd_common.h"
 #include "xpd_config.h"
@@ -413,4 +413,4 @@ __STATIC_INLINE void XPD_PWR_PVM_Disable(PWR_PVMType pvm)
 
 /** @} */
 
-#endif /* XPD_PWR_H_ */
+#endif /* __XPD_PWR_H_ */

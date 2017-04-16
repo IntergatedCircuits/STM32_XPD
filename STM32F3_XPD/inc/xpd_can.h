@@ -21,8 +21,8 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef XPD_CAN_H_
-#define XPD_CAN_H_
+#ifndef __XPD_CAN_H_
+#define __XPD_CAN_H_
 
 #include "xpd_common.h"
 #include "xpd_config.h"
@@ -400,4 +400,4 @@ XPD_ReturnType  XPD_CAN_Receive_IT          (CAN_HandleType * hcan, CAN_FrameTyp
 
 #endif /* CAN_MASTER */
 
-#endif /* XPD_CAN_H_ */
+#endif /* __XPD_CAN_H_ */

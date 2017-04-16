@@ -21,8 +21,8 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef XPD_DMA_H_
-#define XPD_DMA_H_
+#ifndef __XPD_DMA_H_
+#define __XPD_DMA_H_
 
 #include "xpd_common.h"
 #include "xpd_config.h"
@@ -132,16 +132,20 @@ typedef struct
 /** @defgroup DMA_Exported_Macros DMA Exported Macros
  * @{ */
 
+#ifdef USE_XPD_DMA_ERROR_DETECT
 /**
  * @brief  DMA Handle initializer macro
  * @param  INSTANCE: specifies the DMA stream instance.
  */
-#ifdef USE_XPD_DMA_ERROR_DETECT
 #define         NEW_DMA_HANDLE(INSTANCE)                    \
     {.Inst      = (INSTANCE),                               \
      .Callbacks = {NULL,NULL,NULL},                         \
      .Owner     = NULL}
 #else
+/**
+ * @brief  DMA Handle initializer macro
+ * @param  INSTANCE: specifies the DMA stream instance.
+ */
 #define         NEW_DMA_HANDLE(INSTANCE)                    \
     {.Inst      = (INSTANCE),                               \
      .Callbacks = {NULL,NULL},                              \
@@ -257,4 +261,4 @@ void            XPD_DMA_SetSwapMemory   (DMA_HandleType * hdma, void * Address);
 
 /** @} */
 
-#endif /* XPD_DMA_H_ */
+#endif /* __XPD_DMA_H_ */

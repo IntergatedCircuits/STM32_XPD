@@ -21,8 +21,8 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef XPD_UTILS_H_
-#define XPD_UTILS_H_
+#ifndef __XPD_UTILS_H_
+#define __XPD_UTILS_H_
 
 #include "xpd_common.h"
 #include "xpd_config.h"
@@ -108,4 +108,4 @@ void            XPD_SysTick_IRQHandler  (void);
 
 /** @} */
 
-#endif /* XPD_UTILS_H_ */
+#endif /* __XPD_UTILS_H_ */

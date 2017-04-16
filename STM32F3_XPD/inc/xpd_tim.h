@@ -21,8 +21,8 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef XPD_TIM_H_
-#define XPD_TIM_H_
+#ifndef __XPD_TIM_H_
+#define __XPD_TIM_H_
 
 #include "xpd_common.h"
 #include "xpd_config.h"
@@ -484,4 +484,4 @@ void            XPD_TIM_MasterConfig        (TIM_HandleType * htim, const TIM_Ma
 #include "xpd_rcc_pc.h"
 #undef XPD_TIM_API
 
-#endif /* XPD_TIM_H_ */
+#endif /* __XPD_TIM_H_ */

@@ -21,8 +21,8 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef XPD_GPIO_H_
-#define XPD_GPIO_H_
+#ifndef __XPD_GPIO_H_
+#define __XPD_GPIO_H_
 
 #include "xpd_common.h"
 #include "xpd_config.h"
@@ -193,4 +193,4 @@ __STATIC_INLINE void XPD_GPIO_TogglePin(GPIO_TypeDef * GPIOx, uint8_t Pin)
 
 /** @} */
 
-#endif /* XPD_GPIO_H_ */
+#endif /* __XPD_GPIO_H_ */

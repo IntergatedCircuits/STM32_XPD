@@ -21,8 +21,8 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef XPD_COMMON_H_
-#define XPD_COMMON_H_
+#ifndef __XPD_COMMON_H_
+#define __XPD_COMMON_H_
 
 #include <stdint.h>
 
@@ -225,4 +225,4 @@ typedef void ( *XPD_HandleCallbackType )    ( void * Handle );
 #endif /* __GNUC__ */
 
 
-#endif /* XPD_COMMON_H_ */
+#endif /* __XPD_COMMON_H_ */

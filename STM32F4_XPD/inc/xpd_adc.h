@@ -21,8 +21,8 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef XPD_ADC_H_
-#define XPD_ADC_H_
+#ifndef __XPD_ADC_H_
+#define __XPD_ADC_H_
 
 #include "xpd_common.h"
 #include "xpd_config.h"
@@ -454,4 +454,4 @@ uint32_t        XPD_ADC_MultiMode_GetValues     (ADC_HandleType * hadc);
 #include "xpd_rcc_gen.h"
 #undef XPD_ADC_API
 
-#endif /* XPD_ADC_H_ */
+#endif /* __XPD_ADC_H_ */

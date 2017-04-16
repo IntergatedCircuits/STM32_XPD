@@ -21,8 +21,8 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef XPD_ADC_CALC_H_
-#define XPD_ADC_CALC_H_
+#ifndef __XPD_ADC_CALC_H_
+#define __XPD_ADC_CALC_H_
 
 #include "xpd_common.h"
 #include "xpd_config.h"
@@ -54,4 +54,4 @@ float           XPD_ADC_GetTemperature_C    (uint16_t tempConversion);
 
 /** @} */
 
-#endif /* XPD_ADC_CALC_H_ */
+#endif /* __XPD_ADC_CALC_H_ */

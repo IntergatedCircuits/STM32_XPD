@@ -21,8 +21,8 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef XPD_USB_H_
-#define XPD_USB_H_
+#ifndef __XPD_USB_H_
+#define __XPD_USB_H_
 
 #include "xpd_common.h"
 #include "xpd_config.h"
@@ -201,4 +201,4 @@ void            XPD_USB_IRQHandler              (USB_HandleType * husb);
 
 #endif /* USB */
 
-#endif /* XPD_USB_H_ */
+#endif /* __XPD_USB_H_ */

@@ -21,8 +21,8 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef XPD_USART_H_
-#define XPD_USART_H_
+#ifndef __XPD_USART_H_
+#define __XPD_USART_H_
 
 #include "xpd_common.h"
 #include "xpd_config.h"
@@ -614,4 +614,4 @@ XPD_ReturnType  XPD_RS485_Init              (USART_HandleType * husart, const US
 #include "xpd_rcc_pc.h"
 #undef XPD_USART_API
 
-#endif /* XPD_USART_H_ */
+#endif /* __XPD_USART_H_ */

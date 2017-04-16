@@ -21,8 +21,8 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef XPD_FLASH_H_
-#define XPD_FLASH_H_
+#ifndef __XPD_FLASH_H_
+#define __XPD_FLASH_H_
 
 #include "xpd_common.h"
 #include "xpd_config.h"
@@ -94,4 +94,4 @@ __STATIC_INLINE void XPD_FLASH_DataCacheCtrl(FunctionalState NewState)
 
 /** @} */
 
-#endif /* XPD_FLASH_H_ */
+#endif /* __XPD_FLASH_H_ */

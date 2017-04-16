@@ -21,8 +21,8 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef XPD_EXTI_H_
-#define XPD_EXTI_H_
+#ifndef __XPD_EXTI_H_
+#define __XPD_EXTI_H_
 
 #include "xpd_common.h"
 #include "xpd_config.h"
@@ -114,4 +114,4 @@ __STATIC_INLINE void XPD_EXTI_IRQHandler(uint8_t Line)
 
 /** @} */
 
-#endif /* XPD_EXTI_H_ */
+#endif /* __XPD_EXTI_H_ */

@@ -21,10 +21,10 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef XPD_CORE_H_
-#define XPD_CORE_H_
+#ifndef __XPD_CORE_H_
+#define __XPD_CORE_H_
 
 #include "xpd_nvic.h"
 #include "xpd_systick.h"
 
-#endif /* XPD_CORE_H_ */
+#endif /* __XPD_CORE_H_ */

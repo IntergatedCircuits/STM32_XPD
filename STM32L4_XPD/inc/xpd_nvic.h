@@ -21,8 +21,8 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef XPD_NVIC_H_
-#define XPD_NVIC_H_
+#ifndef __XPD_NVIC_H_
+#define __XPD_NVIC_H_
 
 #include "xpd_common.h"
 #include "xpd_config.h"
@@ -30,11 +30,37 @@
 /** @defgroup NVIC
  * @{ */
 
+/** @defgroup NVIC_Exported_Types NVIC Exported Types
+ * @{ */
+
+/** @brief NVIC priority group types */
+typedef enum
+{
+    NVIC_PRIOGROUP_0PRE_4SUB = 7, /*!< 0 preemption priority bits, 4 subpriority bits */
+    NVIC_PRIOGROUP_1PRE_3SUB = 6, /*!< 1 preemption priority bits, 3 subpriority bits */
+    NVIC_PRIOGROUP_2PRE_2SUB = 5, /*!< 2 preemption priority bits, 2 subpriority bits */
+    NVIC_PRIOGROUP_3PRE_1SUB = 4, /*!< 3 preemption priority bits, 1 subpriority bits */
+    NVIC_PRIOGROUP_4PRE_0SUB = 3  /*!< 4 preemption priority bits, 0 subpriority bits */
+}NVIC_PrioGroupType;
+
+/** @} */
+
 /** @defgroup NVIC_Exported_Macros NVIC Exported Macros
  * @{ */
 
-#define XPD_NVIC_SetPriorityGroup(PRIOGROUP)                                \
-    ((void)0)
+/**
+ * @brief  NVIC interrupt priority group configuration setting redirection macro.
+ * @param  PRIOGROUP: the selected @ref NVIC_PrioGroupType to set
+ */
+#define         XPD_NVIC_SetPriorityGroup(PRIOGROUP)                        \
+    NVIC_SetPriorityGrouping((uint32_t)(PRIOGROUP))
+
+/**
+ * @brief  NVIC interrupt priority group configuration reading redirection macro.
+ * @return The configured @ref NVIC_PrioGroupType
+ */
+#define         XPD_NVIC_GetPriorityGroup()                                 \
+    ((NVIC_PrioGroupType)NVIC_GetPriorityGrouping())
 
 /**
  * @brief  NVIC interrupt priority enable redirection macro.
@@ -57,7 +83,7 @@
  * @param  SUB_PRIO: the subpriority value
  */
 #define         XPD_NVIC_SetPriorityConfig(IRQN,PREEMPT_PRIO,SUB_PRIO)      \
-    NVIC_SetPriority((IRQN), (SUB_PRIO))
+    NVIC_SetPriority((IRQN), NVIC_EncodePriority(NVIC_GetPriorityGrouping(),(PREEMPT_PRIO),(SUB_PRIO)))
 
 /**
  * @brief System reset redirection macro.
@@ -69,4 +95,4 @@
 
 /** @} */
 
-#endif /* XPD_NVIC_H_ */
+#endif /* __XPD_NVIC_H_ */

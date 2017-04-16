@@ -21,8 +21,8 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef XPD_NVIC_H_
-#define XPD_NVIC_H_
+#ifndef __XPD_NVIC_H_
+#define __XPD_NVIC_H_
 
 #include "xpd_common.h"
 #include "xpd_config.h"
@@ -69,4 +69,4 @@
 
 /** @} */
 
-#endif /* XPD_NVIC_H_ */
+#endif /* __XPD_NVIC_H_ */

@@ -21,8 +21,8 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef XPD_DMA_H_
-#define XPD_DMA_H_
+#ifndef __XPD_DMA_H_
+#define __XPD_DMA_H_
 
 #include "xpd_common.h"
 #include "xpd_config.h"
@@ -253,4 +253,4 @@ void            XPD_DMA_IRQHandler      (DMA_HandleType * hdma);
 #include "xpd_syscfg.h"
 #undef XPD_DMA_API
 
-#endif /* XPD_DMA_H_ */
+#endif /* __XPD_DMA_H_ */

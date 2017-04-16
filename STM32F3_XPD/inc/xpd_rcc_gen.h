@@ -21,8 +21,8 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef XPD_RCC_GEN_H_
-#define XPD_RCC_GEN_H_
+#ifndef __XPD_RCC_GEN_H_
+#define __XPD_RCC_GEN_H_
 
 
 /** @addtogroup RCC
@@ -385,4 +385,4 @@ void XPD_WWDG_Reset(void);
 
 /** @} */
 
-#endif /* XPD_RCC_GEN_H_ */
+#endif /* __XPD_RCC_GEN_H_ */

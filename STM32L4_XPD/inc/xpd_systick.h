@@ -21,8 +21,8 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef XPD_SYSTICK_H_
-#define XPD_SYSTICK_H_
+#ifndef __XPD_SYSTICK_H_
+#define __XPD_SYSTICK_H_
 
 #include "xpd_common.h"
 #include "xpd_config.h"
@@ -124,4 +124,4 @@ __STATIC_INLINE void XPD_SysTick_Stop_IT(void)
 
 /** @} */
 
-#endif /* XPD_SYSTICK_H_ */
+#endif /* __XPD_SYSTICK_H_ */

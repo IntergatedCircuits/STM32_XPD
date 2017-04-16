@@ -21,8 +21,8 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef XPD_ADC_H_
-#define XPD_ADC_H_
+#ifndef __XPD_ADC_H_
+#define __XPD_ADC_H_
 
 #include "xpd_common.h"
 #include "xpd_config.h"
@@ -311,4 +311,4 @@ XPD_ReturnType  XPD_ADC_Calibrate           (ADC_HandleType * hadc, boolean_t Di
 #include "xpd_rcc_pc.h"
 #undef XPD_ADC_API
 
-#endif /* XPD_ADC_H_ */
+#endif /* __XPD_ADC_H_ */
