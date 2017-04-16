@@ -314,15 +314,18 @@ uint16_t XPD_DMA_GetStatus(DMA_HandleType * hdma)
 XPD_ReturnType XPD_DMA_PollStatus(DMA_HandleType * hdma, DMA_OperationType Operation, uint32_t Timeout)
 {
     XPD_ReturnType result;
-    uint32_t tickstart;
-    boolean_t success;
+    uint32_t mask;
+    //(((HANDLE)->Base->LISR.w >> (DMA_LISR_##FLAG_NAME##IF0 + (uint32_t)((HANDLE)->StreamOffset))) & 1)
 
-    /* Get tick */
-    tickstart = XPD_GetTimer();
+    /* Assemble monitoring mask */
+    mask = (Operation == DMA_OPERATION_TRANSFER) ?
+            DMA_LISR_TCIF1 | DMA_LISR_TEIF1 | DMA_LISR_FEIF1 | DMA_LISR_DMEIF1
+          : DMA_LISR_HTIF1 | DMA_LISR_TEIF1 | DMA_LISR_FEIF1 | DMA_LISR_DMEIF1;
+    mask <<= hdma->StreamOffset;
 
-    for (success = (Operation == DMA_OPERATION_TRANSFER) ? XPD_DMA_GetFlag(hdma, TC) : XPD_DMA_GetFlag(hdma, HT);
-        !success;
-         success = (Operation == DMA_OPERATION_TRANSFER) ? XPD_DMA_GetFlag(hdma, TC) : XPD_DMA_GetFlag(hdma, HT))
+    /* Wait until any flags get active */
+    result = XPD_WaitForDiff(&hdma->Base->LISR.w, mask, 0, &Timeout);
+    if (result == XPD_OK)
     {
         if (XPD_DMA_GetFlag(hdma, TE))
         {
@@ -332,7 +335,7 @@ XPD_ReturnType XPD_DMA_PollStatus(DMA_HandleType * hdma, DMA_OperationType Opera
             /* Clear the transfer error flag */
             XPD_DMA_ClearFlag(hdma, TE);
 
-            return XPD_ERROR;
+            result = XPD_ERROR;
         }
         if (XPD_DMA_GetFlag(hdma, FE))
         {
@@ -354,21 +357,18 @@ XPD_ReturnType XPD_DMA_PollStatus(DMA_HandleType * hdma, DMA_OperationType Opera
 
             return XPD_ERROR;
         }
-        /* Check for the Timeout */
-        if ((Timeout != XPD_NO_TIMEOUT) && ((XPD_GetTimer() - tickstart) > Timeout))
+        else
         {
-            return XPD_TIMEOUT;
+            /* Clear the half transfer and transfer complete flags */
+            if (Operation == DMA_OPERATION_TRANSFER)
+            {
+                XPD_DMA_ClearFlag(hdma, TC);
+            }
+            XPD_DMA_ClearFlag(hdma, HT);
         }
     }
 
-    /* Clear the half transfer and transfer complete flags */
-    if (Operation == DMA_OPERATION_TRANSFER)
-    {
-        XPD_DMA_ClearFlag(hdma, TC);
-    }
-    XPD_DMA_ClearFlag(hdma, HT);
-
-    return XPD_OK;
+    return result;
 }
 
 /**
@@ -387,16 +387,14 @@ DMA_ErrorType XPD_DMA_GetError(DMA_HandleType * hdma)
  */
 void XPD_DMA_IRQHandler(DMA_HandleType * hdma)
 {
-    uint32_t errors = 0;
-
     /* Half Transfer Complete interrupt management */
     if (XPD_DMA_GetFlag(hdma, HT))
     {
         /* clear the half transfer complete flag */
         XPD_DMA_ClearFlag(hdma, HT);
 
-        /* multi buffering mode disabled, DMA mode is not CIRCULAR */
-        if ((hdma->Inst->CR.w & (DMA_SxCR_CIRC | DMA_SxCR_DBM)) == 0)
+        /* DMA mode is not CIRCULAR */
+        if (DMA_REG_BIT(hdma, CCR, CIRC) == 0)
         {
             XPD_DMA_DisableIT(hdma, HT);
         }
@@ -411,8 +409,8 @@ void XPD_DMA_IRQHandler(DMA_HandleType * hdma)
         /* clear the transfer complete flag */
         XPD_DMA_ClearFlag(hdma, TC);
 
-        /* multi buffering mode disabled, DMA mode is not CIRCULAR */
-        if ((hdma->Inst->CR.w & (DMA_SxCR_CIRC | DMA_SxCR_DBM)) == 0)
+        /* DMA mode is not CIRCULAR */
+        if (DMA_REG_BIT(hdma, CCR, CIRC) == 0)
         {
             XPD_DMA_DisableIT(hdma, TC);
         }
@@ -428,7 +426,7 @@ void XPD_DMA_IRQHandler(DMA_HandleType * hdma)
         /* clear the transfer error flag */
         XPD_DMA_ClearFlag(hdma, TE);
 
-        errors |= DMA_ERROR_TRANSFER;
+        hdma->Errors |= DMA_ERROR_TRANSFER;
     }
     /* FIFO Error interrupt management */
     if (XPD_DMA_GetFlag(hdma, FE))
@@ -436,7 +434,7 @@ void XPD_DMA_IRQHandler(DMA_HandleType * hdma)
         /* clear the FIFO error flag */
         XPD_DMA_ClearFlag(hdma, FE);
 
-        errors |= DMA_ERROR_FIFO;
+        hdma->Errors |= DMA_ERROR_FIFO;
     }
     /* Direct Mode Error interrupt management */
     if (XPD_DMA_GetFlag(hdma, DME))
@@ -444,13 +442,11 @@ void XPD_DMA_IRQHandler(DMA_HandleType * hdma)
         /* clear the direct mode error flag */
         XPD_DMA_ClearFlag(hdma, DME);
 
-        errors |= DMA_ERROR_DIRECTM;
+        hdma->Errors |= DMA_ERROR_DIRECTM;
     }
 
-    if (errors != 0)
+    if (hdma->Errors != 0)
     {
-        hdma->Errors |= errors;
-
         /* transfer errors callback */
         XPD_SAFE_CALLBACK(hdma->Callbacks.Error, hdma);
     }

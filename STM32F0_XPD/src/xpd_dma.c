@@ -282,15 +282,17 @@ uint16_t XPD_DMA_GetStatus(DMA_HandleType * hdma)
 XPD_ReturnType XPD_DMA_PollStatus(DMA_HandleType * hdma, DMA_OperationType Operation, uint32_t Timeout)
 {
     XPD_ReturnType result;
-    uint32_t tickstart;
-    boolean_t success;
+    uint32_t mask;
 
-    /* Get tick */
-    tickstart = XPD_GetTimer();
+    /* Assemble monitoring mask */
+    mask = (Operation == DMA_OPERATION_TRANSFER) ?
+            DMA_ISR_TCIF1 | DMA_ISR_TEIF1
+          : DMA_ISR_HTIF1 | DMA_ISR_TEIF1;
+    mask <<= hdma->ChannelOffset;
 
-    for (success = (Operation == DMA_OPERATION_TRANSFER) ? XPD_DMA_GetFlag(hdma, TC) : XPD_DMA_GetFlag(hdma, HT);
-        !success;
-         success = (Operation == DMA_OPERATION_TRANSFER) ? XPD_DMA_GetFlag(hdma, TC) : XPD_DMA_GetFlag(hdma, HT))
+    /* Wait until any flags get active */
+    result = XPD_WaitForDiff(&hdma->Base->ISR.w, mask, 0, &Timeout);
+    if (result == XPD_OK)
     {
         if (XPD_DMA_GetFlag(hdma, TE))
         {
@@ -300,23 +302,20 @@ XPD_ReturnType XPD_DMA_PollStatus(DMA_HandleType * hdma, DMA_OperationType Opera
             /* Clear the transfer error flag */
             XPD_DMA_ClearFlag(hdma, TE);
 
-            return XPD_ERROR;
+            result = XPD_ERROR;
         }
-        /* Check for the Timeout */
-        if ((Timeout != XPD_NO_TIMEOUT) && ((XPD_GetTimer() - tickstart) > Timeout))
+        else
         {
-            return XPD_TIMEOUT;
+            /* Clear the half transfer and transfer complete flags */
+            if (Operation == DMA_OPERATION_TRANSFER)
+            {
+                XPD_DMA_ClearFlag(hdma, TC);
+            }
+            XPD_DMA_ClearFlag(hdma, HT);
         }
     }
 
-    /* Clear the half transfer and transfer complete flags */
-    if (Operation == DMA_OPERATION_TRANSFER)
-    {
-        XPD_DMA_ClearFlag(hdma, TC);
-    }
-    XPD_DMA_ClearFlag(hdma, HT);
-
-    return XPD_OK;
+    return result;
 }
 
 /**
