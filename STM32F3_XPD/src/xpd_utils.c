@@ -91,12 +91,19 @@ __weak void XPD_InitTimer(void)
 
 /**
  * @brief Inserts code delay of the specified time in milliseconds.
+ * @note  The milliseconds based waiting utilities shall not be used concurrently.
+ *        The time of the preempted waiters do not elapse.
  * @param milliseconds: the desired delay in ms
  */
 __weak void XPD_Delay_ms(uint32_t milliseconds)
 {
-    uint32_t starttime = XPD_GetTimer();
-    while ((XPD_GetTimer() - starttime) < milliseconds);
+    /* Initially clear flag */
+    __IO uint32_t dummy = SysTick->CTRL.b.COUNTFLAG;
+    while (milliseconds != 0)
+    {
+        /* COUNTFLAG returns 1 if timer counted to 0 since the last flag read */
+        milliseconds -= SysTick->CTRL.b.COUNTFLAG;
+    }
 }
 
 /**
@@ -114,65 +121,66 @@ __weak void XPD_Delay_us(uint32_t microseconds)
 
 /**
  * @brief Waits until the masked value read from address matches the input match, or until times out. [overrideable]
+ * @note  The milliseconds based waiting utilities shall not be used concurrently.
+ *        The time of the preempted waiters do not elapse.
  * @param varAddress: the word address that needs to be monitored
  * @param bitSelector: a bit mask that selects which bits should be considered
  * @param match: the expected value to wait for
  * @param mstimeout: pointer to the timeout in ms
  * @return TIMEOUT if timed out, or OK if match occurred within the deadline
  */
-__weak XPD_ReturnType XPD_WaitForMatch(volatile uint32_t * varAddress, uint32_t bitSelector, uint32_t match, uint32_t * mstimeout)
+__weak XPD_ReturnType XPD_WaitForMatch(
+        volatile uint32_t * varAddress, uint32_t bitSelector, uint32_t match,
+        uint32_t * mstimeout)
 {
+    /* Initially clear flag */
+    __IO uint32_t dummy = SysTick->CTRL.b.COUNTFLAG;
     XPD_ReturnType result = XPD_OK;
-    uint32_t starttime = XPD_GetTimer();
-    uint32_t timeout = *mstimeout;
-    uint32_t acttime = starttime;
 
-    while((*varAddress & bitSelector) != match)
+    while ((*varAddress & bitSelector) != match)
     {
-        if((timeout != XPD_NO_TIMEOUT) && ((XPD_GetTimer() - starttime) > timeout))
+        if (*mstimeout == 0)
         {
             result = XPD_TIMEOUT;
             break;
         }
-        if (acttime != XPD_GetTimer())
-        {
-            (*mstimeout)--;
-            acttime = XPD_GetTimer();
-        }
+        /* COUNTFLAG returns 1 if timer counted to 0 since the last flag read */
+        *mstimeout -= SysTick->CTRL.b.COUNTFLAG;
     }
     return result;
 }
 
 /**
  * @brief Waits until the masked value read from address differs from the input match, or until times out. [overrideable]
+ * @note  The milliseconds based waiting utilities shall not be used concurrently.
+ *        The time of the preempted waiters do not elapse.
  * @param varAddress: the word address that needs to be monitored
  * @param bitSelector: a bit mask that selects which bits should be considered
  * @param match: the initial value that needs to differ
  * @param mstimeout: pointer to the timeout in ms
  * @return TIMEOUT if timed out, or OK if match occurred within the deadline
  */
-__weak XPD_ReturnType XPD_WaitForDiff(volatile uint32_t * varAddress, uint32_t bitSelector, uint32_t match, uint32_t * mstimeout)
+__weak XPD_ReturnType XPD_WaitForDiff(
+        volatile uint32_t * varAddress, uint32_t bitSelector, uint32_t match,
+        uint32_t * mstimeout)
 {
+    /* Initially clear flag */
+    __IO uint32_t dummy = SysTick->CTRL.b.COUNTFLAG;
     XPD_ReturnType result = XPD_OK;
-    uint32_t starttime = XPD_GetTimer();
-    uint32_t timeout = *mstimeout;
-    uint32_t acttime = starttime;
 
-    while((*varAddress & bitSelector) == match)
+    while ((*varAddress & bitSelector) == match)
     {
-        if((timeout != XPD_NO_TIMEOUT) && ((XPD_GetTimer() - starttime) > timeout))
+        if (*mstimeout == 0)
         {
             result = XPD_TIMEOUT;
             break;
         }
-        if (acttime != XPD_GetTimer())
-        {
-            (*mstimeout)--;
-            acttime = XPD_GetTimer();
-        }
+        /* COUNTFLAG returns 1 if timer counted to 0 since the last flag read */
+        *mstimeout -= SysTick->CTRL.b.COUNTFLAG;
     }
     return result;
 }
+
 /** @} */
 
 /** @defgroup XPD_Exported_Functions_Stream XPD Data Stream Handling Functions
@@ -257,9 +265,9 @@ void XPD_SysTick_IRQHandler(void)
 /**
  * @brief Initializes the basic services of the device:
  *        @arg Memory access
- *        @arg Timer utility
+ *        @arg System Timer utility
  *        @arg Interrupt priority group selection
- *        @arg Enable GPIO clocks
+ *        @arg Enable PWR and SYSCFG clocks
  */
 void XPD_Init(void)
 {
@@ -301,6 +309,10 @@ void XPD_Deinit(void)
     XPD_RCC_ResetAHB();
     XPD_RCC_ResetAPB1();
     XPD_RCC_ResetAPB2();
+
+    /* disable clocks */
+    XPD_PWR_ClockCtrl(DISABLE);
+    XPD_SYSCFG_ClockCtrl(DISABLE);
 }
 
 /** @} */

@@ -67,9 +67,6 @@ extern XPD_CallbacksType XPD_Callbacks;
 #define XPD_EXIT_CRITICAL(HANDLE)
 #endif
 
-/** @brief Timeout value for indefinite waiting */
-#define XPD_NO_TIMEOUT      0xFFFFFFFF
-
 /** @} */
 
 /** @addtogroup XPD_Exported_Functions
