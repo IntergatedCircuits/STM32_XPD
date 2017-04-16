@@ -33,7 +33,32 @@
 /** @defgroup NVIC_Exported_Macros NVIC Exported Macros
  * @{ */
 
-#define XPD_NVIC_SetPriorityGroup(PRIOGROUP)                                \
+/**
+ * @brief  @ref XPD_NVIC_GetCurrentIRQ() return value when it's called in thread context.
+ */
+#define ThreadMode_IRQn      0
+
+/**
+ * @brief  Returns the currently active interrupt line.
+ * @retval The @ref IRQn_Type that is currently being executed
+ */
+#define         XPD_NVIC_GetCurrentIRQ()                                    \
+    ((IRQn_Type)(((IPSR_Type)__get_IPSR()).b.ISR) - 16)
+
+/**
+ * @brief  Enable all exceptions with configurable priority (default).
+ */
+#define         XPD_NVIC_EnableAllIRQs()                                    \
+    (__set_PRIMASK(0))
+
+/**
+ * @brief  Disable all exceptions with configurable priority.
+ */
+#define         XPD_NVIC_DisableAllIRQs()                                   \
+    (__set_PRIMASK(1))
+
+/* Kept for compatibility, not supported on Cortex M0 */
+#define         XPD_NVIC_SetPriorityGroup(PRIOGROUP)                        \
     ((void)0)
 
 /**

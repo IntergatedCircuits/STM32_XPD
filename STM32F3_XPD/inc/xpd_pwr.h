@@ -86,6 +86,27 @@ void            XPD_PWR_StandbyMode         (void);
 
 void            XPD_PWR_WakeUpPin_Enable    (uint8_t WakeUpPin);
 void            XPD_PWR_WakeUpPin_Disable   (uint8_t WakeUpPin);
+
+/**
+ * @brief Send Event on Pending bit enables disabled interrupts to wake up
+ *        a system from WaitForEvent.
+ * @param NewState: the new SEVONPEND value to set
+ */
+__STATIC_INLINE void XPD_PWR_SEVONPEND(FunctionalState NewState)
+{
+    SCB->SCR.b.SEVONPEND = NewState;
+}
+
+/**
+ * @brief Sleep on Exit bit enables to enter sleep mode
+ *        on return from an ISR to Thread mode.
+ * @param NewState: the new SLEEPONEXIT value to set
+ */
+__STATIC_INLINE void XPD_PWR_SLEEPONEXIT(FunctionalState NewState)
+{
+    SCB->SCR.b.SLEEPONEXIT = NewState;
+}
+
 /** @} */
 
 /** @} */
