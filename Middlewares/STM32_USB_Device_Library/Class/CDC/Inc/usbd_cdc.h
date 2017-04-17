@@ -124,27 +124,27 @@ typedef struct
 
 typedef struct _USBD_CDC_Itf
 {
-	void (*Init)(void);
-	void (*DeInit)(void);
-	void (*Control)(uint8_t, uint8_t *, uint16_t);
-	void (*Received)(uint8_t *, uint32_t);
-	void (*Transmitted)(uint8_t *, uint32_t);
+    void (*Init)(void);
+    void (*DeInit)(void);
+    void (*Control)(uint8_t, uint8_t *, uint16_t);
+    void (*Received)(uint8_t *, uint32_t);
+    void (*Transmitted)(uint8_t *, uint32_t);
 } USBD_CDC_ItfTypeDef;
 
 typedef struct
 {
 #ifdef DEVICE_HS
-	uint32_t data[CDC_DATA_HS_MAX_PACKET_SIZE / 4]; /* Force 32bits alignment */
+    uint32_t data[CDC_DATA_HS_MAX_PACKET_SIZE / 4]; /* Force 32bits alignment */
 #else
     uint32_t data[CDC_DATA_FS_MAX_PACKET_SIZE / 4]; /* Force 32bits alignment */
 #endif
-	uint8_t *TxBuffer;
+    uint8_t *TxBuffer;
     uint8_t *RxBuffer;
     uint16_t TxLength;
     uint16_t RxLength;
-	uint8_t CmdOpCode;
-	uint8_t CmdLength;
-	USBD_StatusTypeDef TxState;
+    uint8_t CmdOpCode;
+    uint8_t CmdLength;
+    USBD_StatusTypeDef TxState;
 } USBD_CDC_HandleTypeDef;
 
 /** @defgroup USBD_CORE_Exported_Macros
@@ -169,7 +169,7 @@ extern const USBD_ClassTypeDef USBD_CDC;
  * @{
  */
 uint8_t USBD_CDC_RegisterInterface(USBD_HandleTypeDef *pdev,
-		USBD_CDC_ItfTypeDef *fops);
+        USBD_CDC_ItfTypeDef *fops);
 
 uint8_t USBD_CDC_Transmit(USBD_HandleTypeDef *pdev, uint8_t *pbuff, uint16_t length);
 
