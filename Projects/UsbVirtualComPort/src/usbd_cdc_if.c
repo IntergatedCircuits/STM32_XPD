@@ -89,7 +89,7 @@ static void CDC_USB_Transmitted(uint8_t* pbuf, uint32_t length);
 static void CDC_UART_Transmitted(void * handle);
 static void CDC_ProcessIN(void);
 
-USBD_CDC_ItfTypeDef USBD_Interface_fops_FS =
+const USBD_CDC_ItfTypeDef USBD_Interface_fops_FS =
 { CDC_Init, CDC_DeInit, CDC_USB_Control, CDC_USB_Received, CDC_USB_Transmitted };
 
 
