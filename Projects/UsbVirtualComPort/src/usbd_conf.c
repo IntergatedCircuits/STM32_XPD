@@ -32,6 +32,8 @@ USB_HandleType husb = NEW_USB_HANDLE(USB);
 void USB_IRQHandler(void)
 {
     XPD_USB_IRQHandler(&husb);
+    /* Only for wakeup handling when low power is used */
+    XPD_EXTI_ClearFlag(USB_WAKEUP_EXTI_LINE);
 }
 
 int usbSuspendCallback(void * user)
@@ -119,6 +121,16 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
         husb.Callbacks.ISOINIncomplete  = USBD_LL_IsoINIncomplete;
 
         XPD_USB_Init(pdev->pData, &init);
+
+        if (init.LowPowerMode != DISABLE)
+        {
+            EXTI_InitType wakeup = {
+                .ITCallback = NULL, /* USB IRQHandler is used */
+                .Edge = EDGE_RISING,
+                .Reaction = REACTION_IT,
+            };
+            XPD_EXTI_Init(USB_WAKEUP_EXTI_LINE, &wakeup);
+        }
     }
 
     /* SETUP endpoints */
