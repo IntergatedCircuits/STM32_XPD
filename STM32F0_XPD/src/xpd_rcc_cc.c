@@ -691,7 +691,7 @@ uint32_t XPD_RCC_GetClockFreq(RCC_ClockType SelectedClock)
         return SystemCoreClock;
 
     case SYSCLK:
-        return SystemCoreClock << AHBPrescTable[RCC->CFGR.b.HPRE];
+        return XPD_RCC_GetOscFreq(XPD_RCC_GetSYSCLKSource());
 
     case PCLK1:
         return SystemCoreClock >> APBPrescTable[RCC->CFGR.b.PPRE];
