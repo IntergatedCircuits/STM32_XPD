@@ -142,6 +142,15 @@ __STATIC_INLINE void XPD_PWR_SLEEPONEXIT(FunctionalState NewState)
     SCB->SCR.b.SLEEPONEXIT = NewState;
 }
 
+/**
+ * @brief Sleep Deep bit enables to enter deep sleep mode.
+ * @param NewState: the new SLEEPONEXIT value to set
+ */
+__STATIC_INLINE void XPD_PWR_SLEEPDEEP(FunctionalState NewState)
+{
+    SCB->SCR.b.SLEEPDEEP = NewState;
+}
+
 /** @} */
 
 /** @} */
