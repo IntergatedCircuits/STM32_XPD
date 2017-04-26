@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    xpd_utils.h
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2016-01-17
+  * @version V0.2
+  * @date    2017-04-26
   * @brief   STM32 eXtensible Peripheral Drivers Utilities Module
   *
   *  This file is part of STM32_XPD.
@@ -29,24 +29,6 @@
 
 /** @defgroup XPD_Utils XPD Utilities
  * @{ */
-
-/** @defgroup XPD_Utils_Exported_Types XPD Exported Types
- * @{ */
-
-/** @brief XPD utilities callbacks structure */
-typedef struct {
-    XPD_SimpleCallbackType Tick; /*!< SysTick interrupt callback */
-}XPD_CallbacksType;
-
-/** @} */
-
-/** @defgroup XPD_Exported_Variables XPD Exported Variables
- * @{ */
-
-/** @brief XPD utilities callbacks container */
-extern XPD_CallbacksType XPD_Callbacks;
-
-/** @} */
 
 /** @defgroup XPD_Exported_Macros XPD Exported Macros
  * @{ */
@@ -77,13 +59,10 @@ extern XPD_CallbacksType XPD_Callbacks;
 void            XPD_Init                (void);
 void            XPD_Deinit              (void);
 /** @} */
+
 /** @addtogroup XPD_Exported_Functions_Timer
  * @{ */
 void            XPD_InitTimer           (void);
-void            XPD_IncTimer            (void);
-uint32_t        XPD_GetTimer            (void);
-void            XPD_SuspendTimer        (void);
-void            XPD_ResumeTimer         (void);
 void            XPD_Delay_ms            (uint32_t milliseconds);
 void            XPD_Delay_us            (uint32_t microseconds);
 XPD_ReturnType  XPD_WaitForMatch        (volatile uint32_t * varAddress, uint32_t bitSelector,
@@ -91,14 +70,11 @@ XPD_ReturnType  XPD_WaitForMatch        (volatile uint32_t * varAddress, uint32_
 XPD_ReturnType  XPD_WaitForDiff         (volatile uint32_t * varAddress, uint32_t bitSelector,
                                          uint32_t            match,      uint32_t * mstimeout);
 /** @} */
+
 /** @addtogroup XPD_Exported_Functions_Stream
  * @{ */
 void            XPD_ReadToStream        (volatile uint32_t * reg, DataStreamType * stream);
 void            XPD_WriteFromStream     (volatile uint32_t * reg, DataStreamType * stream);
-/** @} */
-/** @addtogroup XPD_Exported_Functions_IRQ
- * @{ */
-void            XPD_SysTick_IRQHandler  (void);
 /** @} */
 
 /** @} */

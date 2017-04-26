@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    xpd_utils.c
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2016-01-16
+  * @version V0.2
+  * @date    2017-04-26
   * @brief   STM32 eXtensible Peripheral Drivers Utilities Module
   *
   *  This file is part of STM32_XPD.
@@ -28,10 +28,6 @@
 
 extern uint32_t SystemCoreClock;
 
-static volatile uint32_t msTick = 0;
-
-XPD_CallbacksType XPD_Callbacks = { NULL };
-
 /** @addtogroup XPD_Utils
  * @{ */
 
@@ -44,49 +40,13 @@ XPD_CallbacksType XPD_Callbacks = { NULL };
  */
 
 /**
- * @brief Millisecond timer incrementer utility. [overrideable]
- */
-__weak void XPD_IncTimer(void)
-{
-    msTick++;
-}
-
-/**
- * @brief Millisecond timer reader utility. [overrideable]
- * @return System time in milliseconds
- */
-__weak uint32_t XPD_GetTimer(void)
-{
-    return msTick;
-}
-
-/**
- * @brief Millisecond timer interrupt disabler utility. [overrideable]
- */
-__weak void XPD_SuspendTimer(void)
-{
-    XPD_SysTick_DisableIT();
-}
-
-/**
- * @brief Millisecond timer interrupt enabler utility. [overrideable]
- */
-__weak void XPD_ResumeTimer(void)
-{
-    XPD_SysTick_EnableIT();
-}
-
-/**
  * @brief Millisecond timer initializer utility. [overrideable]
  */
 __weak void XPD_InitTimer(void)
 {
-    /* set the SysTick IRQ priority */
-    XPD_NVIC_SetPriorityConfig(SysTick_IRQn, 0, 0);
-
-    /* enable systick and configure 1ms tick */
+    /* Enable SysTick and configure 1ms tick */
     XPD_SysTick_Init(SystemCoreClock / 1000, SYSTICK_CLOCKSOURCE_HCLK);
-    XPD_SysTick_Start_IT();
+    XPD_SysTick_Enable();
 }
 
 /**
@@ -236,23 +196,6 @@ void XPD_WriteFromStream(volatile uint32_t * reg, DataStreamType * stream)
     /* Stream context update */
     stream->buffer += stream->size;
     stream->length--;
-}
-
-/** @} */
-
-/** @defgroup XPD_Exported_Functions_IRQ XPD Interrupt Handling Functions
- *  @brief    XPD Utilities interrupt handlers
- * @{
- */
-
-/**
- * @brief SysTick interrupt handler. Manages millisecond timer and provides callback.
- */
-void XPD_SysTick_IRQHandler(void)
-{
-    XPD_IncTimer();
-
-    XPD_SAFE_CALLBACK(XPD_Callbacks.Tick,);
 }
 
 /** @} */
