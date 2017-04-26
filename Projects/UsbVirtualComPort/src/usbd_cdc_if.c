@@ -92,6 +92,14 @@ static void CDC_ProcessIN(void);
 const USBD_CDC_ItfTypeDef USBD_Interface_fops_FS =
 { CDC_Init, CDC_DeInit, CDC_USB_Control, CDC_USB_Received, CDC_USB_Transmitted };
 
+/**
+ * @brief  This interrupt handler periodically updates IN endpoint data
+ *         from UART received data
+ */
+void SysTick_IRQHandler(void)
+{
+    CDC_ProcessIN();
+}
 
 /**
  * @brief  This function is called from USB CDC when the device is connected
@@ -100,7 +108,7 @@ const USBD_CDC_ItfTypeDef USBD_Interface_fops_FS =
 static void CDC_Init(void)
 {
     /* Unsubscribe from periodic callback handler during initialization */
-    XPD_Callbacks.Tick = NULL;
+    XPD_SysTick_DisableIT();
 
     /* Initialize UART with the current configuration, reset DMAs */
 	(void) XPD_UART_Init(&uart, &SerialConfig, &UartConfig);
@@ -121,7 +129,7 @@ static void CDC_Init(void)
     (void) XPD_USART_Receive_DMA(&uart, CDC_Memory.InData, CDC_IN_DATA_SIZE);
 
     /* Periodic function is subscribed to timer callback */
-    XPD_Callbacks.Tick = CDC_ProcessIN;
+    XPD_SysTick_EnableIT();
 }
 
 /**
