@@ -730,7 +730,7 @@ typedef struct {
             __IO uint32_t FZ_DBG_I2C1_SMBUS_TIMEOUT : 1;
             __IO uint32_t FZ_DBG_I2C2_SMBUS_TIMEOUT : 1;
                  uint32_t __RESERVED3 : 7;
-            __IO uint32_t FZ_DBG_I2C3_SMBUS_TIMEOUT : 1;    /********************  Bit definition for DBGMCU_APB2_FZ register  ************/
+            __IO uint32_t FZ_DBG_I2C3_SMBUS_TIMEOUT : 1;
                  uint32_t __RESERVED4 : 1;
         } b;
         __IO uint32_t w;
