@@ -132,25 +132,13 @@ typedef struct
 /** @defgroup DMA_Exported_Macros DMA Exported Macros
  * @{ */
 
-#ifdef USE_XPD_DMA_ERROR_DETECT
 /**
  * @brief  DMA Handle initializer macro
  * @param  INSTANCE: specifies the DMA stream instance.
  */
 #define         NEW_DMA_HANDLE(INSTANCE)                    \
     {.Inst      = (INSTANCE),                               \
-     .Callbacks = {NULL,NULL,NULL},                         \
      .Owner     = NULL}
-#else
-/**
- * @brief  DMA Handle initializer macro
- * @param  INSTANCE: specifies the DMA stream instance.
- */
-#define         NEW_DMA_HANDLE(INSTANCE)                    \
-    {.Inst      = (INSTANCE),                               \
-     .Callbacks = {NULL,NULL},                              \
-     .Owner     = NULL}
-#endif
 
 /**
  * @brief  Enable the specified DMA interrupt.
