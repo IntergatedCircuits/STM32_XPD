@@ -131,9 +131,6 @@ typedef struct
 #if defined(USE_XPD_USART_ERROR_DETECT) || defined(USE_XPD_DMA_ERROR_DETECT)
     volatile USART_ErrorType Errors;         /*!< Transfer errors */
 #endif
-#ifdef USE_XPD_USART_ERROR_DETECT
-    boolean_t haltOnError;                   /*!< [Internal] Halt on error setting */
-#endif
 }USART_HandleType;
 
 /** @} */

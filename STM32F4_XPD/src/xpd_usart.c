@@ -162,6 +162,9 @@ static XPD_ReturnType usart_init1(USART_HandleType * husart, const USART_InitTyp
     husart->Inst_BB = USART_BB(husart->Inst);
 #endif
 
+    /* Dependencies initialization */
+    XPD_SAFE_CALLBACK(husart->Callbacks.DepInit, husart);
+
     husart->Inst->CR1.w = 0;
     husart->Inst->CR2.w = 0;
     husart->Inst->CR3.w = 0;
@@ -211,14 +214,6 @@ static XPD_ReturnType usart_init1(USART_HandleType * husart, const USART_InitTyp
     }
     husart->TxStream.length = husart->RxStream.length = 0;
 
-#ifdef USE_XPD_USART_ERROR_DETECT
-    /* Reception through DMA will stop if a reception error occurs */
-    husart->haltOnError = Common->HaltRxOnError;
-#ifdef USART_CR3_DDRE
-    USART_REG_BIT(husart, CR3, DDRE) = Common->HaltRxOnError;
-#endif
-#endif
-
     return XPD_OK;
 }
 
@@ -233,9 +228,6 @@ static XPD_ReturnType usart_init2(USART_HandleType * husart, const USART_InitTyp
     USART_REG_BIT(husart, CR1, RE) = Common->Receiver;
 
     XPD_USART_Enable(husart);
-
-    /* Dependencies initialization */
-    XPD_SAFE_CALLBACK(husart->Callbacks.DepInit, husart);
 
 #ifdef IS_UART_WAKEUP_FROMSTOP_INSTANCE
     if (IS_UART_WAKEUP_FROMSTOP_INSTANCE(husart->Inst))
@@ -573,12 +565,6 @@ void XPD_USART_IRQHandler(USART_HandleType * husart)
     uint32_t cr3 = husart->Inst->CR3.w;
 
 #ifdef USE_XPD_USART_ERROR_DETECT
-    /* Stop DMA reception on error when configured */
-    if (((sr & (USART_STATF(NE) | USART_STATF(FE) | USART_STATF(PE))) != 0)
-        && (husart->haltOnError))
-    {
-        USART_REG_BIT(husart, CR3, DMAR) = 0;
-    }
     /* parity error */
     if (((sr & USART_STATF(PE)) != 0) && ((cr1 & USART_CR1_PEIE) != 0))
     {
