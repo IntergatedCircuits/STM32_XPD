@@ -16309,14 +16309,14 @@ typedef struct {
 
 typedef struct
 {
-    __I uint16_t CAL30;
+    const uint16_t CAL30;
     const uint32_t __RESERVED[2];
-    __I uint16_t CAL110;
+    const uint16_t CAL110;
 }ADC_TempSensorCalibrationTypeDef;
 
 #define ADC_TEMPSENSOR       ((ADC_TempSensorCalibrationTypeDef *)((uint32_t)0x1FFFF7B8U))
 
-#define ADC_VREFINT_CAL      (*((__I uint16_t *)((uint32_t)0x1FFFF7BAU)))
+#define ADC_VREFINT_CAL      (*((const uint16_t *)((uint32_t)0x1FFFF7BAU)))
 
 #define ADC_VBAT_SCALER      2
 
@@ -16329,7 +16329,7 @@ typedef struct
   * @{
   */
 
-#define DEVICE_ID_REG        ((__I uint32_t *)UID_BASE)
+#define DEVICE_ID_REG        ((const uint32_t *)UID_BASE)
 
 /**
   * @}
@@ -16339,7 +16339,7 @@ typedef struct
   * @{
   */
 
-#define DEVICE_FLASH_SIZE_KB (*((__I uint16_t *)FLASHSIZE_BASE))
+#define DEVICE_FLASH_SIZE_KB (*((const uint16_t *)FLASHSIZE_BASE))
 
 /**
   * @}
