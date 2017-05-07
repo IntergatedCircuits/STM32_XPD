@@ -201,17 +201,6 @@ USBD_StatusTypeDef USBD_Stop(USBD_HandleTypeDef *pdev)
 }
 
 /**
-* @brief  USBD_RunTestMode 
-*         Launch test mode process
-* @param  pdev: device instance
-* @retval status
-*/
-USBD_StatusTypeDef USBD_RunTestMode(USBD_HandleTypeDef *pdev)
-{
-    return USBD_OK;
-}
-
-/**
 * @brief  USBD_SetClassConfig 
 *        Configure device and start the interface
 * @param  pdev: device instance
@@ -362,8 +351,7 @@ USBD_StatusTypeDef USBD_LL_DataInStage(USBD_HandleTypeDef *pdev, uint8_t epnum, 
                     pdev->ep0_data_len = 0;
 
                     /* Prepare endpoint for premature end of transfer */
-                    USBD_LL_PrepareReceive(pdev, 0,
-                    NULL, 0);
+                    USBD_LL_PrepareReceive(pdev, 0, NULL, 0);
                 }
                 else
                 {
@@ -375,11 +363,6 @@ USBD_StatusTypeDef USBD_LL_DataInStage(USBD_HandleTypeDef *pdev, uint8_t epnum, 
                     USBD_CtlReceiveStatus(pdev);
                 }
             }
-        }
-        if (pdev->dev_test_mode == 1)
-        {
-            USBD_RunTestMode(pdev);
-            pdev->dev_test_mode = 0;
         }
     }
     else if ((pdev->pClass->DataIn != NULL) &&

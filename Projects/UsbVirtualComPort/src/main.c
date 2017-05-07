@@ -33,7 +33,7 @@ int main(void)
     ClockConfiguration();
 
     /* Init Device Library, Add Supported Class and Start the library */
-    USBD_Init(&hUsbDeviceFS, (void*)&FS_Desc, DEVICE_FS);
+    USBD_Init(&hUsbDeviceFS, (void*)&CDC_Desc, DEVICE_FS);
 
     USBD_RegisterClass(&hUsbDeviceFS, (void*)&USBD_CDC);
 

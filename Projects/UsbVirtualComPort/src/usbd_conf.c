@@ -27,13 +27,11 @@
 
 #include "xpd_user.h"
 
-USB_HandleType husb = NEW_USB_HANDLE(USB);
+USB_HandleType usbHandle = NEW_USB_HANDLE(USB);
 
 void USB_IRQHandler(void)
 {
-    XPD_USB_IRQHandler(&husb);
-    /* Only for wakeup handling when low power is used */
-    XPD_EXTI_ClearFlag(USB_WAKEUP_EXTI_LINE);
+    XPD_USB_IRQHandler(&usbHandle);
 }
 
 int usbSuspendCallback(void * user)
@@ -95,54 +93,43 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
     XPD_NVIC_EnableIRQ(USB_IRQn);
 
     /* Link driver to user */
-    pdev->pData = &husb;
+    pdev->pData = &usbHandle;
 
     /* USB init setup */
     {
         const USB_InitType init = {
-            .SOF = ENABLE,
-            .LowPowerMode = DISABLE,
-            .LinkPowerMgmt = DISABLE,
+            .Speed = USB_SPEED_FULL,
         };
 
         /* Link the stack to the driver */
-        husb.User = pdev;
+        usbHandle.User = pdev;
 
-        husb.Callbacks.SetupStage       = USBD_LL_SetupStage;
-        husb.Callbacks.DataOutStage     = USBD_LL_DataOutStage;
-        husb.Callbacks.DataInStage      = USBD_LL_DataInStage;
-        husb.Callbacks.SOF              = USBD_LL_SOF;
-        husb.Callbacks.Reset            = USBD_LL_Reset;
-        husb.Callbacks.Suspend          = usbSuspendCallback;
-        husb.Callbacks.Resume           = usbResumeCallback;
-        husb.Callbacks.Connected        = USBD_LL_DevConnected;
-        husb.Callbacks.Disconnected     = USBD_LL_DevDisconnected;
-        husb.Callbacks.ISOOUTIncomplete = USBD_LL_IsoOUTIncomplete;
-        husb.Callbacks.ISOINIncomplete  = USBD_LL_IsoINIncomplete;
+        usbHandle.Callbacks.SetupStage       = USBD_LL_SetupStage;
+        usbHandle.Callbacks.DataOutStage     = USBD_LL_DataOutStage;
+        usbHandle.Callbacks.DataInStage      = USBD_LL_DataInStage;
+        usbHandle.Callbacks.SOF              = USBD_LL_SOF;
+        usbHandle.Callbacks.Reset            = USBD_LL_Reset;
+        usbHandle.Callbacks.Suspend          = usbSuspendCallback;
+        usbHandle.Callbacks.Resume           = usbResumeCallback;
+        usbHandle.Callbacks.Connected        = USBD_LL_DevConnected;
+        usbHandle.Callbacks.Disconnected     = USBD_LL_DevDisconnected;
 
         XPD_USB_Init(pdev->pData, &init);
 
         if (init.LowPowerMode != DISABLE)
         {
-            EXTI_InitType wakeup = {
-                .ITCallback = NULL, /* USB IRQHandler is used */
-                .Edge = EDGE_RISING,
-                .Reaction = REACTION_IT,
-            };
+            EXTI_InitType wakeup = USB_WAKEUP_EXTI_INIT;
             XPD_EXTI_Init(USB_WAKEUP_EXTI_LINE, &wakeup);
         }
     }
 
-    /* SETUP endpoints */
-    XPD_USB_PMAConfig(pdev->pData, 0x00, 0x18, DISABLE);
-    XPD_USB_PMAConfig(pdev->pData, 0x80, 0x58, DISABLE);
-
     /* Endpoints for CDC device */
-    XPD_USB_PMAConfig(pdev->pData, CDC_IN_EP, 0xC0, DISABLE);
-    XPD_USB_PMAConfig(pdev->pData, CDC_OUT_EP, 0x110, DISABLE);
-    XPD_USB_PMAConfig(pdev->pData, CDC_CMD_EP, 0x100, DISABLE);
+    XPD_USB_EP_BufferInit(pdev->pData, CDC_IN_EP,  CDC_DATA_FS_MAX_PACKET_SIZE);
+    XPD_USB_EP_BufferInit(pdev->pData, CDC_OUT_EP, CDC_DATA_FS_MAX_PACKET_SIZE);
+    XPD_USB_EP_BufferInit(pdev->pData, CDC_CMD_EP, CDC_CMD_PACKET_SIZE);
 
-    pdev->dev_speed = USBD_SPEED_FULL;
+    /* USB device only supports full speed */
+    USBD_LL_SetSpeed(pdev, USBD_SPEED_FULL);
 
     return USBD_OK;
 }

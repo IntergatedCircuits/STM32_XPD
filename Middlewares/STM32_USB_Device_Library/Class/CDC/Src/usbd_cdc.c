@@ -144,8 +144,7 @@ __ALIGN_BEGIN static const uint8_t USBD_CDC_CfgHSDesc[USB_CDC_CONFIG_DESC_SIZ] _
     0x80 | (USBD_SELF_POWERED << 6),   /* bmAttributes: self powered */
     USBD_MAX_POWER_mA / 2,   /* MaxPower x mA */
 
-    /*---------------------------------------------------------------------------*/
-
+#if (CDC_AT_COMMAND_SUPPORT == 1)
     /*Interface Descriptor */
     0x09,   /* bLength: Interface Descriptor size */
     USB_DESC_TYPE_INTERFACE,  /* bDescriptorType: Interface */
@@ -193,7 +192,7 @@ __ALIGN_BEGIN static const uint8_t USBD_CDC_CfgHSDesc[USB_CDC_CONFIG_DESC_SIZ] _
     LOBYTE(CDC_CMD_PACKET_SIZE),     /* wMaxPacketSize: */
     HIBYTE(CDC_CMD_PACKET_SIZE),
     0x10,                           /* bInterval: */
-    /*---------------------------------------------------------------------------*/
+#endif /* (CDC_AT_COMMAND_SUPPORT == 1) */
 
     /*Data class interface descriptor*/
     0x09,   /* bLength: Endpoint Descriptor size */
@@ -240,6 +239,7 @@ __ALIGN_BEGIN static const uint8_t USBD_CDC_CfgFSDesc[USB_CDC_CONFIG_DESC_SIZ] _
     0x80 | (USBD_SELF_POWERED << 6),/* bmAttributes: self powered */
     USBD_MAX_POWER_mA / 2,          /* MaxPower x mA */
 
+#if (CDC_AT_COMMAND_SUPPORT == 1)
     /*Interface Descriptor */
     0x09,                       /* bLength: Interface Descriptor size */
     USB_DESC_TYPE_INTERFACE,    /* bDescriptorType: Interface */
@@ -286,8 +286,8 @@ __ALIGN_BEGIN static const uint8_t USBD_CDC_CfgFSDesc[USB_CDC_CONFIG_DESC_SIZ] _
     0x03,                       /* bmAttributes: Interrupt */
     LOBYTE(CDC_CMD_PACKET_SIZE),/* wMaxPacketSize: */
     HIBYTE(CDC_CMD_PACKET_SIZE),
-    0x10,                       /* bInterval: */
-    /*---------------------------------------------------------------------------*/
+    CDC_CMD_INTR_INTERVAL,      /* bInterval: */
+#endif /* (CDC_AT_COMMAND_SUPPORT == 1) */
 
     /*Data class interface descriptor*/
     0x09,                   /* bLength: Endpoint Descriptor size */
@@ -360,11 +360,13 @@ static uint8_t USBD_CDC_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
     USBD_EP_TYPE_BULK,
     out_packet_size);
 
+#if (CDC_AT_COMMAND_SUPPORT == 1)
     /* Open Command IN EP */
     USBD_LL_OpenEP(pdev,
     CDC_CMD_EP,
     USBD_EP_TYPE_INTR,
     CDC_CMD_PACKET_SIZE);
+#endif
 
     pdev->pClassData = USBD_malloc(sizeof(USBD_CDC_HandleTypeDef));
 
@@ -493,15 +495,19 @@ static uint8_t USBD_CDC_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
     {
         USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*) pdev->pClassData;
 
-        /* Set the transmit state to: free to transmit */
-        hcdc->TxState = USBD_OK;
-
-        if (((USBD_CDC_ItfTypeDef *) pdev->pUserData)->Transmitted != NULL)
+        /* If there has been a valid transmit request */
+        if (hcdc->TxState == USBD_BUSY)
         {
-            /* Provide callback on successful transmission */
-            ((USBD_CDC_ItfTypeDef *) pdev->pUserData)->Transmitted(
-                    hcdc->TxBuffer,
-                    hcdc->TxLength);
+            /* Set the transmit state to: free to transmit */
+            hcdc->TxState = USBD_OK;
+
+            if (((USBD_CDC_ItfTypeDef *) pdev->pUserData)->Transmitted != NULL)
+            {
+                /* Provide callback on successful transmission */
+                ((USBD_CDC_ItfTypeDef *) pdev->pUserData)->Transmitted(
+                        hcdc->TxBuffer,
+                        hcdc->TxLength);
+            }
         }
     }
 

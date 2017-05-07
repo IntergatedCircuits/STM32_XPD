@@ -51,9 +51,7 @@ USART_InitType SerialConfig = {
         .DataSize      = 8,
         .StopBits      = USART_STOPBITS_1,
         .SingleSample  = DISABLE,
-#ifdef USE_XPD_USART_ERROR_DETECT
         .Parity        = USART_PARITY_NONE,
-#endif
 };
 
 UART_InitType UartConfig = {
@@ -96,7 +94,7 @@ const USBD_CDC_ItfTypeDef USBD_Interface_fops_FS =
  * @brief  This interrupt handler periodically updates IN endpoint data
  *         from UART received data
  */
-void SysTick_IRQHandler(void)
+void SysTick_Handler(void)
 {
     CDC_ProcessIN();
 }
@@ -111,7 +109,7 @@ static void CDC_Init(void)
     XPD_SysTick_DisableIT();
 
     /* Initialize UART with the current configuration, reset DMAs */
-	(void) XPD_UART_Init(&uart, &SerialConfig, &UartConfig);
+    (void) XPD_UART_Init(&uart, &SerialConfig, &UartConfig);
     XPD_DMA_Stop(uart.DMA.Transmit);
     XPD_DMA_Stop(uart.DMA.Receive);
 
@@ -121,9 +119,9 @@ static void CDC_Init(void)
     /* Page 0 is initialized for OUT endpoint reception */
     CDC_Memory.OutStatus[0] = BUFFER_RECEIVING;
     CDC_Memory.OutStatus[1] = BUFFER_EMPTY;
-	(void) USBD_CDC_Receive(&hUsbDeviceFS, CDC_Memory.OutData[0], CDC_OUT_DATA_SIZE / 2);
+    (void) USBD_CDC_Receive(&hUsbDeviceFS, CDC_Memory.OutData[0], CDC_OUT_DATA_SIZE / 2);
 
-	/* Start circular buffer reception with DMA for IN endpoint */
+    /* Start circular buffer reception with DMA for IN endpoint */
     CDC_Memory.Index = 0;
     XPD_USART_ClearFlag(&uart, RXNE);
     (void) XPD_USART_Receive_DMA(&uart, CDC_Memory.InData, CDC_IN_DATA_SIZE);
@@ -137,7 +135,8 @@ static void CDC_Init(void)
  */
 static void CDC_DeInit(void)
 {
-	(void) XPD_USART_Deinit(&uart);
+    XPD_SysTick_DisableIT();
+    (void) XPD_USART_Deinit(&uart);
 }
 
 /**
@@ -148,68 +147,64 @@ static void CDC_DeInit(void)
  */
 static void CDC_USB_Control(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 {
-	switch (cmd)
-	{
+    switch (cmd)
+    {
     /* Sets the UART configuration */
-	case CDC_SET_LINE_CODING:
-	    SerialConfig.BaudRate = (uint32_t)(pbuf[0] | (pbuf[1] << 8) | (pbuf[2] << 16) | (pbuf[3] << 24));
-	    SerialConfig.DataSize = pbuf[6];
+    case CDC_SET_LINE_CODING:
+        SerialConfig.BaudRate = (uint32_t)(pbuf[0] | (pbuf[1] << 8) | (pbuf[2] << 16) | (pbuf[3] << 24));
+        SerialConfig.DataSize = pbuf[6];
 
-	    /* set the Stop bit */
-	    if (pbuf[4] == USART_STOPBITS_2)
-	        SerialConfig.StopBits = USART_STOPBITS_2;
-	    else
-	        SerialConfig.StopBits = USART_STOPBITS_1;
+        /* set the Stop bit */
+        if (pbuf[4] == USART_STOPBITS_2)
+            SerialConfig.StopBits = USART_STOPBITS_2;
+        else
+            SerialConfig.StopBits = USART_STOPBITS_1;
 
-#ifdef USE_XPD_USART_ERROR_DETECT
-	    /* set the parity bit*/
-	    switch (pbuf[5])
-	    {
-	    case 1:
-	        SerialConfig.Parity = USART_PARITY_ODD;
-	        break;
-	    case 2:
-	        SerialConfig.Parity = USART_PARITY_EVEN;
-	        break;
-	    default:
-	        SerialConfig.Parity = USART_PARITY_NONE;
-	        break;
-	    }
-#endif
-	    CDC_Init();
-		break;
+        /* set the parity bit*/
+        switch (pbuf[5])
+        {
+        case 1:
+            SerialConfig.Parity = USART_PARITY_ODD;
+            break;
+        case 2:
+            SerialConfig.Parity = USART_PARITY_EVEN;
+            break;
+        default:
+            SerialConfig.Parity = USART_PARITY_NONE;
+            break;
+        }
+        CDC_Init();
+        break;
 
     /* Returns the current UART configuration */
-	case CDC_GET_LINE_CODING:
-		pbuf[0] = (uint8_t) (SerialConfig.BaudRate);
-		pbuf[1] = (uint8_t) (SerialConfig.BaudRate >> 8);
-		pbuf[2] = (uint8_t) (SerialConfig.BaudRate >> 16);
-		pbuf[3] = (uint8_t) (SerialConfig.BaudRate >> 24);
-		pbuf[4] = SerialConfig.StopBits;
-#ifdef USE_XPD_USART_ERROR_DETECT
-		pbuf[5] = (SerialConfig.Parity == USART_PARITY_ODD) ? 1 : SerialConfig.Parity;
-#endif
-		pbuf[6] = SerialConfig.DataSize;
-		break;
+    case CDC_GET_LINE_CODING:
+        pbuf[0] = (uint8_t) (SerialConfig.BaudRate);
+        pbuf[1] = (uint8_t) (SerialConfig.BaudRate >> 8);
+        pbuf[2] = (uint8_t) (SerialConfig.BaudRate >> 16);
+        pbuf[3] = (uint8_t) (SerialConfig.BaudRate >> 24);
+        pbuf[4] = SerialConfig.StopBits;
+        pbuf[5] = (SerialConfig.Parity == USART_PARITY_ODD) ? 1 : SerialConfig.Parity;
+        pbuf[6] = SerialConfig.DataSize;
+        break;
 
-	case CDC_SET_CONTROL_LINE_STATE:
+    case CDC_SET_CONTROL_LINE_STATE:
 #if 0 /* RTS and CTS signals are not mapped on the current hardware */
-	    UartConfig.FlowControl = ((pbuf[0] & 1) != 0) ? UART_FLOWCONTROL_RTS_CTS : UART_FLOWCONTROL_NONE;
+        UartConfig.FlowControl = ((pbuf[0] & 1) != 0) ? UART_FLOWCONTROL_RTS_CTS : UART_FLOWCONTROL_NONE;
 
         CDC_Init();
 #endif
-		break;
+        break;
 
     /* Unused commands */
-	case CDC_SEND_BREAK:
+    case CDC_SEND_BREAK:
     case CDC_SEND_ENCAPSULATED_COMMAND:
     case CDC_GET_ENCAPSULATED_RESPONSE:
     case CDC_SET_COMM_FEATURE:
     case CDC_GET_COMM_FEATURE:
     case CDC_CLEAR_COMM_FEATURE:
-	default:
-		break;
-	}
+    default:
+        break;
+    }
 }
 
 /**
@@ -265,21 +260,12 @@ static void CDC_UART_Transmitted(void * handle)
 
 /**
  * @brief  This function is called when USB CDC interface finished transmission
- * 		   of buffer data.
+ *         of buffer data.
  * @param  pbuf: Buffer of data to be received
  * @param  length: Number of data transmitted (in bytes)
  */
 static void CDC_USB_Transmitted(uint8_t * pbuf, uint32_t length)
 {
-    /* Increment index with the transmitted data size */
-    CDC_Memory.Index += (uint16_t)length;
-
-    /* Prevent overflow */
-    if (CDC_Memory.Index >= CDC_IN_DATA_SIZE)
-    {
-        CDC_Memory.Index = 0;
-    }
-
     /* Call the UART Rx -> USB IN processing */
     CDC_ProcessIN();
 }
@@ -297,16 +283,20 @@ static void CDC_ProcessIN(void)
     /* If the UART RX index is ahead, transmit the new data */
     if (CDC_Memory.Index < rxIndex)
     {
-        /* Return value is ignored, always attempt to send new data */
-        (void) USBD_CDC_Transmit(&hUsbDeviceFS,
-                &CDC_Memory.InData[CDC_Memory.Index], rxIndex - CDC_Memory.Index);
+        if(USBD_OK == USBD_CDC_Transmit(&hUsbDeviceFS,
+                &CDC_Memory.InData[CDC_Memory.Index], rxIndex - CDC_Memory.Index))
+        {
+            CDC_Memory.Index = rxIndex;
+        }
     }
     /* If the USB IN index is ahead, the buffer has wrapped, transmit until the end */
     else if (CDC_Memory.Index > rxIndex)
     {
-        /* Return value is ignored, always attempt to send new data */
-        (void) USBD_CDC_Transmit(&hUsbDeviceFS,
-                &CDC_Memory.InData[CDC_Memory.Index], CDC_IN_DATA_SIZE - CDC_Memory.Index);
+        if (USBD_OK == USBD_CDC_Transmit(&hUsbDeviceFS,
+                &CDC_Memory.InData[CDC_Memory.Index], CDC_IN_DATA_SIZE - CDC_Memory.Index))
+        {
+            CDC_Memory.Index = 0;
+        }
     }
 }
 

@@ -64,12 +64,6 @@ const PinConfigType PinConfig[] =
     },
 };
 
-/* Route SysTick to XPD */
-void SysTick_Handler(void)
-{
-    XPD_SysTick_IRQHandler();
-}
-
 /* System clocks configuration */
 void ClockConfiguration(void)
 {

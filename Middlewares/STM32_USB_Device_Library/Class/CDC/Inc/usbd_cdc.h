@@ -56,7 +56,14 @@ extern "C"
 #define CDC_DATA_FS_MAX_PACKET_SIZE                 64  /* Endpoint IN & OUT Packet size */
 #define CDC_CMD_PACKET_SIZE                         8  /* Control Endpoint Packet size */ 
 
+#define CDC_AT_COMMAND_SUPPORT                      1
+
+#if (CDC_AT_COMMAND_SUPPORT == 1)
 #define USB_CDC_CONFIG_DESC_SIZ                     67
+#define CDC_CMD_INTR_INTERVAL                       0x80
+#else
+#define USB_CDC_CONFIG_DESC_SIZ                     32
+#endif
 #define CDC_DATA_HS_IN_PACKET_SIZE                  CDC_DATA_HS_MAX_PACKET_SIZE
 #define CDC_DATA_HS_OUT_PACKET_SIZE                 CDC_DATA_HS_MAX_PACKET_SIZE
 
