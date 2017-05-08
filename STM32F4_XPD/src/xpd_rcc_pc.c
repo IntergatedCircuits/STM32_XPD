@@ -23,6 +23,36 @@
   */
 #include "xpd_rcc.h"
 
+#if defined(USE_XPD_I2C)
+#include "xpd_i2c.h"
+
+/** @addtogroup I2C
+ * @{ */
+
+/** @addtogroup I2C_Clock_Source
+ * @{ */
+
+/** @defgroup I2C_Clock_Source_Exported_Functions I2C Clock Source Exported Functions
+ * @{ */
+
+/**
+ * @brief Returns the input clock frequency of the I2C.
+ * @param hi2c: pointer to the I2C handle structure
+ * @return The clock frequency of the I2C in Hz
+ */
+uint32_t XPD_I2C_GetClockFreq(I2C_HandleType * hi2c)
+{
+    return XPD_RCC_GetClockFreq(PCLK1);
+}
+
+/** @} */
+
+/** @} */
+
+/** @} */
+
+#endif /* USE_XPD_I2C */
+
 #if defined(USE_XPD_RTC)
 #include "xpd_pwr.h"
 #include "xpd_rtc.h"

@@ -22,7 +22,24 @@
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-#if   defined(XPD_RTC_API)
+#if   defined(XPD_I2C_API)
+
+/** @addtogroup I2C
+ * @{ */
+
+/** @defgroup I2C_Clock_Source I2C Clock Source
+ * @{ */
+
+/** @addtogroup I2C_Clock_Source_Exported_Functions
+ * @{ */
+uint32_t        XPD_I2C_GetClockFreq        (I2C_HandleType * hi2c);
+/** @} */
+
+/** @} */
+
+/** @} */
+
+#elif defined(XPD_RTC_API)
 /** @addtogroup RTC
  * @{ */
 
