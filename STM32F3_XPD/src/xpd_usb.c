@@ -868,8 +868,7 @@ void XPD_USB_IRQHandler(USB_HandleType * husb)
                 else
                 {
                     /* Continue data transmission */
-                    XPD_USB_EP_Transmit(husb, EpAddress, ep->Transfer.buffer,
-                            ep->Transfer.length);
+                    usb_epTransmit(husb, ep, ep->Transfer.length);
                 }
             }
         }
