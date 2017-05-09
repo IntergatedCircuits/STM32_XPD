@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    xpd_rcc_cc.c
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2016-01-17
+  * @version V0.2
+  * @date    2017-05-09
   * @brief   STM32 eXtensible Peripheral Drivers RCC Core Clocks Module
   *
   *  This file is part of STM32_XPD.
@@ -68,11 +68,11 @@ static uint32_t rcc_convertClockDivider(RCC_ClockType clockType, ClockDividerTyp
  */
 
 /**
- * Configures the high speed internal oscillator.
- * @param Config: pointer to the configuration parameters
+ * Sets the new state of the high speed internal oscillator.
+ * @param NewState: the new operation state
  * @return Result of the operation
  */
-XPD_ReturnType XPD_RCC_HSIConfig(const RCC_HSI_InitType * Config)
+XPD_ReturnType XPD_RCC_HSIConfig(RCC_OscStateType NewState)
 {
     XPD_ReturnType result = XPD_OK;
     RCC_OscType sysclock = XPD_RCC_GetSYSCLKSource();
@@ -84,30 +84,21 @@ XPD_ReturnType XPD_RCC_HSIConfig(const RCC_HSI_InitType * Config)
     )
     {
         /* When HSI is used as system clock it will not disabled */
-        if ((RCC_REG_BIT(CR,HSIRDY) != 0) && (Config->State == OSC_OFF))
+        if ((RCC_REG_BIT(CR,HSIRDY) != 0) && (NewState == OSC_OFF))
         {
             result = XPD_ERROR;
-        }
-        /* Otherwise, just the calibration is allowed */
-        else
-        {
-            /* Adjusts the Internal High Speed oscillator (HSI) calibration value.*/
-            RCC->CR.b.HSICAL = Config->CalibrationValue;
         }
     }
     else
     {
         uint32_t timeout = RCC_HSI_TIMEOUT;
-        RCC_REG_BIT(CR,HSION) = Config->State;
+        RCC_REG_BIT(CR,HSION) = NewState;
 
         /* Check the HSI State */
-        if (Config->State != OSC_OFF)
+        if (NewState != OSC_OFF)
         {
             /* Wait until HSI is ready */
             result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_HSIRDY, RCC_CR_HSIRDY, &timeout);
-
-            /* Adjusts the Internal High Speed oscillator (HSI) calibration value.*/
-            RCC->CR.b.HSICAL = Config->CalibrationValue;
         }
         else
         {
@@ -117,13 +108,14 @@ XPD_ReturnType XPD_RCC_HSIConfig(const RCC_HSI_InitType * Config)
     }
     return result;
 }
+
 #ifdef RCC_HSI48_SUPPORT
 /**
- * Configures the high speed internal oscillator.
+ * Sets the new state of the 48 MHz high speed internal oscillator.
  * @param Config: pointer to the configuration parameters
  * @return Result of the operation
  */
-XPD_ReturnType XPD_RCC_HSI48Config(const RCC_HSI_InitType * Config)
+XPD_ReturnType XPD_RCC_HSI48Config(RCC_OscStateType NewState)
 {
     XPD_ReturnType result = XPD_OK;
     RCC_OscType sysclock = XPD_RCC_GetSYSCLKSource();
@@ -135,30 +127,21 @@ XPD_ReturnType XPD_RCC_HSI48Config(const RCC_HSI_InitType * Config)
     )
     {
         /* When HSI is used as system clock it will not disabled */
-        if ((RCC_REG_BIT(CR2,HSI48RDY) != 0) && (Config->State != OSC_ON))
+        if ((RCC_REG_BIT(CR2,HSI48RDY) != 0) && (NewState != OSC_ON))
         {
             result = XPD_ERROR;
-        }
-        /* Otherwise, just the calibration is allowed */
-        else
-        {
-            /* Adjusts the Internal High Speed oscillator (HSI) calibration value.*/
-            RCC->CR2.b.HSI48CAL = Config->CalibrationValue;
         }
     }
     else
     {
         uint32_t timeout = RCC_HSI48_TIMEOUT;
-        RCC_REG_BIT(CR2,HSI48ON) = Config->State;
+        RCC_REG_BIT(CR2,HSI48ON) = NewState;
 
         /* Check the HSI State */
-        if (Config->State != OSC_OFF)
+        if (NewState != OSC_OFF)
         {
             /* Wait until HSI is ready */
             result = XPD_WaitForMatch(&RCC->CR2.w, RCC_CR2_HSI48RDY, RCC_CR2_HSI48RDY, &timeout);
-
-            /* Adjusts the Internal High Speed oscillator (HSI) calibration value.*/
-            RCC->CR2.b.HSI48CAL = Config->CalibrationValue;
         }
         else
         {
@@ -573,6 +556,7 @@ XPD_ReturnType XPD_RCC_HCLKConfig(RCC_OscType SYSCLK_Source, ClockDividerType HC
     uint32_t clkDiv;
     uint32_t timeout = RCC_CLOCKSWITCH_TIMEOUT;
 
+    /* Checking whether the SYSCLK source is ready to be used */
     switch (SYSCLK_Source)
     {
         case HSI:

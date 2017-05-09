@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    xpd_rcc_cc.h
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2015-12-30
+  * @version V0.2
+  * @date    2017-05-09
   * @brief   STM32 eXtensible Peripheral Drivers RCC Core Clocks Module
   *
   *  This file is part of STM32_XPD.
@@ -63,13 +63,6 @@ typedef enum
     OSC_BYPASS = 3  /*!< External oscillator BYPASS state (external clock source) */
 }RCC_OscStateType;
 
-/** @brief HSI setup structure */
-typedef struct
-{
-    uint8_t          CalibrationValue; /*!< HSI calibration value [0..31] (default is 16) */
-    RCC_OscStateType State;            /*!< HSI state */
-}RCC_HSI_InitType;
-
 /** @brief PLL setup structure */
 typedef struct
 {
@@ -118,6 +111,14 @@ typedef enum
 typedef struct {
     XPD_SimpleCallbackType OscReady; /*!< Oscillator ready callback */
     XPD_SimpleCallbackType CSS;      /*!< Clock Security System callback */
+#ifdef RCC_HSI48_SUPPORT
+    struct {
+        XPD_SimpleCallbackType SyncSuccess;  /*!< SYNC OK flag requested interrupt */
+        XPD_SimpleCallbackType SyncWarning;  /*!< SYNC WARN flag requested interrupt */
+        XPD_SimpleCallbackType SyncExpected; /*!< ESYNC flag requested interrupt */
+        XPD_SimpleCallbackType SyncError;    /*!< a SYNC error flag requested interrupt */
+    }HSI48;
+#endif
 } XPD_RCC_CallbacksType;
 /** @} */
 
@@ -134,9 +135,6 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
 
 /** @brief Default HSI calibration value */
 #define HSI_CALIBRATION_DEFAULT_VALUE   0x10
-
-/** @brief Default HSI48 calibration value */
-#define HSI48_CALIBRATION_DEFAULT_VALUE 0x10
 
 /**
  * @brief  Enable the specified RCC interrupt.
@@ -199,9 +197,9 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
 
 /** @addtogroup RCC_Core_Clocks_Exported_Functions_Oscillators
  * @{ */
-XPD_ReturnType      XPD_RCC_HSIConfig           (const RCC_HSI_InitType * Config);
+XPD_ReturnType      XPD_RCC_HSIConfig           (RCC_OscStateType NewState);
 #ifdef RCC_HSI48_SUPPORT
-XPD_ReturnType      XPD_RCC_HSI48Config         (const RCC_HSI_InitType * Config);
+XPD_ReturnType      XPD_RCC_HSI48Config         (RCC_OscStateType NewState);
 #endif
 XPD_ReturnType      XPD_RCC_LSIConfig           (RCC_OscStateType NewState);
 XPD_ReturnType      XPD_RCC_PLLConfig           (const RCC_PLL_InitType * Config);

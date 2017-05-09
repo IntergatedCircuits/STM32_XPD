@@ -49,6 +49,9 @@
 
 #include "xpd_rcc_cc.h"
 #include "xpd_rcc_gen.h"
+#ifdef CRS
+#include "xpd_rcc_crs.h"
+#endif
 
 /** @} */
 

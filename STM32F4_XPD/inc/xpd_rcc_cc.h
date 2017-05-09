@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    xpd_rcc_cc.h
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2015-12-30
+  * @version V0.2
+  * @date    2017-05-09
   * @brief   STM32 eXtensible Peripheral Drivers RCC Core Clocks Module
   *
   *  This file is part of STM32_XPD.
@@ -61,13 +61,6 @@ typedef enum
     OSC_ON     = 1, /*!< Oscillator ON state (internal/external resonator) */
     OSC_BYPASS = 3  /*!< External oscillator BYPASS state (external clock source) */
 }RCC_OscStateType;
-
-/** @brief HSI setup structure */
-typedef struct
-{
-    uint8_t          CalibrationValue; /*!< HSI calibration value [0..31] (default is 16) */
-    RCC_OscStateType State;            /*!< HSI state */
-}RCC_HSI_InitType;
 
 /** @brief PLL setup structure */
 typedef struct
@@ -215,7 +208,7 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
 
 /** @addtogroup RCC_Core_Clocks_Exported_Functions_Oscillators
  * @{ */
-XPD_ReturnType      XPD_RCC_HSIConfig           (const RCC_HSI_InitType * Config);
+XPD_ReturnType      XPD_RCC_HSIConfig           (RCC_OscStateType NewState);
 XPD_ReturnType      XPD_RCC_LSIConfig           (RCC_OscStateType NewState);
 XPD_ReturnType      XPD_RCC_PLLConfig           (const RCC_PLL_InitType * Config);
 #ifdef HSE_VALUE
