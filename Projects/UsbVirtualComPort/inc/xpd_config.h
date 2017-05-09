@@ -30,8 +30,8 @@
 /* TODO step 2: specify startup configuration */
 #define NVIC_PRIOGROUP_SELECT       NVIC_PRIOGROUP_0PRE_4SUB
 #define PREFETCH_ENABLE             1
-#define VDD_VALUE                   3300 /* Value of VDD in mV */
-#define VDDA_VALUE                  3300 /* Value of VDD Analog in mV */
+#define VDD_VALUE                   3000 /* Value of VDD in mV */
+#define VDDA_VALUE                  3000 /* Value of VDD Analog in mV */
 
 /* TODO step 3: specify used XPD modules */
 #define USE_XPD_TIM

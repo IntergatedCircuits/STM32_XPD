@@ -123,9 +123,9 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
         }
     }
 
-    /* Endpoints for CDC device */
-    XPD_USB_EP_BufferInit(pdev->pData, CDC_IN_EP,  CDC_DATA_FS_MAX_PACKET_SIZE);
-    XPD_USB_EP_BufferInit(pdev->pData, CDC_OUT_EP, CDC_DATA_FS_MAX_PACKET_SIZE);
+    /* Endpoints for CDC device (bulk EPs are set to double-buffered) */
+    XPD_USB_EP_BufferInit(pdev->pData, CDC_IN_EP,  CDC_DATA_FS_MAX_PACKET_SIZE * 2);
+    XPD_USB_EP_BufferInit(pdev->pData, CDC_OUT_EP, CDC_DATA_FS_MAX_PACKET_SIZE * 2);
     XPD_USB_EP_BufferInit(pdev->pData, CDC_CMD_EP, CDC_CMD_PACKET_SIZE);
 
     /* USB device only supports full speed */
@@ -206,6 +206,7 @@ USBD_StatusTypeDef USBD_LL_CloseEP(USBD_HandleTypeDef *pdev, uint8_t ep_addr)
  */
 USBD_StatusTypeDef USBD_LL_FlushEP(USBD_HandleTypeDef *pdev, uint8_t ep_addr)
 {
+    XPD_USB_EP_Flush(pdev->pData, ep_addr);
     return USBD_OK;
 }
 

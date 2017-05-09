@@ -879,7 +879,9 @@ void XPD_USB_IRQHandler(USB_HandleType * husb)
     {
         XPD_USB_ClearFlag(husb, RESET);
         XPD_SAFE_CALLBACK(husb->Callbacks.Reset, husb->User);
-        XPD_USB_SetAddress(husb, 0);
+
+        /* reset device address, enable addressing */
+        USB->DADDR.w = USB_DADDR_EF;
     }
 
     /* Handle wakeup signal */
@@ -1006,7 +1008,7 @@ USB_ChargerType XPD_USB_ChargerDetect(USB_HandleType * husb)
         uint32_t timeout = 1000; /* Adjust depending on the speed of plugging in the device */
 
         /* Data Contact Detect: determines contact of data lines to the bus powering entity */
-        if (XPD_OK == XPD_WaitForDiff(&USB->BCDR.w, USB_BCDR_DCDET, 0, &timeout))
+        if (XPD_OK == XPD_WaitForDiff((void*)&USB->BCDR.w, USB_BCDR_DCDET, 0, &timeout))
         {
             /* Bus electric stabilization */
             XPD_Delay_ms(300);

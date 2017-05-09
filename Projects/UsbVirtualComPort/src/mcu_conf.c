@@ -67,13 +67,14 @@ const PinConfigType PinConfig[] =
 /* System clocks configuration */
 void ClockConfiguration(void)
 {
-    const RCC_HSI_InitType hsi = {
-        .State = OSC_ON,
-        .CalibrationValue = HSI48_CALIBRATION_DEFAULT_VALUE
+    const CRS_InitType crsSetup = {
+        .Source     = CRS_SYNC_SOURCE_USB,
+        .ErrorLimit = CRS_ERRORLIMIT_DEFAULT
     };
 
     /* HSI48 configuration */
-    XPD_RCC_HSI48Config(&hsi);
+    XPD_RCC_HSI48Config(OSC_ON);
+    XPD_CRS_Init(&crsSetup);
 
     /* System clocks configuration */
     XPD_RCC_HCLKConfig(HSI48, CLK_DIV1, 1);
