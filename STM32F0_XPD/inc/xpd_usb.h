@@ -60,14 +60,6 @@ typedef enum
     USB_EP_TYPE_INTERRUPT   = 3  /*!< Interrupt endpoint type */
 }USB_EndPointType;
 
-/** @brief USB Endpoints setup type */
-typedef struct
-{
-    uint16_t         MemSize;    /*!< Peripheral RAM memory to be allocated */
-    USB_EndPointType Type;       /*!< Endpoint type */
-    uint8_t          Address;    /*!< Endpoint address */
-}USB_EndPointInitType;
-
 /** @brief USB Endpoint management structure */
 typedef struct
 {
