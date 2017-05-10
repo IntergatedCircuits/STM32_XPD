@@ -232,6 +232,9 @@ typedef struct
 /** @brief Compatibility macro */
 #define         XPD_USB_EP_Flush(HANDLE,EP_NUMBER)  ((void)0)
 
+/** @brief Compatibility macro */
+#define         XPD_USB_PHY_ClockCtrl(HANDLE,SWITCH)((void)0)
+
 /** @} */
 
 /** @addtogroup USB_Exported_Functions

@@ -29,15 +29,23 @@
 
 USB_HandleType usbHandle = NEW_USB_HANDLE(USB);
 
+/* Common interrupt handler for USB core and WKUP line */
 void USB_IRQHandler(void)
 {
+    /* Handle USB interrupts */
     XPD_USB_IRQHandler(&usbHandle);
+
+    /* Handle USB WKUP interrupts */
+    XPD_EXTI_ClearFlag(USB_WAKEUP_EXTI_LINE);
+    XPD_USB_PHY_ClockCtrl(&usbHandle, ENABLE);
 }
 
 int usbSuspendCallback(void * user)
 {
     /* Inform USB library that core enters in suspend Mode */
     int retval = USBD_LL_Suspend(user);
+
+    XPD_USB_PHY_ClockCtrl(&usbHandle, DISABLE);
 
     if (((USB_HandleType *)(((USBD_HandleTypeDef *)user)->pData))->LowPowerMode == ENABLE)
     {
@@ -122,6 +130,10 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
             XPD_EXTI_Init(USB_WAKEUP_EXTI_LINE, &wakeup);
         }
     }
+
+    /* Control endpoints */
+    XPD_USB_EP_BufferInit(pdev->pData, 0x00,  0x40);
+    XPD_USB_EP_BufferInit(pdev->pData, 0x80,  0x40);
 
     /* Endpoints for CDC device (bulk EPs are set to double-buffered) */
     XPD_USB_EP_BufferInit(pdev->pData, CDC_IN_EP,  CDC_DATA_FS_MAX_PACKET_SIZE * 2);
