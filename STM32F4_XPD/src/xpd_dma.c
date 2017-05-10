@@ -394,7 +394,7 @@ void XPD_DMA_IRQHandler(DMA_HandleType * hdma)
         XPD_DMA_ClearFlag(hdma, HT);
 
         /* DMA mode is not CIRCULAR */
-        if (DMA_REG_BIT(hdma, CCR, CIRC) == 0)
+        if (XPD_DMA_CircularMode(hdma) == 0)
         {
             XPD_DMA_DisableIT(hdma, HT);
         }
@@ -410,7 +410,7 @@ void XPD_DMA_IRQHandler(DMA_HandleType * hdma)
         XPD_DMA_ClearFlag(hdma, TC);
 
         /* DMA mode is not CIRCULAR */
-        if (DMA_REG_BIT(hdma, CCR, CIRC) == 0)
+        if (XPD_DMA_CircularMode(hdma) == 0)
         {
             XPD_DMA_DisableIT(hdma, TC);
         }
