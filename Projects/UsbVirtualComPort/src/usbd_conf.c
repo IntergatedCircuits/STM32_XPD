@@ -105,10 +105,6 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
 
     XPD_USB_Init(&usbHandle, &init);
 
-    /* Control endpoints */
-    XPD_USB_EP_BufferInit(pdev->pData, 0x00,  0x40);
-    XPD_USB_EP_BufferInit(pdev->pData, 0x80,  0x40);
-
     /* Endpoints for CDC device (bulk EPs are set to double-buffered) */
     XPD_USB_EP_BufferInit(pdev->pData, CDC_IN_EP,  CDC_DATA_FS_MAX_PACKET_SIZE * 2);
     XPD_USB_EP_BufferInit(pdev->pData, CDC_OUT_EP, CDC_DATA_FS_MAX_PACKET_SIZE * 2);
