@@ -100,6 +100,8 @@ typedef struct
 {
     void *                      User;                           /*!< Pointer to upper stack handler */
     struct {
+        XPD_HandleCallbackType DepInit;                         /*!< Callback to initialize module dependencies */
+        XPD_HandleCallbackType DepDeinit;                       /*!< Callback to restore module dependencies */
 #ifndef USB_BCDR_DPPU
         XPD_CtrlFnType ConnectionStateCtrl;                     /*!< Callback to set USB device bus line connection state */
 #endif
@@ -133,9 +135,12 @@ typedef struct
 /**
  * @brief  USB Handle initializer macro
  * @param  INSTANCE: specifies the USB peripheral instance.
+ * @param  INIT_FN: specifies the dependency initialization function to call back.
+ * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
  */
-#define         NEW_USB_HANDLE(INSTANCE)                \
-     {  .User = NULL, .LinkState = USB_LPM_L3 }
+#define         NEW_USB_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)          \
+     {  .User = NULL, .LinkState = USB_LPM_L3,                      \
+        .Callbacks.DepInit = (INIT_FN), .Callbacks.DepDeinit = (DEINIT_FN)}
 
 #ifdef USB_BB
 #define USB_REG_BIT(HANDLE, REG_NAME, BIT_NAME) (USB_BB->REG_NAME.BIT_NAME)

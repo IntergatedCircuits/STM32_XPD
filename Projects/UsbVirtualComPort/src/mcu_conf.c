@@ -82,6 +82,56 @@ void ClockConfiguration(void)
     XPD_RCC_PCLKConfig(PCLK1, CLK_DIV1);
 }
 
+/************************* USB ************************************/
+
+/* USB dependencies initialization */
+static void usbinit(void * handle)
+{
+    /* GPIO settings */
+    XPD_GPIO_InitPin(PinConfig[USB_DM_PIN].port, PinConfig[USB_DM_PIN].pin, &PinConfig[USB_DM_PIN].config);
+    XPD_GPIO_InitPin(PinConfig[USB_DP_PIN].port, PinConfig[USB_DP_PIN].pin, &PinConfig[USB_DP_PIN].config);
+
+    /* USB clock configuration - must be operated from 48 MHz */
+    XPD_USB_ClockConfig(USB_CLOCKSOURCE_HSI48);
+
+    /* Enable USB FS Interrupt */
+    XPD_NVIC_SetPriorityConfig(USB_IRQn, NVIC_COMMON_PRIO_USB_USART, 0);
+    XPD_NVIC_EnableIRQ(USB_IRQn);
+
+#ifdef XPD_GPIOA_PinRemap
+    XPD_GPIOA_PinRemap(11);
+#endif
+
+    /* Wakeup EXTI line setup */
+    if (((USB_HandleType*)handle)->LowPowerMode != DISABLE)
+    {
+        EXTI_InitType wakeup = USB_WAKEUP_EXTI_INIT;
+        XPD_EXTI_Init(USB_WAKEUP_EXTI_LINE, &wakeup);
+    }
+}
+
+/* USB dependencies deinitialization */
+static void usbdeinit(void * handle)
+{
+    XPD_GPIO_DeinitPin(PinConfig[USB_DM_PIN].port, PinConfig[USB_DM_PIN].pin);
+    XPD_GPIO_DeinitPin(PinConfig[USB_DP_PIN].port, PinConfig[USB_DP_PIN].pin);
+    XPD_NVIC_DisableIRQ(USB_IRQn);
+}
+
+USB_HandleType usbHandle = NEW_USB_HANDLE(USB, usbinit, usbdeinit);
+
+/* Common interrupt handler for USB core and WKUP line */
+void USB_IRQHandler(void)
+{
+    /* Handle USB interrupts */
+    XPD_USB_IRQHandler(&usbHandle);
+
+    /* Handle USB WKUP interrupts */
+    XPD_EXTI_ClearFlag(USB_WAKEUP_EXTI_LINE);
+
+    XPD_USB_PHY_ClockCtrl(&usbHandle, ENABLE);
+}
+
 /************************* UART ************************************/
 DMA_HandleType dmauat = NEW_DMA_HANDLE(DMA1_Channel2);
 DMA_HandleType dmauar = NEW_DMA_HANDLE(DMA1_Channel3);

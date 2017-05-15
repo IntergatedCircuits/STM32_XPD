@@ -313,9 +313,14 @@ XPD_ReturnType XPD_USB_Init(USB_HandleType * husb, const USB_InitType * Config)
         CLEAR_BIT(USB->LPMCSR.w, USB_LPMCSR_LMPEN | USB_LPMCSR_LPMACK);
     }
 #endif
-    USB->CNTR.w = i;
-
     husb->DeviceAddress = 0;
+    husb->LowPowerMode  = Config->LowPowerMode;
+
+    /* Initialize dependencies (pins, IRQ lines) */
+    XPD_SAFE_CALLBACK(husb->Callbacks.DepInit, husb);
+
+    /* Apply interrupts selection */
+    USB->CNTR.w = i;
 
     return XPD_OK;
 }
@@ -338,6 +343,9 @@ XPD_ReturnType XPD_USB_Deinit(USB_HandleType * husb)
 
     /* switch-off device */
     USB_REG_BIT(husb,CNTR,PDWN) = 1;
+
+    /* Deinitialize dependencies */
+    XPD_SAFE_CALLBACK(husb->Callbacks.DepDeinit, husb);
 
     /* Peripheral clock disabled */
     XPD_USB_ClockCtrl(DISABLE);

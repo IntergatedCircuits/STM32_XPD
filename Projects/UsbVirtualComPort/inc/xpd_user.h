@@ -29,6 +29,7 @@
 #include <xpd_gpio.h>
 #include <xpd_rcc.h>
 #include <xpd_usart.h>
+#include <xpd_usb.h>
 
 typedef struct
 {
@@ -53,6 +54,7 @@ typedef enum
 extern const PinConfigType PinConfig[];
 
 extern USART_HandleType uart;
+extern USB_HandleType usbHandle;
 
 extern void ClockConfiguration(void);
 

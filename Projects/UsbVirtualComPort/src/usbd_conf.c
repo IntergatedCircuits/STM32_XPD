@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    usbd_conf.c
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2017-03-22
+  * @version V0.2
+  * @date    2017-05-15
   * @brief   STM32 eXtensible Peripheral Drivers USB Device Module
   *
   *  This file is part of STM32_XPD.
@@ -27,28 +27,15 @@
 
 #include "xpd_user.h"
 
-USB_HandleType usbHandle = NEW_USB_HANDLE(USB);
-
-/* Common interrupt handler for USB core and WKUP line */
-void USB_IRQHandler(void)
-{
-    /* Handle USB interrupts */
-    XPD_USB_IRQHandler(&usbHandle);
-
-    /* Handle USB WKUP interrupts */
-    XPD_EXTI_ClearFlag(USB_WAKEUP_EXTI_LINE);
-    XPD_USB_PHY_ClockCtrl(&usbHandle, ENABLE);
-}
-
 int usbSuspendCallback(void * user)
 {
     /* Inform USB library that core enters in suspend Mode */
     int retval = USBD_LL_Suspend(user);
 
-    XPD_USB_PHY_ClockCtrl(&usbHandle, DISABLE);
-
     if (((USB_HandleType *)(((USBD_HandleTypeDef *)user)->pData))->LowPowerMode == ENABLE)
     {
+        XPD_USB_PHY_ClockCtrl(&usbHandle, DISABLE);
+
         /* Set SLEEPDEEP bit and SleepOnExit of Cortex System Control Register */
         SET_BIT(SCB->SCR.w, SCB_SCR_SLEEPDEEP_Msk | SCB_SCR_SLEEPONEXIT_Msk);
     }
@@ -66,6 +53,19 @@ int usbResumeCallback(void * user)
     return USBD_LL_Resume(user);
 }
 
+#ifdef USB_OTG_HS
+int usbResetCallback(void * user)
+{
+    USB_SpeedType speed = ((USB_HandleType *)(((USBD_HandleTypeDef *)user)->pData))->Speed;
+
+    /* Reset Device */
+    USBD_LL_Reset(user);
+
+    return USBD_LL_SetSpeed(user,
+            (speed == USB_SPEED_FULL) ? USBD_SPEED_FULL : USBD_SPEED_HIGH);
+}
+#endif
+
 /*******************************************************************************
  LL Driver Interface (USB Device Library --> XPD)
  *******************************************************************************/
@@ -77,59 +77,33 @@ int usbResumeCallback(void * user)
  */
 USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
 {
-    /* Configure USB DM and DP pins */
-    const GPIO_InitType gpioinit = {
-        .AlternateMap = GPIO_USB_AF2,
-        .Mode         = GPIO_MODE_ALTERNATE,
-        .Output.Speed = VERY_HIGH,
-        .Output.Type  = GPIO_OUTPUT_PUSHPULL,
-        .Pull         = GPIO_PULL_FLOAT
+    /* USB init setup */
+    const USB_InitType init = {
+        .Speed = USB_SPEED_FULL,
     };
-
-    XPD_GPIO_InitPin(GPIOA, 11, &gpioinit);
-    XPD_GPIO_InitPin(GPIOA, 12, &gpioinit);
-
-#ifdef XPD_GPIOA_PinRemap
-    XPD_GPIOA_PinRemap(11);
-#endif
-
-    /* USB clock configuration - must be operated from 48 MHz */
-    XPD_USB_ClockConfig(USB_CLOCKSOURCE_HSI48);
-
-    /* Enable USB FS Interrupt */
-    XPD_NVIC_SetPriorityConfig(USB_IRQn, NVIC_COMMON_PRIO_USB_USART, 0);
-    XPD_NVIC_EnableIRQ(USB_IRQn);
 
     /* Link driver to user */
     pdev->pData = &usbHandle;
 
-    /* USB init setup */
-    {
-        const USB_InitType init = {
-            .Speed = USB_SPEED_FULL,
-        };
+    /* Link the stack to the driver */
+    usbHandle.User = pdev;
 
-        /* Link the stack to the driver */
-        usbHandle.User = pdev;
+    /* Set direct USBD API callbacks */
+    usbHandle.Callbacks.SetupStage       = USBD_LL_SetupStage;
+    usbHandle.Callbacks.DataOutStage     = USBD_LL_DataOutStage;
+    usbHandle.Callbacks.DataInStage      = USBD_LL_DataInStage;
+    usbHandle.Callbacks.SOF              = USBD_LL_SOF;
+#ifdef USB_OTG_HS
+    usbHandle.Callbacks.Reset            = usbResetCallback;
+#else
+    usbHandle.Callbacks.Reset            = USBD_LL_Reset;
+#endif
+    usbHandle.Callbacks.Suspend          = usbSuspendCallback;
+    usbHandle.Callbacks.Resume           = usbResumeCallback;
+    usbHandle.Callbacks.Connected        = USBD_LL_DevConnected;
+    usbHandle.Callbacks.Disconnected     = USBD_LL_DevDisconnected;
 
-        usbHandle.Callbacks.SetupStage       = USBD_LL_SetupStage;
-        usbHandle.Callbacks.DataOutStage     = USBD_LL_DataOutStage;
-        usbHandle.Callbacks.DataInStage      = USBD_LL_DataInStage;
-        usbHandle.Callbacks.SOF              = USBD_LL_SOF;
-        usbHandle.Callbacks.Reset            = USBD_LL_Reset;
-        usbHandle.Callbacks.Suspend          = usbSuspendCallback;
-        usbHandle.Callbacks.Resume           = usbResumeCallback;
-        usbHandle.Callbacks.Connected        = USBD_LL_DevConnected;
-        usbHandle.Callbacks.Disconnected     = USBD_LL_DevDisconnected;
-
-        XPD_USB_Init(pdev->pData, &init);
-
-        if (init.LowPowerMode != DISABLE)
-        {
-            EXTI_InitType wakeup = USB_WAKEUP_EXTI_INIT;
-            XPD_EXTI_Init(USB_WAKEUP_EXTI_LINE, &wakeup);
-        }
-    }
+    XPD_USB_Init(&usbHandle, &init);
 
     /* Control endpoints */
     XPD_USB_EP_BufferInit(pdev->pData, 0x00,  0x40);
@@ -154,10 +128,6 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
 USBD_StatusTypeDef USBD_LL_DeInit(USBD_HandleTypeDef *pdev)
 {
     XPD_USB_Deinit(pdev->pData);
-
-    XPD_GPIO_DeinitPin(GPIOA, 11);
-    XPD_GPIO_DeinitPin(GPIOA, 12);
-    XPD_NVIC_DisableIRQ(USB_IRQn);
     return USBD_OK;
 }
 
@@ -194,7 +164,7 @@ USBD_StatusTypeDef USBD_LL_Stop(USBD_HandleTypeDef *pdev)
 USBD_StatusTypeDef USBD_LL_OpenEP(USBD_HandleTypeDef *pdev, uint8_t ep_addr,
         uint8_t ep_type, uint16_t ep_mps)
 {
-    XPD_USB_EP_Open(pdev->pData, ep_addr, ep_type, ep_mps);
+    XPD_USB_EP_Open(pdev->pData, ep_addr, (USB_EndPointType)ep_type, ep_mps);
     return USBD_OK;
 }
 
