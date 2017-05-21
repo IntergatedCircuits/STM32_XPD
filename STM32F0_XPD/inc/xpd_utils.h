@@ -77,6 +77,11 @@ void            XPD_ReadToStream        (volatile uint32_t * reg, DataStreamType
 void            XPD_WriteFromStream     (volatile uint32_t * reg, DataStreamType * stream);
 /** @} */
 
+/** @addtogroup XPD_Exported_Functions_Boot
+ * @{ */
+void            XPD_BootTo              (const void * StartAddress);
+/** @} */
+
 /** @} */
 
 /** @} */

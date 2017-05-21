@@ -661,32 +661,18 @@ void XPD_RCC_MCO_Deinit(uint8_t MCOx)
  */
 void XPD_RCC_Deinit(void)
 {
-    /* Set HSION bit, HSITRIM[4:0] bits to the reset value*/
-    RCC_REG_BIT(CR, HSION) = 1;
-    RCC->CR.b.HSITRIM = HSI_CALIBRATION_DEFAULT_VALUE;
+    /* Set HSION bit, HSITRIM[4:0] bits to the reset value */
+    RCC->CR.w = RCC_CR_HSION | RCC_CR_HSITRIM_4;
 
-    /* Reset CFGR register */
+    /* Reset CFGR registers */
     RCC->CFGR.w = 0;
-
-    /* Reset HSEON, CSSON, PLLON */
-    RCC_REG_BIT(CR, HSEON) = 0;
-    RCC_REG_BIT(CR, CSSON) = 0;
-    RCC_REG_BIT(CR, PLLON) = 0;
-
-    /* Reset HSEBYP bit */
-    RCC_REG_BIT(CR, HSEBYP) = 0;
-
-    /* Reset CFGR register */
-    RCC->CFGR.w = 0;
-
-    /* Reset CFGR2 register */
     RCC->CFGR2.w = 0;
-
-    /* Reset CFGR3 register */
     RCC->CFGR3.w = 0;
 
     /* Disable all interrupts */
     RCC->CIR.w = 0;
+
+    SystemCoreClock = HSI_VALUE;
 }
 
 /**
@@ -694,8 +680,8 @@ void XPD_RCC_Deinit(void)
  */
 void XPD_RCC_ResetAHB(void)
 {
-    RCC->AHBRSTR.w = 0xFFFFFFFF;
-    RCC->AHBRSTR.w = 0x00000000;
+    RCC->AHBRSTR.w = ~0;
+    RCC->AHBRSTR.w = 0;
 }
 
 /**
@@ -703,8 +689,8 @@ void XPD_RCC_ResetAHB(void)
  */
 void XPD_RCC_ResetAPB1(void)
 {
-    RCC->APB1RSTR.w = 0xFFFFFFFF;
-    RCC->APB1RSTR.w = 0x00000000;
+    RCC->APB1RSTR.w = ~0;
+    RCC->APB1RSTR.w = 0;
 }
 
 /**
@@ -712,8 +698,8 @@ void XPD_RCC_ResetAPB1(void)
  */
 void XPD_RCC_ResetAPB2(void)
 {
-    RCC->APB2RSTR.w = 0xFFFFFFFF;
-    RCC->APB2RSTR.w = 0x00000000;
+    RCC->APB2RSTR.w = ~0;
+    RCC->APB2RSTR.w = 0;
 }
 
 /** @} */

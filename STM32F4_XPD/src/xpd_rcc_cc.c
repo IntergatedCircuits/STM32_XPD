@@ -696,29 +696,40 @@ void XPD_RCC_MCO_Deinit(uint8_t MCOx)
  */
 void XPD_RCC_Deinit(void)
 {
-    /* Set HSION bit, HSITRIM[4:0] bits to the reset value*/
-    RCC_REG_BIT(CR, HSION) = 1;
-    RCC->CR.b.HSITRIM = HSI_CALIBRATION_DEFAULT_VALUE;
+    /* Set HSION bit, HSITRIM[4:0] bits to the reset value */
+    RCC->CR.w = RCC_CR_HSION | RCC_CR_HSITRIM_4;
 
     /* Reset CFGR register */
     RCC->CFGR.w = 0;
 
-    /* Reset HSEON, CSSON, PLLON, PLLI2S */
-    RCC_REG_BIT(CR, HSEON) = 0;
-    RCC_REG_BIT(CR, CSSON) = 0;
-    RCC_REG_BIT(CR, PLLON) = 0;
-#ifdef RCC_CR_PLLI2SON
-    RCC_REG_BIT(CR, PLLI2SON) = 0;
+    /* Reset PLLCFGR register */
+    RCC->PLLCFGR.w = 0
+#ifdef RCC_PLLCFGR_PLLR_1
+        | RCC_PLLCFGR_PLLR_1
+#endif
+        | RCC_PLLCFGR_PLLM_4 | RCC_PLLCFGR_PLLN_6 | RCC_PLLCFGR_PLLN_7 | RCC_PLLCFGR_PLLQ_2;
+
+    /* Reset PLLI2SCFGR register */
+    RCC->PLLI2SCFGR.w = 0
+#ifdef RCC_PLLI2SCFGR_PLLI2SQ_2
+        | RCC_PLLI2SCFGR_PLLI2SQ_2
+#endif
+#ifdef RCC_PLLI2SCFGR_PLLI2SM_4
+        | RCC_PLLI2SCFGR_PLLI2SM_4
+#endif
+        | RCC_PLLI2SCFGR_PLLI2SN_6 | RCC_PLLI2SCFGR_PLLI2SN_7 | RCC_PLLI2SCFGR_PLLI2SR_1;
+
+    /* Reset PLLSAICFGR register */
+#ifdef RCC_PLLSAICFGR_PLLSAIR_1
+    RCC->PLLSAICFGR.w = RCC_PLLSAICFGR_PLLSAIN_6 | RCC_PLLSAICFGR_PLLSAIN_7 | RCC_PLLSAICFGR_PLLSAIQ_2 | RCC_PLLSAICFGR_PLLSAIR_1;
+#elif defined(RCC_PLLSAICFGR_PLLSAIM_4)
+    RCC->PLLSAICFGR.w = RCC_PLLSAICFGR_PLLSAIM_4 | RCC_PLLSAICFGR_PLLSAIN_6 | RCC_PLLSAICFGR_PLLSAIN_7 | RCC_PLLSAICFGR_PLLSAIQ_2;
 #endif
 
-    /* Reset PLLCFGR register */
-    RCC->PLLCFGR.w = 0x24003010;
-
-    /* Reset HSEBYP bit */
-    RCC_REG_BIT(CR,HSEBYP) = 0;
-
     /* Disable all interrupts */
-    RCC->CIR.w = 0x00000000;
+    RCC->CIR.w = 0;
+
+    SystemCoreClock = HSI_VALUE;
 }
 
 /**
@@ -726,8 +737,8 @@ void XPD_RCC_Deinit(void)
  */
 void XPD_RCC_ResetAHB1(void)
 {
-    RCC->AHB1RSTR.w = 0xFFFFFFFF;
-    RCC->AHB1RSTR.w = 0x00000000;
+    RCC->AHB1RSTR.w = ~0;
+    RCC->AHB1RSTR.w = 0;
 }
 
 /**
@@ -735,8 +746,8 @@ void XPD_RCC_ResetAHB1(void)
  */
 void XPD_RCC_ResetAHB2(void)
 {
-    RCC->AHB2RSTR.w = 0xFFFFFFFF;
-    RCC->AHB2RSTR.w = 0x00000000;
+    RCC->AHB2RSTR.w = ~0;
+    RCC->AHB2RSTR.w = 0;
 }
 
 /**
@@ -744,8 +755,8 @@ void XPD_RCC_ResetAHB2(void)
  */
 void XPD_RCC_ResetAHB3(void)
 {
-    RCC->AHB3RSTR.w = 0xFFFFFFFF;
-    RCC->AHB3RSTR.w = 0x00000000;
+    RCC->AHB3RSTR.w = ~0;
+    RCC->AHB3RSTR.w = 0;
 }
 
 /**
@@ -753,8 +764,8 @@ void XPD_RCC_ResetAHB3(void)
  */
 void XPD_RCC_ResetAPB1(void)
 {
-    RCC->APB1RSTR.w = 0xFFFFFFFF;
-    RCC->APB1RSTR.w = 0x00000000;
+    RCC->APB1RSTR.w = ~0;
+    RCC->APB1RSTR.w = 0;
 }
 
 /**
@@ -762,8 +773,8 @@ void XPD_RCC_ResetAPB1(void)
  */
 void XPD_RCC_ResetAPB2(void)
 {
-    RCC->APB2RSTR.w = 0xFFFFFFFF;
-    RCC->APB2RSTR.w = 0x00000000;
+    RCC->APB2RSTR.w = ~0;
+    RCC->APB2RSTR.w = 0;
 }
 
 /** @} */

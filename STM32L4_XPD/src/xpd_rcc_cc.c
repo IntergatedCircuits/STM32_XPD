@@ -995,23 +995,14 @@ void XPD_RCC_Deinit(void)
     /* Set MSION bit */
     RCC_REG_BIT(CR, MSION) = 1;
 
-    /* Insure MSIRDY bit is set before writing default MSIRANGE value */
+    /* Ensure MSIRDY bit is set before writing MSIRANGE value */
     while(RCC_REG_BIT(CR, MSIRDY) == 0);
 
     /* Set MSIRANGE default value */
-    RCC->CR.b.MSIRANGE = MSI_4MHz;
+    RCC->CR.w = RCC_CR_MSION | RCC_CR_MSIRANGE_6;
 
     /* Reset CFGR register */
     RCC->CFGR.w = 0;
-
-    /* Reset HSION, HSIKERON, HSIASFS, HSEON, PLLON, PLLSAIxON bits */
-    RCC_REG_BIT(CR, HSION) = 0;
-    RCC_REG_BIT(CR, HSIKERON) = 0;
-    RCC_REG_BIT(CR, HSIASFS) = 0;
-    RCC_REG_BIT(CR, HSEON) = 0;
-    RCC_REG_BIT(CR, PLLON) = 0;
-    RCC_REG_BIT(CR, PLLSAI1ON) = 0;
-    RCC_REG_BIT(CR, PLLSAI2ON) = 0;
 
     /* Reset PLLCFGR register */
     RCC->PLLCFGR.w = RCC_PLLCFGR_PLLN_4;
@@ -1024,11 +1015,11 @@ void XPD_RCC_Deinit(void)
     RCC->PLLSAI2CFGR.w = RCC_PLLSAI2CFGR_PLLSAI2N_4;
 #endif
 
-    /* Reset HSEBYP bit */
-    RCC_REG_BIT(CR,HSEBYP) = 0;
-
     /* Disable all interrupts */
-    RCC->CIER.w = 0x00000000;
+    RCC->CIER.w = 0;
+
+    /* Default MSI clock is 4 MHz */
+    SystemCoreClock = 4000000;
 }
 
 /**
@@ -1036,8 +1027,8 @@ void XPD_RCC_Deinit(void)
  */
 void XPD_RCC_ResetAHB1(void)
 {
-    RCC->AHB1RSTR.w = 0xFFFFFFFF;
-    RCC->AHB1RSTR.w = 0x00000000;
+    RCC->AHB1RSTR.w = ~0;
+    RCC->AHB1RSTR.w = 0;
 }
 
 /**
@@ -1045,8 +1036,8 @@ void XPD_RCC_ResetAHB1(void)
  */
 void XPD_RCC_ResetAHB2(void)
 {
-    RCC->AHB2RSTR.w = 0xFFFFFFFF;
-    RCC->AHB2RSTR.w = 0x00000000;
+    RCC->AHB2RSTR.w = ~0;
+    RCC->AHB2RSTR.w = 0;
 }
 
 /**
@@ -1054,8 +1045,8 @@ void XPD_RCC_ResetAHB2(void)
  */
 void XPD_RCC_ResetAHB3(void)
 {
-    RCC->AHB3RSTR.w = 0xFFFFFFFF;
-    RCC->AHB3RSTR.w = 0x00000000;
+    RCC->AHB3RSTR.w = ~0;
+    RCC->AHB3RSTR.w = 0;
 }
 
 /**
@@ -1063,10 +1054,10 @@ void XPD_RCC_ResetAHB3(void)
  */
 void XPD_RCC_ResetAPB1(void)
 {
-    RCC->APB1RSTR1.w = 0xFFFFFFFF;
-    RCC->APB1RSTR1.w = 0x00000000;
-    RCC->APB1RSTR2.w = 0xFFFFFFFF;
-    RCC->APB1RSTR2.w = 0x00000000;
+    RCC->APB1RSTR1.w = ~0;
+    RCC->APB1RSTR1.w = 0;
+    RCC->APB1RSTR2.w = ~0;
+    RCC->APB1RSTR2.w = 0;
 }
 
 /**
@@ -1074,8 +1065,8 @@ void XPD_RCC_ResetAPB1(void)
  */
 void XPD_RCC_ResetAPB2(void)
 {
-    RCC->APB2RSTR.w = 0xFFFFFFFF;
-    RCC->APB2RSTR.w = 0x00000000;
+    RCC->APB2RSTR.w = ~0;
+    RCC->APB2RSTR.w = 0;
 }
 
 /** @} */

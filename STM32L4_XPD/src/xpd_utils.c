@@ -241,23 +241,50 @@ void XPD_Init(void)
 
 /**
  * @brief Deinitializes the basic services of the device:
- *        @arg Timer utility
  *        @arg Resets all peripherals
  */
 void XPD_Deinit(void)
 {
-    XPD_SuspendTimer();
-
     /* Reset of all peripherals */
     XPD_RCC_ResetAHB1();
     XPD_RCC_ResetAHB2();
     XPD_RCC_ResetAHB3();
     XPD_RCC_ResetAPB1();
     XPD_RCC_ResetAPB2();
+}
 
-    /* disable clocks */
-    XPD_PWR_ClockCtrl(DISABLE);
-    XPD_SYSCFG_ClockCtrl(DISABLE);
+/** @} */
+
+/** @defgroup XPD_Exported_Functions_Boot XPD Boot Handling Functions
+ *  @brief    XPD Utilities boot handling functions
+ * @{
+ */
+
+/**
+ * @brief Resets the MCU peripherals to their startup state and
+ *        boots to the application at the specified address
+ * @param StartAddress: The address of the application to be started
+ * @note  Before starting the new application the user shall ensure
+ *        the integrity of the program. This should include:
+ *        @arg Checking address for valid RAM pointer
+ *        @arg Checking address+4 (first PC value) for odd value
+ */
+void XPD_BootTo(void * StartAddress)
+{
+    void (*startApplication)(void) = *((const uint32_t *)(StartAddress + 4));
+
+    /* Reset clock configuration */
+    XPD_RCC_Deinit();
+    /* Reset all peripherals */
+    XPD_Deinit();
+    /* Disable SysTick interrupt as well */
+    XPD_SysTick_DisableIT();
+
+    /* Set the main stack pointer */
+    __set_MSP(*((const uint32_t *)StartAddress));
+
+    /* Jump to application */
+    startApplication();
 }
 
 /** @} */
