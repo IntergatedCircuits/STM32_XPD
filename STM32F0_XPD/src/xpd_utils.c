@@ -258,7 +258,7 @@ void XPD_Deinit(void)
  */
 void XPD_BootTo(void * StartAddress)
 {
-    void (*startApplication)(void) = *((const uint32_t *)(StartAddress + 4));
+    void (*startApplication)(void) = *((const void **)(StartAddress + 4));
 
     /* Reset clock configuration */
     XPD_RCC_Deinit();
