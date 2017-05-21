@@ -6987,161 +6987,161 @@ typedef struct {
 typedef struct {
     union {
         struct {
-            __IO uint32_t SRQSCS : 1;                /*!< Session request success */
-            __IO uint32_t SRQ : 1;                   /*!< Session request */
-            __IO uint32_t VBVALOEN : 1;              /*!< VBUS valid override enable */
-            __IO uint32_t VBVALOVAL : 1;             /*!< VBUS valid override value */
-            __IO uint32_t AVALOEN : 1;               /*!< A-peripheral session valid override enable */
-            __IO uint32_t AVALOVAL : 1;              /*!< A-peripheral session valid override value */
-            __IO uint32_t BVALOEN : 1;               /*!< B-peripheral session valid override enable */
-            __IO uint32_t BVALOVAL : 1;              /*!< B-peripheral session valid override value  */
+            __IO uint32_t SRQSCS : 1;                       /*!< Session request success */
+            __IO uint32_t SRQ : 1;                          /*!< Session request */
+            __IO uint32_t VBVALOEN : 1;                     /*!< VBUS valid override enable */
+            __IO uint32_t VBVALOVAL : 1;                    /*!< VBUS valid override value */
+            __IO uint32_t AVALOEN : 1;                      /*!< A-peripheral session valid override enable */
+            __IO uint32_t AVALOVAL : 1;                     /*!< A-peripheral session valid override value */
+            __IO uint32_t BVALOEN : 1;                      /*!< B-peripheral session valid override enable */
+            __IO uint32_t BVALOVAL : 1;                     /*!< B-peripheral session valid override value  */
                  uint32_t __RESERVED0 : 11;
-            __IO uint32_t BSESVLD : 1;               /*!<  B-session valid*/
+            __IO uint32_t BSESVLD : 1;                      /*!<  B-session valid*/
                  uint32_t __RESERVED1 : 12;
         } b;
         __IO uint32_t w;
-    } GOTGCTL;                               /*!<  USB_OTG Control and Status Register          000h*/
+    } GOTGCTL;                                              /*!<  USB_OTG Control and Status Register          000h*/
     union {
         struct {
                  uint32_t __RESERVED0 : 2;
-            __IO uint32_t SEDET : 1;                 /*!< Session end detected */
+            __IO uint32_t SEDET : 1;                        /*!< Session end detected */
                  uint32_t __RESERVED1 : 5;
-            __IO uint32_t SRSSCHG : 1;               /*!< Session request success status change */
-            __IO uint32_t HNSSCHG : 1;               /*!< Host negotiation success status change */
+            __IO uint32_t SRSSCHG : 1;                      /*!< Session request success status change */
+            __IO uint32_t HNSSCHG : 1;                      /*!< Host negotiation success status change */
                  uint32_t __RESERVED2 : 7;
-            __IO uint32_t HNGDET : 1;                /*!< Host negotiation detected */
-            __IO uint32_t ADTOCHG : 1;               /*!< A-device timeout change */
-            __IO uint32_t DBCDNE : 1;                /*!< Debounce done */
+            __IO uint32_t HNGDET : 1;                       /*!< Host negotiation detected */
+            __IO uint32_t ADTOCHG : 1;                      /*!< A-device timeout change */
+            __IO uint32_t DBCDNE : 1;                       /*!< Debounce done */
                  uint32_t __RESERVED3 : 12;
         } b;
         __IO uint32_t w;
-    } GOTGINT;                               /*!<  USB_OTG Interrupt Register                   004h*/
+    } GOTGINT;                                              /*!<  USB_OTG Interrupt Register                   004h*/
     union {
         struct {
-            __IO uint32_t GINT : 1;                  /*!< Global interrupt mask */
-            __IO uint32_t HBSTLEN : 4;               /*!< Burst length/type */
-            __IO uint32_t DMAEN : 1;                 /*!< DMA enable */
+            __IO uint32_t GINT : 1;                         /*!< Global interrupt mask */
+            __IO uint32_t HBSTLEN : 4;                      /*!< Burst length/type */
+            __IO uint32_t DMAEN : 1;                        /*!< DMA enable */
                  uint32_t __RESERVED0 : 1;
-            __IO uint32_t TXFELVL : 1;               /*!< TxFIFO empty level */
-            __IO uint32_t PTXFELVL : 1;              /*!< Periodic TxFIFO empty level */
+            __IO uint32_t TXFELVL : 1;                      /*!< TxFIFO empty level */
+            __IO uint32_t PTXFELVL : 1;                     /*!< Periodic TxFIFO empty level */
                  uint32_t __RESERVED1 : 23;
         } b;
         __IO uint32_t w;
-    } GAHBCFG;                               /*!<  Core AHB Configuration Register              008h*/
+    } GAHBCFG;                                              /*!<  Core AHB Configuration Register              008h*/
     union {
         struct {
-            __IO uint32_t TOCAL : 3;                 /*!< FS timeout calibration */
+            __IO uint32_t TOCAL : 3;                        /*!< FS timeout calibration */
                  uint32_t __RESERVED0 : 3;
-            __IO uint32_t PHYSEL : 1;                /*!< USB 2.0 high-speed ULPI PHY or USB 1.1 full-speed serial transceiver select */
+            __IO uint32_t PHYSEL : 1;                       /*!< USB 2.0 high-speed ULPI PHY or USB 1.1 full-speed serial transceiver select */
                  uint32_t __RESERVED1 : 1;
-            __IO uint32_t SRPCAP : 1;                /*!< SRP-capable */
-            __IO uint32_t HNPCAP : 1;                /*!< HNP-capable */
-            __IO uint32_t TRDT : 4;                  /*!< USB turnaround time */
+            __IO uint32_t SRPCAP : 1;                       /*!< SRP-capable */
+            __IO uint32_t HNPCAP : 1;                       /*!< HNP-capable */
+            __IO uint32_t TRDT : 4;                         /*!< USB turnaround time */
                  uint32_t __RESERVED2 : 1;
-            __IO uint32_t PHYLPCS : 1;               /*!< PHY Low-power clock select */
+            __IO uint32_t PHYLPCS : 1;                      /*!< PHY Low-power clock select */
                  uint32_t __RESERVED3 : 1;
-            __IO uint32_t ULPIFSLS : 1;              /*!< ULPI FS/LS select */
-            __IO uint32_t ULPIAR : 1;                /*!< ULPI Auto-resume */
-            __IO uint32_t ULPICSM : 1;               /*!< ULPI Clock SuspendM */
-            __IO uint32_t ULPIEVBUSD : 1;            /*!< ULPI External VBUS Drive */
-            __IO uint32_t ULPIEVBUSI : 1;            /*!< ULPI external VBUS indicator */
-            __IO uint32_t TSDPS : 1;                 /*!< TermSel DLine pulsing selection */
-            __IO uint32_t PCCI : 1;                  /*!< Indicator complement */
-            __IO uint32_t PTCI : 1;                  /*!< Indicator pass through */
-            __IO uint32_t ULPIIPD : 1;               /*!< ULPI interface protect disable */
+            __IO uint32_t ULPIFSLS : 1;                     /*!< ULPI FS/LS select */
+            __IO uint32_t ULPIAR : 1;                       /*!< ULPI Auto-resume */
+            __IO uint32_t ULPICSM : 1;                      /*!< ULPI Clock SuspendM */
+            __IO uint32_t ULPIEVBUSD : 1;                   /*!< ULPI External VBUS Drive */
+            __IO uint32_t ULPIEVBUSI : 1;                   /*!< ULPI external VBUS indicator */
+            __IO uint32_t TSDPS : 1;                        /*!< TermSel DLine pulsing selection */
+            __IO uint32_t PCCI : 1;                         /*!< Indicator complement */
+            __IO uint32_t PTCI : 1;                         /*!< Indicator pass through */
+            __IO uint32_t ULPIIPD : 1;                      /*!< ULPI interface protect disable */
                  uint32_t __RESERVED4 : 3;
-            __IO uint32_t FHMOD : 1;                 /*!< Forced host mode */
-            __IO uint32_t FDMOD : 1;                 /*!< Forced peripheral mode */
-            __IO uint32_t CTXPKT : 1;                /*!< Corrupt Tx packet */
+            __IO uint32_t FHMOD : 1;                        /*!< Forced host mode */
+            __IO uint32_t FDMOD : 1;                        /*!< Forced peripheral mode */
+            __IO uint32_t CTXPKT : 1;                       /*!< Corrupt Tx packet */
         } b;
         __IO uint32_t w;
-    } GUSBCFG;                               /*!<  Core USB Configuration Register              00Ch*/
+    } GUSBCFG;                                              /*!<  Core USB Configuration Register              00Ch*/
     union {
         struct {
-            __IO uint32_t CSRST : 1;                 /*!< Core soft reset */
-            __IO uint32_t HSRST : 1;                 /*!< HCLK soft reset */
-            __IO uint32_t FCRST : 1;                 /*!< Host frame counter reset */
+            __IO uint32_t CSRST : 1;                        /*!< Core soft reset */
+            __IO uint32_t HSRST : 1;                        /*!< HCLK soft reset */
+            __IO uint32_t FCRST : 1;                        /*!< Host frame counter reset */
                  uint32_t __RESERVED0 : 1;
-            __IO uint32_t RXFFLSH : 1;               /*!< RxFIFO flush */
-            __IO uint32_t TXFFLSH : 1;               /*!< TxFIFO flush */
-            __IO uint32_t TXFNUM : 5;                /*!< TxFIFO number */
+            __IO uint32_t RXFFLSH : 1;                      /*!< RxFIFO flush */
+            __IO uint32_t TXFFLSH : 1;                      /*!< TxFIFO flush */
+            __IO uint32_t TXFNUM : 5;                       /*!< TxFIFO number */
                  uint32_t __RESERVED1 : 19;
-            __IO uint32_t DMAREQ : 1;                /*!< DMA request signal */
-            __IO uint32_t AHBIDL : 1;                /*!< AHB master idle */
+            __IO uint32_t DMAREQ : 1;                       /*!< DMA request signal */
+            __IO uint32_t AHBIDL : 1;                       /*!< AHB master idle */
         } b;
         __IO uint32_t w;
-    } GRSTCTL;                               /*!<  Core Reset Register                          010h*/
+    } GRSTCTL;                                              /*!<  Core Reset Register                          010h*/
     union {
         struct {
-            __IO uint32_t CMOD : 1;                  /*!< Current mode of operation */
-            __IO uint32_t MMIS : 1;                  /*!< Mode mismatch interrupt */
-            __IO uint32_t OTGINT : 1;                /*!< OTG interrupt */
-            __IO uint32_t SOF : 1;                   /*!< Start of frame */
-            __IO uint32_t RXFLVL : 1;                /*!< RxFIFO nonempty */
-            __IO uint32_t NPTXFE : 1;                /*!< Nonperiodic TxFIFO empty */
-            __IO uint32_t GINAKEFF : 1;              /*!< Global IN nonperiodic NAK effective */
-            __IO uint32_t BOUTNAKEFF : 1;            /*!< Global OUT NAK effective */
+            __IO uint32_t CMOD : 1;                         /*!< Current mode of operation */
+            __IO uint32_t MMIS : 1;                         /*!< Mode mismatch interrupt */
+            __IO uint32_t OTGINT : 1;                       /*!< OTG interrupt */
+            __IO uint32_t SOF : 1;                          /*!< Start of frame */
+            __IO uint32_t RXFLVL : 1;                       /*!< RxFIFO nonempty */
+            __IO uint32_t NPTXFE : 1;                       /*!< Nonperiodic TxFIFO empty */
+            __IO uint32_t GINAKEFF : 1;                     /*!< Global IN nonperiodic NAK effective */
+            __IO uint32_t BOUTNAKEFF : 1;                   /*!< Global OUT NAK effective */
                  uint32_t __RESERVED0 : 2;
-            __IO uint32_t ESUSP : 1;                 /*!< Early suspend */
-            __IO uint32_t USBSUSP : 1;               /*!< USB suspend */
-            __IO uint32_t USBRST : 1;                /*!< USB reset */
-            __IO uint32_t ENUMDNE : 1;               /*!< Enumeration done */
-            __IO uint32_t ISOODRP : 1;               /*!< Isochronous OUT packet dropped interrupt */
-            __IO uint32_t EOPF : 1;                  /*!< End of periodic frame interrupt */
+            __IO uint32_t ESUSP : 1;                        /*!< Early suspend */
+            __IO uint32_t USBSUSP : 1;                      /*!< USB suspend */
+            __IO uint32_t USBRST : 1;                       /*!< USB reset */
+            __IO uint32_t ENUMDNE : 1;                      /*!< Enumeration done */
+            __IO uint32_t ISOODRP : 1;                      /*!< Isochronous OUT packet dropped interrupt */
+            __IO uint32_t EOPF : 1;                         /*!< End of periodic frame interrupt */
                  uint32_t __RESERVED1 : 2;
-            __IO uint32_t IEPINT : 1;                /*!< IN endpoint interrupt */
-            __IO uint32_t OEPINT : 1;                /*!< OUT endpoint interrupt */
-            __IO uint32_t IISOIXFR : 1;              /*!< Incomplete isochronous IN transfer */
-            __IO uint32_t PXFR_INCOMPISOOUT : 1;     /*!< Incomplete periodic transfer */
-            __IO uint32_t DATAFSUSP : 1;             /*!< Data fetch suspended */
+            __IO uint32_t IEPINT : 1;                       /*!< IN endpoint interrupt */
+            __IO uint32_t OEPINT : 1;                       /*!< OUT endpoint interrupt */
+            __IO uint32_t IISOIXFR : 1;                     /*!< Incomplete isochronous IN transfer */
+            __IO uint32_t PXFR_INCOMPISOOUT : 1;            /*!< Incomplete periodic transfer */
+            __IO uint32_t DATAFSUSP : 1;                    /*!< Data fetch suspended */
                  uint32_t __RESERVED2 : 1;
-            __IO uint32_t HPRTINT : 1;               /*!< Host port interrupt */
-            __IO uint32_t HCINT : 1;                 /*!< Host channels interrupt */
-            __IO uint32_t PTXFE : 1;                 /*!< Periodic TxFIFO empty */
-            __IO uint32_t LPMINT : 1;                /*!< LPM interrupt */
-            __IO uint32_t CIDSCHG : 1;               /*!< Connector ID status change */
-            __IO uint32_t DISCINT : 1;               /*!< Disconnect detected interrupt */
-            __IO uint32_t SRQINT : 1;                /*!< Session request/new session detected interrupt */
-            __IO uint32_t WKUINT : 1;                /*!< Resume/remote wakeup detected interrupt */
+            __IO uint32_t HPRTINT : 1;                      /*!< Host port interrupt */
+            __IO uint32_t HCINT : 1;                        /*!< Host channels interrupt */
+            __IO uint32_t PTXFE : 1;                        /*!< Periodic TxFIFO empty */
+            __IO uint32_t LPMINT : 1;                       /*!< LPM interrupt */
+            __IO uint32_t CIDSCHG : 1;                      /*!< Connector ID status change */
+            __IO uint32_t DISCINT : 1;                      /*!< Disconnect detected interrupt */
+            __IO uint32_t SRQINT : 1;                       /*!< Session request/new session detected interrupt */
+            __IO uint32_t WKUINT : 1;                       /*!< Resume/remote wakeup detected interrupt */
         } b;
         __IO uint32_t w;
-    } GINTSTS;                               /*!<  Core Interrupt Register                      014h*/
+    } GINTSTS;                                              /*!<  Core Interrupt Register                      014h*/
     union {
         struct {
                  uint32_t __RESERVED0 : 1;
-            __IO uint32_t MMISM : 1;                 /*!< Mode mismatch interrupt mask */
-            __IO uint32_t OTGINT : 1;                /*!< OTG interrupt mask */
-            __IO uint32_t SOFM : 1;                  /*!< Start of frame mask */
-            __IO uint32_t RXFLVLM : 1;               /*!< Receive FIFO nonempty mask */
-            __IO uint32_t NPTXFEM : 1;               /*!< Nonperiodic TxFIFO empty mask */
-            __IO uint32_t GINAKEFFM : 1;             /*!< Global nonperiodic IN NAK effective mask */
-            __IO uint32_t GONAKEFFM : 1;             /*!< Global OUT NAK effective mask */
+            __IO uint32_t MMISM : 1;                        /*!< Mode mismatch interrupt mask */
+            __IO uint32_t OTGINT : 1;                       /*!< OTG interrupt mask */
+            __IO uint32_t SOFM : 1;                         /*!< Start of frame mask */
+            __IO uint32_t RXFLVLM : 1;                      /*!< Receive FIFO nonempty mask */
+            __IO uint32_t NPTXFEM : 1;                      /*!< Nonperiodic TxFIFO empty mask */
+            __IO uint32_t GINAKEFFM : 1;                    /*!< Global nonperiodic IN NAK effective mask */
+            __IO uint32_t GONAKEFFM : 1;                    /*!< Global OUT NAK effective mask */
                  uint32_t __RESERVED1 : 2;
-            __IO uint32_t ESUSPM : 1;                /*!< Early suspend mask */
-            __IO uint32_t USBSUSPM : 1;              /*!< USB suspend mask */
-            __IO uint32_t USBRST : 1;                /*!< USB reset mask */
-            __IO uint32_t ENUMDNEM : 1;              /*!< Enumeration done mask */
-            __IO uint32_t ISOODRPM : 1;              /*!< Isochronous OUT packet dropped interrupt mask */
-            __IO uint32_t EOPFM : 1;                 /*!< End of periodic frame interrupt mask */
+            __IO uint32_t ESUSPM : 1;                       /*!< Early suspend mask */
+            __IO uint32_t USBSUSPM : 1;                     /*!< USB suspend mask */
+            __IO uint32_t USBRST : 1;                       /*!< USB reset mask */
+            __IO uint32_t ENUMDNEM : 1;                     /*!< Enumeration done mask */
+            __IO uint32_t ISOODRPM : 1;                     /*!< Isochronous OUT packet dropped interrupt mask */
+            __IO uint32_t EOPFM : 1;                        /*!< End of periodic frame interrupt mask */
                  uint32_t __RESERVED2 : 1;
-            __IO uint32_t EPMISM : 1;                /*!< Endpoint mismatch interrupt mask */
-            __IO uint32_t IEPINT : 1;                /*!< IN endpoints interrupt mask */
-            __IO uint32_t OEPINT : 1;                /*!< OUT endpoints interrupt mask */
-            __IO uint32_t IISOIXFRM : 1;             /*!< Incomplete isochronous IN transfer mask */
-            __IO uint32_t PXFRM_IISOOXFRM : 1;       /*!< Incomplete periodic transfer mask */
-            __IO uint32_t FSUSPM : 1;                /*!< Data fetch suspended mask */
+            __IO uint32_t EPMISM : 1;                       /*!< Endpoint mismatch interrupt mask */
+            __IO uint32_t IEPINT : 1;                       /*!< IN endpoints interrupt mask */
+            __IO uint32_t OEPINT : 1;                       /*!< OUT endpoints interrupt mask */
+            __IO uint32_t IISOIXFRM : 1;                    /*!< Incomplete isochronous IN transfer mask */
+            __IO uint32_t PXFRM_IISOOXFRM : 1;              /*!< Incomplete periodic transfer mask */
+            __IO uint32_t FSUSPM : 1;                       /*!< Data fetch suspended mask */
                  uint32_t __RESERVED3 : 1;
-            __IO uint32_t PRTIM : 1;                 /*!< Host port interrupt mask */
-            __IO uint32_t HCIM : 1;                  /*!< Host channels interrupt mask */
-            __IO uint32_t PTXFEM : 1;                /*!< Periodic TxFIFO empty mask */
-            __IO uint32_t LPMINTM : 1;               /*!< LPM interrupt Mask */
-            __IO uint32_t CIDSCHGM : 1;              /*!< Connector ID status change mask */
-            __IO uint32_t DISCINT : 1;               /*!< Disconnect detected interrupt mask */
-            __IO uint32_t SRQIM : 1;                 /*!< Session request/new session detected interrupt mask */
-            __IO uint32_t WUIM : 1;                  /*!< Resume/remote wakeup detected interrupt mask */
+            __IO uint32_t PRTIM : 1;                        /*!< Host port interrupt mask */
+            __IO uint32_t HCIM : 1;                         /*!< Host channels interrupt mask */
+            __IO uint32_t PTXFEM : 1;                       /*!< Periodic TxFIFO empty mask */
+            __IO uint32_t LPMINTM : 1;                      /*!< LPM interrupt Mask */
+            __IO uint32_t CIDSCHGM : 1;                     /*!< Connector ID status change mask */
+            __IO uint32_t DISCINT : 1;                      /*!< Disconnect detected interrupt mask */
+            __IO uint32_t SRQIM : 1;                        /*!< Session request/new session detected interrupt mask */
+            __IO uint32_t WUIM : 1;                         /*!< Resume/remote wakeup detected interrupt mask */
         } b;
         __IO uint32_t w;
-    } GINTMSK;                               /*!<  Core Interrupt Mask Register                 018h*/
+    } GINTMSK;                                              /*!<  Core Interrupt Mask Register                 018h*/
     union {
         struct {
             __IO uint32_t CHNUM : 4;
@@ -7152,95 +7152,95 @@ typedef struct {
                  uint32_t __RESERVED0 : 7;
         } b;
         __IO uint32_t w;
-    } GRXSTSR;                               /*!<  Receive Sts Q Read Register                  01Ch*/
+    } GRXSTSR;                                              /*!<  Receive Sts Q Read Register                  01Ch*/
     union {
         struct {
-            __IO uint32_t EPNUM : 4;                 /*!< IN EP interrupt mask bits */
-            __IO uint32_t BCNT : 11;                 /*!< OUT EP interrupt mask bits */
-            __IO uint32_t DPID : 2;                  /*!< OUT EP interrupt mask bits */
-            __IO uint32_t PKTSTS : 4;                /*!< OUT EP interrupt mask bits */
+            __IO uint32_t EPNUM : 4;                        /*!< IN EP interrupt mask bits */
+            __IO uint32_t BCNT : 11;                        /*!< OUT EP interrupt mask bits */
+            __IO uint32_t DPID : 2;                         /*!< OUT EP interrupt mask bits */
+            __IO uint32_t PKTSTS : 4;                       /*!< OUT EP interrupt mask bits */
                  uint32_t __RESERVED0 : 11;
         } b;
         __IO uint32_t w;
-    } GRXSTSP;                               /*!<  Receive Sts Q Read & POP Register            020h*/
-    __IO uint32_t GRXFSIZ;                   /* Receive FIFO Size Register                      024h*/
-    __IO uint32_t DIEPTXF0_HNPTXFSIZ;        /*!<  EP0 / Non Periodic Tx FIFO Size Register     028h*/
-    __IO uint32_t HNPTXSTS;                  /*!<  Non Periodic Tx FIFO/Queue Sts reg           02Ch*/
-         uint32_t __RESERVED0[2];               /* Reserved                                        030h*/
+    } GRXSTSP;                                              /*!<  Receive Sts Q Read & POP Register            020h*/
+    __IO uint32_t GRXFSIZ;                                  /* Receive FIFO Size Register                      024h*/
+    __IO uint32_t DIEPTXF0_HNPTXFSIZ;                       /*!<  EP0 / Non Periodic Tx FIFO Size Register     028h*/
+    __IO uint32_t HNPTXSTS;                                 /*!<  Non Periodic Tx FIFO/Queue Sts reg           02Ch*/
+         uint32_t __RESERVED0[2];
     union {
         struct {
-            __IO uint32_t DCDET : 1;                 /*!< Data contact detection (DCD) status */
-            __IO uint32_t PDET : 1;                  /*!< Primary detection (PD) status */
-            __IO uint32_t SDET : 1;                  /*!< Secondary detection (SD) status */
-            __IO uint32_t PS2DET : 1;                /*!< DM pull-up detection status */
+            __IO uint32_t DCDET : 1;                        /*!< Data contact detection (DCD) status */
+            __IO uint32_t PDET : 1;                         /*!< Primary detection (PD) status */
+            __IO uint32_t SDET : 1;                         /*!< Secondary detection (SD) status */
+            __IO uint32_t PS2DET : 1;                       /*!< DM pull-up detection status */
                  uint32_t __RESERVED0 : 12;
-            __IO uint32_t PWRDWN : 1;                /*!< Power down */
-            __IO uint32_t BCDEN : 1;                 /*!< Battery charging detector (BCD) enable */
-            __IO uint32_t DCDEN : 1;                 /*!< Data contact detection (DCD) mode enable*/
-            __IO uint32_t PDEN : 1;                  /*!< Primary detection (PD) mode enable*/
-            __IO uint32_t SDEN : 1;                  /*!< Secondary detection (SD) mode enable */
-            __IO uint32_t VBDEN : 1;                 /*!< Secondary detection (SD) mode enable */
+            __IO uint32_t PWRDWN : 1;                       /*!< Power down */
+            __IO uint32_t BCDEN : 1;                        /*!< Battery charging detector (BCD) enable */
+            __IO uint32_t DCDEN : 1;                        /*!< Data contact detection (DCD) mode enable*/
+            __IO uint32_t PDEN : 1;                         /*!< Primary detection (PD) mode enable*/
+            __IO uint32_t SDEN : 1;                         /*!< Secondary detection (SD) mode enable */
+            __IO uint32_t VBDEN : 1;                        /*!< Secondary detection (SD) mode enable */
                  uint32_t __RESERVED1 : 10;
         } b;
         __IO uint32_t w;
-    } GCCFG;                                 /* General Purpose IO Register                     038h*/
-    __IO uint32_t CID;                       /* User ID Register                                03Ch*/
-         uint32_t __RESERVED1[3];               /* Reserved                                        040h-048h*/
+    } GCCFG;                                                /* General Purpose IO Register                     038h*/
+    __IO uint32_t CID;                                      /* User ID Register                                03Ch*/
+         uint32_t __RESERVED1[3];
     union {
         struct {
                  uint32_t __RESERVED0 : 14;
-            __IO uint32_t LPMMode : 1;               /* LPM mode specified for Mode of Operation */
+            __IO uint32_t LPMMode : 1;                      /* LPM mode specified for Mode of Operation */
                  uint32_t __RESERVED1 : 17;
         } b;
         __IO uint32_t w;
-    } GHWCFG3;                               /* User HW config3                                 04Ch*/
-         uint32_t __RESERVED2;               /* Reserved                                        050h*/
+    } GHWCFG3;                                              /* User HW config3                                 04Ch*/
+         uint32_t __RESERVED2;
     union {
         struct {
-            __IO uint32_t LPMEN : 1;                 /* LPM support enable  */
-            __IO uint32_t LPMACK : 1;                /* LPM Token acknowledge enable*/
-            __IO uint32_t BESL : 4;                  /* BESL value received with last ACKed LPM Token  */
-            __IO uint32_t REMWAKE : 1;               /* bRemoteWake value received with last ACKed LPM Token */
-            __IO uint32_t L1SSEN : 1;                /* L1 shallow sleep enable */
-            __IO uint32_t BESLTHRS : 4;              /* BESL threshold */
-            __IO uint32_t L1DSEN : 1;                /* L1 deep sleep enable */
-            __IO uint32_t LPMRSP : 2;                /* LPM response */
-            __IO uint32_t SLPSTS : 1;                /* Port sleep status */
-            __IO uint32_t L1ResumeOK : 1;            /* Sleep State Resume OK */
-            __IO uint32_t LPMCHIDX : 4;              /* LPMCHIDX: */
-            __IO uint32_t LPMRCNT : 3;               /* LPM retry count */
-            __IO uint32_t SNDLPM : 1;                /* Send LPM transaction */
-            __IO uint32_t LPMRCNTSTS : 3;            /* LPM retry count status */
-            __IO uint32_t ENBESL : 1;                /* Enable best effort service latency */
+            __IO uint32_t LPMEN : 1;                        /* LPM support enable  */
+            __IO uint32_t LPMACK : 1;                       /* LPM Token acknowledge enable*/
+            __IO uint32_t BESL : 4;                         /* BESL value received with last ACKed LPM Token  */
+            __IO uint32_t REMWAKE : 1;                      /* bRemoteWake value received with last ACKed LPM Token */
+            __IO uint32_t L1SSEN : 1;                       /* L1 shallow sleep enable */
+            __IO uint32_t BESLTHRS : 4;                     /* BESL threshold */
+            __IO uint32_t L1DSEN : 1;                       /* L1 deep sleep enable */
+            __IO uint32_t LPMRSP : 2;                       /* LPM response */
+            __IO uint32_t SLPSTS : 1;                       /* Port sleep status */
+            __IO uint32_t L1ResumeOK : 1;                   /* Sleep State Resume OK */
+            __IO uint32_t LPMCHIDX : 4;                     /* LPMCHIDX: */
+            __IO uint32_t LPMRCNT : 3;                      /* LPM retry count */
+            __IO uint32_t SNDLPM : 1;                       /* Send LPM transaction */
+            __IO uint32_t LPMRCNTSTS : 3;                   /* LPM retry count status */
+            __IO uint32_t ENBESL : 1;                       /* Enable best effort service latency */
                  uint32_t __RESERVED0 : 3;
         } b;
         __IO uint32_t w;
-    } GLPMCFG;                               /* LPM Register                                    054h*/
+    } GLPMCFG;                                              /* LPM Register                                    054h*/
     union {
         struct {
                  uint32_t __RESERVED0 : 6;
-            __IO uint32_t DISABLEVBUS : 1;           /*!< Power down */
+            __IO uint32_t DISABLEVBUS : 1;                  /*!< Power down */
                  uint32_t __RESERVED1 : 25;
         } b;
         __IO uint32_t w;
-    } GPWRDN;                                /* Power Down Register                             058h*/
-    __IO uint32_t GDFIFOCFG;                 /* DFIFO Software Config Register                  05Ch*/
-    __IO uint32_t GADPCTL;                   /* ADP Timer, Control and Status Register          60Ch*/
-         uint32_t __RESERVED3[39];               /* Reserved                                        058h-0FFh*/
+    } GPWRDN;                                               /* Power Down Register                             058h*/
+    __IO uint32_t GDFIFOCFG;                                /* DFIFO Software Config Register                  05Ch*/
+    __IO uint32_t GADPCTL;                                  /* ADP Timer, Control and Status Register          60Ch*/
+         uint32_t __RESERVED3[39];
     union {
         struct {
-            __IO uint32_t PTXSA : 16;                /*!< Host periodic TxFIFO start address */
-            __IO uint32_t PTXFD : 16;                /*!< Host periodic TxFIFO depth */
+            __IO uint32_t PTXSA : 16;                       /*!< Host periodic TxFIFO start address */
+            __IO uint32_t PTXFD : 16;                       /*!< Host periodic TxFIFO depth */
         } b;
         __IO uint32_t w;
-    } HPTXFSIZ;                              /* Host Periodic Tx FIFO Size Reg                  100h*/
+    } HPTXFSIZ;                                             /* Host Periodic Tx FIFO Size Reg                  100h*/
     union {
         struct {
-            __IO uint32_t INEPTXSA : 16;             /*!< IN endpoint FIFOx transmit RAM start address */
-            __IO uint32_t INEPTXFD : 16;             /*!< IN endpoint TxFIFO depth */
+            __IO uint32_t INEPTXSA : 16;                    /*!< IN endpoint FIFOx transmit RAM start address */
+            __IO uint32_t INEPTXFD : 16;                    /*!< IN endpoint TxFIFO depth */
         } b;
         __IO uint32_t w;
-    } DIEPTXF;                               /* dev Periodic Transmit FIFO */
+    } DIEPTXF;                                              /* dev Periodic Transmit FIFO */
 } USB_OTG_GlobalTypeDef;
 
 
@@ -7251,125 +7251,124 @@ typedef struct {
 typedef struct {
     union {
         struct {
-            __IO uint32_t DSPD : 2;                  /*!< Device speed */
-            __IO uint32_t NZLSOHSK : 1;              /*!< Nonzero-length status OUT handshake */
+            __IO uint32_t DSPD : 2;                         /*!< Device speed */
+            __IO uint32_t NZLSOHSK : 1;                     /*!< Nonzero-length status OUT handshake */
                  uint32_t __RESERVED0 : 1;
-            __IO uint32_t DAD : 7;                   /*!< Device address */
-            __IO uint32_t PFIVL : 2;                 /*!< Periodic (micro)frame interval */
+            __IO uint32_t DAD : 7;                          /*!< Device address */
+            __IO uint32_t PFIVL : 2;                        /*!< Periodic (micro)frame interval */
                  uint32_t __RESERVED1 : 11;
-            __IO uint32_t PERSCHIVL : 2;             /*!< Periodic scheduling interval */
+            __IO uint32_t PERSCHIVL : 2;                    /*!< Periodic scheduling interval */
                  uint32_t __RESERVED2 : 6;
         } b;
         __IO uint32_t w;
-    } DCFG;                                  /* dev Configuration Register   800h*/
+    } DCFG;                                                 /* dev Configuration Register   800h*/
     union {
         struct {
-            __IO uint32_t RWUSIG : 1;                /*!< Remote wakeup signaling */
-            __IO uint32_t SDIS : 1;                  /*!< Soft disconnect */
-            __IO uint32_t GINSTS : 1;                /*!< Global IN NAK status */
-            __IO uint32_t GONSTS : 1;                /*!< Global OUT NAK status */
-            __IO uint32_t TCTL : 3;                  /*!< Test control */
-            __IO uint32_t SGINAK : 1;                /*!< Set global IN NAK */
-            __IO uint32_t CGINAK : 1;                /*!< Clear global IN NAK */
-            __IO uint32_t SGONAK : 1;                /*!< Set global OUT NAK */
-            __IO uint32_t CGONAK : 1;                /*!< Clear global OUT NAK */
-            __IO uint32_t POPRGDNE : 1;              /*!< Power-on programming done */
+            __IO uint32_t RWUSIG : 1;                       /*!< Remote wakeup signaling */
+            __IO uint32_t SDIS : 1;                         /*!< Soft disconnect */
+            __IO uint32_t GINSTS : 1;                       /*!< Global IN NAK status */
+            __IO uint32_t GONSTS : 1;                       /*!< Global OUT NAK status */
+            __IO uint32_t TCTL : 3;                         /*!< Test control */
+            __IO uint32_t SGINAK : 1;                       /*!< Set global IN NAK */
+            __IO uint32_t CGINAK : 1;                       /*!< Clear global IN NAK */
+            __IO uint32_t SGONAK : 1;                       /*!< Set global OUT NAK */
+            __IO uint32_t CGONAK : 1;                       /*!< Clear global OUT NAK */
+            __IO uint32_t POPRGDNE : 1;                     /*!< Power-on programming done */
                  uint32_t __RESERVED0 : 20;
         } b;
         __IO uint32_t w;
-    } DCTL;                                  /* dev Control Register         804h*/
+    } DCTL;                                                 /* dev Control Register         804h*/
     union {
         struct {
-            __IO uint32_t SUSPSTS : 1;               /*!< Suspend status */
-            __IO uint32_t ENUMSPD : 2;               /*!< Enumerated speed */
-            __IO uint32_t EERR : 1;                  /*!< Erratic error */
+            __IO uint32_t SUSPSTS : 1;                      /*!< Suspend status */
+            __IO uint32_t ENUMSPD : 2;                      /*!< Enumerated speed */
+            __IO uint32_t EERR : 1;                         /*!< Erratic error */
                  uint32_t __RESERVED0 : 4;
-            __IO uint32_t FNSOF : 14;                /*!< Frame number of the received SOF */
+            __IO uint32_t FNSOF : 14;                       /*!< Frame number of the received SOF */
                  uint32_t __RESERVED1 : 10;
         } b;
         __IO uint32_t w;
-    } DSTS;                                  /* dev Status Register (RO)     808h*/
-         uint32_t __RESERVED0;               /* Reserved                     80Ch*/
+    } DSTS;                                                 /* dev Status Register (RO)     808h*/
+         uint32_t __RESERVED0;
     union {
         struct {
-            __IO uint32_t XFRCM : 1;                 /*!< Transfer completed interrupt mask */
-            __IO uint32_t EPDM : 1;                  /*!< Endpoint disabled interrupt mask */
+            __IO uint32_t XFRCM : 1;                        /*!< Transfer completed interrupt mask */
+            __IO uint32_t EPDM : 1;                         /*!< Endpoint disabled interrupt mask */
                  uint32_t __RESERVED0 : 1;
-            __IO uint32_t TOM : 1;                   /*!< Timeout condition mask (nonisochronous endpoints) */
-            __IO uint32_t ITTXFEMSK : 1;             /*!< IN token received when TxFIFO empty mask */
-            __IO uint32_t INEPNMM : 1;               /*!< IN token received with EP mismatch mask */
-            __IO uint32_t INEPNEM : 1;               /*!< IN endpoint NAK effective mask */
+            __IO uint32_t TOM : 1;                          /*!< Timeout condition mask (nonisochronous endpoints) */
+            __IO uint32_t ITTXFEMSK : 1;                    /*!< IN token received when TxFIFO empty mask */
+            __IO uint32_t INEPNMM : 1;                      /*!< IN token received with EP mismatch mask */
+            __IO uint32_t INEPNEM : 1;                      /*!< IN endpoint NAK effective mask */
                  uint32_t __RESERVED1 : 1;
-            __IO uint32_t TXFURM : 1;                /*!< FIFO underrun mask */
-            __IO uint32_t BIM : 1;                   /*!< BNA interrupt mask */
+            __IO uint32_t TXFURM : 1;                       /*!< FIFO underrun mask */
+            __IO uint32_t BIM : 1;                          /*!< BNA interrupt mask */
                  uint32_t __RESERVED2 : 22;
         } b;
         __IO uint32_t w;
-    } DIEPMSK;                               /* dev IN Endpoint Mask         810h*/
+    } DIEPMSK;                                              /* dev IN Endpoint Mask         810h*/
     union {
         struct {
-            __IO uint32_t XFRCM : 1;                 /*!< Transfer completed interrupt mask */
-            __IO uint32_t EPDM : 1;                  /*!< Endpoint disabled interrupt mask */
+            __IO uint32_t XFRCM : 1;                        /*!< Transfer completed interrupt mask */
+            __IO uint32_t EPDM : 1;                         /*!< Endpoint disabled interrupt mask */
                  uint32_t __RESERVED0 : 1;
-            __IO uint32_t STUPM : 1;                 /*!< SETUP phase done mask */
-            __IO uint32_t OTEPDM : 1;                /*!< OUT token received when endpoint disabled mask */
+            __IO uint32_t STUPM : 1;                        /*!< SETUP phase done mask */
+            __IO uint32_t OTEPDM : 1;                       /*!< OUT token received when endpoint disabled mask */
                  uint32_t __RESERVED1 : 1;
-            __IO uint32_t B2BSTUP : 1;               /*!< Back-to-back SETUP packets received mask */
+            __IO uint32_t B2BSTUP : 1;                      /*!< Back-to-back SETUP packets received mask */
                  uint32_t __RESERVED2 : 1;
-            __IO uint32_t OPEM : 1;                  /*!< OUT packet error mask */
-            __IO uint32_t BOIM : 1;                  /*!< BNA interrupt mask */
+            __IO uint32_t OPEM : 1;                         /*!< OUT packet error mask */
+            __IO uint32_t BOIM : 1;                         /*!< BNA interrupt mask */
                  uint32_t __RESERVED3 : 22;
         } b;
         __IO uint32_t w;
-    } DOEPMSK;                               /* dev OUT Endpoint Mask        814h*/
+    } DOEPMSK;                                              /* dev OUT Endpoint Mask        814h*/
     union {
         struct {
-            __IO uint32_t IEPINT : 16;               /*!< IN endpoint interrupt bits */
-            __IO uint32_t OEPINT : 16;               /*!< OUT endpoint interrupt bits */
+            __IO uint32_t IEPINT : 16;                      /*!< IN endpoint interrupt bits */
+            __IO uint32_t OEPINT : 16;                      /*!< OUT endpoint interrupt bits */
         } b;
         __IO uint32_t w;
-    } DAINT;                                 /* dev All Endpoints Itr Reg    818h*/
+    } DAINT;                                                /* dev All Endpoints Itr Reg    818h*/
     union {
         struct {
-            __IO uint32_t IEPM : 16;                 /*!< IN EP interrupt mask bits */
-            __IO uint32_t OEPM : 16;                 /*!< OUT EP interrupt mask bits */
+            __IO uint32_t IEPM : 16;                        /*!< IN EP interrupt mask bits */
+            __IO uint32_t OEPM : 16;                        /*!< OUT EP interrupt mask bits */
         } b;
         __IO uint32_t w;
-    } DAINTMSK;                              /* dev All Endpoints Itr Mask   81Ch*/
-         uint32_t __RESERVED1;               /* Reserved                     820h*/
-         uint32_t __RESERVED2;               /* Reserved                     824h*/
-    __IO uint32_t DVBUSDIS;                  /* dev VBUS discharge Register  828h*/
-    __IO uint32_t DVBUSPULSE;                /* dev VBUS Pulse Register      82Ch*/
+    } DAINTMSK;                                             /* dev All Endpoints Itr Mask   81Ch*/
+         uint32_t __RESERVED[2];
+    __IO uint32_t DVBUSDIS;                                 /* dev VBUS discharge Register  828h*/
+    __IO uint32_t DVBUSPULSE;                               /* dev VBUS Pulse Register      82Ch*/
     union {
         struct {
-            __IO uint32_t NONISOTHREN : 1;           /*!< Nonisochronous IN endpoints threshold enable */
-            __IO uint32_t ISOTHREN : 1;              /*!< ISO IN endpoint threshold enable */
-            __IO uint32_t TXTHRLEN : 9;              /*!< Transmit threshold length */
+            __IO uint32_t NONISOTHREN : 1;                  /*!< Nonisochronous IN endpoints threshold enable */
+            __IO uint32_t ISOTHREN : 1;                     /*!< ISO IN endpoint threshold enable */
+            __IO uint32_t TXTHRLEN : 9;                     /*!< Transmit threshold length */
                  uint32_t __RESERVED0 : 5;
-            __IO uint32_t RXTHREN : 1;               /*!< Receive threshold enable */
-            __IO uint32_t RXTHRLEN : 9;              /*!< Receive threshold length */
+            __IO uint32_t RXTHREN : 1;                      /*!< Receive threshold enable */
+            __IO uint32_t RXTHRLEN : 9;                     /*!< Receive threshold length */
                  uint32_t __RESERVED1 : 1;
-            __IO uint32_t ARPEN : 1;                 /*!< Arbiter parking enable */
+            __IO uint32_t ARPEN : 1;                        /*!< Arbiter parking enable */
                  uint32_t __RESERVED2 : 4;
         } b;
         __IO uint32_t w;
-    } DTHRCTL;                               /* dev thr                      830h*/
-    __IO uint32_t DIEPEMPMSK;                /* dev empty msk             834h*/
+    } DTHRCTL;                                              /* dev thr                      830h*/
+    __IO uint32_t DIEPEMPMSK;                               /* dev empty msk             834h*/
     union {
         struct {
                  uint32_t __RESERVED0 : 1;
-            __IO uint32_t IEP1INT : 1;               /*!< IN endpoint 1interrupt bit */
+            __IO uint32_t IEP1INT : 1;                      /*!< IN endpoint 1interrupt bit */
                  uint32_t __RESERVED1 : 15;
-            __IO uint32_t OEP1INT : 1;               /*!< OUT endpoint 1 interrupt bit */
+            __IO uint32_t OEP1INT : 1;                      /*!< OUT endpoint 1 interrupt bit */
                  uint32_t __RESERVED2 : 14;
         } b;
         __IO uint32_t w;
-    } DEACHINT;                              /* dedicated EP interrupt       838h*/
-    __IO uint32_t DEACHMSK;                  /* dedicated EP msk             83Ch*/
-         uint32_t __RESERVED3;               /* dedicated EP mask           840h*/
-    __IO uint32_t DINEP1MSK;                 /* dedicated EP mask           844h*/
-         uint32_t __RESERVED4[15];               /* Reserved                 844-87Ch*/
-    __IO uint32_t DOUTEP1MSK;                /* dedicated EP msk            884h*/
+    } DEACHINT;                                             /* dedicated EP interrupt       838h*/
+    __IO uint32_t DEACHMSK;                                 /* dedicated EP msk             83Ch*/
+         uint32_t __RESERVED3;
+    __IO uint32_t DINEP1MSK;                                /* dedicated EP mask           844h*/
+         uint32_t __RESERVED4[15];
+    __IO uint32_t DOUTEP1MSK;                               /* dedicated EP msk            884h*/
 } USB_OTG_DeviceTypeDef;
 
 
@@ -7379,58 +7378,58 @@ typedef struct {
 typedef struct {
     union {
         struct {
-            __IO uint32_t MPSIZ : 11;                /*!< Maximum packet size */
+            __IO uint32_t MPSIZ : 11;                       /*!< Maximum packet size */
                  uint32_t __RESERVED0 : 4;
-            __IO uint32_t USBAEP : 1;                /*!< USB active endpoint */
-            __IO uint32_t EONUM_DPID : 1;            /*!< Even/odd frame */
-            __IO uint32_t NAKSTS : 1;                /*!< NAK status */
-            __IO uint32_t EPTYP : 2;                 /*!< Endpoint type */
+            __IO uint32_t USBAEP : 1;                       /*!< USB active endpoint */
+            __IO uint32_t EONUM_DPID : 1;                   /*!< Even/odd frame */
+            __IO uint32_t NAKSTS : 1;                       /*!< NAK status */
+            __IO uint32_t EPTYP : 2;                        /*!< Endpoint type */
                  uint32_t __RESERVED1 : 1;
-            __IO uint32_t STALL : 1;                 /*!< STALL handshake */
-            __IO uint32_t TXFNUM : 4;                /*!< TxFIFO number */
-            __IO uint32_t CNAK : 1;                  /*!< Clear NAK */
-            __IO uint32_t SNAK : 1;                  /*!< Set NAK */
-            __IO uint32_t SD0PID_SEVNFRM : 1;        /*!< Set DATA0 PID */
-            __IO uint32_t SODDFRM : 1;               /*!< Set odd frame */
-            __IO uint32_t EPDIS : 1;                 /*!< Endpoint disable */
-            __IO uint32_t EPENA : 1;                 /*!< Endpoint enable */
+            __IO uint32_t STALL : 1;                        /*!< STALL handshake */
+            __IO uint32_t TXFNUM : 4;                       /*!< TxFIFO number */
+            __IO uint32_t CNAK : 1;                         /*!< Clear NAK */
+            __IO uint32_t SNAK : 1;                         /*!< Set NAK */
+            __IO uint32_t SD0PID_SEVNFRM : 1;               /*!< Set DATA0 PID */
+            __IO uint32_t SODDFRM : 1;                      /*!< Set odd frame */
+            __IO uint32_t EPDIS : 1;                        /*!< Endpoint disable */
+            __IO uint32_t EPENA : 1;                        /*!< Endpoint enable */
         } b;
         __IO uint32_t w;
-    } DIEPCTL;                               /* dev IN Endpoint Control Reg 900h + (ep_num * 20h) + 00h*/
-         uint32_t __RESERVED0;               /* Reserved                       900h + (ep_num * 20h) + 04h*/
+    } DIEPCTL;                                              /* dev IN Endpoint Control Reg 900h + (ep_num * 20h) + 00h*/
+         uint32_t __RESERVED0;
     union {
         struct {
-            __IO uint32_t XFRC : 1;                  /*!< Transfer completed interrupt */
-            __IO uint32_t EPDISD : 1;                /*!< Endpoint disabled interrupt */
+            __IO uint32_t XFRC : 1;                         /*!< Transfer completed interrupt */
+            __IO uint32_t EPDISD : 1;                       /*!< Endpoint disabled interrupt */
                  uint32_t __RESERVED0 : 1;
-            __IO uint32_t TOC : 1;                   /*!< Timeout condition */
-            __IO uint32_t ITTXFE : 1;                /*!< IN token received when TxFIFO is empty */
+            __IO uint32_t TOC : 1;                          /*!< Timeout condition */
+            __IO uint32_t ITTXFE : 1;                       /*!< IN token received when TxFIFO is empty */
                  uint32_t __RESERVED1 : 1;
-            __IO uint32_t INEPNE : 1;                /*!< IN endpoint NAK effective */
-            __IO uint32_t TXFE : 1;                  /*!< Transmit FIFO empty */
-            __IO uint32_t TXFIFOUDRN : 1;            /*!< Transmit Fifo Underrun */
-            __IO uint32_t BNA : 1;                   /*!< Buffer not available interrupt */
+            __IO uint32_t INEPNE : 1;                       /*!< IN endpoint NAK effective */
+            __IO uint32_t TXFE : 1;                         /*!< Transmit FIFO empty */
+            __IO uint32_t TXFIFOUDRN : 1;                   /*!< Transmit Fifo Underrun */
+            __IO uint32_t BNA : 1;                          /*!< Buffer not available interrupt */
                  uint32_t __RESERVED2 : 1;
-            __IO uint32_t PKTDRPSTS : 1;             /*!< Packet dropped status */
-            __IO uint32_t BERR : 1;                  /*!< Babble error interrupt */
-            __IO uint32_t NAK : 1;                   /*!< NAK interrupt */
+            __IO uint32_t PKTDRPSTS : 1;                    /*!< Packet dropped status */
+            __IO uint32_t BERR : 1;                         /*!< Babble error interrupt */
+            __IO uint32_t NAK : 1;                          /*!< NAK interrupt */
                  uint32_t __RESERVED3 : 18;
         } b;
         __IO uint32_t w;
-    } DIEPINT;                               /* dev IN Endpoint Itr Reg     900h + (ep_num * 20h) + 08h*/
-         uint32_t __RESERVED1;               /* Reserved                       900h + (ep_num * 20h) + 0Ch*/
+    } DIEPINT;                                              /* dev IN Endpoint Itr Reg     900h + (ep_num * 20h) + 08h*/
+         uint32_t __RESERVED1;
     union {
         struct {
-            __IO uint32_t XFRSIZ : 19;               /*!< Transfer size */
-            __IO uint32_t PKTCNT : 10;               /*!< Packet count */
-            __IO uint32_t MULCNT : 2;                /*!< Packet count */
+            __IO uint32_t XFRSIZ : 19;                      /*!< Transfer size */
+            __IO uint32_t PKTCNT : 10;                      /*!< Packet count */
+            __IO uint32_t MULCNT : 2;                       /*!< Packet count */
                  uint32_t __RESERVED0 : 1;
         } b;
         __IO uint32_t w;
-    } DIEPTSIZ;                              /* IN Endpoint Txfer Size   900h + (ep_num * 20h) + 10h*/
-    __IO uint32_t DIEPDMA;                   /* IN Endpoint DMA Address Reg    900h + (ep_num * 20h) + 14h*/
-    __IO uint32_t DTXFSTS;                   /*IN Endpoint Tx FIFO Status Reg 900h + (ep_num * 20h) + 18h*/
-         uint32_t __RESERVED2;               /* Reserved  900h+(ep_num*20h)+1Ch-900h+ (ep_num * 20h) + 1Ch*/
+    } DIEPTSIZ;                                             /* IN Endpoint Txfer Size   900h + (ep_num * 20h) + 10h*/
+    __IO uint32_t DIEPDMA;                                  /* IN Endpoint DMA Address Reg    900h + (ep_num * 20h) + 14h*/
+    __IO uint32_t DTXFSTS;                                  /* IN Endpoint Tx FIFO Status Reg 900h + (ep_num * 20h) + 18h*/
+         uint32_t __RESERVED2;
 } USB_OTG_INEndpointTypeDef;
 
 
@@ -7440,52 +7439,52 @@ typedef struct {
 typedef struct {
     union {
         struct {
-            __IO uint32_t MPSIZ : 11;                /*!< Maximum packet size */
+            __IO uint32_t MPSIZ : 11;                       /*!< Maximum packet size */
                  uint32_t __RESERVED0 : 4;
-            __IO uint32_t USBAEP : 1;                /*!< USB active endpoint */
+            __IO uint32_t USBAEP : 1;                       /*!< USB active endpoint */
                  uint32_t __RESERVED1 : 1;
-            __IO uint32_t NAKSTS : 1;                /*!< NAK status */
-            __IO uint32_t EPTYP : 2;                 /*!< Endpoint type */
-            __IO uint32_t SNPM : 1;                  /*!< Snoop mode */
-            __IO uint32_t STALL : 1;                 /*!< STALL handshake */
+            __IO uint32_t NAKSTS : 1;                       /*!< NAK status */
+            __IO uint32_t EPTYP : 2;                        /*!< Endpoint type */
+            __IO uint32_t SNPM : 1;                         /*!< Snoop mode */
+            __IO uint32_t STALL : 1;                        /*!< STALL handshake */
                  uint32_t __RESERVED2 : 4;
-            __IO uint32_t CNAK : 1;                  /*!< Clear NAK */
-            __IO uint32_t SNAK : 1;                  /*!< Set NAK */
-            __IO uint32_t SD0PID_SEVNFRM : 1;        /*!< Set DATA0 PID */
-            __IO uint32_t SODDFRM : 1;               /*!< Set odd frame */
-            __IO uint32_t EPDIS : 1;                 /*!< Endpoint disable */
-            __IO uint32_t EPENA : 1;                 /*!< Endpoint enable */
+            __IO uint32_t CNAK : 1;                         /*!< Clear NAK */
+            __IO uint32_t SNAK : 1;                         /*!< Set NAK */
+            __IO uint32_t SD0PID_SEVNFRM : 1;               /*!< Set DATA0 PID */
+            __IO uint32_t SODDFRM : 1;                      /*!< Set odd frame */
+            __IO uint32_t EPDIS : 1;                        /*!< Endpoint disable */
+            __IO uint32_t EPENA : 1;                        /*!< Endpoint enable */
         } b;
         __IO uint32_t w;
-    } DOEPCTL;                               /* dev OUT Endpoint Control Reg  B00h + (ep_num * 20h) + 00h*/
-         uint32_t __RESERVED0;               /* Reserved                      B00h + (ep_num * 20h) + 04h*/
+    } DOEPCTL;                                              /* dev OUT Endpoint Control Reg  B00h + (ep_num * 20h) + 00h*/
+         uint32_t __RESERVED0;
     union {
         struct {
-            __IO uint32_t XFRC : 1;                  /*!< Transfer completed interrupt */
-            __IO uint32_t EPDISD : 1;                /*!< Endpoint disabled interrupt */
+            __IO uint32_t XFRC : 1;                         /*!< Transfer completed interrupt */
+            __IO uint32_t EPDISD : 1;                       /*!< Endpoint disabled interrupt */
                  uint32_t __RESERVED0 : 1;
-            __IO uint32_t STUP : 1;                  /*!< SETUP phase done */
-            __IO uint32_t OTEPDIS : 1;               /*!< OUT token received when endpoint disabled */
+            __IO uint32_t STUP : 1;                         /*!< SETUP phase done */
+            __IO uint32_t OTEPDIS : 1;                      /*!< OUT token received when endpoint disabled */
                  uint32_t __RESERVED1 : 1;
-            __IO uint32_t B2BSTUP : 1;               /*!< Back-to-back SETUP packets received */
+            __IO uint32_t B2BSTUP : 1;                      /*!< Back-to-back SETUP packets received */
                  uint32_t __RESERVED2 : 7;
-            __IO uint32_t NYET : 1;                  /*!< NYET interrupt */
+            __IO uint32_t NYET : 1;                         /*!< NYET interrupt */
                  uint32_t __RESERVED3 : 17;
         } b;
         __IO uint32_t w;
-    } DOEPINT;                               /* dev OUT Endpoint Itr Reg      B00h + (ep_num * 20h) + 08h*/
-         uint32_t __RESERVED1;               /* Reserved                      B00h + (ep_num * 20h) + 0Ch*/
+    } DOEPINT;                                              /* dev OUT Endpoint Itr Reg      B00h + (ep_num * 20h) + 08h*/
+         uint32_t __RESERVED1;
     union {
         struct {
-            __IO uint32_t XFRSIZ : 19;               /*!< Transfer size */
-            __IO uint32_t PKTCNT : 10;               /*!< Packet count */
-            __IO uint32_t STUPCNT : 2;               /*!< SETUP packet count */
+            __IO uint32_t XFRSIZ : 19;                      /*!< Transfer size */
+            __IO uint32_t PKTCNT : 10;                      /*!< Packet count */
+            __IO uint32_t STUPCNT : 2;                      /*!< SETUP packet count */
                  uint32_t __RESERVED0 : 1;
         } b;
         __IO uint32_t w;
-    } DOEPTSIZ;                              /* dev OUT Endpoint Txfer Size   B00h + (ep_num * 20h) + 10h*/
-    __IO uint32_t DOEPDMA;                   /* dev OUT Endpoint DMA Address  B00h + (ep_num * 20h) + 14h*/
-         uint32_t __RESERVED2[2];               /* Reserved B00h + (ep_num * 20h) + 18h - B00h + (ep_num * 20h) + 1Ch*/
+    } DOEPTSIZ;                                             /* dev OUT Endpoint Txfer Size   B00h + (ep_num * 20h) + 10h*/
+    __IO uint32_t DOEPDMA;                                  /* dev OUT Endpoint DMA Address  B00h + (ep_num * 20h) + 14h*/
+         uint32_t __RESERVED2[2];
 } USB_OTG_OUTEndpointTypeDef;
 
 
@@ -7495,31 +7494,31 @@ typedef struct {
 typedef struct {
     union {
         struct {
-            __IO uint32_t FSLSPCS : 2;               /*!< FS/LS PHY clock select */
-            __IO uint32_t FSLSS : 1;                 /*!< FS- and LS-only support */
+            __IO uint32_t FSLSPCS : 2;                      /*!< FS/LS PHY clock select */
+            __IO uint32_t FSLSS : 1;                        /*!< FS- and LS-only support */
                  uint32_t __RESERVED0 : 29;
         } b;
         __IO uint32_t w;
-    } HCFG;                                  /* Host Configuration Register    400h*/
-    __IO uint32_t HFIR;                      /* Host Frame Interval Register   404h*/
+    } HCFG;                                                 /* Host Configuration Register    400h*/
+    __IO uint32_t HFIR;                                     /* Host Frame Interval Register   404h*/
     union {
         struct {
-            __IO uint32_t FRNUM : 16;                /*!< Frame number */
-            __IO uint32_t FTREM : 16;                /*!< Frame time remaining */
+            __IO uint32_t FRNUM : 16;                       /*!< Frame number */
+            __IO uint32_t FTREM : 16;                       /*!< Frame time remaining */
         } b;
         __IO uint32_t w;
-    } HFNUM;                                 /* Host Frame Nbr/Frame Remaining 408h*/
-         uint32_t __RESERVED0;               /* Reserved                       40Ch*/
+    } HFNUM;                                                /* Host Frame Nbr/Frame Remaining 408h*/
+         uint32_t __RESERVED0;
     union {
         struct {
-            __IO uint32_t PTXFSAVL : 16;             /*!< Periodic transmit data FIFO space available */
-            __IO uint32_t PTXQSAV : 8;               /*!< Periodic transmit request queue space available */
-            __IO uint32_t PTXQTOP : 8;               /*!< Top of the periodic transmit request queue */
+            __IO uint32_t PTXFSAVL : 16;                    /*!< Periodic transmit data FIFO space available */
+            __IO uint32_t PTXQSAV : 8;                      /*!< Periodic transmit request queue space available */
+            __IO uint32_t PTXQTOP : 8;                      /*!< Top of the periodic transmit request queue */
         } b;
         __IO uint32_t w;
-    } HPTXSTS;                               /* Host Periodic Tx FIFO/ Queue Status 410h*/
-    __IO uint32_t HAINT;                     /* Host All Channels Interrupt Register 414h*/
-    __IO uint32_t HAINTMSK;                  /* Host All Channels Interrupt Mask 418h*/
+    } HPTXSTS;                                              /* Host Periodic Tx FIFO/ Queue Status 410h*/
+    __IO uint32_t HAINT;                                    /* Host All Channels Interrupt Register 414h*/
+    __IO uint32_t HAINTMSK;                                 /* Host All Channels Interrupt Mask 418h*/
 } USB_OTG_HostTypeDef;
 
 
@@ -7529,71 +7528,71 @@ typedef struct {
 typedef struct {
     union {
         struct {
-            __IO uint32_t MPSIZ : 11;                /*!< Maximum packet size */
-            __IO uint32_t EPNUM : 4;                 /*!< Endpoint number */
-            __IO uint32_t EPDIR : 1;                 /*!< Endpoint direction */
+            __IO uint32_t MPSIZ : 11;                       /*!< Maximum packet size */
+            __IO uint32_t EPNUM : 4;                        /*!< Endpoint number */
+            __IO uint32_t EPDIR : 1;                        /*!< Endpoint direction */
                  uint32_t __RESERVED0 : 1;
-            __IO uint32_t LSDEV : 1;                 /*!< Low-speed device */
-            __IO uint32_t EPTYP : 2;                 /*!< Endpoint type */
-            __IO uint32_t MC : 2;                    /*!< Multi Count (MC) / Error Count (EC) */
-            __IO uint32_t DAD : 7;                   /*!< Device address */
-            __IO uint32_t ODDFRM : 1;                /*!< Odd frame */
-            __IO uint32_t CHDIS : 1;                 /*!< Channel disable */
-            __IO uint32_t CHENA : 1;                 /*!< Channel enable */
+            __IO uint32_t LSDEV : 1;                        /*!< Low-speed device */
+            __IO uint32_t EPTYP : 2;                        /*!< Endpoint type */
+            __IO uint32_t MC : 2;                           /*!< Multi Count (MC) / Error Count (EC) */
+            __IO uint32_t DAD : 7;                          /*!< Device address */
+            __IO uint32_t ODDFRM : 1;                       /*!< Odd frame */
+            __IO uint32_t CHDIS : 1;                        /*!< Channel disable */
+            __IO uint32_t CHENA : 1;                        /*!< Channel enable */
         } b;
         __IO uint32_t w;
     } HCCHAR;
     union {
         struct {
-            __IO uint32_t PRTADDR : 7;               /*!< Port address */
-            __IO uint32_t HUBADDR : 7;               /*!< Hub address */
-            __IO uint32_t XACTPOS : 2;               /*!< XACTPOS */
-            __IO uint32_t COMPLSPLT : 1;             /*!< Do complete split */
+            __IO uint32_t PRTADDR : 7;                      /*!< Port address */
+            __IO uint32_t HUBADDR : 7;                      /*!< Hub address */
+            __IO uint32_t XACTPOS : 2;                      /*!< XACTPOS */
+            __IO uint32_t COMPLSPLT : 1;                    /*!< Do complete split */
                  uint32_t __RESERVED0 : 14;
-            __IO uint32_t SPLITEN : 1;               /*!< Split enable */
+            __IO uint32_t SPLITEN : 1;                      /*!< Split enable */
         } b;
         __IO uint32_t w;
     } HCSPLT;
     union {
         struct {
-            __IO uint32_t XFRC : 1;                  /*!< Transfer completed */
-            __IO uint32_t CHH : 1;                   /*!< Channel halted */
-            __IO uint32_t AHBERR : 1;                /*!< AHB error */
-            __IO uint32_t STALL : 1;                 /*!< STALL response received interrupt */
-            __IO uint32_t NAK : 1;                   /*!< NAK response received interrupt */
-            __IO uint32_t ACK : 1;                   /*!< ACK response received/transmitted interrupt */
-            __IO uint32_t NYET : 1;                  /*!< Response received interrupt */
-            __IO uint32_t TXERR : 1;                 /*!< Transaction error */
-            __IO uint32_t BBERR : 1;                 /*!< Babble error */
-            __IO uint32_t FRMOR : 1;                 /*!< Frame overrun */
-            __IO uint32_t DTERR : 1;                 /*!< Data toggle error */
+            __IO uint32_t XFRC : 1;                         /*!< Transfer completed */
+            __IO uint32_t CHH : 1;                          /*!< Channel halted */
+            __IO uint32_t AHBERR : 1;                       /*!< AHB error */
+            __IO uint32_t STALL : 1;                        /*!< STALL response received interrupt */
+            __IO uint32_t NAK : 1;                          /*!< NAK response received interrupt */
+            __IO uint32_t ACK : 1;                          /*!< ACK response received/transmitted interrupt */
+            __IO uint32_t NYET : 1;                         /*!< Response received interrupt */
+            __IO uint32_t TXERR : 1;                        /*!< Transaction error */
+            __IO uint32_t BBERR : 1;                        /*!< Babble error */
+            __IO uint32_t FRMOR : 1;                        /*!< Frame overrun */
+            __IO uint32_t DTERR : 1;                        /*!< Data toggle error */
                  uint32_t __RESERVED0 : 21;
         } b;
         __IO uint32_t w;
     } HCINT;
     union {
         struct {
-            __IO uint32_t XFRCM : 1;                 /*!< Transfer completed mask */
-            __IO uint32_t CHHM : 1;                  /*!< Channel halted mask */
-            __IO uint32_t AHBERR : 1;                /*!< AHB error */
-            __IO uint32_t STALLM : 1;                /*!< STALL response received interrupt mask */
-            __IO uint32_t NAKM : 1;                  /*!< NAK response received interrupt mask */
-            __IO uint32_t ACKM : 1;                  /*!< ACK response received/transmitted interrupt mask */
-            __IO uint32_t NYET : 1;                  /*!< response received interrupt mask */
-            __IO uint32_t TXERRM : 1;                /*!< Transaction error mask */
-            __IO uint32_t BBERRM : 1;                /*!< Babble error mask */
-            __IO uint32_t FRMORM : 1;                /*!< Frame overrun mask */
-            __IO uint32_t DTERRM : 1;                /*!< Data toggle error mask */
+            __IO uint32_t XFRCM : 1;                        /*!< Transfer completed mask */
+            __IO uint32_t CHHM : 1;                         /*!< Channel halted mask */
+            __IO uint32_t AHBERR : 1;                       /*!< AHB error */
+            __IO uint32_t STALLM : 1;                       /*!< STALL response received interrupt mask */
+            __IO uint32_t NAKM : 1;                         /*!< NAK response received interrupt mask */
+            __IO uint32_t ACKM : 1;                         /*!< ACK response received/transmitted interrupt mask */
+            __IO uint32_t NYET : 1;                         /*!< response received interrupt mask */
+            __IO uint32_t TXERRM : 1;                       /*!< Transaction error mask */
+            __IO uint32_t BBERRM : 1;                       /*!< Babble error mask */
+            __IO uint32_t FRMORM : 1;                       /*!< Frame overrun mask */
+            __IO uint32_t DTERRM : 1;                       /*!< Data toggle error mask */
                  uint32_t __RESERVED0 : 21;
         } b;
         __IO uint32_t w;
     } HCINTMSK;
     union {
         struct {
-            __IO uint32_t XFRSIZ : 19;               /*!< Transfer size */
-            __IO uint32_t PKTCNT : 10;               /*!< Packet count */
-            __IO uint32_t DPID : 2;                  /*!< Data PID */
-            __IO uint32_t DOPING : 1;                /*!< Do PING */
+            __IO uint32_t XFRSIZ : 19;                      /*!< Transfer size */
+            __IO uint32_t PKTCNT : 10;                      /*!< Packet count */
+            __IO uint32_t DPID : 2;                         /*!< Data PID */
+            __IO uint32_t DOPING : 1;                       /*!< Do PING */
         } b;
         __IO uint32_t w;
     } HCTSIZ;
@@ -25043,22 +25042,19 @@ typedef struct
   * @}
   */
 
-/** @defgroup Unique_Device_ID Unique Device ID
-  * @brief    Use the macro as it was defined as: uint32_t DEVICE_ID_REG[3]
+/** @defgroup Device_Programming Addresses for device programming
   * @{
   */
 
-#define DEVICE_ID_REG        ((__I uint32_t *)UID_BASE)
+/** @brief Unique Device ID
+ *  @note  Use the macro as it was defined as: uint32_t DEVICE_ID_REG[3] */
+#define DEVICE_ID_REG        ((const uint32_t *)UID_BASE)
 
-/**
-  * @}
-  */
+/** @brief Device Flash Memory Size in kB */
+#define DEVICE_FLASH_SIZE_KB (*((const uint16_t *)FLASHSIZE_BASE))
 
-/** @defgroup Device_Flash_Size Device Flash Memory Size in kB
-  * @{
-  */
-
-#define DEVICE_FLASH_SIZE_KB (*((__I uint16_t *)FLASHSIZE_BASE))
+/** @brief System Memory Start Address */
+#define SYSTEM_MEMORY_ADDR   ((void *)0x1FFF0000U)
 
 /**
   * @}

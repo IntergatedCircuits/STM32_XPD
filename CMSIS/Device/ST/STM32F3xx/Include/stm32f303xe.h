@@ -19560,12 +19560,19 @@ typedef struct
   * @}
   */
 
-/** @defgroup Unique_Device_ID Unique Device ID
-  * @brief    Use the macro as it was defined as: uint32_t DEVICE_ID_REG[3]
+/** @defgroup Device_Programming Addresses for device programming
   * @{
   */
 
+/** @brief Unique Device ID
+ *  @note  Use the macro as it was defined as: uint32_t DEVICE_ID_REG[3] */
 #define DEVICE_ID_REG        ((const uint32_t *)UID_BASE)
+
+/** @brief Device Flash Memory Size in kB */
+#define DEVICE_FLASH_SIZE_KB (*((const uint16_t *)FLASHSIZE_BASE))
+
+/** @brief System Memory Start Address */
+#define SYSTEM_MEMORY_ADDR   ((void *)0x1FFFD800U)
 
 /**
   * @}
