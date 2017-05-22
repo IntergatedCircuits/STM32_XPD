@@ -5935,7 +5935,7 @@ typedef struct {
     } GINTMSK;                                              /*!<  Core Interrupt Mask Register           Address offset : 0x18      */
     union {
         struct {
-            __IO uint32_t CHNUM : 4;
+            __IO uint32_t CHNUM_EPNUM : 4;
             __IO uint32_t BCNT : 11;
             __IO uint32_t DPID : 2;
             __IO uint32_t PKTSTS : 4;
@@ -5946,18 +5946,49 @@ typedef struct {
     } GRXSTSR;                                              /*!<  Receive Sts Q Read Register            Address offset : 0x1C      */
     union {
         struct {
-            __IO uint32_t EPNUM : 4;                        /*!< IN EP interrupt mask bits */
-            __IO uint32_t BCNT : 11;                        /*!< OUT EP interrupt mask bits */
-            __IO uint32_t DPID : 2;                         /*!< OUT EP interrupt mask bits */
-            __IO uint32_t PKTSTS : 4;                       /*!< OUT EP interrupt mask bits */
-                 uint32_t __RESERVED0 : 11;
+            __IO uint32_t CHNUM_EPNUM : 4;
+            __IO uint32_t BCNT : 11;
+            __IO uint32_t DPID : 2;
+            __IO uint32_t PKTSTS : 4;
+            __IO uint32_t FRMNUM : 4;
+                 uint32_t __RESERVED0 : 7;
         } b;
         __IO uint32_t w;
     } GRXSTSP;                                              /*!<  Receive Sts Q Read & POP Register      Address offset : 0x20      */
     __IO uint32_t GRXFSIZ;                                  /*!<  Receive FIFO Size Register             Address offset : 0x24      */
-    __IO uint32_t DIEPTXF0_HNPTXFSIZ;                       /*!<  EP0 / Non Periodic Tx FIFO Size Register Address offset : 0x28    */
-    __IO uint32_t HNPTXSTS;                                 /*!<  Non Periodic Tx FIFO/Queue Sts reg     Address offset : 0x2C      */
-         uint32_t __RESERVED0[2];
+    union {
+        struct {
+            __IO uint32_t TXFSA : 16;
+            __IO uint32_t TXFD : 16;
+        } b;
+        __IO uint32_t w;
+    } DIEPTXF0_HNPTXFSIZ;                                   /*!<  EP0 / Non Periodic Tx FIFO Size Register Address offset : 0x28    */
+    union {
+        struct {
+            __IO uint32_t NPTXFSAV : 16;
+            __IO uint32_t NPTQXSAV : 8;
+            __IO uint32_t NPTXQTOP : 7;
+                 uint32_t __RESERVED0 : 1;
+        } b;
+        __IO uint32_t w;
+    } HNPTXSTS;                                             /*!<  Non Periodic Tx FIFO/Queue Sts reg     Address offset : 0x2C      */
+    union {
+        struct {
+            __IO uint32_t RWDATA : 8;
+            __IO uint32_t REGADDR : 8;
+            __IO uint32_t ADDR : 7;
+            __IO uint32_t I2CEN : 1;
+            __IO uint32_t ACK : 1;
+                 uint32_t __RESERVED0 : 1;
+            __IO uint32_t I2CDEVADR : 2;
+            __IO uint32_t I2CDATSE0 : 1;
+                 uint32_t __RESERVED1 : 1;
+            __IO uint32_t RW : 1;
+            __IO uint32_t BSYDNE : 1;
+        } b;
+        __IO uint32_t w;
+    } GI2CCTL;                                              /*!<  I2C access register                    Address offset : 0x30      */
+         uint32_t __RESERVED0;
     union {
         struct {
                  uint32_t __RESERVED0 : 16;
@@ -5971,7 +6002,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } GCCFG;                                                /*!<  General Purpose IO Register            Address offset : 0x38      */
-    __IO uint32_t CID;                                      /*!< User ID Register                          Address offset : 0x3C      */
+    __IO uint32_t CID;                                      /*!< User ID Register                        Address offset : 0x3C      */
          uint32_t __RESERVED1[48];
     union {
         struct {
@@ -5986,7 +6017,7 @@ typedef struct {
             __IO uint32_t INEPTXFD : 16;                    /*!< IN endpoint TxFIFO depth */
         } b;
         __IO uint32_t w;
-    } DIEPTXF[16];                                          /*!< Periodic Transmit FIFO                    Address offset : 0x104-0x144 */
+    } DIEPTXF[7];                                           /*!< Periodic Transmit FIFO                    Address offset : 0x104-0x144 */
 } USB_OTG_GlobalTypeDef;
 
 
@@ -6517,7 +6548,7 @@ typedef struct {
     } GINTMSK;                                              /*!<  Core Interrupt Mask Register           Address offset : 0x18      */
     union {
         struct {
-            __IO uint32_t CHNUM : 4;
+            __IO uint32_t CHNUM_EPNUM : 4;
             __IO uint32_t BCNT : 11;
             __IO uint32_t DPID : 2;
             __IO uint32_t PKTSTS : 4;
@@ -6528,18 +6559,49 @@ typedef struct {
     } GRXSTSR;                                              /*!<  Receive Sts Q Read Register            Address offset : 0x1C      */
     union {
         struct {
-            __IO uint32_t EPNUM : 4;                        /*!< IN EP interrupt mask bits */
-            __IO uint32_t BCNT : 11;                        /*!< OUT EP interrupt mask bits */
-            __IO uint32_t DPID : 2;                         /*!< OUT EP interrupt mask bits */
-            __IO uint32_t PKTSTS : 4;                       /*!< OUT EP interrupt mask bits */
-                 uint32_t __RESERVED0 : 11;
+            __IO uint32_t CHNUM_EPNUM : 4;
+            __IO uint32_t BCNT : 11;
+            __IO uint32_t DPID : 2;
+            __IO uint32_t PKTSTS : 4;
+            __IO uint32_t FRMNUM : 4;
+                 uint32_t __RESERVED0 : 7;
         } b;
         __IO uint32_t w;
     } GRXSTSP;                                              /*!<  Receive Sts Q Read & POP Register      Address offset : 0x20      */
     __IO uint32_t GRXFSIZ;                                  /*!<  Receive FIFO Size Register             Address offset : 0x24      */
-    __IO uint32_t DIEPTXF0_HNPTXFSIZ;                       /*!<  EP0 / Non Periodic Tx FIFO Size Register Address offset : 0x28    */
-    __IO uint32_t HNPTXSTS;                                 /*!<  Non Periodic Tx FIFO/Queue Sts reg     Address offset : 0x2C      */
-         uint32_t __RESERVED0[2];
+    union {
+        struct {
+            __IO uint32_t TXFSA : 16;
+            __IO uint32_t TXFD : 16;
+        } b;
+        __IO uint32_t w;
+    } DIEPTXF0_HNPTXFSIZ;                                   /*!<  EP0 / Non Periodic Tx FIFO Size Register Address offset : 0x28    */
+    union {
+        struct {
+            __IO uint32_t NPTXFSAV : 16;
+            __IO uint32_t NPTQXSAV : 8;
+            __IO uint32_t NPTXQTOP : 7;
+                 uint32_t __RESERVED0 : 1;
+        } b;
+        __IO uint32_t w;
+    } HNPTXSTS;                                             /*!<  Non Periodic Tx FIFO/Queue Sts reg     Address offset : 0x2C      */
+    union {
+        struct {
+            __IO uint32_t RWDATA : 8;
+            __IO uint32_t REGADDR : 8;
+            __IO uint32_t ADDR : 7;
+            __IO uint32_t I2CEN : 1;
+            __IO uint32_t ACK : 1;
+                 uint32_t __RESERVED0 : 1;
+            __IO uint32_t I2CDEVADR : 2;
+            __IO uint32_t I2CDATSE0 : 1;
+                 uint32_t __RESERVED1 : 1;
+            __IO uint32_t RW : 1;
+            __IO uint32_t BSYDNE : 1;
+        } b;
+        __IO uint32_t w;
+    } GI2CCTL;                                              /*!<  I2C access register                    Address offset : 0x30      */
+         uint32_t __RESERVED0;
     union {
         struct {
                  uint32_t __RESERVED0 : 16;
@@ -6553,7 +6615,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } GCCFG;                                                /*!<  General Purpose IO Register            Address offset : 0x38      */
-    __IO uint32_t CID;                                      /*!< User ID Register                          Address offset : 0x3C      */
+    __IO uint32_t CID;                                      /*!< User ID Register                        Address offset : 0x3C      */
          uint32_t __RESERVED1[48];
     union {
         struct {
@@ -6568,8 +6630,8 @@ typedef struct {
             __IO uint32_t INEPTXFD : 16;                    /*!< IN endpoint TxFIFO depth */
         } b;
         __IO uint32_t w;
-    } DIEPTXF[16];                                          /*!< Periodic Transmit FIFO                    Address offset : 0x104-0x144 */
-         uint32_t __RESERVED2[175];
+    } DIEPTXF[7];                                          /*!< Periodic Transmit FIFO                    Address offset : 0x104-0x144 */
+         uint32_t __RESERVED2[184];
     union {
         struct {
             __IO uint32_t FSLSPCS : 2;                      /*!< FS/LS PHY clock select */
