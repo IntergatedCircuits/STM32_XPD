@@ -155,7 +155,7 @@ XPD_ReturnType XPD_RCC_MSIConfig(const RCC_MSI_InitType * Config)
 
             /* Adjust the Clock range and the calibration value.*/
             RCC_REG_BIT(CR, MSIRGSEL) = ENABLE;
-            RCC->CR.b.MSIRANGE = Config->ClockFreq;
+            RCC->CR.b.MSIRANGE   = Config->ClockFreq;
             RCC->ICSCR.b.MSITRIM = Config->CalibrationValue;
 
             /* Decreasing the MSI range */
@@ -192,7 +192,7 @@ XPD_ReturnType XPD_RCC_MSIConfig(const RCC_MSI_InitType * Config)
 
             /* Adjust the Clock range and the calibration value.*/
             RCC_REG_BIT(CR, MSIRGSEL) = ENABLE;
-            RCC->CR.b.MSIRANGE = Config->ClockFreq;
+            RCC->CR.b.MSIRANGE   = Config->ClockFreq;
             RCC->ICSCR.b.MSITRIM = Config->CalibrationValue;
         }
         else
@@ -204,6 +204,13 @@ XPD_ReturnType XPD_RCC_MSIConfig(const RCC_MSI_InitType * Config)
             result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_MSIRDY, 0, RCC_MSI_TIMEOUT);
         }
     }
+
+#if defined(RCC_CR_MSIPLLEN) && (LSE_VALUE == 32768)
+    /* When the LSE is ready and at 32.768kHz,
+     * enable MSI calibration based on LSE */
+    RCC_REG_BIT(CR,MSIPLLEN) = RCC_REG_BIT(BDCR,LSERDY) & RCC_REG_BIT(CR,MSIRDY);
+#endif
+
     return result;
 }
 
@@ -515,16 +522,14 @@ XPD_ReturnType XPD_RCC_LSEConfig(RCC_OscStateType NewState)
 
         /* Wait until LSE is ready */
         result = XPD_WaitForMatch(&RCC->BDCR.w, RCC_BDCR_LSERDY, RCC_BDCR_LSERDY, &timeout);
+    }
 
 #if defined(RCC_CR_MSIPLLEN) && (LSE_VALUE == 32768)
-        if ((result == XPD_OK) && (XPD_RCC_GetFlag(MSIRDY) != 0))
-        {
-            /* When the LSE is ready and at 32.768kHz,
-             * enable MSI calibration based on LSE */
-            RCC_REG_BIT(CR,MSIPLLEN) = ENABLE;
-        }
+    /* When the LSE is ready and at 32.768kHz,
+     * enable MSI calibration based on LSE */
+    RCC_REG_BIT(CR,MSIPLLEN) = RCC_REG_BIT(BDCR,LSERDY) & RCC_REG_BIT(CR,MSIRDY);
 #endif
-    }
+
     return result;
 }
 #endif
