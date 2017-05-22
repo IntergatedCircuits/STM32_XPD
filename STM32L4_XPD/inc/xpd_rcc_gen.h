@@ -334,13 +334,13 @@ void XPD_OPAMP_SleepClockCtrl(FunctionalState NewState);
 void XPD_OPAMP_Reset(void);
 #endif
 #ifdef RCC_AHB2ENR_OTGFSEN
-void XPD_OTGFS_ClockCtrl(FunctionalState NewState);
+void XPD_OTG_FS_ClockCtrl(FunctionalState NewState);
 #endif
 #ifdef RCC_AHB2SMENR_OTGFSSMEN
-void XPD_OTGFS_SleepClockCtrl(FunctionalState NewState);
+void XPD_OTG_FS_SleepClockCtrl(FunctionalState NewState);
 #endif
 #ifdef RCC_AHB2RSTR_OTGFSRST
-void XPD_OTGFS_Reset(void);
+void XPD_OTG_FS_Reset(void);
 #endif
 #ifdef RCC_APB1ENR1_PWREN
 void XPD_PWR_ClockCtrl(FunctionalState NewState);

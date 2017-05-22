@@ -866,9 +866,9 @@ void XPD_OPAMP_Reset(void)
 }
 #endif
 #ifdef RCC_AHB2ENR_OTGFSEN
-/** @brief Sets the new clock state of the OTGFS peripheral.
+/** @brief Sets the new clock state of the OTG_FS peripheral.
  *  @param NewState: the new clock state to set */
-void XPD_OTGFS_ClockCtrl(FunctionalState NewState)
+void XPD_OTG_FS_ClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB2ENR,OTGFSEN) = NewState;
     NewState = (FunctionalState)RCC->AHB2ENR.w;
@@ -877,14 +877,14 @@ void XPD_OTGFS_ClockCtrl(FunctionalState NewState)
 #ifdef RCC_AHB2SMENR_OTGFSSMEN
 /** @brief Sets the clock state of the OTGFS peripheral during sleep mode.
  *  @param NewState: the new sleep clock state to set */
-void XPD_OTGFS_SleepClockCtrl(FunctionalState NewState)
+void XPD_OTG_FS_SleepClockCtrl(FunctionalState NewState)
 {
     RCC_REG_BIT(AHB2SMENR,OTGFSSMEN) = NewState;
 }
 #endif
 #ifdef RCC_AHB2RSTR_OTGFSRST
 /** @brief Forces and releases a reset on the OTGFS peripheral. */
-void XPD_OTGFS_Reset(void)
+void XPD_OTG_FS_Reset(void)
 {
     RCC_REG_BIT(AHB2RSTR,OTGFSRST) = 1;
     RCC_REG_BIT(AHB2RSTR,OTGFSRST) = 0;

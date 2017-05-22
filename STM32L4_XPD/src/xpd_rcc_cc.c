@@ -175,7 +175,7 @@ XPD_ReturnType XPD_RCC_MSIConfig(const RCC_MSI_InitType * Config)
             /* Update SystemCoreClock variable */
             SystemCoreClock = XPD_RCC_GetOscFreq(MSI) >> AHBPrescTable[RCC->CFGR.b.HPRE];
 
-            /* Configure the source of time base considering new system clocks settings*/
+            /* Configure the source of time base considering new system clocks settings */
             XPD_InitTimer();
         }
     }
@@ -489,14 +489,11 @@ XPD_ReturnType XPD_RCC_LSEConfig(RCC_OscStateType NewState)
     XPD_ReturnType result = XPD_OK;
     uint32_t timeout = RCC_DBP_TIMEOUT;
 
-    /* Enable Power Clock*/
-    XPD_PWR_ClockCtrl(ENABLE);
-
     /* Enable write access to Backup domain */
     PWR_REG_BIT(CR1,DBP) = 1;
 
     /* Wait for Backup domain Write protection disable */
-    result = XPD_WaitForMatch(&PWR->CR1.w, PWR_CR1_DBP, 1, &timeout);
+    result = XPD_WaitForMatch(&PWR->CR1.w, PWR_CR1_DBP, PWR_CR1_DBP, &timeout);
     if (result != XPD_OK)
     {
         return result;
@@ -518,15 +515,16 @@ XPD_ReturnType XPD_RCC_LSEConfig(RCC_OscStateType NewState)
 
         /* Wait until LSE is ready */
         result = XPD_WaitForMatch(&RCC->BDCR.w, RCC_BDCR_LSERDY, RCC_BDCR_LSERDY, &timeout);
-    }
+
 #if defined(RCC_CR_MSIPLLEN) && (LSE_VALUE == 32768)
-    if ((result == XPD_OK) && (XPD_RCC_GetFlag(MSIRDY) != 0))
-    {
-        /* When the LSE is ready and at 32.768kHz,
-         * enable MSI calibration based on LSE */
-        RCC_REG_BIT(CR,MSIPLLEN) = ENABLE;
-    }
+        if ((result == XPD_OK) && (XPD_RCC_GetFlag(MSIRDY) != 0))
+        {
+            /* When the LSE is ready and at 32.768kHz,
+             * enable MSI calibration based on LSE */
+            RCC_REG_BIT(CR,MSIPLLEN) = ENABLE;
+        }
 #endif
+    }
     return result;
 }
 #endif
