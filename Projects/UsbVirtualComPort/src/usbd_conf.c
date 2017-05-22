@@ -27,7 +27,7 @@
 
 #include "xpd_user.h"
 
-int usbSuspendCallback(void * user)
+static int usbSuspendCallback(void * user)
 {
     /* Inform USB library that core enters in suspend Mode */
     int retval = USBD_LL_Suspend(user);
@@ -42,7 +42,7 @@ int usbSuspendCallback(void * user)
     return retval;
 }
 
-int usbResumeCallback(void * user)
+static int usbResumeCallback(void * user)
 {
     if (((USB_HandleType *)(((USBD_HandleTypeDef *)user)->pData))->LowPowerMode == ENABLE)
     {
@@ -54,7 +54,7 @@ int usbResumeCallback(void * user)
 }
 
 #ifdef USB_OTG_HS
-int usbResetCallback(void * user)
+static int usbResetCallback(void * user)
 {
     USB_SpeedType speed = ((USB_HandleType *)(((USBD_HandleTypeDef *)user)->pData))->Speed;
 
@@ -77,41 +77,44 @@ int usbResetCallback(void * user)
  */
 USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
 {
-    /* USB init setup */
-    const USB_InitType init = {
-        .Speed = USB_SPEED_FULL,
-    };
+    if (pdev->id == DEVICE_FS)
+    {
+        /* USB init setup */
+        const USB_InitType init = {
+            .Speed = USB_SPEED_FULL,
+        };
 
-    /* Link driver to user */
-    pdev->pData = &usbHandle;
+        /* Link driver to user */
+        pdev->pData = &usbHandle;
 
-    /* Link the stack to the driver */
-    usbHandle.User = pdev;
+        /* Link the stack to the driver */
+        usbHandle.User = pdev;
 
-    /* Set direct USBD API callbacks */
-    usbHandle.Callbacks.SetupStage       = USBD_LL_SetupStage;
-    usbHandle.Callbacks.DataOutStage     = USBD_LL_DataOutStage;
-    usbHandle.Callbacks.DataInStage      = USBD_LL_DataInStage;
-    usbHandle.Callbacks.SOF              = USBD_LL_SOF;
+        /* Set direct USBD API callbacks */
+        usbHandle.Callbacks.SetupStage       = USBD_LL_SetupStage;
+        usbHandle.Callbacks.DataOutStage     = USBD_LL_DataOutStage;
+        usbHandle.Callbacks.DataInStage      = USBD_LL_DataInStage;
+        usbHandle.Callbacks.SOF              = USBD_LL_SOF;
 #ifdef USB_OTG_HS
-    usbHandle.Callbacks.Reset            = usbResetCallback;
+        usbHandle.Callbacks.Reset            = usbResetCallback;
 #else
-    usbHandle.Callbacks.Reset            = USBD_LL_Reset;
+        usbHandle.Callbacks.Reset            = USBD_LL_Reset;
 #endif
-    usbHandle.Callbacks.Suspend          = usbSuspendCallback;
-    usbHandle.Callbacks.Resume           = usbResumeCallback;
-    usbHandle.Callbacks.Connected        = USBD_LL_DevConnected;
-    usbHandle.Callbacks.Disconnected     = USBD_LL_DevDisconnected;
+        usbHandle.Callbacks.Suspend          = usbSuspendCallback;
+        usbHandle.Callbacks.Resume           = usbResumeCallback;
+        usbHandle.Callbacks.Connected        = USBD_LL_DevConnected;
+        usbHandle.Callbacks.Disconnected     = USBD_LL_DevDisconnected;
 
-    XPD_USB_Init(&usbHandle, &init);
+        XPD_USB_Init(&usbHandle, &init);
 
-    /* Endpoints for CDC device (bulk EPs are set to double-buffered) */
-    XPD_USB_EP_BufferInit(pdev->pData, CDC_IN_EP,  CDC_DATA_FS_MAX_PACKET_SIZE * 2);
-    XPD_USB_EP_BufferInit(pdev->pData, CDC_OUT_EP, CDC_DATA_FS_MAX_PACKET_SIZE * 2);
-    XPD_USB_EP_BufferInit(pdev->pData, CDC_CMD_EP, CDC_CMD_PACKET_SIZE);
+        /* Endpoints for CDC device (bulk EPs are set to double-buffered) */
+        XPD_USB_EP_BufferInit(pdev->pData, CDC_IN_EP,  CDC_DATA_FS_MAX_PACKET_SIZE * 2);
+        XPD_USB_EP_BufferInit(pdev->pData, CDC_OUT_EP, CDC_DATA_FS_MAX_PACKET_SIZE * 2);
+        XPD_USB_EP_BufferInit(pdev->pData, CDC_CMD_EP, CDC_CMD_PACKET_SIZE);
 
-    /* USB device only supports full speed */
-    USBD_LL_SetSpeed(pdev, USBD_SPEED_FULL);
+        /* USB device only supports full speed */
+        USBD_LL_SetSpeed(pdev, USBD_SPEED_FULL);
+    }
 
     return USBD_OK;
 }

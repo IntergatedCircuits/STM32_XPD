@@ -24,43 +24,23 @@
 #include <xpd_user.h>
 #include <xpd_utils.h>
 
-const PinConfigType PinConfig[] =
+const GPIO_InitType PinConfig[] =
 {
-    /* UART_TX_PIN:
-     * used for UART Tx */
-    {   {
-            .Mode = GPIO_MODE_ALTERNATE,
-            .Pull = GPIO_PULL_FLOAT,
-            .Output = { .Type = GPIO_OUTPUT_PUSHPULL, .Speed = VERY_HIGH },
-            .AlternateMap = GPIO_USART1_AF1
-        }, GPIOA, 9
+    /* UART pins */
+    {
+        .Mode = GPIO_MODE_ALTERNATE,
+        .Pull = GPIO_PULL_FLOAT,
+        .Output.Type  = GPIO_OUTPUT_PUSHPULL,
+        .Output.Speed = VERY_HIGH,
+        .AlternateMap = GPIO_USART1_AF1
     },
-    /* UART_RX_PIN:
-     * used for UART Rx */
-    {   {
-            .Mode = GPIO_MODE_ALTERNATE,
-            .Pull = GPIO_PULL_UP,
-            .Output = { .Type = GPIO_OUTPUT_PUSHPULL, .Speed = VERY_HIGH },
-            .AlternateMap = GPIO_USART1_AF1
-        }, GPIOA, 10
-    },
-    /* USB_DP_PIN:
-     * used for USB */
-    {   {
-            .Mode = GPIO_MODE_ALTERNATE,
-            .Pull = GPIO_PULL_FLOAT,
-            .Output = { .Type = GPIO_OUTPUT_PUSHPULL, .Speed = VERY_HIGH },
-            .AlternateMap = GPIO_USB_AF2
-        }, GPIOA, 12
-    },
-    /* USB_DM_PIN:
-     * used for USB */
-    {   {
-            .Mode = GPIO_MODE_ALTERNATE,
-            .Pull = GPIO_PULL_FLOAT,
-            .Output = { .Type = GPIO_OUTPUT_PUSHPULL, .Speed = VERY_HIGH },
-            .AlternateMap = GPIO_USB_AF2
-        }, GPIOA, 11
+    /* USB pins */
+    {
+        .Mode = GPIO_MODE_ALTERNATE,
+        .Pull = GPIO_PULL_FLOAT,
+        .Output.Type  = GPIO_OUTPUT_PUSHPULL,
+        .Output.Speed = VERY_HIGH,
+        .AlternateMap = GPIO_USB_AF2
     },
 };
 
@@ -88,8 +68,8 @@ void ClockConfiguration(void)
 static void usbinit(void * handle)
 {
     /* GPIO settings */
-    XPD_GPIO_InitPin(PinConfig[USB_DM_PIN].port, PinConfig[USB_DM_PIN].pin, &PinConfig[USB_DM_PIN].config);
-    XPD_GPIO_InitPin(PinConfig[USB_DP_PIN].port, PinConfig[USB_DP_PIN].pin, &PinConfig[USB_DP_PIN].config);
+    XPD_GPIO_InitPin(USB_DM_PIN, &PinConfig[USB_PIN_CFG]);
+    XPD_GPIO_InitPin(USB_DP_PIN, &PinConfig[USB_PIN_CFG]);
 
     /* USB clock configuration - must be operated from 48 MHz */
     XPD_USB_ClockConfig(USB_CLOCKSOURCE_HSI48);
@@ -113,8 +93,8 @@ static void usbinit(void * handle)
 /* USB dependencies deinitialization */
 static void usbdeinit(void * handle)
 {
-    XPD_GPIO_DeinitPin(PinConfig[USB_DM_PIN].port, PinConfig[USB_DM_PIN].pin);
-    XPD_GPIO_DeinitPin(PinConfig[USB_DP_PIN].port, PinConfig[USB_DP_PIN].pin);
+    XPD_GPIO_DeinitPin(USB_DM_PIN);
+    XPD_GPIO_DeinitPin(USB_DP_PIN);
     XPD_NVIC_DisableIRQ(USB_IRQn);
 }
 
@@ -151,8 +131,8 @@ static void uartinit(void * handle)
     };
 
     /* GPIO settings */
-    XPD_GPIO_InitPin(PinConfig[UART_TX_PIN].port, PinConfig[UART_TX_PIN].pin, &PinConfig[UART_TX_PIN].config);
-    XPD_GPIO_InitPin(PinConfig[UART_RX_PIN].port, PinConfig[UART_RX_PIN].pin, &PinConfig[UART_RX_PIN].config);
+    XPD_GPIO_InitPin(UART_TX_PIN, &PinConfig[UART_PIN_CFG]);
+    XPD_GPIO_InitPin(UART_RX_PIN, &PinConfig[UART_PIN_CFG]);
 
     /* DMA settings */
     XPD_DMA_Init(&dmauat, &dmaSetup);
@@ -174,8 +154,8 @@ static void uartinit(void * handle)
 /* UART dependencies deinitialization */
 static void uartdeinit(void * handle)
 {
-    XPD_GPIO_DeinitPin(PinConfig[UART_TX_PIN].port, PinConfig[UART_TX_PIN].pin);
-    XPD_GPIO_DeinitPin(PinConfig[UART_RX_PIN].port, PinConfig[UART_RX_PIN].pin);
+    XPD_GPIO_DeinitPin(UART_TX_PIN);
+    XPD_GPIO_DeinitPin(UART_RX_PIN);
 
     XPD_DMA_Deinit(&dmauat);
     XPD_DMA_Deinit(&dmauar);

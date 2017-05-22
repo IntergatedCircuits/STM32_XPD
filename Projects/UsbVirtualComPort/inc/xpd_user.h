@@ -31,27 +31,23 @@
 #include <xpd_usart.h>
 #include <xpd_usb.h>
 
-typedef struct
-{
-    GPIO_InitType config;
-    GPIO_TypeDef* port;
-    uint8_t       pin;
-}PinConfigType;
-
 typedef enum
 {
-    UART_TX_PIN = 0,
-    UART_RX_PIN,
-    USB_DP_PIN,
-    USB_DM_PIN,
-    NUMBER_OF_PINS
+    UART_PIN_CFG = 0,
+    USB_PIN_CFG,
+    PIN_CFG_COUNT
 }PinType;
+
+#define UART_TX_PIN     GPIOA, 9
+#define UART_RX_PIN     GPIOA, 10
+#define USB_DP_PIN      GPIOA, 12
+#define USB_DM_PIN      GPIOA, 11
 
 /* Ensure preemption-free USB-UART interrupt handling */
 #define NVIC_COMMON_PRIO_USB_USART     0
 
 /* Indexed by PinType */
-extern const PinConfigType PinConfig[];
+extern const GPIO_InitType PinConfig[];
 
 extern USART_HandleType uart;
 extern USB_HandleType usbHandle;
