@@ -129,13 +129,14 @@ static void usart_baudrateConfig(USART_HandleType * husart, uint32_t baudrate)
     }
 #else
     uint32_t over8   = USART_REG_BIT(husart, CR1, OVER8);
-    uint32_t div     = XPD_USART_GetClockFreq(husart) * 25 / ((2 << over8) * baudrate);
+    uint32_t div     = XPD_USART_GetClockFreq(husart) * 25 / ((4 >> over8) * baudrate);
     uint32_t divmant = div / 100;
-    uint32_t divfraq = ((div - (divmant * 100)) * (8 << over8) + 50) / 100;
+    uint32_t divfraq = ((div - (divmant * 100)) * (16 >> over8) + 50) / 100;
 
-    husart->Inst->BRR.b.DIV_Fraction = divfraq & ((16 >> over8) - 1);
+    /* Mantissa is filled with the USARTDIV integer part + fractional overflow */
     husart->Inst->BRR.b.DIV_Mantissa = divmant + (divfraq >> (4 - over8));
-
+    /* Fraction gets the fractional part (4 - over8 bits) */
+    husart->Inst->BRR.b.DIV_Fraction = divfraq & (0xf >> over8);
 #endif
 }
 
