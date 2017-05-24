@@ -54,18 +54,60 @@
 #define MAX_STATIC_ALLOC_SIZE               1000
 
 /* #define for FS and HS identification */
-#define DEVICE_FS 		0
+#define DEVICE_FS       0
+#ifdef USB_OTG_HS
+#define DEVICE_HS       1
+#endif
 
 /** @defgroup USBD_Exported_Macros
   * @{ */
 
 /* Memory management macros */
-#define USBD_malloc               (uint32_t *)USBD_static_malloc
-#define USBD_free                 USBD_static_free
-#define USBD_memset               /* Not used */
-#define USBD_memcpy               /* Not used */
+#define USBD_malloc(SIZE)       (USBD_static_malloc(SIZE))
+#define USBD_free(PTR)          ((void)0)
 
-#define USBD_Delay   XPD_Delay_ms
+#define USBD_Delay(MS)                          \
+    (XPD_Delay_ms(MS))
+
+#define USBD_LL_DeInit(PDEV)                    \
+    (XPD_USB_Deinit((PDEV)->pData), USBD_OK)
+
+#define USBD_LL_Start(PDEV)                     \
+    (XPD_USB_Start((PDEV)->pData), USBD_OK)
+
+#define USBD_LL_Stop(PDEV)                      \
+    (XPD_USB_Stop((PDEV)->pData), USBD_OK)
+
+#define USBD_LL_OpenEP(PDEV, EA, TYPE, MPS)     \
+    (XPD_USB_EP_Open((PDEV)->pData, EA, TYPE, MPS), USBD_OK)
+
+#define USBD_LL_CloseEP(PDEV, EA)               \
+    (XPD_USB_EP_Close((PDEV)->pData, EA), USBD_OK)
+
+#define USBD_LL_FlushEP(PDEV, EA)               \
+    (XPD_USB_EP_Flush((PDEV)->pData, EA), USBD_OK)
+
+#define USBD_LL_StallEP(PDEV, EA)               \
+    (XPD_USB_EP_SetStall((PDEV)->pData, EA), USBD_OK)
+
+#define USBD_LL_IsStallEP(PDEV, EA)             \
+    (((EA) > 0x7F) ? ((USB_HandleType*)(PDEV)->pData)->EP.IN[(EA) & 0x7F].Stalled \
+                   : ((USB_HandleType*)(PDEV)->pData)->EP.OUT[EA].Stalled )
+
+#define USBD_LL_ClearStallEP(PDEV, EA)          \
+    (XPD_USB_EP_ClearStall((PDEV)->pData, EA), USBD_OK)
+
+#define USBD_LL_SetUSBAddress(PDEV, AD)         \
+    (XPD_USB_SetAddress((PDEV)->pData, AD), USBD_OK)
+
+#define USBD_LL_Transmit(PDEV, EA, BUF, SIZE)   \
+    (XPD_USB_EP_Transmit((PDEV)->pData, EA, BUF, SIZE), USBD_OK)
+
+#define USBD_LL_PrepareReceive(PDEV, EA, BUF, SIZE) \
+    (XPD_USB_EP_Receive((PDEV)->pData, EA, BUF, SIZE), USBD_OK)
+
+#define USBD_LL_GetRxDataSize(PDEV, EA)         \
+    (XPD_USB_EP_GetRxCount((PDEV)->pData, EA), USBD_OK)
 
 /* For footprint reasons and since only one allocation is handled in the CDC class
    driver, the malloc/free is changed into a static allocation method */
