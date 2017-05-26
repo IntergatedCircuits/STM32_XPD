@@ -107,7 +107,7 @@
     (XPD_USB_EP_Receive((PDEV)->pData, EA, BUF, SIZE), USBD_OK)
 
 #define USBD_LL_GetRxDataSize(PDEV, EA)         \
-    (XPD_USB_EP_GetRxCount((PDEV)->pData, EA), USBD_OK)
+    ((uint32_t)XPD_USB_EP_GetRxCount((PDEV)->pData, EA))
 
 /* For footprint reasons and since only one allocation is handled in the CDC class
    driver, the malloc/free is changed into a static allocation method */
