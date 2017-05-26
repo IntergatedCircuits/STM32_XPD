@@ -83,7 +83,7 @@ do { if (USB_REG_BIT(husb,EP[EP_ID],BIT_NAME) != 0) USB_TOGGLE(EP_ID, BIT_NAME);
 #define USB_GET_EP_AT(HANDLE, NUMBER)  \
     (((NUMBER) > 0x7F) ? (&((HANDLE)->EP.IN[(NUMBER) &= 0x7F])) : (&((HANDLE)->EP.OUT[NUMBER])))
 
-#define USB_PMA_ALLOCATION(SIZE)    ((SIZE) * (sizeof(USB_PacketAddressType) / 2))
+#define USB_PMA_ALLOCATION(SIZE)    (SIZE)
 
 static const uint16_t usb_epTypeRemap[4] = {
     USB_EP_CONTROL,
@@ -95,8 +95,7 @@ static const uint16_t usb_epTypeRemap[4] = {
 /* Writes user data to USB endpoint packet memory */
 static void usb_writePMA(uint8_t * sourceBuf, uint16_t pmaAddress, uint16_t dataCount)
 {
-    /* PMA stores data in 16 bit elements */
-    USB_PacketAddressType * dest = (USB_PacketAddressType *)(USB_PMAADDR + pmaAddress);
+    USB_PacketAddressType * dest = (USB_PacketAddressType *)USB_PMAADDR + (pmaAddress / 2);
 
     /* Check if input data is aligned */
     if ((((uint32_t)sourceBuf) & 1) == 0)
@@ -123,8 +122,7 @@ static void usb_writePMA(uint8_t * sourceBuf, uint16_t pmaAddress, uint16_t data
 /* Reads USB endpoint data from packet memory */
 static void usb_readPMA(uint8_t * destBuf, uint16_t pmaAddress, uint16_t dataCount)
 {
-    /* PMA stores data in 16 bit elements */
-    USB_PacketAddressType * source = (USB_PacketAddressType *)(USB_PMAADDR + pmaAddress);
+    USB_PacketAddressType * source = (USB_PacketAddressType *)USB_PMAADDR + (pmaAddress / 2);
 
     /* Check if input data is aligned */
     if ((((uint32_t)destBuf) & 1) == 0)
@@ -828,8 +826,7 @@ void XPD_USB_IRQHandler(USB_HandleType * husb)
                 ep->Transfer.size   += count;
                 ep->Transfer.buffer += count;
 
-                /* If the last packet of the data, transfer is complete
-                 * TODO 64 byte single message is not handled */
+                /* If the last packet of the data, transfer is complete */
                 if ((ep->Transfer.length == 0) || (count < ep->MaxPacketSize))
                 {
                     /* Reception finished */
@@ -943,26 +940,6 @@ void XPD_USB_IRQHandler(USB_HandleType * husb)
     {
         XPD_USB_ClearFlag(husb, SOF);
         XPD_SAFE_CALLBACK(husb->Callbacks.SOF, husb->User);
-    }
-
-    /* Handle PMA buffer overflow (collision) */
-    if ((istr & USB_ISTR_PMAOVR) != 0)
-    {
-        XPD_USB_ClearFlag(husb, PMAOVR);
-        /* Isochronous OUT data is processed even with overrun error */
-    }
-
-    /* Handle packet CRC error */
-    if ((istr & USB_ISTR_ERR) != 0)
-    {
-        XPD_USB_ClearFlag(husb, ERR);
-        /* Isochronous OUT data is processed even with CRC error */
-    }
-
-    /* Expected SOF is set in every 1ms */
-    if ((istr & USB_ISTR_ESOF) != 0)
-    {
-        XPD_USB_ClearFlag(husb, ESOF);
     }
 }
 
