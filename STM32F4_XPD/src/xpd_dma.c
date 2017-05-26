@@ -30,7 +30,9 @@
 
 #define DMA_ABORT_TIMEOUT   1000
 
-#define DMA_BASE(STREAM)            ((uint32_t)(STREAM) & (~(uint32_t)0x3FF))
+#define DMA_BASE(STREAM)            ((((uint32_t)(STREAM) & 0xFF) < 0x70) ?     \
+                        (void*)( (uint32_t)(STREAM) & (~(uint32_t)0x3FF)) :     \
+                        (void*)(((uint32_t)(STREAM) & (~(uint32_t)0x3FF)) + 4))
 #define DMA_BASE_OFFSET(STREAM)     (((uint32_t)(STREAM) < (uint32_t)DMA2) ? 0 : 1)
 #define DMA_STREAM_NUMBER(STREAM)   ((((uint32_t)(STREAM) & 0xFF) - 16) / 24)
 
@@ -67,12 +69,8 @@ static void dma_calcBase(DMA_HandleType * hdma)
 {
     uint8_t streamNumber = DMA_STREAM_NUMBER(hdma->Inst);
 
-    hdma->Base = (DMA_TypeDef *)DMA_BASE(hdma->Inst);
-    if (streamNumber > 3)
-    {
-        hdma->Base += 4;
-    }
-    hdma->StreamOffset = ((streamNumber & 2) * 16) + ((streamNumber & 1) * 6);
+    hdma->Base = DMA_BASE(hdma->Inst);
+    hdma->StreamOffset = ((streamNumber & 2) * 8) + ((streamNumber & 1) * 6);
 }
 
 /** @defgroup DMA_Exported_Functions DMA Exported Functions
@@ -315,7 +313,6 @@ XPD_ReturnType XPD_DMA_PollStatus(DMA_HandleType * hdma, DMA_OperationType Opera
 {
     XPD_ReturnType result;
     uint32_t mask;
-    //(((HANDLE)->Base->LISR.w >> (DMA_LISR_##FLAG_NAME##IF0 + (uint32_t)((HANDLE)->StreamOffset))) & 1)
 
     /* Assemble monitoring mask */
     mask = (Operation == DMA_OPERATION_TRANSFER) ?

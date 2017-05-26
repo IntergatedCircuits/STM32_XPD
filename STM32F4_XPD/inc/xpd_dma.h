@@ -180,7 +180,8 @@ typedef struct
  *            @arg FE:      FIFO Error
  */
 #define         XPD_DMA_GetFlag(  HANDLE, FLAG_NAME)        \
-    (((HANDLE)->Base->LISR.w >> (DMA_LISR_##FLAG_NAME##IF0 + (uint32_t)((HANDLE)->StreamOffset))) & 1)
+    (((HANDLE)->Base->LISR.w >> (DMA_LISR_##FLAG_NAME##IF0_Pos \
+            + (uint32_t)((HANDLE)->StreamOffset))) & 1)
 
 /**
  * @brief  Clear the specified DMA flag.
@@ -194,7 +195,8 @@ typedef struct
  *            @arg FE:      FIFO Error
  */
 #define         XPD_DMA_ClearFlag(HANDLE, FLAG_NAME)        \
-    ((HANDLE)->Base->LIFCR.w = (DMA_LIFCR_C##FLAG_NAME##IF0 << (uint32_t)((HANDLE)->StreamOffset)))
+    ((HANDLE)->Base->LIFCR.w = (DMA_LIFCR_C##FLAG_NAME##IF0 \
+            << (uint32_t)((HANDLE)->StreamOffset)))
 
 /**
  * @brief  Provides the circular mode of DMA stream.
