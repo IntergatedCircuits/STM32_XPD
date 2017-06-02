@@ -768,21 +768,12 @@ void XPD_RCC_ResetAHB(void)
 }
 
 /**
- * @brief Resets the APB1 peripherals.
+ * @brief Resets the APB peripherals.
  */
-void XPD_RCC_ResetAPB1(void)
+void XPD_RCC_ResetAPB(void)
 {
-    RCC->APB1RSTR.w = ~0;
-    RCC->APB1RSTR.w = 0;
-}
-
-/**
- * @brief Resets the APB2 peripherals.
- */
-void XPD_RCC_ResetAPB2(void)
-{
-    RCC->APB2RSTR.w = ~0;
-    RCC->APB2RSTR.w = 0;
+    RCC->APB1RSTR.w = RCC->APB2RSTR.w = ~0;
+    RCC->APB1RSTR.w = RCC->APB2RSTR.w = 0;
 }
 
 /** @} */

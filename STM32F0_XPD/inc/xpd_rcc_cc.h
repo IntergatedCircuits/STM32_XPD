@@ -271,8 +271,7 @@ __STATIC_INLINE void XPD_RCC_CSS(FunctionalState NewState)
 void                XPD_RCC_Deinit              (void);
 
 void                XPD_RCC_ResetAHB            (void);
-void                XPD_RCC_ResetAPB1           (void);
-void                XPD_RCC_ResetAPB2           (void);
+void                XPD_RCC_ResetAPB            (void);
 /** @} */
 
 /** @} */
