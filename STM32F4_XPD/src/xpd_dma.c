@@ -87,10 +87,6 @@ XPD_ReturnType XPD_DMA_Init(DMA_HandleType * hdma, const DMA_InitType * Config)
     /* enable DMA clock */
     dma_clockCtrl(hdma, ENABLE);
 
-#ifdef DMA_Stream_BB
-    hdma->Inst_BB = DMA_Stream_BB(hdma->Inst);
-#endif
-
     DMA_REG_BIT(hdma,CR,CT) = 0;
 
     hdma->Inst->CR.b.CHSEL      = Config->Channel;
@@ -215,8 +211,10 @@ XPD_ReturnType XPD_DMA_Start(DMA_HandleType * hdma, void * PeriphAddress, void *
         hdma->Inst->PAR  = (uint32_t)PeriphAddress;
         hdma->Inst->M0AR = (uint32_t)MemAddress;
 
+#ifdef USE_XPD_DMA_ERROR_DETECT
         /* reset error state */
         hdma->Errors = DMA_ERROR_NONE;
+#endif
 
         XPD_DMA_Enable(hdma);
     }
@@ -244,12 +242,13 @@ XPD_ReturnType XPD_DMA_Start_IT(DMA_HandleType * hdma, void * PeriphAddress, voi
 
     if (result == XPD_OK)
     {
-        /* enable interrupts */
+        /* enable interrupts
+         * half transfer interrupt has to be enabled by user if callback is used */
 #ifdef USE_XPD_DMA_ERROR_DETECT
-        SET_BIT(hdma->Inst->CR.w, (DMA_SxCR_TCIE | DMA_SxCR_HTIE | DMA_SxCR_TEIE | DMA_SxCR_DMEIE));
+        SET_BIT(hdma->Inst->CR.w, DMA_SxCR_TCIE | DMA_SxCR_TEIE | DMA_SxCR_DMEIE);
         DMA_REG_BIT(hdma,FCR,FEIE) = 1;
 #else
-        SET_BIT(hdma->Inst->CR.w, (DMA_SxCR_TCIE | DMA_SxCR_HTIE));
+        XPD_DMA_EnableIT(hdma,TC);
 #endif
     }
     return result;
@@ -284,11 +283,9 @@ void XPD_DMA_Stop_IT(DMA_HandleType *hdma)
     XPD_DMA_Disable(hdma);
 
     /* disable interrupts */
+    CLEAR_BIT(hdma->Inst->CR.w, DMA_SxCR_TCIE | DMA_SxCR_HTIE | DMA_SxCR_TEIE | DMA_SxCR_DMEIE);
 #ifdef USE_XPD_DMA_ERROR_DETECT
-    CLEAR_BIT(hdma->Inst->CR.w, (DMA_SxCR_TCIE | DMA_SxCR_HTIE | DMA_SxCR_TEIE | DMA_SxCR_DMEIE));
     DMA_REG_BIT(hdma,FCR,FEIE) = 0;
-#else
-    CLEAR_BIT(hdma->Inst->CR.w, (DMA_SxCR_TCIE | DMA_SxCR_HTIE));
 #endif
 }
 
@@ -324,6 +321,7 @@ XPD_ReturnType XPD_DMA_PollStatus(DMA_HandleType * hdma, DMA_OperationType Opera
     result = XPD_WaitForDiff(&hdma->Base->LISR.w, mask, 0, &Timeout);
     if (result == XPD_OK)
     {
+#ifdef USE_XPD_DMA_ERROR_DETECT
         if (XPD_DMA_GetFlag(hdma, TE))
         {
             /* Update error code */
@@ -355,6 +353,7 @@ XPD_ReturnType XPD_DMA_PollStatus(DMA_HandleType * hdma, DMA_OperationType Opera
             return XPD_ERROR;
         }
         else
+#endif
         {
             /* Clear the half transfer and transfer complete flags */
             if (Operation == DMA_OPERATION_TRANSFER)
@@ -385,23 +384,17 @@ DMA_ErrorType XPD_DMA_GetError(DMA_HandleType * hdma)
 void XPD_DMA_IRQHandler(DMA_HandleType * hdma)
 {
     /* Half Transfer Complete interrupt management */
-    if (XPD_DMA_GetFlag(hdma, HT))
+    if ((DMA_REG_BIT(hdma,CR,HTIE) != 0) && (XPD_DMA_GetFlag(hdma, HT) != 0))
     {
         /* clear the half transfer complete flag */
         XPD_DMA_ClearFlag(hdma, HT);
-
-        /* DMA mode is not CIRCULAR */
-        if (XPD_DMA_CircularMode(hdma) == 0)
-        {
-            XPD_DMA_DisableIT(hdma, HT);
-        }
 
         /* half transfer callback */
         XPD_SAFE_CALLBACK(hdma->Callbacks.HalfComplete, hdma);
     }
 
     /* Transfer Complete interrupt management */
-    if (XPD_DMA_GetFlag(hdma, TC))
+    if (XPD_DMA_GetFlag(hdma, TC) != 0)
     {
         /* clear the transfer complete flag */
         XPD_DMA_ClearFlag(hdma, TC);
@@ -409,7 +402,10 @@ void XPD_DMA_IRQHandler(DMA_HandleType * hdma)
         /* DMA mode is not CIRCULAR */
         if (XPD_DMA_CircularMode(hdma) == 0)
         {
-            XPD_DMA_DisableIT(hdma, TC);
+            CLEAR_BIT(hdma->Inst->CR.w, DMA_SxCR_TCIE | DMA_SxCR_HTIE | DMA_SxCR_TEIE | DMA_SxCR_DMEIE);
+#ifdef USE_XPD_DMA_ERROR_DETECT
+            DMA_REG_BIT(hdma,FCR,FEIE) = 0;
+#endif
         }
 
         /* transfer complete callback */
@@ -418,7 +414,7 @@ void XPD_DMA_IRQHandler(DMA_HandleType * hdma)
 
 #ifdef USE_XPD_DMA_ERROR_DETECT
     /* Transfer Error interrupt management */
-    if (XPD_DMA_GetFlag(hdma, TE))
+    if (XPD_DMA_GetFlag(hdma, TE) != 0)
     {
         /* clear the transfer error flag */
         XPD_DMA_ClearFlag(hdma, TE);
@@ -426,7 +422,7 @@ void XPD_DMA_IRQHandler(DMA_HandleType * hdma)
         hdma->Errors |= DMA_ERROR_TRANSFER;
     }
     /* FIFO Error interrupt management */
-    if (XPD_DMA_GetFlag(hdma, FE))
+    if (XPD_DMA_GetFlag(hdma, FE) != 0)
     {
         /* clear the FIFO error flag */
         XPD_DMA_ClearFlag(hdma, FE);
@@ -434,7 +430,7 @@ void XPD_DMA_IRQHandler(DMA_HandleType * hdma)
         hdma->Errors |= DMA_ERROR_FIFO;
     }
     /* Direct Mode Error interrupt management */
-    if (XPD_DMA_GetFlag(hdma, DME))
+    if (XPD_DMA_GetFlag(hdma, DME) != 0)
     {
         /* clear the direct mode error flag */
         XPD_DMA_ClearFlag(hdma, DME);

@@ -124,7 +124,9 @@ typedef struct
 #endif
     } Callbacks;                             /*   Handle Callbacks */
     void * Owner;                            /*!< [Internal] The pointer of the peripheral handle which uses this handle */
+#ifdef USE_XPD_DMA_ERROR_DETECT
     volatile DMA_ErrorType Errors;           /*!< Transfer errors */
+#endif
 }DMA_HandleType;
 
 /** @} */
@@ -132,13 +134,41 @@ typedef struct
 /** @defgroup DMA_Exported_Macros DMA Exported Macros
  * @{ */
 
+#ifdef DMA_Stream_BB
 /**
  * @brief  DMA Handle initializer macro
  * @param  INSTANCE: specifies the DMA stream instance.
  */
 #define         NEW_DMA_HANDLE(INSTANCE)                    \
-    {.Inst      = (INSTANCE),                               \
-     .Owner     = NULL}
+    {.Inst = (INSTANCE), .Inst_BB = DMA_Stream_BB(INSTANCE)}
+
+/**
+ * @brief DMA register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param REG: specifies the register name.
+ * @param BIT: specifies the register bit name.
+ */
+#define DMA_REG_BIT(HANDLE, REG_NAME, BIT_NAME)             \
+    ((HANDLE)->Inst_BB->REG_NAME.BIT_NAME)
+
+#else
+/**
+ * @brief  DMA Handle initializer macro
+ * @param  INSTANCE: specifies the DMA stream instance.
+ */
+#define         NEW_DMA_HANDLE(INSTANCE)                    \
+    {.Inst = (INSTANCE)}
+
+/**
+ * @brief DMA register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param REG: specifies the register name.
+ * @param BIT: specifies the register bit name.
+ */
+#define DMA_REG_BIT(HANDLE, REG_NAME, BIT_NAME)             \
+    ((HANDLE)->Inst->REG_NAME.b.BIT_NAME)
+
+#endif /* DMA_Stream_BB */
 
 /**
  * @brief  Enable the specified DMA interrupt.
@@ -205,12 +235,6 @@ typedef struct
 #define         XPD_DMA_CircularMode(HANDLE)                \
         (DMA_REG_BIT((HANDLE), CR, CIRC))
 
-#ifdef DMA_Stream_BB
-#define DMA_REG_BIT(HANDLE, REG_NAME, BIT_NAME) ((HANDLE)->Inst_BB->REG_NAME.BIT_NAME)
-#else
-#define DMA_REG_BIT(HANDLE, REG_NAME, BIT_NAME) ((HANDLE)->Inst->REG_NAME.b.BIT_NAME)
-#endif
-
 #define         __XPD_DMA_ITConfig_TC(HANDLE,VALUE)         \
     (DMA_REG_BIT((HANDLE),CR,TCIE) = (VALUE))
 #define         __XPD_DMA_ITConfig_TE(HANDLE,VALUE)         \
@@ -241,12 +265,24 @@ void            XPD_DMA_Stop_IT         (DMA_HandleType * hdma);
 
 uint16_t        XPD_DMA_GetStatus       (DMA_HandleType * hdma);
 XPD_ReturnType  XPD_DMA_PollStatus      (DMA_HandleType * hdma, DMA_OperationType Operation, uint32_t Timeout);
-DMA_ErrorType   XPD_DMA_GetError        (DMA_HandleType * hdma);
 
 void            XPD_DMA_IRQHandler      (DMA_HandleType * hdma);
 
 uint32_t        XPD_DMA_GetActiveMemory (DMA_HandleType * hdma);
 void            XPD_DMA_SetSwapMemory   (DMA_HandleType * hdma, void * Address);
+
+#ifdef USE_XPD_DMA_ERROR_DETECT
+/**
+ * @brief Gets the error state of the DMA stream.
+ * @param hdma: pointer to the DMA stream handle structure
+ * @return Current DMA error state
+ */
+__STATIC_INLINE DMA_ErrorType XPD_DMA_GetError(DMA_HandleType * hdma)
+{
+    return hdma->Errors;
+}
+#endif
+
 /** @} */
 
 /** @} */
