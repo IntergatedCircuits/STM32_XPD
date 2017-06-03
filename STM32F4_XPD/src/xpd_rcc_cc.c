@@ -777,6 +777,21 @@ void XPD_RCC_ResetAPB2(void)
     RCC->APB2RSTR.w = 0;
 }
 
+/**
+ * @brief Reads the reset source flags and optionally clears them.
+ * @param Destructive: set to true if flags shall be cleared
+ * @return The RCC peripheral determined reset source
+ */
+RCC_ResetSourceType XPD_RCC_GetResetSource(boolean_t Destructive)
+{
+    uint32_t csr = (RCC->CSR.w & (~RCC_CSR_RMVF)) >> 24;
+
+    /* Clear flags when destructive is selected */
+    RCC_REG_BIT(CSR,RMVF) = Destructive;
+
+    return (RCC_ResetSourceType)csr;
+}
+
 /** @} */
 
 /** @} */

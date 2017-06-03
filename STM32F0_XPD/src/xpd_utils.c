@@ -206,22 +206,16 @@ void XPD_WriteFromStream(volatile uint32_t * reg, DataStreamType * stream)
  */
 
 /**
- * @brief Initializes the basic services of the device:
- *        @arg Memory access
+ * @brief Initializes the necessary utilities used by XPD drivers:
  *        @arg System Timer utility
- *        @arg Interrupt priority group selection
  *        @arg Enable PWR and SYSCFG clocks
  */
 void XPD_Init(void)
 {
-#if (PREFETCH_ENABLE != 0)
-    XPD_FLASH_PrefetchBufferCtrl(ENABLE);
-#endif
-
     /* Configure systick timer */
     XPD_InitTimer();
 
-    /* enable clock for PWR */
+    /* Enable clock for PWR */
     XPD_PWR_ClockCtrl(ENABLE);
 
     /* Enable SYSCFG clock  */
@@ -235,17 +229,31 @@ void XPD_Init(void)
 void XPD_Deinit(void)
 {
     /* Reset of all peripherals */
+#if defined(AHBPERIPH_BASE)
     XPD_RCC_ResetAHB();
+#else
+#if defined(AHB1PERIPH_BASE)
+    XPD_RCC_ResetAHB1();
+#endif
+#if defined(AHB2PERIPH_BASE)
+    XPD_RCC_ResetAHB2();
+#endif
+#if defined(AHB3PERIPH_BASE)
+    XPD_RCC_ResetAHB3();
+#endif
+#endif
+
+#if defined(APBPERIPH_BASE)
+    XPD_RCC_ResetAPB();
+#else
+#if defined(APB1PERIPH_BASE)
     XPD_RCC_ResetAPB1();
+#endif
+#if defined(APB2PERIPH_BASE)
     XPD_RCC_ResetAPB2();
+#endif
+#endif
 }
-
-/** @} */
-
-/** @defgroup XPD_Exported_Functions_Boot XPD Boot Handling Functions
- *  @brief    XPD Utilities boot handling functions
- * @{
- */
 
 /**
  * @brief Resets the MCU peripherals to their startup state and

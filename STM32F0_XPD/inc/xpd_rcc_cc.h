@@ -107,6 +107,24 @@ typedef enum
 #endif
 }RCC_MCO1_ClockSourceType;
 
+/** @brief RCC reset source types */
+typedef enum
+{
+    RESET_SOURCE_UNKNOWN      = 0x000, /*!< Reset source unknown */
+    RESET_SOURCE_LOWPOWER     = 0x800, /*!< Low-power management reset occurred */
+    RESET_SOURCE_WWDG         = 0x400, /*!< Window watchdog reset occurred */
+    RESET_SOURCE_IWDG         = 0x200, /*!< Independent watchdog reset from VDD domain occurred */
+    RESET_SOURCE_SOFTWARE     = 0x100, /*!< Software reset occurred */
+    RESET_SOURCE_POWERON      = 0x080, /*!< PowerOnReset / PowerDownReset occurred */
+    RESET_SOURCE_NRST         = 0x040, /*!< NRST pin triggered occurred */
+#ifdef RCC_CSR_OBLRSTF
+    RESET_SOURCE_OB_LOADER    = 0x020, /*!< Option byte loader reset occurred */
+#endif
+#ifdef RCC_CSR_V18PWRRSTF
+    RESET_SOURCE_POWERON_1p8V = 0x008, /*!< 1.8 V domain reset occurred */
+#endif
+}RCC_ResetSourceType;
+
 /** @brief RCC callbacks container structure */
 typedef struct {
     XPD_SimpleCallbackType OscReady; /*!< Oscillator ready callback */
@@ -119,7 +137,8 @@ typedef struct {
         XPD_SimpleCallbackType SyncError;    /*!< a SYNC error flag requested interrupt */
     }HSI48;
 #endif
-} XPD_RCC_CallbacksType;
+}XPD_RCC_CallbacksType;
+
 /** @} */
 
 /** @defgroup RCC_Core_Exported_Variables RCC Core Exported Variables
@@ -132,9 +151,6 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
 
 /** @defgroup RCC_Core_Exported_Macros RCC Core Exported Macros
  * @{ */
-
-/** @brief Default HSI calibration value */
-#define HSI_CALIBRATION_DEFAULT_VALUE   0x10
 
 /**
  * @brief  Enable the specified RCC interrupt.
@@ -272,6 +288,8 @@ void                XPD_RCC_Deinit              (void);
 
 void                XPD_RCC_ResetAHB            (void);
 void                XPD_RCC_ResetAPB            (void);
+
+RCC_ResetSourceType XPD_RCC_GetResetSource      (boolean_t Destructive);
 /** @} */
 
 /** @} */

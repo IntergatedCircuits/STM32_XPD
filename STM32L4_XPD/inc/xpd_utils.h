@@ -54,12 +54,6 @@
 /** @addtogroup XPD_Exported_Functions
  * @{ */
 
-/** @addtogroup XPD_Exported_Functions_Init
- * @{ */
-void            XPD_Init                (void);
-void            XPD_Deinit              (void);
-/** @} */
-
 /** @addtogroup XPD_Exported_Functions_Timer
  * @{ */
 void            XPD_InitTimer           (void);
@@ -77,8 +71,10 @@ void            XPD_ReadToStream        (volatile uint32_t * reg, DataStreamType
 void            XPD_WriteFromStream     (volatile uint32_t * reg, DataStreamType * stream);
 /** @} */
 
-/** @addtogroup XPD_Exported_Functions_Boot
+/** @addtogroup XPD_Exported_Functions_Init
  * @{ */
+void            XPD_Init                (void);
+void            XPD_Deinit              (void);
 void            XPD_BootTo              (void * StartAddress);
 /** @} */
 

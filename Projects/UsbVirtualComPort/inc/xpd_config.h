@@ -27,9 +27,7 @@
 /* TODO step 1: specify device header */
 #include "stm32f072xb.h"
 
-/* TODO step 2: specify startup configuration */
-#define NVIC_PRIOGROUP_SELECT       NVIC_PRIOGROUP_0PRE_4SUB
-#define PREFETCH_ENABLE             1
+/* TODO step 2: specify power supplies */
 #define VDD_VALUE                   3000 /* Value of VDD in mV */
 #define VDDA_VALUE                  3000 /* Value of VDD Analog in mV */
 
@@ -37,10 +35,10 @@
 #define USE_XPD_TIM
 #define USE_XPD_USB
 #define USE_XPD_USART
-#define USE_XPD_USART_ERROR_DETECT
 
 /* TODO step 4: specify oscillator parameters */
-#define HSI_STARTUP_TIMEOUT 5000 /* Timeout for HSI startup in ms */
+/* #define HSE_VALUE 80000000
+ * #define LSE_VALUE 32768 */
 
 /* TODO step 5: specify vector table location */
 /* #define VECT_TAB_SRAM */

@@ -83,30 +83,22 @@ typedef enum
 /** @brief MSI setup structure */
 typedef struct
 {
-    uint8_t          CalibrationValue; /*!< MSI calibration value [0..31] (default is 16) */
     RCC_OscStateType State;            /*!< MSI state */
     RCC_MSIFreqType  ClockFreq;        /*!< MSI clock frequency */
 }RCC_MSI_InitType;
 
-/** @brief HSI setup structure */
-typedef struct
-{
-    uint8_t          CalibrationValue; /*!< HSI calibration value [0..31] (default is 16) */
-    RCC_OscStateType State;            /*!< HSI state */
-}RCC_HSI_InitType;
-
 /** @brief PLL setup structure */
 typedef struct
 {
-    uint8_t  M; /*!< Common PLL predivider, only set for main PLL. Permitted values: @arg 1 .. 8 */
-    uint16_t N; /*!< Multiplication factor for PLL. Permitted values: @arg 8 .. 86 */
+    uint8_t  M; /*!< Common PLL predivider, only set for main PLL [1 .. 8] */
+    uint16_t N; /*!< Multiplication factor for PLL [8 .. 86] */
     uint8_t  R; /*!< Division factor for main system clock.
-                     Permitted values: @arg 2 @arg 4 @arg 6 @arg 8 */
-    uint8_t  Q; /*!< Division factor for OTG FS.
-                     Permitted values: @arg 2 @arg 4 @arg 6 @arg 8 */
+                     Permitted values: 2, 4, 6, 8 */
+    uint8_t  Q; /*!< Division factor for CLK48 input.
+                     Permitted values: 2, 4, 6, 8 */
     uint32_t P; /*!< PLL division factor for  SAI clocks.
-                     Permitted values for advanced devices: @arg 2 .. 31
-                     Permitted values otherwise: @arg 7 @arg 17 */
+                     @arg for advanced devices: [2 .. 31]
+                     @arg otherwise: 7, 17 */
     RCC_OscStateType State;  /*!< PLL state */
     RCC_OscType      Source; /*!< PLL input source selection. Permitted values:
                                   @arg @ref RCC_OscType::HSI
@@ -153,6 +145,24 @@ typedef enum
 #endif
 }RCC_LSCO_ClockSourceType;
 
+/** @brief RCC reset source types */
+typedef enum
+{
+    RESET_SOURCE_UNKNOWN   = 0x00, /*!< Reset source unknown */
+    RESET_SOURCE_LOWPOWER  = 0x80, /*!< Illegal Low power mode entry caused reset occurred */
+    RESET_SOURCE_WWDG      = 0x40, /*!< Window watchdog reset occurred */
+    RESET_SOURCE_IWDG      = 0x20, /*!< Independent watchdog reset occurred */
+    RESET_SOURCE_SOFTWARE  = 0x10, /*!< Software reset occurred */
+    RESET_SOURCE_BROWNOUT  = 0x08, /*!< BrownOutReset occurred */
+    RESET_SOURCE_NRST      = 0x04, /*!< NRST pin triggered occurred */
+#ifdef RCC_CSR_OBLRSTF
+    RESET_SOURCE_OB_LOADER = 0x02, /*!< Option byte loader reset occurred */
+#endif
+#ifdef RCC_CSR_FWRSTF
+    RESET_SOURCE_FIREWALL  = 0x01, /*!< Firewall initiated reset occurred */
+#endif
+}RCC_ResetSourceType;
+
 /** @brief RCC callbacks container structure */
 typedef struct {
     XPD_SimpleCallbackType OscReady; /*!< Oscillator ready callback */
@@ -166,7 +176,8 @@ typedef struct {
         XPD_SimpleCallbackType SyncError;    /*!< a SYNC error flag requested interrupt */
     }HSI48;
 #endif
-} XPD_RCC_CallbacksType;
+}XPD_RCC_CallbacksType;
+
 /** @} */
 
 /** @defgroup RCC_Core_Exported_Variables RCC Core Exported Variables
@@ -179,12 +190,6 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
 
 /** @defgroup RCC_Core_Exported_Macros RCC Core Exported Macros
  * @{ */
-
-/** @brief Default HSI calibration value */
-#define HSI_CALIBRATION_DEFAULT_VALUE   0x10
-
-/** @brief Default MSI calibration value */
-#define MSI_CALIBRATION_DEFAULT_VALUE   0x10
 
 /**
  * @brief  Enable the specified RCC interrupt.
@@ -355,6 +360,8 @@ void                XPD_RCC_ResetAHB2           (void);
 void                XPD_RCC_ResetAHB3           (void);
 void                XPD_RCC_ResetAPB1           (void);
 void                XPD_RCC_ResetAPB2           (void);
+
+RCC_ResetSourceType XPD_RCC_GetResetSource      (boolean_t Destructive);
 /** @} */
 
 /** @} */

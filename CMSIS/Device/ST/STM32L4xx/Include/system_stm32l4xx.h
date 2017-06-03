@@ -1,14 +1,14 @@
 /**
   ******************************************************************************
-  * @file    system_stm32f0xx.h
+  * @file    system_stm32l4xx.h
   * @author  MCD Application Team
-  * @version V2.3.0
-  * @date    27-May-2016
-  * @brief   CMSIS Cortex-M0 Device System Source File for STM32F0xx devices.  
+  * @version V1.3.0
+  * @date    17-February-2017
+  * @brief   CMSIS Cortex-M4 Device System Source File for STM32L4xx devices.
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2016 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -39,21 +39,21 @@
   * @{
   */
 
-/** @addtogroup stm32f0xx_system
+/** @addtogroup stm32l4xx_system
   * @{
-  */  
-  
+  */
+
 /**
   * @brief Define to prevent recursive inclusion
   */
-#ifndef __SYSTEM_STM32F0XX_H
-#define __SYSTEM_STM32F0XX_H
+#ifndef __SYSTEM_STM32L4XX_H
+#define __SYSTEM_STM32L4XX_H
 
 #ifdef __cplusplus
  extern "C" {
-#endif 
+#endif
 
-/** @addtogroup STM32F0xx_System_Includes
+/** @addtogroup STM32L4xx_System_Includes
   * @{
   */
 
@@ -62,25 +62,17 @@
   */
 
 
-/** @addtogroup STM32F0xx_System_Exported_types
+/** @addtogroup STM32L4xx_System_Exported_Variables
   * @{
   */
 
-extern uint32_t SystemCoreClock;          /*!< System Clock Frequency (Core Clock) */
+extern uint32_t SystemCoreClock;            /*!< System Clock Frequency (Core Clock) */
 
 /**
   * @}
   */
 
-/** @addtogroup STM32F0xx_System_Exported_Constants
-  * @{
-  */
-
-/**
-  * @}
-  */
-
-/** @addtogroup STM32F0xx_System_Exported_Macros
+/** @addtogroup STM32L4xx_System_Exported_Constants
   * @{
   */
 
@@ -88,10 +80,18 @@ extern uint32_t SystemCoreClock;          /*!< System Clock Frequency (Core Cloc
   * @}
   */
 
-/** @addtogroup STM32F0xx_System_Exported_Functions
+/** @addtogroup STM32L4xx_System_Exported_Macros
   * @{
   */
-  
+
+/**
+  * @}
+  */
+
+/** @addtogroup STM32L4xx_System_Exported_Functions
+  * @{
+  */
+
 extern void SystemInit(void);
 
 /**
@@ -102,12 +102,12 @@ extern void SystemInit(void);
 }
 #endif
 
-#endif /*__SYSTEM_STM32F0XX_H */
+#endif /*__SYSTEM_STM32L4XX_H */
 
 /**
   * @}
   */
-  
+
 /**
   * @}
-  */  
+  */

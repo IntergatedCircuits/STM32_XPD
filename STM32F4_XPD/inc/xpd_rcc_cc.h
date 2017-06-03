@@ -65,16 +65,15 @@ typedef enum
 /** @brief PLL setup structure */
 typedef struct
 {
-    uint8_t  M; /*!< Division factor for PLL VCO input. Permitted values: @arg 0 .. 63 */
-    uint16_t N; /*!< Multiplication factor for PLL VCO input. Permitted values: @arg 50 .. 432
-                     @arg (for STM32F411xE: 192 .. 432) */
+    uint16_t N; /*!< Multiplication factor for PLL VCO input.
+                     @arg for STM32F411xE: [192 .. 432]
+                     @arg otherwise:       [ 50 .. 432] */
+    uint8_t  M; /*!< Division factor for PLL VCO input. [0 .. 63] */
     uint8_t  P; /*!< Division factor for main system clock.
-                     Permitted values: @arg 2 @arg 4 @arg 6 @arg 8 */
-    uint8_t  Q; /*!< Division factor for OTG FS, SDIO and RNG.
-                     Permitted values: @arg 4 .. 15 */
+                     Permitted values: 2, 4, 6, 8 */
+    uint8_t  Q; /*!< Division factor for OTG FS, SDIO and RNG [4 .. 15] */
 #ifdef RCC_PLLCFGR_PLLR
-    uint32_t R; /*!< PLL division factor for I2S, SAI, SYSTEM, SPDIFRX clocks.
-                     Permitted values: @arg 2 .. 7 */
+    uint8_t R;  /*!< PLL division factor for I2S, SAI, SYSTEM, SPDIFRX clocks [2 .. 7] */
 #endif
     RCC_OscStateType State;  /*!< PLL state */
     RCC_OscType      Source; /*!< PLL input source selection. Permitted values:
@@ -118,11 +117,25 @@ typedef enum
 }RCC_MCO2_ClockSourceType;
 #endif
 
+/** @brief RCC reset source types */
+typedef enum
+{
+    RESET_SOURCE_UNKNOWN      = 0x00, /*!< Reset source unknown */
+    RESET_SOURCE_LOWPOWER     = 0x80, /*!< Low-power management reset occurred */
+    RESET_SOURCE_WWDG         = 0x40, /*!< Window watchdog reset occurred */
+    RESET_SOURCE_IWDG         = 0x20, /*!< Independent watchdog reset from VDD domain occurred */
+    RESET_SOURCE_SOFTWARE     = 0x10, /*!< Software reset occurred */
+    RESET_SOURCE_POWERON      = 0x08, /*!< PowerOnReset / PowerDownReset occurred */
+    RESET_SOURCE_NRST         = 0x04, /*!< NRST pin triggered occurred */
+    RESET_SOURCE_BROWNOUT     = 0x02, /*!< BrownOutReset occurred */
+}RCC_ResetSourceType;
+
 /** @brief RCC callbacks container structure */
 typedef struct {
     XPD_SimpleCallbackType OscReady; /*!< Oscillator ready callback */
     XPD_SimpleCallbackType CSS;      /*!< Clock Security System callback */
-} XPD_RCC_CallbacksType;
+}XPD_RCC_CallbacksType;
+
 /** @} */
 
 /** @defgroup RCC_Core_Exported_Variables RCC Core Exported Variables
@@ -135,9 +148,6 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
 
 /** @defgroup RCC_Core_Exported_Macros RCC Core Exported Macros
  * @{ */
-
-/** @brief Default HSI calibration value */
-#define HSI_CALIBRATION_DEFAULT_VALUE   0x10
 
 /**
  * @brief  Enable the specified RCC interrupt.
@@ -283,6 +293,8 @@ void                XPD_RCC_ResetAHB2           (void);
 void                XPD_RCC_ResetAHB3           (void);
 void                XPD_RCC_ResetAPB1           (void);
 void                XPD_RCC_ResetAPB2           (void);
+
+RCC_ResetSourceType XPD_RCC_GetResetSource      (boolean_t Destructive);
 /** @} */
 
 /** @} */

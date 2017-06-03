@@ -156,7 +156,6 @@ XPD_ReturnType XPD_RCC_MSIConfig(const RCC_MSI_InitType * Config)
             /* Adjust the Clock range and the calibration value.*/
             RCC_REG_BIT(CR, MSIRGSEL) = ENABLE;
             RCC->CR.b.MSIRANGE   = Config->ClockFreq;
-            RCC->ICSCR.b.MSITRIM = Config->CalibrationValue;
 
             /* Decreasing the MSI range */
             if (FlashLatency != XPD_FLASH_GetLatency())
@@ -193,7 +192,6 @@ XPD_ReturnType XPD_RCC_MSIConfig(const RCC_MSI_InitType * Config)
             /* Adjust the Clock range and the calibration value.*/
             RCC_REG_BIT(CR, MSIRGSEL) = ENABLE;
             RCC->CR.b.MSIRANGE   = Config->ClockFreq;
-            RCC->ICSCR.b.MSITRIM = Config->CalibrationValue;
         }
         else
         {
@@ -1070,6 +1068,21 @@ void XPD_RCC_ResetAPB2(void)
 {
     RCC->APB2RSTR.w = ~0;
     RCC->APB2RSTR.w = 0;
+}
+
+/**
+ * @brief Reads the reset source flags and optionally clears them.
+ * @param Destructive: set to true if flags shall be cleared
+ * @return The RCC peripheral determined reset source
+ */
+RCC_ResetSourceType XPD_RCC_GetResetSource(boolean_t Destructive)
+{
+    uint32_t csr = RCC->CSR.w >> 24;
+
+    /* Clear flags when destructive is selected */
+    RCC_REG_BIT(CSR,RMVF) = Destructive;
+
+    return (RCC_ResetSourceType)csr;
 }
 
 /** @} */

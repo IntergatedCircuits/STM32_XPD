@@ -38,9 +38,17 @@
 
 /* Disable Backup domain write protection state change timeout */
 #define RCC_DBP_TIMEOUT         ((uint32_t)100)
-#define RCC_LSE_TIMEOUT         LSE_STARTUP_TIMEOUT
 #define RCC_CLOCKSWITCH_TIMEOUT ((uint32_t)5000)   /* 5 s    */
+#ifdef LSE_STARTUP_TIMEOUT
+#define RCC_LSE_TIMEOUT         LSE_STARTUP_TIMEOUT
+#else
+#define RCC_LSE_TIMEOUT         ((uint32_t)5000)   /* 5 s    */
+#endif
+#ifdef HSE_STARTUP_TIMEOUT
 #define RCC_HSE_TIMEOUT         HSE_STARTUP_TIMEOUT
+#else
+#define RCC_HSE_TIMEOUT         ((uint32_t)100)    /* 100 ms */
+#endif
 #define RCC_HSI_TIMEOUT         ((uint32_t)100)    /* 100 ms */
 #define RCC_HSI14_TIMEOUT       ((uint32_t)100)    /* 100 ms */
 #define RCC_HSI48_TIMEOUT       ((uint32_t)100)    /* 100 ms */

@@ -65,16 +65,8 @@
 /** @addtogroup STM32F4xx_System_Exported_types
   * @{
   */
-  /* This variable is updated in three ways:
-      1) by calling CMSIS function SystemCoreClockUpdate()
-      2) by calling HAL API function HAL_RCC_GetSysClockFreq()
-      3) each time HAL_RCC_ClockConfig() is called to configure the system clock frequency 
-         Note: If you use this function to configure the system clock; then there
-               is no need to call the 2 first functions listed above, since SystemCoreClock
-               variable is updated automatically.
-  */
-extern uint32_t SystemCoreClock;          /*!< System Clock Frequency (Core Clock) */
 
+extern uint32_t SystemCoreClock;          /*!< System Clock Frequency (Core Clock) */
 
 /**
   * @}
@@ -101,7 +93,7 @@ extern uint32_t SystemCoreClock;          /*!< System Clock Frequency (Core Cloc
   */
   
 extern void SystemInit(void);
-extern void SystemCoreClockUpdate(void);
+
 /**
   * @}
   */
@@ -119,4 +111,3 @@ extern void SystemCoreClockUpdate(void);
 /**
   * @}
   */  
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
