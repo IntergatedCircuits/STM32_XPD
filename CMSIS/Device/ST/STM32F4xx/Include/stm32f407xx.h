@@ -5316,13 +5316,6 @@ typedef struct {
              uint32_t __RESERVED1[19];
     } DCR;                                                  /*!< TIM DMA control register,            Address offset: 0x48 */
     __IO uint32_t DMAR[32];                                 /*!< TIM DMA address for full transfer,   Address offset: 0x4C */
-    struct {
-        __IO uint32_t TI1_RMP[2];                           /*!< TI1_RMP[1:0] bits (TIM11 Input Capture 1 remap) */
-             uint32_t __RESERVED0[4];
-        __IO uint32_t TI4_RMP[2];                           /*!<TI4_RMP[1:0] bits (TIM5 Input 4 remap)             */
-             uint32_t __RESERVED1[2];
-        __IO uint32_t ITR1_RMP[2];                          /*!<ITR1_RMP[1:0] bits (TIM2 Internal trigger 1 remap) */
-             uint32_t __RESERVED2[20];
     __IO uint32_t OR[32];                                   /*!< TIM option register,                 Address offset: 0x50 */
 } TIM_BitBand_TypeDef;
 
