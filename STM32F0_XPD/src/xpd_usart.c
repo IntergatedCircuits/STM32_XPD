@@ -115,6 +115,7 @@ static void usart_dmaReceiveRedirect(void *hdma)
     XPD_SAFE_CALLBACK(husart->Callbacks.Receive, husart);
 }
 
+/* Calculates and configures the baudrate */
 static void usart_baudrateConfig(USART_HandleType * husart, uint32_t baudrate)
 {
 #if (USART_PERIPHERAL_VERSION > 1)
@@ -140,6 +141,7 @@ static void usart_baudrateConfig(USART_HandleType * husart, uint32_t baudrate)
 #endif
 }
 
+/* Sets the communication direction in half-duplex mode */
 static void usart_setDirection(USART_HandleType * husart, uint32_t direction)
 {
     if ((USART_HALF_DUPLEX_MODE(husart)) && ((husart->Inst->CR1.w & (USART_CR1_TE | USART_CR1_RE)) != direction))
@@ -152,16 +154,13 @@ static void usart_setDirection(USART_HandleType * husart, uint32_t direction)
     }
 }
 
+/* First stage of initialization */
 static XPD_ReturnType usart_init1(USART_HandleType * husart, const USART_InitType * Common)
 {
     uint8_t framesize;
 
     /* enable clock */
     XPD_SAFE_CALLBACK(husart->ClockCtrl, ENABLE);
-
-#ifdef USART_BB
-    husart->Inst_BB = USART_BB(husart->Inst);
-#endif
 
     /* Dependencies initialization */
     XPD_SAFE_CALLBACK(husart->Callbacks.DepInit, husart);
@@ -171,14 +170,10 @@ static XPD_ReturnType usart_init1(USART_HandleType * husart, const USART_InitTyp
     husart->Inst->CR3.w = 0;
 
     /* configure frame format and mode */
-#ifdef USE_XPD_USART_ERROR_DETECT
     framesize = Common->DataSize + (uint8_t)(Common->Parity != USART_PARITY_NONE);
 
     USART_REG_BIT(husart, CR1, PS)     = Common->Parity;
     USART_REG_BIT(husart, CR1, PCE)    = Common->Parity >> 1;
-#else
-    framesize = Common->DataSize;
-#endif
     husart->Inst->CR2.b.STOP           = Common->StopBits;
 #ifdef USART_CR1_M1
     USART_REG_BIT(husart, CR1, M0)     = (uint32_t)(framesize > 8);
@@ -218,6 +213,7 @@ static XPD_ReturnType usart_init1(USART_HandleType * husart, const USART_InitTyp
     return XPD_OK;
 }
 
+/* Second stage of initialization - after specific configuration is done */
 static XPD_ReturnType usart_init2(USART_HandleType * husart, const USART_InitType * Common)
 {
     XPD_ReturnType result = XPD_OK;
@@ -816,14 +812,32 @@ void XPD_USART_Stop_DMA(USART_HandleType * husart)
     /* Transmit DMA disable */
     if (USART_REG_BIT(husart,CR3,DMAT) != 0)
     {
+        uint16_t remaining;
         USART_REG_BIT(husart,CR3,DMAT) = 0;
+
+        /* Read remaining transfer count */
+        remaining = XPD_DMA_GetStatus(husart->DMA.Transmit);
+
+        /* Update transfer context */
+        husart->TxStream.buffer += (husart->TxStream.length - remaining)
+                * husart->TxStream.size;
+        husart->TxStream.length = remaining;
 
         XPD_DMA_Stop_IT(husart->DMA.Transmit);
     }
     /* Receive DMA disable */
     if (USART_REG_BIT(husart,CR3,DMAR) != 0)
     {
+        uint16_t remaining;
         USART_REG_BIT(husart,CR3,DMAR) = 0;
+
+        /* Read remaining transfer count */
+        remaining = XPD_DMA_GetStatus(husart->DMA.Receive);
+
+        /* Update transfer context */
+        husart->RxStream.buffer += (husart->RxStream.length - remaining)
+                * husart->RxStream.size;
+        husart->RxStream.length = remaining;
 
         XPD_DMA_Stop_IT(husart->DMA.Receive);
     }

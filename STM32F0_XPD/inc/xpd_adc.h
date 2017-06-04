@@ -178,17 +178,27 @@ typedef struct
 /** @defgroup ADC_Core_Exported_Macros ADC Core Exported Macros
  * @{ */
 
-#if defined(USE_XPD_ADC_ERROR_DETECT) || defined(USE_XPD_DMA_ERROR_DETECT)
+#ifdef ADC_BB
 /**
  * @brief  ADC Handle initializer macro
  * @param  INSTANCE: specifies the ADC peripheral instance.
  * @param  INIT_FN: specifies the dependency initialization function to call back.
  * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
  */
-#define         NEW_ADC_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)          \
-    {.Inst      = (INSTANCE),                                       \
-     .Callbacks = {(INIT_FN),(DEINIT_FN),NULL,NULL,NULL},           \
-     .Errors    = ADC_ERROR_NONE}
+#define         NEW_ADC_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)      \
+    {.Inst = (INSTANCE), .Inst_BB = ADC_BB(INSTANCE),           \
+     .Callbacks.DepInit   = (INIT_FN),                          \
+     .Callbacks.DepDeinit = (DEINIT_FN)}
+
+/**
+ * @brief ADC register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param REG: specifies the register name.
+ * @param BIT: specifies the register bit name.
+ */
+#define         ADC_REG_BIT(HANDLE, REG_NAME, BIT_NAME)         \
+    ((HANDLE)->Inst_BB->REG_NAME.BIT_NAME)
+
 #else
 /**
  * @brief  ADC Handle initializer macro
@@ -196,10 +206,21 @@ typedef struct
  * @param  INIT_FN: specifies the dependency initialization function to call back.
  * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
  */
-#define         NEW_ADC_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)          \
-    {.Inst      = (INSTANCE),                                       \
-     .Callbacks = {(INIT_FN),(DEINIT_FN),NULL,NULL}}
-#endif
+#define         NEW_ADC_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)      \
+    {.Inst = (INSTANCE),                                        \
+     .Callbacks.DepInit   = (INIT_FN),                          \
+     .Callbacks.DepDeinit = (DEINIT_FN)}
+
+/**
+ * @brief ADC register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param REG: specifies the register name.
+ * @param BIT: specifies the register bit name.
+ */
+#define         ADC_REG_BIT(HANDLE, REG_NAME, BIT_NAME)         \
+    ((HANDLE)->Inst->REG_NAME.b.BIT_NAME)
+
+#endif /* ADC_BB */
 
 /**
  * @brief  Enable the specified ADC interrupt.
@@ -260,12 +281,6 @@ typedef struct
  */
 #define         XPD_ADC_ClearFlag(HANDLE, FLAG_NAME)            \
     ((HANDLE)->Inst->ISR.w = ADC_ISR_##FLAG_NAME)
-
-#ifdef ADC_BB
-#define ADC_REG_BIT(HANDLE, REG_NAME, BIT_NAME) ((HANDLE)->Inst_BB->REG_NAME.BIT_NAME)
-#else
-#define ADC_REG_BIT(HANDLE, REG_NAME, BIT_NAME) ((HANDLE)->Inst->REG_NAME.b.BIT_NAME)
-#endif
 
 /** @} */
 

@@ -152,10 +152,6 @@ static void usb_EP0_outStart(USB_HandleType * husb)
  */
 XPD_ReturnType XPD_USB_Init(USB_HandleType * husb, const USB_InitType * Config)
 {
-#ifdef USB_OTG_BB
-    husb->Inst_BB = USB_OTG_BB(husb->Inst);
-#endif
-
     /* Enable peripheral clock */
 #ifdef USB_OTG_HS
     if (((uint32_t)husb->Inst) == ((uint32_t)USB_OTG_HS))

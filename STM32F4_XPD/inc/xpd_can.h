@@ -166,6 +166,7 @@ typedef struct
 /** @defgroup CAN_Exported_Macros CAN Exported Macros
  * @{ */
 
+#ifdef CAN_BB
 /**
  * @brief  CAN Handle initializer macro
  * @param  INSTANCE: specifies the CAN peripheral instance.
@@ -173,9 +174,59 @@ typedef struct
  * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
  */
 #define         NEW_CAN_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)      \
-    {.Inst      = (INSTANCE),                                   \
-     .Callbacks = {(INIT_FN),(DEINIT_FN),NULL,{NULL,NULL},NULL},\
-     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl}
+    {.Inst = (INSTANCE), .Inst_BB = CAN_BB(INSTANCE),           \
+     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,                   \
+     .Callbacks.DepInit   = (INIT_FN),                          \
+     .Callbacks.DepDeinit = (DEINIT_FN)}
+
+/**
+ * @brief CAN register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param REG: specifies the register name.
+ * @param BIT: specifies the register bit name.
+ */
+#define         CAN_REG_BIT(HANDLE, REG_NAME, BIT_NAME)         \
+    ((HANDLE)->Inst_BB->REG_NAME.BIT_NAME)
+
+/**
+ * @brief Master CAN register bit accessing macro
+ * @param REG: specifies the register name.
+ * @param BIT: specifies the register bit name.
+ */
+#define         CAN_MASTER_REG_BIT(REG_NAME, BIT_NAME)          \
+    (CAN_BB(CAN_MASTER)->REG_NAME.BIT_NAME)
+
+#else
+/**
+ * @brief  CAN Handle initializer macro
+ * @param  INSTANCE: specifies the CAN peripheral instance.
+ * @param  INIT_FN: specifies the dependency initialization function to call back.
+ * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
+ */
+#define         NEW_CAN_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)      \
+    {.Inst = (INSTANCE),                                        \
+     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,                   \
+     .Callbacks.DepInit   = (INIT_FN),                          \
+     .Callbacks.DepDeinit = (DEINIT_FN)}
+
+/**
+ * @brief CAN register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param REG: specifies the register name.
+ * @param BIT: specifies the register bit name.
+ */
+#define         CAN_REG_BIT(HANDLE, REG_NAME, BIT_NAME)         \
+    ((HANDLE)->Inst->REG_NAME.b.BIT_NAME)
+
+/**
+ * @brief Master CAN register bit accessing macro
+ * @param REG: specifies the register name.
+ * @param BIT: specifies the register bit name.
+ */
+#define         CAN_MASTER_REG_BIT(REG_NAME, BIT_NAME)          \
+    (CAN_MASTER->REG_NAME.b.BIT_NAME)
+
+#endif /* CAN_BB */
 
 /**
  * @brief  Enable the specified CAN interrupt.
@@ -334,14 +385,6 @@ typedef struct
  */
 #define         XPD_CAN_ClearFlag(  HANDLE, FLAG_NAME)          \
     ((HANDLE)->Inst->MSR.w = CAN_MSR_##FLAG_NAME)
-
-#ifdef CAN_BB
-#define CAN_REG_BIT(HANDLE, REG_NAME, BIT_NAME) ((HANDLE)->Inst_BB->REG_NAME.BIT_NAME)
-#define CAN_MASTER_REG_BIT(REG_NAME, BIT_NAME)  (CAN_BB(CAN_MASTER)->REG_NAME.BIT_NAME)
-#else
-#define CAN_REG_BIT(HANDLE, REG_NAME, BIT_NAME) ((HANDLE)->Inst->REG_NAME.b.BIT_NAME)
-#define CAN_MASTER_REG_BIT(REG_NAME, BIT_NAME)  (CAN_MASTER->REG_NAME.b.BIT_NAME)
-#endif
 
 /** @} */
 

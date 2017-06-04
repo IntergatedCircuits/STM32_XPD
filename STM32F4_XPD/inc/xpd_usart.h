@@ -71,11 +71,7 @@ typedef struct
     uint8_t               DataSize;      /*!< Specifies the USART frame data size in bits */
     USART_StopBitsType    StopBits;      /*!< The number of stop bits transmitted */
     FunctionalState       SingleSample;  /*!< Sets the sampling to 1/bit from default 3/bit */
-
-#ifdef USE_XPD_USART_ERROR_DETECT
     USART_ParityType      Parity;        /*!< Specifies if the last frame bit is the parity and how it is calculated */
-    FunctionalState       HaltRxOnError; /*!< Specifies whether reception should continue or stop after an error */
-#endif
 }USART_InitType;
 
 #if (USART_PERIPHERAL_VERSION > 1)
@@ -138,6 +134,52 @@ typedef struct
 /** @defgroup USART_Common_Exported_Macros USART Common Exported Macros
  * @{ */
 
+#ifdef USART_BB
+/**
+ * @brief  USART Handle initializer macro
+ * @param  INSTANCE: specifies the SPI peripheral instance.
+ * @param  INIT_FN: specifies the dependency initialization function to call back.
+ * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
+ */
+#define         NEW_USART_HANDLE(INSTANCE, INIT_FN, DEINIT_FN)  \
+    {.Inst = (INSTANCE), .Inst_BB = USART_BB(INSTANCE),         \
+     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,                   \
+     .Callbacks.DepInit   = (INIT_FN),                          \
+     .Callbacks.DepDeinit = (DEINIT_FN)}
+
+/**
+ * @brief USART register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param REG: specifies the register name.
+ * @param BIT: specifies the register bit name.
+ */
+#define         USART_REG_BIT(HANDLE, REG_NAME, BIT_NAME)       \
+    ((HANDLE)->Inst_BB->REG_NAME.BIT_NAME)
+
+#else
+/**
+ * @brief  USART Handle initializer macro
+ * @param  INSTANCE: specifies the SPI peripheral instance.
+ * @param  INIT_FN: specifies the dependency initialization function to call back.
+ * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
+ */
+#define         NEW_USART_HANDLE(INSTANCE, INIT_FN, DEINIT_FN)  \
+    {.Inst = (INSTANCE),                                        \
+     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,                   \
+     .Callbacks.DepInit   = (INIT_FN),                          \
+     .Callbacks.DepDeinit = (DEINIT_FN)}
+
+/**
+ * @brief USART register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param REG: specifies the register name.
+ * @param BIT: specifies the register bit name.
+ */
+#define         USART_REG_BIT(HANDLE, REG_NAME, BIT_NAME)       \
+    ((HANDLE)->Inst->REG_NAME.b.BIT_NAME)
+
+#endif /* USART_BB */
+
 /**
  * @brief  Enable the specified USART interrupt.
  * @param  HANDLE: specifies the USART Handle.
@@ -153,7 +195,7 @@ typedef struct
  *            @arg CTS:     Clear To Send
  *            @arg WU:      Wake Up
  */
-#define         XPD_USART_EnableIT(  HANDLE,  IT_NAME)      \
+#define         XPD_USART_EnableIT(  HANDLE,  IT_NAME)          \
     (__XPD_USART_##IT_NAME##IECtrl(HANDLE, ENABLE))
 
 /**
@@ -171,8 +213,30 @@ typedef struct
  *            @arg CTS:     Clear To Send
  *            @arg WU:      Wake Up
  */
-#define         XPD_USART_DisableIT( HANDLE,  IT_NAME)      \
+#define         XPD_USART_DisableIT( HANDLE,  IT_NAME)          \
         (__XPD_USART_##IT_NAME##IECtrl(HANDLE, DISABLE))
+
+/**
+ * @brief  Resume the specified USART DMA requests.
+ * @param  HANDLE: specifies the USART Handle.
+ * @param  DMA_NAME: specifies the DMA request to resume.
+ *         This parameter can be one of the following values:
+ *            @arg T:       Transmit
+ *            @arg R:       Receive
+ */
+#define         XPD_USART_EnableDMA(HANDLE, DMA_NAME)           \
+    (SPI_REG_BIT((HANDLE), CR3, DMA##DMA_NAME) = 1)
+
+/**
+ * @brief  Halt the specified USART DMA requests.
+ * @param  HANDLE: specifies the USART Handle.
+ * @param  DMA_NAME: specifies the DMA request to halt.
+ *         This parameter can be one of the following values:
+ *            @arg T:       Transmit
+ *            @arg R:       Receive
+ */
+#define         XPD_USART_DisableDMA(HANDLE, DMA_NAME)          \
+    (SPI_REG_BIT((HANDLE), CR3, DMA##DMA_NAME) = 0)
 
 #if (USART_PERIPHERAL_VERSION > 1)
 /* macros for cross-compatibility */
@@ -203,7 +267,7 @@ typedef struct
  *            @arg CTS:     Clear To Send
  *            @arg WU:      Wake Up
  */
-#define         XPD_USART_GetFlag(  HANDLE, FLAG_NAME)      \
+#define         XPD_USART_GetFlag(  HANDLE, FLAG_NAME)          \
     (((HANDLE)->Inst->ISR.w >> USART_ISR_##FLAG_NAME##_Pos) & 1)
 
 /**
@@ -222,9 +286,9 @@ typedef struct
  *            @arg CTS:     Clear To Send
  *            @arg WU:      Wake Up
  */
-#define         XPD_USART_ClearFlag(HANDLE, FLAG_NAME)      \
-    ((USART_ISR_##FLAG_NAME != USART_ISR_RXNE) ?            \
-    ((HANDLE)->Inst->ICR.w = USART_ICR_##FLAG_NAME##CF) :   \
+#define         XPD_USART_ClearFlag(HANDLE, FLAG_NAME)          \
+    ((USART_ISR_##FLAG_NAME != USART_ISR_RXNE) ?                \
+    ((HANDLE)->Inst->ICR.w = USART_ICR_##FLAG_NAME##CF) :       \
     ((HANDLE)->Inst->RQR.w = USART_RQR_RXFRQ))
 #else
 
@@ -244,7 +308,7 @@ typedef struct
  *            @arg LBD:     LIN break detection
  *            @arg CTS:     Clear To Send
  */
-#define         XPD_USART_GetFlag(  HANDLE, FLAG_NAME)      \
+#define         XPD_USART_GetFlag(  HANDLE, FLAG_NAME)          \
     (USART_REG_BIT((HANDLE),SR,FLAG_NAME))
 
 /**
@@ -263,74 +327,39 @@ typedef struct
  *            @arg LBD:     LIN break detection
  *            @arg CTS:     Clear To Send
  */
-#define         XPD_USART_ClearFlag(HANDLE, FLAG_NAME)                              \
-    do { if(USART_SR_##FLAG_NAME##_Pos <= USART_SR_RXNE_Pos)                        \
-       { volatile uint32_t _x_ = (HANDLE)->Inst->SR.w; _x_ = (HANDLE)->Inst->DR; }  \
-       else {(USART_REG_BIT((HANDLE),SR,FLAG_NAME) = 0);} } while(0)
-
-/* Compatibility macros */
-#define         XPD_USART_InversionConfig(HANDLE, INVERSIONS)       ((void)0)
-#define         XPD_USART_OverrunConfig(HANDLE, MODE)               ((void)0)
-#define         XPD_UART_BaudrateModeConfig(HANDLE, MODE)           ((void)0)
+#define         XPD_USART_ClearFlag(HANDLE, FLAG_NAME)          \
+    do { if(USART_SR_##FLAG_NAME##_Pos <= USART_SR_RXNE_Pos)    \
+       { __IO uint32_t _x_ = (HANDLE)->Inst->SR.w;              \
+       _x_ = (HANDLE)->Inst->DR; } else                         \
+       {(USART_REG_BIT((HANDLE),SR,FLAG_NAME) = 0);}} while(0)
 
 #endif /* (USART_PERIPHERAL_VERSION > 1) */
 
-#if defined(USE_XPD_USART_ERROR_DETECT) || defined(USE_XPD_DMA_ERROR_DETECT)
-/**
- * @brief  USART Handle initializer macro
- * @param  INSTANCE: specifies the SPI peripheral instance.
- * @param  INIT_FN: specifies the dependency initialization function to call back.
- * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
- */
-#define         NEW_USART_HANDLE(INSTANCE, INIT_FN, DEINIT_FN)          \
-    {.Inst      = (INSTANCE),                                           \
-     .Callbacks = {(INIT_FN),(DEINIT_FN),NULL,NULL,NULL,NULL,NULL,NULL},\
-     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,                           \
-     .Errors    = USART_ERROR_NONE}
-#else
-/**
- * @brief  USART Handle initializer macro
- * @param  INSTANCE: specifies the SPI peripheral instance.
- * @param  INIT_FN: specifies the dependency initialization function to call back.
- * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
- */
-#define         NEW_USART_HANDLE(INSTANCE, INIT_FN, DEINIT_FN)          \
-    {.Inst      = (INSTANCE),                                           \
-     .Callbacks = {(INIT_FN),(DEINIT_FN),NULL,NULL,NULL,NULL,NULL},     \
-     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl}
-#endif
-
-#ifdef USART_BB
-#define USART_REG_BIT(_HANDLE_, _REG_NAME_, _BIT_NAME_) ((_HANDLE_)->Inst_BB->_REG_NAME_._BIT_NAME_)
-#else
-#define USART_REG_BIT(_HANDLE_, _REG_NAME_, _BIT_NAME_) ((_HANDLE_)->Inst->_REG_NAME_.b._BIT_NAME_)
-#endif /* USART_BB */
-
-#define __XPD_USART_IDLEIECtrl(     HANDLE, NEWSTATE)   \
+#define __XPD_USART_IDLEIECtrl(     HANDLE, NEWSTATE)           \
     (USART_REG_BIT((HANDLE),CR1,IDLEIE) = NEWSTATE)
 
-#define __XPD_USART_RXNEIECtrl(HANDLE, NEWSTATE)        \
+#define __XPD_USART_RXNEIECtrl(HANDLE, NEWSTATE)                \
     (USART_REG_BIT((HANDLE),CR1,RXNEIE) = NEWSTATE)
 
-#define __XPD_USART_TCIECtrl(HANDLE, NEWSTATE)          \
+#define __XPD_USART_TCIECtrl(HANDLE, NEWSTATE)                  \
     (USART_REG_BIT((HANDLE),CR1,TCIE) = NEWSTATE)
 
-#define __XPD_USART_TXEIECtrl(HANDLE, NEWSTATE)         \
+#define __XPD_USART_TXEIECtrl(HANDLE, NEWSTATE)                 \
     (USART_REG_BIT((HANDLE),CR1,TXEIE) = NEWSTATE)
 
-#define __XPD_USART_PEIECtrl(HANDLE, NEWSTATE)          \
+#define __XPD_USART_PEIECtrl(HANDLE, NEWSTATE)                  \
     (USART_REG_BIT((HANDLE),CR1,PEIE) = NEWSTATE)
 
-#define __XPD_USART_LBDIECtrl(HANDLE, NEWSTATE)         \
+#define __XPD_USART_LBDIECtrl(HANDLE, NEWSTATE)                 \
     (USART_REG_BIT((HANDLE),CR2,LBDIE) = NEWSTATE)
 
-#define __XPD_USART_EIECtrl(HANDLE, NEWSTATE)           \
+#define __XPD_USART_EIECtrl(HANDLE, NEWSTATE)                   \
     (USART_REG_BIT((HANDLE),CR3,EIE) = NEWSTATE)
 
-#define __XPD_USART_CTSIECtrl(HANDLE, NEWSTATE)         \
+#define __XPD_USART_CTSIECtrl(HANDLE, NEWSTATE)                 \
     (USART_REG_BIT((HANDLE),CR3,CTSIE) = NEWSTATE)
 
-#define __XPD_USART_WUIECtrl(HANDLE, NEWSTATE)         \
+#define __XPD_USART_WUIECtrl(HANDLE, NEWSTATE)                  \
     (USART_REG_BIT((HANDLE),CR3,WUFIE) = NEWSTATE)
 
 /** @} */

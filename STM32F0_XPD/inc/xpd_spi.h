@@ -143,6 +143,52 @@ typedef struct
 /** @defgroup SPI_Exported_Macros SPI Exported Macros
  * @{ */
 
+#ifdef SPI_BB
+/**
+ * @brief  SPI Handle initializer macro
+ * @param  INSTANCE: specifies the SPI peripheral instance.
+ * @param  INIT_FN: specifies the dependency initialization function to call back.
+ * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
+ */
+#define         NEW_SPI_HANDLE(INSTANCE, INIT_FN, DEINIT_FN)    \
+    {.Inst = (INSTANCE), .Inst_BB = SPI_BB(INSTANCE),           \
+     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,                   \
+     .Callbacks.DepInit   = (INIT_FN),                          \
+     .Callbacks.DepDeinit = (DEINIT_FN)}
+
+/**
+ * @brief SPI register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param REG: specifies the register name.
+ * @param BIT: specifies the register bit name.
+ */
+#define         SPI_REG_BIT(_HANDLE_, _REG_NAME_, _BIT_NAME_)   \
+    ((_HANDLE_)->Inst_BB->_REG_NAME_._BIT_NAME_)
+
+#else
+/**
+ * @brief  SPI Handle initializer macro
+ * @param  INSTANCE: specifies the SPI peripheral instance.
+ * @param  INIT_FN: specifies the dependency initialization function to call back.
+ * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
+ */
+#define         NEW_SPI_HANDLE(INSTANCE, INIT_FN, DEINIT_FN)    \
+    {.Inst = (INSTANCE),                                        \
+     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,                   \
+     .Callbacks.DepInit   = (INIT_FN),                          \
+     .Callbacks.DepDeinit = (DEINIT_FN)}
+
+/**
+ * @brief SPI register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param REG: specifies the register name.
+ * @param BIT: specifies the register bit name.
+ */
+#define         SPI_REG_BIT(_HANDLE_, _REG_NAME_, _BIT_NAME_)   \
+    ((_HANDLE_)->Inst->_REG_NAME_.b._BIT_NAME_)
+
+#endif /* SPI_BB */
+
 /**
  * @brief  Enable the specified SPI interrupt.
  * @param  HANDLE: specifies the SPI Handle.
@@ -152,7 +198,7 @@ typedef struct
  *            @arg RXNE:    Receive not empty
  *            @arg ERR:     Error
  */
-#define         XPD_SPI_EnableIT(HANDLE, IT_NAME)       \
+#define         XPD_SPI_EnableIT(HANDLE, IT_NAME)               \
     (SPI_REG_BIT((HANDLE),CR2,IT_NAME##IE) = 1)
 
 /**
@@ -164,8 +210,30 @@ typedef struct
  *            @arg RXNE:    Receive not empty
  *            @arg ERR:     Error
  */
-#define         XPD_SPI_DisableIT(HANDLE, IT_NAME)      \
+#define         XPD_SPI_DisableIT(HANDLE, IT_NAME)              \
     (SPI_REG_BIT((HANDLE),CR2,IT_NAME##IE) = 0)
+
+/**
+ * @brief  Resume the specified SPI DMA requests.
+ * @param  HANDLE: specifies the SPI Handle.
+ * @param  DMA_NAME: specifies the DMA request to resume.
+ *         This parameter can be one of the following values:
+ *            @arg T:       Transmit
+ *            @arg R:       Receive
+ */
+#define         XPD_SPI_EnableDMA(HANDLE, DMA_NAME)             \
+    (SPI_REG_BIT((HANDLE), CR2, DMA_NAME##XDMAEN) = 1)
+
+/**
+ * @brief  Halt the specified SPI DMA requests.
+ * @param  HANDLE: specifies the SPI Handle.
+ * @param  DMA_NAME: specifies the DMA request to halt.
+ *         This parameter can be one of the following values:
+ *            @arg T:       Transmit
+ *            @arg R:       Receive
+ */
+#define         XPD_SPI_DisableDMA(HANDLE, DMA_NAME)            \
+    (SPI_REG_BIT((HANDLE), CR2, DMA_NAME##XDMAEN) = 0)
 
 /**
  * @brief  Get the specified SPI flag.
@@ -181,7 +249,7 @@ typedef struct
  *            @arg BSY:     Busy
  *            @arg FRE:     TI frame format error
  */
-#define         XPD_SPI_GetFlag(HANDLE, FLAG_NAME)      \
+#define         XPD_SPI_GetFlag(HANDLE, FLAG_NAME)              \
     (SPI_REG_BIT((HANDLE),SR,FLAG_NAME))
 
 /**
@@ -191,39 +259,8 @@ typedef struct
  *         This parameter can be one of the following values:
  *            @arg CRCERR:  CRC error
  */
-#define         XPD_SPI_ClearFlag(HANDLE, FLAG_NAME)    \
+#define         XPD_SPI_ClearFlag(HANDLE, FLAG_NAME)            \
     (SPI_REG_BIT((HANDLE),SR,FLAG_NAME) = 0)
-
-#if defined(USE_XPD_SPI_ERROR_DETECT) || defined(USE_XPD_DMA_ERROR_DETECT)
-/**
- * @brief  SPI Handle initializer macro
- * @param  INSTANCE: specifies the SPI peripheral instance.
- * @param  INIT_FN: specifies the dependency initialization function to call back.
- * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
- */
-#define         NEW_SPI_HANDLE(INSTANCE, INIT_FN, DEINIT_FN)    \
-    {.Inst      = (INSTANCE),                                   \
-     .Callbacks = {(INIT_FN),(DEINIT_FN),NULL,NULL,NULL},       \
-     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,                   \
-     .Errors    = SPI_ERROR_NONE}
-#else
-/**
- * @brief  SPI Handle initializer macro
- * @param  INSTANCE: specifies the SPI peripheral instance.
- * @param  INIT_FN: specifies the dependency initialization function to call back.
- * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
- */
-#define         NEW_SPI_HANDLE(INSTANCE, INIT_FN, DEINIT_FN)    \
-    {.Inst      = (INSTANCE),                                   \
-     .Callbacks = {(INIT_FN),(DEINIT_FN),NULL,NULL},            \
-     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl}
-#endif
-
-#ifdef SPI_BB
-#define SPI_REG_BIT(_HANDLE_, _REG_NAME_, _BIT_NAME_) ((_HANDLE_)->Inst_BB->_REG_NAME_._BIT_NAME_)
-#else
-#define SPI_REG_BIT(_HANDLE_, _REG_NAME_, _BIT_NAME_) ((_HANDLE_)->Inst->_REG_NAME_.b._BIT_NAME_)
-#endif /* SPI_BB */
 
 /** @} */
 

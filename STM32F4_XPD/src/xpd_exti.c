@@ -27,8 +27,6 @@
 XPD_ValueCallbackType XPD_EXTI_Callbacks[] = {
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 };
 
 /** @addtogroup EXTI
@@ -48,13 +46,17 @@ void XPD_EXTI_Init(uint8_t Line, const EXTI_InitType * Config)
     XPD_EXTI_ClockCtrl(ENABLE);
 #endif
 
-    if (Config->Reaction & REACTION_IT)
+    /* GPIO callbacks only */
+    if (Line < 16)
     {
-        XPD_EXTI_Callbacks[Line] = Config->ITCallback;
-    }
-    else
-    {
-        XPD_EXTI_Callbacks[Line] = NULL;
+        if (Config->Reaction & REACTION_IT)
+        {
+            XPD_EXTI_Callbacks[Line] = Config->ITCallback;
+        }
+        else
+        {
+            XPD_EXTI_Callbacks[Line] = NULL;
+        }
     }
 
 #ifdef EXTI_BB

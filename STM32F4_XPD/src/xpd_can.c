@@ -184,10 +184,6 @@ XPD_ReturnType XPD_CAN_Init(CAN_HandleType * hcan, const CAN_InitType * Config)
     /* enable peripheral clock */
     hcan->ClockCtrl(ENABLE);
 
-#ifdef CAN_BB
-    hcan->Inst_BB = CAN_BB(hcan->Inst);
-#endif
-
     /* Dependencies initialization */
     XPD_SAFE_CALLBACK(hcan->Callbacks.DepInit, hcan);
 

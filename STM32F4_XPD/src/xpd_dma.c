@@ -368,16 +368,6 @@ XPD_ReturnType XPD_DMA_PollStatus(DMA_HandleType * hdma, DMA_OperationType Opera
 }
 
 /**
- * @brief Gets the error state of the DMA stream.
- * @param hdma: pointer to the DMA stream handle structure
- * @return Current DMA error state
- */
-DMA_ErrorType XPD_DMA_GetError(DMA_HandleType * hdma)
-{
-    return hdma->Errors;
-}
-
-/**
  * @brief DMA stream transfer interrupt handler that provides handle callbacks.
  * @param hdma: pointer to the DMA stream handle structure
  */

@@ -143,9 +143,23 @@ typedef struct
         .Callbacks.DepInit = (INIT_FN), .Callbacks.DepDeinit = (DEINIT_FN)}
 
 #ifdef USB_BB
+/**
+ * @brief USB register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param REG: specifies the register name.
+ * @param BIT: specifies the register bit name.
+ */
 #define USB_REG_BIT(HANDLE, REG_NAME, BIT_NAME) (USB_BB->REG_NAME.BIT_NAME)
+
 #else
+/**
+ * @brief USB register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param REG: specifies the register name.
+ * @param BIT: specifies the register bit name.
+ */
 #define USB_REG_BIT(HANDLE, REG_NAME, BIT_NAME) (USB->REG_NAME.b.BIT_NAME)
+
 #endif /* USB_BB */
 
 /**

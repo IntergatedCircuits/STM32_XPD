@@ -942,26 +942,6 @@ void XPD_USB_IRQHandler(USB_HandleType * husb)
         XPD_USB_ClearFlag(husb, SOF);
         XPD_SAFE_CALLBACK(husb->Callbacks.SOF, husb->User);
     }
-
-    /* Handle PMA buffer overflow (collision) */
-    if ((istr & USB_ISTR_PMAOVR) != 0)
-    {
-        XPD_USB_ClearFlag(husb, PMAOVR);
-        /* Isochronous OUT data is processed even with overrun error */
-    }
-
-    /* Handle packet CRC error */
-    if ((istr & USB_ISTR_ERR) != 0)
-    {
-        XPD_USB_ClearFlag(husb, ERR);
-        /* Isochronous OUT data is processed even with CRC error */
-    }
-
-    /* Expected SOF is set in every 1ms */
-    if ((istr & USB_ISTR_ESOF) != 0)
-    {
-        XPD_USB_ClearFlag(husb, ESOF);
-    }
 }
 
 /**

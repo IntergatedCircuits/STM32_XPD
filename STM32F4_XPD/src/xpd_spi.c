@@ -224,10 +224,6 @@ XPD_ReturnType XPD_SPI_Init(SPI_HandleType * hspi, const SPI_InitType * Config)
     /* enable clock */
     XPD_SAFE_CALLBACK(hspi->ClockCtrl, ENABLE);
 
-#ifdef SPI_BB
-    hspi->Inst_BB = SPI_BB(hspi->Inst);
-#endif
-
     XPD_SPI_Disable(hspi);
 
     /* Set bits related to Channel and NSS behavior */
@@ -1131,14 +1127,32 @@ void XPD_SPI_Stop_DMA(SPI_HandleType * hspi)
     /* Transmit DMA disable */
     if (SPI_REG_BIT(hspi, CR2, TXDMAEN) != 0)
     {
+        uint16_t remaining;
         SPI_REG_BIT(hspi, CR2, TXDMAEN) = 0;
+
+        /* Read remaining transfer count */
+        remaining = XPD_DMA_GetStatus(hspi->DMA.Transmit);
+
+        /* Update transfer context */
+        hspi->TxStream.buffer += (hspi->TxStream.length - remaining)
+                * hspi->TxStream.size;
+        hspi->TxStream.length = remaining;
 
         XPD_DMA_Stop_IT(hspi->DMA.Transmit);
     }
     /* Receive DMA disable */
     if (SPI_REG_BIT(hspi, CR2, RXDMAEN) != 0)
     {
+        uint16_t remaining;
         SPI_REG_BIT(hspi, CR2, RXDMAEN) = 0;
+
+        /* Read remaining transfer count */
+        remaining = XPD_DMA_GetStatus(hspi->DMA.Receive);
+
+        /* Update transfer context */
+        hspi->RxStream.buffer += (hspi->RxStream.length - remaining)
+                * hspi->RxStream.size;
+        hspi->RxStream.length = remaining;
 
         XPD_DMA_Stop_IT(hspi->DMA.Receive);
     }

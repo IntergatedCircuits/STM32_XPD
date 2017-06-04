@@ -375,10 +375,6 @@ XPD_ReturnType XPD_ADC_Init(ADC_HandleType * hadc, const ADC_InitType * Config)
     /* enable clock */
     adc_clockCtrl(hadc, ENABLE);
 
-#ifdef ADC_BB
-    hadc->Inst_BB = ADC_BB(hadc->Inst);
-#endif
-
     /* Initialize ADC API internal variables */
     hadc->InjectedSetup.ChannelCount = 0;
     hadc->InjectedSetup.ContextQueue = 0;

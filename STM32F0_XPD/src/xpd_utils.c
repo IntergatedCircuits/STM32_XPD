@@ -238,7 +238,7 @@ void XPD_Deinit(void)
 #if defined(AHB2PERIPH_BASE)
     XPD_RCC_ResetAHB2();
 #endif
-#if defined(AHB3PERIPH_BASE)
+#if defined(AHB3PERIPH_BASE) || defined(RCC_AHB3RSTR_FSMCRST) || defined(RCC_AHB3RSTR_FMCRST)
     XPD_RCC_ResetAHB3();
 #endif
 #endif

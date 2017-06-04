@@ -138,6 +138,27 @@ typedef struct
 /** @defgroup USB_Exported_Macros USB Exported Macros
  * @{ */
 
+#ifdef USB_OTG_BB
+/**
+ * @brief  USB Handle initializer macro
+ * @param  INSTANCE: specifies the USB peripheral instance.
+ * @param  INIT_FN: specifies the dependency initialization function to call back.
+ * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
+ */
+#define         NEW_USB_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)          \
+     {  .Inst = (INSTANCE), .LinkState = USB_LPM_L3,                \
+        .Inst_BB = USB_OTG_BB(INSTANCE),                            \
+        .Callbacks.DepInit = (INIT_FN), .Callbacks.DepDeinit = (DEINIT_FN)}
+
+/**
+ * @brief USB register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param REG: specifies the register name.
+ * @param BIT: specifies the register bit name.
+ */
+#define USB_REG_BIT(HANDLE, REG, BIT) ((HANDLE)->Inst_BB->REG.BIT)
+
+#else
 /**
  * @brief  USB Handle initializer macro
  * @param  INSTANCE: specifies the USB peripheral instance.
@@ -148,10 +169,14 @@ typedef struct
      {  .Inst = (INSTANCE), .LinkState = USB_LPM_L3,                \
         .Callbacks.DepInit = (INIT_FN), .Callbacks.DepDeinit = (DEINIT_FN)}
 
-#ifdef USB_OTG_BB
-#define USB_REG_BIT(HANDLE, REG, BIT) ((HANDLE)->Inst_BB->REG.BIT)
-#else
+/**
+ * @brief USB register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param REG: specifies the register name.
+ * @param BIT: specifies the register bit name.
+ */
 #define USB_REG_BIT(HANDLE, REG, BIT) ((HANDLE)->Inst->REG.b.BIT)
+
 #endif /* USB_OTG_BB */
 
 /**

@@ -174,10 +174,6 @@ XPD_ReturnType XPD_ADC_Init(ADC_HandleType * hadc, const ADC_InitType * Config)
     /* enable clock */
     XPD_SAFE_CALLBACK(hadc->ClockCtrl, ENABLE);
 
-#ifdef ADC_BB
-    hadc->Inst_BB = ADC_BB(hadc->Inst);
-#endif
-
     ADC_REG_BIT(hadc,CR1,SCAN)  = Config->ScanMode;
     ADC_REG_BIT(hadc,CR2,ALIGN) = Config->LeftAlignment;
     ADC_REG_BIT(hadc,CR2,CONT)  = Config->ContinuousMode;

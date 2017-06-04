@@ -130,6 +130,7 @@ typedef struct
 #endif
     uint8_t                     DeviceAddress;                  /*!< USB Address */
     FunctionalState             LowPowerMode;                   /*!< Low power mode activation */
+    USB_SpeedType               Speed;                          /*!< Currently available speed */
     USB_LinkStateType           LinkState;                      /*!< Device link status */
 #if (USB_DATA_WORD_ALIGNED == 1) && defined(USB_OTG_GAHBCFG_DMAEN)
     FunctionalState             DMA;                            /*!< DMA activation */
@@ -142,6 +143,27 @@ typedef struct
  * @{ */
 
 #if   defined(USB_OTG_FS)
+#ifdef USB_OTG_BB
+/**
+ * @brief  USB Handle initializer macro
+ * @param  INSTANCE: specifies the USB peripheral instance.
+ * @param  INIT_FN: specifies the dependency initialization function to call back.
+ * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
+ */
+#define         NEW_USB_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)          \
+     {  .Inst = (INSTANCE), .LinkState = USB_LPM_L3,                \
+        .Inst_BB = USB_OTG_BB(INSTANCE),                            \
+        .Callbacks.DepInit = (INIT_FN), .Callbacks.DepDeinit = (DEINIT_FN)}
+
+/**
+ * @brief USB register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param REG: specifies the register name.
+ * @param BIT: specifies the register bit name.
+ */
+#define USB_REG_BIT(HANDLE, REG, BIT) ((HANDLE)->Inst_BB->REG.BIT)
+
+#else
 /**
  * @brief  USB Handle initializer macro
  * @param  INSTANCE: specifies the USB peripheral instance.
@@ -152,10 +174,14 @@ typedef struct
      {  .Inst = (INSTANCE), .LinkState = USB_LPM_L3,                \
         .Callbacks.DepInit = (INIT_FN), .Callbacks.DepDeinit = (DEINIT_FN)}
 
-#ifdef USB_OTG_BB
-#define USB_REG_BIT(HANDLE, REG, BIT) ((HANDLE)->Inst_BB->REG.BIT)
-#else
+/**
+ * @brief USB register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param REG: specifies the register name.
+ * @param BIT: specifies the register bit name.
+ */
 #define USB_REG_BIT(HANDLE, REG, BIT) ((HANDLE)->Inst->REG.b.BIT)
+
 #endif /* USB_OTG_BB */
 
 /**
@@ -199,7 +225,6 @@ typedef struct
 #define         XPD_USB_BESL(HANDLE)                ((HANDLE)->Inst->GLPMCFG.b.BESL)
 
 #elif defined(USB)
-
 /**
  * @brief  USB Handle initializer macro
  * @param  INSTANCE: specifies the USB peripheral instance.
@@ -211,9 +236,23 @@ typedef struct
         .Callbacks.DepInit = (INIT_FN), .Callbacks.DepDeinit = (DEINIT_FN)}
 
 #ifdef USB_BB
+/**
+ * @brief USB register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param REG: specifies the register name.
+ * @param BIT: specifies the register bit name.
+ */
 #define USB_REG_BIT(HANDLE, REG_NAME, BIT_NAME) (USB_BB->REG_NAME.BIT_NAME)
+
 #else
+/**
+ * @brief USB register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param REG: specifies the register name.
+ * @param BIT: specifies the register bit name.
+ */
 #define USB_REG_BIT(HANDLE, REG_NAME, BIT_NAME) (USB->REG_NAME.b.BIT_NAME)
+
 #endif /* USB_BB */
 
 /**

@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    xpd_tim.h
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2016-04-30
+  * @version V0.2
+  * @date    2016-05-28
   * @brief   STM32 eXtensible Peripheral Drivers Timer Module
   *
   *  This file is part of STM32_XPD.
@@ -95,8 +95,8 @@ typedef struct
         XPD_HandleCallbackType Update;       /*!< Timer update callback */
         XPD_HandleCallbackType ChannelEvent; /*!< Channel compare/capture callback */
         XPD_HandleCallbackType Trigger;      /*!< Trigger callback */
-        XPD_HandleCallbackType Break;        /*!< Break callback */
         XPD_HandleCallbackType Commutation;  /*!< Commutation callback */
+        XPD_HandleCallbackType Break;        /*!< Break callback */
 #ifdef USE_XPD_DMA_ERROR_DETECT
         XPD_HandleCallbackType Error;        /*!< DMA error callback */
 #endif
@@ -104,8 +104,7 @@ typedef struct
     struct {
         DMA_HandleType * Update;             /*!< DMA handle for update transfer */
         DMA_HandleType * Channel[4];         /*!< DMA handles for channel transfers */
-        DMA_HandleType * Commutation;        /*!< DMA handle for commutation transfer */
-        DMA_HandleType * Trigger;            /*!< DMA handle for trigger transfer */
+        DMA_HandleType * Burst;              /*!< DMA handle for burst transfers */
     }DMA;                                    /*   DMA handle references */
     volatile TIM_ChannelType ActiveChannel;  /*!< The currently active timer channel */
 }TIM_HandleType;
@@ -115,17 +114,28 @@ typedef struct
 /** @defgroup TIM_Common_Exported_Macros TIM Common Exported Macros
  * @{ */
 
-#ifdef USE_XPD_DMA_ERROR_DETECT
+#ifdef TIM_BB
 /**
  * @brief  TIM Handle initializer macro
  * @param  INSTANCE: specifies the TIM peripheral instance.
  * @param  INIT_FN: specifies the dependency initialization function to call back.
  * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
  */
-#define         NEW_TIM_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)               \
-    {.Inst      = (INSTANCE),                                            \
-     .Callbacks = {(INIT_FN),(DEINIT_FN),NULL,NULL,NULL,NULL,NULL,NULL}, \
-     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl}
+#define         NEW_TIM_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)  \
+    {.Inst = (INSTANCE), .Inst_BB = TIM_BB(INSTANCE),       \
+     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,               \
+     .Callbacks.DepInit   = (INIT_FN),                      \
+     .Callbacks.DepDeinit = (DEINIT_FN)}
+
+/**
+ * @brief TIM register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param REG: specifies the register name.
+ * @param BIT: specifies the register bit name.
+ */
+#define         TIM_REG_BIT(HANDLE, REG_NAME, BIT_NAME)     \
+    ((HANDLE)->Inst_BB->REG_NAME.BIT_NAME)
+
 #else
 /**
  * @brief  TIM Handle initializer macro
@@ -133,11 +143,22 @@ typedef struct
  * @param  INIT_FN: specifies the dependency initialization function to call back.
  * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
  */
-#define         NEW_TIM_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)               \
-    {.Inst      = (INSTANCE),                                            \
-     .Callbacks = {(INIT_FN),(DEINIT_FN),NULL,NULL,NULL,NULL,NULL},      \
-     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl}
-#endif
+#define         NEW_TIM_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)  \
+    {.Inst = (INSTANCE),                                    \
+     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,               \
+     .Callbacks.DepInit   = (INIT_FN),                      \
+     .Callbacks.DepDeinit = (DEINIT_FN)}
+
+/**
+ * @brief TIM register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param REG: specifies the register name.
+ * @param BIT: specifies the register bit name.
+ */
+#define         TIM_REG_BIT(HANDLE, REG_NAME, BIT_NAME)     \
+    ((HANDLE)->Inst->REG_NAME.b.BIT_NAME)
+
+#endif /* TIM_BB */
 
 /**
  * @brief  Enable the specified TIM interrupt.
@@ -153,7 +174,7 @@ typedef struct
  *            @arg T:       Trigger
  *            @arg B:       Break
  */
-#define         XPD_TIM_EnableIT(HANDLE, IT_NAME)   \
+#define         XPD_TIM_EnableIT(HANDLE, IT_NAME)           \
     (TIM_REG_BIT((HANDLE),DIER,IT_NAME##IE) = 1)
 
 /**
@@ -170,8 +191,40 @@ typedef struct
  *            @arg T:       Trigger
  *            @arg B:       Break
  */
-#define         XPD_TIM_DisableIT(HANDLE, IT_NAME)  \
+#define         XPD_TIM_DisableIT(HANDLE, IT_NAME)          \
     (TIM_REG_BIT((HANDLE),DIER,IT_NAME##IE) = 0)
+
+/**
+ * @brief  Enable the specified TIM DMA request.
+ * @param  HANDLE: specifies the TIM Handle.
+ * @param  DMA_NAME: specifies the DMA request to enable.
+ *         This parameter can be one of the following values:
+ *            @arg U:       Update
+ *            @arg CC1:     Capture/Compare channel 1
+ *            @arg CC2:     Capture/Compare channel 2
+ *            @arg CC3:     Capture/Compare channel 3
+ *            @arg CC4:     Capture/Compare channel 4
+ *            @arg COM:     Commutation
+ *            @arg T:       Trigger
+ */
+#define         XPD_TIM_EnableDMA(HANDLE, DMA_NAME)         \
+    (TIM_REG_BIT((HANDLE),DIER,DMA_NAME##DE) = 1)
+
+/**
+ * @brief  Disable the specified TIM DMA request.
+ * @param  HANDLE: specifies the TIM Handle.
+ * @param  DMA_NAME: specifies the DMA request to enable.
+ *         This parameter can be one of the following values:
+ *            @arg U:       Update
+ *            @arg CC1:     Capture/Compare channel 1
+ *            @arg CC2:     Capture/Compare channel 2
+ *            @arg CC3:     Capture/Compare channel 3
+ *            @arg CC4:     Capture/Compare channel 4
+ *            @arg COM:     Commutation
+ *            @arg T:       Trigger
+ */
+#define         XPD_TIM_DisableDMA(HANDLE, DMA_NAME)        \
+    (TIM_REG_BIT((HANDLE),DIER,DMA_NAME##DE) = 0)
 
 /**
  * @brief  Get the specified TIM flag.
@@ -187,7 +240,7 @@ typedef struct
  *            @arg T:       Trigger
  *            @arg B:       Break
  */
-#define         XPD_TIM_GetFlag(HANDLE, FLAG_NAME)  \
+#define         XPD_TIM_GetFlag(HANDLE, FLAG_NAME)          \
     (TIM_REG_BIT((HANDLE),SR,FLAG_NAME##IF))
 
 /**
@@ -204,7 +257,7 @@ typedef struct
  *            @arg T:       Trigger
  *            @arg B:       Break
  */
-#define         XPD_TIM_ClearFlag(HANDLE,FLAG_NAME) \
+#define         XPD_TIM_ClearFlag(HANDLE,FLAG_NAME)         \
     (TIM_REG_BIT((HANDLE),SR,FLAG_NAME##IF) = 0)
 
 /**
@@ -221,64 +274,108 @@ typedef struct
  *            @arg T:       Trigger
  *            @arg B:       Break
  */
-#define         XPD_TIM_GenerateEvent(HANDLE,FLAG_NAME) \
+#define         XPD_TIM_GenerateEvent(HANDLE,FLAG_NAME)     \
     (TIM_REG_BIT((HANDLE),EGR,FLAG_NAME##G) = 1)
 
 /**
- * @brief Gets the TIM counter direction.
+ * @brief Gets or sets the TIM counter direction.
  * @param htim: pointer to the TIM handle structure
  * @return The current counter direction (up/down)
  */
-#define         XPD_TIM_Counter_Direction(HANDLE)       \
+#define         XPD_TIM_Counter_Direction(HANDLE)           \
     (TIM_REG_BIT((HANDLE), CR1, DIR))
 
 /**
- * @brief Gets the current TIM counter value.
+ * @brief Gets or sets the current TIM counter value.
  * @param htim: pointer to the TIM handle structure
  * @return The value of the counter
  */
-#define         XPD_TIM_Counter_Value(HANDLE)           \
+#define         XPD_TIM_Counter_Value(HANDLE)               \
     ((HANDLE)->Inst->CNT)
 
 /**
- * @brief Gets the current TIM reload value.
+ * @brief Gets or sets the current TIM reload value.
  * @param htim: pointer to the TIM handle structure
  * @return The value of the reload register
  */
-#define         XPD_TIM_Counter_Reload(HANDLE)          \
+#define         XPD_TIM_Counter_Reload(HANDLE)              \
     ((HANDLE)->Inst->ARR)
 
 /**
- * @brief Gets the current TIM repetition counter value.
+ * @brief Gets or sets the current TIM repetition counter value.
  * @param htim: pointer to the TIM handle structure
  * @return The value of the repetition counter
  */
-#define         XPD_TIM_Counter_Repetition(HANDLE)      \
+#define         XPD_TIM_Counter_Repetition(HANDLE)          \
     ((HANDLE)->Inst->RCR)
 
+/**
+ * @brief  Enable the specified TIM Channel interrupt.
+ * @param  HANDLE: specifies the TIM Handle.
+ * @param  CH: Number of TIM channel interrupt to enable.
+ */
+#define         XPD_TIM_Channel_EnableIT(HANDLE, CH)        \
+    SET_BIT((HANDLE)->Inst->DIER.w, TIM_DIER_CC1IE << (CH))
 
-#define         XPD_TIM_Channel_GetFlag(HANDLE, CH)  \
+/**
+ * @brief  Disable the specified TIM Channel interrupt.
+ * @param  HANDLE: specifies the TIM Handle.
+ * @param  CH: Number of TIM channel interrupt to disable.
+ */
+#define         XPD_TIM_Channel_DisableIT(HANDLE, CH)       \
+    CLEAR_BIT((HANDLE)->Inst->DIER.w, TIM_DIER_CC1IE << (CH))
+
+/**
+ * @brief  Enable the specified TIM Channel DMA transfer requests.
+ * @param  HANDLE: specifies the TIM Handle.
+ * @param  CH: Number of TIM channel DMA requests to enable.
+ */
+#define         XPD_TIM_Channel_EnableDMA(HANDLE, CH)       \
+    SET_BIT((HANDLE)->Inst->DIER.w, TIM_DIER_CC1DE << (CH))
+
+/**
+ * @brief  Disable the specified TIM Channel DMA transfer requests.
+ * @param  HANDLE: specifies the TIM Handle.
+ * @param  CH: Number of TIM channel DMA requests to disable.
+ */
+#define         XPD_TIM_Channel_DisableDMA(HANDLE, CH)      \
+    CLEAR_BIT((HANDLE)->Inst->DIER.w, TIM_DIER_CC1DE << (CH))
+
+/**
+ * @brief  Get the specified TIM channel flag.
+ * @param  HANDLE: specifies the TIM Handle.
+ * @param  CH: Number of TIM channel flag to return.
+ */
+#define         XPD_TIM_Channel_GetFlag(HANDLE, CH)         \
     ((HANDLE)->Inst->SR.w & (TIM_SR_CC1IF << (CH)))
 
-#define         XPD_TIM_Channel_ClearFlag(HANDLE, CH)\
-    SET_BIT((HANDLE)->Inst->SR.w,(TIM_SR_CC1IF << (CH)))
+/**
+ * @brief  Clear the specified TIM channel flag.
+ * @param  HANDLE: specifies the TIM Handle.
+ * @param  CH: Number of TIM channel flag to clear.
+ */
+#define         XPD_TIM_Channel_ClearFlag(HANDLE, CH)       \
+    CLEAR_BIT((HANDLE)->Inst->SR.w, TIM_SR_CC1IF << (CH))
 
-#define         XPD_TIM_Channel_EnableIT(HANDLE, CH) \
-    SET_BIT((HANDLE)->Inst->DIER.w,(TIM_DIER_CC1IE << (CH)))
-
-#define         XPD_TIM_Channel_DisableIT(HANDLE, CH)\
-    CLEAR_BIT((HANDLE)->Inst->DIER.w,(TIM_DIER_CC1IE << (CH)))
-
-#define         XPD_TIM_Channel_EnableDMA(HANDLE, CH)\
-    SET_BIT((HANDLE)->Inst->DIER.w,(TIM_DIER_CC1DE << (CH)))
-
-#define         XPD_TIM_Channel_DisableDMA(HANDLE, CH)\
-    CLEAR_BIT((HANDLE)->Inst->DIER.w,(TIM_DIER_CC1DE << (CH)))
-
-#ifdef TIM_BB
-#define TIM_REG_BIT(HANDLE, REG_NAME, BIT_NAME) ((HANDLE)->Inst_BB->REG_NAME.BIT_NAME)
+#if TIM_SUPPORTED_CHANNEL_COUNT > 5
+/**
+ * @brief  Gets or sets the current TIM channel value.
+ * @param  HANDLE: specifies the TIM Handle.
+ * @param  CH: Number of TIM channel.
+ * @return The value of the channel.
+ */
+#define         XPD_TIM_Channel_Value(HANDLE, CH)           \
+    ((&(HANDLE)->Inst->CCR1)[((CH) < TIM_CHANNEL_5)         \
+                            ? (CH) : ((CH) + 5)])
 #else
-#define TIM_REG_BIT(HANDLE, REG_NAME, BIT_NAME) ((HANDLE)->Inst->REG_NAME.b.BIT_NAME)
+/**
+ * @brief  Gets or sets the current TIM channel value.
+ * @param  HANDLE: specifies the TIM Handle.
+ * @param  CH: Number of TIM channel.
+ * @return The value of the channel.
+ */
+#define         XPD_TIM_Channel_Value(HANDLE, CH)           \
+    ((&(HANDLE)->Inst->CCR1)[ CH ]))
 #endif
 
 /** @} */
@@ -288,28 +385,158 @@ typedef struct
 XPD_ReturnType  XPD_TIM_Init                (TIM_HandleType * htim, const TIM_Counter_InitType * Config);
 XPD_ReturnType  XPD_TIM_Deinit              (TIM_HandleType * htim);
 
-void            XPD_TIM_Counter_Start       (TIM_HandleType * htim);
-void            XPD_TIM_Counter_Stop        (TIM_HandleType * htim);
 void            XPD_TIM_Counter_Start_IT    (TIM_HandleType * htim);
 void            XPD_TIM_Counter_Stop_IT     (TIM_HandleType * htim);
 XPD_ReturnType  XPD_TIM_Counter_Start_DMA   (TIM_HandleType * htim, void * Address, uint16_t Length);
 void            XPD_TIM_Counter_Stop_DMA    (TIM_HandleType * htim);
 
-TIM_ChannelType XPD_TIM_Channel_GetActive   (TIM_HandleType * htim);
-
-void            XPD_TIM_Channel_Enable      (TIM_HandleType * htim, TIM_ChannelType Channel);
-void            XPD_TIM_Channel_Disable     (TIM_HandleType * htim, TIM_ChannelType Channel);
-void            XPD_TIM_Channel_SetPulse    (TIM_HandleType * htim, TIM_ChannelType Channel, uint32_t Pulse);
-uint32_t        XPD_TIM_Channel_GetPulse    (TIM_HandleType * htim, TIM_ChannelType Channel);
-
-void            XPD_TIM_CompChannel_Enable  (TIM_HandleType * htim, TIM_ChannelType Channel);
-void            XPD_TIM_CompChannel_Disable (TIM_HandleType * htim, TIM_ChannelType Channel);
+void            XPD_TIM_Channel_Start       (TIM_HandleType * htim, TIM_ChannelType Channel);
+void            XPD_TIM_Channel_Stop        (TIM_HandleType * htim, TIM_ChannelType Channel);
+void            XPD_TIM_Channel_Start_IT    (TIM_HandleType * htim, TIM_ChannelType Channel);
+void            XPD_TIM_Channel_Stop_IT     (TIM_HandleType * htim, TIM_ChannelType Channel);
+XPD_ReturnType  XPD_TIM_Channel_Start_DMA   (TIM_HandleType * htim, TIM_ChannelType Channel,
+                                             void * Address, uint16_t Length);
+void            XPD_TIM_Channel_Stop_DMA    (TIM_HandleType * htim, TIM_ChannelType Channel);
 
 void            XPD_TIM_UP_IRQHandler       (TIM_HandleType * htim);
 void            XPD_TIM_CC_IRQHandler       (TIM_HandleType * htim);
 void            XPD_TIM_TRG_COM_IRQHandler  (TIM_HandleType * htim);
 void            XPD_TIM_BRK_IRQHandler      (TIM_HandleType * htim);
 void            XPD_TIM_IRQHandler          (TIM_HandleType * htim);
+
+/**
+ * @brief Enables the TIM counter.
+ * @param htim: pointer to the TIM handle structure
+ */
+__STATIC_INLINE void XPD_TIM_Counter_Start(TIM_HandleType * htim)
+{
+    TIM_REG_BIT(htim,CR1,CEN) = 1;
+}
+
+/**
+ * @brief Disables the TIM counter.
+ * @param htim: pointer to the TIM handle structure
+ */
+__STATIC_INLINE void XPD_TIM_Counter_Stop(TIM_HandleType * htim)
+{
+    TIM_REG_BIT(htim,CR1,CEN) = 0;
+}
+
+/**
+ * @brief Enables the selected capture/compare channel.
+ * @param htim: pointer to the TIM handle structure
+ * @param Channel: the channel to enable
+ */
+__STATIC_INLINE void XPD_TIM_Channel_Enable(TIM_HandleType * htim, TIM_ChannelType Channel)
+{
+#ifdef TIM_BB
+    *(&htim->Inst_BB->CCER.CC1E + (4 * Channel)) = 1;
+#else
+    SET_BIT(htim->Inst->CCER.w, TIM_CCER_CC1E << (4 * Channel));
+#endif
+}
+
+/**
+ * @brief Disables the selected capture/compare channel.
+ * @param htim: pointer to the TIM handle structure
+ * @param Channel: the channel to disable
+ */
+__STATIC_INLINE void XPD_TIM_Channel_Disable(TIM_HandleType * htim, TIM_ChannelType Channel)
+{
+#ifdef TIM_BB
+    *(&htim->Inst_BB->CCER.CC1E + (4 * Channel)) = 0;
+#else
+    CLEAR_BIT(htim->Inst->CCER.w, TIM_CCER_CC1E << (4 * Channel));
+#endif
+}
+
+/**
+ * @brief Enables the selected complementary capture/compare channel.
+ * @param htim: pointer to the TIM handle structure
+ * @param Channel: the complementary channel to enable
+ */
+__STATIC_INLINE void XPD_TIM_CompChannel_Enable(TIM_HandleType * htim, TIM_ChannelType Channel)
+{
+#ifdef TIM_BB
+    *(&htim->Inst_BB->CCER.CC1NE + (4 * Channel)) = 1;
+#else
+    SET_BIT(htim->Inst->CCER.w, TIM_CCER_CC1NE << (4 * Channel));
+#endif
+}
+
+/**
+ * @brief Disables the selected complementary capture/compare channel.
+ * @param htim: pointer to the TIM handle structure
+ * @param Channel: the complementary channel to disable
+ */
+__STATIC_INLINE void XPD_TIM_CompChannel_Disable(TIM_HandleType * htim, TIM_ChannelType Channel)
+{
+#ifdef TIM_BB
+    *(&htim->Inst_BB->CCER.CC1NE + (4 * Channel)) = 0;
+#else
+    CLEAR_BIT(htim->Inst->CCER.w, TIM_CCER_CC1NE << (4 * Channel));
+#endif
+}
+
+/** @} */
+
+/** @} */
+
+/** @defgroup TIM_Burst TIM Burst DMA Transfer Mode
+ * @{ */
+
+/** @defgroup TIM_Burst_Exported_Types TIM Burst DMA Exported Types
+ * @{ */
+
+/** @brief TIM burst DMA selection */
+typedef enum
+{
+    TIM_BURSTSOURCE_UPDATE    = 0, /*!< TIM counter value updated event */
+    TIM_BURSTSOURCE_CHANNEL_1 = 1, /*!< TIM Capture/Compare channel 1 event */
+    TIM_BURSTSOURCE_CHANNEL_2 = 2, /*!< TIM Capture/Compare channel 2 event */
+    TIM_BURSTSOURCE_CHANNEL_3 = 3, /*!< TIM Capture/Compare channel 3 event */
+    TIM_BURSTSOURCE_CHANNEL_4 = 4, /*!< TIM Capture/Compare channel 4 event */
+    TIM_BURSTSOURCE_COM       = 5, /*!< TIM Capture/Compare control update event */
+    TIM_BURSTSOURCE_TRIGGER   = 6, /*!< TIM Trigger event */
+}TIM_BurstSourceType;
+
+/** @brief TIM burst DMA register start indexes */
+typedef enum
+{
+    TIM_CR1_REG_INDEX = 0,
+    TIM_CR2_REG_INDEX,
+    TIM_SMCR_REG_INDEX,
+    TIM_DIER_REG_INDEX,
+    TIM_SR_REG_INDEX,
+    TIM_CCMR1_REG_INDEX,
+    TIM_CCMR2_REG_INDEX,
+    TIM_CCER_REG_INDEX,
+    TIM_CNT_REG_INDEX,
+    TIM_PSC_REG_INDEX,
+    TIM_ARR_REG_INDEX,
+    TIM_RCR_REG_INDEX,
+    TIM_CCR1_REG_INDEX,
+    TIM_CCR2_REG_INDEX,
+    TIM_CCR3_REG_INDEX,
+    TIM_CCR4_REG_INDEX,
+    TIM_BDTR_REG_INDEX,
+    TIM_DCR_REG_INDEX,
+}TIM_Burst_RegIndexType;
+
+/** @brief TIM DMA burst setup structure */
+typedef struct
+{
+    TIM_Burst_RegIndexType RegIndex; /*!< TIM register offset starting from the timer base */
+    TIM_BurstSourceType    Source;   /*!< TIM burst DMA and trigger source */
+}TIM_Burst_InitType;
+
+/** @} */
+
+/** @addtogroup TIM_Burst_Exported_Functions
+ * @{ */
+XPD_ReturnType  XPD_TIM_Burst_Start_DMA     (TIM_HandleType * htim, const TIM_Burst_InitType * Config,
+                                             void * Address, uint16_t Length);
+void            XPD_TIM_Burst_Stop_DMA      (TIM_HandleType * htim, TIM_BurstSourceType Source);
 /** @} */
 
 /** @} */
@@ -344,74 +571,173 @@ typedef enum
 /** @brief TIM output channel setup structure */
 typedef struct
 {
-    TIM_Output_ModeType Output;      /*!< Output channel mode
-                                          @note Cannot be modified at LockLevel {3} */
-    struct {
-        ActiveLevelType ActiveLevel; /*!< Output channel active level
-                                          @note Cannot be modified at LockLevel {2, 3} */
-        FlagStatus      IdleState;   /*!< Output channel idle state
-                                          @note Cannot be modified at LockLevel {1, 2, 3} */
-    } Channel;
-    struct {
-        ActiveLevelType ActiveLevel; /*!< Complementary output channel active level
-                                          @note Cannot be modified at LockLevel {2, 3} */
-        FlagStatus      IdleState;   /*!< Complementary output channel idle state
-                                          @note Cannot be modified at LockLevel {1, 2, 3} */
-    } CompChannel;
-} TIM_Output_InitType;
+    TIM_Output_ModeType Mode;            /*!< Output channel mode */
+    ActiveLevelType     Polarity;        /*!< Output channel active level */
+    FlagStatus          IdleState;       /*!< Output channel idle state */
+    ActiveLevelType     CompPolarity;    /*!< Complementary output channel active level */
+    FlagStatus          CompIdleState;   /*!< Complementary output channel idle state */
+}TIM_Output_InitType;
 
 /** @brief TIM Main Output drive setup structure */
 typedef struct
 {
-    uint8_t         LockLevel;       /*!< [0 .. 3] Depending on value, locks selected configuration bits
-                                          @note Can only be set once after each reset */
-    FunctionalState AutomaticOutput; /*!< Automatic output (MOE is set by software or update event)
-                                          @note Cannot be modified from LockLevel 1 */
-    FunctionalState IdleOffState;    /*!< Off-state selection for Idle mode
-                                          @note Cannot be modified from LockLevel 2 */
-    FunctionalState RunOffState;     /*!< Off-state selection for Run mode
-                                          @note Cannot be modified from LockLevel 2 */
-    struct {
-        FunctionalState State;       /*!< Break function state
-                                          @note Cannot be modified from LockLevel 1 */
-        ActiveLevelType Polarity;    /*!< Break input polarity
-                                          @note Cannot be modified from LockLevel 1 */
-#ifdef TIM_BDTR_BKF
-        uint8_t         Filter;      /*!< Break input capture filter
-                                          @note Cannot be modified from LockLevel 1 */
-#endif
-    }Break;
-#ifdef TIM_BDTR_BK2E
-    struct {
-        FunctionalState State;       /*!< Break2 function state
-                                          @note Cannot be modified from LockLevel 1 */
-        ActiveLevelType Polarity;    /*!< Break2 input polarity
-                                          @note Cannot be modified from LockLevel 1 */
-        uint8_t         Filter;      /*!< Break2 input capture filter
-                                          @note Cannot be modified from LockLevel 1 */
-    }Break2;
-#endif
+    uint16_t        DeadCounts;      /*!< The dead time between the complementary outputs in deadtime clock counts */
+    FunctionalState AutomaticOutput; /*!< Automatic output (MOE is set by software or update event) */
+    FunctionalState IdleOffState;    /*!< Off-state selection for Idle mode */
+    FunctionalState RunOffState;     /*!< Off-state selection for Run mode */
 }TIM_Output_DriveType;
+
+/** @brief TIM Break setup structure */
+typedef struct
+{
+    FunctionalState            State;    /*!< Break function state */
+    ActiveLevelType            Polarity; /*!< Break input polarity */
+#ifdef TIM_BDTR_BKF
+    uint8_t                    Filter;   /*!< Break input capture filter */
+#endif
+}TIM_Output_BreakInitType;
+
+/** @brief TIM OCxREF clear configuration selection */
+typedef enum
+{
+    TIM_OCREFCLEAR_SOURCE_NONE      = 0, /*!< OCxREF clear disabled */
+    TIM_OCREFCLEAR_SOURCE_ETR       = 1, /*!< OCxREF cleared by ETRF high level */
+#ifdef TIM_SMCR_OCCS
+    TIM_OCREFCLEAR_SOURCE_OCREF_CLR = 2, /*!< OCxREF cleared by OCREF_CLR input high level */
+#endif
+}TIM_OCRefClearSourceType;
+
+/** @brief TIM Commutation trigger source selection */
+typedef enum
+{
+    TIM_COMSOURCE_NONE      = 0,                             /*!< Capture/compare preload disabled */
+    TIM_COMSOURCE_SOFTWARE  = 1,                             /*!< Commutate only on software generated event */
+    TIM_COMSOURCE_TRGI_ITR0 = 2,                             /*!< Commutate on Internal Trigger 0 */
+    TIM_COMSOURCE_TRGI_ITR1 = TIM_SMCR_TS_0,                 /*!< Commutate on Internal Trigger 1 */
+    TIM_COMSOURCE_TRGI_ITR2 = TIM_SMCR_TS_1,                 /*!< Commutate on Internal Trigger 2 */
+    TIM_COMSOURCE_TRGI_ITR3 = TIM_SMCR_TS_1 | TIM_SMCR_TS_0, /*!< Commutate on Internal Trigger 3 */
+}TIM_CommutationSourceType;
 
 /** @} */
 
 /** @addtogroup TIM_Output_Exported_Functions
  * @{ */
-void            XPD_TIM_Output_Enable       (TIM_HandleType * htim);
-void            XPD_TIM_Output_Disable      (TIM_HandleType * htim);
-
-void            XPD_TIM_Output_Init         (TIM_HandleType * htim, TIM_ChannelType Channel,
+void            XPD_TIM_Output_ChannelConfig(TIM_HandleType * htim, TIM_ChannelType Channel,
                                              const TIM_Output_InitType * Config);
-void            XPD_TIM_Output_Start        (TIM_HandleType * htim, TIM_ChannelType Channel);
-void            XPD_TIM_Output_Stop         (TIM_HandleType * htim, TIM_ChannelType Channel);
-void            XPD_TIM_Output_Start_IT     (TIM_HandleType * htim, TIM_ChannelType Channel);
-void            XPD_TIM_Output_Stop_IT      (TIM_HandleType * htim, TIM_ChannelType Channel);
-XPD_ReturnType  XPD_TIM_Output_Start_DMA    (TIM_HandleType * htim, TIM_ChannelType Channel,
-                                             void * Address, uint16_t Length);
-void            XPD_TIM_Output_Stop_DMA     (TIM_HandleType * htim, TIM_ChannelType Channel);
 
-void            XPD_TIM_Output_SetDeadtime  (TIM_HandleType * htim, uint32_t DeadCounts);
 void            XPD_TIM_Output_DriveConfig  (TIM_HandleType * htim, const TIM_Output_DriveType * Config);
+
+void            XPD_TIM_Output_BreakConfig  (TIM_HandleType * htim, uint8_t BreakLine,
+                                             const TIM_Output_BreakInitType * Config);
+
+void            XPD_TIM_Output_OCRefClearConfig
+                                            (TIM_HandleType * htim, TIM_ChannelType Channel,
+                                             TIM_OCRefClearSourceType OCREF_CLR_IN);
+
+void            XPD_TIM_Output_CommutationConfig
+                                            (TIM_HandleType * htim,
+                                             TIM_CommutationSourceType ComSource);
+
+/**
+ * @brief Sets the selected lock level to write-protect certain timer configuration registers.
+ * @param htim: pointer to the TIM handle structure
+ * @param LockLevel: the specified lock level to apply [0..3]
+ */
+__STATIC_INLINE void XPD_TIM_Output_SetLock(TIM_HandleType * htim, uint8_t LockLevel)
+{
+    htim->Inst->BDTR.b.LOCK = LockLevel;
+}
+
+/**
+ * @brief Manually enables the main output of an advanced timer.
+ * @param htim: pointer to the TIM handle structure
+ */
+__STATIC_INLINE void XPD_TIM_Output_Enable(TIM_HandleType * htim)
+{
+    TIM_REG_BIT(htim,BDTR,MOE) = 1;
+}
+
+/**
+ * @brief Manually disables the main output of an advanced timer.
+ * @param htim: pointer to the TIM handle structure
+ */
+__STATIC_INLINE void XPD_TIM_Output_Disable(TIM_HandleType * htim)
+{
+    TIM_REG_BIT(htim,BDTR,MOE) = 0;
+}
+
+/** @} */
+
+/** @} */
+
+/** @defgroup TIM_OnePulseMode TIM One Pulse Mode
+ * @{ */
+
+/** @defgroup TIM_OnePulseMode_Exported_Functions TIM One Pulse Mode Exported Functions
+ * @{ */
+
+/**
+ * @brief Enables the one pulse mode of the timer output.
+ * @param htim: pointer to the TIM handle structure
+ */
+__STATIC_INLINE void XPD_TIM_OnePulseMode_Enable(TIM_HandleType * htim)
+{
+    TIM_REG_BIT(htim, CR1, OPM) = 1;
+}
+
+/**
+ * @brief Disables the one pulse mode of the timer output.
+ * @param htim: pointer to the TIM handle structure
+ */
+__STATIC_INLINE void XPD_TIM_OnePulseMode_Disable(TIM_HandleType * htim)
+{
+    TIM_REG_BIT(htim, CR1, OPM) = 0;
+}
+
+/** @} */
+
+/** @} */
+
+/** @defgroup TIM_Input TIM Input
+ * @{ */
+
+/** @defgroup TIM_Input_Exported_Types TIM Input Exported Types
+ * @{ */
+
+/** @brief TIM input channel sources */
+typedef enum
+{
+    TIM_INPUT_OWN_TI  = 1,  /*!< TIM input n is connected to ICn */
+    TIM_INPUT_PAIR_TI = 2,  /*!< TIM input n is connected to IC(n ^ (n & 1)) */
+    TIM_INPUT_TRC     = 3,  /*!< TIM input n is connected to TRC */
+}TIM_Input_SourceType;
+
+/** @brief TIM input capture channel setup structure */
+typedef struct
+{
+    TIM_Input_SourceType Source;    /*!< Specifies the input source */
+    ActiveLevelType      Polarity;  /*!< Specifies the active edge of the input signal */
+    ClockDividerType     Prescaler; /*!< Specifies the input capture prescaler [DIV1..DIV8] */
+    uint8_t              Filter;    /*!< Specifies the input capture filter. [0..15] */
+}TIM_Input_InitType;
+
+/** @} */
+
+/** @addtogroup TIM_Input_Exported_Functions
+ * {@ */
+void            XPD_TIM_Input_ChannelConfig (TIM_HandleType * htim, TIM_ChannelType Channel,
+                                             const TIM_Input_InitType * Config);
+
+/**
+ * @brief Sets the TI1 input source as XOR(Ch1, Ch2, Ch3) instead of default Ch1.
+ * @param htim: pointer to the TIM handle structure
+ * @param NewState: Input channels XOR selection
+ */
+__STATIC_INLINE void XPD_TIM_Input_ChannelsXOR(TIM_HandleType * htim, FunctionalState NewState)
+{
+    TIM_REG_BIT(htim,CR2,TI1S) = NewState;
+}
+
 /** @} */
 
 /** @} */
@@ -461,18 +787,60 @@ typedef enum
 /** @brief TIM master setup structure */
 typedef struct
 {
-    FunctionalState        MasterMode;     /*!< Master mode configuration */
-    TIM_TriggerOutputType  MasterTrigger;  /*!< Trigger output (TRGO) selection */
+    FunctionalState        MasterSlaveMode; /*!< Master/Slave mode configuration */
+    TIM_TriggerOutputType  MasterTrigger;   /*!< Trigger output (TRGO) selection */
 #ifdef TIM_CR2_MMS2
-    TIM_TriggerOutput2Type MasterTrigger2; /*!< Trigger output 2 (TRGO2) selection */
+    TIM_TriggerOutput2Type MasterTrigger2;  /*!< Trigger output 2 (TRGO2) selection */
 #endif
 }TIM_MasterConfigType;
+
+/** @brief TIM slave operating modes */
+typedef enum
+{
+    TIM_SLAVEMODE_DISABLE        = 0, /* Slave mode disabled, internal clock is fed to prescaler */
+    TIM_SLAVEMODE_ENCODER_1      = 1, /* Counts up/down on TI1FP1 edge depending on TI2FP2 level */
+    TIM_SLAVEMODE_ENCODER_2      = 2, /* Counts up/down on TI2FP2 edge depending on TI1FP1 level */
+    TIM_SLAVEMODE_ENCODER_12     = 3, /* Counts up/down on both TI1FP1 and TI2FP2 edges
+                                         depending on the level of the other input */
+    TIM_SLAVEMODE_RESET          = 4, /* TRGI rising edge reinitializes the counter and generates an Update event */
+    TIM_SLAVEMODE_GATED          = 5, /* TRGI high level keeps the counter clock enabled */
+    TIM_SLAVEMODE_TRIGGER        = 6, /* The counter starts at a rising edge of the trigger TRGI */
+    TIM_SLAVEMODE_EXTERNAL_CLOCK = 7, /* TRGI rising edge clocks the counter */
+#ifdef TIM_SMCR_SMS_3
+    TIM_SLAVEMODE_RESET_TRIGGER  = TIM_SMCR_SMS_3, /* TRGI rising edge reinitializes the counter,
+                                                      generates an Update event and starts the counter */
+#endif
+}TIM_SlaveModeType;
+
+/** @brief TIM clock trigger types */
+typedef enum
+{
+    TIM_TRGI_ITR0      = 0,                             /*!< Internal Trigger 0 */
+    TIM_TRGI_ITR1      = TIM_SMCR_TS_0,                 /*!< Internal Trigger 1 */
+    TIM_TRGI_ITR2      = TIM_SMCR_TS_1,                 /*!< Internal Trigger 2 */
+    TIM_TRGI_ITR3      = TIM_SMCR_TS_1 | TIM_SMCR_TS_0, /*!< Internal Trigger 3 */
+    TIM_TRGI_TI1       = TIM_SMCR_TS_2 | TIM_SMCR_TS_0, /*!< Filtered Timer Input 1 */
+    TIM_TRGI_TI2       = TIM_SMCR_TS_2 | TIM_SMCR_TS_1, /*!< Filtered Timer Input 2 */
+    TIM_TRGI_TI1_ED    = TIM_SMCR_TS_2,                 /*!< Timer Input 1 Edge Detector */
+    TIM_TRGI_ETR_MODE1 = TIM_SMCR_TS,                   /*!< External Trigger input mode 1 */
+    TIM_TRGI_ETR_MODE2 = TIM_SMCR_ECE | TIM_SMCR_TS,    /*!< External Trigger input mode 2 */
+}TIM_TriggerInputType;
+
+/** @brief TIM slave setup structure */
+typedef struct {
+    TIM_SlaveModeType    SlaveMode;    /*!< Slave mode selection  */
+    TIM_TriggerInputType SlaveTrigger; /*!< Input Trigger source */
+    ActiveLevelType      Polarity;     /*!< Specifies the active edge of the input signal */
+    ClockDividerType     Prescaler;    /*!< Specifies the input clock prescaler [DIV1..DIV8] */
+    uint8_t              Filter;       /*!< Specifies the input clock filter. [0..15] */
+}TIM_SlaveConfigType;
 
 /** @} */
 
 /** @addtogroup TIM_MasterSlave_Exported_Functions
  * @{ */
 void            XPD_TIM_MasterConfig        (TIM_HandleType * htim, const TIM_MasterConfigType * Config);
+void            XPD_TIM_SlaveConfig         (TIM_HandleType * htim, const TIM_SlaveConfigType * Config);
 /** @} */
 
 /** @} */

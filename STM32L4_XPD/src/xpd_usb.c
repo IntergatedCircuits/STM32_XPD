@@ -942,26 +942,6 @@ void XPD_USB_IRQHandler(USB_HandleType * husb)
         XPD_USB_ClearFlag(husb, SOF);
         XPD_SAFE_CALLBACK(husb->Callbacks.SOF, husb->User);
     }
-
-    /* Handle PMA buffer overflow (collision) */
-    if ((istr & USB_ISTR_PMAOVR) != 0)
-    {
-        XPD_USB_ClearFlag(husb, PMAOVR);
-        /* Isochronous OUT data is processed even with overrun error */
-    }
-
-    /* Handle packet CRC error */
-    if ((istr & USB_ISTR_ERR) != 0)
-    {
-        XPD_USB_ClearFlag(husb, ERR);
-        /* Isochronous OUT data is processed even with CRC error */
-    }
-
-    /* Expected SOF is set in every 1ms */
-    if ((istr & USB_ISTR_ESOF) != 0)
-    {
-        XPD_USB_ClearFlag(husb, ESOF);
-    }
 }
 
 /**
@@ -1200,10 +1180,6 @@ static void usb_EP0_outStart(USB_HandleType * husb)
  */
 XPD_ReturnType XPD_USB_Init(USB_HandleType * husb, const USB_InitType * Config)
 {
-#ifdef USB_OTG_BB
-    husb->Inst_BB = USB_OTG_BB(husb->Inst);
-#endif
-
     /* Enable peripheral clock */
 #ifdef USB_OTG_HS
     if (((uint32_t)husb->Inst) == ((uint32_t)USB_OTG_HS))

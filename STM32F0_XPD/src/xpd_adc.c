@@ -266,10 +266,6 @@ XPD_ReturnType XPD_ADC_Init(ADC_HandleType * hadc, const ADC_InitType * Config)
     /* enable clock */
     adc_clockCtrl(hadc, ENABLE);
 
-#ifdef ADC_BB
-    hadc->Inst_BB = ADC_BB(hadc->Inst);
-#endif
-
     hadc->ActiveConversions = 0;
 
     /* Set used EndFlag */
