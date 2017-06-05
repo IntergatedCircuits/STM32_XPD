@@ -229,7 +229,7 @@ void XPD_Init(void)
 void XPD_Deinit(void)
 {
     /* Reset of all peripherals */
-#if defined(AHBPERIPH_BASE)
+#if defined(AHBPERIPH_BASE) || defined(RCC_AHBRSTR_GPIOARST)
     XPD_RCC_ResetAHB();
 #else
 #if defined(AHB1PERIPH_BASE)

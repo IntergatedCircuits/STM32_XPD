@@ -476,7 +476,7 @@ XPD_ReturnType XPD_TIM_Burst_Start_DMA(TIM_HandleType * htim, const TIM_Burst_In
     /* Set the DMA start address location - relative to timer start address */
     htim->Inst->DCR.b.DBA = Config->RegIndex;
     /* Set the DMA burst transfer length */
-    htim->Inst->DCR.b.DBL = Length;
+    htim->Inst->DCR.b.DBL = Length - 1;
 
     /* Set up DMA for transfer */
     result = XPD_DMA_Start_IT(hdma, (void*)&htim->Inst->DMAR, Address, Length);
@@ -556,7 +556,7 @@ void XPD_TIM_Output_ChannelConfig(TIM_HandleType * htim, TIM_ChannelType Channel
 
         /* get related CCMR register */
 #if TIM_SUPPORTED_CHANNEL_COUNT > 5
-        if (Channel < TIM_CHANNEL_5)
+        if (Channel > TIM_CHANNEL_4)
         {
             pccmr = &htim->Inst->CCMR3.w;
         }
@@ -682,7 +682,7 @@ void XPD_TIM_Output_OCRefClearConfig(TIM_HandleType * htim, TIM_ChannelType Chan
 
     /* get related CCMR register */
 #if TIM_SUPPORTED_CHANNEL_COUNT > 5
-    if (Channel < TIM_CHANNEL_5)
+    if (Channel > TIM_CHANNEL_4)
     {
         pccmr = &htim->Inst->CCMR3.w;
     }
