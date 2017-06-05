@@ -148,7 +148,7 @@ typedef struct
  * @param REG: specifies the register name.
  * @param BIT: specifies the register bit name.
  */
-#define DMA_REG_BIT(HANDLE, REG_NAME, BIT_NAME)             \
+#define         DMA_REG_BIT(HANDLE, REG_NAME, BIT_NAME)     \
     ((HANDLE)->Inst_BB->REG_NAME.BIT_NAME)
 
 #else
@@ -165,7 +165,7 @@ typedef struct
  * @param REG: specifies the register name.
  * @param BIT: specifies the register bit name.
  */
-#define DMA_REG_BIT(HANDLE, REG_NAME, BIT_NAME)             \
+#define         DMA_REG_BIT(HANDLE, REG_NAME, BIT_NAME)     \
     ((HANDLE)->Inst->REG_NAME.b.BIT_NAME)
 
 #endif /* DMA_Stream_BB */
