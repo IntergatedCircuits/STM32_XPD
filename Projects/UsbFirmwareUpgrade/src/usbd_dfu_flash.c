@@ -42,8 +42,8 @@ USBD_HandleTypeDef hUsbDeviceFS;
 void FlashIf_Init(void);
 void FlashIf_DeInit(void);
 void FlashIf_Erase(uint32_t Add);
-void* FlashIf_Write(uint8_t *src, uint8_t *dest, uint32_t Len);
-void* FlashIf_Read(uint8_t *src, uint8_t *dest, uint32_t Len);
+void FlashIf_Write(uint8_t *dest, uint8_t *src, uint32_t Len);
+void FlashIf_Read(uint8_t *dest, uint8_t *src, uint32_t Len);
 void FlashIf_GetStatus(uint32_t Add, uint8_t Cmd, uint8_t *buffer);
 
 const USBD_DFU_MediaTypeDef USBD_DFU_Flash_fops = {
@@ -88,14 +88,13 @@ void FlashIf_Erase(uint32_t Add)
  * @param  src: Pointer to the source buffer. Address to be written to.
  * @param  Len: Number of data to be written (in bytes).
  */
-void* FlashIf_Write(uint8_t *dest, uint8_t *src, uint32_t Len)
+void FlashIf_Write(uint8_t *dest, uint8_t *src, uint32_t Len)
 {
     if ((Len & 3) != 0)
     {
         Len = Len & (~1);
     }
     XPD_FLASH_Program(dest, src, Len);
-    return dest;
 }
 
 /**
@@ -104,13 +103,12 @@ void* FlashIf_Write(uint8_t *dest, uint8_t *src, uint32_t Len)
  * @param  src: Pointer to the source buffer. Address to be written to.
  * @param  Len: Number of data to be read (in bytes).
  */
-void* FlashIf_Read(uint8_t *dest, uint8_t *src, uint32_t Len)
+void FlashIf_Read(uint8_t *dest, uint8_t *src, uint32_t Len)
 {
     while (Len-- > 0)
     {
         *dest++ = *src++;
     }
-    return dest;
 }
 
 /**

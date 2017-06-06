@@ -178,8 +178,8 @@ typedef struct
     void  (* Init)     (void);
     void  (* DeInit)   (void);
     void  (* Erase)    (uint32_t Add);
-    void* (* Write)    (uint8_t *dest, uint8_t *src, uint32_t Len);
-    void* (* Read)     (uint8_t *dest, uint8_t *src, uint32_t Len);
+    void  (* Write)    (uint8_t *dest, uint8_t *src, uint32_t Len);
+    void  (* Read)     (uint8_t *dest, uint8_t *src, uint32_t Len);
     void  (* GetStatus)(uint32_t Add,  uint8_t cmd, uint8_t *buff);
 }USBD_DFU_MediaTypeDef;
 
