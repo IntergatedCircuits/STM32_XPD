@@ -36,7 +36,9 @@
 #define FLASH_GETOPERATION()    (FLASH->CR.w & (FLASH_CR_PER | FLASH_CR_MER | FLASH_CR_PG))
 
 #define FLASH_PAGE_SIZE         0x800
-#define FLASH_BLOCK_SIZE(ADDR)  (FLASH_PAGE_SIZE)
+
+#define FLASH_BLOCK_SIZE_KB(ADDR)   \
+    (FLASH_PAGE_SIZE >> 10)
 
 #ifndef FLASH_KEY1
 #define FLASH_KEY1              0x45670123
@@ -297,9 +299,10 @@ XPD_ReturnType XPD_FLASH_Erase(void * Address, uint16_t kBytes)
         hflash->Address = Address;
         hflash->MemStream.length = kBytes;
 
+        /* Keep erasing blocks until at least the requested amount */
         while (hflash->MemStream.length > 0)
         {
-            uint32_t blocksize = FLASH_BLOCK_SIZE(hflash->Address);
+            uint32_t blocksize = FLASH_BLOCK_SIZE_KB(hflash->Address);
             flash_blockErase();
 
             /* Wait for last operation to be completed */
@@ -308,15 +311,15 @@ XPD_ReturnType XPD_FLASH_Erase(void * Address, uint16_t kBytes)
             /* If the erase operation is completed, disable the PER Bit */
             FLASH_REG_BIT(CR,PER) = 0;
 
-            /* In case of error, stop flash programming */
-            if (result != XPD_OK)
+            /* In case of error or length underflow, stop flash programming */
+            if ((result != XPD_OK) || (hflash->MemStream.length < blocksize))
             {
                 break;
             }
 
             /* Increase flash address */
-            hflash->Address += blocksize;
-            hflash->MemStream.length -= blocksize >> 10;
+            hflash->Address += blocksize << 10;
+            hflash->MemStream.length -= blocksize;
         }
     }
 
@@ -385,13 +388,13 @@ void XPD_FLASH_IRQHandler(void)
         {
             case FLASH_OPERATION_ERASE_BLOCK:
             {
-                uint32_t blocksize = FLASH_BLOCK_SIZE(hflash->Address);
-                hflash->MemStream.length -= blocksize >> 10;
+                uint32_t blocksize = FLASH_BLOCK_SIZE_KB(hflash->Address);
 
-                if (hflash->MemStream.length > 0)
+                if (hflash->MemStream.length > blocksize)
                 {
                     /* Continue with erasing consecutive blocks */
-                    hflash->Address += blocksize;
+                    hflash->Address += blocksize << 10;
+                    hflash->MemStream.length -= blocksize;
                     flash_blockErase();
                 }
                 else

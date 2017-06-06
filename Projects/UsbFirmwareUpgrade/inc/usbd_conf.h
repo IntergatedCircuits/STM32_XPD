@@ -55,14 +55,9 @@
 #define USBD_DFU_MAX_ITF_NUM                1
 #define USBD_DFU_XFER_SIZE                  1024   /* Max DFU Packet Size = 1024 bytes */
 
-#define USBD_DFU_APP_DEFAULT_ADD            (FLASH_BASE + 0x6000) /* 24K DFU */
-
-/* 64 pages of 2 Kbytes */
-#define FLASH_DESC_STR      "@Internal Flash   /0x08000000/12*02Ka,52*02Kg"
-
 #define USBD_DFU_DOWNLOAD_SUPPORT           1
 #define USBD_DFU_UPLOAD_SUPPORT             1
-#define USBD_DETACH_SUPPORT                 1
+#define USBD_DFU_DETACH_SUPPORT             1
 
 /* #define for FS and HS identification */
 #define DEVICE_FS       0

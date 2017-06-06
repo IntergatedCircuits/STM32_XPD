@@ -206,7 +206,7 @@ __ALIGN_BEGIN static const uint8_t USBD_DFU_CfgDesc[USB_DFU_CONFIG_DESC_SIZ] __A
     /******************** DFU Functional Descriptor********************/
     0x09,   /*blength = 9 Bytes*/
     DFU_DESCRIPTOR_TYPE,   /* DFU Functional Descriptor*/
-    USBD_DFU_DOWNLOAD_SUPPORT | (USBD_DFU_UPLOAD_SUPPORT << 1) | (USBD_DETACH_SUPPORT << 3),
+    USBD_DFU_DOWNLOAD_SUPPORT | (USBD_DFU_UPLOAD_SUPPORT << 1) | (USBD_DFU_DETACH_SUPPORT << 3),
             /*bmAttribute
                 bitCanDnload             = 1      (bit 0)
                 bitCanUpload             = 1      (bit 1)
@@ -250,7 +250,7 @@ static uint8_t USBD_DFU_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
         hdfu = (USBD_DFU_HandleTypeDef*) pdev->pClassData;
 
         hdfu->alt_setting = 0;
-        hdfu->data_ptr = USBD_DFU_APP_DEFAULT_ADD;
+        hdfu->data_ptr = ((USBD_DFU_MediaTypeDef *)pdev->pUserData)->StartAddress;
         hdfu->wblock_num = 0;
         hdfu->wlength = 0;
 

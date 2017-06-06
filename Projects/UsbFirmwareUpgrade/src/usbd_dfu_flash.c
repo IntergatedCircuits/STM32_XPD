@@ -33,11 +33,21 @@
 #include <usbd_dfu_flash.h>
 #include <xpd_user.h>
 
-#define FLASH_ERASE_TIME    (uint16_t)50
-#define FLASH_PROGRAM_TIME  (uint16_t)50
-
 /* USB Device Core handle declaration */
 USBD_HandleTypeDef hUsbDeviceFS;
+
+
+#define FLASH_ERASE_TIME      (uint16_t)50
+#define FLASH_PROGRAM_TIME    (uint16_t)50
+
+/*
+ * Device memory:   128 kB
+ * Layout:          64 pages of 2 kBytes
+ * Bootloader size: 24 kB */
+#define FLASH_WRITE_ADDRESS   (FLASH_BASE + 0x6000)
+
+#define FLASH_DESC_STR        "@Internal Flash   /0x08000000/12*02Ka,52*02Kg"
+
 
 void FlashIf_Init(void);
 void FlashIf_DeInit(void);
@@ -48,8 +58,13 @@ void FlashIf_GetStatus(uint32_t Add, uint8_t Cmd, uint8_t *buffer);
 
 const USBD_DFU_MediaTypeDef USBD_DFU_Flash_fops = {
     (uint8_t *)FLASH_DESC_STR,
-    FlashIf_Init,  FlashIf_DeInit, FlashIf_Erase,
-    FlashIf_Write, FlashIf_Read,   FlashIf_GetStatus
+    (void*)FLASH_WRITE_ADDRESS,
+    FlashIf_Init,
+    FlashIf_DeInit,
+    FlashIf_Erase,
+    FlashIf_Write,
+    FlashIf_Read,
+    FlashIf_GetStatus
 };
 
 /**
@@ -71,15 +86,14 @@ void FlashIf_DeInit(void)
 }
 
 /**
- * @brief  Erases sector.
- * @param  Add: Address of sector to be erased.
+ * @brief  Erases flash block.
+ * @param  Add: Address of block to be erased.
  */
 void FlashIf_Erase(uint32_t Add)
 {
-    if (Add == USBD_DFU_APP_DEFAULT_ADD)
-    {
-        XPD_FLASH_Erase((void*)Add, DEVICE_FLASH_SIZE_KB - ((Add - FLASH_BASE) >> 10));
-    }
+    /* Erase flash memory from the start address
+     * As length is not provided, only delete one block */
+    XPD_FLASH_Erase((void*)Add, 1);
 }
 
 /**
@@ -90,10 +104,6 @@ void FlashIf_Erase(uint32_t Add)
  */
 void FlashIf_Write(uint8_t *dest, uint8_t *src, uint32_t Len)
 {
-    if ((Len & 3) != 0)
-    {
-        Len = Len & (~1);
-    }
     XPD_FLASH_Program(dest, src, Len);
 }
 
@@ -112,9 +122,10 @@ void FlashIf_Read(uint8_t *dest, uint8_t *src, uint32_t Len)
 }
 
 /**
- * @brief  Gets Memory Status.
+ * @brief  Gets memory operation duration.
  * @param  Add: Address to be read from.
- * @param  Cmd: Number of data to be read (in bytes).
+ * @param  Cmd: Type of operation.
+ * @param  buffer: Response data - duration of operation.
  */
 void FlashIf_GetStatus(uint32_t Add, uint8_t Cmd, uint8_t *buffer)
 {
@@ -122,14 +133,14 @@ void FlashIf_GetStatus(uint32_t Add, uint8_t Cmd, uint8_t *buffer)
     {
         case DFU_MEDIA_PROGRAM:
             buffer[1] = (uint8_t) FLASH_PROGRAM_TIME;
-            buffer[2] = (uint8_t) (FLASH_PROGRAM_TIME << 8);
+            buffer[2] = (uint8_t)(FLASH_PROGRAM_TIME << 8);
             buffer[3] = 0;
             break;
 
         case DFU_MEDIA_ERASE:
         default:
             buffer[1] = (uint8_t) FLASH_ERASE_TIME;
-            buffer[2] = (uint8_t) (FLASH_ERASE_TIME << 8);
+            buffer[2] = (uint8_t)(FLASH_ERASE_TIME << 8);
             buffer[3] = 0;
             break;
     }

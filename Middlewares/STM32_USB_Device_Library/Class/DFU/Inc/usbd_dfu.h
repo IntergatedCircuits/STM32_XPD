@@ -175,6 +175,7 @@ typedef struct
 typedef struct
 {
     const uint8_t* pStrDesc;
+    void * StartAddress;
     void  (* Init)     (void);
     void  (* DeInit)   (void);
     void  (* Erase)    (uint32_t Add);
