@@ -578,7 +578,7 @@ static void DFU_Detach(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req)
         hdfu->wlength = 0;
     }
 
-#if USBD_DETACH_SUPPORT != 0
+#if (USBD_DFU_DETACH_SUPPORT != 0)
     {
         /* Perform an Attach-Detach operation on USB bus */
         USBD_Stop(pdev);
