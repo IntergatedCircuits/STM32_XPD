@@ -210,7 +210,7 @@ extern const USBD_ClassTypeDef USBD_DFU;
  * @{
  */
 uint8_t  USBD_DFU_RegisterMedia    (USBD_HandleTypeDef   *pdev,
-                                    USBD_DFU_MediaTypeDef *fops);
+                                    const USBD_DFU_MediaTypeDef *fops);
 /**
  * @}
  */

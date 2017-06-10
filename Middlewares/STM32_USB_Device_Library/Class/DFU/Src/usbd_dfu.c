@@ -532,7 +532,7 @@ static uint8_t* USBD_DFU_GetUsrStringDesc (USBD_HandleTypeDef *pdev, uint8_t ind
  * @param  fops: storage callback
  * @retval status
  */
-uint8_t USBD_DFU_RegisterMedia(USBD_HandleTypeDef *pdev, USBD_DFU_MediaTypeDef *fops)
+uint8_t USBD_DFU_RegisterMedia(USBD_HandleTypeDef *pdev, const USBD_DFU_MediaTypeDef *fops)
 {
     uint8_t ret = USBD_FAIL;
 

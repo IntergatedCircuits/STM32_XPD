@@ -603,7 +603,7 @@ uint8_t *USBD_CDC_GetDeviceQualifierDescriptor(uint16_t *length)
  * @param  fops: CDC Interface callback
  * @retval status
  */
-uint8_t USBD_CDC_RegisterInterface(USBD_HandleTypeDef *pdev, USBD_CDC_ItfTypeDef *fops)
+uint8_t USBD_CDC_RegisterInterface(USBD_HandleTypeDef *pdev, const USBD_CDC_ItfTypeDef *fops)
 {
     uint8_t ret = USBD_FAIL;
 
