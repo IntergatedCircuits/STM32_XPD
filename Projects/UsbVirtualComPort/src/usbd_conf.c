@@ -110,7 +110,10 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
         /* Endpoints for CDC device (bulk EPs are set to double-buffered) */
         XPD_USB_EP_BufferInit(pdev->pData, CDC_IN_EP,  CDC_DATA_FS_MAX_PACKET_SIZE * 2);
         XPD_USB_EP_BufferInit(pdev->pData, CDC_OUT_EP, CDC_DATA_FS_MAX_PACKET_SIZE * 2);
+
+#if (CDC_AT_COMMAND_SUPPORT == 1)
         XPD_USB_EP_BufferInit(pdev->pData, CDC_CMD_EP, CDC_CMD_PACKET_SIZE);
+#endif
 
         /* USB device only supports full speed */
         USBD_LL_SetSpeed(pdev, USBD_SPEED_FULL);

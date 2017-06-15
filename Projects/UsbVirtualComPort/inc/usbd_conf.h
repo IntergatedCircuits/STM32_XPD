@@ -53,6 +53,8 @@
 #define USBD_CDC_INTERVAL                   1000
 #define MAX_STATIC_ALLOC_SIZE               1000
 
+#define CDC_AT_COMMAND_SUPPORT              0
+
 /* #define for FS and HS identification */
 #define DEVICE_FS       0
 #ifdef USB_OTG_HS
