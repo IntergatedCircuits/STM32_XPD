@@ -844,6 +844,7 @@ void XPD_USB_IRQHandler(USB_HandleType * husb)
             /* IN data sent */
             if ((epReg & USB_EP_CTR_TX) != 0)
             {
+                __IO USB_PacketAddressType* pCountReg;
                 ep = &husb->EP.IN[EpAddress];
 
                 /* Clear TX complete flag */
@@ -853,13 +854,17 @@ void XPD_USB_IRQHandler(USB_HandleType * husb)
                 if ((ep->DoubleBuffer == ENABLE) && ((epReg & USB_EP_DTOG_TX) == 0))
                 {
                     /* written from endpoint 1 buffer */
-                    count = USB_EP_BDT[epId].RX_COUNT & 0x3FF;
+                    pCountReg = &USB_EP_BDT[epId].RX_COUNT;
                 }
                 else
                 {
                     /* written from endpoint 0 (Tx) buffer */
-                    count = USB_EP_BDT[epId].TX_COUNT & 0x3FF;
+                    pCountReg = &USB_EP_BDT[epId].TX_COUNT;
                 }
+                count = (*pCountReg) & 0x3FF;
+
+                /* Clear register to avoid initial repeated data sending */
+                (*pCountReg) = 0;
 
                 ep->Transfer.size   += count;
                 ep->Transfer.buffer += count;
