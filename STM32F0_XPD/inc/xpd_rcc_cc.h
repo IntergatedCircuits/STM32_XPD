@@ -67,7 +67,7 @@ typedef enum
 typedef struct
 {
     uint8_t          Multiplier; /*!< PLL multiplier value [2..16] */
-    RCC_OscStateType State;      /*!< PLL state */
+    FunctionalState  State;      /*!< PLL state */
     RCC_OscType      Source;     /*!< PLL input source selection. Permitted values:
                                       @arg @ref RCC_OscType::HSI
                                       @arg @ref RCC_OscType::HSE */
@@ -213,11 +213,11 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
 
 /** @addtogroup RCC_Core_Clocks_Exported_Functions_Oscillators
  * @{ */
-XPD_ReturnType      XPD_RCC_HSIConfig           (RCC_OscStateType NewState);
+XPD_ReturnType      XPD_RCC_HSIConfig           (FunctionalState NewState);
 #ifdef RCC_HSI48_SUPPORT
-XPD_ReturnType      XPD_RCC_HSI48Config         (RCC_OscStateType NewState);
+XPD_ReturnType      XPD_RCC_HSI48Config         (FunctionalState NewState);
 #endif
-XPD_ReturnType      XPD_RCC_LSIConfig           (RCC_OscStateType NewState);
+XPD_ReturnType      XPD_RCC_LSIConfig           (FunctionalState NewState);
 XPD_ReturnType      XPD_RCC_PLLConfig           (const RCC_PLL_InitType * Config);
 #ifdef HSE_VALUE
 XPD_ReturnType      XPD_RCC_HSEConfig           (RCC_OscStateType NewState);

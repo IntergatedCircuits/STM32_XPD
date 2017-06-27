@@ -217,7 +217,7 @@ XPD_ReturnType XPD_RCC_MSIConfig(const RCC_MSI_InitType * Config)
  * @param NewState: the new operation state
  * @return Result of the operation
  */
-XPD_ReturnType XPD_RCC_HSIConfig(RCC_OscStateType NewState)
+XPD_ReturnType XPD_RCC_HSIConfig(FunctionalState NewState)
 {
     XPD_ReturnType result = XPD_OK;
     RCC_OscType sysclock = XPD_RCC_GetSYSCLKSource();
@@ -458,7 +458,7 @@ XPD_ReturnType XPD_RCC_PLLSAI2Config(const RCC_PLL_InitType * Config)
  * @param NewState: the new operation state
  * @return Result of the operation
  */
-XPD_ReturnType XPD_RCC_LSIConfig(RCC_OscStateType NewState)
+XPD_ReturnType XPD_RCC_LSIConfig(FunctionalState NewState)
 {
     XPD_ReturnType result = XPD_OK;
     uint32_t timeout = RCC_LSI_TIMEOUT;
@@ -538,7 +538,7 @@ XPD_ReturnType XPD_RCC_LSEConfig(RCC_OscStateType NewState)
  * @param NewState: the new operation state
  * @return Result of the operation
  */
-XPD_ReturnType XPD_RCC_HSI48Config(RCC_OscStateType NewState)
+XPD_ReturnType XPD_RCC_HSI48Config(FunctionalState NewState)
 {
     XPD_ReturnType result = XPD_OK;
     uint32_t timeout = RCC_HSI48_TIMEOUT;

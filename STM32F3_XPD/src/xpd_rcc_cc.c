@@ -72,7 +72,7 @@ static uint32_t rcc_convertClockDivider(RCC_ClockType clockType, ClockDividerTyp
  * @param NewState: the new operation state
  * @return Result of the operation
  */
-XPD_ReturnType XPD_RCC_HSIConfig(RCC_OscStateType NewState)
+XPD_ReturnType XPD_RCC_HSIConfig(FunctionalState NewState)
 {
     XPD_ReturnType result = XPD_OK;
     RCC_OscType sysclock = XPD_RCC_GetSYSCLKSource();
@@ -208,7 +208,7 @@ XPD_ReturnType XPD_RCC_PLLConfig(const RCC_PLL_InitType * Config)
  * @param NewState: the new operation state
  * @return Result of the operation
  */
-XPD_ReturnType XPD_RCC_LSIConfig(RCC_OscStateType NewState)
+XPD_ReturnType XPD_RCC_LSIConfig(FunctionalState NewState)
 {
     XPD_ReturnType result = XPD_OK;
     uint32_t timeout = RCC_LSI_TIMEOUT;

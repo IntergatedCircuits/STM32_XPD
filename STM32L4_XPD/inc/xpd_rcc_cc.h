@@ -83,7 +83,7 @@ typedef enum
 /** @brief MSI setup structure */
 typedef struct
 {
-    RCC_OscStateType State;            /*!< MSI state */
+    FunctionalState  State;            /*!< MSI state */
     RCC_MSIFreqType  ClockFreq;        /*!< MSI clock frequency */
 }RCC_MSI_InitType;
 
@@ -99,7 +99,7 @@ typedef struct
     uint32_t P; /*!< PLL division factor for  SAI clocks.
                      @arg for advanced devices: [2 .. 31]
                      @arg otherwise: 7, 17 */
-    RCC_OscStateType State;  /*!< PLL state */
+    FunctionalState  State;  /*!< PLL state */
     RCC_OscType      Source; /*!< PLL input source selection. Permitted values:
                                   @arg @ref RCC_OscType::HSI
                                   @arg @ref RCC_OscType::HSE
@@ -265,8 +265,8 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
 /** @addtogroup RCC_Core_Clocks_Exported_Functions_Oscillators
  * @{ */
 XPD_ReturnType      XPD_RCC_MSIConfig           (const RCC_MSI_InitType * Config);
-XPD_ReturnType      XPD_RCC_HSIConfig           (RCC_OscStateType NewState);
-XPD_ReturnType      XPD_RCC_LSIConfig           (RCC_OscStateType NewState);
+XPD_ReturnType      XPD_RCC_HSIConfig           (FunctionalState NewState);
+XPD_ReturnType      XPD_RCC_LSIConfig           (FunctionalState NewState);
 XPD_ReturnType      XPD_RCC_PLLConfig           (const RCC_PLL_InitType * Config);
 
 XPD_ReturnType      XPD_RCC_PLLSAI1Config       (const RCC_PLL_InitType * Config);
@@ -280,7 +280,7 @@ XPD_ReturnType      XPD_RCC_HSEConfig           (RCC_OscStateType NewState);
 XPD_ReturnType      XPD_RCC_LSEConfig           (RCC_OscStateType NewState);
 #endif
 #ifdef RCC_HSI48_SUPPORT
-XPD_ReturnType      XPD_RCC_HSI48Config         (RCC_OscStateType NewState);
+XPD_ReturnType      XPD_RCC_HSI48Config         (FunctionalState NewState);
 #endif
 
 uint32_t            XPD_RCC_GetOscFreq          (RCC_OscType Oscillator);

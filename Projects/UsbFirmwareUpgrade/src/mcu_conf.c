@@ -50,7 +50,7 @@ void ClockConfiguration(void)
 {
     /* PLL configuration */
     const RCC_PLL_InitType pll = {
-        .State = OSC_ON,
+        .State = ENABLE,
         .Source = HSE,
         .Multiplier = 72000000 / HSE_VALUE
     };
