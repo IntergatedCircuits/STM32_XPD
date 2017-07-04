@@ -19620,9 +19620,9 @@ typedef struct {
   * @{
   */
 
-#define ADC_TEMPSENSOR_CHANNEL  16U
-#define ADC_VREFINT_CHANNEL     17U
-#define ADC_VBAT_CHANNEL        18U
+#define ADC1_TEMPSENSOR_CHANNEL     16U
+#define ADC1_VREFINT_CHANNEL        17U
+#define ADC1_VBAT_CHANNEL           18U
 
 /**
   * @}

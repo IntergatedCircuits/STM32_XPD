@@ -18578,17 +18578,18 @@ typedef struct {
   * @{
   */
 
-/* Note: Vopamp1, TempSensor and Vbat internal channels available on ADC1 only */
-#define ADC_VOPAMP1_CHANNEL     15U
-#define ADC_TEMPSENSOR_CHANNEL  16U
-#define ADC_VBAT_CHANNEL        17U
+/* Vopamp1, TempSensor and Vbat internal channels available on ADC1 only */
+#define ADC1_VOPAMP1_CHANNEL        15U
+#define ADC1_TEMPSENSOR_CHANNEL     16U
+#define ADC1_VBAT_CHANNEL           17U
 
-/* Note: Vopamp2/3/4 internal channels available on ADC2/3/4 respectively     */
-#define ADC_VOPAMP2_CHANNEL     17U
+/* Vopamp2 internal channels available on ADC2 */
+#define ADC2_VOPAMP2_CHANNEL        17U
 
-/* Note: VrefInt internal channels available on all ADCs, but only            */
-/*       one ADC is allowed to be connected to VrefInt at the same time.      */
-#define ADC_VREFINT_CHANNEL     18U
+/* VrefInt internal channels available on all ADCs, but only
+ * one ADC is allowed to be connected to VrefInt at the same time. */
+#define ADC1_VREFINT_CHANNEL        18U
+#define ADC2_VREFINT_CHANNEL        18U
 
 /**
   * @}
@@ -18601,7 +18602,7 @@ typedef struct {
 typedef struct
 {
     const uint16_t CAL30;
-    const uint32_t __RESERVED[2];
+    const uint16_t __RESERVED[4];
     const uint16_t CAL110;
 }ADC_TempSensorCalibrationTypeDef;
 

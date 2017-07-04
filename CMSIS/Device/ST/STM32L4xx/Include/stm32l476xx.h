@@ -25490,9 +25490,30 @@ typedef struct {
 /** @defgroup ADC_Internal_Channels ADC Internal Channels
   * @{
   */
-#define ADC_TEMPSENSOR_CHANNEL  17
-#define ADC_VREFINT_CHANNEL     0
-#define ADC_VBAT_CHANNEL        18
+
+/* Internal channels available on ADC1 only: */
+#define ADC1_VREFINT_CHANNEL        0U
+
+/* Internal channels available on ADC1 and ADC3 only: */
+#define ADC1_TEMPSENSOR_CHANNEL     17U
+#define ADC3_TEMPSENSOR_CHANNEL     17U
+
+#define ADC1_VBAT_CHANNEL           18U
+#define ADC3_VBAT_CHANNEL           18U
+
+/* Internal channels available on ADC1 and ADC2 only: */
+#define ADC1_VOPAMP1_CHANNEL        8U
+#define ADC2_VOPAMP1_CHANNEL        8U
+
+#define ADC1_VOPAMP2_CHANNEL        15U
+#define ADC2_VOPAMP2_CHANNEL        15U
+
+/* Internal channels available on ADC2 and ADC3 only: */
+#define ADC2_VDAC1_OUT1_CHANNEL     17U
+#define ADC3_VDAC1_OUT1_CHANNEL     14U
+
+#define ADC2_VDAC1_OUT2_CHANNEL     18U
+#define ADC3_VDAC1_OUT2_CHANNEL     15U
 
 /**
   * @}
@@ -25504,14 +25525,14 @@ typedef struct {
 
 typedef struct
 {
-    __I uint16_t CAL30;
-    const uint32_t __RESERVED[5];
-    __I uint16_t CAL110;
+    const uint16_t CAL30;
+    const uint16_t __RESERVED[10];
+    const uint16_t CAL110;
 }ADC_TempSensorCalibrationTypeDef;
 
 #define ADC_TEMPSENSOR       ((ADC_TempSensorCalibrationTypeDef *)((uint32_t)0x1FFF75A8))
 
-#define ADC_VREFINT_CAL      (*((__I uint16_t *)((uint32_t)0x1FFF75AA)))
+#define ADC_VREFINT_CAL      (*((const uint16_t *)((uint32_t)0x1FFF75AA)))
 
 #define ADC_VBAT_SCALER      3
 
@@ -25519,22 +25540,19 @@ typedef struct
   * @}
   */
 
-/** @defgroup Unique_Device_ID Unique Device ID
-  * @brief    Use the macro as it was defined as: uint32_t DEVICE_ID_REG[3]
+/** @defgroup Device_Programming Addresses for device programming
   * @{
   */
 
-#define DEVICE_ID_REG        ((__I uint32_t *)UID_BASE)
+/** @brief Unique Device ID
+ *  @note  Use the macro as it was defined as: uint32_t DEVICE_ID_REG[3] */
+#define DEVICE_ID_REG        ((const uint32_t *)UID_BASE)
 
-/**
-  * @}
-  */
+/** @brief Device Flash Memory Size in kB */
+#define DEVICE_FLASH_SIZE_KB (*((const uint16_t *)FLASHSIZE_BASE))
 
-/** @defgroup Device_Flash_Size Device Flash Memory Size in kB
-  * @{
-  */
-
-#define DEVICE_FLASH_SIZE_KB (*((__I uint16_t *)FLASHSIZE_BASE))
+/** @brief System Memory Start Address */
+#define SYSTEM_MEMORY_ADDR   ((void *)0x1FFF00000U)
 
 /**
   * @}
