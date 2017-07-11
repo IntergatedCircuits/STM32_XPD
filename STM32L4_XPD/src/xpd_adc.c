@@ -35,10 +35,10 @@
  * @{ */
 
 #define ADC_STAB_DELAY_US           10
-#define ADC_TEMPSENSOR_DELAY_US     10
+#define ADC_TEMPSENSOR_DELAY_US     120
 #define ADC_CALIBRATION_TIMEOUT     10
 #define ADC_CONVERSION_TIME_MAX_CPU_CYCLES ((uint32_t) 156928)
-#define ADC_STOP_CONVERSION_TIMEOUT 11
+#define ADC_STOP_CONVERSION_TIMEOUT 5
 
 #define ADC_STARTCTRL           (ADC_CR_ADSTART | ADC_CR_JADSTART)
 #define ADC_STOPCTRL            (ADC_CR_ADSTP | ADC_CR_JADSTP)
@@ -67,32 +67,14 @@
 #endif
 
 #if (ADC_COUNT > 1)
-static const XPD_CtrlFnType adc_clkCtrl[] = {
-#if (ADC_COUNT == 1)
-        XPD_ADC1_ClockCtrl
-#elif (ADC_COUNT == 2)
-        XPD_ADC12_ClockCtrl
-#elif (ADC_COUNT == 4)
-        XPD_ADC12_ClockCtrl,
-        XPD_ADC34_ClockCtrl
-#endif
-};
-
 static volatile uint8_t adc_users[] = {
-        0,
-#if (ADC_COUNT == 4)
         0
-#endif
 };
 
 static void adc_clockCtrl(ADC_HandleType * hadc, FunctionalState ClockState)
 {
     uint8_t adcx = ADC_INDEX(hadc);
-#if (ADC_COUNT == 4)
-    uint8_t index = adcx / 2;
-#else
     uint8_t index = 0;
-#endif
 
     if (ClockState == DISABLE)
     {
@@ -103,10 +85,10 @@ static void adc_clockCtrl(ADC_HandleType * hadc, FunctionalState ClockState)
         SET_BIT(adc_users[index], 1 << adcx);
     }
 
-    adc_clkCtrl[index]((adc_users[index] > 0) ? ENABLE : DISABLE);
+    XPD_ADC_ClockCtrl((adc_users[index] > 0) ? ENABLE : DISABLE);
 }
 #else
-#define adc_clockCtrl(HANDLE, STATE)    (XPD_ADC1_ClockCtrl(STATE))
+#define adc_clockCtrl(HANDLE, STATE)    (XPD_ADC_ClockCtrl(STATE))
 #endif
 
 __STATIC_INLINE uint32_t adc_getMultiCfgr(ADC_HandleType * hadc, uint32_t dual)
@@ -186,6 +168,15 @@ static void adc_sampleTimeConfig(ADC_HandleType * hadc, const ADC_ChannelInitTyp
             ADC_SMPR1_SMP0 << number, Channel->SampleTime << number);
 }
 
+/* Sets the oversampling configuration of the ADC */
+static void adc_oversamplingConfig(ADC_HandleType * hadc, const ADC_OversamplingType * Config)
+{
+    hadc->Inst->CFGR2.b.OVSS  = Config->RightShift;
+    hadc->Inst->CFGR2.b.OVSR  = Config->Ratio;
+    hadc->Inst->CFGR2.b.ROVSM = Config->RestartOnInject;
+    hadc->Inst->CFGR2.b.TROVS = Config->DiscontinuousMode;
+}
+
 /* Enables an internal channel for conversion */
 static void adc_initInternalChannel(ADC_HandleType * hadc, uint8_t Channel)
 {
@@ -196,12 +187,15 @@ static void adc_initInternalChannel(ADC_HandleType * hadc, uint8_t Channel)
         case ADC1_VBAT_CHANNEL:
             /* enable the VBAT input */
 #if (ADC_COUNT > 1)
-            if (hadc->Inst == ADC1)
+            if (hadc->Inst != ADC2)
 #endif
             { chbit = ADC_CCR_VBATEN; }
             break;
 
         case ADC1_VREFINT_CHANNEL:
+#if (ADC_COUNT > 1)
+            if (hadc->Inst == ADC1)
+#endif
             /* enable the VREF input */
             { chbit = ADC_CCR_VREFEN; }
             break;
@@ -209,7 +203,7 @@ static void adc_initInternalChannel(ADC_HandleType * hadc, uint8_t Channel)
         case ADC1_TEMPSENSOR_CHANNEL:
             /* enable the TS input */
 #if (ADC_COUNT > 1)
-            if (hadc->Inst == ADC1)
+            if (hadc->Inst != ADC2)
 #endif
             { chbit = ADC_CCR_TSEN; }
             break;
@@ -393,6 +387,9 @@ XPD_ReturnType XPD_ADC_Init(ADC_HandleType * hadc, const ADC_InitType * Config)
         hadc->EndFlagSelection = ADC_ENDFLAG_CONVERSION;
     }
 
+    /* Exit deep power down mode */
+    ADC_REG_BIT(hadc,CR,DEEPPWD) = 0;
+
     /* Enable voltage regulator (if disabled at this step) */
     if (hadc->Inst->CR.b.ADVREGEN != 1)
     {
@@ -442,6 +439,16 @@ XPD_ReturnType XPD_ADC_Init(ADC_HandleType * hadc, const ADC_InitType * Config)
         {
             ADC_REG_BIT(hadc, CFGR, AUTDLY) = Config->LPAutoWait;
             ADC_REG_BIT(hadc, CFGR, DMACFG) = Config->ContinuousDMARequests;
+#ifdef ADC_CFGR_DFSDMCFG
+            ADC_REG_BIT(hadc, CFGR,DFSDMCFG)= Config->DirectToDFSDM;
+#endif
+
+            /* Set oversampling mode configuration */
+            if (Config->Oversampling.State == ENABLE)
+            {
+                adc_oversamplingConfig(hadc, &Config->Oversampling);
+            }
+            ADC_REG_BIT(hadc, CFGR2, ROVSE) = Config->Oversampling.State;
         }
 
         /* Set conversion count as flag when scan mode is selected */
@@ -492,6 +499,7 @@ XPD_ReturnType XPD_ADC_Deinit(ADC_HandleType * hadc)
 
     /* Reset register CFGR */
     hadc->Inst->CFGR.w = 0;
+    hadc->Inst->CFGR2.w = 0;
 
     /* Deinitialize peripheral dependencies */
     XPD_SAFE_CALLBACK(hadc->Callbacks.DepDeinit, hadc);
@@ -1123,6 +1131,13 @@ void XPD_ADC_Injected_Init(ADC_HandleType * hadc, const ADC_Injected_InitType * 
             {
                 hadc->Inst->CFGR.b.JAUTO = Config->AutoInjection;
             }
+
+            /* Set oversampling mode configuration */
+            if (Config->Oversampling.State == ENABLE)
+            {
+                adc_oversamplingConfig(hadc, &Config->Oversampling);
+            }
+            ADC_REG_BIT(hadc, CFGR2, JOVSE) = Config->Oversampling.State;
         }
     }
 }
@@ -1288,7 +1303,7 @@ void XPD_ADC_Injected_Stop_IT(ADC_HandleType * hadc)
 
 /** @} */
 
-#ifdef ADC12_COMMON
+#ifdef ADC123_COMMON
 /** @addtogroup ADC_MultiMode
  * @{ */
 

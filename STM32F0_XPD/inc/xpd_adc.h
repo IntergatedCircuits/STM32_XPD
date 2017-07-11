@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    xpd_adc.h
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2016-02-04
+  * @version V0.2
+  * @date    2016-07-06
   * @brief   STM32 eXtensible Peripheral Drivers Analog Digital Converter Module
   *
   *  This file is part of STM32_XPD.
@@ -114,7 +114,6 @@ typedef struct
     FunctionalState       LPAutoPowerOff;        /*!< When enabled, the ADC automatically powers-off after a conversion
                                                     and automatically starts up when a new conversion is triggered.
                                                     @note: This feature also turns off the ADC dedicated 14 MHz RC oscillator (HSI14) */
-    ADC_SampleTimeType    SampleTime;            /*!< Common sample time of all ADC channels */
     struct {
         ADC_TriggerSourceType Source;            /*!< Source of the conversion trigger */
         EdgeType              Edge;              /*!< Trigger edges that initiate conversion */
@@ -124,8 +123,8 @@ typedef struct
 /** @brief ADC channel setup structure */
 typedef struct
 {
-    uint32_t           Channel;      /*!< Number of the ADC channel [0..18] */
-    uint8_t            Rank;         /*!< Channel availability (set to positive to enable) */
+    uint8_t            Number;       /*!< Number of the ADC channel [0..18] */
+    ADC_SampleTimeType SampleTime;   /*!< Common sample time of all ADC channels */
 }ADC_ChannelInitType;
 
 /** @brief ADC watchdog channel selection */
@@ -166,7 +165,7 @@ typedef struct
     struct {
         DMA_HandleType * Conversion;                /*!< DMA handle for update transfer */
     }DMA;                                           /*   DMA handle references */
-    uint8_t ActiveConversions;                      /*!< ADC number of current regular conversions */
+    uint8_t ConversionCount;                        /*!< ADC number of regular conversions */
     uint8_t EndFlagSelection;                       /*!< [Internal] Stores the EOC configuration */
 #if defined(USE_XPD_ADC_ERROR_DETECT) || defined(USE_XPD_DMA_ERROR_DETECT)
     volatile ADC_ErrorType Errors;                  /*!< Conversion errors */
@@ -178,12 +177,29 @@ typedef struct
 /** @defgroup ADC_Core_Exported_Macros ADC Core Exported Macros
  * @{ */
 
+/** @brief Number of ADC peripherals */
+#define         ADC_COUNT           1
+
+/**
+ * @brief  The index of the ADC peripheral managed by the handle.
+ * @param  HANDLE: specifies the peripheral handle.
+ */
+#define         ADC_INDEX(HANDLE)   \
+    0
+
+/**
+ * @brief  The common ADC registers related to the handle.
+ * @param  HANDLE: specifies the peripheral handle.
+ */
+#define         ADC_COMMON(HANDLE)  \
+    (ADC1_COMMON)
+
 #ifdef ADC_BB
 /**
- * @brief  ADC Handle initializer macro
- * @param  INSTANCE: specifies the ADC peripheral instance.
- * @param  INIT_FN: specifies the dependency initialization function to call back.
- * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
+ * @brief ADC Handle initializer macro
+ * @param INSTANCE: specifies the ADC peripheral instance.
+ * @param INIT_FN: specifies the dependency initialization function to call back.
+ * @param DEINIT_FN: specifies the dependency deinitialization function to call back.
  */
 #define         NEW_ADC_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)      \
     {.Inst = (INSTANCE), .Inst_BB = ADC_BB(INSTANCE),           \
@@ -199,12 +215,21 @@ typedef struct
 #define         ADC_REG_BIT(HANDLE, REG_NAME, BIT_NAME)         \
     ((HANDLE)->Inst_BB->REG_NAME.BIT_NAME)
 
+/**
+ * @brief ADC common register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param REG: specifies the register name.
+ * @param BIT: specifies the register bit name.
+ */
+#define         ADC_COMMON_REG_BIT(HANDLE, REG_NAME, BIT_NAME)  \
+    (ADC_COMMON_BB->REG_NAME.BIT_NAME)
+
 #else
 /**
- * @brief  ADC Handle initializer macro
- * @param  INSTANCE: specifies the ADC peripheral instance.
- * @param  INIT_FN: specifies the dependency initialization function to call back.
- * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
+ * @brief ADC Handle initializer macro
+ * @param INSTANCE: specifies the ADC peripheral instance.
+ * @param INIT_FN: specifies the dependency initialization function to call back.
+ * @param DEINIT_FN: specifies the dependency deinitialization function to call back.
  */
 #define         NEW_ADC_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)      \
     {.Inst = (INSTANCE),                                        \
@@ -219,6 +244,15 @@ typedef struct
  */
 #define         ADC_REG_BIT(HANDLE, REG_NAME, BIT_NAME)         \
     ((HANDLE)->Inst->REG_NAME.b.BIT_NAME)
+
+/**
+ * @brief ADC common register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param REG: specifies the register name.
+ * @param BIT: specifies the register bit name.
+ */
+#define         ADC_COMMON_REG_BIT(HANDLE, REG_NAME, BIT_NAME)  \
+    (ADC_COMMON(HANDLE)->REG_NAME.b.BIT_NAME)
 
 #endif /* ADC_BB */
 
@@ -288,11 +322,13 @@ typedef struct
  * @{ */
 XPD_ReturnType  XPD_ADC_Init                (ADC_HandleType * hadc, const ADC_InitType * Config);
 XPD_ReturnType  XPD_ADC_Deinit              (ADC_HandleType * hadc);
-void            XPD_ADC_ChannelConfig       (ADC_HandleType * hadc, const ADC_ChannelInitType * Config);
+void            XPD_ADC_ChannelConfig       (ADC_HandleType * hadc, const ADC_ChannelInitType * Channels,
+                                             uint8_t ChannelCount);
 
 void            XPD_ADC_Start               (ADC_HandleType * hadc);
 void            XPD_ADC_Stop                (ADC_HandleType * hadc);
-XPD_ReturnType  XPD_ADC_PollStatus          (ADC_HandleType * hadc, ADC_OperationType Operation, uint32_t Timeout);
+XPD_ReturnType  XPD_ADC_PollStatus          (ADC_HandleType * hadc, ADC_OperationType Operation,
+                                             uint32_t Timeout);
 
 void            XPD_ADC_Start_IT            (ADC_HandleType * hadc);
 void            XPD_ADC_Stop_IT             (ADC_HandleType * hadc);
@@ -305,7 +341,16 @@ void            XPD_ADC_WatchdogConfig      (ADC_HandleType * hadc, uint8_t Chan
                                              const ADC_WatchdogInitType * Config);
 uint8_t         XPD_ADC_WatchdogStatus      (ADC_HandleType * hadc);
 
-uint16_t        XPD_ADC_GetValue            (ADC_HandleType * hadc);
+/**
+ * @brief Return the result of the last ADC regular conversion.
+ * @param hadc: pointer to the ADC handle structure
+ * @return The conversion result
+ */
+__STATIC_INLINE uint16_t XPD_ADC_GetValue(ADC_HandleType * hadc)
+{
+    return (uint16_t)hadc->Inst->DR;
+}
+
 /** @} */
 
 /** @} */

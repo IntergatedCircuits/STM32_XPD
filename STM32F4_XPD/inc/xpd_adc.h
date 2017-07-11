@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    xpd_adc.h
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2016-02-04
+  * @version V0.2
+  * @date    2016-07-06
   * @brief   STM32 eXtensible Peripheral Drivers Analog Digital Converter Module
   *
   *  This file is part of STM32_XPD.
@@ -138,7 +138,6 @@ typedef struct
 {
     ADC_ResolutionType  Resolution;            /*!< A/D conversion resolution */
     FunctionalState     LeftAlignment;         /*!< ENABLE to left-align converted data, otherwise DISABLE */
-    uint8_t             ConversionCount;       /*!< Number of conversions in the sequence [1..16] */
     FunctionalState     ContinuousMode;        /*!< Continuous or single mode */
     FunctionalState     ContinuousDMARequests; /*!< Continuous DMA requests, or only for a single EOC flag */
     FunctionalState     ScanMode;              /*!< Scan mode converts all configured channels in sequence */
@@ -154,9 +153,9 @@ typedef struct
 /** @brief ADC channel setup structure */
 typedef struct
 {
-    uint32_t           Channel;    /*!< Number of the ADC channel [0..18] */
-    uint8_t            Rank;       /*!< Channel rank [1 .. 16] */
+    uint8_t            Number;     /*!< Number of the ADC channel [0..18] */
     ADC_SampleTimeType SampleTime; /*!< Sample time of the channel */
+    uint16_t           Offset;     /*!< Offset is subtracted after conversion of injected channel */
 }ADC_ChannelInitType;
 
 /** @brief ADC watchdog channel selection */
@@ -213,6 +212,43 @@ typedef struct
 /** @defgroup ADC_Core_Exported_Macros ADC Core Exported Macros
  * @{ */
 
+#if defined(ADC123_COMMON)
+/** @brief Number of ADC peripherals */
+#define         ADC_COUNT           3
+
+/**
+ * @brief  The index of the ADC peripheral managed by the handle.
+ * @param  HANDLE: specifies the peripheral handle.
+ */
+#define         ADC_INDEX(HANDLE)   \
+    (((((uint32_t)(HANDLE)->Inst)) >> 8) & 3)
+
+/**
+ * @brief  The common ADC registers related to the handle.
+ * @param  HANDLE: specifies the peripheral handle.
+ */
+#define         ADC_COMMON(HANDLE)  \
+    (ADC123_COMMON)
+
+#else
+/** @brief Number of ADC peripherals */
+#define         ADC_COUNT           1
+
+/**
+ * @brief  The index of the ADC peripheral managed by the handle.
+ * @param  HANDLE: specifies the peripheral handle.
+ */
+#define         ADC_INDEX(HANDLE)   \
+    0
+
+/**
+ * @brief  The common ADC registers related to the handle.
+ * @param  HANDLE: specifies the peripheral handle.
+ */
+#define         ADC_COMMON(HANDLE)  \
+    (ADC1_COMMON)
+
+#endif /* ADC123_COMMON */
 #ifdef ADC_BB
 /**
  * @brief  ADC Handle initializer macro
@@ -222,6 +258,7 @@ typedef struct
  */
 #define         NEW_ADC_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)      \
     {.Inst = (INSTANCE), .Inst_BB = ADC_BB(INSTANCE),           \
+     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,                   \
      .Callbacks.DepInit   = (INIT_FN),                          \
      .Callbacks.DepDeinit = (DEINIT_FN)}
 
@@ -236,10 +273,11 @@ typedef struct
 
 /**
  * @brief ADC common register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
  * @param REG: specifies the register name.
  * @param BIT: specifies the register bit name.
  */
-#define         ADC_COMMON_REG_BIT( REG_NAME, BIT_NAME)         \
+#define         ADC_COMMON_REG_BIT(HANDLE, REG_NAME, BIT_NAME)  \
     (ADC_COMMON_BB->REG_NAME.BIT_NAME)
 
 #else
@@ -251,6 +289,7 @@ typedef struct
  */
 #define         NEW_ADC_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)      \
     {.Inst = (INSTANCE),                                        \
+     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,                   \
      .Callbacks.DepInit   = (INIT_FN),                          \
      .Callbacks.DepDeinit = (DEINIT_FN)}
 
@@ -265,11 +304,12 @@ typedef struct
 
 /**
  * @brief ADC common register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
  * @param REG: specifies the register name.
  * @param BIT: specifies the register bit name.
  */
-#define         ADC_COMMON_REG_BIT( REG_NAME, BIT_NAME)         \
-    (ADC_BASE->REG_NAME.b.BIT_NAME)
+#define         ADC_COMMON_REG_BIT(HANDLE, REG_NAME, BIT_NAME)  \
+    (ADC_COMMON(HANDLE)->REG_NAME.b.BIT_NAME)
 
 #endif /* ADC_BB */
 
@@ -336,7 +376,8 @@ typedef struct
  * @{ */
 XPD_ReturnType  XPD_ADC_Init                (ADC_HandleType * hadc, const ADC_InitType * Config);
 XPD_ReturnType  XPD_ADC_Deinit              (ADC_HandleType * hadc);
-void            XPD_ADC_ChannelConfig       (ADC_HandleType * hadc, const ADC_ChannelInitType * Config);
+void            XPD_ADC_ChannelConfig       (ADC_HandleType * hadc, const ADC_ChannelInitType * Channels,
+                                             uint8_t ChannelCount);
 
 void            XPD_ADC_Start               (ADC_HandleType * hadc);
 void            XPD_ADC_Stop                (ADC_HandleType * hadc);
@@ -353,7 +394,16 @@ void            XPD_ADC_WatchdogConfig      (ADC_HandleType * hadc, uint8_t Chan
                                              const ADC_WatchdogInitType * Config);
 uint8_t         XPD_ADC_WatchdogStatus      (ADC_HandleType * hadc);
 
-uint16_t        XPD_ADC_GetValue            (ADC_HandleType * hadc);
+/**
+ * @brief Return the result of the last ADC regular conversion.
+ * @param hadc: pointer to the ADC handle structure
+ * @return The conversion result
+ */
+__STATIC_INLINE uint16_t XPD_ADC_GetValue(ADC_HandleType * hadc)
+{
+    return (uint16_t)hadc->Inst->DR;
+}
+
 /** @} */
 
 /** @} */
@@ -389,11 +439,6 @@ typedef enum
 /** @brief ADC injected channel setup structure */
 typedef struct
 {
-    uint32_t           Channel;             /*!< The ADC injected channel selection */
-    uint8_t            Rank;                /*!< The rank in the injected group sequencer [1..4] */
-    uint8_t            ConversionCount;     /*!< Number of injected conversions in the injected group [1..4] */
-    uint16_t           Offset;              /*!< The data to be subtracted from the converted value [0..4095] */
-    ADC_SampleTimeType SampleTime;          /*!< The sample time value to be set for the selected channel */
     FunctionalState    AutoInjection;       /*!< Automatic injected conversion after regular group
                                                  @note External triggers must be disabled */
     FunctionalState    DiscontinuousMode;   /*!< Sets discontinuous mode
@@ -408,14 +453,35 @@ typedef struct
 
 /** @addtogroup ADC_Injected_Exported_Functions
  * @{ */
-void            XPD_ADC_Injected_Init       (ADC_HandleType * hadc, ADC_Injected_InitType * Config);
+void            XPD_ADC_Injected_Init       (ADC_HandleType * hadc, const ADC_Injected_InitType * Config);
+void            XPD_ADC_Injected_ChannelConfig(ADC_HandleType*hadc, const ADC_ChannelInitType * Channels,
+                                             uint8_t ChannelCount);
+
 void            XPD_ADC_Injected_Start      (ADC_HandleType * hadc);
+void            XPD_ADC_Injected_Stop       (ADC_HandleType * hadc);
+
 void            XPD_ADC_Injected_Start_IT   (ADC_HandleType * hadc);
-uint16_t        XPD_ADC_Injected_GetValue   (ADC_HandleType * hadc, uint8_t Rank);
-/** @} */
+void            XPD_ADC_Injected_Stop_IT    (ADC_HandleType * hadc);
+
+/**
+ * @brief Return the result of an ADC injected conversion.
+ * @param hadc: pointer to the ADC handle structure
+ * @param Index: index of channel on injected ADC conversion sequence (0-indexed)
+ * @return The conversion result
+ */
+__STATIC_INLINE uint16_t XPD_ADC_Inject_GetValue(ADC_HandleType * hadc, uint8_t Index)
+{
+    /* clear the flag for injected end of conversion */
+    XPD_ADC_ClearFlag(hadc, JEOC);
+
+    return (uint16_t)((&hadc->Inst->JDR1)[Index]);
+}
 
 /** @} */
 
+/** @} */
+
+#ifdef ADC123_COMMON
 /** @defgroup ADC_MultiMode Multi ADC Mode Conversions
  * @{ */
 
@@ -464,13 +530,25 @@ typedef struct
 
 /** @addtogroup ADC_MultiMode_Exported_Functions
  * @{ */
-void            XPD_ADC_MultiMode_Init          (ADC_HandleType * hadc, const ADC_MultiMode_InitType * Config);
+void            XPD_ADC_MultiMode_Config        (ADC_HandleType * hadc, const ADC_MultiMode_InitType * Config);
 XPD_ReturnType  XPD_ADC_MultiMode_Start_DMA     (ADC_HandleType * hadc, void * Address);
 void            XPD_ADC_MultiMode_Stop_DMA      (ADC_HandleType * hadc);
-uint32_t        XPD_ADC_MultiMode_GetValues     (ADC_HandleType * hadc);
+
+/**
+ * @brief Return the result of the last common ADC regular conversions.
+ * @param hadc: pointer to the ADC handle structure
+ * @return A pair of conversion results in a single word
+ */
+__STATIC_INLINE uint32_t XPD_ADC_MultiMode_GetValues(ADC_HandleType * hadc)
+{
+    /* Return the multi mode conversion values */
+    return ADC_COMMON(hadc)->CDR.w;
+}
+
 /** @} */
 
 /** @} */
+#endif /* ADC123_COMMON */
 
 /** @} */
 

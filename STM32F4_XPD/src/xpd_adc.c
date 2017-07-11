@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    xpd_adc.c
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2016-02-04
+  * @version V0.2
+  * @date    2016-07-06
   * @brief   STM32 eXtensible Peripheral Drivers Analog Digital Converter Module
   *
   *  This file is part of STM32_XPD.
@@ -43,7 +43,7 @@
  */
 void XPD_ADC_ClockConfig(ADC_ClockSourceType ClockSource)
 {
-    ADC->CCR.b.ADCPRE = ClockSource;
+    ADC_COMMON()->CCR.b.ADCPRE = ClockSource;
 }
 
 /**
@@ -52,7 +52,7 @@ void XPD_ADC_ClockConfig(ADC_ClockSourceType ClockSource)
  */
 uint32_t XPD_ADC_GetClockFreq(void)
 {
-    return XPD_RCC_GetClockFreq(PCLK2) / ((ADC->CCR.b.ADCPRE + 1) * 2);
+    return XPD_RCC_GetClockFreq(PCLK2) / ((ADC_COMMON()->CCR.b.ADCPRE + 1) * 2);
 }
 
 /** @} */
@@ -64,6 +64,9 @@ uint32_t XPD_ADC_GetClockFreq(void)
 
 #define ADC_STAB_DELAY_US         3
 #define ADC_TEMPSENSOR_DELAY_US   10
+
+#define ADC_SQR_MASK            (ADC_SQR3_SQ1 >> ADC_SQR3_SQ1_Pos)
+#define ADC_SQR_SIZE            (ADC_SQR3_SQ2_Pos - ADC_SQR3_SQ1_Pos)
 
 static void adc_dmaConversionRedirect(void *hdma)
 {
@@ -91,67 +94,45 @@ static void adc_dmaErrorRedirect(void *hdma)
 }
 #endif
 
-static void adc_sequencerConfig(ADC_HandleType * hadc, uint8_t Channel, uint8_t Rank)
+/* Sets the sample time for a channel configuration */
+static void adc_sampleTimeConfig(ADC_HandleType * hadc, const ADC_ChannelInitType * Channel)
 {
-    uint32_t regoffset, rankm, choffset;
-
-    /* channel configuration for a given rank */
-    if (Rank < 7)
-    {
-        regoffset = 2;
-        rankm = 1;
-    }
-    else if (Rank < 13)
-    {
-        regoffset = 1;
-        rankm = 7;
-    }
-    else
-    {
-        regoffset = 0;
-        rankm = 13;
-    }
-
-    /* set the channel for the selected rank */
-    choffset = (Rank - rankm) * 5;
-    MODIFY_REG((&hadc->Inst->SQR1.w)[regoffset], ADC_SQR3_SQ1 << choffset, Channel << choffset);
-}
-
-static void adc_sampleTimeConfig(ADC_HandleType * hadc, uint8_t Channel, ADC_SampleTimeType SampleTime)
-{
-    uint32_t regoffset = 1;
+    uint32_t regoffset = 1, number = Channel->Number;
 
     /* Channel sampling time configuration */
-    if (Channel > 10)
+    if (number > 10)
     {
         regoffset = 0;
-        Channel -= 10;
+        number -= 10;
     }
-    Channel *= 3;
+    number *= 3;
 
     /* set the sample time */
-    MODIFY_REG((&hadc->Inst->SMPR1.w)[regoffset], ADC_SMPR2_SMP0  << Channel, SampleTime << Channel);
+    MODIFY_REG((&hadc->Inst->SMPR1.w)[regoffset],
+            ADC_SMPR2_SMP0 << number, Channel->SampleTime << number);
 }
 
 /* Enables an internal channel for conversion */
-static void adc_initInternalChannel(ADC_HandleType * hadc, uint32_t Channel)
+static void adc_initInternalChannel(ADC_HandleType * hadc, uint8_t Channel)
 {
+#if (ADC_COUNT > 1)
     /* Only ADC1 has access to internal measurement channels */
     if (hadc->Inst == ADC1)
+#endif
     {
         /* if ADC1 channel 18 is selected, enable VBAT */
-        if (Channel == ADC_VBAT_CHANNEL)
+        if (Channel == ADC1_VBAT_CHANNEL)
         {
             /* enable the VBAT input */
-            ADC_COMMON_REG_BIT(CCR, VBATE) = 1;
+            ADC_COMMON_REG_BIT(hadc,CCR,VBATE) = 1;
         }
         /* if ADC1 channel 16 or 17 is selected, enable Temperature sensor and VREFINT */
-        else if ((Channel == ADC_TEMPSENSOR_CHANNEL) || (Channel == ADC_VREFINT_CHANNEL))
+        else if ((Channel == ADC1_TEMPSENSOR_CHANNEL) || (Channel == ADC1_VREFINT_CHANNEL))
         {
             /* enable the TS-VREF input */
-            ADC_COMMON_REG_BIT(CCR,TSVREFE) = 1;
+            ADC_COMMON_REG_BIT(hadc,CCR,TSVREFE) = 1;
 
-            if (Channel == ADC_TEMPSENSOR_CHANNEL)
+            if (Channel == ADC1_TEMPSENSOR_CHANNEL)
             {
                 /* wait temperature sensor stabilization */
                 XPD_Delay_us(ADC_TEMPSENSOR_DELAY_US);
@@ -171,9 +152,10 @@ static void adc_initInternalChannel(ADC_HandleType * hadc, uint32_t Channel)
  */
 XPD_ReturnType XPD_ADC_Init(ADC_HandleType * hadc, const ADC_InitType * Config)
 {
-    /* enable clock */
+    /* Enable clock */
     XPD_SAFE_CALLBACK(hadc->ClockCtrl, ENABLE);
 
+    /* Apply configuration */
     ADC_REG_BIT(hadc,CR1,SCAN)  = Config->ScanMode;
     ADC_REG_BIT(hadc,CR2,ALIGN) = Config->LeftAlignment;
     ADC_REG_BIT(hadc,CR2,CONT)  = Config->ContinuousMode;
@@ -182,9 +164,7 @@ XPD_ReturnType XPD_ADC_Init(ADC_HandleType * hadc, const ADC_InitType * Config)
 
     hadc->Inst->CR1.b.RES       = Config->Resolution;
 
-    hadc->Inst->SQR1.b.L        = Config->ConversionCount - 1;
-
-    /* external trigger configuration */
+    /* External trigger configuration */
     if(Config->Trigger.Source == ADC_TRIGGER_SOFTWARE)
     {
         /* reset the external trigger */
@@ -197,19 +177,19 @@ XPD_ReturnType XPD_ADC_Init(ADC_HandleType * hadc, const ADC_InitType * Config)
         hadc->Inst->CR2.b.EXTEN  = Config->Trigger.Edge;
     }
 
-    /* discontinuous mode configuration */
+    /* Discontinuous mode configuration */
     if (Config->DiscontinuousCount != 0)
     {
         ADC_REG_BIT(hadc,CR1,DISCEN) = 1;
 
-        hadc->Inst->CR1.b.DISCNUM    = Config->DiscontinuousCount - 1;
+        hadc->Inst->CR1.b.DISCNUM = Config->DiscontinuousCount - 1;
     }
     else
     {
         CLEAR_BIT(hadc->Inst->CR1.w, ADC_CR1_DISCEN | ADC_CR1_DISCNUM);
     }
 
-    /* dependencies initialization */
+    /* Dependencies initialization */
     XPD_SAFE_CALLBACK(hadc->Callbacks.DepInit, hadc);
 
     return XPD_OK;
@@ -222,32 +202,65 @@ XPD_ReturnType XPD_ADC_Init(ADC_HandleType * hadc, const ADC_InitType * Config)
  */
 XPD_ReturnType XPD_ADC_Deinit(ADC_HandleType * hadc)
 {
+    /* Turn off ADC */
     ADC_REG_BIT(hadc,CR2,ADON) = 0;
 
     /* Deinitialize peripheral dependencies */
     XPD_SAFE_CALLBACK(hadc->Callbacks.DepDeinit, hadc);
 
-    /* disable clock */
+    /* Disable clock */
     XPD_SAFE_CALLBACK(hadc->ClockCtrl, DISABLE);
 
     return XPD_OK;
 }
 
 /**
- * @brief Initializes a regular ADC channel for conversion using the setup configuration.
+ * @brief Initializes the regular ADC channels for conversion using the setup configuration.
  * @param hadc: pointer to the ADC handle structure
- * @param Config: pointer to ADC regular channel setup configuration
+ * @param Channels: ADC regular channel configuration array pointer
+ * @param ChannelCount: number of channels to configure
  */
-void XPD_ADC_ChannelConfig(ADC_HandleType * hadc, const ADC_ChannelInitType * Config)
+void XPD_ADC_ChannelConfig(ADC_HandleType * hadc, const ADC_ChannelInitType * Channels, uint8_t ChannelCount)
 {
-    /* sequencer rank configuration */
-    adc_sequencerConfig(hadc, Config->Channel, Config->Rank);
+    uint8_t i;
 
-    /* sample time configuration */
-    adc_sampleTimeConfig(hadc, Config->Channel, Config->SampleTime);
+    /* Sequencer configuration */
+    for (i = 0; (i < ChannelCount) && (i < 6); i++)
+    {
+        /* set the channel for the selected rank */
+        uint32_t choffset = ADC_SQR3_SQ1_Pos + (ADC_SQR_SIZE * i);
 
-    /* Internal channel configuration (if applicable) */
-    adc_initInternalChannel(hadc, Config->Channel);
+        MODIFY_REG(hadc->Inst->SQR3.w,
+                ADC_SQR_MASK << choffset, Channels[i].Number << choffset);
+    }
+    for (; (i < ChannelCount) && (i < 12); i++)
+    {
+        /* set the channel for the selected rank */
+        uint32_t choffset = ADC_SQR_SIZE * (i - 6);
+
+        MODIFY_REG(hadc->Inst->SQR2.w,
+                ADC_SQR_MASK << choffset, Channels[i].Number << choffset);
+    }
+    for (;  i < ChannelCount; i++)
+    {
+        /* set the channel for the selected rank */
+        uint32_t choffset = ADC_SQR_SIZE * (i - 12);
+
+        MODIFY_REG(hadc->Inst->SQR1.w,
+                ADC_SQR_MASK << choffset, Channels[i].Number << choffset);
+    }
+
+    for (i = 0; i < ChannelCount; i++)
+    {
+        /* Sample time configuration */
+        adc_sampleTimeConfig(hadc, &Channels[i]);
+
+        /* Internal channel configuration (if applicable) */
+        adc_initInternalChannel(hadc, Channels[i].Number);
+    }
+
+    /* Set the number of conversions */
+    hadc->Inst->SQR1.b.L = ChannelCount - 1;
 }
 
 /**
@@ -264,20 +277,20 @@ void XPD_ADC_Start(ADC_HandleType * hadc)
         XPD_Delay_us(ADC_STAB_DELAY_US);
     }
 
-    /* if no external trigger present and ADC is either not in multimode, or the multimode master,
-     * enable software conversion of regular channels */
-    if (    (hadc->Inst->CR2.b.EXTEN == 0)
-         && ((ADC->CCR.b.MULTI == 0) || (hadc->Inst == ADC1)))
-    {
-        ADC_REG_BIT(hadc,CR2,SWSTART) = 1;
-    }
-
     /* initialize number of remaining conversions count */
     hadc->ActiveConversions = hadc->Inst->SQR1.b.L + 1;
 
 #if defined(USE_XPD_ADC_ERROR_DETECT) || defined(USE_XPD_DMA_ERROR_DETECT)
     hadc->Errors = ADC_ERROR_NONE;
 #endif
+
+    /* if no external trigger present and ADC is either not in multimode, or the multimode master,
+     * enable software conversion of regular channels */
+    if (    (hadc->Inst->CR2.b.EXTEN == 0)
+         && ((ADC_COMMON(hadc)->CCR.b.MULTI == 0) || (hadc->Inst == ADC1)))
+    {
+        ADC_REG_BIT(hadc,CR2,SWSTART) = 1;
+    }
 }
 
 /**
@@ -470,7 +483,9 @@ XPD_ReturnType XPD_ADC_Start_DMA(ADC_HandleType * hadc, void * Address)
         hadc->DMA.Conversion->Callbacks.Complete     = adc_dmaConversionRedirect;
 #ifdef USE_XPD_DMA_ERROR_DETECT
         hadc->DMA.Conversion->Callbacks.Error        = adc_dmaErrorRedirect;
+#endif
 
+#ifdef USE_XPD_ADC_ERROR_DETECT
         /* Enable ADC overrun interrupt */
         XPD_ADC_EnableIT(hadc, OVR);
 #endif
@@ -539,16 +554,6 @@ uint8_t XPD_ADC_WatchdogStatus(ADC_HandleType * hadc)
     return XPD_ADC_GetFlag(hadc, AWD);
 }
 
-/**
- * @brief Return the result of the last ADC regular conversion.
- * @param hadc: pointer to the ADC handle structure
- * @return The conversion result
- */
-uint16_t XPD_ADC_GetValue(ADC_HandleType * hadc)
-{
-    return (uint16_t)hadc->Inst->DR;
-}
-
 /** @} */
 
 /** @} */
@@ -564,66 +569,59 @@ uint16_t XPD_ADC_GetValue(ADC_HandleType * hadc)
  * @param hadc: pointer to the ADC handle structure
  * @param Config: pointer to ADC injected channel setup configuration
  */
-void XPD_ADC_Injected_Init(ADC_HandleType * hadc, ADC_Injected_InitType * Config)
+void XPD_ADC_Injected_Init(ADC_HandleType * hadc, const ADC_Injected_InitType * Config)
 {
-    /* sample time configuration */
-    adc_sampleTimeConfig(hadc, Config->Channel, Config->SampleTime);
-
-    hadc->Inst->JSQR.b.JL = Config->ConversionCount - 1;
-
-    /* only one of these shall be enabled at a time */
+    /* Only one of these shall be enabled at a time */
     ADC_REG_BIT(hadc, CR1, JAUTO)   = Config->AutoInjection;
     ADC_REG_BIT(hadc, CR1, JDISCEN) = Config->DiscontinuousMode;
 
-    (&hadc->Inst->JOFR1)[Config->Rank - 1] = Config->Offset;
-
-    /* channel configuration for a given rank */
-    {
-        uint32_t channelOffset = ((Config->Rank + 3) * 5) - Config->ConversionCount;
-        uint32_t channelMask   = ADC_JSQR_JSQ1 << channelOffset;
-        uint32_t channelVal    = (uint32_t)((uint8_t)Config->Channel) << channelOffset;
-
-        /* Set the SQx bits for the selected rank */
-        MODIFY_REG(hadc->Inst->JSQR.w, channelMask, channelVal);
-    }
-
-    /* if the trigger is software, or the injected channel is converted automatically after regular */
+    /* If the trigger is software, or the injected channel is converted automatically after regular */
     if (   (Config->Trigger.InjSource == ADC_INJTRIGGER_SOFTWARE)
         || (Config->AutoInjection == ENABLE))
     {
-        /* reset the external trigger */
+        /* Reset the external trigger */
         CLEAR_BIT(hadc->Inst->CR2.w, ADC_CR2_JEXTSEL | ADC_CR2_JEXTEN);
     }
     else
     {
-        /* external trigger config */
+        /* External trigger config */
         hadc->Inst->CR2.b.JEXTSEL = Config->Trigger.InjSource;
         hadc->Inst->CR2.b.JEXTEN  = Config->Trigger.Edge;
     }
+}
 
-    if (hadc->Inst == ADC1)
+/**
+ * @brief Initializes the injected ADC channels for conversion using the setup configuration.
+ * @param hadc: pointer to the ADC handle structure
+ * @param Channels: ADC injected channel configuration array pointer
+ * @param ChannelCount: number of channels to configure
+ */
+void XPD_ADC_Injected_ChannelConfig(ADC_HandleType * hadc, const ADC_ChannelInitType * Channels,
+        uint8_t ChannelCount)
+{
+    uint8_t i;
+
+    for (i = 0; i < ChannelCount; i++)
     {
-        /* if ADC1 Channel_18 is selected enable VBAT Channel */
-        if (Config->Channel == ADC_VBAT_CHANNEL)
-        {
-            /* Enable the VBAT channel*/
-            ADC_COMMON_REG_BIT(CCR, VBATE) = 1;
-        }
-        /* if ADC1 Channel_16 or Channel_17 is selected enable TSVREFE Channel(Temperature sensor and VREFINT) */
-        else if (((Config->Channel == ADC_TEMPSENSOR_CHANNEL) || (Config->Channel == ADC_VREFINT_CHANNEL))
-                && (ADC_COMMON_REG_BIT(CCR,TSVREFE) == 0))
-        {
-            /* Enable the TSVREFE channel*/
-            ADC_COMMON_REG_BIT(CCR,TSVREFE) = 1;
+        /* Channel configuration for a given rank */
+        uint32_t choffset = ADC_JSQR_JSQ1_Pos + (5 * i);
 
-            if (Config->Channel == ADC_TEMPSENSOR_CHANNEL)
-            {
-                /* Delay for temperature sensor stabilization time */
-                /* Compute number of CPU cycles to wait for */
-                XPD_Delay_us(ADC_TEMPSENSOR_DELAY_US);
-            }
-        }
+        /* Set the SQx bits for the selected rank */
+        MODIFY_REG(hadc->Inst->JSQR.w,
+                0x1F << choffset, Channels[i].Number << choffset);
+
+        /* Sample time configuration */
+        adc_sampleTimeConfig(hadc, &Channels[i]);
+
+        /* Offset configuration */
+        (&hadc->Inst->JOFR1)[i] = Channels[i].Offset;
+
+        /* Internal channel configuration (if applicable) */
+        adc_initInternalChannel(hadc, Channels[i].Number);
     }
+
+    /* Set the injected sequence length */
+    hadc->Inst->JSQR.b.JL = ChannelCount - 1;
 }
 
 /**
@@ -644,13 +642,28 @@ void XPD_ADC_Injected_Start(ADC_HandleType * hadc)
         XPD_Delay_us(ADC_STAB_DELAY_US);
     }
 
-    /* if no external trigger present and ADC is either not in multimode, or the multimode master,
+    /* If no external trigger present and ADC is either not in multimode, or the multimode master,
      * enable software conversion of injected channels */
     if (    ( hadc->Inst->CR2.b.JEXTEN       == 0)
          && ( ADC_REG_BIT(hadc, CR1, JAUTO)  == 0)
-         && ((ADC_COMMON_REG_BIT(CCR, MULTI) == DISABLE) || (hadc->Inst == ADC1)))
+         && ((ADC_COMMON_REG_BIT(hadc,CCR,MULTI) == DISABLE) || (hadc->Inst == ADC1)))
     {
         ADC_REG_BIT(hadc,CR2,JSWSTART) = 1;
+    }
+}
+
+/**
+ * @brief Stop the conversion of injected channels by disabling ADC peripheral.
+ * @note  If auto-injection is used, the conversion can only be stopped along with the regular group.
+ * @param hadc: pointer to the ADC handle structure
+ */
+void XPD_ADC_Injected_Stop(ADC_HandleType * hadc)
+{
+    /* Check against auto injection */
+    if (ADC_REG_BIT(hadc,CR1,JAUTO) == 0)
+    {
+        /* Stop conversions on regular and injected groups */
+        ADC_REG_BIT(hadc,CR2,ADON) = 0;
     }
 }
 
@@ -665,27 +678,26 @@ void XPD_ADC_Injected_Start_IT(ADC_HandleType * hadc)
 #endif
     XPD_ADC_EnableIT(hadc, JEOC);
 
-    XPD_ADC_Injected_Start(hadc);
+    XPD_ADC_Inject_Start(hadc);
 }
 
 /**
- * @brief Return the result of an ADC injected conversion.
+ * @brief Stop the conversion of injected channels by disabling ADC peripheral and interrupts.
+ * @note  If auto-injection is used, the conversion can only be stopped along with the regular group.
  * @param hadc: pointer to the ADC handle structure
- * @param Rank: injected rank of ADC conversion
- * @return The conversion result
  */
-uint16_t XPD_ADC_Injected_GetValue(ADC_HandleType * hadc, uint8_t Rank)
+void XPD_ADC_Injected_Stop_IT(ADC_HandleType * hadc)
 {
-    /* clear the flag for injected end of conversion */
-    XPD_ADC_ClearFlag(hadc, JEOC);
+    XPD_ADC_Injected_Stop(hadc);
 
-    return (uint16_t)((&hadc->Inst->JDR1)[Rank - 1]);
+    XPD_ADC_DisableIT(hadc, JEOC);
 }
 
 /** @} */
 
 /** @} */
 
+#ifdef ADC123_COMMON
 /** @addtogroup ADC_MultiMode
  * @{ */
 
@@ -697,11 +709,11 @@ uint16_t XPD_ADC_Injected_GetValue(ADC_HandleType * hadc, uint8_t Rank)
  * @param hadc: pointer to the ADC handle structure
  * @param Config: pointer to the multi ADC setup configuration
  */
-void XPD_ADC_MultiMode_Init(ADC_HandleType * hadc, const ADC_MultiMode_InitType * Config)
+void XPD_ADC_MultiMode_Config(ADC_HandleType * hadc, const ADC_MultiMode_InitType * Config)
 {
-    ADC->CCR.b.MULTI = Config->Mode;
-    ADC->CCR.b.DMA   = Config->DMAAccessMode;
-    ADC->CCR.b.DELAY = Config->InterSamplingDelay - 5;
+    ADC_COMMON(hadc)->CCR.b.MULTI = Config->Mode;
+    ADC_COMMON(hadc)->CCR.b.DMA   = Config->DMAAccessMode;
+    ADC_COMMON(hadc)->CCR.b.DELAY = Config->InterSamplingDelay - 5;
 }
 
 /**
@@ -715,7 +727,8 @@ XPD_ReturnType XPD_ADC_MultiMode_Start_DMA(ADC_HandleType * hadc, void * Address
     XPD_ReturnType result;
 
     /* Set up DMA for transfer */
-    result = XPD_DMA_Start_IT(hadc->DMA.Conversion, (void *)&ADC->CDR.w, Address, hadc->Inst->SQR1.b.L + 1);
+    result = XPD_DMA_Start_IT(hadc->DMA.Conversion,
+            (void *)&ADC_COMMON(hadc)->CDR.w, Address, hadc->Inst->SQR1.b.L + 1);
 
     /* If the DMA is currently used, return with error */
     if (result == XPD_OK)
@@ -727,13 +740,15 @@ XPD_ReturnType XPD_ADC_MultiMode_Start_DMA(ADC_HandleType * hadc, void * Address
         hadc->DMA.Conversion->Callbacks.Complete     = adc_dmaConversionRedirect;
 #ifdef USE_XPD_DMA_ERROR_DETECT
         hadc->DMA.Conversion->Callbacks.Error        = adc_dmaErrorRedirect;
+#endif
 
+#ifdef USE_XPD_ADC_ERROR_DETECT
         /* Enable ADC overrun interrupt */
         XPD_ADC_EnableIT(hadc, OVR);
 #endif
 
         /* pass the continuous DMA request setting to the common config */
-        ADC_COMMON_REG_BIT(CCR,DDS) = ADC_REG_BIT(hadc, CR2, DDS);
+        ADC_COMMON_REG_BIT(hadc,CCR,DDS) = ADC_REG_BIT(hadc, CR2, DDS);
 
         /* Enable ADC DMA mode */
         ADC_REG_BIT(hadc, CR2, DMA) = 1;
@@ -750,25 +765,15 @@ XPD_ReturnType XPD_ADC_MultiMode_Start_DMA(ADC_HandleType * hadc, void * Address
 void XPD_ADC_MultiMode_Stop_DMA(ADC_HandleType * hadc)
 {
     /* disable the selected ADC DMA request after last transfer */
-    ADC_COMMON_REG_BIT(CCR,DDS) = 0;
+    ADC_COMMON_REG_BIT(hadc,CCR,DDS) = 0;
 
     XPD_ADC_Stop_DMA(hadc);
 }
 
-/**
- * @brief Return the result of the last common ADC regular conversions.
- * @param hadc: pointer to the ADC handle structure
- * @return A pair of conversion results in a single word
- */
-uint32_t XPD_ADC_MultiMode_GetValues(ADC_HandleType * hadc)
-{
-    /* return the multi mode conversion values */
-    return ADC->CDR.w;
-}
-
 /** @} */
 
 /** @} */
+#endif /* ADC123_COMMON */
 
 /** @} */
 

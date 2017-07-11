@@ -50,14 +50,17 @@ typedef enum
 /** @brief ADC sample times */
 typedef enum
 {
-    ADC_SAMPLETIME_1p5   = 0, /*!< Sampling during 1.5 clock cycles */
-    ADC_SAMPLETIME_2p5   = 1, /*!< Sampling during 2.5 clock cycles */
-    ADC_SAMPLETIME_4p5   = 2, /*!< Sampling during 4.5 clock cycles */
-    ADC_SAMPLETIME_7p5   = 3, /*!< Sampling during 7.5 clock cycles */
-    ADC_SAMPLETIME_19p5  = 4, /*!< Sampling during 19.5 clock cycles */
-    ADC_SAMPLETIME_61p5  = 5, /*!< Sampling during 61.5 clock cycles */
-    ADC_SAMPLETIME_181p5 = 6, /*!< Sampling during 181.5 clock cycles */
-    ADC_SAMPLETIME_601p5 = 7  /*!< Sampling during 601.5 clock cycles */
+    ADC_SAMPLETIME_2p5   = 0, /*!< Sampling during 2.5 clock cycles */
+#ifdef ADC_SMPR1_SMPPLUS
+    ADC_SAMPLETIME_3p5   = 8, /*!< ADC sampling option 2.5 is replaced to 3.5 clock cycles */
+#endif
+    ADC_SAMPLETIME_6p5   = 1, /*!< Sampling during 6.5 clock cycles */
+    ADC_SAMPLETIME_12p5  = 2, /*!< Sampling during 12.5 clock cycles */
+    ADC_SAMPLETIME_24p5  = 3, /*!< Sampling during 24.5 clock cycles */
+    ADC_SAMPLETIME_47p5  = 4, /*!< Sampling during 47.5 clock cycles */
+    ADC_SAMPLETIME_92p5  = 5, /*!< Sampling during 92.5 clock cycles */
+    ADC_SAMPLETIME_247p5 = 6, /*!< Sampling during 247.5 clock cycles */
+    ADC_SAMPLETIME_640p5 = 7  /*!< Sampling during 640.5 clock cycles */
 }ADC_SampleTimeType;
 
 /** @brief ADC conversion resolution */
@@ -72,57 +75,24 @@ typedef enum
 /** @brief ADC trigger sources */
 typedef enum
 {
+    ADC_TRIGGER_TIM1_CC1   = 0,  /*!< TIM1 Channel 1 */
+    ADC_TRIGGER_TIM1_CC2   = 1,  /*!< TIM1 Channel 2 */
+    ADC_TRIGGER_TIM1_CC3   = 2,  /*!< TIM1 Channel 3 */
+    ADC_TRIGGER_TIM2_CC2   = 3,  /*!< TIM2 Channel 2 */
+    ADC_TRIGGER_TIM3_TRGO  = 4,  /*!< TIM3 Trigger Out */
+    ADC_TRIGGER_TIM4_CC4   = 5,  /*!< TIM4 Channel 4 */
+    ADC_TRIGGER_EXTI11     = 6,  /*!< EXTI Line 11 */
+    ADC_TRIGGER_TIM8_TRGO  = 7,  /*!< TIM8 Trigger Out */
+    ADC_TRIGGER_TIM8_TRGO2 = 8,  /*!< TIM8 Trigger Out 2 */
+    ADC_TRIGGER_TIM1_TRGO  = 9,  /*!< TIM1 Trigger Out */
+    ADC_TRIGGER_TIM1_TRGO2 = 10, /*!< TIM1 Trigger Out 2 */
+    ADC_TRIGGER_TIM2_TRGO  = 11, /*!< TIM2 Trigger Out */
+    ADC_TRIGGER_TIM4_TRGO  = 12, /*!< TIM4 Trigger Out */
+    ADC_TRIGGER_TIM6_TRGO  = 13, /*!< TIM6 Trigger Out */
+    ADC_TRIGGER_TIM15_TRGO = 14, /*!< TIM15 Trigger Out */
+    ADC_TRIGGER_TIM3_CC4   = 15, /*!< TIM3 Channel 4 */
     ADC_TRIGGER_SOFTWARE   = 16  /*!< Implicit trigger by software on start call */
 }ADC_TriggerSourceType;
-
-/** @brief ADC1 and 2 trigger sources */
-typedef enum
-{
-    ADC1_2_TRIGGER_TIM1_CC1   = 0,  /*!< TIM1 Channel 1 */
-    ADC1_2_TRIGGER_TIM1_CC2   = 1,  /*!< TIM1 Channel 2 */
-    ADC1_2_TRIGGER_TIM1_CC3   = 2,  /*!< TIM1 Channel 3 */
-    ADC1_2_TRIGGER_TIM2_CC2   = 3,  /*!< TIM2 Channel 2 */
-    ADC1_2_TRIGGER_TIM3_TRGO  = 4,  /*!< TIM3 Trigger Out */
-    ADC1_2_TRIGGER_TIM4_CC4   = 5,  /*!< TIM4 Channel 4 */
-    ADC1_2_TRIGGER_EXTI11     = 6,  /*!< EXTI Line 11 */
-#ifdef HRTIM1
-    ADC1_2_TRIGGER_HRTIM_TRG1 = 7,  /*!< HRTIM Trigger 1 */
-    ADC1_2_TRIGGER_HRTIM_TRG3 = 8,  /*!< HRTIM Trigger 3 */
-#else
-    ADC1_2_TRIGGER_TIM8_TRGO  = 7,  /*!< TIM8 Trigger Out */
-    ADC1_2_TRIGGER_TIM8_TRGO2 = 8,  /*!< TIM8 Trigger Out 2 */
-#endif
-    ADC1_2_TRIGGER_TIM1_TRGO  = 9,  /*!< TIM1 Trigger Out */
-    ADC1_2_TRIGGER_TIM1_TRGO2 = 10, /*!< TIM1 Trigger Out 2 */
-    ADC1_2_TRIGGER_TIM2_TRGO  = 11, /*!< TIM2 Trigger Out */
-    ADC1_2_TRIGGER_TIM4_TRGO  = 12, /*!< TIM4 Trigger Out */
-    ADC1_2_TRIGGER_TIM6_TRGO  = 13, /*!< TIM6 Trigger Out */
-    ADC1_2_TRIGGER_TIM15_TRGO = 14, /*!< TIM15 Trigger Out */
-    ADC1_2_TRIGGER_TIM3_CC4   = 15, /*!< TIM3 Channel 4 */
-    ADC1_2_TRIGGER_SOFTWARE   = 16  /*!< Implicit trigger by software on start call */
-}ADC1_2_TriggerSourceType;
-
-/** @brief ADC3 and 4 trigger sources */
-typedef enum
-{
-    ADC3_4_TRIGGER_TIM3_CC1   = 0,  /*!< TIM3 Channel 1 */
-    ADC3_4_TRIGGER_TIM2_CC3   = 1,  /*!< TIM2 Channel 3 */
-    ADC3_4_TRIGGER_TIM1_CC3   = 2,  /*!< TIM1 Channel 3 */
-    ADC3_4_TRIGGER_TIM8_CC1   = 3,  /*!< TIM8 Channel 1 */
-    ADC3_4_TRIGGER_TIM8_TRGO  = 4,  /*!< TIM8 Trigger Out */
-    ADC3_4_TRIGGER_EXTI2      = 5,  /*!< EXTI Line 2 */
-    ADC3_4_TRIGGER_TIM4_CC1   = 6,  /*!< TIM4 Channel 1 */
-    ADC3_4_TRIGGER_TIM2_TRGO  = 7,  /*!< TIM2 Trigger Out */
-    ADC3_4_TRIGGER_TIM8_TRGO2 = 8,  /*!< TIM8 Trigger Out 2 */
-    ADC3_4_TRIGGER_TIM1_TRGO  = 9,  /*!< TIM1 Trigger Out */
-    ADC3_4_TRIGGER_TIM1_TRGO2 = 10, /*!< TIM1 Trigger Out 2 */
-    ADC3_4_TRIGGER_TIM3_TRGO  = 11, /*!< TIM3 Trigger Out */
-    ADC3_4_TRIGGER_TIM4_TRGO  = 12, /*!< TIM4 Trigger Out */
-    ADC3_4_TRIGGER_TIM7_TRGO  = 13, /*!< TIM7 Trigger Out */
-    ADC3_4_TRIGGER_TIM15_TRGO = 14, /*!< TIM15 Trigger Out */
-    ADC3_4_TRIGGER_TIM2_CC1   = 15, /*!< TIM2 Channel 1 */
-    ADC3_4_TRIGGER_SOFTWARE   = 16  /*!< Implicit trigger by software on start call */
-}ADC3_4_TriggerSourceType;
 
 /** @brief ADC End of Conversion flag mode */
 typedef enum
@@ -142,11 +112,36 @@ typedef enum
     ADC_OPERATION_OVERRUN       = ADC_ISR_OVR   /*!< Overrun */
 }ADC_OperationType;
 
+/** @brief ADC oversampling ratio options */
+typedef enum
+{
+    ADC_OVERSAMPLING_RATIO_2   = 0, /*!< Oversampling x2 */
+    ADC_OVERSAMPLING_RATIO_4   = 1, /*!< Oversampling x4 */
+    ADC_OVERSAMPLING_RATIO_8   = 2, /*!< Oversampling x8 */
+    ADC_OVERSAMPLING_RATIO_16  = 3, /*!< Oversampling x16 */
+    ADC_OVERSAMPLING_RATIO_32  = 4, /*!< Oversampling x32 */
+    ADC_OVERSAMPLING_RATIO_64  = 5, /*!< Oversampling x64 */
+    ADC_OVERSAMPLING_RATIO_128 = 6, /*!< Oversampling x128 */
+    ADC_OVERSAMPLING_RATIO_256 = 7, /*!< Oversampling x256 */
+}ADC_OversamplingRatioType;
+
+/** @brief ADC oversampling setup structure */
+typedef struct
+{
+    FunctionalState           State;             /*!< Oversampling feature activation */
+    ADC_OversamplingRatioType Ratio;             /*!< Oversampling ratio (number of samples collected) */
+    uint8_t                   RightShift;        /*!< Right shifting by a number of bits before providing the data [0..8] */
+    FunctionalState           DiscontinuousMode; /*!< Enable to use triggered oversampling mode */
+    FunctionalState           RestartOnInject;   /*!< Regular oversampling restarted after an injected conversion,
+                                                      otherwise the accumulator is intact. */
+}ADC_OversamplingType;
+
 /** @brief ADC setup structure */
 typedef struct
 {
     ADC_ResolutionType  Resolution;            /*!< A/D conversion resolution */
     FunctionalState     LeftAlignment;         /*!< ENABLE to left-align converted data, otherwise DISABLE */
+    uint8_t             ConversionCount;       /*!< Number of conversions in the sequence [1..16] */
     FunctionalState     ContinuousMode;        /*!< Continuous or single mode */
     FunctionalState     ContinuousDMARequests; /*!< Continuous DMA requests, or only for a single EOC flag */
     FunctionalState     ScanMode;              /*!< Scan mode converts all configured channels in sequence */
@@ -158,6 +153,10 @@ typedef struct
         ADC_TriggerSourceType Source;          /*!< Source of the conversion trigger */
         EdgeType              Edge;            /*!< Trigger edges that initiate conversion */
     }Trigger;
+    ADC_OversamplingType Oversampling;         /*!< Oversampling configuration (applied for regular conversion group) */
+#ifdef ADC_CFGR_DFSDMCFG
+    FunctionalState     DirectToDFSDM;         /*!< ADC conversion data can be sent directly to DFSDM */
+#endif
 }ADC_InitType;
 
 /** @brief ADC channel setup structure */
@@ -227,30 +226,9 @@ typedef struct
 /** @defgroup ADC_Core_Exported_Macros ADC Core Exported Macros
  * @{ */
 
-#if defined(ADC34_COMMON)
+#if defined(ADC123_COMMON)
 /** @brief Number of ADC peripherals */
-#define         ADC_COUNT           4
-
-/**
- * @brief  The index of the ADC peripheral managed by the handle.
- * @param  HANDLE: specifies the peripheral handle.
- */
-#define         ADC_INDEX(HANDLE)                   \
-    ((((((uint32_t)(HANDLE)->Inst) > ADC2_BASE) ?   \
-    (((uint32_t)(HANDLE)->Inst) - 0x200) :          \
-     ((uint32_t)(HANDLE)->Inst)) >> 8) & 3)
-
-/**
- * @brief  The common ADC registers related to the handle.
- * @param  HANDLE: specifies the peripheral handle.
- */
-#define         ADC_COMMON(HANDLE)                  \
-    ((ADC_Common_TypeDef *)(((uint32_t)(HANDLE)->Inst) | 0x300))
-
-#elif defined(ADC12_COMMON)
-
-/** @brief Number of ADC peripherals */
-#define         ADC_COUNT           2
+#define         ADC_COUNT           3
 
 /**
  * @brief  The index of the ADC peripheral managed by the handle.
@@ -264,7 +242,7 @@ typedef struct
  * @param  HANDLE: specifies the peripheral handle.
  */
 #define         ADC_COMMON(HANDLE)  \
-    (ADC12_COMMON)
+    (ADC123_COMMON)
 
 #else
 /** @brief Number of ADC peripherals */
@@ -284,7 +262,7 @@ typedef struct
 #define         ADC_COMMON(HANDLE)  \
     (ADC1_COMMON)
 
-#endif /* ADC34_COMMON */
+#endif /* ADC123_COMMON */
 #ifdef ADC_BB
 /**
  * @brief  ADC Handle initializer macro
@@ -427,29 +405,6 @@ typedef struct
 #define         XPD_ADC_ClearFlag(HANDLE, FLAG_NAME)            \
     ((HANDLE)->Inst->ISR.w = ADC_ISR_##FLAG_NAME)
 
-/* Compatibility macros */
-#define ADC_TRIGGER_TIM1_CC1   (ADC1_2_TRIGGER_TIM1_CC1)
-#define ADC_TRIGGER_TIM1_CC2   (ADC1_2_TRIGGER_TIM1_CC2)
-#define ADC_TRIGGER_TIM1_CC3   (ADC1_2_TRIGGER_TIM1_CC3)
-#define ADC_TRIGGER_TIM2_CC2   (ADC1_2_TRIGGER_TIM2_CC2)
-#define ADC_TRIGGER_TIM3_TRGO  (ADC1_2_TRIGGER_TIM3_TRGO)
-#define ADC_TRIGGER_TIM4_CC4   (ADC1_2_TRIGGER_TIM4_CC4)
-#define ADC_TRIGGER_EXTI11     (ADC1_2_TRIGGER_EXTI11)
-#ifdef HRTIM1
-#define ADC_TRIGGER_HRTIM_TRG1 (ADC1_2_TRIGGER_HRTIM_TRG1)
-#define ADC_TRIGGER_HRTIM_TRG3 (ADC1_2_TRIGGER_HRTIM_TRG3)
-#else
-#define ADC_TRIGGER_TIM8_TRGO  (ADC1_2_TRIGGER_TIM8_TRGO)
-#define ADC_TRIGGER_TIM8_TRGO2 (ADC1_2_TRIGGER_TIM8_TRGO2)
-#endif
-#define ADC_TRIGGER_TIM1_TRGO  (ADC1_2_TRIGGER_TIM1_TRGO)
-#define ADC_TRIGGER_TIM1_TRGO2 (ADC1_2_TRIGGER_TIM1_TRGO2)
-#define ADC_TRIGGER_TIM2_TRGO  (ADC1_2_TRIGGER_TIM2_TRGO)
-#define ADC_TRIGGER_TIM4_TRGO  (ADC1_2_TRIGGER_TIM4_TRGO)
-#define ADC_TRIGGER_TIM6_TRGO  (ADC1_2_TRIGGER_TIM6_TRGO)
-#define ADC_TRIGGER_TIM15_TRGO (ADC1_2_TRIGGER_TIM15_TRGO)
-#define ADC_TRIGGER_TIM3_CC4   (ADC1_2_TRIGGER_TIM3_CC4)
-
 /** @} */
 
 /** @defgroup ADC_Core_Exported_Functions ADC Core Exported Functions
@@ -484,6 +439,15 @@ __STATIC_INLINE uint16_t XPD_ADC_GetValue(ADC_HandleType * hadc)
     return (uint16_t)hadc->Inst->DR;
 }
 
+/**
+ * @brief Put the ADC in deep power down state, reducing power consumption and losing calibration.
+ * @param hadc: pointer to the ADC handle structure
+ */
+__STATIC_INLINE void XPD_ADC_Shutdown(ADC_HandleType * hadc)
+{
+    ADC_REG_BIT(hadc,CR,DEEPPWD) = 1;
+}
+
 /** @} */
 
 /** @} */
@@ -497,96 +461,41 @@ __STATIC_INLINE uint16_t XPD_ADC_GetValue(ADC_HandleType * hadc)
 /** @brief ADC injected trigger sources */
 typedef enum
 {
-    ADC_INJTRIGGER_SOFTWARE  = 16  /*!< Implicit trigger by software on start call */
+    ADC_INJTRIGGER_TIM1_TRGO  = 0,  /*!< TIM1 Trigger Out */
+    ADC_INJTRIGGER_TIM1_CC4   = 1,  /*!< TIM1 Channel 4 */
+    ADC_INJTRIGGER_TIM2_TRGO  = 2,  /*!< TIM2 Trigger Out */
+    ADC_INJTRIGGER_TIM2_CC1   = 3,  /*!< TIM2 Channel 1 */
+    ADC_INJTRIGGER_TIM3_CC4   = 4,  /*!< TIM3 Channel 4 */
+    ADC_INJTRIGGER_TIM4_TRGO  = 5,  /*!< TIM4 Trigger Out */
+    ADC_INJTRIGGER_EXTI15     = 6,  /*!< EXTI Line 15 */
+    ADC_INJTRIGGER_TIM8_CC4   = 7,  /*!< TIM8 Channel 4 */
+    ADC_INJTRIGGER_TIM1_TRGO2 = 8,  /*!< TIM1 Trigger Out 2 */
+    ADC_INJTRIGGER_TIM8_TRGO  = 9,  /*!< TIM8 Trigger Out */
+    ADC_INJTRIGGER_TIM8_TRGO2 = 10, /*!< TIM8 Trigger Out 2 */
+    ADC_INJTRIGGER_TIM3_CC3   = 11, /*!< TIM3 Channel 3 */
+    ADC_INJTRIGGER_TIM3_TRGO  = 12, /*!< TIM3 Trigger Out */
+    ADC_INJTRIGGER_TIM3_CC1   = 13, /*!< TIM3 Channel 1 */
+    ADC_INJTRIGGER_TIM6_TRGO  = 14, /*!< TIM6 Trigger Out */
+    ADC_INJTRIGGER_TIM15_TRGO = 15, /*!< TIM15 Trigger Out */
+    ADC_INJTRIGGER_SOFTWARE   = 16  /*!< Implicit trigger by software on start call */
 }ADC_InjTriggerSourceType;
-
-/** @brief ADC1 and 2 injected trigger sources */
-typedef enum
-{
-    ADC1_2_INJTRIGGER_TIM1_TRGO  = 0,  /*!< TIM1 Trigger Out */
-    ADC1_2_INJTRIGGER_TIM1_CC4   = 1,  /*!< TIM1 Channel 4 */
-    ADC1_2_INJTRIGGER_TIM2_TRGO  = 2,  /*!< TIM2 Trigger Out */
-    ADC1_2_INJTRIGGER_TIM2_CC1   = 3,  /*!< TIM2 Channel 1 */
-    ADC1_2_INJTRIGGER_TIM3_CC4   = 4,  /*!< TIM3 Channel 4 */
-    ADC1_2_INJTRIGGER_TIM4_TRGO  = 5,  /*!< TIM4 Trigger Out */
-    ADC1_2_INJTRIGGER_EXTI15     = 6,  /*!< EXTI Line 15 */
-    ADC1_2_INJTRIGGER_TIM8_CC4   = 7,  /*!< TIM8 Channel 4 */
-    ADC1_2_INJTRIGGER_TIM1_TRGO2 = 8,  /*!< TIM1 Trigger Out 2 */
-#ifdef HRTIM1
-    ADC1_2_INJTRIGGER_HRTIM_TRG2 = 9,  /*!< HRTIM Trigger 2 */
-    ADC1_2_INJTRIGGER_HRTIM_TRG4 = 10, /*!< HRTIM Trigger 4 */
-#else
-    ADC1_2_INJTRIGGER_TIM8_TRGO  = 9,  /*!< TIM8 Trigger Out */
-    ADC1_2_INJTRIGGER_TIM8_TRGO2 = 10, /*!< TIM8 Trigger Out 2 */
-#endif
-    ADC1_2_INJTRIGGER_TIM3_CC3   = 11, /*!< TIM3 Channel 3 */
-    ADC1_2_INJTRIGGER_TIM3_TRGO  = 12, /*!< TIM3 Trigger Out */
-    ADC1_2_INJTRIGGER_TIM3_CC1   = 13, /*!< TIM3 Channel 1 */
-    ADC1_2_INJTRIGGER_TIM6_TRGO  = 14, /*!< TIM6 Trigger Out */
-    ADC1_2_INJTRIGGER_TIM15_TRGO = 15, /*!< TIM15 Trigger Out */
-    ADC1_2_INJTRIGGER_SOFTWARE   = 16  /*!< Implicit trigger by software on start call */
-}ADC1_2_InjTriggerSourceType;
-
-/** @brief ADC3 and 4 injected trigger sources */
-typedef enum
-{
-    ADC3_4_INJTRIGGER_TIM1_TRGO  = 0,  /*!< TIM1 Trigger Out */
-    ADC3_4_INJTRIGGER_TIM1_CC4   = 1,  /*!< TIM1 Channel 4 */
-    ADC3_4_INJTRIGGER_TIM4_CC3   = 2,  /*!< TIM4 Channel 3 */
-    ADC3_4_INJTRIGGER_TIM8_CC2   = 3,  /*!< TIM8 Channel 2 */
-    ADC3_4_INJTRIGGER_TIM8_CC3   = 4,  /*!< TIM8 Channel 3 */
-    ADC3_4_INJTRIGGER_TIM8_CC4   = 5,  /*!< TIM8 Channel 4 */
-    ADC3_4_INJTRIGGER_TIM4_CC4   = 6,  /*!< TIM4 Channel 4 */
-    ADC3_4_INJTRIGGER_TIM4_TRGO  = 7,  /*!< TIM4 Trigger Out */
-    ADC3_4_INJTRIGGER_TIM1_TRGO2 = 8,  /*!< TIM1 Trigger Out 2 */
-    ADC3_4_INJTRIGGER_TIM8_TRGO  = 9,  /*!< TIM8 Trigger Out */
-    ADC3_4_INJTRIGGER_TIM8_TRGO2 = 10, /*!< TIM8 Trigger Out 2 */
-    ADC3_4_INJTRIGGER_TIM1_CC3   = 11, /*!< TIM1 Channel 3 */
-    ADC3_4_INJTRIGGER_TIM3_TRGO  = 12, /*!< TIM3 Trigger Out */
-    ADC3_4_INJTRIGGER_TIM2_TRGO  = 13, /*!< TIM2 Trigger Out */
-    ADC3_4_INJTRIGGER_TIM7_TRGO  = 14, /*!< TIM7 Trigger Out */
-    ADC3_4_INJTRIGGER_TIM15_TRGO = 15, /*!< TIM15 Trigger Out */
-    ADC3_4_INJTRIGGER_SOFTWARE   = 16  /*!< Implicit trigger by software on start call */
-}ADC3_4_InjTriggerSourceType;
 
 /** @brief ADC injected channel setup structure */
 typedef struct
 {
-    FunctionalState    AutoInjection;       /*!< Automatic injected conversion after regular group
+    FunctionalState      AutoInjection;     /*!< Automatic injected conversion after regular group
                                                  @note External triggers must be disabled */
-    FunctionalState    DiscontinuousMode;   /*!< Sets discontinuous mode
+    FunctionalState      DiscontinuousMode; /*!< Sets discontinuous mode
                                                  @note Cannot be used with auto injection */
     struct {
         ADC_InjTriggerSourceType InjSource; /*!< Source of the conversion trigger */
         EdgeType                 Edge;      /*!< Trigger edges that initiate conversion */
     }Trigger;
-    FunctionalState    ContextQueue;        /*!< Context queue feature */
+    FunctionalState      ContextQueue;      /*!< Context queue feature */
+    ADC_OversamplingType Oversampling;      /*!< Oversampling configuration for injected group */
 }ADC_Injected_InitType;
 
 /** @} */
-
-/* Compatibility macros */
-#define ADC_INJTRIGGER_TIM1_TRGO  (ADC_INJTRIGGER_TIM1_TRGO)
-#define ADC_INJTRIGGER_TIM1_CC4   (ADC_INJTRIGGER_TIM1_CC4)
-#define ADC_INJTRIGGER_TIM2_TRGO  (ADC_INJTRIGGER_TIM2_TRGO)
-#define ADC_INJTRIGGER_TIM2_CC1   (ADC_INJTRIGGER_TIM2_CC1)
-#define ADC_INJTRIGGER_TIM3_CC4   (ADC_INJTRIGGER_TIM3_CC4)
-#define ADC_INJTRIGGER_TIM4_TRGO  (ADC_INJTRIGGER_TIM4_TRGO)
-#define ADC_INJTRIGGER_EXTI15     (ADC_INJTRIGGER_EXTI15)
-#define ADC_INJTRIGGER_TIM8_CC4   (ADC_INJTRIGGER_TIM8_CC4)
-#define ADC_INJTRIGGER_TIM1_TRGO2 (ADC_INJTRIGGER_TIM1_TRGO2)
-#ifdef HRTIM1
-#define ADC_INJTRIGGER_HRTIM_TRG2 (ADC_INJTRIGGER_HRTIM_TRG2)
-#define ADC_INJTRIGGER_HRTIM_TRG4 (ADC_INJTRIGGER_HRTIM_TRG4)
-#else
-#define ADC_INJTRIGGER_TIM8_TRGO  (ADC_INJTRIGGER_TIM8_TRGO)
-#define ADC_INJTRIGGER_TIM8_TRGO2 (ADC_INJTRIGGER_TIM8_TRGO2)
-#endif
-#define ADC_INJTRIGGER_TIM3_CC3   (ADC_INJTRIGGER_TIM3_CC3)
-#define ADC_INJTRIGGER_TIM3_TRGO  (ADC_INJTRIGGER_TIM3_TRGO)
-#define ADC_INJTRIGGER_TIM3_CC1   (ADC_INJTRIGGER_TIM3_CC1)
-#define ADC_INJTRIGGER_TIM6_TRGO  (ADC_INJTRIGGER_TIM6_TRGO)
-#define ADC_INJTRIGGER_TIM15_TRGO (ADC_INJTRIGGER_TIM15_TRGO)
 
 /** @addtogroup ADC_Injected_Exported_Functions
  * @{ */
@@ -618,7 +527,7 @@ __STATIC_INLINE uint16_t XPD_ADC_Inject_GetValue(ADC_HandleType * hadc, uint8_t 
 
 /** @} */
 
-#ifdef ADC12_COMMON
+#ifdef ADC123_COMMON
 /** @defgroup ADC_MultiMode Multi ADC Mode Conversions
  * @{ */
 
