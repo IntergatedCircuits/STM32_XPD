@@ -12,8 +12,8 @@ The project redefines all peripheral layout structures to include bit field defi
 
 ## Documentation
 
-The project is well structured and doxygen documented, therefore offering easy understandability and navigation. The [XPD Wiki](https://github.com/IntergatedCircuits/STM32_XPD/wiki) offers a Beginner's Guide as well as detailed explanation of the unique concepts applied in the library.
+The project is well structured and doxygen documented, therefore offering easy understandability and navigation. The [XPD Wiki](https://github.com/IntergatedCircuits/STM32_XPD/wiki) offers a Beginner's Guide as well as detailed explanation of each peripheral module driver and the unique concepts applied in the library.
 
 ## Feedback
 
-The CMSIS device descriptors are result of a custom code generator with some manual touchups, therefore certain bit fields might have allocated incorrectly. Generally only the XPD supported peripherals' fields can be relied upon. Furthermore, part of the XPD API itself is not thoroughly tested. Should you find any bugs, have any questions or constructive ideas please don't be afraid to contact the author or [open an issue](https://github.com/IntergatedCircuits/STM32_XPD/issues/new).
+The CMSIS device descriptors are result of a custom code generator with some manual touchups, therefore certain bit fields might have allocated incorrectly. Generally only the XPD supported peripherals' fields can be relied upon. Furthermore, part of the XPD API itself is not thoroughly tested. If you find any bugs, have any questions or constructive ideas, or would like to request support of a currently missing device, don't be afraid to contact the author or [open an issue](https://github.com/IntergatedCircuits/STM32_XPD/issues/new).
