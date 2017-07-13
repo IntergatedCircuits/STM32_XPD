@@ -125,11 +125,11 @@ typedef enum
 /** @brief ADC operation types */
 typedef enum
 {
-    ADC_OPERATION_CONVERSION    = ADC_SR_EOC,  /*!< Conversion */
+    ADC_OPERATION_CONVERSION    = ADC_SR_EOC,  /*!< Regular conversion */
 #ifdef ADC_SR_JEOC
     ADC_OPERATION_INJCONVERSION = ADC_SR_JEOC, /*!< Injected conversion */
 #endif
-    ADC_OPERATION_WATCHDOG      = ADC_SR_AWD,  /*!< Analog watchdog */
+    ADC_OPERATION_WATCHDOG1     = ADC_SR_AWD,  /*!< Analog watchdog 1 */
     ADC_OPERATION_OVERRUN       = ADC_SR_OVR   /*!< Overrun */
 }ADC_OperationType;
 
@@ -150,35 +150,29 @@ typedef struct
     }Trigger;
 }ADC_InitType;
 
+/** @brief ADC analog watchdog selection */
+typedef enum
+{
+    ADC_AWD_NONE = 0, /*!< No watchdog is used */
+    ADC_AWD1     = 1, /*!< AWD default watchdog
+                           @note This watchdog can only monitor a single channel, or whole conversion group(s) */
+}ADC_WatchdogType;
+
 /** @brief ADC channel setup structure */
 typedef struct
 {
     uint8_t            Number;     /*!< Number of the ADC channel [0..18] */
     ADC_SampleTimeType SampleTime; /*!< Sample time of the channel */
     uint16_t           Offset;     /*!< Offset is subtracted after conversion of injected channel */
+    ADC_WatchdogType   Watchdog;   /*!< Channel monitoring watchdog selection */
 }ADC_ChannelInitType;
-
-/** @brief ADC watchdog channel selection */
-typedef enum
-{
-    ADC_WATCHDOG_NONE           = 0,                                                 /*!< No channels */
-    ADC_WATCHDOG_SINGLE_REG     = (ADC_CR1_AWDSGL | ADC_CR1_AWDEN),                  /*!< A single regular channel */
-    ADC_WATCHDOG_SINGLE_INJ     = (ADC_CR1_AWDSGL | ADC_CR1_JAWDEN),                 /*!< A single injected channel */
-    ADC_WATCHDOG_SINGLE_REG_INJ = (ADC_CR1_AWDSGL | ADC_CR1_AWDEN | ADC_CR1_JAWDEN), /*!< A single regular/injected channel */
-    ADC_WATCHDOG_ALL_REG        =  ADC_CR1_AWDEN,                                    /*!< All regular channels */
-    ADC_WATCHDOG_ALL_INJ        =  ADC_CR1_JAWDEN,                                   /*!< All injected channels */
-    ADC_WATCHDOG_ALL_REG_INJ    = (ADC_CR1_AWDEN | ADC_CR1_JAWDEN)                   /*!< All regular and injected channels */
-}ADC_WatchdogModeType;
 
 /** @brief ADC watchdog setup structure */
 typedef struct
 {
-    ADC_WatchdogModeType Mode;     /*!< Watchdog channel selection */
-    struct {
-        uint16_t High;             /*!< Watchdog high threshold */
-        uint16_t Low;              /*!< Watchdog low threshold */
-    } Threshold;
-}ADC_WatchdogInitType;
+    uint16_t High;             /*!< Watchdog high threshold */
+    uint16_t Low;              /*!< Watchdog low threshold */
+}ADC_WatchdogThresholdType;
 
 /** @brief ADC Handle structure */
 typedef struct
@@ -370,6 +364,9 @@ typedef struct
 /* Compatibility macros */
 #define         XPD_ADC_Calibrate(HANDLE, DIFFERENTIAL)     ((void)0)
 
+#define AWD1    AWD
+#define AWD1IE  AWDIE
+
 /** @} */
 
 /** @defgroup ADC_Core_Exported_Functions ADC Core Exported Functions
@@ -381,7 +378,8 @@ void            XPD_ADC_ChannelConfig       (ADC_HandleType * hadc, const ADC_Ch
 
 void            XPD_ADC_Start               (ADC_HandleType * hadc);
 void            XPD_ADC_Stop                (ADC_HandleType * hadc);
-XPD_ReturnType  XPD_ADC_PollStatus          (ADC_HandleType * hadc, ADC_OperationType Operation, uint32_t Timeout);
+XPD_ReturnType  XPD_ADC_PollStatus          (ADC_HandleType * hadc, ADC_OperationType Operation,
+                                             uint32_t Timeout);
 
 void            XPD_ADC_Start_IT            (ADC_HandleType * hadc);
 void            XPD_ADC_Stop_IT             (ADC_HandleType * hadc);
@@ -390,9 +388,9 @@ void            XPD_ADC_IRQHandler          (ADC_HandleType * hadc);
 XPD_ReturnType  XPD_ADC_Start_DMA           (ADC_HandleType * hadc, void * Address);
 void            XPD_ADC_Stop_DMA            (ADC_HandleType * hadc);
 
-void            XPD_ADC_WatchdogConfig      (ADC_HandleType * hadc, uint8_t Channel,
-                                             const ADC_WatchdogInitType * Config);
-uint8_t         XPD_ADC_WatchdogStatus      (ADC_HandleType * hadc);
+void            XPD_ADC_WatchdogConfig      (ADC_HandleType * hadc, ADC_WatchdogType Watchdog,
+                                             const ADC_WatchdogThresholdType * Config);
+ADC_WatchdogType XPD_ADC_WatchdogStatus     (ADC_HandleType * hadc);
 
 /**
  * @brief Return the result of the last ADC regular conversion.

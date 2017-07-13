@@ -47,6 +47,7 @@
 
 #define ADC_SQR_MASK            (ADC_SQR1_SQ1 >> ADC_SQR1_SQ1_Pos)
 #define ADC_SQR_SIZE            (ADC_SQR1_SQ2_Pos - ADC_SQR1_SQ1_Pos)
+#define ADC_SQR_REGDIR          (1)
 
 #if (ADC_COUNT > 1)
 
@@ -508,56 +509,94 @@ XPD_ReturnType XPD_ADC_Deinit(ADC_HandleType * hadc)
  * @param Channels: ADC regular channel configuration array pointer
  * @param ChannelCount: number of channels to configure
  */
-void XPD_ADC_ChannelConfig(ADC_HandleType * hadc, const ADC_ChannelInitType * Channels, uint8_t ChannelCount)
+void XPD_ADC_ChannelConfig(ADC_HandleType * hadc, const ADC_ChannelInitType * Channels,
+        uint8_t ChannelCount)
 {
     /* No regular conversion ongoing */
     if (ADC_REG_BIT(hadc, CR, ADSTART) == 0)
     {
         uint8_t i;
+        uint32_t seqOffset = ADC_SQR1_SQ1_Pos;
+        __IO uint32_t *pSQR = &hadc->Inst->SQR1.w;
 
-        /* Sequencer configuration */
-        for (i = 0; (i < ChannelCount) && (i < 4); i++)
+        for (i = 0; i < ChannelCount; i++)
         {
-            /* set the channel for the selected rank */
-            uint32_t choffset = ADC_SQR1_SQ1_Pos + (ADC_SQR_SIZE * i);
+            /* Sequencer configuration */
+            MODIFY_REG(*pSQR, ADC_SQR_MASK << seqOffset, Channels[i].Number << seqOffset);
 
-            MODIFY_REG(hadc->Inst->SQR1.w,
-                    ADC_SQR_MASK << choffset, Channels[i].Number << choffset);
-        }
-        for (; (i < ChannelCount) && (i < 9); i++)
-        {
-            /* set the channel for the selected rank */
-            uint32_t choffset = ADC_SQR_SIZE * (i - 4);
+            /* Advance to next sequence element */
+            seqOffset += ADC_SQR_SIZE;
 
-            MODIFY_REG(hadc->Inst->SQR2.w,
-                    ADC_SQR_MASK << choffset, Channels[i].Number << choffset);
-        }
-        for (; (i < ChannelCount) && (i < 14); i++)
-        {
-            /* set the channel for the selected rank */
-            uint32_t choffset = ADC_SQR_SIZE * (i - 9);
-
-            MODIFY_REG(hadc->Inst->SQR3.w,
-                    ADC_SQR_MASK << choffset, Channels[i].Number << choffset);
-        }
-        for (;  i < ChannelCount; i++)
-        {
-            /* set the channel for the selected rank */
-            uint32_t choffset = ADC_SQR_SIZE * (i - 14);
-
-            MODIFY_REG(hadc->Inst->SQR4.w,
-                    ADC_SQR_MASK << choffset, Channels[i].Number << choffset);
+            /* Jump to next register when the current one is filled */
+            if (seqOffset > (32 - ADC_SQR_SIZE))
+            {
+                pSQR += ADC_SQR_REGDIR;
+                seqOffset = 0;
+            }
         }
 
         /* No injected conversion ongoing */
         if (ADC_REG_BIT(hadc, CR, JADSTART) == 0)
         {
+            uint8_t wdgUsers = 0;
+            uint32_t watchdogMasks[4] = {0, 0, 0, 0};
+
             /* Channel sampling time configuration */
             for (i = 0; i < ChannelCount; i++)
             {
                 /* Sample time configuration */
                 adc_sampleTimeConfig(hadc, &Channels[i]);
+
+                watchdogMasks[1] = 1 << Channels[i].Number;
+                watchdogMasks[0] |= watchdogMasks[1];
+
+                /* If a watchdog is used for the channel, set it in the configuration */
+                if (Channels[i].Watchdog == ADC_AWD1)
+                {
+                    hadc->Inst->CFGR.b.AWD1CH = Channels[i].Number;
+                    wdgUsers++;
+                }
+                /* Store channel flag for channel-wise watchdog configuration */
+                else if (Channels[i].Watchdog != ADC_AWD_NONE)
+                {
+                    watchdogMasks[Channels[i].Watchdog] |= watchdogMasks[1];
+                }
             }
+
+            /* Determine watchdog1 configuration based on user count */
+            switch (wdgUsers)
+            {
+                case 0:
+                    CLEAR_BIT(hadc->Inst->CFGR.w,
+                            ADC_CFGR_AWD1SGL | ADC_CFGR_AWD1EN);
+                    break;
+
+                case 1:
+                    CLEAR_BIT(hadc->Inst->CFGR.w,
+                            ADC_CFGR_AWD1SGL | ADC_CFGR_AWD1EN);
+                    break;
+
+                default:
+                {
+                    uint32_t clrMask = ADC_CFGR_AWD1SGL | ADC_CFGR_AWD1EN;
+
+                    /* Clear single injected channel monitoring if exists */
+                    if ((hadc->Inst->CFGR.w & (ADC_CFGR_AWD1SGL | ADC_CFGR_JAWD1EN))
+                                           == (ADC_CFGR_AWD1SGL | ADC_CFGR_JAWD1EN) )
+                    {
+                        clrMask |= ADC_CFGR_JAWD1EN;
+                    }
+                    /* All regular channels will be monitored,
+                     * even if they were not configured so! */
+                    MODIFY_REG(hadc->Inst->CFGR.w,
+                            clrMask, ADC_CFGR_AWD1EN);
+                    break;
+                }
+            }
+
+            /* Clear unmonitored channel flags, set monitored ones */
+            MODIFY_REG(hadc->Inst->AWD2CR.w, watchdogMasks[0], watchdogMasks[2]);
+            MODIFY_REG(hadc->Inst->AWD3CR.w, watchdogMasks[0], watchdogMasks[3]);
 
             /* Set offsets configuration */
             adc_offsetConfig(hadc, Channels, ChannelCount);
@@ -828,7 +867,7 @@ void XPD_ADC_IRQHandler(ADC_HandleType * hadc)
     if (    ((isr & ADC_ISR_AWD1) != 0)
          && ((ier & ADC_IER_AWD1IE) != 0))
     {
-        hadc->ActiveWatchdog = 1;
+        hadc->ActiveWatchdog = ADC_AWD1;
 
         /* watchdog callback */
         XPD_SAFE_CALLBACK(hadc->Callbacks.Watchdog, hadc);
@@ -840,7 +879,7 @@ void XPD_ADC_IRQHandler(ADC_HandleType * hadc)
     if (    ((isr & ADC_ISR_AWD2) != 0)
          && ((ier & ADC_IER_AWD2IE) != 0))
     {
-        hadc->ActiveWatchdog = 2;
+        hadc->ActiveWatchdog = ADC_AWD2;
 
         /* watchdog callback */
         XPD_SAFE_CALLBACK(hadc->Callbacks.Watchdog, hadc);
@@ -852,7 +891,7 @@ void XPD_ADC_IRQHandler(ADC_HandleType * hadc)
     if (    ((isr & ADC_ISR_AWD3) != 0)
          && ((ier & ADC_IER_AWD3IE) != 0))
     {
-        hadc->ActiveWatchdog = 3;
+        hadc->ActiveWatchdog = ADC_AWD3;
 
         /* watchdog callback */
         XPD_SAFE_CALLBACK(hadc->Callbacks.Watchdog, hadc);
@@ -960,108 +999,43 @@ void XPD_ADC_Stop_DMA(ADC_HandleType * hadc)
 /**
  * @brief Initializes the analog watchdog using the setup configuration.
  * @param hadc: pointer to the ADC handle structure
- * @param Channel: the ADC channel to monitor (only used when single channel monitoring is configured)
+ * @param Watchdog: the analog watchdog selection
  * @param Config: pointer to analog watchdog setup configuration
  */
-void XPD_ADC_WatchdogConfig(ADC_HandleType * hadc, uint8_t Channel, const ADC_WatchdogInitType * Config)
+void XPD_ADC_WatchdogConfig(ADC_HandleType * hadc, ADC_WatchdogType Watchdog,
+        const ADC_WatchdogThresholdType * Config)
 {
     /* No injected or regular conversion ongoing */
-    if ((hadc->Inst->CR.w & ADC_STARTCTRL) == 0)
+    if ((Watchdog != ADC_AWD_NONE) && ((hadc->Inst->CR.w & ADC_STARTCTRL) == 0))
     {
         uint32_t scaling = hadc->Inst->CFGR.b.RES * 2;
+        uint32_t trx;
 
-        /* AWD1 */
-        if (Config->Number == 1)
+        /* Analog watchdogs configuration */
+        if (Watchdog == ADC_AWD1)
         {
-            /* Set channels selection */
-            MODIFY_REG(hadc->Inst->CFGR.w,
-                    (ADC_CFGR_AWD1SGL | ADC_CFGR_JAWD1EN | ADC_CFGR_AWD1EN), Config->Mode);
-            hadc->Inst->CFGR.b.AWD1CH = Channel;
-
-            hadc->Inst->TR1.w = (Config->Threshold.High  << (16 + scaling))
-                    | (Config->Threshold.Low  << scaling);
-
-            XPD_ADC_ClearFlag(hadc, AWD1);
-
-            /* Configure ADC Analog watchdog interrupt */
-            XPD_ADC_EnableIT(hadc, AWD1);
+            /* Shift the offset in function of the selected ADC resolution:
+             * Thresholds have to be left-aligned on bit 11, the LSB (right bits)
+             * are set to 0 */
+            hadc->Inst->TR1.w = (Config->High  << (16 + scaling))
+                    | (Config->Low  << scaling);
         }
         else
         {
-            uint32_t thr;
             /* Shift the threshold in function of the selected ADC resolution
              * have to be left-aligned on bit 7, the LSB (right bits) are set to 0 */
-            if (4 < scaling)
+            if (scaling < 5)
             {
-                thr = (Config->Threshold.High  << (20 - scaling))
-                        | (Config->Threshold.Low  >> (scaling - 4));
+                trx = (Config->High  << (20 - scaling))
+                        | (Config->Low  << (4 - scaling));
             }
             else
             {
-                thr = (Config->Threshold.High  << (20 - scaling))
-                        | (Config->Threshold.Low  << (4 - scaling));
+                trx = (Config->High  << (20 - scaling))
+                        | (Config->Low  >> (scaling - 4));
             }
 
-            /* AWD2 */
-            if (Config->Number == 2)
-            {
-                if (Config->Mode != ADC_WATCHDOG_NONE)
-                {
-                    /* Set the high and low thresholds */
-                    hadc->Inst->TR2.w = thr;
-
-                    /* All channels selection */
-                    if ((Config->Mode & ADC_CFGR_AWD1SGL) == 0)
-                    {
-                        hadc->Inst->AWD2CR.w = ADC_AWD2CR_AWD2CH;
-                    }
-                    else
-                    {
-                        SET_BIT(hadc->Inst->AWD2CR.w, 1 << Channel);
-                    }
-                }
-                else
-                {
-                    /* Disable watchdog */
-                    hadc->Inst->TR2.w = 0;
-                    hadc->Inst->AWD2CR.w = 0;
-                }
-
-                XPD_ADC_ClearFlag(hadc, AWD2);
-
-                /* Configure ADC Analog watchdog interrupt */
-                XPD_ADC_EnableIT(hadc, AWD2);
-            }
-            /* AWD3 */
-            else
-            {
-                if (Config->Mode != ADC_WATCHDOG_NONE)
-                {
-                    /* Set the high and low thresholds */
-                    hadc->Inst->TR3.w = thr;
-
-                    /* All channels selection */
-                    if ((Config->Mode & ADC_CFGR_AWD1SGL) == 0)
-                    {
-                        hadc->Inst->AWD3CR.w = ADC_AWD3CR_AWD3CH;
-                    }
-                    else
-                    {
-                        SET_BIT(hadc->Inst->AWD3CR.w, 1 << Channel);
-                    }
-                }
-                else
-                {
-                    /* Disable watchdog */
-                    hadc->Inst->TR3.w = 0;
-                    hadc->Inst->AWD3CR.w = 0;
-                }
-
-                XPD_ADC_ClearFlag(hadc, AWD3);
-
-                /* Configure ADC Analog watchdog interrupt */
-                XPD_ADC_EnableIT(hadc, AWD3);
-            }
+            (&hadc->Inst->TR2.w)[Watchdog - ADC_AWD2] = trx;
         }
     }
 }
@@ -1071,7 +1045,7 @@ void XPD_ADC_WatchdogConfig(ADC_HandleType * hadc, uint8_t Channel, const ADC_Wa
  * @param hadc: pointer to the ADC handle structure
  * @return The watchdog number if an active watchdog triggered an interrupt, 0 otherwise
  */
-uint8_t XPD_ADC_WatchdogStatus(ADC_HandleType * hadc)
+ADC_WatchdogType XPD_ADC_WatchdogStatus(ADC_HandleType * hadc)
 {
     /* Update the active watchdog variable with current flag status */
     hadc->ActiveWatchdog *= hadc->Inst->ISR.w >> (hadc->ActiveWatchdog + ADC_ISR_AWD1_Pos - 1);
@@ -1137,16 +1111,69 @@ void XPD_ADC_Injected_ChannelConfig(ADC_HandleType * hadc, const ADC_ChannelInit
         uint8_t ChannelCount)
 {
     uint8_t i;
+    uint32_t seqOffset = ADC_JSQR_JSQ1_Pos;
 
     /* No ongoing conversions bound settings */
     if ((hadc->Inst->CR.w & ADC_STARTCTRL) == 0)
     {
+        uint8_t wdgUsers = 0;
+        uint32_t watchdogMasks[4] = {0, 0, 0, 0};
+
         /* Channel sampling time configuration */
         for (i = 0; i < ChannelCount; i++)
         {
             /* Sample time configuration */
             adc_sampleTimeConfig(hadc, &Channels[i]);
+
+            watchdogMasks[1] = 1 << Channels[i].Number;
+            watchdogMasks[0] |= watchdogMasks[1];
+
+            /* If a watchdog is used for the channel, set it in the configuration */
+            if (Channels[i].Watchdog == ADC_AWD1)
+            {
+                hadc->Inst->CFGR.b.AWD1CH = Channels[i].Number;
+                wdgUsers++;
+            }
+            /* Store channel flag for channel-wise watchdog configuration */
+            else if (Channels[i].Watchdog != ADC_AWD_NONE)
+            {
+                watchdogMasks[Channels[i].Watchdog] |= watchdogMasks[1];
+            }
         }
+        /* Determine watchdog1 configuration based on user count */
+        switch (wdgUsers)
+        {
+            case 0:
+                CLEAR_BIT(hadc->Inst->CFGR.w,
+                        ADC_CFGR_AWD1SGL | ADC_CFGR_JAWD1EN);
+                break;
+
+            case 1:
+                CLEAR_BIT(hadc->Inst->CFGR.w,
+                        ADC_CFGR_AWD1SGL | ADC_CFGR_JAWD1EN);
+                break;
+
+            default:
+            {
+                uint32_t clrMask = ADC_CFGR_AWD1SGL | ADC_CFGR_JAWD1EN;
+
+                /* Clear single regular channel monitoring if exists */
+                if ((hadc->Inst->CFGR.w & (ADC_CFGR_AWD1SGL | ADC_CFGR_AWD1EN))
+                                       == (ADC_CFGR_AWD1SGL | ADC_CFGR_AWD1EN) )
+                {
+                    clrMask |= ADC_CFGR_AWD1EN;
+                }
+                /* All injected channels will be monitored,
+                 * even if they were not configured so! */
+                MODIFY_REG(hadc->Inst->CFGR.w,
+                        clrMask, ADC_CFGR_JAWD1EN);
+                break;
+            }
+        }
+
+        /* Clear unmonitored channel flags, set monitored ones */
+        MODIFY_REG(hadc->Inst->AWD2CR.w, watchdogMasks[0], watchdogMasks[2]);
+        MODIFY_REG(hadc->Inst->AWD3CR.w, watchdogMasks[0], watchdogMasks[3]);
 
         /* Set offsets configuration */
         adc_offsetConfig(hadc, Channels, ChannelCount);
@@ -1185,11 +1212,10 @@ void XPD_ADC_Injected_ChannelConfig(ADC_HandleType * hadc, const ADC_ChannelInit
     for (i = 0; i < ChannelCount; i++)
     {
         /* Channel configuration for a given rank */
-        uint32_t choffset = ADC_JSQR_JSQ1_Pos + (ADC_SQR_SIZE * i);
-
-        /* Set the SQx bits for the selected rank */
         MODIFY_REG(hadc->InjectedContextQueue,
-                ADC_SQR_MASK << choffset, Channels[i].Number << choffset);
+                ADC_SQR_MASK << seqOffset, Channels[i].Number << seqOffset);
+
+        seqOffset += ADC_SQR_SIZE;
     }
 
     /* Set the injected sequence length */
@@ -1317,7 +1343,7 @@ void XPD_ADC_MultiMode_Config(ADC_HandleType * hadc, const ADC_MultiMode_InitTyp
              && ((            *pCR & ADC_CR_ADEN) == 0))
         {
             common->CCR.b.DUAL  = Config->Mode;
-            common->CCR.b.DELAY = Config->InterSamplingDelay;
+            common->CCR.b.DELAY = Config->InterSamplingDelay - 1;
         }
     }
 }

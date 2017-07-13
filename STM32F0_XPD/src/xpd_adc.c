@@ -278,12 +278,14 @@ XPD_ReturnType XPD_ADC_Deinit(ADC_HandleType * hadc)
  * @note  This device line does not support channel-wise sample time configuration,
  *        simply the first element's setting will be applied for all channels.
  */
-void XPD_ADC_ChannelConfig(ADC_HandleType * hadc, const ADC_ChannelInitType * Channels, uint8_t ChannelCount)
+void XPD_ADC_ChannelConfig(ADC_HandleType * hadc, const ADC_ChannelInitType * Channels,
+        uint8_t ChannelCount)
 {
     /* No ongoing conversion on regular group */
     if (ADC_REG_BIT(hadc, CR, ADSTART) == 0)
     {
         uint8_t i;
+        uint8_t wdgUsers = 0;
 
         /* Set common sampling time */
         hadc->Inst->SMPR.b.SMP = Channels[0].SampleTime;
@@ -298,10 +300,38 @@ void XPD_ADC_ChannelConfig(ADC_HandleType * hadc, const ADC_ChannelInitType * Ch
 
             /* Internal channel configuration (if applicable) */
             adc_initInternalChannel(hadc, Channels[i].Number);
+
+            /* If a watchdog is used for the channel, set it in the configuration */
+            if (Channels[i].Watchdog != ADC_AWD_NONE)
+            {
+                hadc->Inst->CFGR1.b.AWD1CH = Channels[i].Number;
+                wdgUsers++;
+            }
         }
 
         /* Set conversion count */
         hadc->ConversionCount = ChannelCount;
+
+        /* Determine watchdog configuration based on user count */
+        switch (wdgUsers)
+        {
+            case 0:
+                CLEAR_BIT(hadc->Inst->CFGR1.w,
+                        ADC_CFGR1_AWD1SGL | ADC_CFGR1_AWD1EN);
+                break;
+
+            case 1:
+                SET_BIT(hadc->Inst->CFGR1.w,
+                        ADC_CFGR1_AWD1SGL | ADC_CFGR1_AWD1EN);
+                break;
+
+            default:
+                /* All regular channels will be monitored,
+                 * even if they were not configured so! */
+                MODIFY_REG(hadc->Inst->CFGR1.w,
+                        ADC_CFGR1_AWD1SGL | ADC_CFGR1_AWD1EN, ADC_CFGR1_AWD1EN);
+                break;
+        }
     }
 }
 
@@ -555,33 +585,24 @@ void XPD_ADC_Stop_DMA(ADC_HandleType * hadc)
 /**
  * @brief Initializes the analog watchdog using the setup configuration.
  * @param hadc: pointer to the ADC handle structure
- * @param Channel: the ADC channel to monitor (only used when single channel monitoring is configured)
+ * @param Watchdog: the analog watchdog selection
  * @param Config: pointer to analog watchdog setup configuration
  */
-void XPD_ADC_WatchdogConfig(ADC_HandleType * hadc, uint8_t Channel, const ADC_WatchdogInitType * Config)
+void XPD_ADC_WatchdogConfig(ADC_HandleType * hadc, ADC_WatchdogType Watchdog,
+        const ADC_WatchdogThresholdType * Config)
 {
     /* Configure when ADC is stopped */
-    if ((hadc->Inst->CR.w & ADC_STARTCTRL) == 0)
+    if ((Watchdog != ADC_AWD_NONE) && ((hadc->Inst->CR.w & ADC_STARTCTRL) == 0))
     {
         uint32_t scaling = hadc->Inst->CFGR1.b.RES * 2;
 
         /* Analog watchdogs configuration */
         {
-            MODIFY_REG(hadc->Inst->CFGR1.w,
-                    (ADC_CFGR1_AWD1SGL | ADC_CFGR1_AWD1EN), Config->Mode);
-            hadc->Inst->CFGR1.b.AWD1CH = Channel;
-
             /* Shift the offset in function of the selected ADC resolution:
              * Thresholds have to be left-aligned on bit 11, the LSB (right bits)
              * are set to 0 */
-            hadc->Inst->TR.w = (Config->Threshold.High  << (16 + scaling))
-                    | (Config->Threshold.Low  << scaling);
-
-            /* Clear the ADC Analog watchdog flag */
-            XPD_ADC_ClearFlag(hadc, AWD1);
-
-            /* Configure ADC Analog watchdog interrupt */
-            XPD_ADC_EnableIT(hadc, AWD1);
+            hadc->Inst->TR.w = (Config->High  << (16 + scaling))
+                    | (Config->Low  << scaling);
         }
     }
 }
@@ -591,7 +612,7 @@ void XPD_ADC_WatchdogConfig(ADC_HandleType * hadc, uint8_t Channel, const ADC_Wa
  * @param hadc: pointer to the ADC handle structure
  * @return Set if the watchdog is active, 0 otherwise
  */
-uint8_t XPD_ADC_WatchdogStatus(ADC_HandleType * hadc)
+ADC_WatchdogType XPD_ADC_WatchdogStatus(ADC_HandleType * hadc)
 {
     return XPD_ADC_GetFlag(hadc, AWD1);
 }

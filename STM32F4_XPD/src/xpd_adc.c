@@ -67,6 +67,7 @@ uint32_t XPD_ADC_GetClockFreq(void)
 
 #define ADC_SQR_MASK            (ADC_SQR3_SQ1 >> ADC_SQR3_SQ1_Pos)
 #define ADC_SQR_SIZE            (ADC_SQR3_SQ2_Pos - ADC_SQR3_SQ1_Pos)
+#define ADC_SQR_REGDIR          (-1)
 
 static void adc_dmaConversionRedirect(void *hdma)
 {
@@ -220,47 +221,76 @@ XPD_ReturnType XPD_ADC_Deinit(ADC_HandleType * hadc)
  * @param Channels: ADC regular channel configuration array pointer
  * @param ChannelCount: number of channels to configure
  */
-void XPD_ADC_ChannelConfig(ADC_HandleType * hadc, const ADC_ChannelInitType * Channels, uint8_t ChannelCount)
+void XPD_ADC_ChannelConfig(ADC_HandleType * hadc, const ADC_ChannelInitType * Channels,
+        uint8_t ChannelCount)
 {
     uint8_t i;
-
-    /* Sequencer configuration */
-    for (i = 0; (i < ChannelCount) && (i < 6); i++)
-    {
-        /* set the channel for the selected rank */
-        uint32_t choffset = ADC_SQR3_SQ1_Pos + (ADC_SQR_SIZE * i);
-
-        MODIFY_REG(hadc->Inst->SQR3.w,
-                ADC_SQR_MASK << choffset, Channels[i].Number << choffset);
-    }
-    for (; (i < ChannelCount) && (i < 12); i++)
-    {
-        /* set the channel for the selected rank */
-        uint32_t choffset = ADC_SQR_SIZE * (i - 6);
-
-        MODIFY_REG(hadc->Inst->SQR2.w,
-                ADC_SQR_MASK << choffset, Channels[i].Number << choffset);
-    }
-    for (;  i < ChannelCount; i++)
-    {
-        /* set the channel for the selected rank */
-        uint32_t choffset = ADC_SQR_SIZE * (i - 12);
-
-        MODIFY_REG(hadc->Inst->SQR1.w,
-                ADC_SQR_MASK << choffset, Channels[i].Number << choffset);
-    }
+    uint32_t seqOffset = ADC_SQR3_SQ1_Pos;
+    __IO uint32_t *pSQR = &hadc->Inst->SQR3.w;
+    uint8_t wdgUsers = 0;
 
     for (i = 0; i < ChannelCount; i++)
     {
+        /* Sequencer configuration */
+        MODIFY_REG(*pSQR, ADC_SQR_MASK << seqOffset, Channels[i].Number << seqOffset);
+
+        /* Advance to next sequence element */
+        seqOffset += ADC_SQR_SIZE;
+
+        /* Jump to next register when the current one is filled */
+        if (seqOffset > (32 - ADC_SQR_SIZE))
+        {
+            pSQR += ADC_SQR_REGDIR;
+            seqOffset = 0;
+        }
+
         /* Sample time configuration */
         adc_sampleTimeConfig(hadc, &Channels[i]);
 
         /* Internal channel configuration (if applicable) */
         adc_initInternalChannel(hadc, Channels[i].Number);
+
+        /* If a watchdog is used for the channel, set it in the configuration */
+        if (Channels[i].Watchdog != ADC_AWD_NONE)
+        {
+            hadc->Inst->CR1.b.AWDCH = Channels[i].Number;
+            wdgUsers++;
+        }
     }
 
     /* Set the number of conversions */
     hadc->Inst->SQR1.b.L = ChannelCount - 1;
+
+    /* Determine watchdog configuration based on user count */
+    switch (wdgUsers)
+    {
+        case 0:
+            CLEAR_BIT(hadc->Inst->CR1.w,
+                    ADC_CR1_AWDEN | ADC_CR1_AWDSGL);
+            break;
+
+        case 1:
+            SET_BIT(hadc->Inst->CR1.w,
+                    ADC_CR1_AWDEN | ADC_CR1_AWDSGL);
+            break;
+
+        default:
+        {
+            uint32_t clrMask = ADC_CR1_AWDEN | ADC_CR1_AWDSGL;
+
+            /* Clear single injected channel monitoring if exists */
+            if ((hadc->Inst->CR1.w & (ADC_CR1_AWDSGL | ADC_CR1_JAWDEN))
+                                  == (ADC_CR1_AWDSGL | ADC_CR1_JAWDEN) )
+            {
+                clrMask |= ADC_CR1_JAWDEN;
+            }
+            /* All regular channels will be monitored,
+             * even if they were not configured so! */
+            MODIFY_REG(hadc->Inst->CR1.w,
+                    clrMask, ADC_CR1_AWDEN);
+            break;
+        }
+    }
 }
 
 /**
@@ -517,30 +547,24 @@ void XPD_ADC_Stop_DMA(ADC_HandleType * hadc)
 /**
  * @brief Initializes the analog watchdog using the setup configuration.
  * @param hadc: pointer to the ADC handle structure
- * @param Channel: the ADC channel to monitor (only used when single channel monitoring is configured)
+ * @param Watchdog: the analog watchdog selection
  * @param Config: pointer to analog watchdog setup configuration
  */
-void XPD_ADC_WatchdogConfig(ADC_HandleType * hadc, uint8_t Channel, const ADC_WatchdogInitType * Config)
+void XPD_ADC_WatchdogConfig(ADC_HandleType * hadc, ADC_WatchdogType Watchdog,
+        const ADC_WatchdogThresholdType * Config)
 {
-    /* set the analog watchdog mode */
-    MODIFY_REG(hadc->Inst->CR1.w, (ADC_CR1_AWDSGL | ADC_CR1_JAWDEN | ADC_CR1_AWDEN), Config->Mode);
-
-    /* Watchdog activation */
-    if (Config->Mode != ADC_WATCHDOG_NONE)
+    if (Watchdog != ADC_AWD_NONE)
     {
-        /* set thresholds */
-        hadc->Inst->HTR = Config->Threshold.High;
-        hadc->Inst->LTR = Config->Threshold.Low;
+        uint32_t scaling = hadc->Inst->CR1.b.RES * 2;
 
-        /* select the analog watchdog channel */
-        hadc->Inst->CR1.b.AWDCH = Channel;
-
-        XPD_ADC_EnableIT(hadc, AWD);
-    }
-    else
-    {
-        /* Watchdog deactivation */
-        XPD_ADC_DisableIT(hadc, AWD);
+        /* Analog watchdogs configuration */
+        {
+            /* Shift the offset in function of the selected ADC resolution:
+             * Thresholds have to be left-aligned on bit 11, the LSB (right bits)
+             * are set to 0 */
+            hadc->Inst->HTR = Config->High << scaling;
+            hadc->Inst->LTR = Config->Low  << scaling;
+        }
     }
 }
 
@@ -549,7 +573,7 @@ void XPD_ADC_WatchdogConfig(ADC_HandleType * hadc, uint8_t Channel, const ADC_Wa
  * @param hadc: pointer to the ADC handle structure
  * @return Set if the watchdog is active, 0 otherwise
  */
-uint8_t XPD_ADC_WatchdogStatus(ADC_HandleType * hadc)
+ADC_WatchdogType XPD_ADC_WatchdogStatus(ADC_HandleType * hadc)
 {
     return XPD_ADC_GetFlag(hadc, AWD);
 }
@@ -600,15 +624,16 @@ void XPD_ADC_Injected_ChannelConfig(ADC_HandleType * hadc, const ADC_ChannelInit
         uint8_t ChannelCount)
 {
     uint8_t i;
+    uint32_t seqOffset = ADC_JSQR_JSQ1_Pos;
+    uint8_t wdgUsers = 0;
 
     for (i = 0; i < ChannelCount; i++)
     {
         /* Channel configuration for a given rank */
-        uint32_t choffset = ADC_JSQR_JSQ1_Pos + (5 * i);
-
-        /* Set the SQx bits for the selected rank */
         MODIFY_REG(hadc->Inst->JSQR.w,
-                0x1F << choffset, Channels[i].Number << choffset);
+                ADC_SQR_MASK << seqOffset, Channels[i].Number << seqOffset);
+
+        seqOffset += ADC_SQR_SIZE;
 
         /* Sample time configuration */
         adc_sampleTimeConfig(hadc, &Channels[i]);
@@ -618,10 +643,48 @@ void XPD_ADC_Injected_ChannelConfig(ADC_HandleType * hadc, const ADC_ChannelInit
 
         /* Internal channel configuration (if applicable) */
         adc_initInternalChannel(hadc, Channels[i].Number);
+
+        /* If a watchdog is used for the channel, set it in the configuration */
+        if (Channels[i].Watchdog != ADC_AWD_NONE)
+        {
+            hadc->Inst->CR1.b.AWDCH = Channels[i].Number;
+            wdgUsers++;
+        }
     }
 
     /* Set the injected sequence length */
     hadc->Inst->JSQR.b.JL = ChannelCount - 1;
+
+    /* Determine watchdog configuration based on user count */
+    switch (wdgUsers)
+    {
+        case 0:
+            CLEAR_BIT(hadc->Inst->CR1.w,
+                    ADC_CR1_JAWDEN | ADC_CR1_AWDSGL);
+            break;
+
+        case 1:
+            SET_BIT(hadc->Inst->CR1.w,
+                    ADC_CR1_JAWDEN | ADC_CR1_AWDSGL);
+            break;
+
+        default:
+        {
+            uint32_t clrMask = ADC_CR1_JAWDEN | ADC_CR1_AWDSGL;
+
+            /* Clear single regular channel monitoring if exists */
+            if ((hadc->Inst->CR1.w & (ADC_CR1_AWDSGL | ADC_CR1_AWDEN))
+                                  == (ADC_CR1_AWDSGL | ADC_CR1_AWDEN) )
+            {
+                clrMask |= ADC_CR1_AWDEN;
+            }
+            /* All regular channels will be monitored,
+             * even if they were not configured so! */
+            MODIFY_REG(hadc->Inst->CR1.w,
+                    clrMask, ADC_CR1_JAWDEN);
+            break;
+        }
+    }
 }
 
 /**
