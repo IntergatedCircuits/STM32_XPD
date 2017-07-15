@@ -1,10 +1,10 @@
 /**
   ******************************************************************************
-  * @file      startup_stm32f302xc.s
+  * @file      startup_stm32f303xc.s
   * @author    MCD Application Team
   * @version   V2.2.0
   * @date      13-November-2015
-  * @brief     STM32F302xB/STM32F302xC devices vector table for Atollic 
+  * @brief     STM32F303xB/STM32F303xC devices vector table for Atollic 
   *            TrueSTUDIO toolchain.
   *            This module performs:
   *                - Set the initial SP
@@ -196,11 +196,11 @@ g_pfnVectors:
 	.word	EXTI15_10_IRQHandler
 	.word	RTC_Alarm_IRQHandler
 	.word	USBWakeUp_IRQHandler
-	.word	0
-	.word	0
-	.word	0
-	.word	0
-	.word	0
+	.word	TIM8_BRK_IRQHandler
+	.word	TIM8_UP_IRQHandler
+	.word	TIM8_TRG_COM_IRQHandler
+	.word	TIM8_CC_IRQHandler
+	.word	ADC3_IRQHandler
 	.word	0
 	.word	0
 	.word	0
@@ -208,18 +208,18 @@ g_pfnVectors:
 	.word	UART4_IRQHandler
 	.word	UART5_IRQHandler
 	.word	TIM6_DAC_IRQHandler
-	.word	0
+	.word	TIM7_IRQHandler
 	.word	DMA2_Channel1_IRQHandler
 	.word	DMA2_Channel2_IRQHandler
 	.word	DMA2_Channel3_IRQHandler
 	.word	DMA2_Channel4_IRQHandler
 	.word	DMA2_Channel5_IRQHandler
+	.word	ADC4_IRQHandler
 	.word	0
 	.word	0
-	.word	0
-	.word	COMP1_2_IRQHandler
-	.word	COMP4_6_IRQHandler
-	.word	0
+	.word	COMP1_2_3_IRQHandler
+	.word	COMP4_5_6_IRQHandler
+	.word	COMP7_IRQHandler
 	.word	0
 	.word	0
 	.word	0
@@ -400,6 +400,21 @@ g_pfnVectors:
 	.weak	USBWakeUp_IRQHandler
 	.thumb_set USBWakeUp_IRQHandler,Default_Handler
 
+	.weak	TIM8_BRK_IRQHandler
+	.thumb_set TIM8_BRK_IRQHandler,Default_Handler
+
+	.weak	TIM8_UP_IRQHandler
+	.thumb_set TIM8_UP_IRQHandler,Default_Handler
+
+	.weak	TIM8_TRG_COM_IRQHandler
+	.thumb_set TIM8_TRG_COM_IRQHandler,Default_Handler
+
+	.weak	TIM8_CC_IRQHandler
+	.thumb_set TIM8_CC_IRQHandler,Default_Handler
+
+	.weak	ADC3_IRQHandler
+	.thumb_set ADC3_IRQHandler,Default_Handler
+
 	.weak	SPI3_IRQHandler
 	.thumb_set SPI3_IRQHandler,Default_Handler
 
@@ -411,6 +426,9 @@ g_pfnVectors:
 
 	.weak	TIM6_DAC_IRQHandler
 	.thumb_set TIM6_DAC_IRQHandler,Default_Handler
+
+	.weak	TIM7_IRQHandler
+	.thumb_set TIM7_IRQHandler,Default_Handler
 
 	.weak	DMA2_Channel1_IRQHandler
 	.thumb_set DMA2_Channel1_IRQHandler,Default_Handler
@@ -426,12 +444,18 @@ g_pfnVectors:
 
 	.weak	DMA2_Channel5_IRQHandler
 	.thumb_set DMA2_Channel5_IRQHandler,Default_Handler
+
+	.weak	ADC4_IRQHandler
+	.thumb_set ADC4_IRQHandler,Default_Handler	
 	
-	.weak	COMP1_2_IRQHandler
-	.thumb_set COMP1_2_IRQHandler,Default_Handler
+	.weak	COMP1_2_3_IRQHandler
+	.thumb_set COMP1_2_3_IRQHandler,Default_Handler
 	
-	.weak	COMP4_6_IRQHandler
-	.thumb_set COMP4_6_IRQHandler,Default_Handler
+	.weak	COMP4_5_6_IRQHandler
+	.thumb_set COMP4_5_6_IRQHandler,Default_Handler
+	
+	.weak	COMP7_IRQHandler
+	.thumb_set COMP7_IRQHandler,Default_Handler	
 	
 	.weak	USB_HP_IRQHandler
 	.thumb_set USB_HP_IRQHandler,Default_Handler

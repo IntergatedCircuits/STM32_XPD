@@ -36,7 +36,7 @@
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
 #include <usbd_cdc_if.h>
-#include <xpd_user.h>
+#include <xpd_bsp.h>
 
 #define CDC_OUT_DATA_SIZE   256
 #define CDC_IN_DATA_SIZE    256

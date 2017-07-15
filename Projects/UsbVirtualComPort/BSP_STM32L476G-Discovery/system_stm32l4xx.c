@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    system_stm32f3xx.c
+  * @file    system_stm32l4xx.c
   * @author  Benedek Kupper
   * @version V0.1
   * @date    2017-06-02
@@ -26,11 +26,11 @@
   * @{
   */
 
-/** @addtogroup stm32f3xx_system
+/** @addtogroup stm32l4xx_system
   * @{
   */
 
-/** @addtogroup STM32F3xx_System_Private_Includes
+/** @addtogroup STM32L4xx_System_Private_Includes
   * @{
   */
 
@@ -43,7 +43,7 @@
   * @}
   */
 
-/** @addtogroup STM32F3xx_System_Private_Defines
+/** @addtogroup STM32L4xx_System_Private_Defines
   * @{
   */
 
@@ -56,27 +56,23 @@
   * @}
   */
 
-/** @addtogroup STM32F3xx_System_Private_Variables
+/** @addtogroup STM32L4xx_System_Private_Variables
   * @{
   */
 
 /** @brief Global variable used to store the actual system clock frequency [Hz] */
 uint32_t SystemCoreClock;
 
-/** @brief Global variable used to store the last MCU reset reason */
-RCC_ResetSourceType ResetSource;
-
 /**
   * @}
   */
 
-/** @addtogroup STM32F3xx_System_Private_Functions
+/** @addtogroup STM32L4xx_System_Private_Functions
   * @{
   */
 
 /**
-  * @brief  Setup the microcontroller system
-  *         Initialize the FPU setting, vector table location and the PLL configuration is reset.
+  * @brief  Setup the microcontroller system.
   */
 void SystemInit(void)
 {
@@ -102,13 +98,14 @@ void SystemInit(void)
     /* initialize XPD services */
     XPD_Init();
 
-    /* Read reset source to global variable */
-    ResetSource = XPD_RCC_GetResetSource(TRUE);
+    /* Configure system memory options */
+    XPD_FLASH_InstCacheCtrl(ENABLE);
 
-    /* TODO Configure system memory options */
+    XPD_FLASH_DataCacheCtrl(ENABLE);
+
     XPD_FLASH_PrefetchBufferCtrl(ENABLE);
 
-    /* TODO Set Interrupt Group Priority */
+    /* Set Interrupt Group Priority */
     XPD_NVIC_SetPriorityGroup(NVIC_PRIOGROUP_0PRE_4SUB);
 }
 

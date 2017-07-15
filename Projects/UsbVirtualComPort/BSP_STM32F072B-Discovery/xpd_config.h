@@ -1,10 +1,10 @@
 /**
   ******************************************************************************
-  * @file    xpd_user.h
+  * @file    xpd_config.h
   * @author  Benedek Kupper
   * @version V0.1
-  * @date    2016-06-05
-  * @brief   STM32 eXtensible Peripheral Drivers USB Firmware Upgrade Project
+  * @date    2017-06-03
+  * @brief   STM32 eXtensible Peripheral Drivers Configuration Header
   *
   *  This file is part of STM32_XPD.
   *
@@ -21,36 +21,26 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef __XPD_USER_H_
-#define __XPD_USER_H_
+#ifndef __XPD_CONFIG_H_
+#define __XPD_CONFIG_H_
 
-#include <xpd_core.h>
-#include <xpd_flash.h>
-#include <xpd_gpio.h>
-#include <xpd_rcc.h>
-#include <xpd_tim.h>
-#include <xpd_usb.h>
+/* TODO step 1: specify device header */
+#include "stm32f072xb.h"
 
-typedef enum
-{
-    USB_PIN_CFG = 0,
-    OUT_PIN_CFG,
-    PIN_CFG_COUNT
-}PinType;
+/* TODO step 2: specify used XPD modules */
+#define USE_XPD_USB
+#define USE_XPD_USART
 
-#define USB_CONNECT_PIN GPIOA, 9
+/* TODO step 3: specify power supplies */
+#define VDD_VALUE                   3000 /* Value of VDD in mV */
+#define VDDA_VALUE                  3000 /* Value of VDD Analog in mV */
 
-#define USB_DP_PIN      GPIOA, 12
-#define USB_DM_PIN      GPIOA, 11
+/* TODO step 4: specify oscillator parameters */
+/* #define HSE_VALUE 80000000
+ * #define LSE_VALUE 32768 */
 
-#define LED_RED_PIN     GPIOB, 14
-#define LED_GREEN_PIN   GPIOB, 15
+/* TODO step 5: specify vector table location */
+/* #define VECT_TAB_SRAM
+#define VECT_TAB_OFFSET  0x0  *//* Vector Table base offset field. This value must be a multiple of 0x200. */
 
-/* Indexed by PinType */
-extern const GPIO_InitType PinConfig[];
-
-extern USB_HandleType usbHandle;
-
-extern void ClockConfiguration(void);
-
-#endif /* __XPD_USER_H_ */
+#endif /* __XPD_CONFIG_H_ */

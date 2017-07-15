@@ -56,7 +56,7 @@
 #define USBD_PID                      0xDF11
 #define USBD_LANGID_STRING            0x409
 #define USBD_MANUFACTURER_STRING      "STMicroelectronics"
-#define USBD_PRODUCT_FS_STRING        "DFU in FS Mode"
+#define USBD_PRODUCT_FS_STRING        "DFU"
 #define USBD_CONFIGURATION_FS_STRING  "DFU Config"
 #define USBD_INTERFACE_FS_STRING      "DFU Interface"
 #define  USB_SIZ_STRING_SERIAL        0x1A

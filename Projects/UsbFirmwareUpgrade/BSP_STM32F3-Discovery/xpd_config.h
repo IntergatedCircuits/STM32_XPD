@@ -1,10 +1,10 @@
 /**
   ******************************************************************************
-  * @file    main.c
+  * @file    xpd_config.h
   * @author  Benedek Kupper
   * @version V0.1
-  * @date    2017-04-16
-  * @brief   STM32 eXtensible Peripheral Drivers USB Virtual COM Port Project
+  * @date    2016-01-01
+  * @brief   STM32 eXtensible Peripheral Drivers Configuration Header
   *
   *  This file is part of STM32_XPD.
   *
@@ -21,27 +21,28 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#include <xpd_user.h>
+#ifndef XPD_CONFIG_H_
+#define XPD_CONFIG_H_
 
-#include <usbd_core.h>
-#include <usbd_desc.h>
-#include <usbd_cdc_if.h>
+/* TODO step 1: specify device header */
+#include "stm32f303xc.h"
+
+/* TODO step 2: specify startup configuration */
+#define VDD_VALUE                   3000 /* Value of VDD in mV */
+#define VDDA_VALUE                  3000 /* Value of VDD Analog in mV */
 
 
-int main(void)
-{
-    ClockConfiguration();
+/* TODO step 3: specify used XPD modules */
+#define USE_XPD_FLASH
+#define USE_XPD_USB
 
-    /* Init Device Library, Add Supported Class and Start the library */
-    USBD_Init(&hUsbDeviceFS, (void*)&CDC_Desc, DEVICE_FS);
 
-    USBD_RegisterClass(&hUsbDeviceFS, (void*)&USBD_CDC);
+/* TODO step 4: specify oscillator parameters */
+#define HSE_VALUE 8000000 /* Value of the external high speed oscillator in Hz */
 
-    USBD_CDC_RegisterInterface(&hUsbDeviceFS, &USBD_Interface_fops_FS);
 
-    USBD_Start(&hUsbDeviceFS);
+/* TODO step 5: specify vector table location */
+/* #define VECT_TAB_SRAM */
+#define VECT_TAB_OFFSET  0x0 /* Vector Table base offset field. This value must be a multiple of 0x200. */
 
-    while(1)
-    {
-    }
-}
+#endif /* XPD_CONFIG_H_ */

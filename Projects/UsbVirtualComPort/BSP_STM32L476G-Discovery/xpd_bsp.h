@@ -1,10 +1,10 @@
 /**
   ******************************************************************************
-  * @file    main.c
+  * @file    xpd_bsp.h
   * @author  Benedek Kupper
   * @version V0.1
-  * @date    2016-05-27
-  * @brief   STM32 CAN to USB Virtual COM Port Project
+  * @date    2017-07-15
+  * @brief   STM32 eXtensible Peripheral Drivers USB Virtual COM Port Project
   *
   *  This file is part of STM32_XPD.
   *
@@ -21,28 +21,35 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
+#ifndef __XPD_BSP_H_
+#define __XPD_BSP_H_
 
-#include <xpd_user.h>
+#include <xpd_core.h>
+#include <xpd_gpio.h>
+#include <xpd_usart.h>
+#include <xpd_usb.h>
 
-#include <usbd_core.h>
-#include <usbd_desc.h>
-#include <usbd_dfu_flash.h>
-
-
-int main(void)
+typedef enum
 {
-    ClockConfiguration();
+    UART_PIN_CFG = 0,
+    USB_PIN_CFG,
+    PIN_CFG_COUNT
+}PinType;
 
-    /* Init Device Library, Add Supported Class and Start the library */
-    USBD_Init(&hUsbDeviceFS, (void*)&DFU_Desc, DEVICE_FS);
+#define UART_TX_PIN     GPIOD, 5
+#define UART_RX_PIN     GPIOD, 6
+#define USB_DP_PIN      GPIOA, 12
+#define USB_DM_PIN      GPIOA, 11
+#define USB_VBUS_PIN    GPIOA, 9
 
-    USBD_RegisterClass(&hUsbDeviceFS, (void*)&USBD_DFU);
+/* Indexed by PinType */
+extern const GPIO_InitType PinConfig[];
 
-    USBD_DFU_RegisterMedia(&hUsbDeviceFS, &USBD_DFU_Flash_fops);
+/* Peripheral handle references */
+extern USART_HandleType uart;
+extern USB_HandleType usbHandle;
 
-    USBD_Start(&hUsbDeviceFS);
+/* System clocks configuration */
+void ClockConfiguration(void);
 
-    while(1)
-    {
-    }
-}
+#endif /* __XPD_BSP_H_ */

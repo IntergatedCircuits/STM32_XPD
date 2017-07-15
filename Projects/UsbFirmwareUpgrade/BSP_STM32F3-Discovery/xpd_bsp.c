@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    mcu_conf.c
+  * @file    xpd_bsp.c
   * @author  Benedek Kupper
   * @version V0.1
   * @date    2017-06-05
@@ -21,8 +21,9 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#include <xpd_user.h>
-#include <xpd_utils.h>
+#include <xpd_bsp.h>
+
+#include <xpd_rcc.h>
 
 const GPIO_InitType PinConfig[] =
 {
@@ -67,11 +68,13 @@ void ClockConfiguration(void)
 
 /************************* USB ************************************/
 
+#ifdef USB_CONNECT_PIN
 /* Callback is used to set the USB FS device 1K5 pullup resistor on DP */
 static void usbConnect(FunctionalState state)
 {
     XPD_GPIO_WritePin(USB_CONNECT_PIN, state);
 }
+#endif
 
 /* USB dependencies initialization */
 static void usbinit(void * handle)
@@ -79,13 +82,15 @@ static void usbinit(void * handle)
     /* GPIO settings */
     XPD_GPIO_InitPin(USB_DM_PIN, &PinConfig[USB_PIN_CFG]);
     XPD_GPIO_InitPin(USB_DP_PIN, &PinConfig[USB_PIN_CFG]);
+#ifdef USB_CONNECT_PIN
     XPD_GPIO_InitPin(USB_CONNECT_PIN, &PinConfig[OUT_PIN_CFG]);
-
-    /* USB clock configuration - must be operated from 48 MHz */
-    XPD_USB_ClockConfig(USB_CLOCKSOURCE_PLL_DIV1p5);
 
     /* USB 1K5 pullup resistor is external, map GPIO switcher to handle */
     ((USB_HandleType*)handle)->Callbacks.ConnectionStateCtrl = usbConnect;
+#endif
+
+    /* USB clock configuration - must be operated from 48 MHz */
+    XPD_USB_ClockConfig(USB_CLOCKSOURCE_PLL_DIV1p5);
 
     /* Remap USB interrupts */
     XPD_USB_ITRemap(ENABLE);
@@ -93,16 +98,6 @@ static void usbinit(void * handle)
     /* Enable USB FS Interrupt (only EP0 used, USB_HP_IRQn is not used) */
     XPD_NVIC_SetPriorityConfig(USB_LP_IRQn, 0, 0);
     XPD_NVIC_EnableIRQ(USB_LP_IRQn);
-
-    /* Wakeup EXTI line setup */
-    if (((USB_HandleType*)handle)->LowPowerMode != DISABLE)
-    {
-        EXTI_InitType wakeup = USB_WAKEUP_EXTI_INIT;
-        XPD_EXTI_Init(USB_WAKEUP_EXTI_LINE, &wakeup);
-
-        XPD_NVIC_SetPriorityConfig(USBWakeUp_RMP_IRQn, 0, 0);
-        XPD_NVIC_EnableIRQ(USBWakeUp_RMP_IRQn);
-    }
 }
 
 /* USB dependencies deinitialization */
@@ -110,9 +105,10 @@ static void usbdeinit(void * handle)
 {
     XPD_GPIO_DeinitPin(USB_DM_PIN);
     XPD_GPIO_DeinitPin(USB_DP_PIN);
+#ifdef USB_CONNECT_PIN
     XPD_GPIO_DeinitPin(USB_CONNECT_PIN);
+#endif
     XPD_NVIC_DisableIRQ(USB_LP_IRQn);
-    XPD_NVIC_DisableIRQ(USBWakeUp_RMP_IRQn);
 }
 
 USB_HandleType usbHandle = NEW_USB_HANDLE(USB, usbinit, usbdeinit);
@@ -121,13 +117,4 @@ USB_HandleType usbHandle = NEW_USB_HANDLE(USB, usbinit, usbdeinit);
 void USB_LP_IRQHandler(void)
 {
     XPD_USB_IRQHandler(&usbHandle);
-}
-
-/* USB wakeup interrupt handling */
-void USBWakeUp_RMP_IRQHandler(void)
-{
-    XPD_EXTI_ClearFlag(USB_WAKEUP_EXTI_LINE);
-
-    /* Re-enable suspended PHY clock */
-    XPD_USB_PHY_ClockCtrl(&usbHandle, ENABLE);
 }

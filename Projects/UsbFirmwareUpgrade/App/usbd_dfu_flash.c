@@ -31,26 +31,25 @@
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
 #include <usbd_dfu_flash.h>
-#include <xpd_user.h>
+
+#include "../BSP_STM32F3-Discovery/xpd_bsp.h"
 
 /* USB Device Core handle declaration */
 USBD_HandleTypeDef hUsbDeviceFS;
 
 
-#define FLASH_ERASE_TIME      (uint16_t)50
-#define FLASH_PROGRAM_TIME    (uint16_t)50
+#define FLASH_ERASE_TIME      50
+#define FLASH_PROGRAM_TIME    50
 
 /*
  * Device memory:   128 kB
  * Layout:          64 pages of 2 kBytes
  * Bootloader size: 24 kB */
-#define FLASH_WRITE_ADDRESS   (FLASH_BASE + 0x6000)
+#define FLASH_WRITE_ADDRESS   (FLASH_BASE + 0x5000)
 
-#define FLASH_DESC_STR        "@Internal Flash   /0x08000000/12*02Ka,52*02Kg"
+#define FLASH_DESC_STR        "@Internal Flash /0x08000000/10*2Ka,54*2Kg"
 
 
-void FlashIf_Init(void);
-void FlashIf_DeInit(void);
 void FlashIf_Erase(uint32_t Add);
 void FlashIf_Write(uint8_t *dest, uint8_t *src, uint32_t Len);
 void FlashIf_Read(uint8_t *dest, uint8_t *src, uint32_t Len);
@@ -59,31 +58,13 @@ void FlashIf_GetStatus(uint32_t Add, uint8_t Cmd, uint8_t *buffer);
 const USBD_DFU_MediaTypeDef USBD_DFU_Flash_fops = {
     (uint8_t *)FLASH_DESC_STR,
     (void*)FLASH_WRITE_ADDRESS,
-    FlashIf_Init,
-    FlashIf_DeInit,
+    XPD_FLASH_Unlock,
+    XPD_FLASH_Lock,
     FlashIf_Erase,
     FlashIf_Write,
     FlashIf_Read,
     FlashIf_GetStatus
 };
-
-/**
- * @brief  Initializes Memory.
- */
-void FlashIf_Init(void)
-{
-    /* Unlock the internal flash */
-    XPD_FLASH_Unlock();
-}
-
-/**
- * @brief  De-Initializes Memory.
- */
-void FlashIf_DeInit(void)
-{
-    /* Lock the internal flash */
-    XPD_FLASH_Lock();
-}
 
 /**
  * @brief  Erases flash block.

@@ -1,10 +1,10 @@
 /**
   ******************************************************************************
-  * @file    xpd_config.h
+  * @file    main.c
   * @author  Benedek Kupper
   * @version V0.1
-  * @date    2017-06-03
-  * @brief   STM32 eXtensible Peripheral Drivers Configuration Header
+  * @date    2016-05-27
+  * @brief   STM32 CAN to USB Virtual COM Port Project
   *
   *  This file is part of STM32_XPD.
   *
@@ -21,27 +21,27 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef __XPD_CONFIG_H_
-#define __XPD_CONFIG_H_
 
-/* TODO step 1: specify device header */
-#include "stm32f072xb.h"
+#include <usbd_core.h>
+#include <usbd_desc.h>
+#include <usbd_dfu_flash.h>
+#include "../BSP_STM32F3-Discovery/xpd_bsp.h"
 
-/* TODO step 2: specify used XPD modules */
-#define USE_XPD_TIM
-#define USE_XPD_USB
-#define USE_XPD_USART
 
-/* TODO step 3: specify power supplies */
-#define VDD_VALUE                   3000 /* Value of VDD in mV */
-#define VDDA_VALUE                  3000 /* Value of VDD Analog in mV */
+int main(void)
+{
+    ClockConfiguration();
 
-/* TODO step 4: specify oscillator parameters */
-/* #define HSE_VALUE 80000000
- * #define LSE_VALUE 32768 */
+    /* Init Device Library, Add Supported Class and Start the library */
+    USBD_Init(&hUsbDeviceFS, (void*)&DFU_Desc, DEVICE_FS);
 
-/* TODO step 5: specify vector table location */
-/* #define VECT_TAB_SRAM
-#define VECT_TAB_OFFSET  0x0  *//* Vector Table base offset field. This value must be a multiple of 0x200. */
+    USBD_RegisterClass(&hUsbDeviceFS, (void*)&USBD_DFU);
 
-#endif /* __XPD_CONFIG_H_ */
+    USBD_DFU_RegisterMedia(&hUsbDeviceFS, &USBD_DFU_Flash_fops);
+
+    USBD_Start(&hUsbDeviceFS);
+
+    while(1)
+    {
+    }
+}

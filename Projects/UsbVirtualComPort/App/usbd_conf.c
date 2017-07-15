@@ -25,7 +25,7 @@
 #include "usbd_cdc.h"
 #include "usbd_core.h"
 
-#include "xpd_user.h"
+#include "xpd_bsp.h"
 
 static int usbSuspendCallback(void * user)
 {

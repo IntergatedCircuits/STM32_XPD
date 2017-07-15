@@ -1,9 +1,9 @@
 /**
   ******************************************************************************
-  * @file    mcu_conf.c
+  * @file    xpd_bsp.c
   * @author  Benedek Kupper
   * @version V0.1
-  * @date    2017-04-16
+  * @date    2017-07-15
   * @brief   STM32 eXtensible Peripheral Drivers USB Virtual COM Port Project
   *
   *  This file is part of STM32_XPD.
@@ -21,8 +21,13 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#include <xpd_user.h>
-#include <xpd_utils.h>
+#include <xpd_bsp.h>
+
+#include <xpd_dma.h>
+#include <xpd_gpio.h>
+#include <xpd_rcc.h>
+#include <xpd_usart.h>
+#include <xpd_usb.h>
 
 const GPIO_InitType PinConfig[] =
 {
@@ -32,7 +37,7 @@ const GPIO_InitType PinConfig[] =
         .Pull = GPIO_PULL_FLOAT,
         .Output.Type  = GPIO_OUTPUT_PUSHPULL,
         .Output.Speed = VERY_HIGH,
-        .AlternateMap = GPIO_USART1_AF1
+        .AlternateMap = GPIO_USART2_AF7
     },
     /* USB pins */
     {
@@ -40,27 +45,45 @@ const GPIO_InitType PinConfig[] =
         .Pull = GPIO_PULL_FLOAT,
         .Output.Type  = GPIO_OUTPUT_PUSHPULL,
         .Output.Speed = VERY_HIGH,
-        .AlternateMap = GPIO_USB_AF2
+        .AlternateMap = GPIO_OTG_FS_AF10
     },
 };
 
 /* System clocks configuration */
 void ClockConfiguration(void)
 {
-    const CRS_InitType crsSetup = {
-        .Source     = CRS_SYNC_SOURCE_USB,
-        .ErrorLimit = CRS_ERRORLIMIT_DEFAULT
+    const RCC_MSI_InitType msi = {
+            .ClockFreq = MSI_48MHz,
+            .State = OSC_ON};
+
+    const RCC_PLL_InitType pll = {
+        .State = OSC_ON,
+        .Source = MSI,
+        .M = 6,
+        .N = 20,
+        .R = 2,
+        .Q = 2, /* don't care */
+        .P = 7  /* don't care */
     };
 
-    /* HSI48 configuration */
-    XPD_RCC_HSI48Config(OSC_ON);
-    XPD_CRS_Init(&crsSetup);
+    /* MSI configuration */
+    XPD_RCC_MSIConfig(&msi);
+
+    /* Use LSE to synchronize MSI */
+    XPD_RCC_LSEConfig(OSC_ON);
+
+    /* PLL configuration */
+    XPD_RCC_PLLConfig(&pll);
 
     /* System clocks configuration */
-    XPD_RCC_HCLKConfig(HSI48, CLK_DIV1, 1);
+    XPD_RCC_HCLKConfig(PLL, CLK_DIV1, 4);
 
     XPD_RCC_PCLKConfig(PCLK1, CLK_DIV1);
+    XPD_RCC_PCLKConfig(PCLK2, CLK_DIV1);
 }
+
+/* Ensure preemption-free USB-UART interrupt handling */
+#define NVIC_COMMON_PRIO_USB_USART     0
 
 /************************* USB ************************************/
 
@@ -72,21 +95,17 @@ static void usbinit(void * handle)
     XPD_GPIO_InitPin(USB_DP_PIN, &PinConfig[USB_PIN_CFG]);
 
     /* USB clock configuration - must be operated from 48 MHz */
-    XPD_USB_ClockConfig(USB_CLOCKSOURCE_HSI48);
+    XPD_USB_ClockConfig(USB_CLOCKSOURCE_MSI);
 
     /* Enable USB FS Interrupt */
-    XPD_NVIC_SetPriorityConfig(USB_IRQn, NVIC_COMMON_PRIO_USB_USART, 0);
-    XPD_NVIC_EnableIRQ(USB_IRQn);
-
-#ifdef XPD_GPIOA_PinRemap
-    XPD_GPIOA_PinRemap(11);
-#endif
+    XPD_NVIC_SetPriorityConfig(OTG_FS_IRQn, NVIC_COMMON_PRIO_USB_USART, 0);
+    XPD_NVIC_EnableIRQ(OTG_FS_IRQn);
 
     /* Wakeup EXTI line setup */
     if (((USB_HandleType*)handle)->LowPowerMode != DISABLE)
     {
         EXTI_InitType wakeup = USB_WAKEUP_EXTI_INIT;
-        XPD_EXTI_Init(USB_WAKEUP_EXTI_LINE, &wakeup);
+        XPD_EXTI_Init(USB_OTG_FS_WAKEUP_EXTI_LINE, &wakeup);
     }
 }
 
@@ -95,26 +114,26 @@ static void usbdeinit(void * handle)
 {
     XPD_GPIO_DeinitPin(USB_DM_PIN);
     XPD_GPIO_DeinitPin(USB_DP_PIN);
-    XPD_NVIC_DisableIRQ(USB_IRQn);
+    XPD_EXTI_Deinit(USB_OTG_FS_WAKEUP_EXTI_LINE);
+    XPD_NVIC_DisableIRQ(OTG_FS_IRQn);
 }
 
-USB_HandleType usbHandle = NEW_USB_HANDLE(USB, usbinit, usbdeinit);
+USB_HandleType usbHandle = NEW_USB_HANDLE(USB_OTG_FS,usbinit,usbdeinit);
 
-/* Common interrupt handler for USB core and WKUP line */
-void USB_IRQHandler(void)
+/* USB interrupt handling */
+void OTG_FS_IRQHandler(void)
 {
-    /* Handle USB interrupts */
     XPD_USB_IRQHandler(&usbHandle);
 
-    /* Handle USB WKUP interrupts */
-    XPD_EXTI_ClearFlag(USB_WAKEUP_EXTI_LINE);
+    XPD_EXTI_ClearFlag(USB_OTG_FS_WAKEUP_EXTI_LINE);
 
+    /* Re-enable suspended PHY clock */
     XPD_USB_PHY_ClockCtrl(&usbHandle, ENABLE);
 }
 
 /************************* UART ************************************/
-DMA_HandleType dmauat = NEW_DMA_HANDLE(DMA1_Channel2);
-DMA_HandleType dmauar = NEW_DMA_HANDLE(DMA1_Channel3);
+DMA_HandleType dmauat = NEW_DMA_HANDLE(DMA1_Channel7);
+DMA_HandleType dmauar = NEW_DMA_HANDLE(DMA1_Channel6);
 
 /* UART dependencies initialization */
 static void uartinit(void * handle)
@@ -143,12 +162,14 @@ static void uartinit(void * handle)
     ((USART_HandleType*)handle)->DMA.Transmit = &dmauat;
     ((USART_HandleType*)handle)->DMA.Receive  = &dmauar;
 
-    XPD_NVIC_SetPriorityConfig(DMA1_Channel2_3_IRQn, NVIC_COMMON_PRIO_USB_USART, 0);
-    XPD_NVIC_EnableIRQ(DMA1_Channel2_3_IRQn);
+    XPD_NVIC_SetPriorityConfig(DMA1_Channel6_IRQn, NVIC_COMMON_PRIO_USB_USART, 0);
+    XPD_NVIC_EnableIRQ(DMA1_Channel6_IRQn);
+    XPD_NVIC_SetPriorityConfig(DMA1_Channel7_IRQn, NVIC_COMMON_PRIO_USB_USART, 0);
+    XPD_NVIC_EnableIRQ(DMA1_Channel7_IRQn);
 
     /* USART transmit DMA uses TC interrupt for completion callback */
-    XPD_NVIC_SetPriorityConfig(USART1_IRQn, NVIC_COMMON_PRIO_USB_USART, 0);
-    XPD_NVIC_EnableIRQ(USART1_IRQn);
+    XPD_NVIC_SetPriorityConfig(USART2_IRQn, NVIC_COMMON_PRIO_USB_USART, 0);
+    XPD_NVIC_EnableIRQ(USART2_IRQn);
 }
 
 /* UART dependencies deinitialization */
@@ -159,21 +180,25 @@ static void uartdeinit(void * handle)
 
     XPD_DMA_Deinit(&dmauat);
     XPD_DMA_Deinit(&dmauar);
-    XPD_NVIC_DisableIRQ(DMA1_Channel2_3_IRQn);
-    XPD_NVIC_DisableIRQ(USART1_IRQn);
+    XPD_NVIC_DisableIRQ(DMA1_Channel6_IRQn);
+    XPD_NVIC_DisableIRQ(DMA1_Channel7_IRQn);
+    XPD_NVIC_DisableIRQ(USART2_IRQn);
 }
 
 /* UART DMA interrupt handling */
-void DMA1_Channel2_3_IRQHandler(void)
+void DMA1_Channel6_IRQHandler(void)
 {
-    XPD_DMA_IRQHandler(&dmauat);
     XPD_DMA_IRQHandler(&dmauar);
 }
+void DMA1_Channel7_IRQHandler(void)
+{
+    XPD_DMA_IRQHandler(&dmauat);
+}
 
-USART_HandleType uart = NEW_USART_HANDLE(USART1, uartinit, uartdeinit);
+USART_HandleType uart = NEW_USART_HANDLE(USART2, uartinit, uartdeinit);
 
 /* UART interrupt handling */
-void USART1_IRQHandler(void)
+void USART2_IRQHandler(void)
 {
     XPD_USART_IRQHandler(&uart);
 }

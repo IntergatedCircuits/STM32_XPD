@@ -25,33 +25,7 @@
 #include "usbd_dfu.h"
 #include "usbd_core.h"
 
-#include "xpd_user.h"
-
-static int usbSuspendCallback(void * user)
-{
-    /* Inform USB library that core enters in suspend Mode */
-    int retval = USBD_LL_Suspend(user);
-
-    if (((USB_HandleType *)(((USBD_HandleTypeDef *)user)->pData))->LowPowerMode == ENABLE)
-    {
-        XPD_USB_PHY_ClockCtrl(&usbHandle, DISABLE);
-
-        /* Set SLEEPDEEP bit and SleepOnExit of Cortex System Control Register */
-        SET_BIT(SCB->SCR.w, SCB_SCR_SLEEPDEEP_Msk | SCB_SCR_SLEEPONEXIT_Msk);
-    }
-    return retval;
-}
-
-static int usbResumeCallback(void * user)
-{
-    if (((USB_HandleType *)(((USBD_HandleTypeDef *)user)->pData))->LowPowerMode == ENABLE)
-    {
-        CLEAR_BIT(SCB->SCR.w, SCB_SCR_SLEEPDEEP_Msk | SCB_SCR_SLEEPONEXIT_Msk);
-        /* Reconfigure system clocks */
-        ClockConfiguration();
-    }
-    return USBD_LL_Resume(user);
-}
+#include "../BSP_STM32F3-Discovery/xpd_bsp.h"
 
 #ifdef USB_OTG_HS
 static int usbResetCallback(void * user)
@@ -96,16 +70,13 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
         usbHandle.Callbacks.SetupStage       = USBD_LL_SetupStage;
         usbHandle.Callbacks.DataOutStage     = USBD_LL_DataOutStage;
         usbHandle.Callbacks.DataInStage      = USBD_LL_DataInStage;
-        usbHandle.Callbacks.SOF              = USBD_LL_SOF;
 #ifdef USB_OTG_HS
         usbHandle.Callbacks.Reset            = usbResetCallback;
 #else
         usbHandle.Callbacks.Reset            = USBD_LL_Reset;
 #endif
-        usbHandle.Callbacks.Suspend          = usbSuspendCallback;
-        usbHandle.Callbacks.Resume           = usbResumeCallback;
-        usbHandle.Callbacks.Connected        = USBD_LL_DevConnected;
-        usbHandle.Callbacks.Disconnected     = USBD_LL_DevDisconnected;
+        usbHandle.Callbacks.Suspend          = USBD_LL_Suspend;
+        usbHandle.Callbacks.Resume           = USBD_LL_Resume;
 
         XPD_USB_Init(&usbHandle, &init);
 

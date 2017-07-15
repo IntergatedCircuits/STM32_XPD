@@ -1,10 +1,10 @@
 /**
   ******************************************************************************
-  * @file    xpd_user.h
+  * @file    xpd_bsp.h
   * @author  Benedek Kupper
   * @version V0.1
-  * @date    2016-01-18
-  * @brief   STM32 eXtensible Peripheral Drivers User Header
+  * @date    2016-06-05
+  * @brief   STM32 eXtensible Peripheral Drivers USB Firmware Upgrade Project
   *
   *  This file is part of STM32_XPD.
   *
@@ -21,37 +21,32 @@
   *  You should have received a copy of the GNU General Public License
   *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef __XPD_USER_H_
-#define __XPD_USER_H_
+#ifndef __XPD_BSP_H_
+#define __XPD_BSP_H_
 
 #include <xpd_core.h>
-#include <xpd_dma.h>
+#include <xpd_flash.h>
 #include <xpd_gpio.h>
-#include <xpd_rcc.h>
-#include <xpd_usart.h>
 #include <xpd_usb.h>
 
 typedef enum
 {
-    UART_PIN_CFG = 0,
-    USB_PIN_CFG,
+    USB_PIN_CFG = 0,
+    OUT_PIN_CFG,
     PIN_CFG_COUNT
 }PinType;
 
-#define UART_TX_PIN     GPIOA, 9
-#define UART_RX_PIN     GPIOA, 10
+/* Not available on the F3-Discovery board */
+/* #define USB_CONNECT_PIN GPIOA, 9 */
+
 #define USB_DP_PIN      GPIOA, 12
 #define USB_DM_PIN      GPIOA, 11
-
-/* Ensure preemption-free USB-UART interrupt handling */
-#define NVIC_COMMON_PRIO_USB_USART     0
 
 /* Indexed by PinType */
 extern const GPIO_InitType PinConfig[];
 
-extern USART_HandleType uart;
 extern USB_HandleType usbHandle;
 
 extern void ClockConfiguration(void);
 
-#endif /* __XPD_USER_H_ */
+#endif /* __XPD_BSP_H_ */
