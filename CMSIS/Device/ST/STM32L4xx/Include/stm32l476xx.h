@@ -4640,7 +4640,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } OR;                                                   /*!< RTC option register,                                       Address offset: 0x4C */
-    __IO uint32_t BKPR[16];                                 /*!< RTC backup registers,                                      Address offset: 0x50-0x8C */
+    __IO uint32_t BKPR[32];                                 /*!< RTC backup registers,                                      Address offset: 0x50-0x8C */
 } RTC_TypeDef;
 
 
@@ -4832,7 +4832,7 @@ typedef struct {
         __IO uint32_t OUT_RMP;
              uint32_t __RESERVED0[30];
     } OR;                                                   /*!< RTC option register,                                       Address offset: 0x4C */
-    __IO uint32_t BKPR[16][32];                             /*!< RTC backup registers,                                      Address offset: 0x50-0x8C */
+    __IO uint32_t BKPR[32][32];                             /*!< RTC backup registers,                                      Address offset: 0x50-0x8C */
 } RTC_BitBand_TypeDef;
 
 
@@ -25525,16 +25525,20 @@ typedef struct {
 
 typedef struct
 {
-    const uint16_t CAL30;
+    const uint16_t CAL_LOW;
     const uint16_t __RESERVED[10];
-    const uint16_t CAL110;
+    const uint16_t CAL_HIGH;
 }ADC_TempSensorCalibrationTypeDef;
 
-#define ADC_TEMPSENSOR       ((ADC_TempSensorCalibrationTypeDef *)((uint32_t)0x1FFF75A8))
+#define ADC_CAL_mV          3000
 
-#define ADC_VREFINT_CAL      (*((const uint16_t *)((uint32_t)0x1FFF75AA)))
+#define ADC_TEMPSENSOR      ((ADC_TempSensorCalibrationTypeDef *)((uint32_t)0x1FFF75A8))
+#define ADC_TEMPSENSOR_CAL_LOW      30
+#define ADC_TEMPSENSOR_CAL_HIGH     110
 
-#define ADC_VBAT_SCALER      3
+#define ADC_VREFINT_CAL     (*((const uint16_t *)((uint32_t)0x1FFF75AA)))
+
+#define ADC_VBAT_SCALER     3
 
 /**
   * @}

@@ -6935,13 +6935,15 @@ typedef struct {
   * @{
   */
 
-#define ADC_TEMPSENSOR_30    (*((const uint16_t *)((uint32_t)0x1FFFF7B8U)))
+#define ADC_CAL_mV          3300
 
+#define ADC_TEMPSENSOR_LOW  (*((const uint16_t *)((uint32_t)0x1FFFF7B8U)))
+#define ADC_TEMPSENSOR_CAL_LOW      30
 #define ADC_TEMPSENSOR_SLOPE(VALUE) ((10 * (VALUE)) / 43) /* The slope is 4.3 mv/C */
 
-#define ADC_VREFINT_CAL      (*((const uint16_t *)((uint32_t)0x1FFFF7BAU)))
+#define ADC_VREFINT_CAL     (*((const uint16_t *)((uint32_t)0x1FFFF7BAU)))
 
-#define ADC_VBAT_SCALER      2
+#define ADC_VBAT_SCALER     2
 
 /**
   * @}

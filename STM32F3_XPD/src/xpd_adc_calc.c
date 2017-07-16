@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    xpd_adc_calc.c
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2017-01-06
+  * @version V0.2
+  * @date    2017-07-16
   * @brief   STM32 eXtensible Peripheral Drivers ADC Calculations Module
   *
   *  This file is part of STM32_XPD.
@@ -55,7 +55,7 @@ float XPD_ADC_GetVDDA_V(void)
  */
 float XPD_ADC_GetVBAT_V(uint16_t vBatConversion)
 {
-    /* Convert to V from ADC range, multiply by 2 */
+    /* Convert to V from ADC range, multiply by scaler */
     return (ADC_VBAT_SCALER * (float)vBatConversion * VDDA_V) / 4095.0;
 }
 
@@ -76,24 +76,25 @@ float XPD_ADC_GetValue_V(uint16_t channelConversion)
 float XPD_ADC_GetTemperature_C(uint16_t tempConversion)
 {
     float temp;
-
 #if defined(ADC_TEMPSENSOR)
+    float tempdiff = (float)(ADC_TEMPSENSOR_CAL_HIGH - ADC_TEMPSENSOR_CAL_LOW);
     /*
      * Convert the conversion result as it was measured at 3.3V
      * tempConvCorrected / VDDA_mV = tempConversion / 3300
      * Calculate temperature from factory calibration data
      * (tempConvCorrected - CAL30)/(CAL110 - CAL30) = (Temp_C - 30)/(110 - 30)
      */
-    temp = ((110.0 - 30.0) * (float)tempConversion * VDDA_V) / 3.3;
-    temp -= (110.0 - 30.0) * (float)ADC_TEMPSENSOR->CAL30;
-    temp /= (float)(ADC_TEMPSENSOR->CAL110 - ADC_TEMPSENSOR->CAL30);
-    temp += 30.0;
-#elif defined(ADC_TEMPSENSOR_30)
+    temp = (tempdiff * (float)tempConversion * VDDA_V) / ((float)ADC_CAL_mV / 1000.0);
+    temp -= tempdiff * (float)ADC_TEMPSENSOR->CAL_LOW;
+    temp /= (float)(ADC_TEMPSENSOR->CAL_HIGH - ADC_TEMPSENSOR->CAL_LOW);
+    temp += (float)ADC_TEMPSENSOR_CAL_LOW;
+#elif defined(ADC_TEMPSENSOR_LOW)
     /*
-     * Calculate temperature using calibration at 30°C and average slope:
+     * Calculate temperature using calibration at 30C and average slope:
      * temp = (V30 - Vsense)/Avg_slope + 30
      */
-    temp = ADC_TEMPSENSOR_SLOPE(XPD_ADC_GetValue_V(ADC_TEMPSENSOR_30 - tempConversion)) + 30;
+    temp = ADC_TEMPSENSOR_SLOPE(XPD_ADC_GetValue_V(ADC_TEMPSENSOR_LOW - tempConversion))
+            + ADC_TEMPSENSOR_CAL_LOW;
 #else
     temp = 0;
 #endif
@@ -111,9 +112,9 @@ int32_t XPD_ADC_SetVDDA(uint16_t vRefintConversion)
      * The reference voltage is measured at 3.3V, with 12 bit resolution
      * VREFINT_CAL * 3300 / 4095 = vRefintConversion * VDD / 4095
      */
-    VDDA_mV = ((int32_t)ADC_VREFINT_CAL * 3300) / (int32_t)vRefintConversion;
+    VDDA_mV = ((int32_t)ADC_VREFINT_CAL * ADC_CAL_mV) / (int32_t)vRefintConversion;
 #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
-    VDDA_V  = ((float)ADC_VREFINT_CAL * 3.3) / (float)vRefintConversion;
+    VDDA_V  = ((float)ADC_VREFINT_CAL * ((float)ADC_CAL_mV / 1000.0)) / (float)vRefintConversion;
 #endif
     return VDDA_mV;
 }
@@ -133,7 +134,7 @@ int32_t XPD_ADC_GetVDDA_mV(void)
  */
 int32_t XPD_ADC_GetVBAT_mV(uint16_t vBatConversion)
 {
-    /* Convert to mV from ADC range, multiply by 2 */
+    /* Convert to mV from ADC range, multiply by scaler */
     return (ADC_VBAT_SCALER * (int32_t)vBatConversion * VDDA_mV) / 4095;
 }
 
@@ -155,22 +156,24 @@ int32_t XPD_ADC_GetTemperature(uint16_t tempConversion)
 {
     int32_t temp;
 #if defined(ADC_TEMPSENSOR)
+    int32_t tempdiff = ADC_TEMPSENSOR_CAL_HIGH - ADC_TEMPSENSOR_CAL_LOW;
     /*
      * Convert the conversion result as it was measured at 3.3V
      * tempConvCorrected / VDDA_mV = tempConversion / 3300
      * Calculate temperature from factory calibration data
      * (tempConvCorrected - CAL30)/(CAL110 - CAL30) = (Temp_C - 30)/(110 - 30)
      */
-    temp = ((110 - 30) * (int32_t)tempConversion * VDDA_mV) / 3300;
-    temp -= (110 - 30) * (int32_t)ADC_TEMPSENSOR->CAL30;
-    temp /= (int32_t)(ADC_TEMPSENSOR->CAL110 - ADC_TEMPSENSOR->CAL30);
-    temp += 30;
-#elif defined(ADC_TEMPSENSOR_30)
+    temp = (tempdiff * (int32_t)tempConversion * VDDA_mV) / ADC_CAL_mV;
+    temp -= tempdiff * (int32_t)ADC_TEMPSENSOR->CAL_LOW;
+    temp /= (int32_t)(ADC_TEMPSENSOR->CAL_HIGH - ADC_TEMPSENSOR->CAL_LOW);
+    temp += ADC_TEMPSENSOR_CAL_LOW;
+#elif defined(ADC_TEMPSENSOR_LOW)
     /*
-     * Calculate temperature using calibration at 30°C and average slope:
+     * Calculate temperature using calibration at 30C and average slope:
      * temp = (V30 - Vsense)/Avg_slope + 30
      */
-    temp = ADC_TEMPSENSOR_SLOPE(XPD_ADC_GetValue_mV(ADC_TEMPSENSOR_30 - tempConversion)) + 30;
+    temp = ADC_TEMPSENSOR_SLOPE(XPD_ADC_GetValue_mV(ADC_TEMPSENSOR_LOW - tempConversion))
+            + ADC_TEMPSENSOR_CAL_LOW;
 #else
     temp = 0;
 #endif

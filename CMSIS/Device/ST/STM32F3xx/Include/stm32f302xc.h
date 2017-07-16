@@ -16618,16 +16618,20 @@ typedef struct {
 
 typedef struct
 {
-    const uint16_t CAL30;
+    const uint16_t CAL_LOW;
     const uint16_t __RESERVED[4];
-    const uint16_t CAL110;
+    const uint16_t CAL_HIGH;
 }ADC_TempSensorCalibrationTypeDef;
 
-#define ADC_TEMPSENSOR       ((ADC_TempSensorCalibrationTypeDef *)((uint32_t)0x1FFFF7B8U))
+#define ADC_CAL_mV          3300
 
-#define ADC_VREFINT_CAL      (*((const uint16_t *)((uint32_t)0x1FFFF7BAU)))
+#define ADC_TEMPSENSOR      ((ADC_TempSensorCalibrationTypeDef *)((uint32_t)0x1FFFF7B8U))
+#define ADC_TEMPSENSOR_CAL_LOW      30
+#define ADC_TEMPSENSOR_CAL_HIGH     110
 
-#define ADC_VBAT_SCALER      2
+#define ADC_VREFINT_CAL     (*((const uint16_t *)((uint32_t)0x1FFFF7BAU)))
+
+#define ADC_VBAT_SCALER     2
 
 /**
   * @}
