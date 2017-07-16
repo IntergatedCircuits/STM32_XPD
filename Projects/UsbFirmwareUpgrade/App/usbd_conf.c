@@ -25,7 +25,7 @@
 #include "usbd_dfu.h"
 #include "usbd_core.h"
 
-#include "../BSP_STM32F3-Discovery/xpd_bsp.h"
+#include "xpd_bsp.h"
 
 #ifdef USB_OTG_HS
 static int usbResetCallback(void * user)

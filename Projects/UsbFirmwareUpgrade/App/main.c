@@ -25,7 +25,7 @@
 #include <usbd_core.h>
 #include <usbd_desc.h>
 #include <usbd_dfu_flash.h>
-#include "../BSP_STM32F3-Discovery/xpd_bsp.h"
+#include <xpd_bsp.h>
 
 
 int main(void)

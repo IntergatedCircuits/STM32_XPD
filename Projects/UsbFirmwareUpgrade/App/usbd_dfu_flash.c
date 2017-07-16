@@ -32,7 +32,7 @@
   */
 #include <usbd_dfu_flash.h>
 
-#include "../BSP_STM32F3-Discovery/xpd_bsp.h"
+#include <xpd_bsp.h>
 
 /* USB Device Core handle declaration */
 USBD_HandleTypeDef hUsbDeviceFS;
