@@ -96,7 +96,6 @@ static void usbinit(void * handle)
     XPD_USB_ITRemap(ENABLE);
 
     /* Enable USB FS Interrupt (only EP0 used, USB_HP_IRQn is not used) */
-    XPD_NVIC_SetPriorityConfig(USB_LP_IRQn, 0, 0);
     XPD_NVIC_EnableIRQ(USB_LP_IRQn);
 }
 

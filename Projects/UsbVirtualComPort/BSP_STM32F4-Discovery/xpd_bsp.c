@@ -23,11 +23,7 @@
   */
 #include <xpd_bsp.h>
 
-#include <xpd_dma.h>
-#include <xpd_gpio.h>
 #include <xpd_rcc.h>
-#include <xpd_usart.h>
-#include <xpd_usb.h>
 
 const GPIO_InitType PinConfig[] =
 {
@@ -74,9 +70,6 @@ void ClockConfiguration(void)
     XPD_RCC_PCLKConfig(PCLK2, CLK_DIV2);
 }
 
-/* Ensure preemption-free USB-UART interrupt handling */
-#define NVIC_COMMON_PRIO_USB_USART     0
-
 /************************* USB ************************************/
 
 /* USB dependencies initialization */
@@ -89,7 +82,6 @@ static void usbinit(void * handle)
     /* USB clock configuration - must be operated from 48 MHz */
 
     /* Enable USB FS Interrupt */
-    XPD_NVIC_SetPriorityConfig(OTG_FS_IRQn, NVIC_COMMON_PRIO_USB_USART, 0);
     XPD_NVIC_EnableIRQ(OTG_FS_IRQn);
 
     /* Wakeup EXTI line setup */
@@ -98,7 +90,6 @@ static void usbinit(void * handle)
         EXTI_InitType wakeup = USB_WAKEUP_EXTI_INIT;
         XPD_EXTI_Init(USB_OTG_FS_WAKEUP_EXTI_LINE, &wakeup);
 
-        XPD_NVIC_SetPriorityConfig(OTG_FS_WKUP_IRQn, NVIC_COMMON_PRIO_USB_USART, 0);
         XPD_NVIC_EnableIRQ(OTG_FS_WKUP_IRQn);
     }
 }
@@ -128,6 +119,8 @@ void OTG_FS_WKUP_IRQHandler(void)
 
     /* Re-enable suspended PHY clock */
     XPD_USB_PHY_ClockCtrl(&usbHandle, ENABLE);
+
+    XPD_USB_IRQHandler(&usbHandle);
 }
 
 /************************* UART ************************************/
@@ -162,13 +155,10 @@ static void uartinit(void * handle)
     ((USART_HandleType*)handle)->DMA.Transmit = &dmauat;
     ((USART_HandleType*)handle)->DMA.Receive  = &dmauar;
 
-    XPD_NVIC_SetPriorityConfig(DMA1_Stream5_IRQn, NVIC_COMMON_PRIO_USB_USART, 0);
     XPD_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
-    XPD_NVIC_SetPriorityConfig(DMA1_Stream6_IRQn, NVIC_COMMON_PRIO_USB_USART, 0);
     XPD_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
 
     /* USART transmit DMA uses TC interrupt for completion callback */
-    XPD_NVIC_SetPriorityConfig(USART2_IRQn, NVIC_COMMON_PRIO_USB_USART, 0);
     XPD_NVIC_EnableIRQ(USART2_IRQn);
 }
 
@@ -189,12 +179,10 @@ static void uartdeinit(void * handle)
 void DMA1_Stream5_IRQHandler(void)
 {
     XPD_DMA_IRQHandler(&dmauar);
-    NVIC_ClearPendingIRQ(DMA1_Stream5_IRQn);
 }
 void DMA1_Stream6_IRQHandler(void)
 {
     XPD_DMA_IRQHandler(&dmauat);
-    NVIC_ClearPendingIRQ(DMA1_Stream6_IRQn);
 }
 
 USART_HandleType uart = NEW_USART_HANDLE(USART2, uartinit, uartdeinit);

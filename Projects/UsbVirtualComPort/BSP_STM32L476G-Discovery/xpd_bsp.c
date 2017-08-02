@@ -23,11 +23,7 @@
   */
 #include <xpd_bsp.h>
 
-#include <xpd_dma.h>
-#include <xpd_gpio.h>
 #include <xpd_rcc.h>
-#include <xpd_usart.h>
-#include <xpd_usb.h>
 
 const GPIO_InitType PinConfig[] =
 {
@@ -82,9 +78,6 @@ void ClockConfiguration(void)
     XPD_RCC_PCLKConfig(PCLK2, CLK_DIV1);
 }
 
-/* Ensure preemption-free USB-UART interrupt handling */
-#define NVIC_COMMON_PRIO_USB_USART     0
-
 /************************* USB ************************************/
 
 /* USB dependencies initialization */
@@ -98,7 +91,6 @@ static void usbinit(void * handle)
     XPD_USB_ClockConfig(USB_CLOCKSOURCE_MSI);
 
     /* Enable USB FS Interrupt */
-    XPD_NVIC_SetPriorityConfig(OTG_FS_IRQn, NVIC_COMMON_PRIO_USB_USART, 0);
     XPD_NVIC_EnableIRQ(OTG_FS_IRQn);
 
     /* Wakeup EXTI line setup */
@@ -162,13 +154,10 @@ static void uartinit(void * handle)
     ((USART_HandleType*)handle)->DMA.Transmit = &dmauat;
     ((USART_HandleType*)handle)->DMA.Receive  = &dmauar;
 
-    XPD_NVIC_SetPriorityConfig(DMA1_Channel6_IRQn, NVIC_COMMON_PRIO_USB_USART, 0);
     XPD_NVIC_EnableIRQ(DMA1_Channel6_IRQn);
-    XPD_NVIC_SetPriorityConfig(DMA1_Channel7_IRQn, NVIC_COMMON_PRIO_USB_USART, 0);
     XPD_NVIC_EnableIRQ(DMA1_Channel7_IRQn);
 
     /* USART transmit DMA uses TC interrupt for completion callback */
-    XPD_NVIC_SetPriorityConfig(USART2_IRQn, NVIC_COMMON_PRIO_USB_USART, 0);
     XPD_NVIC_EnableIRQ(USART2_IRQn);
 }
 
