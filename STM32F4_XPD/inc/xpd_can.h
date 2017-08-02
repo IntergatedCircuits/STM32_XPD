@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    xpd_can.h
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2015-12-30
+  * @version V0.2
+  * @date    2017-08-02
   * @brief   STM32 eXtensible Peripheral Drivers CAN Module
   *
   *  This file is part of STM32_XPD.
@@ -27,17 +27,6 @@
 #include "xpd_common.h"
 #include "xpd_config.h"
 
-#if defined(CAN2)
-#define __DUAL_CAN_DEVICE
-#define CAN_FILTERBANK_NUMBER   28
-#define CAN_MASTER              CAN1
-#elif defined(CAN_FM1R_FBM13)
-#define CAN_FILTERBANK_NUMBER   14
-#define CAN_MASTER              CAN
-#endif
-
-#ifdef CAN_MASTER
-
 /** @defgroup CAN
  * @{ */
 
@@ -57,25 +46,24 @@ typedef enum
 typedef struct
 {
     struct {
-        uint16_t Prescaler;   /*!< CAN bus sampler clock prescaler from PCLKx. Permitted values: @arg 1 .. 1024 */
-        uint8_t  BS1;         /*!< Bit segment 1 of bit timing. Permitted values: @arg 1 .. 16 */
-        uint8_t  BS2;         /*!< Bit segment 2 of bit timing. Permitted values: @arg 1 .. 8 */
-        uint8_t  SJW;         /*!< Synchronization jump width. Permitted values: @arg 1 .. 4 */
-    } Timing;                 /*   Bit timing configuration */
+        uint16_t Prescaler; /*!< CAN bus sampler clock prescaler from PCLKx. Permitted values: @arg 1 .. 1024 */
+        uint8_t  BS1;       /*!< Bit segment 1 of bit timing. Permitted values: @arg 1 .. 16 */
+        uint8_t  BS2;       /*!< Bit segment 2 of bit timing. Permitted values: @arg 1 .. 8 */
+        uint8_t  SJW;       /*!< Synchronization jump width. Permitted values: @arg 1 .. 4 */
+    }Timing;                /*   Bit timing configuration */
     union {
         struct {
-            CAN_ModeType    Mode : 2;   /*!< CAN test mode selection */
-            FunctionalState TXFP : 1;   /*!< Transmit FIFO Priority on request age instead of ID priority */
-            FunctionalState RFLM : 1;   /*!< Receive FIFO Locked Mode keeps older messages in full FIFO */
-            FunctionalState NART : 1;   /*!< Non Automatic ReTransmission */
-            FunctionalState AWUM : 1;   /*!< Automatic Wake-Up on message detection */
-            FunctionalState ABOM : 1;   /*!< Automatic Bus-Off Recovery */
-            FunctionalState TTCM : 1;   /*!< Time-Triggered Communication Mode */
-        } Individual;
-        uint8_t All;                    /*!< Set to 0 for default features */
-    }Features;                          /*   Features configuration */
-} CAN_InitType;
-
+            CAN_ModeType    Mode : 2; /*!< CAN test mode selection */
+            FunctionalState TXFP : 1; /*!< Transmit FIFO Priority on request age instead of ID priority */
+            FunctionalState RFLM : 1; /*!< Receive FIFO Locked Mode keeps older messages in full FIFO */
+            FunctionalState NART : 1; /*!< Non Automatic ReTransmission */
+            FunctionalState AWUM : 1; /*!< Automatic Wake-Up on message detection */
+            FunctionalState ABOM : 1; /*!< Automatic Bus-Off Recovery */
+            FunctionalState TTCM : 1; /*!< Time-Triggered Communication Mode */
+        }Settings;
+        uint8_t wSettings;            /*!< Set to 0 for default features */
+    };
+}CAN_InitType;
 
 /** @brief CAN Identifier types */
 typedef enum
@@ -84,44 +72,44 @@ typedef enum
     CAN_IDTYPE_EXT_DATA   = 4,   /*!< Extended (29 bit Id) data */
     CAN_IDTYPE_STD_RTR    = 2,   /*!< Standard (11 bit Id) remote transmit request */
     CAN_IDTYPE_EXT_RTR    = 6    /*!< Extended (29 bit Id) remote transmit request */
-} CAN_IdType;
+}CAN_IdType;
 
 /** @brief CAN Identifier structure */
 typedef struct
 {
     uint32_t   Value;           /*!< Identifier field numeric value */
     CAN_IdType Type;            /*!< ID and data type (Std/Ext, Data/RTR) */
-} CAN_IdentifierFieldType;
+}CAN_IdentifierFieldType;
 
 /** @brief CAN Frame structure */
 typedef struct
 {
-	union {
-		uint8_t  Byte[8];          /*!< Data in byte format */
-		uint32_t Word[2];          /*!< Data in word format */
-	} Data;                        /*   Data field */
-	CAN_IdentifierFieldType Id;    /*!< Frame Identifier */
+    union {
+        uint8_t  Byte[8];          /*!< Data in byte format */
+        uint32_t Word[2];          /*!< Data in word format */
+    } Data;                        /*   Data field */
+    CAN_IdentifierFieldType Id;    /*!< Frame Identifier */
     uint8_t                 DLC;   /*!< Data Length Code */
-	uint8_t                 Index; /*!< This field has different use based on its direction:
-	                                 @arg Received frames: Filter Match Index,
-	                                      for pairing with accepter filters' @ref CAN_FilterType::MatchIndex
-	                                 @arg Transmitted frames: Mailbox Index */
-} CAN_FrameType;
+    uint8_t                 Index; /*!< This field has different use based on its direction:
+                                     @arg Received frames: Filter Match Index,
+                                          for pairing with acceptance filter
+                                     @arg Transmitted frames: Mailbox Index */
+}CAN_FrameType;
 
 /** @brief CAN Error types */
 typedef enum
 {
-	CAN_ERROR_NONE         = 0x00, /*!< No error */
-	CAN_ERROR_STUFF        = 0x10, /*!< Stuff error */
-	CAN_ERROR_FORM         = 0x20, /*!< Form error */
-	CAN_ERROR_ACK          = 0x30, /*!< Acknowledge error */
-	CAN_ERROR_BITRECESSIVE = 0x40, /*!< Bit recessive error */
-	CAN_ERROR_BITDOMINANT  = 0x50, /*!< Bit dominant error */
-	CAN_ERROR_CRC          = 0x60, /*!< CRC error */
+    CAN_ERROR_NONE         = 0x00, /*!< No error */
+    CAN_ERROR_STUFF        = 0x10, /*!< Stuff error */
+    CAN_ERROR_FORM         = 0x20, /*!< Form error */
+    CAN_ERROR_ACK          = 0x30, /*!< Acknowledge error */
+    CAN_ERROR_BITRECESSIVE = 0x40, /*!< Bit recessive error */
+    CAN_ERROR_BITDOMINANT  = 0x50, /*!< Bit dominant error */
+    CAN_ERROR_CRC          = 0x60, /*!< CRC error */
     CAN_ERROR_ERRORWARNING = 0x01, /*!< Error warning state */
     CAN_ERROR_ERRORPASSIVE = 0x02, /*!< Error passive state */
     CAN_ERROR_BUSOFF       = 0x04, /*!< Bus off state */
-} CAN_ErrorType;
+}CAN_ErrorType;
 
 /** @brief CAN Filter types */
 typedef enum
@@ -129,37 +117,37 @@ typedef enum
     CAN_FILTER_MATCH        = 0x01, /*!< Filter accepts messages with identical Identifier */
     CAN_FILTER_MASK         = 0x00, /*!< Filter accepts messages with identical Identifier type
                                          and matching Identifier field values on the mask-selected bits */
-    CAN_FILTER_MASK_ANYTYPE = 0x08, /*!< Filter accepts messages with matching Identifier field values on the mask-selected bits */
-} CAN_FilterModeType;
+    CAN_FILTER_MASK_ANYTYPE = 0x08, /*!< Filter accepts messages with matching Identifier field
+                                         values on the mask-selected bits */
+}CAN_FilterModeType;
 
 /** @brief CAN Filter structure */
 typedef struct
 {
-    uint8_t                 MatchIndex;    /*!< This value is set by @ref XPD_CAN_FilterInit function,
-                                                the user can use the value for matching the filter with the received frames' FMI */
-    CAN_FilterModeType      Mode;          /*!< Filter mode */
-    uint32_t                Mask;          /*!< Identifier mask which selects which Identifier field bits are checked */
-    CAN_IdentifierFieldType Pattern;       /*!< Identifier pattern which is expected by the filter */
-} CAN_FilterType;
+    uint32_t                Mask;    /*!< Identifier mask which selects which Identifier field bits are checked */
+    CAN_IdentifierFieldType Pattern; /*!< Identifier pattern which is expected by the filter */
+    CAN_FilterModeType      Mode;    /*!< Filter mode */
+    uint8_t                 FIFO;    /*!< The selected receive FIFO [0 .. 1]*/
+}CAN_FilterType;
 
 /** @brief CAN Handle structure */
 typedef struct
 {
-	CAN_TypeDef *Inst;                     /*!< The address of the peripheral instance used by the handle */
+    CAN_TypeDef * Inst;                    /*!< The address of the peripheral instance used by the handle */
 #ifdef CAN_BB
-	CAN_BitBand_TypeDef *Inst_BB;          /*!< The address of the peripheral instance in the bit-band region */
+    CAN_BitBand_TypeDef * Inst_BB;         /*!< The address of the peripheral instance in the bit-band region */
 #endif
     XPD_CtrlFnType ClockCtrl;              /*!< Function pointer for RCC clock control */
-	struct {
-	    XPD_HandleCallbackType DepInit;    /*!< Callback to initialize module dependencies (GPIOs, IRQs) */
-	    XPD_HandleCallbackType DepDeinit;  /*!< Callback to restore module dependencies (GPIOs, IRQs) */
-	    XPD_HandleCallbackType Transmit;   /*!< Frame transmission successful callback */
-	    XPD_HandleCallbackType Receive[2]; /*!< Frame reception successful callback for each FIFO */
-	    XPD_HandleCallbackType Error;      /*!< Error detection callback */
-	} Callbacks;                           /*   Handle Callbacks */
-	CAN_FrameType* RxFrame[2];             /*!< [Internal] Pointers to where the received frames will be stored */
+    struct {
+        XPD_HandleCallbackType DepInit;    /*!< Callback to initialize module dependencies (GPIOs, IRQs) */
+        XPD_HandleCallbackType DepDeinit;  /*!< Callback to restore module dependencies (GPIOs, IRQs) */
+        XPD_HandleCallbackType Transmit;   /*!< Frame transmission successful callback */
+        XPD_HandleCallbackType Receive[2]; /*!< Frame reception successful callback for each FIFO */
+        XPD_HandleCallbackType Error;      /*!< Error detection callback */
+    } Callbacks;                           /*   Handle Callbacks */
+    CAN_FrameType * RxFrame[2];            /*!< [Internal] Pointers to where the received frames will be stored */
     volatile uint8_t State;                /*!< [Internal] CAN interrupt-controlled communication state */
-} CAN_HandleType;
+}CAN_HandleType;
 
 /** @} */
 
@@ -188,14 +176,6 @@ typedef struct
 #define         CAN_REG_BIT(HANDLE, REG_NAME, BIT_NAME)         \
     ((HANDLE)->Inst_BB->REG_NAME.BIT_NAME)
 
-/**
- * @brief Master CAN register bit accessing macro
- * @param REG: specifies the register name.
- * @param BIT: specifies the register bit name.
- */
-#define         CAN_MASTER_REG_BIT(REG_NAME, BIT_NAME)          \
-    (CAN_BB(CAN_MASTER)->REG_NAME.BIT_NAME)
-
 #else
 /**
  * @brief  CAN Handle initializer macro
@@ -217,14 +197,6 @@ typedef struct
  */
 #define         CAN_REG_BIT(HANDLE, REG_NAME, BIT_NAME)         \
     ((HANDLE)->Inst->REG_NAME.b.BIT_NAME)
-
-/**
- * @brief Master CAN register bit accessing macro
- * @param REG: specifies the register name.
- * @param BIT: specifies the register bit name.
- */
-#define         CAN_MASTER_REG_BIT(REG_NAME, BIT_NAME)          \
-    (CAN_MASTER->REG_NAME.b.BIT_NAME)
 
 #endif /* CAN_BB */
 
@@ -315,7 +287,7 @@ typedef struct
  * @return The state of the flag.
  */
 #define         XPD_CAN_GetTxFlag(  HANDLE, MB, FLAG_NAME)      \
-        (((HANDLE)->Inst->TSR.w & (CAN_TSR_##FLAG_NAME##0 << (8 * (MB)))) != 0 ? 1 : 0)
+    (((HANDLE)->Inst->TSR.w & (CAN_TSR_##FLAG_NAME##0 << (8 * (MB)))) != 0 ? 1 : 0)
 
 /**
  * @brief  Clear the specified CAN transmit flag.
@@ -330,7 +302,7 @@ typedef struct
  *            @arg ABRQ:    Abort Request
  */
 #define         XPD_CAN_ClearTxFlag(HANDLE, MB, FLAG_NAME)      \
-        ((HANDLE)->Inst->TSR.w = CAN_TSR_##FLAG_NAME##0 << (8 * (MB)))
+    ((HANDLE)->Inst->TSR.w = CAN_TSR_##FLAG_NAME##0 << (8 * (MB)))
 
 /**
  * @brief  Get the specified CAN error flag.
@@ -412,13 +384,9 @@ CAN_ErrorType   XPD_CAN_GetError            (CAN_HandleType * hcan);
 
 /** @addtogroup CAN_Exported_Functions_Filter
  * @{ */
-XPD_ReturnType  XPD_CAN_FilterInit          (CAN_HandleType * hcan, uint8_t FIFONumber, CAN_FilterType * Filter);
-XPD_ReturnType  XPD_CAN_FilterDeinit        (CAN_HandleType * hcan, uint8_t FIFONumber, uint8_t * MatchIndex);
-XPD_ReturnType  XPD_CAN_FilterIndexUpdate   (CAN_HandleType * hcan, uint8_t FIFONumber, uint8_t * MatchIndex);
-void            XPD_CAN_FilterBankReset     (CAN_HandleType * hcan);
-#ifdef __DUAL_CAN_DEVICE
-XPD_ReturnType  XPD_CAN_FilterBankSizeConfig(CAN_HandleType* hcan, uint8_t NewSize);
-#endif
+XPD_ReturnType  XPD_CAN_FilterBankConfig    (CAN_HandleType * hcan, uint8_t NewSize);
+XPD_ReturnType  XPD_CAN_FilterConfig        (CAN_HandleType * hcan, const CAN_FilterType * Filters,
+                                             uint8_t * MatchIndexes, uint8_t FilterCount);
 /** @} */
 
 /** @addtogroup CAN_Exported_Functions_Transmit
@@ -440,7 +408,5 @@ XPD_ReturnType  XPD_CAN_Receive_IT          (CAN_HandleType * hcan, CAN_FrameTyp
 #define XPD_CAN_API
 #include "xpd_rcc_gen.h"
 #undef XPD_CAN_API
-
-#endif /* CAN_MASTER */
 
 #endif /* __XPD_CAN_H_ */

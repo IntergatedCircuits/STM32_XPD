@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    xpd_can.c
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2015-12-30
+  * @version V0.2
+  * @date    2017-08-02
   * @brief   STM32 eXtensible Peripheral Drivers CAN Module
   *
   *  This file is part of STM32_XPD.
@@ -24,14 +24,10 @@
 #include "xpd_can.h"
 #include "xpd_utils.h"
 
-#if defined(USE_XPD_CAN) && defined(CAN_MASTER)
+#ifdef USE_XPD_CAN
 
 /** @addtogroup CAN
  * @{ */
-
-#ifndef CAN_TSR_CODE_Pos
-#define CAN_TSR_CODE_Pos 24U
-#endif
 
 #define CAN_STATE_TRANSMIT      0x0F
 #define CAN_STATE_RECEIVE       0x30
@@ -52,9 +48,56 @@
 #define CAN_RECEIVE1_INTERRUPTS  CAN_IER_FMPIE1
 #define CAN_TRANSMIT_INTERRUPTS  CAN_IER_TMEIE
 
-#ifdef __DUAL_CAN_DEVICE
-static boolean_t can_slaveFiltersUnused();
+#if defined(CAN3)
+#define CAN_MASTER(HANDLE)                                      \
+    (((HANDLE)->Inst == CAN3) ? CAN3 : CAN1)
+
+#define FILTERBANK_NUMBER(HANDLE)                               \
+    (((HANDLE)->Inst == CAN3) ? 14 : 28)
+
+#define FILTERBANK_OFFSET(HANDLE)                               \
+    (((HANDLE)->Inst == CAN2) ? CAN1->FMR.b.CAN2SB : 0)
+
+#define FILTERBANK_COUNT(HANDLE)                                \
+    (((HANDLE)->Inst == CAN1) ? (CAN1->FMR.b.CAN2SB) :          \
+    (((HANDLE)->Inst == CAN2) ? (28 - CAN1->FMR.b.CAN2SB) : 14))
+
+#elif defined(CAN2)
+#define CAN_MASTER(HANDLE)              (CAN1)
+#define FILTERBANK_NUMBER(HANDLE)       28
+
+#define FILTERBANK_OFFSET(HANDLE)                               \
+    (((HANDLE)->Inst == CAN1) ? 0 : CAN1->FMR.b.CAN2SB)
+
+#define FILTERBANK_COUNT(HANDLE)                                \
+    (((HANDLE)->Inst == CAN1) ? (CAN1->FMR.b.CAN2SB) : (28 - CAN1->FMR.b.CAN2SB))
+
+#define CAN1_SLAVE_FILTERS_ACTIVE()                                  \
+    ((CAN1->FA1R & (~((1 << CAN1->FMR.b.CAN2SB) - 1))) != 0)
+
+#else
+#define CAN_MASTER(HANDLE)              ((HANDLE)->Inst)
+#define FILTERBANK_NUMBER(HANDLE)       14
+#define FILTERBANK_OFFSET(HANDLE)       0
+#define FILTERBANK_COUNT(HANDLE)        (FILTERBANK_NUMBER(HANDLE))
+
 #endif
+
+#ifdef CAN_BB
+#define CANx_REG_BIT(REG_NAME, BIT_NAME)  \
+    (CANx_BB->REG_NAME.BIT_NAME)
+#else
+#define CANx_REG_BIT(REG_NAME, BIT_NAME)  \
+    (CANx->REG_NAME.b.BIT_NAME)
+#endif
+
+/* Filter types */
+#define STD_MASK    0
+#define STD_MATCH   1
+#define EXT_MASK    2
+#define EXT_MATCH   3
+
+static const uint8_t filterTypeSpace[4] = {2, 4, 1, 2};
 
 /** @defgroup CAN_Private_Functions CAN Private Functions
  * @{ */
@@ -65,7 +108,7 @@ static boolean_t can_slaveFiltersUnused();
  * @param mailbox: Set to the lowest number empty mailbox
  * @return BUSY if all mailboxes are full, OK if empty mailbox found
  */
-static XPD_ReturnType can_getEmptyMailbox(CAN_HandleType * hcan, uint8_t * mailbox)
+__STATIC_INLINE XPD_ReturnType can_getEmptyMailbox(CAN_HandleType * hcan, uint8_t * mailbox)
 {
     XPD_ReturnType result = XPD_BUSY;
     uint32_t reg = hcan->Inst->TSR.w;
@@ -158,6 +201,27 @@ static void can_frameReceive(CAN_HandleType * hcan, uint8_t FIFONumber)
     }
 }
 
+/**
+ * @brief Resets the receive filter bank configurations for the CAN peripheral.
+ * @param hcan: pointer to the CAN handle structure
+ */
+__STATIC_INLINE void can_filterReset(CAN_HandleType * hcan)
+{
+    uint32_t fbOffset = FILTERBANK_OFFSET(hcan);
+    uint32_t mask     = (1 << FILTERBANK_COUNT(hcan)) - 1;
+
+#ifdef CAN2
+#ifdef CAN3
+    if (hcan->Inst != CAN3)
+#endif /* CAN3 */
+    {
+        XPD_CAN1_ClockCtrl(ENABLE);
+    }
+#endif /* CAN2 */
+
+    CLEAR_BIT(CAN_MASTER(hcan)->FA1R, mask << fbOffset);
+}
+
 /** @} */
 
 /** @defgroup CAN_Exported_Functions CAN Exported Functions
@@ -200,10 +264,10 @@ XPD_ReturnType XPD_CAN_Init(CAN_HandleType * hcan, const CAN_InitType * Config)
     }
 
     /* set the features (except for mode) */
-    MODIFY_REG(hcan->Inst->MCR.w, 0xFC, Config->Features.All);
+    MODIFY_REG(hcan->Inst->MCR.w, 0xFC, Config->wSettings);
 
     /* set the bit timing register (with test mode) */
-    hcan->Inst->BTR.w = (uint32_t)Config->Features.All << 30;
+    hcan->Inst->BTR.w = (uint32_t)Config->wSettings << 30;
     hcan->Inst->BTR.b.SJW = (uint32_t)Config->Timing.SJW - 1;
     hcan->Inst->BTR.b.TS1 = (uint32_t)Config->Timing.BS1 - 1;
     hcan->Inst->BTR.b.TS2 = (uint32_t)Config->Timing.BS2 - 1;
@@ -219,10 +283,10 @@ XPD_ReturnType XPD_CAN_Init(CAN_HandleType * hcan, const CAN_InitType * Config)
     }
 
     /* reset operation state */
-    hcan->State  = 0;
+    hcan->State = 0;
 
     /* reset filter banks */
-    XPD_CAN_FilterBankReset(hcan);
+    can_filterReset(hcan);
 
     return result;
 }
@@ -234,23 +298,23 @@ XPD_ReturnType XPD_CAN_Init(CAN_HandleType * hcan, const CAN_InitType * Config)
  */
 XPD_ReturnType XPD_CAN_Deinit(CAN_HandleType * hcan)
 {
-    /* disable all interrupt requests */
+    /* Disable all interrupt requests */
     hcan->Inst->IER.w = 0;
 
-    /* disable filters */
-    XPD_CAN_FilterBankReset(hcan);
+    /* Disable filters */
+    can_filterReset(hcan);
 
-    /* disable peripheral clock */
-#ifdef __DUAL_CAN_DEVICE
-    /* master clock is only off when no filters are used */
-    if ((hcan->Inst != CAN1) || can_slaveFiltersUnused())
+    /* Deinitialize peripheral dependencies */
+    XPD_SAFE_CALLBACK(hcan->Callbacks.DepDeinit, hcan);
+
+    /* Disable peripheral clock */
+#ifdef CAN2
+    /* Master clock is only off when no filters are used */
+    if ((hcan->Inst != CAN1) || !CAN1_SLAVE_FILTERS_ACTIVE())
 #endif
     {
         hcan->ClockCtrl(DISABLE);
     }
-
-    /* Deinitialize peripheral dependencies */
-    XPD_SAFE_CALLBACK(hcan->Callbacks.DepDeinit, hcan);
 
     return XPD_OK;
 }
@@ -316,7 +380,6 @@ CAN_ErrorType XPD_CAN_GetError(CAN_HandleType * hcan)
  */
 XPD_ReturnType XPD_CAN_Transmit(CAN_HandleType * hcan, CAN_FrameType * Frame, uint32_t Timeout)
 {
-    uint32_t temp;
     XPD_ReturnType result;
 
     /* no timeout, no wait for success */
@@ -354,10 +417,10 @@ XPD_ReturnType XPD_CAN_Transmit(CAN_HandleType * hcan, CAN_FrameType * Frame, ui
         if (result == XPD_OK)
         {
             /* convert to txok flag for mailbox */
-            temp = CAN_TSR_TXOK0 << (temp * 8);
+            uint32_t txok = CAN_TSR_TXOK0 << (Frame->Index * 8);
 
             /* wait for txok with the remaining time */
-            result = XPD_WaitForMatch(&hcan->Inst->TSR.w, temp, temp, &Timeout);
+            result = XPD_WaitForMatch(&hcan->Inst->TSR.w, txok, txok, &Timeout);
         }
     }
 
@@ -407,7 +470,7 @@ XPD_ReturnType XPD_CAN_Transmit_IT(CAN_HandleType * hcan, CAN_FrameType * Frame)
  */
 XPD_ReturnType XPD_CAN_Receive(CAN_HandleType * hcan, CAN_FrameType* Frame, uint8_t FIFONumber, uint32_t Timeout)
 {
-    XPD_ReturnType result;
+    XPD_ReturnType result = XPD_BUSY;
     uint8_t recState = CAN_STATE_RECEIVE0 << FIFONumber;
 
     /* check if FIFO is not in use */
@@ -427,10 +490,7 @@ XPD_ReturnType XPD_CAN_Receive(CAN_HandleType * hcan, CAN_FrameType* Frame, uint
             can_frameReceive(hcan, FIFONumber);
         }
     }
-    else
-    {
-        result = XPD_BUSY;
-    }
+
     return result;
 }
 
@@ -443,7 +503,7 @@ XPD_ReturnType XPD_CAN_Receive(CAN_HandleType * hcan, CAN_FrameType* Frame, uint
  */
 XPD_ReturnType XPD_CAN_Receive_IT(CAN_HandleType * hcan, CAN_FrameType * Frame, uint8_t FIFONumber)
 {
-    XPD_ReturnType result;
+    XPD_ReturnType result = XPD_BUSY;
     uint8_t recState = CAN_STATE_RECEIVE0 << FIFONumber;
 
     /* check if FIFO is not in use */
@@ -454,14 +514,10 @@ XPD_ReturnType XPD_CAN_Receive_IT(CAN_HandleType * hcan, CAN_FrameType * Frame, 
         /* save receive data target */
         hcan->RxFrame[FIFONumber] = Frame;
 
-        SET_BIT(hcan->Inst->IER.w,
-            CAN_ERROR_INTERRUPTS | ((FIFONumber == 0) ? CAN_RECEIVE0_INTERRUPTS : CAN_RECEIVE1_INTERRUPTS));
+        SET_BIT(hcan->Inst->IER.w, CAN_ERROR_INTERRUPTS
+            | ((FIFONumber == 0) ? CAN_RECEIVE0_INTERRUPTS : CAN_RECEIVE1_INTERRUPTS));
 
         result = XPD_OK;
-    }
-    else
-    {
-        result = XPD_BUSY;
     }
     return result;
 }
@@ -506,10 +562,12 @@ void XPD_CAN_TX_IRQHandler(CAN_HandleType * hcan)
             /* disable transmit interrupt */
             temp = CAN_TRANSMIT_INTERRUPTS;
 
+#ifdef USE_XPD_CAN_ERROR_DETECT
             if ((hcan->State & CAN_STATE_RECEIVE) == 0)
             {
                 temp |= CAN_ERROR_INTERRUPTS;
             }
+#endif
             CLEAR_BIT(hcan->Inst->IER.w, temp);
         }
     }
@@ -534,10 +592,12 @@ void XPD_CAN_RX0_IRQHandler(CAN_HandleType * hcan)
         {
             temp = CAN_RECEIVE0_INTERRUPTS;
 
+#ifdef USE_XPD_CAN_ERROR_DETECT
             if ((hcan->State & (CAN_STATE_TRANSMIT | CAN_STATE_RECEIVE1)) == 0)
             {
                 temp |= CAN_ERROR_INTERRUPTS;
             }
+#endif
             CLEAR_BIT(hcan->State, CAN_STATE_RECEIVE0);
 
             CLEAR_BIT(hcan->Inst->IER.w, temp);
@@ -567,10 +627,12 @@ void XPD_CAN_RX1_IRQHandler(CAN_HandleType * hcan)
         {
             temp = CAN_RECEIVE1_INTERRUPTS;
 
+#ifdef USE_XPD_CAN_ERROR_DETECT
             if ((hcan->State & (CAN_STATE_TRANSMIT | CAN_STATE_RECEIVE0)) == 0)
             {
                 temp |= CAN_ERROR_INTERRUPTS;
             }
+#endif
             CLEAR_BIT(hcan->State, CAN_STATE_RECEIVE1);
 
             CLEAR_BIT(hcan->Inst->IER.w, temp);
@@ -607,488 +669,249 @@ void XPD_CAN_SCE_IRQHandler(CAN_HandleType * hcan)
  * @{
  */
 
-__STATIC_INLINE void can_filterBankEnable(uint8_t FilterNumber)
-{
-#ifdef CAN_BB
-    CAN_BB(CAN_MASTER)->FA1R[FilterNumber] = 1;
-#else
-    SET_BIT(CAN_MASTER->FA1R, 1 << (uint32_t)FilterNumber);
-#endif
-}
-
-__STATIC_INLINE void can_filterBankDisable(uint8_t FilterNumber)
-{
-#ifdef CAN_BB
-    CAN_BB(CAN_MASTER)->FA1R[FilterNumber] = 0;
-#else
-    CLEAR_BIT(CAN_MASTER->FA1R, 1 << (uint32_t)FilterNumber);
-#endif
-}
-
-__STATIC_INLINE uint8_t can_getFilterBankOffset(CAN_HandleType * hcan)
-{
-#ifdef __DUAL_CAN_DEVICE
-    if (hcan->Inst == CAN_MASTER)
-    {
-        return 0;
-    }
-    else
-    {
-        return CAN_MASTER->FMR.b.CAN2SB;
-    }
-#else
-    return 0;
-#endif
-}
-
-__STATIC_INLINE uint8_t can_getFilterBankSize(CAN_HandleType * hcan)
-{
-#ifdef __DUAL_CAN_DEVICE
-    if (hcan->Inst == CAN_MASTER)
-    {
-        return CAN_MASTER->FMR.b.CAN2SB - 1;
-    }
-    else
-    {
-        return CAN_FILTERBANK_NUMBER;
-    }
-#else
-    return CAN_FILTERBANK_NUMBER;
-#endif
-}
-
-typedef enum
-{
-    Std_Mask = 0,
-    Std_Match = 1,
-    Ext_Mask = 2,
-    Ext_Match = 3,
-    FILTERTYPE_INVALID = 4
-}FilterInfoType;
-
-static const uint8_t filterTypeSpace[4] = {2, 4, 1, 2};
-
-static struct
-{
-    uint8_t type;
-    uint8_t configuredFields;
-} FilterInfo[CAN_FILTERBANK_NUMBER];
-
-typedef union
-{
-    uint16_t u16[4];
-    uint32_t u32[2];
-}FilterRegister;
-
-#ifdef __DUAL_CAN_DEVICE
-static boolean_t can_slaveFiltersUnused()
-{
-    return FilterInfo[CAN_MASTER->FMR.b.CAN2SB].type == FILTERTYPE_INVALID;
-}
-#endif
-
 /**
- * @brief Resets the receive filter bank configurations for the CAN peripheral.
+ * @brief Configures the receive filters for the peripheral and provides each filter its own Filter Match Index (FMI).
  * @param hcan: pointer to the CAN handle structure
+ * @param Filters: filter configuration list (array)
+ * @param MatchIndexes: array to fill with the FMI of the filters - set to NULL to ignore
+ * @param FilterCount: the number of input filters to configure
+ * @return ERROR if filters cannot fit in the filter bank, OK if filters are added
  */
-void XPD_CAN_FilterBankReset(CAN_HandleType * hcan)
+XPD_ReturnType XPD_CAN_FilterConfig(CAN_HandleType * hcan, const CAN_FilterType * Filters, uint8_t * MatchIndexes, uint8_t FilterCount)
 {
-    uint8_t filterbankoffset, filterbanksize, i;
-
-#ifdef __DUAL_CAN_DEVICE
-    XPD_CAN1_ClockCtrl(ENABLE);
+    XPD_ReturnType result = XPD_OK;
+    uint8_t fbDemand = 0, currentFMI = 0, remaining, currentType;
+    CAN_TypeDef * CANx = CAN_MASTER(hcan);
+#ifdef CAN_BB
+    CAN_BitBand_TypeDef * CANx_BB = CAN_BB(CANx);
 #endif
 
-    filterbankoffset = can_getFilterBankOffset(hcan);
-    filterbanksize = can_getFilterBankSize(hcan);
+    uint8_t fbOffset = FILTERBANK_OFFSET(hcan);
+    uint8_t fbCount  = FILTERBANK_COUNT(hcan);
+    uint32_t mask    = (1 << fbCount) - 1;
 
-    for (i = filterbankoffset; i < filterbanksize; i++)
+#ifdef CAN2
+#ifdef CAN3
+    if (hcan->Inst != CAN3)
+#endif /* CAN3 */
     {
-        /* disable all matched filters */
-        can_filterBankDisable(i);
-        /* set type value to invalid */
-        FilterInfo[i].type = FILTERTYPE_INVALID;
-        FilterInfo[i].configuredFields = 0;
+        XPD_CAN1_ClockCtrl(ENABLE);
     }
-}
+#endif /* CAN2 */
 
-/**
- * @brief Configures a receive filter and sets its Match Index (FMI).
- * @param hcan: pointer to the CAN handle structure
- * @param FIFONumber: the selected receive FIFO [0 .. 1]
- * @param Filter: pointer to the filter configuration
- * @return ERROR if filter cannot fit in the filter bank, OK if filter is added
- */
-XPD_ReturnType XPD_CAN_FilterInit(CAN_HandleType * hcan, uint8_t FIFONumber, CAN_FilterType * Filter)
-{
-    uint8_t filterbanksize, filterbankoffset, fbank, fplace, i, confFieldMask;
-    uint32_t fFifoReg;
-    FilterRegister FR;
-    uint8_t type = (Filter->Mode & CAN_FILTER_MATCH) | ((Filter->Pattern.Type & CAN_IDTYPE_EXT_DATA) >> 1);
-    XPD_ReturnType result = XPD_ERROR;
+    /* Enter filter initialization */
+    CANx_REG_BIT(FMR,FINIT) = 1;
 
-#ifdef __DUAL_CAN_DEVICE
-    XPD_CAN1_ClockCtrl(ENABLE);
-#endif
+    /* Deactivate all filter banks assigned to this peripheral */
+    CLEAR_BIT(CANx->FA1R, mask << fbOffset);
 
-    fFifoReg = CAN_MASTER->FFA1R;
-    filterbanksize = can_getFilterBankSize(hcan);
-    filterbankoffset = can_getFilterBankOffset(hcan);
-
-    fbank = filterbanksize;
-
-    /* see if the filter can be paired up in an already configured bank */
-    if (type != Ext_Mask)
+    /* Configure filters in a type assorted way */
+    for (remaining = FilterCount, currentType = 0; remaining > 0; currentType++)
     {
-        confFieldMask = (1 << filterTypeSpace[type]) - 1;
-        for (fbank = filterbankoffset; fbank < filterbanksize; fbank++)
-        {
-            if (    (FilterInfo[fbank].type == type)
-                 && (FilterInfo[fbank].configuredFields != confFieldMask)
-                 && (((fFifoReg >> fbank) & 1) == FIFONumber))
-                break;
-        }
-    }
+        uint8_t i, fbankIndex, fbankPos = 255;
+        union {
+            uint16_t u16[4];
+            uint32_t u32[2];
+            CAN_FilterRegister_TypeDef filterReg;
+        }FilterBank;
 
-    /* try to find empty filter bank */
-    if (fbank == filterbanksize)
-    {
-        for (fbank = filterbankoffset; fbank < filterbanksize; fbank++)
+        /* Find all filters with the selected type in the list */
+        for (i = 0; i < FilterCount; i++)
         {
-            /* type is set to invalid at reset */
-            if (FilterInfo[fbank].type == FILTERTYPE_INVALID)
+            uint8_t type = (Filters[i].Mode & CAN_FILTER_MATCH)
+                    | ((Filters[i].Pattern.Type & CAN_IDTYPE_EXT_DATA) >> 1);
+
+            if (type == currentType)
             {
-                CAN_MASTER_REG_BIT(FMR,FINIT) = 1;
+                /* If the current filter bank is full, set up another one */
+                if (fbankPos >= filterTypeSpace[currentType])
+                {
+                    fbankIndex = fbDemand + fbOffset;
+
+                    /* Check against overrun of used filter banks */
+                    if ((fbDemand + 1) > fbCount)
+                    {
+                        remaining = 0;
+                        result = XPD_ERROR;
+                        break;
+                    }
+
+                    /* Configure new filter bank type */
 #ifdef CAN_BB
-                CAN_BB(CAN_MASTER)->FFA1R[fbank] = FIFONumber;
-                CAN_BB(CAN_MASTER)->FM1R[fbank]  = type; /* mode is either mask or ID match */
-                CAN_BB(CAN_MASTER)->FS1R[fbank]  = type >> 1; /* 32 bit scale for ext ID, 16 bit for std ID */
+                    /* Setting filter FIFO assignment */
+                    CANx_BB->FFA1R[fbankIndex] = Filters[i].FIFO;
+
+                    /* Setting filter mode */
+                    CANx_BB->FM1R[fbankIndex]  = type;
+
+                    /* Setting filter scale */
+                    CANx_BB->FS1R[fbankIndex]  = type >> 1;
 #else
-                fFifoReg = 1 << fbank;
+                    uint32_t fbIndexMask = 1 << fbankIndex;
 
-                if (FIFONumber == 0)
-                    CLEAR_BIT(CAN_MASTER->FFA1R,fFifoReg);
-                else
-                    SET_BIT(CAN_MASTER->FFA1R,fFifoReg);
+                    /* Setting filter FIFO assignment */
+                    if (Filters[i].FIFO == 0)
+                    {   CLEAR_BIT(CANx->FFA1R, fbIndexMask); }
+                    else
+                    {   SET_BIT(CANx->FFA1R, fbIndexMask); }
 
-                if ((type & 1) == 0)
-                    CLEAR_BIT(CAN_MASTER->FM1R,fFifoReg);
-                else
-                    SET_BIT(CAN_MASTER->FM1R,fFifoReg);
+                    /* Setting filter mode */
+                    if ((type & 1) == 0)
+                    {   CLEAR_BIT(CANx->FM1R, fbIndexMask); }
+                    else
+                    {   SET_BIT(CANx->FM1R, fbIndexMask); }
 
-                if ((type & 2) == 0)
-                    CLEAR_BIT(CAN_MASTER->FS1R,fFifoReg);
-                else
-                    SET_BIT(CAN_MASTER->FS1R,fFifoReg);
+                    /* Setting filter scale */
+                    if ((type & 2) == 0)
+                    {   CLEAR_BIT(CANx->FS1R, fbIndexMask); }
+                    else
+                    {   SET_BIT(CANx->FS1R, fbIndexMask); }
 #endif /* CAN_BB */
-                CAN_MASTER_REG_BIT(FMR,FINIT) = 0;
 
-                fFifoReg = CAN_MASTER->FFA1R;
-                FilterInfo[fbank].type = type;
-                break;
+                    fbankPos = 0;
+                    fbDemand++;
+                }
+
+                /* Set the identifier pattern depending on the filter scale */
+                if ((currentType & 2) == 0)
+                {
+                    FilterBank.u16[fbankPos] = (Filters[i].Pattern.Value << 5)
+                                             | (Filters[i].Pattern.Type  << 2);
+
+                    /* Set the masking bits */
+                    if ((currentType & 1) == 0)
+                    {
+                        FilterBank.u16[fbankPos + 1] = (Filters[i].Mask << 5);
+
+                        /* If mask does not pass any type, set the type bits */
+                        if (Filters[i].Mode == CAN_FILTER_MASK)
+                        {
+                            FilterBank.u16[fbankPos + 1] |= CAN_IDTYPE_EXT_RTR << 2;
+                        }
+                    }
+                }
+                else
+                {
+                    FilterBank.u32[fbankPos] = (Filters[i].Pattern.Value << 3)
+                                             | (Filters[i].Pattern.Type);
+
+                    /* Set the masking bits */
+                    if ((currentType & 1) == 0)
+                    {
+                        /* Filter bank size fixes the mask field location */
+                        FilterBank.u32[1] = (Filters[i].Mask << 3);
+
+                        /* If mask does not pass any type, set the type bits */
+                        if (Filters[i].Mode == CAN_FILTER_MASK)
+                        {
+                            FilterBank.u32[1] |= CAN_IDTYPE_EXT_RTR;
+                        }
+                    }
+                }
+
+                /* Set the current filter's FMI */
+                if (MatchIndexes != NULL)
+                {
+                    MatchIndexes[i] = currentFMI + fbankPos;
+                }
+
+                /* If the last element of the bank */
+                if ((fbankPos + 1) >= filterTypeSpace[currentType])
+                {
+                    currentFMI += filterTypeSpace[currentType];
+
+                    /* Set the configured bank in the peripheral */
+                    CANx->sFilterRegister[fbankIndex] = FilterBank.filterReg;
+                }
+                /* Unused filters after the current one are set to
+                 * the copies of the current to avoid receiving unwanted frames */
+                else if (filterTypeSpace[type] == 2)
+                {
+                    FilterBank.u32[1] = FilterBank.u32[0];
+                }
+                else if (fbankPos == 0)
+                {
+                    FilterBank.u16[1] = FilterBank.u16[0];
+                    FilterBank.u32[1] = FilterBank.u32[0];
+                }
+                else {}
+
+                fbankPos++;
+                remaining--;
             }
         }
-    }
 
-    /* if any filter bank is available */
-    if (fbank < filterbanksize)
-    {
-        /* find the first unused filter field in the selected bank */
-        for (fplace = 0; fplace < filterTypeSpace[type]; fplace++)
+        /* If the last bank was not filled completely */
+        if (fbankPos < filterTypeSpace[currentType])
         {
-            if ((FilterInfo[fbank].configuredFields & (1 << fplace)) == 0)
-            {
-                /* copy the contents of the filter bank to local variable */
-                FR.u32[0] = CAN_MASTER->sFilterRegister[fbank].FR1;
-                FR.u32[1] = CAN_MASTER->sFilterRegister[fbank].FR2;
+            currentFMI += filterTypeSpace[currentType];
 
-                /* fill the selected field with the filter configuration */
-                switch (type)
-                {
-                    case Std_Mask:
-                    {
-                        FR.u16[fplace] = Filter->Pattern.Value << 5;
-                        if (Filter->Pattern.Type & CAN_IDTYPE_STD_RTR)
-                        {
-                            FR.u16[fplace] |= 0x10;
-                        }
-                        FR.u16[fplace + 1] = Filter->Mask << 5;
-                        if ((Filter->Mode & CAN_FILTER_MASK_ANYTYPE) == 0)
-                        {
-                            FR.u16[fplace + 1] |= 0x18;
-                        }
-                        break;
-                    }
-                    case Std_Match:
-                    {
-                        FR.u16[fplace] = Filter->Pattern.Value << 5;
-                        if (Filter->Pattern.Type & CAN_IDTYPE_STD_RTR)
-                        {
-                            FR.u16[fplace] |= 0x10;
-                        }
-                        break;
-                    }
-                    case Ext_Mask:
-                    {
-                        FR.u32[fplace] = (Filter->Pattern.Value << 3) | (Filter->Pattern.Type & CAN_IDTYPE_EXT_RTR);
-                        FR.u32[fplace + 1] = (Filter->Mask << 3);
-                        if ((Filter->Mode & CAN_FILTER_MASK_ANYTYPE) == 0)
-                        {
-                            FR.u32[fplace + 1] |= Filter->Pattern.Type & CAN_IDTYPE_EXT_RTR;
-                        }
-                        break;
-                    }
-                    case Ext_Match:
-                    {
-                        FR.u32[fplace] = (Filter->Pattern.Value << 3) | (Filter->Pattern.Type & CAN_IDTYPE_EXT_RTR);
-                        break;
-                    }
-                }
-                /* save active configuration in context */
-                SET_BIT(FilterInfo[fbank].configuredFields, 1 << fplace);
-
-                /* unused filters after the current one are set to the copies of the current */
-                for (i = fplace + 1; i < filterTypeSpace[type]; i++)
-                {
-                    if ((FilterInfo[fbank].configuredFields & (1 << i)) == 0)
-                    {
-                        if (filterTypeSpace[type] == 4)
-                            FR.u16[i] = FR.u16[fplace];
-                        else
-                            FR.u32[i] = FR.u32[fplace];
-                    }
-                }
-                /* disable filter bank to enable changing settings */
-                can_filterBankDisable(fbank);
-
-                /* copy back the configured bank to the peripheral */
-                CAN_MASTER->sFilterRegister[fbank].FR1 = FR.u32[0];
-                CAN_MASTER->sFilterRegister[fbank].FR2 = FR.u32[1];
-
-                /* enable filter bank */
-                can_filterBankEnable(fbank);
-
-                /* set the filter match index in the config structure */
-                Filter->MatchIndex = fplace;
-                for (i = filterbankoffset; i < fbank; i++)
-                {
-                    if (((fFifoReg >> fbank) & 1) == FIFONumber)
-                        Filter->MatchIndex += filterTypeSpace[FilterInfo[i].type];
-                }
-
-                result = XPD_OK;
-                break;
-            }
+            /* Set the configured bank in the peripheral */
+            CANx->sFilterRegister[fbankIndex] = FilterBank.filterReg;
         }
     }
+
+    /* Activate all configured filter banks */
+    mask = (1 << fbDemand) - 1;
+    SET_BIT(CANx->FA1R, mask << fbOffset);
+
+    /* Exit filter initialization */
+    CANx_REG_BIT(FMR,FINIT) = 0;
 
     return result;
 }
 
 /**
- * @brief Updates a receive Filter Match Index. Necessary after a filter has been removed from the same filter bank.
- * @param hcan: pointer to the CAN handle structure
- * @param FIFONumber: the selected receive FIFO [0 .. 1]
- * @param MatchIndex: pointer to the old Filter Match Index that will be refreshed after the operation
- * @return ERROR if no filter with the input match index was found, OK if successful
- */
-XPD_ReturnType XPD_CAN_FilterIndexUpdate(CAN_HandleType * hcan, uint8_t FIFONumber, uint8_t * MatchIndex)
-{
-    uint8_t filterbankoffset, filterbanksize, fbank, fplace;
-    uint8_t offset = 0;
-    uint32_t fFifoReg;
-    XPD_ReturnType result = XPD_ERROR;
-
-    fFifoReg = CAN_MASTER->FFA1R;
-    filterbankoffset = can_getFilterBankOffset(hcan);
-    filterbanksize = can_getFilterBankSize(hcan);
-
-    for (fbank = filterbankoffset; fbank < filterbanksize; fbank++)
-    {
-        if ((FilterInfo[fbank].configuredFields != 0) && (((fFifoReg >> fbank) & 1) == FIFONumber))
-        {
-            if (*MatchIndex < (offset + filterTypeSpace[FilterInfo[fbank].type]))
-            {
-                /* due to removable filters, the filter can be copied to preceding locations,
-                 * if no preceding filters are configured */
-                for (fplace = 0; fplace < (*MatchIndex - offset); fplace++)
-                {
-                    if ((FilterInfo[fbank].configuredFields & (1 << fplace)) != 0)
-                    {
-                        break;
-                    }
-                }
-                /* no preceding configured filter is found */
-                if (fplace == (*MatchIndex - offset))
-                {
-                    *MatchIndex = offset;
-                    FilterInfo[fbank].configuredFields = (FilterInfo[fbank].configuredFields & ~(1 << fplace)) | 1;
-                }
-                result = XPD_OK;
-                break;
-            }
-            offset += filterTypeSpace[FilterInfo[fbank].type];
-        }
-    }
-
-    return result;
-}
-
-/**
- * @brief Removes a receive filter by its Match Index (FMI).
- * @param hcan: pointer to the CAN handle structure
- * @param FIFONumber: the selected receive FIFO [0 .. 1]
- * @param MatchIndex: pointer to the reference of the filter
- * @return ERROR if no filter with the input match index was found, OK if successful
- */
-XPD_ReturnType XPD_CAN_FilterDeinit(CAN_HandleType * hcan, uint8_t FIFONumber, uint8_t * MatchIndex)
-{
-    uint8_t filterbankoffset, filterbanksize, fbank, fplace, i;
-    uint8_t offset = 0;
-    uint32_t fFifoReg, temp;
-    FilterRegister FR;
-    XPD_ReturnType result = XPD_ERROR;
-
-    fFifoReg = CAN_MASTER->FFA1R;
-    filterbankoffset = can_getFilterBankOffset(hcan);
-    filterbanksize = can_getFilterBankSize(hcan);
-
-    for (fbank = filterbankoffset; fbank < filterbanksize; fbank++)
-    {
-        if ((FilterInfo[fbank].configuredFields != 0) && (((fFifoReg >> fbank) & 1) == FIFONumber))
-        {
-            if (*MatchIndex < (offset + filterTypeSpace[FilterInfo[fbank].type]))
-            {
-                /* the filter is not active, error */
-                temp = 1 << (*MatchIndex - offset);
-                if ((FilterInfo[fbank].configuredFields & temp) == 0)
-                {
-                    break;
-                }
-                CLEAR_BIT(FilterInfo[fbank].configuredFields, temp);
-
-                /* if it is possible to rearrange filters within the bank */
-                if (FilterInfo[fbank].type != Ext_Mask)
-                {
-                    /* check if any other configured filter is in the bank */
-                    for (fplace = 0; fplace < filterTypeSpace[FilterInfo[fbank].type]; fplace++)
-                    {
-                        if ((FilterInfo[fbank].configuredFields & (1 << fplace)) != 0)
-                        {
-                            /* copy the contents of the filter bank to local variable */
-                            FR.u32[0] = CAN_MASTER->sFilterRegister[fbank].FR1;
-                            FR.u32[1] = CAN_MASTER->sFilterRegister[fbank].FR2;
-
-                            if (filterTypeSpace[FilterInfo[fbank].type] == 4)
-                            {
-                                for (i = 0; i < 4; i++)
-                                {
-                                    if (i != fplace)
-                                        FR.u16[i] = FR.u16[fplace];
-                                }
-                            }
-                            else
-                            {
-                                FR.u32[1 - fplace] = FR.u32[fplace];
-                            }
-                            /* disable filter bank to enable changing settings */
-                            can_filterBankDisable(fbank);
-
-                            /* copy back the configured bank to the peripheral */
-                            CAN_MASTER->sFilterRegister[fbank].FR1 = FR.u32[0];
-                            CAN_MASTER->sFilterRegister[fbank].FR2 = FR.u32[1];
-
-                            /* enable filter bank */
-                            can_filterBankEnable(fbank);
-
-                            result = XPD_OK;
-                            break;
-                        }
-                    }
-                }
-                /* filter is ext_mask, or filter bank is empty, disable it */
-                if (result != XPD_OK)
-                {
-                    can_filterBankDisable(fbank);
-                }
-
-                result = XPD_OK;
-                break;
-            }
-            offset += filterTypeSpace[FilterInfo[fbank].type];
-        }
-    }
-
-    return result;
-}
-
-#ifdef __DUAL_CAN_DEVICE
-
-/**
- * Sets the filter bank size for the CAN peripheral.
+ * @brief Sets the filter bank size for the CAN peripheral.
+ * @note  This operation resets the filter configuration for the slave CAN controller.
  * @param hcan: pointer to the CAN handle structure
  * @param NewSize: the new filter bank size for the CAN peripheral [0 .. 28]
  * @return ERROR if size is invalid, or if size change would disable master CAN filters, OK if successful
- * @note Operation resets the filter configuration for the slave CAN controller.
  */
-XPD_ReturnType XPD_CAN_FilterBankSizeConfig(CAN_HandleType * hcan, uint8_t NewSize)
+XPD_ReturnType XPD_CAN_FilterBankConfig(CAN_HandleType * hcan, uint8_t NewSize)
 {
-    uint8_t prevBanks, i;
-    XPD_ReturnType result = XPD_OK;
+    XPD_ReturnType result = XPD_ERROR;
 
-    XPD_CAN1_ClockCtrl(ENABLE);
-
-    if(NewSize > CAN_FILTERBANK_NUMBER)
-    {
-        result = XPD_ERROR;
-    }
+#ifdef CAN3
+    if (hcan->Inst == CAN3)
+    { /* Simply return with error */ }
     else
+#endif /* CAN3 */
+#ifdef CAN2
+    if (NewSize <= 28)
     {
-        /* slave CAN bank size is counted from the end */
-        if (hcan->Inst != CAN_MASTER)
+        uint32_t masterMask;
+
+        XPD_CAN1_ClockCtrl(ENABLE);
+
+        masterMask = (1 << CAN1->FMR.b.CAN2SB) - 1;
+
+        /* Slave CAN bank size is counted from the end */
+        if (hcan->Inst != CAN1)
         {
             NewSize = 28 - NewSize;
         }
 
-        prevBanks = CAN_MASTER->FMR.b.CAN2SB;
-
-        /* if the master CAN is losing filters, check if there are any configured */
-        if (prevBanks > NewSize)
+        /* Do not allow the master CAN to lose active filters */
+        if (((CAN1->FA1R & masterMask) & (0xFFFF << NewSize)) == 0)
         {
-            for (i = NewSize; i < prevBanks; i++)
-            {
-                if (FilterInfo[i].configuredFields != 0)
-                {
-                    result = XPD_ERROR;
-                    break;
-                }
-            }
-        }
+            CAN1->FMR.b.FINIT = 1;
 
-        if (result == XPD_OK)
-        {
-            /* reset all slave filters, as their indexes get misaligned due to the change */
-            for (i = prevBanks; i < CAN_FILTERBANK_NUMBER; i++)
-            {
-                /* disable all matched filters */
-                can_filterBankDisable(i);
-                /* set type value to invalid */
-                FilterInfo[i].type = FILTERTYPE_INVALID;
-                FilterInfo[i].configuredFields = 0;
-            }
-
-            CAN_MASTER_REG_BIT(FMR,FINIT) = 1;
+            /* Deactivate slave CAN filter banks */
+            CLEAR_BIT(CAN1->FA1R, ~masterMask);
 
             /* select the start slave bank */
-            CAN_MASTER->FMR.b.CAN2SB = NewSize;
+            CAN1->FMR.b.CAN2SB = NewSize;
 
-            CAN_MASTER_REG_BIT(FMR,FINIT) = 0;
+            CAN1->FMR.b.FINIT = 0;
+
+            result = XPD_OK;
         }
     }
+#endif /* CAN2 */
 
     return result;
 }
-#endif /* __DUAL_CAN_DEVICE */
 
 /** @} */
 
@@ -1096,4 +919,4 @@ XPD_ReturnType XPD_CAN_FilterBankSizeConfig(CAN_HandleType * hcan, uint8_t NewSi
 
 /** @} */
 
-#endif /* defined(USE_XPD_CAN) && defined(CAN_MASTER) */
+#endif /* USE_XPD_CAN */
