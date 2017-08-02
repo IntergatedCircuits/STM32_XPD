@@ -99,7 +99,7 @@ __ALIGN_BEGIN static const uint8_t USBD_CDC_DeviceQualifierDesc[USB_LEN_DEV_QUAL
     USB_LEN_DEV_QUALIFIER_DESC,     /* bLength */
     USB_DESC_TYPE_DEVICE_QUALIFIER, /* bDescriptorType */
     0x00, 0x02,                     /* bcdUSB */
-    0x00,                           /* bDeviceClass */
+    0x02,                           /* bDeviceClass */
     0x00,                           /* bDeviceSubClass */
     0x00,                           /* bDeviceProtocol */
     0x40,                           /* bMaxPacketSize */
@@ -133,7 +133,7 @@ const USBD_ClassTypeDef USBD_CDC = {
 /* USB CDC device Configuration Descriptor */
 __ALIGN_BEGIN static const uint8_t USBD_CDC_CfgHSDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_END =
 {
-    /*Configuration Descriptor*/
+    /* Configuration Descriptor */
     0x09,                           /* bLength: Configuration Descriptor size */
     USB_DESC_TYPE_CONFIGURATION,    /* bDescriptorType: Configuration */
     USB_CDC_CONFIG_DESC_SIZ,0x00,   /* wTotalLength:no of returned bytes */
@@ -143,7 +143,7 @@ __ALIGN_BEGIN static const uint8_t USBD_CDC_CfgHSDesc[USB_CDC_CONFIG_DESC_SIZ] _
     0x80 | (USBD_SELF_POWERED << 6),/* bmAttributes: self powered */
     USBD_MAX_POWER_mA / 2,          /* MaxPower x mA */
 
-    /*Interface Descriptor */
+    /* Interface Descriptor */
     0x09,                       /* bLength: Interface Descriptor size */
     USB_DESC_TYPE_INTERFACE,    /* bDescriptorType: Interface */
     /* Interface descriptor type */
@@ -155,34 +155,34 @@ __ALIGN_BEGIN static const uint8_t USBD_CDC_CfgHSDesc[USB_CDC_CONFIG_DESC_SIZ] _
     0x01,   /* bInterfaceProtocol: Common AT commands */
     0x00,   /* iInterface: */
 
-    /*Header Functional Descriptor*/
+    /* Header Functional Descriptor */
     0x05,   /* bLength: Endpoint Descriptor size */
     0x24,   /* bDescriptorType: CS_INTERFACE */
     0x00,   /* bDescriptorSubtype: Header Func Desc */
     0x10,   /* bcdCDC: spec release number */
     0x01,
 
-    /*Call Management Functional Descriptor*/
+    /* Call Management Functional Descriptor */
     0x05,   /* bFunctionLength */
     0x24,   /* bDescriptorType: CS_INTERFACE */
     0x01,   /* bDescriptorSubtype: Call Management Func Desc */
     0x00,   /* bmCapabilities: D0+D1 */
     0x01,   /* bDataInterface: 1 */
 
-    /*ACM Functional Descriptor*/
+    /* ACM Functional Descriptor */
     0x04,   /* bFunctionLength */
     0x24,   /* bDescriptorType: CS_INTERFACE */
     0x02,   /* bDescriptorSubtype: Abstract Control Management desc */
     0x02,   /* bmCapabilities */
 
-    /*Union Functional Descriptor*/
+    /* Union Functional Descriptor */
     0x05,   /* bFunctionLength */
     0x24,   /* bDescriptorType: CS_INTERFACE */
     0x06,   /* bDescriptorSubtype: Union func desc */
     0x00,   /* bMasterInterface: Communication class interface */
     0x01,   /* bSlaveInterface0: Data Class Interface */
 
-    /*Endpoint 2 Descriptor*/
+    /* Endpoint 2 Descriptor */
     0x07,                       /* bLength: Endpoint Descriptor size */
     USB_DESC_TYPE_ENDPOINT,     /* bDescriptorType: Endpoint */
     CDC_CMD_EP,                 /* bEndpointAddress */
@@ -195,7 +195,7 @@ __ALIGN_BEGIN static const uint8_t USBD_CDC_CfgHSDesc[USB_CDC_CONFIG_DESC_SIZ] _
     0x80,                       /* bInterval: */
 #endif /* CDC_CMD_INTR_INTERVAL */
 
-    /*Data class interface descriptor*/
+    /* Data class interface descriptor */
     0x09,   /* bLength: Endpoint Descriptor size */
     USB_DESC_TYPE_INTERFACE,  /* bDescriptorType: */
     0x01,   /* bInterfaceNumber: Number of Interface */
@@ -206,7 +206,7 @@ __ALIGN_BEGIN static const uint8_t USBD_CDC_CfgHSDesc[USB_CDC_CONFIG_DESC_SIZ] _
     0x00,   /* bInterfaceProtocol: */
     0x00,   /* iInterface: */
 
-    /*Endpoint OUT Descriptor*/
+    /* Endpoint OUT Descriptor */
     0x07,   /* bLength: Endpoint Descriptor size */
     USB_DESC_TYPE_ENDPOINT,      /* bDescriptorType: Endpoint */
     CDC_OUT_EP,                        /* bEndpointAddress */
@@ -215,7 +215,7 @@ __ALIGN_BEGIN static const uint8_t USBD_CDC_CfgHSDesc[USB_CDC_CONFIG_DESC_SIZ] _
     HIBYTE(CDC_DATA_HS_MAX_PACKET_SIZE),
     0x00,                              /* bInterval: ignore for Bulk transfer */
 
-    /*Endpoint IN Descriptor*/
+    /* Endpoint IN Descriptor */
     0x07,   /* bLength: Endpoint Descriptor size */
     USB_DESC_TYPE_ENDPOINT,      /* bDescriptorType: Endpoint */
     CDC_IN_EP,                         /* bEndpointAddress */
@@ -226,11 +226,10 @@ __ALIGN_BEGIN static const uint8_t USBD_CDC_CfgHSDesc[USB_CDC_CONFIG_DESC_SIZ] _
 };
 #endif
 
-#ifdef DEVICE_FS
 /* USB CDC device Configuration Descriptor */
 __ALIGN_BEGIN static const uint8_t USBD_CDC_CfgFSDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_END =
 {
-    /*Configuration Descriptor*/
+    /* Configuration Descriptor */
     0x09,                           /* bLength: Configuration Descriptor size */
     USB_DESC_TYPE_CONFIGURATION,    /* bDescriptorType: Configuration */
     USB_CDC_CONFIG_DESC_SIZ,0x00,   /* wTotalLength:no of returned bytes */
@@ -240,7 +239,7 @@ __ALIGN_BEGIN static const uint8_t USBD_CDC_CfgFSDesc[USB_CDC_CONFIG_DESC_SIZ] _
     0x80 | (USBD_SELF_POWERED << 6),/* bmAttributes: self powered */
     USBD_MAX_POWER_mA / 2,          /* MaxPower x mA */
 
-    /*Interface Descriptor */
+    /* Interface Descriptor */
     0x09,                       /* bLength: Interface Descriptor size */
     USB_DESC_TYPE_INTERFACE,    /* bDescriptorType: Interface */
     /* Interface descriptor type */
@@ -252,34 +251,34 @@ __ALIGN_BEGIN static const uint8_t USBD_CDC_CfgFSDesc[USB_CDC_CONFIG_DESC_SIZ] _
     0x01,   /* bInterfaceProtocol: Common AT commands */
     0x00,   /* iInterface: */
 
-    /*Header Functional Descriptor*/
+    /* Header Functional Descriptor */
     0x05,   /* bLength: Endpoint Descriptor size */
     0x24,   /* bDescriptorType: CS_INTERFACE */
     0x00,   /* bDescriptorSubtype: Header Func Desc */
     0x10,   /* bcdCDC: spec release number */
     0x01,
 
-    /*Call Management Functional Descriptor*/
+    /* Call Management Functional Descriptor */
     0x05,   /* bFunctionLength */
     0x24,   /* bDescriptorType: CS_INTERFACE */
     0x01,   /* bDescriptorSubtype: Call Management Func Desc */
     0x00,   /* bmCapabilities: D0+D1 */
     0x01,   /* bDataInterface: 1 */
 
-    /*ACM Functional Descriptor*/
+    /* ACM Functional Descriptor */
     0x04,   /* bFunctionLength */
     0x24,   /* bDescriptorType: CS_INTERFACE */
     0x02,   /* bDescriptorSubtype: Abstract Control Management desc */
     0x02,   /* bmCapabilities */
 
-    /*Union Functional Descriptor*/
+    /* Union Functional Descriptor */
     0x05,   /* bFunctionLength */
     0x24,   /* bDescriptorType: CS_INTERFACE */
     0x06,   /* bDescriptorSubtype: Union func desc */
     0x00,   /* bMasterInterface: Communication class interface */
     0x01,   /* bSlaveInterface0: Data Class Interface */
 
-    /*Endpoint 2 Descriptor*/
+    /* Endpoint 2 Descriptor */
     0x07,                       /* bLength: Endpoint Descriptor size */
     USB_DESC_TYPE_ENDPOINT,     /* bDescriptorType: Endpoint */
     CDC_CMD_EP,                 /* bEndpointAddress */
@@ -292,7 +291,7 @@ __ALIGN_BEGIN static const uint8_t USBD_CDC_CfgFSDesc[USB_CDC_CONFIG_DESC_SIZ] _
     0x80,                       /* bInterval: */
 #endif /* CDC_CMD_INTR_INTERVAL */
 
-    /*Data class interface descriptor*/
+    /* Data class interface descriptor */
     0x09,                   /* bLength: Endpoint Descriptor size */
     USB_DESC_TYPE_INTERFACE,/* bDescriptorType: */
     0x01,                   /* bInterfaceNumber: Number of Interface */
@@ -303,7 +302,7 @@ __ALIGN_BEGIN static const uint8_t USBD_CDC_CfgFSDesc[USB_CDC_CONFIG_DESC_SIZ] _
     0x00,                   /* bInterfaceProtocol: */
     0x00,                   /* iInterface: */
 
-    /*Endpoint OUT Descriptor*/
+    /* Endpoint OUT Descripto r*/
     0x07,                               /* bLength: Endpoint Descriptor size */
     USB_DESC_TYPE_ENDPOINT,             /* bDescriptorType: Endpoint */
     CDC_OUT_EP,                         /* bEndpointAddress */
@@ -312,7 +311,7 @@ __ALIGN_BEGIN static const uint8_t USBD_CDC_CfgFSDesc[USB_CDC_CONFIG_DESC_SIZ] _
     HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
     0x00,                               /* bInterval: ignore for Bulk transfer */
 
-    /*Endpoint IN Descriptor*/
+    /* Endpoint IN Descriptor */
     0x07,                               /* bLength: Endpoint Descriptor size */
     USB_DESC_TYPE_ENDPOINT,             /* bDescriptorType: Endpoint */
     CDC_IN_EP,                          /* bEndpointAddress */
@@ -321,7 +320,6 @@ __ALIGN_BEGIN static const uint8_t USBD_CDC_CfgFSDesc[USB_CDC_CONFIG_DESC_SIZ] _
     HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
     0x00                                /* bInterval: ignore for Bulk transfer */
 };
-#endif
 
 /** @} */
 
@@ -407,9 +405,11 @@ static uint8_t USBD_CDC_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
     USBD_LL_CloseEP(pdev,
     CDC_OUT_EP);
 
+#if (CDC_AT_COMMAND_SUPPORT == 1)
     /* Close Command IN EP */
     USBD_LL_CloseEP(pdev,
     CDC_CMD_EP);
+#endif
 
     /* DeInit CDC Interface components */
     if (pdev->pClassData != NULL)
@@ -651,7 +651,7 @@ uint8_t USBD_CDC_Transmit(USBD_HandleTypeDef *pdev, uint8_t *pbuff, uint16_t len
 }
 
 /**
- * @brief  USBD_CDC_Receive
+ * @brief  Initiates reception of user data through the CDC OUT endpoint
  * @param  pdev: device instance
  * @param  pbuff: Rx Buffer
  * @param  length: Rx data length
@@ -669,6 +669,28 @@ uint8_t USBD_CDC_Receive(USBD_HandleTypeDef *pdev, uint8_t *pbuff, uint16_t leng
         /* Prepare Out endpoint to receive next packet */
         retval = USBD_LL_PrepareReceive(pdev, CDC_OUT_EP, hcdc->RxBuffer, length);
     }
+    return retval;
+}
+
+/**
+ * @brief  Sets the input as command data on the CMD IN endpoint
+ * @param  pdev: device instance
+ * @param  pbuff: Tx Buffer
+ * @retval status
+ */
+uint8_t USBD_CDC_SendCommand(USBD_HandleTypeDef *pdev, uint8_t *pbuff)
+{
+    uint8_t retval = USBD_FAIL;
+
+#if (CDC_AT_COMMAND_SUPPORT == 1)
+    if (pdev->pClassData != NULL)
+    {
+        USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*) pdev->pClassData;
+
+        /* Transmit command packet */
+        retval = USBD_LL_Transmit(pdev, CDC_CMD_EP, pbuff, CDC_CMD_PACKET_SIZE);
+    }
+#endif
     return retval;
 }
 

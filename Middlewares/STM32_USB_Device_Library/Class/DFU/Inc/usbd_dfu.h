@@ -104,7 +104,7 @@ extern "C"
 #define DFU_CMD_GETCOMMANDS            0x00
 #define DFU_CMD_SETADDRESSPOINTER      0x21
 #define DFU_CMD_ERASE                  0x41
-    
+
 #define DFU_MEDIA_ERASE                0x00
 #define DFU_MEDIA_PROGRAM              0x01
 
@@ -160,11 +160,9 @@ typedef struct
         uint32_t d32[USBD_DFU_XFER_SIZE / 4];
         uint8_t d8[USBD_DFU_XFER_SIZE];
     } buffer;
-
     uint8_t dev_state;
     uint8_t dev_status[DFU_STATUS_DEPTH];
     uint8_t manif_state;
-
     uint32_t wblock_num;
     uint32_t wlength;
     uint32_t data_ptr;
@@ -215,17 +213,18 @@ uint8_t  USBD_DFU_RegisterMedia    (USBD_HandleTypeDef   *pdev,
  * @}
  */
 
+/**
+ * @}
+ */
+
+/**
+ * @}
+ */
+
 #ifdef __cplusplus
 }
 #endif
 
 #endif  /* __USB_DFU_H */
-/**
- * @}
- */
-
-/**
- * @}
- */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
