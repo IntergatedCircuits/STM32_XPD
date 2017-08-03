@@ -92,12 +92,13 @@
 #endif
 
 /* Filter types */
-#define STD_MASK    0
-#define STD_MATCH   1
-#define EXT_MASK    2
-#define EXT_MATCH   3
+#define FILTER_SIZE_FLAG_Pos    2
+#define FILTER_SIZE_FLAG        4
+#define FILTER_MODE_FLAG_Pos    1
+#define FILTER_MODE_FLAG        2
+#define FMI_INVALID             0xFF
 
-static const uint8_t filterTypeSpace[4] = {2, 4, 1, 2};
+static const uint8_t filterTypeSpace[] = {2, 4, 1, 2};
 
 /** @defgroup CAN_Private_Functions CAN Private Functions
  * @{ */
@@ -670,17 +671,19 @@ void XPD_CAN_SCE_IRQHandler(CAN_HandleType * hcan)
  */
 
 /**
- * @brief Configures the receive filters for the peripheral and provides each filter its own Filter Match Index (FMI).
+ * @brief Configures the receive filters for the peripheral and provides each filter
+ *        its own Filter Match Index (FMI).
  * @param hcan: pointer to the CAN handle structure
  * @param Filters: filter configuration list (array)
- * @param MatchIndexes: array to fill with the FMI of the filters - set to NULL to ignore
+ * @param MatchIndexes: array to fill with the FMI of the filters
  * @param FilterCount: the number of input filters to configure
  * @return ERROR if filters cannot fit in the filter bank, OK if filters are added
  */
-XPD_ReturnType XPD_CAN_FilterConfig(CAN_HandleType * hcan, const CAN_FilterType * Filters, uint8_t * MatchIndexes, uint8_t FilterCount)
+XPD_ReturnType XPD_CAN_FilterConfig(CAN_HandleType * hcan, const CAN_FilterType * Filters,
+        uint8_t * MatchIndexes, uint8_t FilterCount)
 {
     XPD_ReturnType result = XPD_OK;
-    uint8_t fbDemand = 0, currentFMI = 0, remaining, currentType;
+    uint8_t i, base, fbDemand = 0, currentFMI = 0;
     CAN_TypeDef * CANx = CAN_MASTER(hcan);
 #ifdef CAN_BB
     CAN_BitBand_TypeDef * CANx_BB = CAN_BB(CANx);
@@ -705,149 +708,165 @@ XPD_ReturnType XPD_CAN_FilterConfig(CAN_HandleType * hcan, const CAN_FilterType 
     /* Deactivate all filter banks assigned to this peripheral */
     CLEAR_BIT(CANx->FA1R, mask << fbOffset);
 
-    /* Configure filters in a type assorted way */
-    for (remaining = FilterCount, currentType = 0; remaining > 0; currentType++)
+    /* Initially set invalid value to FMI, to indicate missing configuration */
+    for (i = 0; i < FilterCount; i++)
     {
-        uint8_t i, fbankIndex, fbankPos = 255;
-        union {
-            uint16_t u16[4];
-            uint32_t u32[2];
-            CAN_FilterRegister_TypeDef filterReg;
-        }FilterBank;
+        MatchIndexes[i] = FMI_INVALID;
+    }
 
-        /* Find all filters with the selected type in the list */
-        for (i = 0; i < FilterCount; i++)
+    for (base = 0; base < FilterCount; base++)
+    {
+        /* If the current filter is not configured, it has a yet unprocessed type */
+        if (MatchIndexes[base] == FMI_INVALID)
         {
-            uint8_t type = (Filters[i].Mode & CAN_FILTER_MATCH)
-                    | ((Filters[i].Pattern.Type & CAN_IDTYPE_EXT_DATA) >> 1);
+            uint8_t fbankIndex, fbankPos = 255;
+            uint8_t currentType, currentSize, type;
+            union {
+                uint16_t u16[4];
+                uint32_t u32[2];
+                CAN_FilterRegister_TypeDef filterReg;
+            }FilterBank;
 
-            if (type == currentType)
-            {
-                /* If the current filter bank is full, set up another one */
-                if (fbankPos >= filterTypeSpace[currentType])
+            currentType = Filters[base].FIFO
+                       | (Filters[base].Mode         & CAN_FILTER_MATCH)
+                       | (Filters[base].Pattern.Type & CAN_IDTYPE_EXT_DATA);
+            currentSize = filterTypeSpace[currentType >> 1];
+            type = currentType;
+            i = base;
+
+            do {
+                /* If the type of the currently indexed filter matches the base */
+                if (type == currentType)
                 {
-                    fbankIndex = fbDemand + fbOffset;
-
-                    /* Check against overrun of used filter banks */
-                    if ((fbDemand + 1) > fbCount)
+                    /* If the current filter bank is full, set up another one */
+                    if (fbankPos >= currentSize)
                     {
-                        remaining = 0;
-                        result = XPD_ERROR;
-                        break;
-                    }
+                        fbankIndex = fbDemand + fbOffset;
 
-                    /* Configure new filter bank type */
+                        /* Check against overrun of used filter banks */
+                        if ((fbDemand + 1) > fbCount)
+                        {
+                            base = FilterCount;
+                            result = XPD_ERROR;
+                            break;
+                        }
+
+                        /* Configure new filter bank type */
 #ifdef CAN_BB
-                    /* Setting filter FIFO assignment */
-                    CANx_BB->FFA1R[fbankIndex] = Filters[i].FIFO;
+                        /* Setting filter FIFO assignment */
+                        CANx_BB->FFA1R[fbankIndex] = Filters[i].FIFO;
 
-                    /* Setting filter mode */
-                    CANx_BB->FM1R[fbankIndex]  = type;
+                        /* Setting filter mode */
+                        CANx_BB->FM1R[fbankIndex]  = type >> FILTER_MODE_FLAG_Pos;
 
-                    /* Setting filter scale */
-                    CANx_BB->FS1R[fbankIndex]  = type >> 1;
+                        /* Setting filter scale */
+                        CANx_BB->FS1R[fbankIndex]  = type >> FILTER_SIZE_FLAG_Pos;
 #else
-                    uint32_t fbIndexMask = 1 << fbankIndex;
+                        uint32_t fbIndexMask = 1 << fbankIndex;
 
-                    /* Setting filter FIFO assignment */
-                    if (Filters[i].FIFO == 0)
-                    {   CLEAR_BIT(CANx->FFA1R, fbIndexMask); }
-                    else
-                    {   SET_BIT(CANx->FFA1R, fbIndexMask); }
+                        /* Setting filter FIFO assignment */
+                        if (Filters[i].FIFO == 0)
+                        {   CLEAR_BIT(CANx->FFA1R, fbIndexMask); }
+                        else
+                        {   SET_BIT(CANx->FFA1R, fbIndexMask); }
 
-                    /* Setting filter mode */
-                    if ((type & 1) == 0)
-                    {   CLEAR_BIT(CANx->FM1R, fbIndexMask); }
-                    else
-                    {   SET_BIT(CANx->FM1R, fbIndexMask); }
+                        /* Setting filter mode */
+                        if ((type & FILTER_MODE_FLAG) == 0)
+                        {   CLEAR_BIT(CANx->FM1R, fbIndexMask); }
+                        else
+                        {   SET_BIT(CANx->FM1R, fbIndexMask); }
 
-                    /* Setting filter scale */
-                    if ((type & 2) == 0)
-                    {   CLEAR_BIT(CANx->FS1R, fbIndexMask); }
-                    else
-                    {   SET_BIT(CANx->FS1R, fbIndexMask); }
+                        /* Setting filter scale */
+                        if ((type & FILTER_SIZE_FLAG) == 0)
+                        {   CLEAR_BIT(CANx->FS1R, fbIndexMask); }
+                        else
+                        {   SET_BIT(CANx->FS1R, fbIndexMask); }
 #endif /* CAN_BB */
 
-                    fbankPos = 0;
-                    fbDemand++;
-                }
+                        fbankPos = 0;
+                        fbDemand++;
+                    }
 
-                /* Set the identifier pattern depending on the filter scale */
-                if ((currentType & 2) == 0)
-                {
-                    FilterBank.u16[fbankPos] = (Filters[i].Pattern.Value << 5)
-                                             | (Filters[i].Pattern.Type  << 2);
-
-                    /* Set the masking bits */
-                    if ((currentType & 1) == 0)
+                    /* Set the identifier pattern depending on the filter scale */
+                    if ((currentType & FILTER_SIZE_FLAG) == 0)
                     {
-                        FilterBank.u16[fbankPos + 1] = (Filters[i].Mask << 5);
+                        FilterBank.u16[fbankPos] = (Filters[i].Pattern.Value << 5)
+                                                 | (Filters[i].Pattern.Type  << 2);
 
-                        /* If mask does not pass any type, set the type bits */
-                        if (Filters[i].Mode == CAN_FILTER_MASK)
+                        /* Set the masking bits */
+                        if ((currentType & FILTER_MODE_FLAG) == 0)
                         {
-                            FilterBank.u16[fbankPos + 1] |= CAN_IDTYPE_EXT_RTR << 2;
+                            FilterBank.u16[fbankPos + 1] = (Filters[i].Mask << 5);
+
+                            /* If mask does not pass any type, set the type bits */
+                            if (Filters[i].Mode == CAN_FILTER_MASK)
+                            {
+                                FilterBank.u16[fbankPos + 1] |= CAN_IDTYPE_EXT_RTR << 2;
+                            }
                         }
                     }
-                }
-                else
-                {
-                    FilterBank.u32[fbankPos] = (Filters[i].Pattern.Value << 3)
-                                             | (Filters[i].Pattern.Type);
-
-                    /* Set the masking bits */
-                    if ((currentType & 1) == 0)
+                    else
                     {
-                        /* Filter bank size fixes the mask field location */
-                        FilterBank.u32[1] = (Filters[i].Mask << 3);
+                        FilterBank.u32[fbankPos] = (Filters[i].Pattern.Value << 3)
+                                                 | (Filters[i].Pattern.Type);
 
-                        /* If mask does not pass any type, set the type bits */
-                        if (Filters[i].Mode == CAN_FILTER_MASK)
+                        /* Set the masking bits */
+                        if ((currentType & FILTER_MODE_FLAG) == 0)
                         {
-                            FilterBank.u32[1] |= CAN_IDTYPE_EXT_RTR;
+                            /* Filter bank size fixes the mask field location */
+                            FilterBank.u32[1] = (Filters[i].Mask << 3);
+
+                            /* If mask does not pass any type, set the type bits */
+                            if (Filters[i].Mode == CAN_FILTER_MASK)
+                            {
+                                FilterBank.u32[1] |= CAN_IDTYPE_EXT_RTR;
+                            }
                         }
                     }
-                }
 
-                /* Set the current filter's FMI */
-                if (MatchIndexes != NULL)
-                {
+                    /* Set the current filter's FMI */
                     MatchIndexes[i] = currentFMI + fbankPos;
+
+                    /* If the last element of the bank */
+                    if ((fbankPos + 1) >= currentSize)
+                    {
+                        currentFMI += currentSize;
+
+                        /* Set the configured bank in the peripheral */
+                        CANx->sFilterRegister[fbankIndex] = FilterBank.filterReg;
+                    }
+                    /* Unused filters after the current one are set to
+                     * the copies of the current to avoid receiving unwanted frames */
+                    else if (currentSize == 2)
+                    {
+                        FilterBank.u32[1] = FilterBank.u32[0];
+                    }
+                    else if (fbankPos == 0)
+                    {
+                        FilterBank.u16[1] = FilterBank.u16[0];
+                        FilterBank.u32[1] = FilterBank.u32[0];
+                    }
+                    else {}
+
+                    fbankPos++;
                 }
 
-                /* If the last element of the bank */
-                if ((fbankPos + 1) >= filterTypeSpace[currentType])
-                {
-                    currentFMI += filterTypeSpace[currentType];
+                /* Advance to the next filter */
+                i++;
+                type = Filters[i].FIFO
+                    | (Filters[i].Mode         & CAN_FILTER_MATCH)
+                    | (Filters[i].Pattern.Type & CAN_IDTYPE_EXT_DATA);
 
-                    /* Set the configured bank in the peripheral */
-                    CANx->sFilterRegister[fbankIndex] = FilterBank.filterReg;
-                }
-                /* Unused filters after the current one are set to
-                 * the copies of the current to avoid receiving unwanted frames */
-                else if (filterTypeSpace[type] == 2)
-                {
-                    FilterBank.u32[1] = FilterBank.u32[0];
-                }
-                else if (fbankPos == 0)
-                {
-                    FilterBank.u16[1] = FilterBank.u16[0];
-                    FilterBank.u32[1] = FilterBank.u32[0];
-                }
-                else {}
+            } while (i < FilterCount);
 
-                fbankPos++;
-                remaining--;
+            /* If the last bank was not filled completely */
+            if (fbankPos < currentSize)
+            {
+                currentFMI += currentSize;
+
+                /* Set the configured bank in the peripheral */
+                CANx->sFilterRegister[fbankIndex] = FilterBank.filterReg;
             }
-        }
-
-        /* If the last bank was not filled completely */
-        if (fbankPos < filterTypeSpace[currentType])
-        {
-            currentFMI += filterTypeSpace[currentType];
-
-            /* Set the configured bank in the peripheral */
-            CANx->sFilterRegister[fbankIndex] = FilterBank.filterReg;
         }
     }
 

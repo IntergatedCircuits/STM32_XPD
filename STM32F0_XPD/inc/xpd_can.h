@@ -114,10 +114,10 @@ typedef enum
 /** @brief CAN Filter types */
 typedef enum
 {
-    CAN_FILTER_MATCH        = 0x01, /*!< Filter accepts messages with identical Identifier */
+    CAN_FILTER_MATCH        = 0x02, /*!< Filter accepts messages with identical Identifier */
     CAN_FILTER_MASK         = 0x00, /*!< Filter accepts messages with identical Identifier type
                                          and matching Identifier field values on the mask-selected bits */
-    CAN_FILTER_MASK_ANYTYPE = 0x08, /*!< Filter accepts messages with matching Identifier field
+    CAN_FILTER_MASK_ANYTYPE = 0x80, /*!< Filter accepts messages with matching Identifier field
                                          values on the mask-selected bits */
 }CAN_FilterModeType;
 
