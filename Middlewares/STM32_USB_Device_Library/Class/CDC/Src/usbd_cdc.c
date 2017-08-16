@@ -88,7 +88,7 @@ static uint8_t *USBD_CDC_GetFSCfgDesc(uint16_t *length);
 static uint8_t *USBD_CDC_GetHSCfgDesc(uint16_t *length);
 #endif
 
-uint8_t *USBD_CDC_GetDeviceQualifierDescriptor(uint16_t *length);
+static uint8_t *USBD_CDC_GetDeviceQualifierDescriptor(uint16_t *length);
 
 /** @defgroup USBD_CDC_Private_Variables
  * @{ */
@@ -373,16 +373,16 @@ static uint8_t USBD_CDC_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
 
     if (pdev->pClassData != NULL)
     {
-        USBD_CDC_HandleTypeDef * hcdc = (USBD_CDC_HandleTypeDef*) pdev->pClassData;
+        USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*) pdev->pClassData;
+        USBD_CDC_ItfTypeDef *itf     = (USBD_CDC_ItfTypeDef*) pdev->pUserData;
 
         /* Initialize transfer states */
-        hcdc->TxState  = USBD_OK;
-        hcdc->TxBuffer = hcdc->RxBuffer = NULL;
+        hcdc->TxLength = 0;
 
         /* Initialize CDC Interface components */
-        if (((USBD_CDC_ItfTypeDef *) pdev->pUserData)->Init != NULL)
+        if (itf->Init != NULL)
         {
-            ((USBD_CDC_ItfTypeDef *) pdev->pUserData)->Init();
+            itf->Init();
         }
     }
 
@@ -414,10 +414,13 @@ static uint8_t USBD_CDC_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
     /* DeInit CDC Interface components */
     if (pdev->pClassData != NULL)
     {
-        if (((USBD_CDC_ItfTypeDef *) pdev->pUserData)->DeInit != NULL)
+        USBD_CDC_ItfTypeDef *itf     = (USBD_CDC_ItfTypeDef*) pdev->pUserData;
+
+        if (itf->DeInit != NULL)
         {
-            ((USBD_CDC_ItfTypeDef *) pdev->pUserData)->DeInit();
+            itf->DeInit();
         }
+
         USBD_free(pdev->pClassData);
         pdev->pClassData = NULL;
     }
@@ -434,6 +437,7 @@ static uint8_t USBD_CDC_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
 static uint8_t USBD_CDC_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req)
 {
     USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*) pdev->pClassData;
+    USBD_CDC_ItfTypeDef *itf     = (USBD_CDC_ItfTypeDef*) pdev->pUserData;
 
     switch (req->bmRequest & USB_REQ_TYPE_MASK)
     {
@@ -442,10 +446,9 @@ static uint8_t USBD_CDC_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *re
         {
             if (req->bmRequest & 0x80)
             {
-                if (((USBD_CDC_ItfTypeDef *) pdev->pUserData)->Control != NULL)
+                if (itf->Control != NULL)
                 {
-                    ((USBD_CDC_ItfTypeDef *) pdev->pUserData)->Control(
-                            req->bRequest, (uint8_t *) hcdc->data, req->wLength);
+                    itf->Control(req->bRequest, (uint8_t *) hcdc->data, req->wLength);
 
                     USBD_CtlSendData(pdev, (uint8_t *) hcdc->data, req->wLength);
                 }
@@ -458,10 +461,9 @@ static uint8_t USBD_CDC_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *re
                 USBD_CtlPrepareRx(pdev, (uint8_t *) hcdc->data, req->wLength);
             }
         }
-        else if (((USBD_CDC_ItfTypeDef *) pdev->pUserData)->Control != NULL)
+        else if (itf->Control != NULL)
         {
-            ((USBD_CDC_ItfTypeDef *) pdev->pUserData)->Control(req->bRequest,
-                    (uint8_t*) req, 0);
+            itf->Control(req->bRequest, (uint8_t*) req, 0);
         }
         break;
 
@@ -494,22 +496,22 @@ static uint8_t USBD_CDC_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *re
  */
 static uint8_t USBD_CDC_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
 {
-    if (pdev->pClassData != NULL)
-    {
-        USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*) pdev->pClassData;
+    USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*) pdev->pClassData;
+    USBD_CDC_ItfTypeDef *itf     = (USBD_CDC_ItfTypeDef*) pdev->pUserData;
 
+    if (hcdc != NULL)
+    {
         /* If there has been a valid transmit request */
-        if (hcdc->TxState == USBD_BUSY)
+        if (hcdc->TxLength > 0)
         {
             /* Set the transmit state to: free to transmit */
-            hcdc->TxState = USBD_OK;
+            uint16_t txLen = hcdc->TxLength;
+            hcdc->TxLength = 0;
 
-            if (((USBD_CDC_ItfTypeDef *) pdev->pUserData)->Transmitted != NULL)
+            if (itf->Transmitted != NULL)
             {
                 /* Provide callback on successful transmission */
-                ((USBD_CDC_ItfTypeDef *) pdev->pUserData)->Transmitted(
-                        hcdc->TxBuffer,
-                        hcdc->TxLength);
+                itf->Transmitted(hcdc->TxBuffer, txLen);
             }
         }
     }
@@ -526,18 +528,14 @@ static uint8_t USBD_CDC_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
 static uint8_t USBD_CDC_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum)
 {
     USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*) pdev->pClassData;
+    USBD_CDC_ItfTypeDef *itf     = (USBD_CDC_ItfTypeDef*) pdev->pUserData;
 
     /* USB data will be immediately processed, this allows next USB traffic being
      NAKed till the end of the application transfer */
-    if (pdev->pClassData != NULL)
+    if ((itf->Received != NULL) && (hcdc != NULL))
     {
-        if (((USBD_CDC_ItfTypeDef *) pdev->pUserData)->Received != NULL)
-        {
-            /* Provide callback on successful reception */
-            ((USBD_CDC_ItfTypeDef *) pdev->pUserData)->Received(
-                    hcdc->RxBuffer,
-                    USBD_LL_GetRxDataSize(pdev, epnum));
-        }
+        /* Provide callback on successful reception */
+        itf->Received(hcdc->RxBuffer, USBD_LL_GetRxDataSize(pdev, epnum));
     }
 
     return USBD_OK;
@@ -551,13 +549,12 @@ static uint8_t USBD_CDC_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum)
 static uint8_t USBD_CDC_EP0_RxReady(USBD_HandleTypeDef *pdev)
 {
     USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*) pdev->pClassData;
+    USBD_CDC_ItfTypeDef *itf     = (USBD_CDC_ItfTypeDef*) pdev->pUserData;
 
-    if ((((USBD_CDC_ItfTypeDef *)pdev->pUserData)->Control != NULL) &&
-        (pdev->pClassData != NULL) && (hcdc->CmdOpCode != 0xFF))
+    if ((itf->Control != NULL) && (hcdc != NULL) && (hcdc->CmdOpCode != 0xFF))
     {
         /* Provide callback to CMD handler */
-        ((USBD_CDC_ItfTypeDef *) pdev->pUserData)->Control(hcdc->CmdOpCode,
-                (uint8_t *) hcdc->data, hcdc->CmdLength);
+        itf->Control(hcdc->CmdOpCode, (uint8_t *) hcdc->data, hcdc->CmdLength);
         hcdc->CmdOpCode = 0xFF;
     }
 
@@ -594,7 +591,7 @@ static uint8_t *USBD_CDC_GetHSCfgDesc(uint16_t *length)
  * @param  length: pointer to the data length
  * @retval pointer to descriptor buffer
  */
-uint8_t *USBD_CDC_GetDeviceQualifierDescriptor(uint16_t *length)
+static uint8_t *USBD_CDC_GetDeviceQualifierDescriptor(uint16_t *length)
 {
     *length = sizeof(USBD_CDC_DeviceQualifierDesc);
     return USBD_CDC_DeviceQualifierDesc;
@@ -628,18 +625,17 @@ uint8_t USBD_CDC_RegisterInterface(USBD_HandleTypeDef *pdev, const USBD_CDC_ItfT
  */
 uint8_t USBD_CDC_Transmit(USBD_HandleTypeDef *pdev, uint8_t *pbuff, uint16_t length)
 {
+    USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*) pdev->pClassData;
     uint8_t retval = USBD_FAIL;
 
-    if (pdev->pClassData != NULL)
+    if (hcdc != NULL)
     {
-        USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*) pdev->pClassData;
-        retval = hcdc->TxState;
+        retval = USBD_BUSY;
 
         /* If the transmit state is: free to transmit */
-        if (retval == USBD_OK)
+        if (hcdc->TxLength == 0)
         {
             /* Tx Transfer in progress */
-            hcdc->TxState = USBD_BUSY;
             hcdc->TxBuffer = pbuff;
             hcdc->TxLength = length;
 
@@ -659,11 +655,11 @@ uint8_t USBD_CDC_Transmit(USBD_HandleTypeDef *pdev, uint8_t *pbuff, uint16_t len
  */
 uint8_t USBD_CDC_Receive(USBD_HandleTypeDef *pdev, uint8_t *pbuff, uint16_t length)
 {
+    USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*) pdev->pClassData;
     uint8_t retval = USBD_FAIL;
 
-    if (pdev->pClassData != NULL)
+    if (hcdc != NULL)
     {
-        USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*) pdev->pClassData;
         hcdc->RxBuffer = pbuff;
 
         /* Prepare Out endpoint to receive next packet */
@@ -680,13 +676,12 @@ uint8_t USBD_CDC_Receive(USBD_HandleTypeDef *pdev, uint8_t *pbuff, uint16_t leng
  */
 uint8_t USBD_CDC_SendCommand(USBD_HandleTypeDef *pdev, uint8_t *pbuff)
 {
+    USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*) pdev->pClassData;
     uint8_t retval = USBD_FAIL;
 
 #if (CDC_AT_COMMAND_SUPPORT == 1)
-    if (pdev->pClassData != NULL)
+    if (hcdc != NULL)
     {
-        USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*) pdev->pClassData;
-
         /* Transmit command packet */
         retval = USBD_LL_Transmit(pdev, CDC_CMD_EP, pbuff, CDC_CMD_PACKET_SIZE);
     }

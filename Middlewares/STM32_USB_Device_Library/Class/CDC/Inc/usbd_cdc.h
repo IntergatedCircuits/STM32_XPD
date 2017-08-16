@@ -85,10 +85,6 @@ extern "C"
  * @{
  */
 
-/**
- * @}
- */
-
 typedef struct
 {
     uint8_t  bLength;               /*!< Size of Descriptor in Bytes */
@@ -142,15 +138,10 @@ typedef struct
     uint8_t *TxBuffer;
     uint8_t *RxBuffer;
     uint16_t TxLength;
-    uint16_t RxLength;
     uint8_t CmdOpCode;
     uint8_t CmdLength;
     USBD_StatusTypeDef TxState;
 } USBD_CDC_HandleTypeDef;
-
-/** @defgroup USBD_CORE_Exported_Macros
- * @{
- */
 
 /**
  * @}
@@ -162,6 +153,7 @@ typedef struct
 
 extern const USBD_ClassTypeDef USBD_CDC;
 #define USBD_CDC_CLASS    &USBD_CDC
+
 /**
  * @}
  */
@@ -169,6 +161,7 @@ extern const USBD_ClassTypeDef USBD_CDC;
 /** @defgroup USB_CORE_Exported_Functions
  * @{
  */
+
 uint8_t USBD_CDC_RegisterInterface(USBD_HandleTypeDef *pdev,
         const USBD_CDC_ItfTypeDef *fops);
 
