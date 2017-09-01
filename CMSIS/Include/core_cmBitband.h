@@ -32,7 +32,7 @@ extern "C"
 {
 #endif
 
-#if (__CORTEX_M >= 3)
+#if (__CORTEX_M == 3) || (__CORTEX_M == 4)
 /** \brief  Peripheral bit-band alias address generation macro
 
  This macro maps a given peripheral address to its bit-band alias address.
