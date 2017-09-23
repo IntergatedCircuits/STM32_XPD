@@ -123,7 +123,7 @@ const USBD_ClassTypeDef USBD_CDC = {
     NULL,
 #endif
     USBD_CDC_GetFSCfgDesc,
-    NULL, /* USBD_CDC_GetOtherSpeedCfgDesc, */
+    USBD_CDC_GetFSCfgDesc, /* USBD_CDC_GetOtherSpeedCfgDesc, */
     USBD_CDC_GetDeviceQualifierDescriptor
 };
 
@@ -300,7 +300,7 @@ __ALIGN_BEGIN static const uint8_t USBD_CDC_CfgFSDesc[USB_CDC_CONFIG_DESC_SIZ] _
     0x00,                   /* bInterfaceProtocol: */
     0x00,                   /* iInterface: */
 
-    /* Endpoint OUT Descripto r*/
+    /* Endpoint OUT Descriptor */
     0x07,                               /* bLength: Endpoint Descriptor size */
     USB_DESC_TYPE_ENDPOINT,             /* bDescriptorType: Endpoint */
     CDC_OUT_EP,                         /* bEndpointAddress */

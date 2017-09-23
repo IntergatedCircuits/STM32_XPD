@@ -130,11 +130,7 @@ typedef struct _USBD_CDC_Itf
 
 typedef struct
 {
-#ifdef DEVICE_HS
-    uint32_t data[CDC_DATA_HS_MAX_PACKET_SIZE / 4]; /* Force 32bits alignment */
-#else
-    uint32_t data[CDC_DATA_FS_MAX_PACKET_SIZE / 4]; /* Force 32bits alignment */
-#endif
+    uint32_t data[USB_MAX_EP0_SIZE / 4]; /* Force 32bits alignment */
     uint8_t *TxBuffer;
     uint8_t *RxBuffer;
     uint16_t TxLength;

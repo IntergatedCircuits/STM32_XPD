@@ -926,7 +926,8 @@ void XPD_USB_IRQHandler(USB_HandleType * husb)
                         }
 #endif
 
-                        XPD_SAFE_CALLBACK(husb->Callbacks.DataInStage, husb->User, EpAddress, husb->EP.IN[EpAddress].Transfer.buffer);
+                        XPD_SAFE_CALLBACK(husb->Callbacks.DataInStage, husb->User,
+                                0x80 | EpAddress, husb->EP.IN[EpAddress].Transfer.buffer);
 
 #if (USB_DATA_WORD_ALIGNED == 1) && defined(USB_OTG_GAHBCFG_DMAEN)
                         if (husb->DMA == ENABLE)

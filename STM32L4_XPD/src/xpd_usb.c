@@ -732,7 +732,7 @@ void XPD_USB_IRQHandler(USB_HandleType * husb)
                 ep->Transfer.buffer += ep->Transfer.size;
 
                 /* IN packet successfully sent */
-                XPD_SAFE_CALLBACK(husb->Callbacks.DataInStage, husb->User, 0,
+                XPD_SAFE_CALLBACK(husb->Callbacks.DataInStage, husb->User, 0x80,
                         ep->Transfer.buffer);
 
                 /* Set device address if new valid has been received */
@@ -874,7 +874,7 @@ void XPD_USB_IRQHandler(USB_HandleType * husb)
                 {
                     /* Transmission complete */
                     XPD_SAFE_CALLBACK(husb->Callbacks.DataInStage,
-                            husb->User, EpAddress, ep->Transfer.buffer);
+                            husb->User, 0x80 | EpAddress, ep->Transfer.buffer);
                 }
                 else
                 {
@@ -1959,7 +1959,8 @@ void XPD_USB_IRQHandler(USB_HandleType * husb)
                         }
 #endif
 
-                        XPD_SAFE_CALLBACK(husb->Callbacks.DataInStage, husb->User, EpAddress, husb->EP.IN[EpAddress].Transfer.buffer);
+                        XPD_SAFE_CALLBACK(husb->Callbacks.DataInStage, husb->User,
+                                0x80 | EpAddress, husb->EP.IN[EpAddress].Transfer.buffer);
 
 #if (USB_DATA_WORD_ALIGNED == 1) && defined(USB_OTG_GAHBCFG_DMAEN)
                         if (husb->DMA == ENABLE)

@@ -93,7 +93,7 @@
 * @param  id: Low level core index
 * @retval None
 */
-USBD_StatusTypeDef USBD_Init(USBD_HandleTypeDef *pdev, USBD_DescriptorsTypeDef *pdesc, uint8_t id)
+USBD_StatusTypeDef USBD_Init(USBD_HandleTypeDef *pdev, const USBD_DescriptorsTypeDef *pdesc, uint8_t id)
 {
     /* Check whether the USB Host handle is valid */
     if (pdev == NULL)
@@ -152,10 +152,10 @@ USBD_StatusTypeDef USBD_DeInit(USBD_HandleTypeDef *pdev)
   * @param  pclass: Class handle
   * @retval USBD Status
   */
-USBD_StatusTypeDef USBD_RegisterClass(USBD_HandleTypeDef *pdev, USBD_ClassTypeDef *pclass)
+USBD_StatusTypeDef USBD_RegisterClass(USBD_HandleTypeDef *pdev, const USBD_ClassTypeDef *pclass)
 {
     USBD_StatusTypeDef status;
-    if (pclass != 0)
+    if (pclass != NULL)
     {
         /* link the class to the USB Device handle */
         pdev->pClass = pclass;
@@ -325,7 +325,7 @@ USBD_StatusTypeDef USBD_LL_DataInStage(USBD_HandleTypeDef *pdev, uint8_t epnum, 
 {
     USBD_EndpointTypeDef *pep;
 
-    if (epnum == 0)
+    if ((epnum & 0x7f) == 0)
     {
         pep = &pdev->ep_in[0];
 
@@ -451,12 +451,10 @@ USBD_StatusTypeDef USBD_LL_Resume(USBD_HandleTypeDef *pdev)
 */
 USBD_StatusTypeDef USBD_LL_SOF(USBD_HandleTypeDef *pdev)
 {
-    if (pdev->dev_state == USBD_STATE_CONFIGURED)
+    if ((pdev->dev_state == USBD_STATE_CONFIGURED) &&
+        (pdev->pClass->SOF != NULL))
     {
-        if (pdev->pClass->SOF != NULL)
-        {
-            pdev->pClass->SOF(pdev);
-        }
+        pdev->pClass->SOF(pdev);
     }
     return USBD_OK;
 }
@@ -469,6 +467,11 @@ USBD_StatusTypeDef USBD_LL_SOF(USBD_HandleTypeDef *pdev)
 */
 USBD_StatusTypeDef USBD_LL_IsoINIncomplete(USBD_HandleTypeDef *pdev, uint8_t epnum)
 {
+    if ((pdev->dev_state == USBD_STATE_CONFIGURED) &&
+        (pdev->pClass->IsoINIncomplete != NULL))
+    {
+        pdev->pClass->IsoINIncomplete(pdev, epnum);
+    }
     return USBD_OK;
 }
 
@@ -480,6 +483,11 @@ USBD_StatusTypeDef USBD_LL_IsoINIncomplete(USBD_HandleTypeDef *pdev, uint8_t epn
 */
 USBD_StatusTypeDef USBD_LL_IsoOUTIncomplete(USBD_HandleTypeDef *pdev, uint8_t epnum)
 {
+    if ((pdev->dev_state == USBD_STATE_CONFIGURED) &&
+        (pdev->pClass->IsoOUTIncomplete != NULL))
+    {
+        pdev->pClass->IsoOUTIncomplete(pdev, epnum);
+    }
     return USBD_OK;
 }
 
