@@ -583,7 +583,7 @@ void XPD_CAN_RX0_IRQHandler(CAN_HandleType * hcan)
     uint32_t temp;
 
     /* check reception completion */
-    if (CAN_REG_BIT(hcan,IER,FMP0IE) && (hcan->Inst->RFR[0].b.FMP != 0))
+    if (CAN_REG_BIT(hcan,IER,FMP0IE) && (CAN_REG_BIT(hcan,RFR[0],FMP) != 0))
     {
         /* get the FIFO contents to the requested frame structure */
         can_frameReceive(hcan, 0);
@@ -618,7 +618,7 @@ void XPD_CAN_RX1_IRQHandler(CAN_HandleType * hcan)
     uint32_t temp;
 
     /* check reception completion */
-    if (CAN_REG_BIT(hcan,IER,FMP1IE) && (hcan->Inst->RFR[1].b.FMP != 0))
+    if (CAN_REG_BIT(hcan,IER,FMP1IE) && (CAN_REG_BIT(hcan,RFR[1],FMP) != 0))
     {
         /* get the FIFO contents to the requested frame structure */
         can_frameReceive(hcan, 1);
