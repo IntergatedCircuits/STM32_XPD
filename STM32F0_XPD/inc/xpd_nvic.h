@@ -36,7 +36,7 @@
 /**
  * @brief  @ref XPD_NVIC_GetCurrentIRQ() return value when it's called in thread context.
  */
-#define ThreadMode_IRQn      0
+#define ThreadMode_IRQn      (-16)
 
 /**
  * @brief  Returns the currently active interrupt line.
