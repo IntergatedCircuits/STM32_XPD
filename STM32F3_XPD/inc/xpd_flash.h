@@ -3,7 +3,7 @@
   * @file    xpd_flash.h
   * @author  Benedek Kupper
   * @version V0.2
-  * @date    2016-06-05
+  * @date    2017-09-24
   * @brief   STM32 eXtensible Peripheral Drivers Flash Module
   *
   *  This file is part of STM32_XPD.
@@ -148,6 +148,7 @@ XPD_ReturnType  XPD_FLASH_Erase_IT          (void * Address, uint16_t kBytes);
 
 XPD_ReturnType  XPD_FLASH_PollStatus        (uint32_t Timeout);
 FLASH_ErrorType XPD_FLASH_GetError          (void);
+uint32_t        XPD_FLASH_GetAddress        (void);
 
 void            XPD_FLASH_IRQHandler        (void);
 

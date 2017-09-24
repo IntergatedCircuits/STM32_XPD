@@ -3,7 +3,7 @@
   * @file    xpd_flash.c
   * @author  Benedek Kupper
   * @version V0.2
-  * @date    2016-06-05
+  * @date    2017-09-24
   * @brief   STM32 eXtensible Peripheral Drivers Flash Module
   *
   *  This file is part of STM32_XPD.
@@ -33,13 +33,17 @@
 
 #define hflash                  (&xpd_flashHandle)
 
-#define FLASH_GETOPERATION()    (FLASH->CR.w & (FLASH_CR_PER | FLASH_CR_MER | FLASH_CR_PG))
+#define FLASH_OPERATIONS        \
+    (FLASH_OPERATION_ERASE_BLOCK | FLASH_OPERATION_ERASE_BANK | FLASH_OPERATION_PROGRAM)
 
 #define FLASH_PAGE_SIZE         0x800
 
-#define FLASH_BLOCK_SIZE_KB(ADDR)   \
-    (FLASH_PAGE_SIZE >> 10)
+#define FLASH_BLOCK_SIZE_KB     (FLASH_PAGE_SIZE >> 10)
 
+/* The size of a single programming operation */
+#define FLASH_MEMSTREAM_SIZE    (sizeof(uint16_t))
+
+/* Keys for FLASH operations unlocking */
 #ifndef FLASH_KEY1
 #define FLASH_KEY1              0x45670123
 #endif
@@ -51,33 +55,31 @@
 static struct
 {
     void * Address;
-    DataStreamType  MemStream;
+    DataStreamType MemStream;
     volatile FLASH_ErrorType Errors;
 } xpd_flashHandle =
 {
-        .Errors         = FLASH_ERROR_NONE,
-        .MemStream.size = sizeof(uint16_t),
+    .Errors         = FLASH_ERROR_NONE,
+    .MemStream.size = FLASH_MEMSTREAM_SIZE,
 };
 
 /* Erase the next scheduled block */
 static void flash_blockErase(void)
 {
-    /* Proceed to erase the page */
-    FLASH_REG_BIT(CR,PER) = 1;
-
+    /* Set the page address to erase */
     FLASH->AR = (uint32_t)hflash->Address;
-
     FLASH_REG_BIT(CR,STRT) = 1;
 }
 
 /* Read errors to context, and clear them in register */
-void flash_checkErrors(void)
+static FLASH_ErrorType flash_checkErrors(void)
 {
     /* Read error flags */
     hflash->Errors = FLASH->SR.w & (FLASH_SR_PGERR | FLASH_SR_WRPERR);
 
     /* Clear error flags */
     FLASH->SR.w = hflash->Errors;
+    return hflash->Errors;
 }
 
 /** @addtogroup FLASH_Exported_Functions
@@ -93,8 +95,10 @@ void XPD_FLASH_Unlock(void)
         /* Authorize the FLASH Registers access */
         FLASH->KEYR = FLASH_KEY1;
         FLASH->KEYR = FLASH_KEY2;
+
+        /* Clear any previous request bits */
+        CLEAR_BIT(FLASH->CR.w, FLASH_OPERATIONS);
     }
-    CLEAR_BIT(FLASH->CR.w, FLASH_CR_PER | FLASH_CR_MER | FLASH_CR_PG);
 }
 
 /**
@@ -128,8 +132,7 @@ XPD_ReturnType XPD_FLASH_PollStatus(uint32_t Timeout)
         XPD_FLASH_ClearFlag(EOP);
     }
 
-    flash_checkErrors();
-    if (hflash->Errors != FLASH_ERROR_NONE)
+    if (flash_checkErrors() != FLASH_ERROR_NONE)
     {
         result = XPD_ERROR;
     }
@@ -140,8 +143,8 @@ XPD_ReturnType XPD_FLASH_PollStatus(uint32_t Timeout)
 /**
  * @brief Programs the input data to the specified flash address.
  * @note  The FLASH interface should be unlocked beforehand, and locked afterwards.
- * @note  If flash memory is not erased before programming, only 1 -> 0 bit transitions
- *        will be written.
+ * @note  If flash memory is not erased before programming,
+ *        only 0 value is allowed to be written. Otherwise an error flag is set.
  * @param Address: the start flash address to write
  * @param Data: input data to program
  * @param Length: amount of bytes to program
@@ -161,18 +164,15 @@ XPD_ReturnType XPD_FLASH_Program(void * Address, const void * Data, uint16_t Len
         hflash->MemStream.length = Length / hflash->MemStream.size;
         hflash->Address = Address;
 
+        /* Enable flash programming */
+        FLASH_REG_BIT(CR,PG) = 1;
+
         while (hflash->MemStream.length > 0)
         {
-            /* Enable flash programming */
-            FLASH_REG_BIT(CR,PG) = 1;
-
             XPD_WriteFromStream(hflash->Address, &hflash->MemStream);
 
             /* Wait for last operation to be completed */
             result = XPD_FLASH_PollStatus(FLASH_TIMEOUT_MS);
-
-            /* Disable flash programming */
-            FLASH_REG_BIT(CR,PG) = 0;
 
             /* In case of error, stop flash programming */
             if (result != XPD_OK)
@@ -184,6 +184,8 @@ XPD_ReturnType XPD_FLASH_Program(void * Address, const void * Data, uint16_t Len
             hflash->Address += hflash->MemStream.size;
         }
 
+        /* Disable flash programming */
+        FLASH_REG_BIT(CR,PG) = 0;
     }
 
     return result;
@@ -192,8 +194,8 @@ XPD_ReturnType XPD_FLASH_Program(void * Address, const void * Data, uint16_t Len
 /**
  * @brief Programs the input data to the specified flash address in interrupt (non-blocking) mode.
  * @note  The FLASH interface should be unlocked beforehand, and locked afterwards.
- * @note  If flash memory is not erased before programming, only 1 -> 0 bit transitions
- *        will be written.
+ * @note  If flash memory is not erased before programming,
+ *        only 0 value is allowed to be written. Otherwise an error flag is set.
  * @param Address: the start flash address to write
  * @param Data: input data to program
  * @param Length: amount of bytes to program
@@ -205,7 +207,7 @@ XPD_ReturnType XPD_FLASH_Program_IT(void * Address, const void * Data, uint16_t 
     XPD_ReturnType result = XPD_BUSY;
 
     /* Only start if no ongoing operations are present */
-    if (FLASH_GETOPERATION() == FLASH_OPERATION_NONE)
+    if (FLASH_REG_BIT(SR,BSY) == 0)
     {
         hflash->MemStream.buffer = (void*)Data;
         hflash->MemStream.length = Length / hflash->MemStream.size;
@@ -240,13 +242,16 @@ XPD_ReturnType XPD_FLASH_EraseBank(uint8_t Bank)
 
     if (result == XPD_OK)
     {
-        /* Only bank1 is present */
-        FLASH_REG_BIT(CR,MER) = 1;
-        FLASH_REG_BIT(CR,STRT) = 1;
+        {
+            /* Only bank1 is present */
+            FLASH_REG_BIT(CR,MER)  = 1;
+            FLASH_REG_BIT(CR,STRT) = 1;
 
-        result = XPD_FLASH_PollStatus(FLASH_TIMEOUT_MS);
+            hflash->Address = (void*)FLASH_BASE;
+            result = XPD_FLASH_PollStatus(FLASH_TIMEOUT_MS);
 
-        FLASH_REG_BIT(CR,MER) = 0;
+            FLASH_REG_BIT(CR,MER)  = 0;
+        }
     }
 
     return result;
@@ -264,15 +269,18 @@ XPD_ReturnType XPD_FLASH_EraseBank_IT(uint8_t Bank)
     XPD_ReturnType result = XPD_BUSY;
 
     /* Only start if no ongoing operations are present */
-    if (FLASH_GETOPERATION() == FLASH_OPERATION_NONE)
+    if (FLASH_REG_BIT(SR,BSY) == 0)
     {
         /* Enable interrupts */
         SET_BIT(FLASH->CR.w, FLASH_CR_EOPIE | FLASH_CR_ERRIE);
 
-        /* Only bank1 is present */
-        FLASH_REG_BIT(CR,MER)  = 1;
-        FLASH_REG_BIT(CR,STRT) = 1;
+        {
+            /* Only bank1 is present */
+            FLASH_REG_BIT(CR,MER)  = 1;
+            FLASH_REG_BIT(CR,STRT) = 1;
 
+            hflash->Address = (void*)FLASH_BASE;
+        }
         result = XPD_OK;
     }
 
@@ -299,28 +307,30 @@ XPD_ReturnType XPD_FLASH_Erase(void * Address, uint16_t kBytes)
         hflash->Address = Address;
         hflash->MemStream.length = kBytes;
 
+        /* Set the page erase control bit */
+        FLASH_REG_BIT(CR,PER) = 1;
+
         /* Keep erasing blocks until at least the requested amount */
         while (hflash->MemStream.length > 0)
         {
-            uint32_t blocksize = FLASH_BLOCK_SIZE_KB(hflash->Address);
             flash_blockErase();
 
             /* Wait for last operation to be completed */
             result = XPD_FLASH_PollStatus(FLASH_TIMEOUT_MS);
 
-            /* If the erase operation is completed, disable the PER Bit */
-            FLASH_REG_BIT(CR,PER) = 0;
-
             /* In case of error or length underflow, stop flash programming */
-            if ((result != XPD_OK) || (hflash->MemStream.length < blocksize))
+            if ((result != XPD_OK) || (hflash->MemStream.length < FLASH_BLOCK_SIZE_KB))
             {
                 break;
             }
 
             /* Increase flash address */
-            hflash->Address += blocksize << 10;
-            hflash->MemStream.length -= blocksize;
+            hflash->Address += FLASH_BLOCK_SIZE_KB << 10;
+            hflash->MemStream.length -= FLASH_BLOCK_SIZE_KB;
         }
+
+        /* If the erase operation is completed, disable the PER Bit */
+        FLASH_REG_BIT(CR,PER) = 0;
     }
 
     return result;
@@ -339,15 +349,18 @@ XPD_ReturnType XPD_FLASH_Erase_IT(void * Address, uint16_t kBytes)
     XPD_ReturnType result = XPD_BUSY;
 
     /* Only start if no ongoing operations are present */
-    if (FLASH_GETOPERATION() == FLASH_OPERATION_NONE)
+    if (FLASH_REG_BIT(SR,BSY) == 0)
     {
         hflash->Address = Address;
         hflash->MemStream.length = kBytes;
 
-        flash_blockErase();
-
         /* Enable interrupts */
         SET_BIT(FLASH->CR.w, FLASH_CR_EOPIE | FLASH_CR_ERRIE);
+
+        /* Set the page erase control bit */
+        FLASH_REG_BIT(CR,PER) = 1;
+
+        flash_blockErase();
 
         result = XPD_OK;
     }
@@ -362,12 +375,11 @@ XPD_ReturnType XPD_FLASH_Erase_IT(void * Address, uint16_t kBytes)
 void XPD_FLASH_IRQHandler(void)
 {
     /* Check FLASH error flags */
-    flash_checkErrors();
-    if (hflash->Errors != FLASH_ERROR_NONE)
+    if (flash_checkErrors() != FLASH_ERROR_NONE)
     {
         /* Stop programming */
         hflash->MemStream.length = 0;
-        CLEAR_BIT(FLASH->CR.w, FLASH_CR_MER | FLASH_CR_PER | FLASH_CR_PG);
+        CLEAR_BIT(FLASH->CR.w, FLASH_OPERATIONS);
 
         /* Error callback */
         XPD_SAFE_CALLBACK(XPD_FLASH_Callbacks.Error,);
@@ -376,42 +388,13 @@ void XPD_FLASH_IRQHandler(void)
     /* Check FLASH End of Operation flag  */
     if (XPD_FLASH_GetFlag(EOP) != 0)
     {
-        FLASH_OperationType operation = FLASH_GETOPERATION();
+        FLASH_OperationType operation = (FLASH->CR.w & FLASH_OPERATIONS);
 
         /* Clear FLASH End of Operation pending bit */
         XPD_FLASH_ClearFlag(EOP);
 
-        /* If the operation completed, disable its control bit */
-        CLEAR_BIT(FLASH->CR.w, operation);
-
         switch (operation)
         {
-            case FLASH_OPERATION_ERASE_BLOCK:
-            {
-                uint32_t blocksize = FLASH_BLOCK_SIZE_KB(hflash->Address);
-
-                if (hflash->MemStream.length > blocksize)
-                {
-                    /* Continue with erasing consecutive blocks */
-                    hflash->Address += blocksize << 10;
-                    hflash->MemStream.length -= blocksize;
-                    flash_blockErase();
-                }
-                else
-                {
-                    /* provide completion callback */
-                    XPD_SAFE_CALLBACK(XPD_FLASH_Callbacks.EraseComplete,);
-                }
-                break;
-            }
-
-            case FLASH_OPERATION_ERASE_BANK:
-            {
-                /* provide completion callback */
-                XPD_SAFE_CALLBACK(XPD_FLASH_Callbacks.EraseComplete,);
-                break;
-            }
-
             case FLASH_OPERATION_PROGRAM:
             {
                 /* Check if there are still data to program */
@@ -420,24 +403,54 @@ void XPD_FLASH_IRQHandler(void)
                     /* Continue with programming consecutive pages */
                     hflash->Address += hflash->MemStream.size;
 
-                    FLASH_REG_BIT(CR,PG) = 1;
-
                     XPD_WriteFromStream(hflash->Address, &hflash->MemStream);
                 }
                 else
                 {
+                    /* If the operation completed, disable its control bit */
+                    FLASH_REG_BIT(CR,PG) = 0;
+
                     /* provide completion callback */
                     XPD_SAFE_CALLBACK(XPD_FLASH_Callbacks.ProgramComplete,);
                 }
                 break;
             }
 
-            default: break;
+            case FLASH_OPERATION_ERASE_BLOCK:
+            {
+                if (hflash->MemStream.length > FLASH_BLOCK_SIZE_KB)
+                {
+                    /* Continue with erasing consecutive blocks */
+                    hflash->Address += FLASH_BLOCK_SIZE_KB << 10;
+                    hflash->MemStream.length -= FLASH_BLOCK_SIZE_KB;
+                    flash_blockErase();
+                }
+                else
+                {
+                    /* If the operation completed, disable its control bit */
+                    FLASH_REG_BIT(CR,PER) = 0;
+
+                    /* provide completion callback */
+                    XPD_SAFE_CALLBACK(XPD_FLASH_Callbacks.EraseComplete,);
+                }
+                break;
+            }
+
+            /* FLASH_OPERATION_ERASE_BANK */
+            default:
+            {
+                /* If the operation completed, disable its control bit */
+                CLEAR_BIT(FLASH->CR.w, operation);
+
+                /* provide completion callback */
+                XPD_SAFE_CALLBACK(XPD_FLASH_Callbacks.EraseComplete,);
+                break;
+            }
         }
     }
 
     /* No more pending operations, disable further interrupts */
-    if (FLASH_GETOPERATION() == FLASH_OPERATION_NONE)
+    if ((FLASH->CR.w & FLASH_OPERATIONS) == FLASH_OPERATION_NONE)
     {
         CLEAR_BIT(FLASH->CR.w, FLASH_CR_EOPIE | FLASH_CR_ERRIE);
     }
@@ -450,6 +463,15 @@ void XPD_FLASH_IRQHandler(void)
 FLASH_ErrorType XPD_FLASH_GetError(void)
 {
     return hflash->Errors;
+}
+
+/**
+ * @brief Provides the current address where the last flash operation was attempted.
+ * @return The current address
+ */
+uint32_t XPD_FLASH_GetAddress(void)
+{
+    return (uint32_t)hflash->Address;
 }
 
 /** @} */
