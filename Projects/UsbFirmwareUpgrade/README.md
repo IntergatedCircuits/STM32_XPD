@@ -2,7 +2,7 @@
 
 This project implements a firmware upgrade (bootloader) solution using the USB *Device Firmware Upgrade Class* (DFU), which provides an interface to up- and download (executable) images to the device memory. The project implements the same DFU functionality as the **System Memory Boot mode** permanently programmed in all USB capable STM32 devices, therefore the following guide applies to DFU firmware upgrade in general for the STM32 family.
 
-The project is provided with a number of Board Support Packages, which extend the applicability of the project ~~over the whole supported product range.~~ (The flash interface is not delivered on all device lines yet.)
+The project is provided with a number of Board Support Packages, which extend the applicability of the project over the whole supported product range.
 
 ## Project structure
 
