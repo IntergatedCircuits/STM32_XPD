@@ -1280,7 +1280,6 @@ XPD_ReturnType XPD_USB_Init(USB_HandleType * husb, const USB_InitType * Config)
         /* Clear all pending Device Interrupts */
         husb->Inst->DIEPMSK.w  = 0;
         husb->Inst->DOEPMSK.w  = 0;
-        husb->Inst->DAINT.w    = ~0;
         husb->Inst->DAINTMSK.w = 0;
 
         /* Init endpoints structures */
@@ -1449,7 +1448,6 @@ void XPD_USB_Stop(USB_HandleType * husb)
         husb->Inst->IEP[i].DIEPINT.w = 0xFF;
         husb->Inst->OEP[i].DOEPINT.w = 0xFF;
     }
-    husb->Inst->DAINT.w = ~0;
 
     /* Clear interrupt masks */
     husb->Inst->DIEPMSK.w  = 0;
@@ -1570,7 +1568,7 @@ void XPD_USB_EP_Close(USB_HandleType * husb, uint8_t EpAddress)
                 USB_OTG_DIEPINT_EPDISD, USB_OTG_DIEPINT_EPDISD, &timeout);
 
         /* Flush any data remaining in the TxFIFO */
-        usb_flushTxFifo(husb->Inst, 0x10);
+        usb_flushTxFifo(husb->Inst, EpAddress);
 
         /* Disable endpoint interrupts */
         CLEAR_BIT(husb->Inst->DAINTMSK.w, 1 << EpAddress);
@@ -1582,7 +1580,7 @@ void XPD_USB_EP_Close(USB_HandleType * husb, uint8_t EpAddress)
         /* sets the NAK bit for the OUT endpoint */
         husb->Inst->OEP[EpAddress].DOEPCTL.w = USB_OTG_DOEPCTL_SNAK;
 
-        /* Disable IN endpoint */
+        /* Disable OUT endpoint */
         husb->Inst->OEP[EpAddress].DOEPCTL.w = USB_OTG_DOEPCTL_EPDIS;
 
         XPD_WaitForMatch(&husb->Inst->OEP[EpAddress].DOEPINT.w,
@@ -1859,12 +1857,6 @@ void XPD_USB_IRQHandler(USB_HandleType * husb)
 
     if (gints != 0)
     {
-        /* Incorrect mode, acknowledge the interrupt */
-        if ((gints & USB_OTG_GINTSTS_MMIS) != 0)
-        {
-            XPD_USB_ClearFlag(husb, MMIS);
-        }
-
         /* OUT endpoint interrupts */
         if ((gints & USB_OTG_GINTSTS_OEPINT) != 0)
         {
@@ -2066,7 +2058,6 @@ void XPD_USB_IRQHandler(USB_HandleType * husb)
             }
 
             /* Clear device flags, enable EP0 interrupts */
-            husb->Inst->DAINT.w     = ~0;
             husb->Inst->DAINTMSK.w |= 0x10001;
 
             {
