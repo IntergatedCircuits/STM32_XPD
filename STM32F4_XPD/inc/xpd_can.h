@@ -391,6 +391,7 @@ XPD_ReturnType  XPD_CAN_FilterConfig        (CAN_HandleType * hcan, const CAN_Fi
 
 /** @addtogroup CAN_Exported_Functions_Transmit
  * @{ */
+XPD_ReturnType  XPD_CAN_Post                (CAN_HandleType * hcan, CAN_FrameType * Frame, uint32_t Timeout);
 XPD_ReturnType  XPD_CAN_Transmit            (CAN_HandleType * hcan, CAN_FrameType * Frame, uint32_t Timeout);
 XPD_ReturnType  XPD_CAN_Transmit_IT         (CAN_HandleType * hcan, CAN_FrameType * Frame);
 /** @} */

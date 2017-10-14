@@ -373,6 +373,28 @@ CAN_ErrorType XPD_CAN_GetError(CAN_HandleType * hcan)
  */
 
 /**
+ * @brief Waits for an empty transmit mailbox and posts the frame in it.
+ * @param hcan: pointer to the CAN handle structure
+ * @param Frame: pointer to the frame to transmit
+ * @param Timeout: available time for getting a mailbox
+ * @return TIMEOUT if timed out, OK if frame is posted in a mailbox
+ */
+XPD_ReturnType XPD_CAN_Post(CAN_HandleType * hcan, CAN_FrameType * Frame, uint32_t Timeout)
+{
+    XPD_ReturnType result;
+
+    result = XPD_WaitForDiff(&hcan->Inst->TSR.w, CAN_TSR_TME, 0, &Timeout);
+
+    if (result == XPD_OK)
+    {
+        /* Empty mailbox available, post frame */
+        result = can_frameTransmit(hcan, Frame);
+    }
+
+    return result;
+}
+
+/**
  * @brief Transmits a frame and waits for completion until times out.
  * @param hcan: pointer to the CAN handle structure
  * @param Frame: pointer to the frame to transmit
@@ -383,45 +405,34 @@ XPD_ReturnType XPD_CAN_Transmit(CAN_HandleType * hcan, CAN_FrameType * Frame, ui
 {
     XPD_ReturnType result;
 
-    /* no timeout, no wait for success */
-    if (Timeout == 0)
+    do
     {
+        result = XPD_WaitForDiff(&hcan->Inst->TSR.w, CAN_TSR_TME, 0, &Timeout);
+
+        /* if getting free mailbox times out, exit with busy */
+        if (result != XPD_OK)
+        {
+            return XPD_BUSY;
+        }
+
         /* get mailbox if available */
         result = can_frameTransmit(hcan, Frame);
 
-        /* result is busy if there was no free mailbox, timeout if scheduling was successful */
-        if (result == XPD_OK)
-        {
-            result = XPD_TIMEOUT;
-        }
-    }
-    else
+    /* until free mailbox was found */
+    } while (result != XPD_OK);
+
+    /* wait if transmit mailbox was found */
     {
-        do
+        /* convert to txok flag for mailbox */
+        uint32_t txok = CAN_TSR_TXOK0 << (Frame->Index * 8);
+
+        /* wait for txok with the remaining time */
+        result = XPD_WaitForMatch(&hcan->Inst->TSR.w, txok, txok, &Timeout);
+
+        /* Abort frame if transmission has timed out */
+        if (result != XPD_OK)
         {
-            result = XPD_WaitForDiff(&hcan->Inst->TSR.w, CAN_TSR_TME, 0, &Timeout);
-
-            /* if getting free mailbox times out, exit with busy */
-            if (result != XPD_OK)
-            {
-                result = XPD_BUSY;
-                break;
-            }
-
-            /* get mailbox if available */
-            result = can_frameTransmit(hcan, Frame);
-
-        /* until free mailbox was found */
-        } while (result != XPD_OK);
-
-        /* wait if transmit mailbox was found */
-        if (result == XPD_OK)
-        {
-            /* convert to txok flag for mailbox */
-            uint32_t txok = CAN_TSR_TXOK0 << (Frame->Index * 8);
-
-            /* wait for txok with the remaining time */
-            result = XPD_WaitForMatch(&hcan->Inst->TSR.w, txok, txok, &Timeout);
+            XPD_CAN_ClearTxFlag(hcan, Frame->Index, ABRQ);
         }
     }
 
