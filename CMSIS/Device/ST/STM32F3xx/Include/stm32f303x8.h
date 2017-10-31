@@ -1176,7 +1176,7 @@ typedef struct {
                  uint32_t __RESERVED2 : 8;
             __IO uint32_t FZ_DBG_I2C1_SMBUS_TIMEOUT : 1;
                  uint32_t __RESERVED3 : 3;
-            __IO uint32_t FZ_DBG_CAN_STOP : 1;              /********************  Bit definition for DBGMCU_APB2_FZ register  ************/
+            __IO uint32_t FZ_DBG_CAN_STOP : 1;
                  uint32_t __RESERVED4 : 6;
         } b;
         __IO uint32_t w;
@@ -1187,7 +1187,7 @@ typedef struct {
                  uint32_t __RESERVED0 : 1;
             __IO uint32_t FZ_DBG_TIM15_STOP : 1;
             __IO uint32_t FZ_DBG_TIM16_STOP : 1;
-            __IO uint32_t FZ_DBG_TIM17_STOP : 1;            /******************************************************************************/
+            __IO uint32_t FZ_DBG_TIM17_STOP : 1;
                  uint32_t __RESERVED1 : 27;
         } b;
         __IO uint32_t w;
@@ -2396,10 +2396,7 @@ typedef struct {
             __IO uint32_t I2C1SW : 1;                       /*!< I2C1SW bits */
                  uint32_t __RESERVED1 : 3;
             __IO uint32_t TIM1SW : 1;                       /*!< TIM1SW bits */
-                 uint32_t __RESERVED2 : 7;
-            __IO uint32_t USART2SW : 2;                     /*!< USART2SW[1:0] bits */
-            __IO uint32_t USART3SW : 2;                     /*!< USART3SW[1:0] bits */
-                 uint32_t __RESERVED3 : 12;
+                 uint32_t __RESERVED2 : 23;
         } b;
         __IO uint32_t w;
     } CFGR3;                                                /*!< RCC clock configuration register 3,                          Address offset: 0x30 */
@@ -2601,10 +2598,7 @@ typedef struct {
         __IO uint32_t I2C1SW;                               /*!< I2C1SW bits */
              uint32_t __RESERVED1[3];
         __IO uint32_t TIM1SW;                               /*!< TIM1SW bits */
-             uint32_t __RESERVED2[7];
-        __IO uint32_t USART2SW[2];                          /*!< USART2SW[1:0] bits */
-        __IO uint32_t USART3SW[2];                          /*!< USART3SW[1:0] bits */
-             uint32_t __RESERVED3[12];
+             uint32_t __RESERVED2[23];
     } CFGR3;                                                /*!< RCC clock configuration register 3,                          Address offset: 0x30 */
 } RCC_BitBand_TypeDef;
 
@@ -2661,7 +2655,7 @@ typedef struct {
             __IO uint32_t TSIE : 1;
             __IO uint32_t ADD1H : 1;
             __IO uint32_t SUB1H : 1;
-            __IO uint32_t BCK : 1;
+            __IO uint32_t BKP : 1;
             __IO uint32_t COSEL : 1;
             __IO uint32_t POL : 1;
             __IO uint32_t OSEL : 2;
@@ -2834,7 +2828,7 @@ typedef struct {
         __IO uint32_t w;
     } ALRMBSSR;                                             /*!< RTC alarm B sub second register,                          Address offset: 0x48 */
          uint32_t __RESERVED1;
-    __IO uint32_t BKPR[16];                                 /*!< RTC backup registers,                                     Address offset: 0x50-0x8C */
+    __IO uint32_t BKPR[5];                                  /*!< RTC backup registers,                                     Address offset: 0x50-0x8C */
 } RTC_TypeDef;
 
 
@@ -2879,7 +2873,7 @@ typedef struct {
         __IO uint32_t TSIE;
         __IO uint32_t ADD1H;
         __IO uint32_t SUB1H;
-        __IO uint32_t BCK;
+        __IO uint32_t BKP;
         __IO uint32_t COSEL;
         __IO uint32_t POL;
         __IO uint32_t OSEL[2];
@@ -3017,7 +3011,7 @@ typedef struct {
              uint32_t __RESERVED1[4];
     } ALRMBSSR;                                             /*!< RTC alarm B sub second register,                          Address offset: 0x48 */
          uint32_t __RESERVED1[32];
-    __IO uint32_t BKPR[16][32];                             /*!< RTC backup registers,                                     Address offset: 0x50-0x8C */
+    __IO uint32_t BKPR[5][32];                              /*!< RTC backup registers,                                     Address offset: 0x50-0x8C */
 } RTC_BitBand_TypeDef;
 
 
@@ -3069,8 +3063,7 @@ typedef struct {
         struct {
             __IO uint32_t RXNE : 1;                         /*!< Receive buffer Not Empty */
             __IO uint32_t TXE : 1;                          /*!< Transmit buffer Empty */
-            __IO uint32_t CHSIDE : 1;                       /*!< Channel side */
-            __IO uint32_t UDR : 1;                          /*!< Underrun flag */
+                 uint32_t __RESERVED0 : 2;
             __IO uint32_t CRCERR : 1;                       /*!< CRC Error flag */
             __IO uint32_t MODF : 1;                         /*!< Mode fault */
             __IO uint32_t OVR : 1;                          /*!< Overrun flag */
@@ -3078,7 +3071,7 @@ typedef struct {
             __IO uint32_t FRE : 1;                          /*!< TI frame format error */
             __IO uint32_t FRLVL : 2;                        /*!< FIFO Reception Level */
             __IO uint32_t FTLVL : 2;                        /*!< FIFO Transmission Level */
-                 uint32_t __RESERVED0 : 19;
+                 uint32_t __RESERVED1 : 19;
         } b;
         __IO uint32_t w;
     } SR;                                                   /*!< SPI Status register,                                 Address offset: 0x08 */
@@ -3125,8 +3118,7 @@ typedef struct {
     struct {
         __IO uint32_t RXNE;                                 /*!< Receive buffer Not Empty */
         __IO uint32_t TXE;                                  /*!< Transmit buffer Empty */
-        __IO uint32_t CHSIDE;                               /*!< Channel side */
-        __IO uint32_t UDR;                                  /*!< Underrun flag */
+             uint32_t __RESERVED0[2];
         __IO uint32_t CRCERR;                               /*!< CRC Error flag */
         __IO uint32_t MODF;                                 /*!< Mode fault */
         __IO uint32_t OVR;                                  /*!< Overrun flag */
@@ -3134,7 +3126,7 @@ typedef struct {
         __IO uint32_t FRE;                                  /*!< TI frame format error */
         __IO uint32_t FRLVL[2];                             /*!< FIFO Reception Level */
         __IO uint32_t FTLVL[2];                             /*!< FIFO Transmission Level */
-             uint32_t __RESERVED0[19];
+             uint32_t __RESERVED1[19];
     } SR;                                                   /*!< SPI Status register,                                 Address offset: 0x08 */
     __IO uint32_t DR[32];                                   /*!< SPI data register,                                   Address offset: 0x0C */
     __IO uint32_t CRCPR[32];                                /*!< SPI CRC polynomial register,                         Address offset: 0x10 */
@@ -10955,9 +10947,19 @@ typedef struct {
 #define EXTI_IMR2_IM35 EXTI_IMR2_MR35
 #endif
 
+#if defined(EXTI_IMR2_MR33) && defined(EXTI_IMR2_MR34) && defined(EXTI_IMR2_MR35)
 #define EXTI_IMR2_IM_Pos           (0U)                                        
 #define EXTI_IMR2_IM_Msk           (0xFU << EXTI_IMR2_IM_Pos)                  /*!< 0x0000000F */
 #define EXTI_IMR2_IM               EXTI_IMR2_IM_Msk                            
+#elif defined(EXTI_IMR2_MR34) && defined(EXTI_IMR2_MR35)
+#define EXTI_IMR2_IM_Pos           (0U)                                        
+#define EXTI_IMR2_IM_Msk           (0xDU << EXTI_IMR2_IM_Pos)                  /*!< 0x0000000D */
+#define EXTI_IMR2_IM               EXTI_IMR2_IM_Msk                            
+#else
+#define EXTI_IMR2_IM_Pos           (0U)                                        
+#define EXTI_IMR2_IM_Msk           (0x1U << EXTI_IMR2_IM_Pos)                  /*!< 0x00000001 */
+#define EXTI_IMR2_IM               EXTI_IMR2_IM_Msk                            
+#endif
 
 /*******************  Bit definition for EXTI_EMR2 ****************************/
 #define EXTI_EMR2_MR32_Pos         (0U)                                        
@@ -10974,6 +10976,20 @@ typedef struct {
 #endif
 #if defined(EXTI_EMR2_MR35)
 #define EXTI_EMR2_EM35 EXTI_EMR2_MR35
+#endif
+
+#if defined(EXTI_EMR2_MR33) && defined(EXTI_EMR2_MR34) && defined(EXTI_EMR2_MR35)
+#define EXTI_EMR2_EM_Pos           (0U)                                        
+#define EXTI_EMR2_EM_Msk           (0xFU << EXTI_EMR2_EM_Pos)                  /*!< 0x0000000F */
+#define EXTI_EMR2_EM               EXTI_EMR2_EM_Msk                            
+#elif defined(EXTI_EMR2_MR34) && defined(EXTI_EMR2_MR35)
+#define EXTI_EMR2_EM_Pos           (0U)                                        
+#define EXTI_EMR2_EM_Msk           (0xDU << EXTI_EMR2_EM_Pos)                  /*!< 0x0000000D */
+#define EXTI_EMR2_EM               EXTI_EMR2_EM_Msk                            
+#else
+#define EXTI_EMR2_EM_Pos           (0U)                                        
+#define EXTI_EMR2_EM_Msk           (0x1U << EXTI_EMR2_EM_Pos)                  /*!< 0x00000001 */
+#define EXTI_EMR2_EM               EXTI_EMR2_EM_Msk                            
 #endif
 
 /******************  Bit definition for EXTI_RTSR2 register ********************/
@@ -11225,21 +11241,6 @@ typedef struct {
 #define OB_WRP1_nWRP1_Msk    (0xFFU << OB_WRP1_nWRP1_Pos)                      /*!< 0xFF000000 */
 #define OB_WRP1_nWRP1        OB_WRP1_nWRP1_Msk                                 /*!< Flash memory write protection complemented option bytes */
 
-/******************  Bit definition for FLASH_WRP2 register  ******************/
-#define OB_WRP2_WRP2_Pos     (0U)                                              
-#define OB_WRP2_WRP2_Msk     (0xFFU << OB_WRP2_WRP2_Pos)                       /*!< 0x000000FF */
-#define OB_WRP2_WRP2         OB_WRP2_WRP2_Msk                                  /*!< Flash memory write protection option bytes */
-#define OB_WRP2_nWRP2_Pos    (8U)                                              
-#define OB_WRP2_nWRP2_Msk    (0xFFU << OB_WRP2_nWRP2_Pos)                      /*!< 0x0000FF00 */
-#define OB_WRP2_nWRP2        OB_WRP2_nWRP2_Msk                                 /*!< Flash memory write protection complemented option bytes */
-
-/******************  Bit definition for FLASH_WRP3 register  ******************/
-#define OB_WRP3_WRP3_Pos     (16U)                                             
-#define OB_WRP3_WRP3_Msk     (0xFFU << OB_WRP3_WRP3_Pos)                       /*!< 0x00FF0000 */
-#define OB_WRP3_WRP3         OB_WRP3_WRP3_Msk                                  /*!< Flash memory write protection option bytes */
-#define OB_WRP3_nWRP3_Pos    (24U)                                             
-#define OB_WRP3_nWRP3_Msk    (0xFFU << OB_WRP3_nWRP3_Pos)                      /*!< 0xFF000000 */
-#define OB_WRP3_nWRP3        OB_WRP3_nWRP3_Msk                                 /*!< Flash memory write protection complemented option bytes */
 
 /******************************************************************************/
 /*                                                                            */
@@ -12816,9 +12817,9 @@ typedef struct {
 #define RTC_CR_COSEL_Pos             (19U)                                     
 #define RTC_CR_COSEL_Msk             (0x1U << RTC_CR_COSEL_Pos)                /*!< 0x00080000 */
 #define RTC_CR_COSEL                 RTC_CR_COSEL_Msk                          
-#define RTC_CR_BCK_Pos               (18U)                                     
-#define RTC_CR_BCK_Msk               (0x1U << RTC_CR_BCK_Pos)                  /*!< 0x00040000 */
-#define RTC_CR_BCK                   RTC_CR_BCK_Msk                            
+#define RTC_CR_BKP_Pos               (18U)                                     
+#define RTC_CR_BKP_Msk               (0x1U << RTC_CR_BKP_Pos)                  /*!< 0x00040000 */
+#define RTC_CR_BKP                   RTC_CR_BKP_Msk                            
 #define RTC_CR_SUB1H_Pos             (17U)                                     
 #define RTC_CR_SUB1H_Msk             (0x1U << RTC_CR_SUB1H_Pos)                /*!< 0x00020000 */
 #define RTC_CR_SUB1H                 RTC_CR_SUB1H_Msk                          
@@ -12867,6 +12868,11 @@ typedef struct {
 #define RTC_CR_WUCKSEL_0             (0x1U << RTC_CR_WUCKSEL_Pos)              /*!< 0x00000001 */
 #define RTC_CR_WUCKSEL_1             (0x2U << RTC_CR_WUCKSEL_Pos)              /*!< 0x00000002 */
 #define RTC_CR_WUCKSEL_2             (0x4U << RTC_CR_WUCKSEL_Pos)              /*!< 0x00000004 */
+
+/* Legacy defines */
+#define RTC_CR_BCK_Pos               RTC_CR_BKP_Pos
+#define RTC_CR_BCK_Msk               RTC_CR_BKP_Msk
+#define RTC_CR_BCK                   RTC_CR_BKP
 
 /********************  Bits definition for RTC_ISR register  ******************/
 #define RTC_ISR_RECALPF_Pos          (16U)                                     
@@ -13409,12 +13415,6 @@ typedef struct {
 #define SPI_SR_TXE_Pos              (1U)                                       
 #define SPI_SR_TXE_Msk              (0x1U << SPI_SR_TXE_Pos)                   /*!< 0x00000002 */
 #define SPI_SR_TXE                  SPI_SR_TXE_Msk                             /*!< Transmit buffer Empty */
-#define SPI_SR_CHSIDE_Pos           (2U)                                       
-#define SPI_SR_CHSIDE_Msk           (0x1U << SPI_SR_CHSIDE_Pos)                /*!< 0x00000004 */
-#define SPI_SR_CHSIDE               SPI_SR_CHSIDE_Msk                          /*!< Channel side */
-#define SPI_SR_UDR_Pos              (3U)                                       
-#define SPI_SR_UDR_Msk              (0x1U << SPI_SR_UDR_Pos)                   /*!< 0x00000008 */
-#define SPI_SR_UDR                  SPI_SR_UDR_Msk                             /*!< Underrun flag */
 #define SPI_SR_CRCERR_Pos           (4U)                                       
 #define SPI_SR_CRCERR_Msk           (0x1U << SPI_SR_CRCERR_Pos)                /*!< 0x00000010 */
 #define SPI_SR_CRCERR               SPI_SR_CRCERR_Msk                          /*!< CRC Error flag */

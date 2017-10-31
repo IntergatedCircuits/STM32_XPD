@@ -538,13 +538,7 @@ typedef struct {
         } b;
         __IO uint32_t w;
     } CFGR;                                                 /*!< CEC configuration register,                                 Address offset:0x04 */
-    union {
-        struct {
-            __IO uint32_t TXD : 8;                          /*!< CEC Tx Data                        */
-                 uint32_t __RESERVED0 : 24;
-        } b;
-        __IO uint32_t w;
-    } TXDR;                                                 /*!< CEC Tx data register ,                                      Address offset:0x08 */
+    __IO uint32_t TXDR;                                     /*!< CEC Tx data register ,                                      Address offset:0x08 */
     __IO uint32_t RXDR;                                     /*!< CEC Rx Data Register,                                       Address offset:0x0C */
     union {
         struct {
@@ -1430,52 +1424,52 @@ typedef struct {
     } CIR;                                                  /*!< RCC clock interrupt register,                                Address offset: 0x08 */
     union {
         struct {
-            __IO uint32_t SYSCFGRST : 1;                    /*!< SYSCFG clock reset */
+            __IO uint32_t SYSCFGRST : 1;                    /*!< SYSCFG reset */
                  uint32_t __RESERVED0 : 8;
-            __IO uint32_t ADCRST : 1;                       /*!< ADC clock reset */
+            __IO uint32_t ADCRST : 1;                       /*!< ADC reset */
                  uint32_t __RESERVED1 : 1;
-            __IO uint32_t TIM1RST : 1;                      /*!< TIM1 clock reset */
-            __IO uint32_t SPI1RST : 1;                      /*!< SPI1 clock reset */
+            __IO uint32_t TIM1RST : 1;                      /*!< TIM1 reset */
+            __IO uint32_t SPI1RST : 1;                      /*!< SPI1 reset */
                  uint32_t __RESERVED2 : 1;
-            __IO uint32_t USART1RST : 1;                    /*!< USART1 clock reset */
+            __IO uint32_t USART1RST : 1;                    /*!< USART1 reset */
                  uint32_t __RESERVED3 : 1;
-            __IO uint32_t TIM15RST : 1;                     /*!< TIM15 clock reset */
-            __IO uint32_t TIM16RST : 1;                     /*!< TIM16 clock reset */
-            __IO uint32_t TIM17RST : 1;                     /*!< TIM17 clock reset */
+            __IO uint32_t TIM15RST : 1;                     /*!< TIM15 reset */
+            __IO uint32_t TIM16RST : 1;                     /*!< TIM16 reset */
+            __IO uint32_t TIM17RST : 1;                     /*!< TIM17 reset */
                  uint32_t __RESERVED4 : 3;
-            __IO uint32_t DBGMCURST : 1;                    /*!< DBGMCU clock reset */
+            __IO uint32_t DBGMCURST : 1;                    /*!< DBGMCU reset */
                  uint32_t __RESERVED5 : 9;
         } b;
         __IO uint32_t w;
     } APB2RSTR;                                             /*!< RCC APB2 peripheral reset register,                          Address offset: 0x0C */
     union {
         struct {
-            __IO uint32_t TIM2RST : 1;                      /*!< Timer 2 clock reset */
-            __IO uint32_t TIM3RST : 1;                      /*!< Timer 3 clock reset */
+            __IO uint32_t TIM2RST : 1;                      /*!< Timer 2 reset */
+            __IO uint32_t TIM3RST : 1;                      /*!< Timer 3 reset */
                  uint32_t __RESERVED0 : 2;
-            __IO uint32_t TIM6RST : 1;                      /*!< Timer 6 clock reset */
-            __IO uint32_t TIM7RST : 1;                      /*!< Timer 7 clock reset */
+            __IO uint32_t TIM6RST : 1;                      /*!< Timer 6 reset */
+            __IO uint32_t TIM7RST : 1;                      /*!< Timer 7 reset */
                  uint32_t __RESERVED1 : 2;
-            __IO uint32_t TIM14RST : 1;                     /*!< Timer 14 clock reset */
+            __IO uint32_t TIM14RST : 1;                     /*!< Timer 14 reset */
                  uint32_t __RESERVED2 : 2;
-            __IO uint32_t WWDGRST : 1;                      /*!< Window Watchdog clock reset */
+            __IO uint32_t WWDGRST : 1;                      /*!< Window Watchdog reset */
                  uint32_t __RESERVED3 : 2;
-            __IO uint32_t SPI2RST : 1;                      /*!< SPI2 clock reset */
+            __IO uint32_t SPI2RST : 1;                      /*!< SPI2 reset */
                  uint32_t __RESERVED4 : 2;
-            __IO uint32_t USART2RST : 1;                    /*!< USART 2 clock reset */
-            __IO uint32_t USART3RST : 1;                    /*!< USART 3 clock reset */
-            __IO uint32_t USART4RST : 1;                    /*!< USART 4 clock reset */
+            __IO uint32_t USART2RST : 1;                    /*!< USART 2 reset */
+            __IO uint32_t USART3RST : 1;                    /*!< USART 3 reset */
+            __IO uint32_t USART4RST : 1;                    /*!< USART 4 reset */
                  uint32_t __RESERVED5 : 1;
-            __IO uint32_t I2C1RST : 1;                      /*!< I2C 1 clock reset */
-            __IO uint32_t I2C2RST : 1;                      /*!< I2C 2 clock reset */
-            __IO uint32_t USBRST : 1;                       /*!< USB clock reset */
+            __IO uint32_t I2C1RST : 1;                      /*!< I2C 1 reset */
+            __IO uint32_t I2C2RST : 1;                      /*!< I2C 2 reset */
+            __IO uint32_t USBRST : 1;                       /*!< USB reset */
                  uint32_t __RESERVED6 : 1;
-            __IO uint32_t CANRST : 1;                       /*!< CAN clock reset */
+            __IO uint32_t CANRST : 1;                       /*!< CAN reset */
                  uint32_t __RESERVED7 : 1;
-            __IO uint32_t CRSRST : 1;                       /*!< CRS clock reset */
-            __IO uint32_t PWRRST : 1;                       /*!< PWR clock reset */
-            __IO uint32_t DACRST : 1;                       /*!< DAC clock reset */
-            __IO uint32_t CECRST : 1;                       /*!< CEC clock reset */
+            __IO uint32_t CRSRST : 1;                       /*!< CRS reset */
+            __IO uint32_t PWRRST : 1;                       /*!< PWR reset */
+            __IO uint32_t DACRST : 1;                       /*!< DAC reset */
+            __IO uint32_t CECRST : 1;                       /*!< CEC reset */
                  uint32_t __RESERVED8 : 1;
         } b;
         __IO uint32_t w;
@@ -1589,14 +1583,14 @@ typedef struct {
     union {
         struct {
                  uint32_t __RESERVED0 : 17;
-            __IO uint32_t GPIOARST : 1;                     /*!< GPIOA clock reset */
-            __IO uint32_t GPIOBRST : 1;                     /*!< GPIOB clock reset */
-            __IO uint32_t GPIOCRST : 1;                     /*!< GPIOC clock reset */
-            __IO uint32_t GPIODRST : 1;                     /*!< GPIOD clock reset */
-            __IO uint32_t GPIOERST : 1;                     /*!< GPIOE clock reset */
-            __IO uint32_t GPIOFRST : 1;                     /*!< GPIOF clock reset */
+            __IO uint32_t GPIOARST : 1;                     /*!< GPIOA reset */
+            __IO uint32_t GPIOBRST : 1;                     /*!< GPIOB reset */
+            __IO uint32_t GPIOCRST : 1;                     /*!< GPIOC reset */
+            __IO uint32_t GPIODRST : 1;                     /*!< GPIOD reset */
+            __IO uint32_t GPIOERST : 1;                     /*!< GPIOE reset */
+            __IO uint32_t GPIOFRST : 1;                     /*!< GPIOF reset */
                  uint32_t __RESERVED1 : 1;
-            __IO uint32_t TSCRST : 1;                       /*!< TS clock reset */
+            __IO uint32_t TSCRST : 1;                       /*!< TS reset */
                  uint32_t __RESERVED2 : 7;
         } b;
         __IO uint32_t w;
@@ -1690,7 +1684,7 @@ typedef struct {
             __IO uint32_t TSIE : 1;
             __IO uint32_t ADD1H : 1;
             __IO uint32_t SUB1H : 1;
-            __IO uint32_t BCK : 1;
+            __IO uint32_t BKP : 1;
             __IO uint32_t COSEL : 1;
             __IO uint32_t POL : 1;
             __IO uint32_t OSEL : 2;
@@ -8977,56 +8971,108 @@ typedef struct {
 #define GPIO_LCKR_LCKK                  GPIO_LCKR_LCKK_Msk                     
 
 /****************** Bit definition for GPIO_AFRL register  ********************/
-#define GPIO_AFRL_AFRL0_Pos             (0U)                                   
-#define GPIO_AFRL_AFRL0_Msk             (0xFU << GPIO_AFRL_AFRL0_Pos)          /*!< 0x0000000F */
-#define GPIO_AFRL_AFRL0                 GPIO_AFRL_AFRL0_Msk                    
-#define GPIO_AFRL_AFRL1_Pos             (4U)                                   
-#define GPIO_AFRL_AFRL1_Msk             (0xFU << GPIO_AFRL_AFRL1_Pos)          /*!< 0x000000F0 */
-#define GPIO_AFRL_AFRL1                 GPIO_AFRL_AFRL1_Msk                    
-#define GPIO_AFRL_AFRL2_Pos             (8U)                                   
-#define GPIO_AFRL_AFRL2_Msk             (0xFU << GPIO_AFRL_AFRL2_Pos)          /*!< 0x00000F00 */
-#define GPIO_AFRL_AFRL2                 GPIO_AFRL_AFRL2_Msk                    
-#define GPIO_AFRL_AFRL3_Pos             (12U)                                  
-#define GPIO_AFRL_AFRL3_Msk             (0xFU << GPIO_AFRL_AFRL3_Pos)          /*!< 0x0000F000 */
-#define GPIO_AFRL_AFRL3                 GPIO_AFRL_AFRL3_Msk                    
-#define GPIO_AFRL_AFRL4_Pos             (16U)                                  
-#define GPIO_AFRL_AFRL4_Msk             (0xFU << GPIO_AFRL_AFRL4_Pos)          /*!< 0x000F0000 */
-#define GPIO_AFRL_AFRL4                 GPIO_AFRL_AFRL4_Msk                    
-#define GPIO_AFRL_AFRL5_Pos             (20U)                                  
-#define GPIO_AFRL_AFRL5_Msk             (0xFU << GPIO_AFRL_AFRL5_Pos)          /*!< 0x00F00000 */
-#define GPIO_AFRL_AFRL5                 GPIO_AFRL_AFRL5_Msk                    
-#define GPIO_AFRL_AFRL6_Pos             (24U)                                  
-#define GPIO_AFRL_AFRL6_Msk             (0xFU << GPIO_AFRL_AFRL6_Pos)          /*!< 0x0F000000 */
-#define GPIO_AFRL_AFRL6                 GPIO_AFRL_AFRL6_Msk                    
-#define GPIO_AFRL_AFRL7_Pos             (28U)                                  
-#define GPIO_AFRL_AFRL7_Msk             (0xFU << GPIO_AFRL_AFRL7_Pos)          /*!< 0xF0000000 */
-#define GPIO_AFRL_AFRL7                 GPIO_AFRL_AFRL7_Msk                    
+#define GPIO_AFRL_AFSEL0_Pos            (0U)                                   
+#define GPIO_AFRL_AFSEL0_Msk            (0xFU << GPIO_AFRL_AFSEL0_Pos)         /*!< 0x0000000F */
+#define GPIO_AFRL_AFSEL0                GPIO_AFRL_AFSEL0_Msk                    
+#define GPIO_AFRL_AFSEL1_Pos            (4U)                                   
+#define GPIO_AFRL_AFSEL1_Msk            (0xFU << GPIO_AFRL_AFSEL1_Pos)         /*!< 0x000000F0 */
+#define GPIO_AFRL_AFSEL1                GPIO_AFRL_AFSEL1_Msk                    
+#define GPIO_AFRL_AFSEL2_Pos            (8U)                                   
+#define GPIO_AFRL_AFSEL2_Msk            (0xFU << GPIO_AFRL_AFSEL2_Pos)         /*!< 0x00000F00 */
+#define GPIO_AFRL_AFSEL2                GPIO_AFRL_AFSEL2_Msk                    
+#define GPIO_AFRL_AFSEL3_Pos            (12U)                                  
+#define GPIO_AFRL_AFSEL3_Msk            (0xFU << GPIO_AFRL_AFSEL3_Pos)         /*!< 0x0000F000 */
+#define GPIO_AFRL_AFSEL3                GPIO_AFRL_AFSEL3_Msk                    
+#define GPIO_AFRL_AFSEL4_Pos            (16U)                                  
+#define GPIO_AFRL_AFSEL4_Msk            (0xFU << GPIO_AFRL_AFSEL4_Pos)         /*!< 0x000F0000 */
+#define GPIO_AFRL_AFSEL4                GPIO_AFRL_AFSEL4_Msk                    
+#define GPIO_AFRL_AFSEL5_Pos            (20U)                                  
+#define GPIO_AFRL_AFSEL5_Msk            (0xFU << GPIO_AFRL_AFSEL5_Pos)         /*!< 0x00F00000 */
+#define GPIO_AFRL_AFSEL5                GPIO_AFRL_AFSEL5_Msk                    
+#define GPIO_AFRL_AFSEL6_Pos            (24U)                                  
+#define GPIO_AFRL_AFSEL6_Msk            (0xFU << GPIO_AFRL_AFSEL6_Pos)         /*!< 0x0F000000 */
+#define GPIO_AFRL_AFSEL6                GPIO_AFRL_AFSEL6_Msk                    
+#define GPIO_AFRL_AFSEL7_Pos            (28U)                                  
+#define GPIO_AFRL_AFSEL7_Msk            (0xFU << GPIO_AFRL_AFSEL7_Pos)         /*!< 0xF0000000 */
+#define GPIO_AFRL_AFSEL7                GPIO_AFRL_AFSEL7_Msk  
 
+/* Legacy aliases */                  
+#define GPIO_AFRL_AFRL0_Pos             GPIO_AFRL_AFSEL0_Pos                                  
+#define GPIO_AFRL_AFRL0_Msk             GPIO_AFRL_AFSEL0_Msk
+#define GPIO_AFRL_AFRL0                 GPIO_AFRL_AFSEL0
+#define GPIO_AFRL_AFRL1_Pos             GPIO_AFRL_AFSEL1_Pos
+#define GPIO_AFRL_AFRL1_Msk             GPIO_AFRL_AFSEL1_Msk
+#define GPIO_AFRL_AFRL1                 GPIO_AFRL_AFSEL1
+#define GPIO_AFRL_AFRL2_Pos             GPIO_AFRL_AFSEL2_Pos
+#define GPIO_AFRL_AFRL2_Msk             GPIO_AFRL_AFSEL2_Msk
+#define GPIO_AFRL_AFRL2                 GPIO_AFRL_AFSEL2
+#define GPIO_AFRL_AFRL3_Pos             GPIO_AFRL_AFSEL3_Pos
+#define GPIO_AFRL_AFRL3_Msk             GPIO_AFRL_AFSEL3_Msk
+#define GPIO_AFRL_AFRL3                 GPIO_AFRL_AFSEL3
+#define GPIO_AFRL_AFRL4_Pos             GPIO_AFRL_AFSEL4_Pos
+#define GPIO_AFRL_AFRL4_Msk             GPIO_AFRL_AFSEL4_Msk
+#define GPIO_AFRL_AFRL4                 GPIO_AFRL_AFSEL4
+#define GPIO_AFRL_AFRL5_Pos             GPIO_AFRL_AFSEL5_Pos
+#define GPIO_AFRL_AFRL5_Msk             GPIO_AFRL_AFSEL5_Msk
+#define GPIO_AFRL_AFRL5                 GPIO_AFRL_AFSEL5
+#define GPIO_AFRL_AFRL6_Pos             GPIO_AFRL_AFSEL6_Pos
+#define GPIO_AFRL_AFRL6_Msk             GPIO_AFRL_AFSEL6_Msk
+#define GPIO_AFRL_AFRL6                 GPIO_AFRL_AFSEL6
+#define GPIO_AFRL_AFRL7_Pos             GPIO_AFRL_AFSEL7_Pos
+#define GPIO_AFRL_AFRL7_Msk             GPIO_AFRL_AFSEL7_Msk
+#define GPIO_AFRL_AFRL7                 GPIO_AFRL_AFSEL7
+ 
 /****************** Bit definition for GPIO_AFRH register  ********************/
-#define GPIO_AFRH_AFRH0_Pos             (0U)                                   
-#define GPIO_AFRH_AFRH0_Msk             (0xFU << GPIO_AFRH_AFRH0_Pos)          /*!< 0x0000000F */
-#define GPIO_AFRH_AFRH0                 GPIO_AFRH_AFRH0_Msk                    
-#define GPIO_AFRH_AFRH1_Pos             (4U)                                   
-#define GPIO_AFRH_AFRH1_Msk             (0xFU << GPIO_AFRH_AFRH1_Pos)          /*!< 0x000000F0 */
-#define GPIO_AFRH_AFRH1                 GPIO_AFRH_AFRH1_Msk                    
-#define GPIO_AFRH_AFRH2_Pos             (8U)                                   
-#define GPIO_AFRH_AFRH2_Msk             (0xFU << GPIO_AFRH_AFRH2_Pos)          /*!< 0x00000F00 */
-#define GPIO_AFRH_AFRH2                 GPIO_AFRH_AFRH2_Msk                    
-#define GPIO_AFRH_AFRH3_Pos             (12U)                                  
-#define GPIO_AFRH_AFRH3_Msk             (0xFU << GPIO_AFRH_AFRH3_Pos)          /*!< 0x0000F000 */
-#define GPIO_AFRH_AFRH3                 GPIO_AFRH_AFRH3_Msk                    
-#define GPIO_AFRH_AFRH4_Pos             (16U)                                  
-#define GPIO_AFRH_AFRH4_Msk             (0xFU << GPIO_AFRH_AFRH4_Pos)          /*!< 0x000F0000 */
-#define GPIO_AFRH_AFRH4                 GPIO_AFRH_AFRH4_Msk                    
-#define GPIO_AFRH_AFRH5_Pos             (20U)                                  
-#define GPIO_AFRH_AFRH5_Msk             (0xFU << GPIO_AFRH_AFRH5_Pos)          /*!< 0x00F00000 */
-#define GPIO_AFRH_AFRH5                 GPIO_AFRH_AFRH5_Msk                    
-#define GPIO_AFRH_AFRH6_Pos             (24U)                                  
-#define GPIO_AFRH_AFRH6_Msk             (0xFU << GPIO_AFRH_AFRH6_Pos)          /*!< 0x0F000000 */
-#define GPIO_AFRH_AFRH6                 GPIO_AFRH_AFRH6_Msk                    
-#define GPIO_AFRH_AFRH7_Pos             (28U)                                  
-#define GPIO_AFRH_AFRH7_Msk             (0xFU << GPIO_AFRH_AFRH7_Pos)          /*!< 0xF0000000 */
-#define GPIO_AFRH_AFRH7                 GPIO_AFRH_AFRH7_Msk                    
+#define GPIO_AFRH_AFSEL8_Pos            (0U)                                   
+#define GPIO_AFRH_AFSEL8_Msk            (0xFU << GPIO_AFRH_AFSEL8_Pos)         /*!< 0x0000000F */
+#define GPIO_AFRH_AFSEL8                GPIO_AFRH_AFSEL8_Msk                    
+#define GPIO_AFRH_AFSEL9_Pos            (4U)                                   
+#define GPIO_AFRH_AFSEL9_Msk            (0xFU << GPIO_AFRH_AFSEL9_Pos)         /*!< 0x000000F0 */
+#define GPIO_AFRH_AFSEL9                GPIO_AFRH_AFSEL9_Msk                    
+#define GPIO_AFRH_AFSEL10_Pos           (8U)                                   
+#define GPIO_AFRH_AFSEL10_Msk           (0xFU << GPIO_AFRH_AFSEL10_Pos)        /*!< 0x00000F00 */
+#define GPIO_AFRH_AFSEL10               GPIO_AFRH_AFSEL10_Msk                    
+#define GPIO_AFRH_AFSEL11_Pos           (12U)                                  
+#define GPIO_AFRH_AFSEL11_Msk           (0xFU << GPIO_AFRH_AFSEL11_Pos)        /*!< 0x0000F000 */
+#define GPIO_AFRH_AFSEL11               GPIO_AFRH_AFSEL11_Msk                    
+#define GPIO_AFRH_AFSEL12_Pos           (16U)                                  
+#define GPIO_AFRH_AFSEL12_Msk           (0xFU << GPIO_AFRH_AFSEL12_Pos)        /*!< 0x000F0000 */
+#define GPIO_AFRH_AFSEL12               GPIO_AFRH_AFSEL12_Msk                    
+#define GPIO_AFRH_AFSEL13_Pos           (20U)                                  
+#define GPIO_AFRH_AFSEL13_Msk           (0xFU << GPIO_AFRH_AFSEL13_Pos)        /*!< 0x00F00000 */
+#define GPIO_AFRH_AFSEL13               GPIO_AFRH_AFSEL13_Msk                    
+#define GPIO_AFRH_AFSEL14_Pos           (24U)                                  
+#define GPIO_AFRH_AFSEL14_Msk           (0xFU << GPIO_AFRH_AFSEL14_Pos)        /*!< 0x0F000000 */
+#define GPIO_AFRH_AFSEL14               GPIO_AFRH_AFSEL14_Msk                    
+#define GPIO_AFRH_AFSEL15_Pos           (28U)                                  
+#define GPIO_AFRH_AFSEL15_Msk           (0xFU << GPIO_AFRH_AFSEL15_Pos)        /*!< 0xF0000000 */
+#define GPIO_AFRH_AFSEL15               GPIO_AFRH_AFSEL15_Msk                    
+
+/* Legacy aliases */                  
+#define GPIO_AFRH_AFRH0_Pos             GPIO_AFRH_AFSEL8_Pos
+#define GPIO_AFRH_AFRH0_Msk             GPIO_AFRH_AFSEL8_Msk
+#define GPIO_AFRH_AFRH0                 GPIO_AFRH_AFSEL8
+#define GPIO_AFRH_AFRH1_Pos             GPIO_AFRH_AFSEL9_Pos
+#define GPIO_AFRH_AFRH1_Msk             GPIO_AFRH_AFSEL9_Msk
+#define GPIO_AFRH_AFRH1                 GPIO_AFRH_AFSEL9
+#define GPIO_AFRH_AFRH2_Pos             GPIO_AFRH_AFSEL10_Pos
+#define GPIO_AFRH_AFRH2_Msk             GPIO_AFRH_AFSEL10_Msk
+#define GPIO_AFRH_AFRH2                 GPIO_AFRH_AFSEL10
+#define GPIO_AFRH_AFRH3_Pos             GPIO_AFRH_AFSEL11_Pos
+#define GPIO_AFRH_AFRH3_Msk             GPIO_AFRH_AFSEL11_Msk
+#define GPIO_AFRH_AFRH3                 GPIO_AFRH_AFSEL11
+#define GPIO_AFRH_AFRH4_Pos             GPIO_AFRH_AFSEL12_Pos
+#define GPIO_AFRH_AFRH4_Msk             GPIO_AFRH_AFSEL12_Msk
+#define GPIO_AFRH_AFRH4                 GPIO_AFRH_AFSEL12
+#define GPIO_AFRH_AFRH5_Pos             GPIO_AFRH_AFSEL13_Pos
+#define GPIO_AFRH_AFRH5_Msk             GPIO_AFRH_AFSEL13_Msk
+#define GPIO_AFRH_AFRH5                 GPIO_AFRH_AFSEL13
+#define GPIO_AFRH_AFRH6_Pos             GPIO_AFRH_AFSEL14_Pos
+#define GPIO_AFRH_AFRH6_Msk             GPIO_AFRH_AFSEL14_Msk
+#define GPIO_AFRH_AFRH6                 GPIO_AFRH_AFSEL14
+#define GPIO_AFRH_AFRH7_Pos             GPIO_AFRH_AFSEL15_Pos
+#define GPIO_AFRH_AFRH7_Msk             GPIO_AFRH_AFSEL15_Msk
+#define GPIO_AFRH_AFRH7                 GPIO_AFRH_AFSEL15
 
 /****************** Bit definition for GPIO_BRR register  *********************/
 #define GPIO_BRR_BR_0                   (0x00000001U)                          
@@ -9754,90 +9800,90 @@ typedef struct {
 /*****************  Bit definition for RCC_APB2RSTR register  ****************/
 #define RCC_APB2RSTR_SYSCFGRST_Pos               (0U)                          
 #define RCC_APB2RSTR_SYSCFGRST_Msk               (0x1U << RCC_APB2RSTR_SYSCFGRST_Pos) /*!< 0x00000001 */
-#define RCC_APB2RSTR_SYSCFGRST                   RCC_APB2RSTR_SYSCFGRST_Msk    /*!< SYSCFG clock reset */
+#define RCC_APB2RSTR_SYSCFGRST                   RCC_APB2RSTR_SYSCFGRST_Msk    /*!< SYSCFG reset */
 #define RCC_APB2RSTR_ADCRST_Pos                  (9U)                          
 #define RCC_APB2RSTR_ADCRST_Msk                  (0x1U << RCC_APB2RSTR_ADCRST_Pos) /*!< 0x00000200 */
-#define RCC_APB2RSTR_ADCRST                      RCC_APB2RSTR_ADCRST_Msk       /*!< ADC clock reset */
+#define RCC_APB2RSTR_ADCRST                      RCC_APB2RSTR_ADCRST_Msk       /*!< ADC reset */
 #define RCC_APB2RSTR_TIM1RST_Pos                 (11U)                         
 #define RCC_APB2RSTR_TIM1RST_Msk                 (0x1U << RCC_APB2RSTR_TIM1RST_Pos) /*!< 0x00000800 */
-#define RCC_APB2RSTR_TIM1RST                     RCC_APB2RSTR_TIM1RST_Msk      /*!< TIM1 clock reset */
+#define RCC_APB2RSTR_TIM1RST                     RCC_APB2RSTR_TIM1RST_Msk      /*!< TIM1 reset */
 #define RCC_APB2RSTR_SPI1RST_Pos                 (12U)                         
 #define RCC_APB2RSTR_SPI1RST_Msk                 (0x1U << RCC_APB2RSTR_SPI1RST_Pos) /*!< 0x00001000 */
-#define RCC_APB2RSTR_SPI1RST                     RCC_APB2RSTR_SPI1RST_Msk      /*!< SPI1 clock reset */
+#define RCC_APB2RSTR_SPI1RST                     RCC_APB2RSTR_SPI1RST_Msk      /*!< SPI1 reset */
 #define RCC_APB2RSTR_USART1RST_Pos               (14U)                         
 #define RCC_APB2RSTR_USART1RST_Msk               (0x1U << RCC_APB2RSTR_USART1RST_Pos) /*!< 0x00004000 */
-#define RCC_APB2RSTR_USART1RST                   RCC_APB2RSTR_USART1RST_Msk    /*!< USART1 clock reset */
+#define RCC_APB2RSTR_USART1RST                   RCC_APB2RSTR_USART1RST_Msk    /*!< USART1 reset */
 #define RCC_APB2RSTR_TIM15RST_Pos                (16U)                         
 #define RCC_APB2RSTR_TIM15RST_Msk                (0x1U << RCC_APB2RSTR_TIM15RST_Pos) /*!< 0x00010000 */
-#define RCC_APB2RSTR_TIM15RST                    RCC_APB2RSTR_TIM15RST_Msk     /*!< TIM15 clock reset */
+#define RCC_APB2RSTR_TIM15RST                    RCC_APB2RSTR_TIM15RST_Msk     /*!< TIM15 reset */
 #define RCC_APB2RSTR_TIM16RST_Pos                (17U)                         
 #define RCC_APB2RSTR_TIM16RST_Msk                (0x1U << RCC_APB2RSTR_TIM16RST_Pos) /*!< 0x00020000 */
-#define RCC_APB2RSTR_TIM16RST                    RCC_APB2RSTR_TIM16RST_Msk     /*!< TIM16 clock reset */
+#define RCC_APB2RSTR_TIM16RST                    RCC_APB2RSTR_TIM16RST_Msk     /*!< TIM16 reset */
 #define RCC_APB2RSTR_TIM17RST_Pos                (18U)                         
 #define RCC_APB2RSTR_TIM17RST_Msk                (0x1U << RCC_APB2RSTR_TIM17RST_Pos) /*!< 0x00040000 */
-#define RCC_APB2RSTR_TIM17RST                    RCC_APB2RSTR_TIM17RST_Msk     /*!< TIM17 clock reset */
+#define RCC_APB2RSTR_TIM17RST                    RCC_APB2RSTR_TIM17RST_Msk     /*!< TIM17 reset */
 #define RCC_APB2RSTR_DBGMCURST_Pos               (22U)                         
 #define RCC_APB2RSTR_DBGMCURST_Msk               (0x1U << RCC_APB2RSTR_DBGMCURST_Pos) /*!< 0x00400000 */
-#define RCC_APB2RSTR_DBGMCURST                   RCC_APB2RSTR_DBGMCURST_Msk    /*!< DBGMCU clock reset */
+#define RCC_APB2RSTR_DBGMCURST                   RCC_APB2RSTR_DBGMCURST_Msk    /*!< DBGMCU reset */
 
-/*!< Old ADC1 clock reset bit definition maintained for legacy purpose */
+/*!< Old ADC1 reset bit definition maintained for legacy purpose */
 #define  RCC_APB2RSTR_ADC1RST                RCC_APB2RSTR_ADCRST          
 
 /*****************  Bit definition for RCC_APB1RSTR register  ****************/
 #define RCC_APB1RSTR_TIM2RST_Pos                 (0U)                          
 #define RCC_APB1RSTR_TIM2RST_Msk                 (0x1U << RCC_APB1RSTR_TIM2RST_Pos) /*!< 0x00000001 */
-#define RCC_APB1RSTR_TIM2RST                     RCC_APB1RSTR_TIM2RST_Msk      /*!< Timer 2 clock reset */
+#define RCC_APB1RSTR_TIM2RST                     RCC_APB1RSTR_TIM2RST_Msk      /*!< Timer 2 reset */
 #define RCC_APB1RSTR_TIM3RST_Pos                 (1U)                          
 #define RCC_APB1RSTR_TIM3RST_Msk                 (0x1U << RCC_APB1RSTR_TIM3RST_Pos) /*!< 0x00000002 */
-#define RCC_APB1RSTR_TIM3RST                     RCC_APB1RSTR_TIM3RST_Msk      /*!< Timer 3 clock reset */
+#define RCC_APB1RSTR_TIM3RST                     RCC_APB1RSTR_TIM3RST_Msk      /*!< Timer 3 reset */
 #define RCC_APB1RSTR_TIM6RST_Pos                 (4U)                          
 #define RCC_APB1RSTR_TIM6RST_Msk                 (0x1U << RCC_APB1RSTR_TIM6RST_Pos) /*!< 0x00000010 */
-#define RCC_APB1RSTR_TIM6RST                     RCC_APB1RSTR_TIM6RST_Msk      /*!< Timer 6 clock reset */
+#define RCC_APB1RSTR_TIM6RST                     RCC_APB1RSTR_TIM6RST_Msk      /*!< Timer 6 reset */
 #define RCC_APB1RSTR_TIM7RST_Pos                 (5U)                          
 #define RCC_APB1RSTR_TIM7RST_Msk                 (0x1U << RCC_APB1RSTR_TIM7RST_Pos) /*!< 0x00000020 */
-#define RCC_APB1RSTR_TIM7RST                     RCC_APB1RSTR_TIM7RST_Msk      /*!< Timer 7 clock reset */
+#define RCC_APB1RSTR_TIM7RST                     RCC_APB1RSTR_TIM7RST_Msk      /*!< Timer 7 reset */
 #define RCC_APB1RSTR_TIM14RST_Pos                (8U)                          
 #define RCC_APB1RSTR_TIM14RST_Msk                (0x1U << RCC_APB1RSTR_TIM14RST_Pos) /*!< 0x00000100 */
-#define RCC_APB1RSTR_TIM14RST                    RCC_APB1RSTR_TIM14RST_Msk     /*!< Timer 14 clock reset */
+#define RCC_APB1RSTR_TIM14RST                    RCC_APB1RSTR_TIM14RST_Msk     /*!< Timer 14 reset */
 #define RCC_APB1RSTR_WWDGRST_Pos                 (11U)                         
 #define RCC_APB1RSTR_WWDGRST_Msk                 (0x1U << RCC_APB1RSTR_WWDGRST_Pos) /*!< 0x00000800 */
-#define RCC_APB1RSTR_WWDGRST                     RCC_APB1RSTR_WWDGRST_Msk      /*!< Window Watchdog clock reset */
+#define RCC_APB1RSTR_WWDGRST                     RCC_APB1RSTR_WWDGRST_Msk      /*!< Window Watchdog reset */
 #define RCC_APB1RSTR_SPI2RST_Pos                 (14U)                         
 #define RCC_APB1RSTR_SPI2RST_Msk                 (0x1U << RCC_APB1RSTR_SPI2RST_Pos) /*!< 0x00004000 */
-#define RCC_APB1RSTR_SPI2RST                     RCC_APB1RSTR_SPI2RST_Msk      /*!< SPI2 clock reset */
+#define RCC_APB1RSTR_SPI2RST                     RCC_APB1RSTR_SPI2RST_Msk      /*!< SPI2 reset */
 #define RCC_APB1RSTR_USART2RST_Pos               (17U)                         
 #define RCC_APB1RSTR_USART2RST_Msk               (0x1U << RCC_APB1RSTR_USART2RST_Pos) /*!< 0x00020000 */
-#define RCC_APB1RSTR_USART2RST                   RCC_APB1RSTR_USART2RST_Msk    /*!< USART 2 clock reset */
+#define RCC_APB1RSTR_USART2RST                   RCC_APB1RSTR_USART2RST_Msk    /*!< USART 2 reset */
 #define RCC_APB1RSTR_USART3RST_Pos               (18U)                         
 #define RCC_APB1RSTR_USART3RST_Msk               (0x1U << RCC_APB1RSTR_USART3RST_Pos) /*!< 0x00040000 */
-#define RCC_APB1RSTR_USART3RST                   RCC_APB1RSTR_USART3RST_Msk    /*!< USART 3 clock reset */
+#define RCC_APB1RSTR_USART3RST                   RCC_APB1RSTR_USART3RST_Msk    /*!< USART 3 reset */
 #define RCC_APB1RSTR_USART4RST_Pos               (19U)                         
 #define RCC_APB1RSTR_USART4RST_Msk               (0x1U << RCC_APB1RSTR_USART4RST_Pos) /*!< 0x00080000 */
-#define RCC_APB1RSTR_USART4RST                   RCC_APB1RSTR_USART4RST_Msk    /*!< USART 4 clock reset */
+#define RCC_APB1RSTR_USART4RST                   RCC_APB1RSTR_USART4RST_Msk    /*!< USART 4 reset */
 #define RCC_APB1RSTR_I2C1RST_Pos                 (21U)                         
 #define RCC_APB1RSTR_I2C1RST_Msk                 (0x1U << RCC_APB1RSTR_I2C1RST_Pos) /*!< 0x00200000 */
-#define RCC_APB1RSTR_I2C1RST                     RCC_APB1RSTR_I2C1RST_Msk      /*!< I2C 1 clock reset */
+#define RCC_APB1RSTR_I2C1RST                     RCC_APB1RSTR_I2C1RST_Msk      /*!< I2C 1 reset */
 #define RCC_APB1RSTR_I2C2RST_Pos                 (22U)                         
 #define RCC_APB1RSTR_I2C2RST_Msk                 (0x1U << RCC_APB1RSTR_I2C2RST_Pos) /*!< 0x00400000 */
-#define RCC_APB1RSTR_I2C2RST                     RCC_APB1RSTR_I2C2RST_Msk      /*!< I2C 2 clock reset */
+#define RCC_APB1RSTR_I2C2RST                     RCC_APB1RSTR_I2C2RST_Msk      /*!< I2C 2 reset */
 #define RCC_APB1RSTR_USBRST_Pos                  (23U)                         
 #define RCC_APB1RSTR_USBRST_Msk                  (0x1U << RCC_APB1RSTR_USBRST_Pos) /*!< 0x00800000 */
-#define RCC_APB1RSTR_USBRST                      RCC_APB1RSTR_USBRST_Msk       /*!< USB clock reset */
+#define RCC_APB1RSTR_USBRST                      RCC_APB1RSTR_USBRST_Msk       /*!< USB reset */
 #define RCC_APB1RSTR_CANRST_Pos                  (25U)                         
 #define RCC_APB1RSTR_CANRST_Msk                  (0x1U << RCC_APB1RSTR_CANRST_Pos) /*!< 0x02000000 */
-#define RCC_APB1RSTR_CANRST                      RCC_APB1RSTR_CANRST_Msk       /*!< CAN clock reset */
+#define RCC_APB1RSTR_CANRST                      RCC_APB1RSTR_CANRST_Msk       /*!< CAN reset */
 #define RCC_APB1RSTR_CRSRST_Pos                  (27U)                         
 #define RCC_APB1RSTR_CRSRST_Msk                  (0x1U << RCC_APB1RSTR_CRSRST_Pos) /*!< 0x08000000 */
-#define RCC_APB1RSTR_CRSRST                      RCC_APB1RSTR_CRSRST_Msk       /*!< CRS clock reset */
+#define RCC_APB1RSTR_CRSRST                      RCC_APB1RSTR_CRSRST_Msk       /*!< CRS reset */
 #define RCC_APB1RSTR_PWRRST_Pos                  (28U)                         
 #define RCC_APB1RSTR_PWRRST_Msk                  (0x1U << RCC_APB1RSTR_PWRRST_Pos) /*!< 0x10000000 */
-#define RCC_APB1RSTR_PWRRST                      RCC_APB1RSTR_PWRRST_Msk       /*!< PWR clock reset */
+#define RCC_APB1RSTR_PWRRST                      RCC_APB1RSTR_PWRRST_Msk       /*!< PWR reset */
 #define RCC_APB1RSTR_DACRST_Pos                  (29U)                         
 #define RCC_APB1RSTR_DACRST_Msk                  (0x1U << RCC_APB1RSTR_DACRST_Pos) /*!< 0x20000000 */
-#define RCC_APB1RSTR_DACRST                      RCC_APB1RSTR_DACRST_Msk       /*!< DAC clock reset */
+#define RCC_APB1RSTR_DACRST                      RCC_APB1RSTR_DACRST_Msk       /*!< DAC reset */
 #define RCC_APB1RSTR_CECRST_Pos                  (30U)                         
 #define RCC_APB1RSTR_CECRST_Msk                  (0x1U << RCC_APB1RSTR_CECRST_Pos) /*!< 0x40000000 */
-#define RCC_APB1RSTR_CECRST                      RCC_APB1RSTR_CECRST_Msk       /*!< CEC clock reset */
+#define RCC_APB1RSTR_CECRST                      RCC_APB1RSTR_CECRST_Msk       /*!< CEC reset */
 
 /******************  Bit definition for RCC_AHBENR register  *****************/
 #define RCC_AHBENR_DMAEN_Pos                     (0U)                          
@@ -10044,28 +10090,28 @@ typedef struct {
 /*******************  Bit definition for RCC_AHBRSTR register  ***************/
 #define RCC_AHBRSTR_GPIOARST_Pos                 (17U)                         
 #define RCC_AHBRSTR_GPIOARST_Msk                 (0x1U << RCC_AHBRSTR_GPIOARST_Pos) /*!< 0x00020000 */
-#define RCC_AHBRSTR_GPIOARST                     RCC_AHBRSTR_GPIOARST_Msk      /*!< GPIOA clock reset */
+#define RCC_AHBRSTR_GPIOARST                     RCC_AHBRSTR_GPIOARST_Msk      /*!< GPIOA reset */
 #define RCC_AHBRSTR_GPIOBRST_Pos                 (18U)                         
 #define RCC_AHBRSTR_GPIOBRST_Msk                 (0x1U << RCC_AHBRSTR_GPIOBRST_Pos) /*!< 0x00040000 */
-#define RCC_AHBRSTR_GPIOBRST                     RCC_AHBRSTR_GPIOBRST_Msk      /*!< GPIOB clock reset */
+#define RCC_AHBRSTR_GPIOBRST                     RCC_AHBRSTR_GPIOBRST_Msk      /*!< GPIOB reset */
 #define RCC_AHBRSTR_GPIOCRST_Pos                 (19U)                         
 #define RCC_AHBRSTR_GPIOCRST_Msk                 (0x1U << RCC_AHBRSTR_GPIOCRST_Pos) /*!< 0x00080000 */
-#define RCC_AHBRSTR_GPIOCRST                     RCC_AHBRSTR_GPIOCRST_Msk      /*!< GPIOC clock reset */
+#define RCC_AHBRSTR_GPIOCRST                     RCC_AHBRSTR_GPIOCRST_Msk      /*!< GPIOC reset */
 #define RCC_AHBRSTR_GPIODRST_Pos                 (20U)                         
 #define RCC_AHBRSTR_GPIODRST_Msk                 (0x1U << RCC_AHBRSTR_GPIODRST_Pos) /*!< 0x00100000 */
-#define RCC_AHBRSTR_GPIODRST                     RCC_AHBRSTR_GPIODRST_Msk      /*!< GPIOD clock reset */
+#define RCC_AHBRSTR_GPIODRST                     RCC_AHBRSTR_GPIODRST_Msk      /*!< GPIOD reset */
 #define RCC_AHBRSTR_GPIOERST_Pos                 (21U)                         
 #define RCC_AHBRSTR_GPIOERST_Msk                 (0x1U << RCC_AHBRSTR_GPIOERST_Pos) /*!< 0x00200000 */
-#define RCC_AHBRSTR_GPIOERST                     RCC_AHBRSTR_GPIOERST_Msk      /*!< GPIOE clock reset */
+#define RCC_AHBRSTR_GPIOERST                     RCC_AHBRSTR_GPIOERST_Msk      /*!< GPIOE reset */
 #define RCC_AHBRSTR_GPIOFRST_Pos                 (22U)                         
 #define RCC_AHBRSTR_GPIOFRST_Msk                 (0x1U << RCC_AHBRSTR_GPIOFRST_Pos) /*!< 0x00400000 */
-#define RCC_AHBRSTR_GPIOFRST                     RCC_AHBRSTR_GPIOFRST_Msk      /*!< GPIOF clock reset */
+#define RCC_AHBRSTR_GPIOFRST                     RCC_AHBRSTR_GPIOFRST_Msk      /*!< GPIOF reset */
 #define RCC_AHBRSTR_TSCRST_Pos                   (24U)                         
 #define RCC_AHBRSTR_TSCRST_Msk                   (0x1U << RCC_AHBRSTR_TSCRST_Pos) /*!< 0x01000000 */
-#define RCC_AHBRSTR_TSCRST                       RCC_AHBRSTR_TSCRST_Msk        /*!< TS clock reset */
+#define RCC_AHBRSTR_TSCRST                       RCC_AHBRSTR_TSCRST_Msk        /*!< TS reset */
 
 /* Old Bit definition maintained for legacy purpose */
-#define  RCC_AHBRSTR_TSRST                   RCC_AHBRSTR_TSCRST         /*!< TS clock reset */
+#define  RCC_AHBRSTR_TSRST                   RCC_AHBRSTR_TSCRST         /*!< TS reset */
 
 /*******************  Bit definition for RCC_CFGR2 register  *****************/
 /*!< PREDIV configuration */
@@ -10291,9 +10337,9 @@ typedef struct {
 #define RTC_CR_COSEL_Pos             (19U)                                     
 #define RTC_CR_COSEL_Msk             (0x1U << RTC_CR_COSEL_Pos)                /*!< 0x00080000 */
 #define RTC_CR_COSEL                 RTC_CR_COSEL_Msk                          
-#define RTC_CR_BCK_Pos               (18U)                                     
-#define RTC_CR_BCK_Msk               (0x1U << RTC_CR_BCK_Pos)                  /*!< 0x00040000 */
-#define RTC_CR_BCK                   RTC_CR_BCK_Msk                            
+#define RTC_CR_BKP_Pos               (18U)                                     
+#define RTC_CR_BKP_Msk               (0x1U << RTC_CR_BKP_Pos)                  /*!< 0x00040000 */
+#define RTC_CR_BKP                   RTC_CR_BKP_Msk                            
 #define RTC_CR_SUB1H_Pos             (17U)                                     
 #define RTC_CR_SUB1H_Msk             (0x1U << RTC_CR_SUB1H_Pos)                /*!< 0x00020000 */
 #define RTC_CR_SUB1H                 RTC_CR_SUB1H_Msk                          
@@ -10336,6 +10382,11 @@ typedef struct {
 #define RTC_CR_WUCKSEL_0             (0x1U << RTC_CR_WUCKSEL_Pos)              /*!< 0x00000001 */
 #define RTC_CR_WUCKSEL_1             (0x2U << RTC_CR_WUCKSEL_Pos)              /*!< 0x00000002 */
 #define RTC_CR_WUCKSEL_2             (0x4U << RTC_CR_WUCKSEL_Pos)              /*!< 0x00000004 */
+
+/* Legacy defines */
+#define RTC_CR_BCK_Pos               RTC_CR_BKP_Pos
+#define RTC_CR_BCK_Msk               RTC_CR_BKP_Msk
+#define RTC_CR_BCK                   RTC_CR_BKP
 
 /********************  Bits definition for RTC_ISR register  *****************/
 #define RTC_ISR_RECALPF_Pos          (16U)                                     
@@ -13174,6 +13225,9 @@ typedef struct {
 
 #define IS_TIM_REMAP_INSTANCE(INSTANCE)\
   ((INSTANCE) == TIM14)
+
+#define IS_TIM_ADVANCED_INSTANCE(INSTANCE)\
+  ((INSTANCE) == TIM1)
 
 /****************************** TSC Instances *********************************/
 #define IS_TSC_ALL_INSTANCE(INSTANCE) ((INSTANCE) == TSC)

@@ -1938,7 +1938,7 @@ typedef struct {
     __IO uint32_t MACHTLR;
     union {
         struct {
-            __IO uint32_t MB : 1;                           /* MII busy */
+            __IO uint32_t MB : 1;                           /* MII busy  */
             __IO uint32_t MW : 1;                           /* MII write */
             __IO uint32_t CR : 3;                           /* CR clock range: 6 cases */
                  uint32_t __RESERVED0 : 1;
@@ -2346,7 +2346,7 @@ typedef struct {
     __IO uint32_t MACHTHR[32];
     __IO uint32_t MACHTLR[32];
     struct {
-        __IO uint32_t MB;                                   /* MII busy */
+        __IO uint32_t MB;                                   /* MII busy  */
         __IO uint32_t MW;                                   /* MII write */
         __IO uint32_t CR[3];                                /* CR clock range: 6 cases */
              uint32_t __RESERVED0;
@@ -3189,7 +3189,9 @@ typedef struct {
     union {
         struct {
                  uint32_t __RESERVED0 : 16;
-            __IO uint32_t ADCxDC2 : 3;                      /*!< Refer to AN4073 on how to use this bit  */
+            __IO uint32_t ADC1DC2 : 1;                      /*!< Refer to AN4073 on how to use this bit  */
+            __IO uint32_t ADC2DC2 : 1;                      /*!< Refer to AN4073 on how to use this bit  */
+            __IO uint32_t ADC3DC2 : 1;                      /*!< Refer to AN4073 on how to use this bit  */
                  uint32_t __RESERVED1 : 4;
             __IO uint32_t MII_RMII_SEL : 1;                 /*!<Ethernet PHY interface selection */
                  uint32_t __RESERVED2 : 8;
@@ -3221,7 +3223,9 @@ typedef struct {
     } MEMRMP;                                               /*!< SYSCFG memory remap register,                      Address offset: 0x00      */
     struct {
              uint32_t __RESERVED0[16];
-        __IO uint32_t ADCxDC2[3];                           /*!< Refer to AN4073 on how to use this bit  */
+        __IO uint32_t ADC1DC2;                              /*!< Refer to AN4073 on how to use this bit  */
+        __IO uint32_t ADC2DC2;                              /*!< Refer to AN4073 on how to use this bit  */
+        __IO uint32_t ADC3DC2;                              /*!< Refer to AN4073 on how to use this bit  */
              uint32_t __RESERVED1[4];
         __IO uint32_t MII_RMII_SEL;                         /*!<Ethernet PHY interface selection */
              uint32_t __RESERVED2[8];
@@ -4760,7 +4764,7 @@ typedef struct {
         __IO uint32_t w;
     } ALRMBSSR;                                             /*!< RTC alarm B sub second register,                          Address offset: 0x48 */
          uint32_t __RESERVED0;
-    __IO uint32_t BKPR[16];                                 /*!< RTC backup registers,                                     Address offset: 0x50-0x8C */
+    __IO uint32_t BKPR[20];                                 /*!< RTC backup registers,                                     Address offset: 0x50-0x8C */
 } RTC_TypeDef;
 
 
@@ -4944,7 +4948,7 @@ typedef struct {
              uint32_t __RESERVED1[4];
     } ALRMBSSR;                                             /*!< RTC alarm B sub second register,                          Address offset: 0x48 */
          uint32_t __RESERVED0[32];
-    __IO uint32_t BKPR[16][32];                             /*!< RTC backup registers,                                     Address offset: 0x50-0x8C */
+    __IO uint32_t BKPR[20][32];                             /*!< RTC backup registers,                                     Address offset: 0x50-0x8C */
 } RTC_BitBand_TypeDef;
 
 
@@ -5871,7 +5875,7 @@ typedef struct {
             __IO uint32_t IDLEIE : 1;                       /*!<IDLE Interrupt Enable                  */
             __IO uint32_t RXNEIE : 1;                       /*!<RXNE Interrupt Enable                  */
             __IO uint32_t TCIE : 1;                         /*!<Transmission Complete Interrupt Enable */
-            __IO uint32_t TXEIE : 1;                        /*!<PE Interrupt Enable                    */
+            __IO uint32_t TXEIE : 1;                        /*!<TXE Interrupt Enable                   */
             __IO uint32_t PEIE : 1;                         /*!<PE Interrupt Enable                    */
             __IO uint32_t PS : 1;                           /*!<Parity Selection                       */
             __IO uint32_t PCE : 1;                          /*!<Parity Control Enable                  */
@@ -5958,7 +5962,7 @@ typedef struct {
         __IO uint32_t IDLEIE;                               /*!<IDLE Interrupt Enable                  */
         __IO uint32_t RXNEIE;                               /*!<RXNE Interrupt Enable                  */
         __IO uint32_t TCIE;                                 /*!<Transmission Complete Interrupt Enable */
-        __IO uint32_t TXEIE;                                /*!<PE Interrupt Enable                    */
+        __IO uint32_t TXEIE;                                /*!<TXE Interrupt Enable                   */
         __IO uint32_t PEIE;                                 /*!<PE Interrupt Enable                    */
         __IO uint32_t PS;                                   /*!<Parity Selection                       */
         __IO uint32_t PCE;                                  /*!<Parity Control Enable                  */
@@ -6097,34 +6101,34 @@ typedef struct {
             __IO uint32_t SRQSCS : 1;                       /*!< Session request success */
             __IO uint32_t SRQ : 1;                          /*!< Session request */
                  uint32_t __RESERVED0 : 6;
-            __IO uint32_t HNGSCS : 1;                       /*!< Host negotiation success */
+            __IO uint32_t HNGSCS : 1;                       /*!< Host set HNP enable */
             __IO uint32_t HNPRQ : 1;                        /*!< HNP request */
             __IO uint32_t HSHNPEN : 1;                      /*!< Host set HNP enable */
             __IO uint32_t DHNPEN : 1;                       /*!< Device HNP enabled */
                  uint32_t __RESERVED1 : 4;
             __IO uint32_t CIDSTS : 1;                       /*!< Connector ID status */
             __IO uint32_t DBCT : 1;                         /*!< Long/short debounce time */
-            __IO uint32_t ASVLD : 1;                        /*!< A-session valid */
+            __IO uint32_t ASVLD : 1;                        /*!< A-session valid  */
             __IO uint32_t BSVLD : 1;                        /*!< B-session valid */
                  uint32_t __RESERVED2 : 12;
         } b;
         __IO uint32_t w;
-    } GOTGCTL;                                              /*!<  USB_OTG Control and Status Register    Address offset : 0x00      */
+    } GOTGCTL;                                              /*!< USB_OTG Control and Status Register          000h */
     union {
         struct {
                  uint32_t __RESERVED0 : 2;
-            __IO uint32_t SEDET : 1;                        /*!< Session end detected */
+            __IO uint32_t SEDET : 1;                        /*!< Session end detected                   */
                  uint32_t __RESERVED1 : 5;
-            __IO uint32_t SRSSCHG : 1;                      /*!< Session request success status change */
+            __IO uint32_t SRSSCHG : 1;                      /*!< Session request success status change  */
             __IO uint32_t HNSSCHG : 1;                      /*!< Host negotiation success status change */
                  uint32_t __RESERVED2 : 7;
-            __IO uint32_t HNGDET : 1;                       /*!< Host negotiation detected */
-            __IO uint32_t ADTOCHG : 1;                      /*!< A-device timeout change */
-            __IO uint32_t DBCDNE : 1;                       /*!< Debounce done */
+            __IO uint32_t HNGDET : 1;                       /*!< Host negotiation detected              */
+            __IO uint32_t ADTOCHG : 1;                      /*!< A-device timeout change                */
+            __IO uint32_t DBCDNE : 1;                       /*!< Debounce done                          */
                  uint32_t __RESERVED3 : 12;
         } b;
         __IO uint32_t w;
-    } GOTGINT;                                              /*!<  USB_OTG Interrupt Register             Address offset : 0x04      */
+    } GOTGINT;                                              /*!< USB_OTG Interrupt Register                   004h */
     union {
         struct {
             __IO uint32_t GINT : 1;                         /*!< Global interrupt mask */
@@ -6136,7 +6140,7 @@ typedef struct {
                  uint32_t __RESERVED1 : 23;
         } b;
         __IO uint32_t w;
-    } GAHBCFG;                                              /*!<  Core AHB Configuration Register        Address offset : 0x08      */
+    } GAHBCFG;                                              /*!< Core AHB Configuration Register              008h */
     union {
         struct {
             __IO uint32_t TOCAL : 3;                        /*!< FS timeout calibration */
@@ -6149,108 +6153,108 @@ typedef struct {
                  uint32_t __RESERVED2 : 1;
             __IO uint32_t PHYLPCS : 1;                      /*!< PHY Low-power clock select */
                  uint32_t __RESERVED3 : 1;
-            __IO uint32_t ULPIFSLS : 1;                     /*!< ULPI FS/LS select */
-            __IO uint32_t ULPIAR : 1;                       /*!< ULPI Auto-resume */
-            __IO uint32_t ULPICSM : 1;                      /*!< ULPI Clock SuspendM */
-            __IO uint32_t ULPIEVBUSD : 1;                   /*!< ULPI External VBUS Drive */
-            __IO uint32_t ULPIEVBUSI : 1;                   /*!< ULPI external VBUS indicator */
+            __IO uint32_t ULPIFSLS : 1;                     /*!< ULPI FS/LS select               */
+            __IO uint32_t ULPIAR : 1;                       /*!< ULPI Auto-resume                */
+            __IO uint32_t ULPICSM : 1;                      /*!< ULPI Clock SuspendM             */
+            __IO uint32_t ULPIEVBUSD : 1;                   /*!< ULPI External VBUS Drive        */
+            __IO uint32_t ULPIEVBUSI : 1;                   /*!< ULPI external VBUS indicator    */
             __IO uint32_t TSDPS : 1;                        /*!< TermSel DLine pulsing selection */
-            __IO uint32_t PCCI : 1;                         /*!< Indicator complement */
-            __IO uint32_t PTCI : 1;                         /*!< Indicator pass through */
-            __IO uint32_t ULPIIPD : 1;                      /*!< ULPI interface protect disable */
+            __IO uint32_t PCCI : 1;                         /*!< Indicator complement            */
+            __IO uint32_t PTCI : 1;                         /*!< Indicator pass through          */
+            __IO uint32_t ULPIIPD : 1;                      /*!< ULPI interface protect disable  */
                  uint32_t __RESERVED4 : 3;
-            __IO uint32_t FHMOD : 1;                        /*!< Forced host mode */
-            __IO uint32_t FDMOD : 1;                        /*!< Forced peripheral mode */
-            __IO uint32_t CTXPKT : 1;                       /*!< Corrupt Tx packet */
+            __IO uint32_t FHMOD : 1;                        /*!< Forced host mode                */
+            __IO uint32_t FDMOD : 1;                        /*!< Forced peripheral mode          */
+            __IO uint32_t CTXPKT : 1;                       /*!< Corrupt Tx packet               */
         } b;
         __IO uint32_t w;
-    } GUSBCFG;                                              /*!<  Core USB Configuration Register        Address offset : 0x0C      */
+    } GUSBCFG;                                              /*!< Core USB Configuration Register              00Ch */
     union {
         struct {
-            __IO uint32_t CSRST : 1;                        /*!< Core soft reset */
-            __IO uint32_t HSRST : 1;                        /*!< HCLK soft reset */
+            __IO uint32_t CSRST : 1;                        /*!< Core soft reset          */
+            __IO uint32_t HSRST : 1;                        /*!< HCLK soft reset          */
             __IO uint32_t FCRST : 1;                        /*!< Host frame counter reset */
                  uint32_t __RESERVED0 : 1;
-            __IO uint32_t RXFFLSH : 1;                      /*!< RxFIFO flush */
-            __IO uint32_t TXFFLSH : 1;                      /*!< TxFIFO flush */
+            __IO uint32_t RXFFLSH : 1;                      /*!< RxFIFO flush             */
+            __IO uint32_t TXFFLSH : 1;                      /*!< TxFIFO flush             */
             __IO uint32_t TXFNUM : 5;                       /*!< TxFIFO number */
                  uint32_t __RESERVED1 : 19;
             __IO uint32_t DMAREQ : 1;                       /*!< DMA request signal */
             __IO uint32_t AHBIDL : 1;                       /*!< AHB master idle */
         } b;
         __IO uint32_t w;
-    } GRSTCTL;                                              /*!<  Core Reset Register                    Address offset : 0x10      */
+    } GRSTCTL;                                              /*!< Core Reset Register                          010h */
     union {
         struct {
-            __IO uint32_t CMOD : 1;                         /*!< Current mode of operation */
-            __IO uint32_t MMIS : 1;                         /*!< Mode mismatch interrupt */
-            __IO uint32_t OTGINT : 1;                       /*!< OTG interrupt */
-            __IO uint32_t SOF : 1;                          /*!< Start of frame */
-            __IO uint32_t RXFLVL : 1;                       /*!< RxFIFO nonempty */
-            __IO uint32_t NPTXFE : 1;                       /*!< Nonperiodic TxFIFO empty */
-            __IO uint32_t GINAKEFF : 1;                     /*!< Global IN nonperiodic NAK effective */
-            __IO uint32_t BOUTNAKEFF : 1;                   /*!< Global OUT NAK effective */
+            __IO uint32_t CMOD : 1;                         /*!< Current mode of operation                      */
+            __IO uint32_t MMIS : 1;                         /*!< Mode mismatch interrupt                        */
+            __IO uint32_t OTGINT : 1;                       /*!< OTG interrupt                                  */
+            __IO uint32_t SOF : 1;                          /*!< Start of frame                                 */
+            __IO uint32_t RXFLVL : 1;                       /*!< RxFIFO nonempty                                */
+            __IO uint32_t NPTXFE : 1;                       /*!< Nonperiodic TxFIFO empty                       */
+            __IO uint32_t GINAKEFF : 1;                     /*!< Global IN nonperiodic NAK effective            */
+            __IO uint32_t BOUTNAKEFF : 1;                   /*!< Global OUT NAK effective                       */
                  uint32_t __RESERVED0 : 2;
-            __IO uint32_t ESUSP : 1;                        /*!< Early suspend */
-            __IO uint32_t USBSUSP : 1;                      /*!< USB suspend */
-            __IO uint32_t USBRST : 1;                       /*!< USB reset */
-            __IO uint32_t ENUMDNE : 1;                      /*!< Enumeration done */
-            __IO uint32_t ISOODRP : 1;                      /*!< Isochronous OUT packet dropped interrupt */
-            __IO uint32_t EOPF : 1;                         /*!< End of periodic frame interrupt */
+            __IO uint32_t ESUSP : 1;                        /*!< Early suspend                                  */
+            __IO uint32_t USBSUSP : 1;                      /*!< USB suspend                                    */
+            __IO uint32_t USBRST : 1;                       /*!< USB reset                                      */
+            __IO uint32_t ENUMDNE : 1;                      /*!< Enumeration done                               */
+            __IO uint32_t ISOODRP : 1;                      /*!< Isochronous OUT packet dropped interrupt       */
+            __IO uint32_t EOPF : 1;                         /*!< End of periodic frame interrupt                */
                  uint32_t __RESERVED1 : 2;
-            __IO uint32_t IEPINT : 1;                       /*!< IN endpoint interrupt */
-            __IO uint32_t OEPINT : 1;                       /*!< OUT endpoint interrupt */
-            __IO uint32_t IISOIXFR : 1;                     /*!< Incomplete isochronous IN transfer */
-            __IO uint32_t PXFR_INCOMPISOOUT : 1;            /*!< Incomplete periodic transfer */
-            __IO uint32_t DATAFSUSP : 1;                    /*!< Data fetch suspended */
+            __IO uint32_t IEPINT : 1;                       /*!< IN endpoint interrupt                          */
+            __IO uint32_t OEPINT : 1;                       /*!< OUT endpoint interrupt                         */
+            __IO uint32_t IISOIXFR : 1;                     /*!< Incomplete isochronous IN transfer             */
+            __IO uint32_t PXFR_INCOMPISOOUT : 1;            /*!< Incomplete periodic transfer                   */
+            __IO uint32_t DATAFSUSP : 1;                    /*!< Data fetch suspended                           */
                  uint32_t __RESERVED2 : 1;
-            __IO uint32_t HPRTINT : 1;                      /*!< Host port interrupt */
-            __IO uint32_t HCINT : 1;                        /*!< Host channels interrupt */
-            __IO uint32_t PTXFE : 1;                        /*!< Periodic TxFIFO empty */
+            __IO uint32_t HPRTINT : 1;                      /*!< Host port interrupt                            */
+            __IO uint32_t HCINT : 1;                        /*!< Host channels interrupt                        */
+            __IO uint32_t PTXFE : 1;                        /*!< Periodic TxFIFO empty                          */
                  uint32_t __RESERVED3 : 1;
-            __IO uint32_t CIDSCHG : 1;                      /*!< Connector ID status change */
-            __IO uint32_t DISCINT : 1;                      /*!< Disconnect detected interrupt */
+            __IO uint32_t CIDSCHG : 1;                      /*!< Connector ID status change                     */
+            __IO uint32_t DISCINT : 1;                      /*!< Disconnect detected interrupt                  */
             __IO uint32_t SRQINT : 1;                       /*!< Session request/new session detected interrupt */
-            __IO uint32_t WKUINT : 1;                       /*!< Resume/remote wakeup detected interrupt */
+            __IO uint32_t WKUINT : 1;                       /*!< Resume/remote wakeup detected interrupt        */
         } b;
         __IO uint32_t w;
-    } GINTSTS;                                              /*!<  Core Interrupt Register                Address offset : 0x14      */
+    } GINTSTS;                                              /*!< Core Interrupt Register                      014h */
     union {
         struct {
                  uint32_t __RESERVED0 : 1;
-            __IO uint32_t MMISM : 1;                        /*!< Mode mismatch interrupt mask */
-            __IO uint32_t OTGINT : 1;                       /*!< OTG interrupt mask */
-            __IO uint32_t SOFM : 1;                         /*!< Start of frame mask */
-            __IO uint32_t RXFLVLM : 1;                      /*!< Receive FIFO nonempty mask */
-            __IO uint32_t NPTXFEM : 1;                      /*!< Nonperiodic TxFIFO empty mask */
-            __IO uint32_t GINAKEFFM : 1;                    /*!< Global nonperiodic IN NAK effective mask */
-            __IO uint32_t GONAKEFFM : 1;                    /*!< Global OUT NAK effective mask */
+            __IO uint32_t MMISM : 1;                        /*!< Mode mismatch interrupt mask                        */
+            __IO uint32_t OTGINT : 1;                       /*!< OTG interrupt mask                                  */
+            __IO uint32_t SOFM : 1;                         /*!< Start of frame mask                                 */
+            __IO uint32_t RXFLVLM : 1;                      /*!< Receive FIFO nonempty mask                          */
+            __IO uint32_t NPTXFEM : 1;                      /*!< Nonperiodic TxFIFO empty mask                       */
+            __IO uint32_t GINAKEFFM : 1;                    /*!< Global nonperiodic IN NAK effective mask            */
+            __IO uint32_t GONAKEFFM : 1;                    /*!< Global OUT NAK effective mask                       */
                  uint32_t __RESERVED1 : 2;
-            __IO uint32_t ESUSPM : 1;                       /*!< Early suspend mask */
-            __IO uint32_t USBSUSPM : 1;                     /*!< USB suspend mask */
-            __IO uint32_t USBRST : 1;                       /*!< USB reset mask */
-            __IO uint32_t ENUMDNEM : 1;                     /*!< Enumeration done mask */
-            __IO uint32_t ISOODRPM : 1;                     /*!< Isochronous OUT packet dropped interrupt mask */
-            __IO uint32_t EOPFM : 1;                        /*!< End of periodic frame interrupt mask */
+            __IO uint32_t ESUSPM : 1;                       /*!< Early suspend mask                                  */
+            __IO uint32_t USBSUSPM : 1;                     /*!< USB suspend mask                                    */
+            __IO uint32_t USBRST : 1;                       /*!< USB reset mask                                      */
+            __IO uint32_t ENUMDNEM : 1;                     /*!< Enumeration done mask                               */
+            __IO uint32_t ISOODRPM : 1;                     /*!< Isochronous OUT packet dropped interrupt mask       */
+            __IO uint32_t EOPFM : 1;                        /*!< End of periodic frame interrupt mask                */
                  uint32_t __RESERVED2 : 1;
-            __IO uint32_t EPMISM : 1;                       /*!< Endpoint mismatch interrupt mask */
-            __IO uint32_t IEPINT : 1;                       /*!< IN endpoints interrupt mask */
-            __IO uint32_t OEPINT : 1;                       /*!< OUT endpoints interrupt mask */
-            __IO uint32_t IISOIXFRM : 1;                    /*!< Incomplete isochronous IN transfer mask */
-            __IO uint32_t PXFRM_IISOOXFRM : 1;              /*!< Incomplete periodic transfer mask */
-            __IO uint32_t FSUSPM : 1;                       /*!< Data fetch suspended mask */
+            __IO uint32_t EPMISM : 1;                       /*!< Endpoint mismatch interrupt mask                    */
+            __IO uint32_t IEPINT : 1;                       /*!< IN endpoints interrupt mask                         */
+            __IO uint32_t OEPINT : 1;                       /*!< OUT endpoints interrupt mask                        */
+            __IO uint32_t IISOIXFRM : 1;                    /*!< Incomplete isochronous IN transfer mask             */
+            __IO uint32_t PXFRM_IISOOXFRM : 1;              /*!< Incomplete periodic transfer mask                   */
+            __IO uint32_t FSUSPM : 1;                       /*!< Data fetch suspended mask                           */
                  uint32_t __RESERVED3 : 1;
-            __IO uint32_t PRTIM : 1;                        /*!< Host port interrupt mask */
-            __IO uint32_t HCIM : 1;                         /*!< Host channels interrupt mask */
-            __IO uint32_t PTXFEM : 1;                       /*!< Periodic TxFIFO empty mask */
+            __IO uint32_t PRTIM : 1;                        /*!< Host port interrupt mask                            */
+            __IO uint32_t HCIM : 1;                         /*!< Host channels interrupt mask                        */
+            __IO uint32_t PTXFEM : 1;                       /*!< Periodic TxFIFO empty mask                          */
                  uint32_t __RESERVED4 : 1;
-            __IO uint32_t CIDSCHGM : 1;                     /*!< Connector ID status change mask */
-            __IO uint32_t DISCINT : 1;                      /*!< Disconnect detected interrupt mask */
+            __IO uint32_t CIDSCHGM : 1;                     /*!< Connector ID status change mask                     */
+            __IO uint32_t DISCINT : 1;                      /*!< Disconnect detected interrupt mask                  */
             __IO uint32_t SRQIM : 1;                        /*!< Session request/new session detected interrupt mask */
-            __IO uint32_t WUIM : 1;                         /*!< Resume/remote wakeup detected interrupt mask */
+            __IO uint32_t WUIM : 1;                         /*!< Resume/remote wakeup detected interrupt mask        */
         } b;
         __IO uint32_t w;
-    } GINTMSK;                                              /*!<  Core Interrupt Mask Register           Address offset : 0x18      */
+    } GINTMSK;                                              /*!< Core Interrupt Mask Register                 018h */
     union {
         struct {
             __IO uint32_t CHNUM_EPNUM : 4;
@@ -6261,26 +6265,26 @@ typedef struct {
                  uint32_t __RESERVED0 : 7;
         } b;
         __IO uint32_t w;
-    } GRXSTSR;                                              /*!<  Receive Sts Q Read Register            Address offset : 0x1C      */
+    } GRXSTSR;                                              /*!< Receive Sts Q Read Register                  01Ch */
     union {
         struct {
-            __IO uint32_t CHNUM_EPNUM : 4;
-            __IO uint32_t BCNT : 11;
-            __IO uint32_t DPID : 2;
-            __IO uint32_t PKTSTS : 4;
+            __IO uint32_t CHNUM_EPNUM : 4;                  /*!< IN EP interrupt mask bits  */
+            __IO uint32_t BCNT : 11;                        /*!< OUT EP interrupt mask bits */
+            __IO uint32_t DPID : 2;                         /*!< OUT EP interrupt mask bits */
+            __IO uint32_t PKTSTS : 4;                       /*!< OUT EP interrupt mask bits */
             __IO uint32_t FRMNUM : 4;
                  uint32_t __RESERVED0 : 7;
         } b;
         __IO uint32_t w;
-    } GRXSTSP;                                              /*!<  Receive Sts Q Read & POP Register      Address offset : 0x20      */
-    __IO uint32_t GRXFSIZ;                                  /*!<  Receive FIFO Size Register             Address offset : 0x24      */
+    } GRXSTSP;                                              /*!< Receive Sts Q Read & POP Register            020h */
+    __IO uint32_t GRXFSIZ;                                  /*!< Receive FIFO Size Register                   024h */
     union {
         struct {
-            __IO uint32_t TXFSA : 16;
-            __IO uint32_t TXFD : 16;
+            __IO uint32_t TXFSA : 16;                       /*!< IN endpoint FIFOx transmit RAM start address */
+            __IO uint32_t TXFD : 16;                        /*!< IN endpoint TxFIFO depth */
         } b;
         __IO uint32_t w;
-    } DIEPTXF0_HNPTXFSIZ;                                   /*!<  EP0 / Non Periodic Tx FIFO Size Register Address offset : 0x28    */
+    } DIEPTXF0_HNPTXFSIZ;                                   /*!< EP0 / Non Periodic Tx FIFO Size Register     028h */
     union {
         struct {
             __IO uint32_t NPTXFSAV : 16;
@@ -6289,53 +6293,37 @@ typedef struct {
                  uint32_t __RESERVED0 : 1;
         } b;
         __IO uint32_t w;
-    } HNPTXSTS;                                             /*!<  Non Periodic Tx FIFO/Queue Sts reg     Address offset : 0x2C      */
-    union {
-        struct {
-            __IO uint32_t RWDATA : 8;
-            __IO uint32_t REGADDR : 8;
-            __IO uint32_t ADDR : 7;
-            __IO uint32_t I2CEN : 1;
-            __IO uint32_t ACK : 1;
-                 uint32_t __RESERVED0 : 1;
-            __IO uint32_t I2CDEVADR : 2;
-            __IO uint32_t I2CDATSE0 : 1;
-                 uint32_t __RESERVED1 : 1;
-            __IO uint32_t RW : 1;
-            __IO uint32_t BSYDNE : 1;
-        } b;
-        __IO uint32_t w;
-    } GI2CCTL;                                              /*!<  I2C access register                    Address offset : 0x30      */
-         uint32_t __RESERVED0;
+    } HNPTXSTS;                                             /*!< Non Periodic Tx FIFO/Queue Sts reg           02Ch */
+         uint32_t __RESERVED0[2];
     union {
         struct {
                  uint32_t __RESERVED0 : 16;
             __IO uint32_t PWRDWN : 1;                       /*!< Power down */
-            __IO uint32_t I2CPADEN : 1;                     /*!< Enable I2C bus connection for the external I2C PHY interface */
+                 uint32_t __RESERVED1 : 1;
             __IO uint32_t VBUSASEN : 1;                     /*!< Enable the VBUS sensing device */
             __IO uint32_t VBUSBSEN : 1;                     /*!< Enable the VBUS sensing device */
             __IO uint32_t SOFOUTEN : 1;                     /*!< SOF output enable */
-            __IO uint32_t NOVBUSSENS : 1;                   /*!< VBUS sensing disable option */
-                 uint32_t __RESERVED1 : 10;
+            __IO uint32_t NOVBUSSENS : 1;                   /*!< VBUS sensing disable option*/
+                 uint32_t __RESERVED2 : 10;
         } b;
         __IO uint32_t w;
-    } GCCFG;                                                /*!<  General Purpose IO Register            Address offset : 0x38      */
-    __IO uint32_t CID;                                      /*!< User ID Register                        Address offset : 0x3C      */
+    } GCCFG;                                                /*!< General Purpose IO Register                  038h */
+    __IO uint32_t CID;                                      /*!< User ID Register                             03Ch */
          uint32_t __RESERVED1[48];
     union {
         struct {
-            __IO uint32_t PTXSA : 16;                       /*!< Host periodic TxFIFO start address */
-            __IO uint32_t PTXFD : 16;                       /*!< Host periodic TxFIFO depth */
+            __IO uint32_t PTXSA : 16;                       /*!< Host periodic TxFIFO start address            */
+            __IO uint32_t PTXFD : 16;                       /*!< Host periodic TxFIFO depth                    */
         } b;
         __IO uint32_t w;
-    } HPTXFSIZ;                                             /*!< Host Periodic Tx FIFO Size Reg            Address offset : 0x100 */
+    } HPTXFSIZ;                                             /*!< Host Periodic Tx FIFO Size Reg               100h */
     union {
         struct {
             __IO uint32_t INEPTXSA : 16;                    /*!< IN endpoint FIFOx transmit RAM start address */
             __IO uint32_t INEPTXFD : 16;                    /*!< IN endpoint TxFIFO depth */
         } b;
         __IO uint32_t w;
-    } DIEPTXF[7];                                           /*!< Periodic Transmit FIFO                    Address offset : 0x104-0x144 */
+    } DIEPTXF[7];                                           /*!< Periodic Transmit FIFO                       104h-144h */
 } USB_OTG_GlobalTypeDef;
 
 
@@ -6356,84 +6344,84 @@ typedef struct {
                  uint32_t __RESERVED2 : 6;
         } b;
         __IO uint32_t w;
-    } DCFG;                                                 /*!< dev Configuration Register   Address offset : 0x800 */
+    } DCFG;                                                 /*!< dev Configuration Register   800h */
     union {
         struct {
             __IO uint32_t RWUSIG : 1;                       /*!< Remote wakeup signaling */
-            __IO uint32_t SDIS : 1;                         /*!< Soft disconnect */
-            __IO uint32_t GINSTS : 1;                       /*!< Global IN NAK status */
-            __IO uint32_t GONSTS : 1;                       /*!< Global OUT NAK status */
+            __IO uint32_t SDIS : 1;                         /*!< Soft disconnect         */
+            __IO uint32_t GINSTS : 1;                       /*!< Global IN NAK status    */
+            __IO uint32_t GONSTS : 1;                       /*!< Global OUT NAK status   */
             __IO uint32_t TCTL : 3;                         /*!< Test control */
-            __IO uint32_t SGINAK : 1;                       /*!< Set global IN NAK */
-            __IO uint32_t CGINAK : 1;                       /*!< Clear global IN NAK */
-            __IO uint32_t SGONAK : 1;                       /*!< Set global OUT NAK */
-            __IO uint32_t CGONAK : 1;                       /*!< Clear global OUT NAK */
+            __IO uint32_t SGINAK : 1;                       /*!< Set global IN NAK         */
+            __IO uint32_t CGINAK : 1;                       /*!< Clear global IN NAK       */
+            __IO uint32_t SGONAK : 1;                       /*!< Set global OUT NAK        */
+            __IO uint32_t CGONAK : 1;                       /*!< Clear global OUT NAK      */
             __IO uint32_t POPRGDNE : 1;                     /*!< Power-on programming done */
                  uint32_t __RESERVED0 : 20;
         } b;
         __IO uint32_t w;
-    } DCTL;                                                 /*!< dev Control Register         Address offset : 0x804 */
+    } DCTL;                                                 /*!< dev Control Register         804h */
     union {
         struct {
-            __IO uint32_t SUSPSTS : 1;                      /*!< Suspend status */
+            __IO uint32_t SUSPSTS : 1;                      /*!< Suspend status   */
             __IO uint32_t ENUMSPD : 2;                      /*!< Enumerated speed */
-            __IO uint32_t EERR : 1;                         /*!< Erratic error */
+            __IO uint32_t EERR : 1;                         /*!< Erratic error     */
                  uint32_t __RESERVED0 : 4;
             __IO uint32_t FNSOF : 14;                       /*!< Frame number of the received SOF */
                  uint32_t __RESERVED1 : 10;
         } b;
         __IO uint32_t w;
-    } DSTS;                                                 /*!< dev Status Register (RO)     Address offset : 0x808 */
+    } DSTS;                                                 /*!< dev Status Register (RO)     808h */
          uint32_t __RESERVED0;
     union {
         struct {
-            __IO uint32_t XFRCM : 1;                        /*!< Transfer completed interrupt mask */
-            __IO uint32_t EPDM : 1;                         /*!< Endpoint disabled interrupt mask */
+            __IO uint32_t XFRCM : 1;                        /*!< Transfer completed interrupt mask                 */
+            __IO uint32_t EPDM : 1;                         /*!< Endpoint disabled interrupt mask                  */
                  uint32_t __RESERVED0 : 1;
             __IO uint32_t TOM : 1;                          /*!< Timeout condition mask (nonisochronous endpoints) */
-            __IO uint32_t ITTXFEMSK : 1;                    /*!< IN token received when TxFIFO empty mask */
-            __IO uint32_t INEPNMM : 1;                      /*!< IN token received with EP mismatch mask */
-            __IO uint32_t INEPNEM : 1;                      /*!< IN endpoint NAK effective mask */
+            __IO uint32_t ITTXFEMSK : 1;                    /*!< IN token received when TxFIFO empty mask          */
+            __IO uint32_t INEPNMM : 1;                      /*!< IN token received with EP mismatch mask           */
+            __IO uint32_t INEPNEM : 1;                      /*!< IN endpoint NAK effective mask                    */
                  uint32_t __RESERVED1 : 1;
-            __IO uint32_t TXFURM : 1;                       /*!< FIFO underrun mask */
-            __IO uint32_t BIM : 1;                          /*!< BNA interrupt mask */
+            __IO uint32_t TXFURM : 1;                       /*!< FIFO underrun mask                                */
+            __IO uint32_t BIM : 1;                          /*!< BNA interrupt mask                                */
                  uint32_t __RESERVED2 : 22;
         } b;
         __IO uint32_t w;
-    } DIEPMSK;                                              /*!< dev IN Endpoint Mask        Address offset : 0x810 */
+    } DIEPMSK;                                              /*!< dev IN Endpoint Mask         810h */
     union {
         struct {
             __IO uint32_t XFRCM : 1;                        /*!< Transfer completed interrupt mask */
-            __IO uint32_t EPDM : 1;                         /*!< Endpoint disabled interrupt mask */
+            __IO uint32_t EPDM : 1;                         /*!< Endpoint disabled interrupt mask               */
                  uint32_t __RESERVED0 : 1;
-            __IO uint32_t STUPM : 1;                        /*!< SETUP phase done mask */
+            __IO uint32_t STUPM : 1;                        /*!< SETUP phase done mask                          */
             __IO uint32_t OTEPDM : 1;                       /*!< OUT token received when endpoint disabled mask */
                  uint32_t __RESERVED1 : 1;
             __IO uint32_t B2BSTUP : 1;                      /*!< Back-to-back SETUP packets received mask */
                  uint32_t __RESERVED2 : 1;
-            __IO uint32_t OPEM : 1;                         /*!< OUT packet error mask */
-            __IO uint32_t BOIM : 1;                         /*!< BNA interrupt mask */
+            __IO uint32_t OPEM : 1;                         /*!< OUT packet error mask                          */
+            __IO uint32_t BOIM : 1;                         /*!< BNA interrupt mask                             */
                  uint32_t __RESERVED3 : 22;
         } b;
         __IO uint32_t w;
-    } DOEPMSK;                                              /*!< dev OUT Endpoint Mask        Address offset : 0x814 */
+    } DOEPMSK;                                              /*!< dev OUT Endpoint Mask        814h */
     union {
         struct {
-            __IO uint32_t IEPINT : 16;                      /*!< IN endpoint interrupt bits */
+            __IO uint32_t IEPINT : 16;                      /*!< IN endpoint interrupt bits  */
             __IO uint32_t OEPINT : 16;                      /*!< OUT endpoint interrupt bits */
         } b;
         __IO uint32_t w;
-    } DAINT;                                                /*!< dev All Endpoints Itr Reg    Address offset : 0x818 */
+    } DAINT;                                                /*!< dev All Endpoints Itr Reg    818h */
     union {
         struct {
             __IO uint32_t IEPM : 16;                        /*!< IN EP interrupt mask bits */
             __IO uint32_t OEPM : 16;                        /*!< OUT EP interrupt mask bits */
         } b;
         __IO uint32_t w;
-    } DAINTMSK;                                             /*!< dev All Endpoints Itr Mask   Address offset : 0x81C */
+    } DAINTMSK;                                             /*!< dev All Endpoints Itr Mask   81Ch */
          uint32_t __RESERVED1[2];
-    __IO uint32_t DVBUSDIS;                                 /*!< dev VBUS discharge Register  Address offset : 0x828 */
-    __IO uint32_t DVBUSPULSE;                               /*!< dev VBUS Pulse Register      Address offset : 0x82C */
+    __IO uint32_t DVBUSDIS;                                 /*!< dev VBUS discharge Register  828h */
+    __IO uint32_t DVBUSPULSE;                               /*!< dev VBUS Pulse Register      82Ch */
     union {
         struct {
             __IO uint32_t NONISOTHREN : 1;                  /*!< Nonisochronous IN endpoints threshold enable */
@@ -6447,23 +6435,23 @@ typedef struct {
                  uint32_t __RESERVED2 : 4;
         } b;
         __IO uint32_t w;
-    } DTHRCTL;                                              /*!< dev thr                      Address offset : 0x830 */
-    __IO uint32_t DIEPEMPMSK;                               /*!< dev empty msk                Address offset : 0x834 */
+    } DTHRCTL;                                              /*!< dev threshold                830h */
+    __IO uint32_t DIEPEMPMSK;                               /*!< dev empty msk                834h */
     union {
         struct {
                  uint32_t __RESERVED0 : 1;
-            __IO uint32_t IEP1INT : 1;                      /*!< IN endpoint 1interrupt bit */
+            __IO uint32_t IEP1INT : 1;                      /*!< IN endpoint 1interrupt bit   */
                  uint32_t __RESERVED1 : 15;
             __IO uint32_t OEP1INT : 1;                      /*!< OUT endpoint 1 interrupt bit */
                  uint32_t __RESERVED2 : 14;
         } b;
         __IO uint32_t w;
-    } DEACHINT;                                             /*!< dedicated EP interrupt       Address offset : 0x838 */
-    __IO uint32_t DEACHMSK;                                 /*!< dedicated EP msk             Address offset : 0x83C */
+    } DEACHINT;                                             /*!< dedicated EP interrupt       838h */
+    __IO uint32_t DEACHMSK;                                 /*!< dedicated EP msk             83Ch */
          uint32_t __RESERVED2;
-    __IO uint32_t DINEP1MSK;                                /*!< dedicated EP mask            Address offset : 0x844 */
+    __IO uint32_t DINEP1MSK;                                /*!< dedicated EP mask            844h */
          uint32_t __RESERVED3[15];
-    __IO uint32_t DOUTEP1MSK;                               /*!< dedicated EP msk             Address offset : 0x884 */
+    __IO uint32_t DOUTEP1MSK;                               /*!< dedicated EP msk             884h */
 } USB_OTG_DeviceTypeDef;
 
 
@@ -6474,24 +6462,24 @@ typedef struct {
 typedef struct {
     union {
         struct {
-            __IO uint32_t MPSIZ : 11;                       /*!< Maximum packet size */
+            __IO uint32_t MPSIZ : 11;                       /*!< Maximum packet size              */
                  uint32_t __RESERVED0 : 4;
-            __IO uint32_t USBAEP : 1;                       /*!< USB active endpoint */
-            __IO uint32_t EONUM_DPID : 1;                   /*!< Even/odd frame */
-            __IO uint32_t NAKSTS : 1;                       /*!< NAK status */
-            __IO uint32_t EPTYP : 2;                        /*!< Endpoint type */
+            __IO uint32_t USBAEP : 1;                       /*!< USB active endpoint              */
+            __IO uint32_t EONUM_DPID : 1;                   /*!< Even/odd frame                   */
+            __IO uint32_t NAKSTS : 1;                       /*!< NAK status                       */
+            __IO uint32_t EPTYP : 2;                        /*!< Endpoint type                    */
                  uint32_t __RESERVED1 : 1;
-            __IO uint32_t STALL : 1;                        /*!< STALL handshake */
-            __IO uint32_t TXFNUM : 4;                       /*!< TxFIFO number */
-            __IO uint32_t CNAK : 1;                         /*!< Clear NAK */
+            __IO uint32_t STALL : 1;                        /*!< STALL handshake                  */
+            __IO uint32_t TXFNUM : 4;                       /*!< TxFIFO number                    */
+            __IO uint32_t CNAK : 1;                         /*!< Clear NAK                        */
             __IO uint32_t SNAK : 1;                         /*!< Set NAK */
-            __IO uint32_t SD0PID_SEVNFRM : 1;               /*!< Set DATA0 PID */
-            __IO uint32_t SODDFRM : 1;                      /*!< Set odd frame */
-            __IO uint32_t EPDIS : 1;                        /*!< Endpoint disable */
-            __IO uint32_t EPENA : 1;                        /*!< Endpoint enable */
+            __IO uint32_t SD0PID_SEVNFRM : 1;               /*!< Set DATA0 PID                    */
+            __IO uint32_t SODDFRM : 1;                      /*!< Set odd frame                    */
+            __IO uint32_t EPDIS : 1;                        /*!< Endpoint disable                 */
+            __IO uint32_t EPENA : 1;                        /*!< Endpoint enable                  */
         } b;
         __IO uint32_t w;
-    } DIEPCTL;                                              /* dev IN Endpoint Control Reg 900h + (ep_num * 20h) + 00h     */
+    } DIEPCTL;                                              /*!< dev IN Endpoint Control Reg    900h + (ep_num * 20h) + 00h */
          uint32_t __RESERVED0;
     union {
         struct {
@@ -6512,7 +6500,7 @@ typedef struct {
                  uint32_t __RESERVED3 : 18;
         } b;
         __IO uint32_t w;
-    } DIEPINT;                                              /* dev IN Endpoint Itr Reg     900h + (ep_num * 20h) + 08h     */
+    } DIEPINT;                                              /*!< dev IN Endpoint Itr Reg        900h + (ep_num * 20h) + 08h */
          uint32_t __RESERVED1;
     union {
         struct {
@@ -6522,9 +6510,9 @@ typedef struct {
                  uint32_t __RESERVED0 : 1;
         } b;
         __IO uint32_t w;
-    } DIEPTSIZ;                                             /* IN Endpoint Txfer Size   900h + (ep_num * 20h) + 10h        */
-    __IO uint32_t DIEPDMA;                                  /* IN Endpoint DMA Address Reg    900h + (ep_num * 20h) + 14h  */
-    __IO uint32_t DTXFSTS;                                  /* IN Endpoint Tx FIFO Status Reg 900h + (ep_num * 20h) + 18h  */
+    } DIEPTSIZ;                                             /*!< IN Endpoint Txfer Size         900h + (ep_num * 20h) + 10h */
+    __IO uint32_t DIEPDMA;                                  /*!< IN Endpoint DMA Address Reg    900h + (ep_num * 20h) + 14h */
+    __IO uint32_t DTXFSTS;                                  /*!< IN Endpoint Tx FIFO Status Reg 900h + (ep_num * 20h) + 18h */
          uint32_t __RESERVED2;
 } USB_OTG_INEndpointTypeDef;
 
@@ -6553,7 +6541,7 @@ typedef struct {
             __IO uint32_t EPENA : 1;                        /*!< Endpoint enable */
         } b;
         __IO uint32_t w;
-    } DOEPCTL;                                              /* dev OUT Endpoint Control Reg  B00h + (ep_num * 20h) + 00h*/
+    } DOEPCTL;                                              /*!< dev OUT Endpoint Control Reg           B00h + (ep_num * 20h) + 00h */
          uint32_t __RESERVED0;
     union {
         struct {
@@ -6569,7 +6557,7 @@ typedef struct {
                  uint32_t __RESERVED3 : 17;
         } b;
         __IO uint32_t w;
-    } DOEPINT;                                              /* dev OUT Endpoint Itr Reg      B00h + (ep_num * 20h) + 08h*/
+    } DOEPINT;                                              /*!< dev OUT Endpoint Itr Reg               B00h + (ep_num * 20h) + 08h */
          uint32_t __RESERVED1;
     union {
         struct {
@@ -6579,8 +6567,8 @@ typedef struct {
                  uint32_t __RESERVED0 : 1;
         } b;
         __IO uint32_t w;
-    } DOEPTSIZ;                                             /* dev OUT Endpoint Txfer Size   B00h + (ep_num * 20h) + 10h*/
-    __IO uint32_t DOEPDMA;                                  /* dev OUT Endpoint DMA Address  B00h + (ep_num * 20h) + 14h*/
+    } DOEPTSIZ;                                             /*!< dev OUT Endpoint Txfer Size            B00h + (ep_num * 20h) + 10h */
+    __IO uint32_t DOEPDMA;                                  /*!< dev OUT Endpoint DMA Address           B00h + (ep_num * 20h) + 14h */
          uint32_t __RESERVED2[2];
 } USB_OTG_OUTEndpointTypeDef;
 
@@ -6592,31 +6580,31 @@ typedef struct {
 typedef struct {
     union {
         struct {
-            __IO uint32_t FSLSPCS : 2;                      /*!< FS/LS PHY clock select */
+            __IO uint32_t FSLSPCS : 2;                      /*!< FS/LS PHY clock select  */
             __IO uint32_t FSLSS : 1;                        /*!< FS- and LS-only support */
                  uint32_t __RESERVED0 : 29;
         } b;
         __IO uint32_t w;
-    } HCFG;                                                 /* Host Configuration Register    400h*/
-    __IO uint32_t HFIR;                                     /* Host Frame Interval Register   404h*/
+    } HCFG;                                                 /*!< Host Configuration Register          400h */
+    __IO uint32_t HFIR;                                     /*!< Host Frame Interval Register         404h */
     union {
         struct {
-            __IO uint32_t FRNUM : 16;                       /*!< Frame number */
+            __IO uint32_t FRNUM : 16;                       /*!< Frame number         */
             __IO uint32_t FTREM : 16;                       /*!< Frame time remaining */
         } b;
         __IO uint32_t w;
-    } HFNUM;                                                /* Host Frame Nbr/Frame Remaining 408h*/
+    } HFNUM;                                                /*!< Host Frame Nbr/Frame Remaining       408h */
          uint32_t __RESERVED0;
     union {
         struct {
-            __IO uint32_t PTXFSAVL : 16;                    /*!< Periodic transmit data FIFO space available */
+            __IO uint32_t PTXFSAVL : 16;                    /*!< Periodic transmit data FIFO space available     */
             __IO uint32_t PTXQSAV : 8;                      /*!< Periodic transmit request queue space available */
             __IO uint32_t PTXQTOP : 8;                      /*!< Top of the periodic transmit request queue */
         } b;
         __IO uint32_t w;
-    } HPTXSTS;                                              /* Host Periodic Tx FIFO/ Queue Status 410h*/
-    __IO uint32_t HAINT;                                    /* Host All Channels Interrupt Register 414h*/
-    __IO uint32_t HAINTMSK;                                 /* Host All Channels Interrupt Mask 418h*/
+    } HPTXSTS;                                              /*!< Host Periodic Tx FIFO/ Queue Status  410h */
+    __IO uint32_t HAINT;                                    /*!< Host All Channels Interrupt Register 414h */
+    __IO uint32_t HAINTMSK;                                 /*!< Host All Channels Interrupt Mask     418h */
 } USB_OTG_HostTypeDef;
 
 
@@ -6640,7 +6628,7 @@ typedef struct {
             __IO uint32_t CHENA : 1;                        /*!< Channel enable */
         } b;
         __IO uint32_t w;
-    } HCCHAR;
+    } HCCHAR;                                               /*!< Host Channel Characteristics Register    500h */
     union {
         struct {
             __IO uint32_t PRTADDR : 7;                      /*!< Port address */
@@ -6651,7 +6639,7 @@ typedef struct {
             __IO uint32_t SPLITEN : 1;                      /*!< Split enable */
         } b;
         __IO uint32_t w;
-    } HCSPLT;
+    } HCSPLT;                                               /*!< Host Channel Split Control Register      504h */
     union {
         struct {
             __IO uint32_t XFRC : 1;                         /*!< Transfer completed */
@@ -6668,7 +6656,7 @@ typedef struct {
                  uint32_t __RESERVED0 : 21;
         } b;
         __IO uint32_t w;
-    } HCINT;
+    } HCINT;                                                /*!< Host Channel Interrupt Register          508h */
     union {
         struct {
             __IO uint32_t XFRCM : 1;                        /*!< Transfer completed mask */
@@ -6685,7 +6673,7 @@ typedef struct {
                  uint32_t __RESERVED0 : 21;
         } b;
         __IO uint32_t w;
-    } HCINTMSK;
+    } HCINTMSK;                                             /*!< Host Channel Interrupt Mask Register     50Ch */
     union {
         struct {
             __IO uint32_t XFRSIZ : 19;                      /*!< Transfer size */
@@ -6694,8 +6682,8 @@ typedef struct {
             __IO uint32_t DOPING : 1;                       /*!< Do PING */
         } b;
         __IO uint32_t w;
-    } HCTSIZ;
-    __IO uint32_t HCDMA;
+    } HCTSIZ;                                               /*!< Host Channel Transfer Size Register      510h */
+    __IO uint32_t HCDMA;                                    /*!< Host Channel DMA Address Register        514h */
          uint32_t __RESERVED0[2];
 } USB_OTG_HostChannelTypeDef;
 
@@ -6710,34 +6698,34 @@ typedef struct {
             __IO uint32_t SRQSCS : 1;                       /*!< Session request success */
             __IO uint32_t SRQ : 1;                          /*!< Session request */
                  uint32_t __RESERVED0 : 6;
-            __IO uint32_t HNGSCS : 1;                       /*!< Host negotiation success */
+            __IO uint32_t HNGSCS : 1;                       /*!< Host set HNP enable */
             __IO uint32_t HNPRQ : 1;                        /*!< HNP request */
             __IO uint32_t HSHNPEN : 1;                      /*!< Host set HNP enable */
             __IO uint32_t DHNPEN : 1;                       /*!< Device HNP enabled */
                  uint32_t __RESERVED1 : 4;
             __IO uint32_t CIDSTS : 1;                       /*!< Connector ID status */
             __IO uint32_t DBCT : 1;                         /*!< Long/short debounce time */
-            __IO uint32_t ASVLD : 1;                        /*!< A-session valid */
+            __IO uint32_t ASVLD : 1;                        /*!< A-session valid  */
             __IO uint32_t BSVLD : 1;                        /*!< B-session valid */
                  uint32_t __RESERVED2 : 12;
         } b;
         __IO uint32_t w;
-    } GOTGCTL;                                              /*!<  USB_OTG Control and Status Register    Address offset : 0x00      */
+    } GOTGCTL;                                              /*!< USB_OTG Control and Status Register          000h */
     union {
         struct {
                  uint32_t __RESERVED0 : 2;
-            __IO uint32_t SEDET : 1;                        /*!< Session end detected */
+            __IO uint32_t SEDET : 1;                        /*!< Session end detected                   */
                  uint32_t __RESERVED1 : 5;
-            __IO uint32_t SRSSCHG : 1;                      /*!< Session request success status change */
+            __IO uint32_t SRSSCHG : 1;                      /*!< Session request success status change  */
             __IO uint32_t HNSSCHG : 1;                      /*!< Host negotiation success status change */
                  uint32_t __RESERVED2 : 7;
-            __IO uint32_t HNGDET : 1;                       /*!< Host negotiation detected */
-            __IO uint32_t ADTOCHG : 1;                      /*!< A-device timeout change */
-            __IO uint32_t DBCDNE : 1;                       /*!< Debounce done */
+            __IO uint32_t HNGDET : 1;                       /*!< Host negotiation detected              */
+            __IO uint32_t ADTOCHG : 1;                      /*!< A-device timeout change                */
+            __IO uint32_t DBCDNE : 1;                       /*!< Debounce done                          */
                  uint32_t __RESERVED3 : 12;
         } b;
         __IO uint32_t w;
-    } GOTGINT;                                              /*!<  USB_OTG Interrupt Register             Address offset : 0x04      */
+    } GOTGINT;                                              /*!< USB_OTG Interrupt Register                   004h */
     union {
         struct {
             __IO uint32_t GINT : 1;                         /*!< Global interrupt mask */
@@ -6749,7 +6737,7 @@ typedef struct {
                  uint32_t __RESERVED1 : 23;
         } b;
         __IO uint32_t w;
-    } GAHBCFG;                                              /*!<  Core AHB Configuration Register        Address offset : 0x08      */
+    } GAHBCFG;                                              /*!< Core AHB Configuration Register              008h */
     union {
         struct {
             __IO uint32_t TOCAL : 3;                        /*!< FS timeout calibration */
@@ -6762,108 +6750,108 @@ typedef struct {
                  uint32_t __RESERVED2 : 1;
             __IO uint32_t PHYLPCS : 1;                      /*!< PHY Low-power clock select */
                  uint32_t __RESERVED3 : 1;
-            __IO uint32_t ULPIFSLS : 1;                     /*!< ULPI FS/LS select */
-            __IO uint32_t ULPIAR : 1;                       /*!< ULPI Auto-resume */
-            __IO uint32_t ULPICSM : 1;                      /*!< ULPI Clock SuspendM */
-            __IO uint32_t ULPIEVBUSD : 1;                   /*!< ULPI External VBUS Drive */
-            __IO uint32_t ULPIEVBUSI : 1;                   /*!< ULPI external VBUS indicator */
+            __IO uint32_t ULPIFSLS : 1;                     /*!< ULPI FS/LS select               */
+            __IO uint32_t ULPIAR : 1;                       /*!< ULPI Auto-resume                */
+            __IO uint32_t ULPICSM : 1;                      /*!< ULPI Clock SuspendM             */
+            __IO uint32_t ULPIEVBUSD : 1;                   /*!< ULPI External VBUS Drive        */
+            __IO uint32_t ULPIEVBUSI : 1;                   /*!< ULPI external VBUS indicator    */
             __IO uint32_t TSDPS : 1;                        /*!< TermSel DLine pulsing selection */
-            __IO uint32_t PCCI : 1;                         /*!< Indicator complement */
-            __IO uint32_t PTCI : 1;                         /*!< Indicator pass through */
-            __IO uint32_t ULPIIPD : 1;                      /*!< ULPI interface protect disable */
+            __IO uint32_t PCCI : 1;                         /*!< Indicator complement            */
+            __IO uint32_t PTCI : 1;                         /*!< Indicator pass through          */
+            __IO uint32_t ULPIIPD : 1;                      /*!< ULPI interface protect disable  */
                  uint32_t __RESERVED4 : 3;
-            __IO uint32_t FHMOD : 1;                        /*!< Forced host mode */
-            __IO uint32_t FDMOD : 1;                        /*!< Forced peripheral mode */
-            __IO uint32_t CTXPKT : 1;                       /*!< Corrupt Tx packet */
+            __IO uint32_t FHMOD : 1;                        /*!< Forced host mode                */
+            __IO uint32_t FDMOD : 1;                        /*!< Forced peripheral mode          */
+            __IO uint32_t CTXPKT : 1;                       /*!< Corrupt Tx packet               */
         } b;
         __IO uint32_t w;
-    } GUSBCFG;                                              /*!<  Core USB Configuration Register        Address offset : 0x0C      */
+    } GUSBCFG;                                              /*!< Core USB Configuration Register              00Ch */
     union {
         struct {
-            __IO uint32_t CSRST : 1;                        /*!< Core soft reset */
-            __IO uint32_t HSRST : 1;                        /*!< HCLK soft reset */
+            __IO uint32_t CSRST : 1;                        /*!< Core soft reset          */
+            __IO uint32_t HSRST : 1;                        /*!< HCLK soft reset          */
             __IO uint32_t FCRST : 1;                        /*!< Host frame counter reset */
                  uint32_t __RESERVED0 : 1;
-            __IO uint32_t RXFFLSH : 1;                      /*!< RxFIFO flush */
-            __IO uint32_t TXFFLSH : 1;                      /*!< TxFIFO flush */
+            __IO uint32_t RXFFLSH : 1;                      /*!< RxFIFO flush             */
+            __IO uint32_t TXFFLSH : 1;                      /*!< TxFIFO flush             */
             __IO uint32_t TXFNUM : 5;                       /*!< TxFIFO number */
                  uint32_t __RESERVED1 : 19;
             __IO uint32_t DMAREQ : 1;                       /*!< DMA request signal */
             __IO uint32_t AHBIDL : 1;                       /*!< AHB master idle */
         } b;
         __IO uint32_t w;
-    } GRSTCTL;                                              /*!<  Core Reset Register                    Address offset : 0x10      */
+    } GRSTCTL;                                              /*!< Core Reset Register                          010h */
     union {
         struct {
-            __IO uint32_t CMOD : 1;                         /*!< Current mode of operation */
-            __IO uint32_t MMIS : 1;                         /*!< Mode mismatch interrupt */
-            __IO uint32_t OTGINT : 1;                       /*!< OTG interrupt */
-            __IO uint32_t SOF : 1;                          /*!< Start of frame */
-            __IO uint32_t RXFLVL : 1;                       /*!< RxFIFO nonempty */
-            __IO uint32_t NPTXFE : 1;                       /*!< Nonperiodic TxFIFO empty */
-            __IO uint32_t GINAKEFF : 1;                     /*!< Global IN nonperiodic NAK effective */
-            __IO uint32_t BOUTNAKEFF : 1;                   /*!< Global OUT NAK effective */
+            __IO uint32_t CMOD : 1;                         /*!< Current mode of operation                      */
+            __IO uint32_t MMIS : 1;                         /*!< Mode mismatch interrupt                        */
+            __IO uint32_t OTGINT : 1;                       /*!< OTG interrupt                                  */
+            __IO uint32_t SOF : 1;                          /*!< Start of frame                                 */
+            __IO uint32_t RXFLVL : 1;                       /*!< RxFIFO nonempty                                */
+            __IO uint32_t NPTXFE : 1;                       /*!< Nonperiodic TxFIFO empty                       */
+            __IO uint32_t GINAKEFF : 1;                     /*!< Global IN nonperiodic NAK effective            */
+            __IO uint32_t BOUTNAKEFF : 1;                   /*!< Global OUT NAK effective                       */
                  uint32_t __RESERVED0 : 2;
-            __IO uint32_t ESUSP : 1;                        /*!< Early suspend */
-            __IO uint32_t USBSUSP : 1;                      /*!< USB suspend */
-            __IO uint32_t USBRST : 1;                       /*!< USB reset */
-            __IO uint32_t ENUMDNE : 1;                      /*!< Enumeration done */
-            __IO uint32_t ISOODRP : 1;                      /*!< Isochronous OUT packet dropped interrupt */
-            __IO uint32_t EOPF : 1;                         /*!< End of periodic frame interrupt */
+            __IO uint32_t ESUSP : 1;                        /*!< Early suspend                                  */
+            __IO uint32_t USBSUSP : 1;                      /*!< USB suspend                                    */
+            __IO uint32_t USBRST : 1;                       /*!< USB reset                                      */
+            __IO uint32_t ENUMDNE : 1;                      /*!< Enumeration done                               */
+            __IO uint32_t ISOODRP : 1;                      /*!< Isochronous OUT packet dropped interrupt       */
+            __IO uint32_t EOPF : 1;                         /*!< End of periodic frame interrupt                */
                  uint32_t __RESERVED1 : 2;
-            __IO uint32_t IEPINT : 1;                       /*!< IN endpoint interrupt */
-            __IO uint32_t OEPINT : 1;                       /*!< OUT endpoint interrupt */
-            __IO uint32_t IISOIXFR : 1;                     /*!< Incomplete isochronous IN transfer */
-            __IO uint32_t PXFR_INCOMPISOOUT : 1;            /*!< Incomplete periodic transfer */
-            __IO uint32_t DATAFSUSP : 1;                    /*!< Data fetch suspended */
+            __IO uint32_t IEPINT : 1;                       /*!< IN endpoint interrupt                          */
+            __IO uint32_t OEPINT : 1;                       /*!< OUT endpoint interrupt                         */
+            __IO uint32_t IISOIXFR : 1;                     /*!< Incomplete isochronous IN transfer             */
+            __IO uint32_t PXFR_INCOMPISOOUT : 1;            /*!< Incomplete periodic transfer                   */
+            __IO uint32_t DATAFSUSP : 1;                    /*!< Data fetch suspended                           */
                  uint32_t __RESERVED2 : 1;
-            __IO uint32_t HPRTINT : 1;                      /*!< Host port interrupt */
-            __IO uint32_t HCINT : 1;                        /*!< Host channels interrupt */
-            __IO uint32_t PTXFE : 1;                        /*!< Periodic TxFIFO empty */
+            __IO uint32_t HPRTINT : 1;                      /*!< Host port interrupt                            */
+            __IO uint32_t HCINT : 1;                        /*!< Host channels interrupt                        */
+            __IO uint32_t PTXFE : 1;                        /*!< Periodic TxFIFO empty                          */
                  uint32_t __RESERVED3 : 1;
-            __IO uint32_t CIDSCHG : 1;                      /*!< Connector ID status change */
-            __IO uint32_t DISCINT : 1;                      /*!< Disconnect detected interrupt */
+            __IO uint32_t CIDSCHG : 1;                      /*!< Connector ID status change                     */
+            __IO uint32_t DISCINT : 1;                      /*!< Disconnect detected interrupt                  */
             __IO uint32_t SRQINT : 1;                       /*!< Session request/new session detected interrupt */
-            __IO uint32_t WKUINT : 1;                       /*!< Resume/remote wakeup detected interrupt */
+            __IO uint32_t WKUINT : 1;                       /*!< Resume/remote wakeup detected interrupt        */
         } b;
         __IO uint32_t w;
-    } GINTSTS;                                              /*!<  Core Interrupt Register                Address offset : 0x14      */
+    } GINTSTS;                                              /*!< Core Interrupt Register                      014h */
     union {
         struct {
                  uint32_t __RESERVED0 : 1;
-            __IO uint32_t MMISM : 1;                        /*!< Mode mismatch interrupt mask */
-            __IO uint32_t OTGINT : 1;                       /*!< OTG interrupt mask */
-            __IO uint32_t SOFM : 1;                         /*!< Start of frame mask */
-            __IO uint32_t RXFLVLM : 1;                      /*!< Receive FIFO nonempty mask */
-            __IO uint32_t NPTXFEM : 1;                      /*!< Nonperiodic TxFIFO empty mask */
-            __IO uint32_t GINAKEFFM : 1;                    /*!< Global nonperiodic IN NAK effective mask */
-            __IO uint32_t GONAKEFFM : 1;                    /*!< Global OUT NAK effective mask */
+            __IO uint32_t MMISM : 1;                        /*!< Mode mismatch interrupt mask                        */
+            __IO uint32_t OTGINT : 1;                       /*!< OTG interrupt mask                                  */
+            __IO uint32_t SOFM : 1;                         /*!< Start of frame mask                                 */
+            __IO uint32_t RXFLVLM : 1;                      /*!< Receive FIFO nonempty mask                          */
+            __IO uint32_t NPTXFEM : 1;                      /*!< Nonperiodic TxFIFO empty mask                       */
+            __IO uint32_t GINAKEFFM : 1;                    /*!< Global nonperiodic IN NAK effective mask            */
+            __IO uint32_t GONAKEFFM : 1;                    /*!< Global OUT NAK effective mask                       */
                  uint32_t __RESERVED1 : 2;
-            __IO uint32_t ESUSPM : 1;                       /*!< Early suspend mask */
-            __IO uint32_t USBSUSPM : 1;                     /*!< USB suspend mask */
-            __IO uint32_t USBRST : 1;                       /*!< USB reset mask */
-            __IO uint32_t ENUMDNEM : 1;                     /*!< Enumeration done mask */
-            __IO uint32_t ISOODRPM : 1;                     /*!< Isochronous OUT packet dropped interrupt mask */
-            __IO uint32_t EOPFM : 1;                        /*!< End of periodic frame interrupt mask */
+            __IO uint32_t ESUSPM : 1;                       /*!< Early suspend mask                                  */
+            __IO uint32_t USBSUSPM : 1;                     /*!< USB suspend mask                                    */
+            __IO uint32_t USBRST : 1;                       /*!< USB reset mask                                      */
+            __IO uint32_t ENUMDNEM : 1;                     /*!< Enumeration done mask                               */
+            __IO uint32_t ISOODRPM : 1;                     /*!< Isochronous OUT packet dropped interrupt mask       */
+            __IO uint32_t EOPFM : 1;                        /*!< End of periodic frame interrupt mask                */
                  uint32_t __RESERVED2 : 1;
-            __IO uint32_t EPMISM : 1;                       /*!< Endpoint mismatch interrupt mask */
-            __IO uint32_t IEPINT : 1;                       /*!< IN endpoints interrupt mask */
-            __IO uint32_t OEPINT : 1;                       /*!< OUT endpoints interrupt mask */
-            __IO uint32_t IISOIXFRM : 1;                    /*!< Incomplete isochronous IN transfer mask */
-            __IO uint32_t PXFRM_IISOOXFRM : 1;              /*!< Incomplete periodic transfer mask */
-            __IO uint32_t FSUSPM : 1;                       /*!< Data fetch suspended mask */
+            __IO uint32_t EPMISM : 1;                       /*!< Endpoint mismatch interrupt mask                    */
+            __IO uint32_t IEPINT : 1;                       /*!< IN endpoints interrupt mask                         */
+            __IO uint32_t OEPINT : 1;                       /*!< OUT endpoints interrupt mask                        */
+            __IO uint32_t IISOIXFRM : 1;                    /*!< Incomplete isochronous IN transfer mask             */
+            __IO uint32_t PXFRM_IISOOXFRM : 1;              /*!< Incomplete periodic transfer mask                   */
+            __IO uint32_t FSUSPM : 1;                       /*!< Data fetch suspended mask                           */
                  uint32_t __RESERVED3 : 1;
-            __IO uint32_t PRTIM : 1;                        /*!< Host port interrupt mask */
-            __IO uint32_t HCIM : 1;                         /*!< Host channels interrupt mask */
-            __IO uint32_t PTXFEM : 1;                       /*!< Periodic TxFIFO empty mask */
+            __IO uint32_t PRTIM : 1;                        /*!< Host port interrupt mask                            */
+            __IO uint32_t HCIM : 1;                         /*!< Host channels interrupt mask                        */
+            __IO uint32_t PTXFEM : 1;                       /*!< Periodic TxFIFO empty mask                          */
                  uint32_t __RESERVED4 : 1;
-            __IO uint32_t CIDSCHGM : 1;                     /*!< Connector ID status change mask */
-            __IO uint32_t DISCINT : 1;                      /*!< Disconnect detected interrupt mask */
+            __IO uint32_t CIDSCHGM : 1;                     /*!< Connector ID status change mask                     */
+            __IO uint32_t DISCINT : 1;                      /*!< Disconnect detected interrupt mask                  */
             __IO uint32_t SRQIM : 1;                        /*!< Session request/new session detected interrupt mask */
-            __IO uint32_t WUIM : 1;                         /*!< Resume/remote wakeup detected interrupt mask */
+            __IO uint32_t WUIM : 1;                         /*!< Resume/remote wakeup detected interrupt mask        */
         } b;
         __IO uint32_t w;
-    } GINTMSK;                                              /*!<  Core Interrupt Mask Register           Address offset : 0x18      */
+    } GINTMSK;                                              /*!< Core Interrupt Mask Register                 018h */
     union {
         struct {
             __IO uint32_t CHNUM_EPNUM : 4;
@@ -6874,26 +6862,26 @@ typedef struct {
                  uint32_t __RESERVED0 : 7;
         } b;
         __IO uint32_t w;
-    } GRXSTSR;                                              /*!<  Receive Sts Q Read Register            Address offset : 0x1C      */
+    } GRXSTSR;                                              /*!< Receive Sts Q Read Register                  01Ch */
     union {
         struct {
-            __IO uint32_t CHNUM_EPNUM : 4;
-            __IO uint32_t BCNT : 11;
-            __IO uint32_t DPID : 2;
-            __IO uint32_t PKTSTS : 4;
+            __IO uint32_t CHNUM_EPNUM : 4;                  /*!< IN EP interrupt mask bits  */
+            __IO uint32_t BCNT : 11;                        /*!< OUT EP interrupt mask bits */
+            __IO uint32_t DPID : 2;                         /*!< OUT EP interrupt mask bits */
+            __IO uint32_t PKTSTS : 4;                       /*!< OUT EP interrupt mask bits */
             __IO uint32_t FRMNUM : 4;
                  uint32_t __RESERVED0 : 7;
         } b;
         __IO uint32_t w;
-    } GRXSTSP;                                              /*!<  Receive Sts Q Read & POP Register      Address offset : 0x20      */
-    __IO uint32_t GRXFSIZ;                                  /*!<  Receive FIFO Size Register             Address offset : 0x24      */
+    } GRXSTSP;                                              /*!< Receive Sts Q Read & POP Register            020h */
+    __IO uint32_t GRXFSIZ;                                  /*!< Receive FIFO Size Register                   024h */
     union {
         struct {
-            __IO uint32_t TXFSA : 16;
-            __IO uint32_t TXFD : 16;
+            __IO uint32_t TXFSA : 16;                       /*!< IN endpoint FIFOx transmit RAM start address */
+            __IO uint32_t TXFD : 16;                        /*!< IN endpoint TxFIFO depth */
         } b;
         __IO uint32_t w;
-    } DIEPTXF0_HNPTXFSIZ;                                   /*!<  EP0 / Non Periodic Tx FIFO Size Register Address offset : 0x28    */
+    } DIEPTXF0_HNPTXFSIZ;                                   /*!< EP0 / Non Periodic Tx FIFO Size Register     028h */
     union {
         struct {
             __IO uint32_t NPTXFSAV : 16;
@@ -6902,81 +6890,65 @@ typedef struct {
                  uint32_t __RESERVED0 : 1;
         } b;
         __IO uint32_t w;
-    } HNPTXSTS;                                             /*!<  Non Periodic Tx FIFO/Queue Sts reg     Address offset : 0x2C      */
-    union {
-        struct {
-            __IO uint32_t RWDATA : 8;
-            __IO uint32_t REGADDR : 8;
-            __IO uint32_t ADDR : 7;
-            __IO uint32_t I2CEN : 1;
-            __IO uint32_t ACK : 1;
-                 uint32_t __RESERVED0 : 1;
-            __IO uint32_t I2CDEVADR : 2;
-            __IO uint32_t I2CDATSE0 : 1;
-                 uint32_t __RESERVED1 : 1;
-            __IO uint32_t RW : 1;
-            __IO uint32_t BSYDNE : 1;
-        } b;
-        __IO uint32_t w;
-    } GI2CCTL;                                              /*!<  I2C access register                    Address offset : 0x30      */
-         uint32_t __RESERVED0;
+    } HNPTXSTS;                                             /*!< Non Periodic Tx FIFO/Queue Sts reg           02Ch */
+         uint32_t __RESERVED0[2];
     union {
         struct {
                  uint32_t __RESERVED0 : 16;
             __IO uint32_t PWRDWN : 1;                       /*!< Power down */
-            __IO uint32_t I2CPADEN : 1;                     /*!< Enable I2C bus connection for the external I2C PHY interface */
+                 uint32_t __RESERVED1 : 1;
             __IO uint32_t VBUSASEN : 1;                     /*!< Enable the VBUS sensing device */
             __IO uint32_t VBUSBSEN : 1;                     /*!< Enable the VBUS sensing device */
             __IO uint32_t SOFOUTEN : 1;                     /*!< SOF output enable */
-            __IO uint32_t NOVBUSSENS : 1;                   /*!< VBUS sensing disable option */
-                 uint32_t __RESERVED1 : 10;
+            __IO uint32_t NOVBUSSENS : 1;                   /*!< VBUS sensing disable option*/
+                 uint32_t __RESERVED2 : 10;
         } b;
         __IO uint32_t w;
-    } GCCFG;                                                /*!<  General Purpose IO Register            Address offset : 0x38      */
-    __IO uint32_t CID;                                      /*!< User ID Register                        Address offset : 0x3C      */
+    } GCCFG;                                                /*!< General Purpose IO Register                  038h */
+    __IO uint32_t CID;                                      /*!< User ID Register                             03Ch */
          uint32_t __RESERVED1[48];
     union {
         struct {
-            __IO uint32_t PTXSA : 16;                       /*!< Host periodic TxFIFO start address */
-            __IO uint32_t PTXFD : 16;                       /*!< Host periodic TxFIFO depth */
+            __IO uint32_t PTXSA : 16;                       /*!< Host periodic TxFIFO start address            */
+            __IO uint32_t PTXFD : 16;                       /*!< Host periodic TxFIFO depth                    */
         } b;
         __IO uint32_t w;
-    } HPTXFSIZ;                                             /*!< Host Periodic Tx FIFO Size Reg            Address offset : 0x100 */
+    } HPTXFSIZ;                                             /*!< Host Periodic Tx FIFO Size Reg               100h */
     union {
         struct {
             __IO uint32_t INEPTXSA : 16;                    /*!< IN endpoint FIFOx transmit RAM start address */
             __IO uint32_t INEPTXFD : 16;                    /*!< IN endpoint TxFIFO depth */
         } b;
         __IO uint32_t w;
-    } DIEPTXF[7];                                           /*!< Periodic Transmit FIFO                    Address offset : 0x104-0x144 */
+    } DIEPTXF[7];                                           /*!< Periodic Transmit FIFO                       104h-144h */
          uint32_t __RESERVED2[184];
     union {
         struct {
-            __IO uint32_t FSLSPCS : 2;                      /*!< FS/LS PHY clock select */
+            __IO uint32_t FSLSPCS : 2;                      /*!< FS/LS PHY clock select  */
             __IO uint32_t FSLSS : 1;                        /*!< FS- and LS-only support */
                  uint32_t __RESERVED0 : 29;
         } b;
         __IO uint32_t w;
-    } HCFG;                                                 /*!< Host Configuration Register              Address offset : 0x400 */
-    __IO uint32_t HFIR;                                     /*!< Host Frame Interval Register             Address offset : 0x404 */
+    } HCFG;                                                 /*!< Host Configuration Register          400h */
+    __IO uint32_t HFIR;                                     /*!< Host Frame Interval Register         404h */
     union {
         struct {
-            __IO uint32_t FRNUM : 16;                       /*!< Frame number */
+            __IO uint32_t FRNUM : 16;                       /*!< Frame number         */
             __IO uint32_t FTREM : 16;                       /*!< Frame time remaining */
         } b;
         __IO uint32_t w;
-    } HFNUM;                                                /*!< Host Frame Nbr/Frame Remaining           Address offset : 0x408 */
+    } HFNUM;                                                /*!< Host Frame Nbr/Frame Remaining       408h */
          uint32_t __RESERVED3;
     union {
         struct {
-            __IO uint32_t PTXFSAVL : 16;                    /*!< Periodic transmit data FIFO space available */
+            __IO uint32_t PTXFSAVL : 16;                    /*!< Periodic transmit data FIFO space available     */
             __IO uint32_t PTXQSAV : 8;                      /*!< Periodic transmit request queue space available */
             __IO uint32_t PTXQTOP : 8;                      /*!< Top of the periodic transmit request queue */
         } b;
         __IO uint32_t w;
-    } HPTXSTS;                                              /*!< Host Periodic Tx FIFO/ Queue Status      Address offset : 0x410 */
-    __IO uint32_t HAINT;                                    /*!< Host All Channels Interrupt Register     Address offset : 0x414 */
-    __IO uint32_t HAINTMSK;                                 /*!< Host All Channels Interrupt Mask         Address offset : 0x418 */
+    } HPTXSTS;                                              /*!< Host Periodic Tx FIFO/ Queue Status  410h */
+    __IO uint32_t HAINT;                                    /*!< Host All Channels Interrupt Register 414h */
+    __IO uint32_t HAINTMSK;                                 /*!< Host All Channels Interrupt Mask     418h */
          uint32_t __RESERVED4[9];
     union {
         struct {
@@ -6997,9 +6969,9 @@ typedef struct {
                  uint32_t __RESERVED1 : 13;
         } b;
         __IO uint32_t w;
-    } HPRT;                                                 /*!< Host Port Control and Status Register    Address offset : 0x440 */
+    } HPRT;                                                 /*!< Host Port Control and Status Register 440h */
          uint32_t __RESERVED5[47];
-    USB_OTG_HostChannelTypeDef HC[12];                      /*!< Host Channels                            Address offset : 0x500-0x67F */
+    USB_OTG_HostChannelTypeDef HC[12];                      /*!< Host Channels                        500h-67Fh */
          uint32_t __RESERVED6[96];
     union {
         struct {
@@ -7013,84 +6985,84 @@ typedef struct {
                  uint32_t __RESERVED2 : 6;
         } b;
         __IO uint32_t w;
-    } DCFG;                                                 /*!< dev Configuration Register   Address offset : 0x800 */
+    } DCFG;                                                 /*!< dev Configuration Register   800h */
     union {
         struct {
             __IO uint32_t RWUSIG : 1;                       /*!< Remote wakeup signaling */
-            __IO uint32_t SDIS : 1;                         /*!< Soft disconnect */
-            __IO uint32_t GINSTS : 1;                       /*!< Global IN NAK status */
-            __IO uint32_t GONSTS : 1;                       /*!< Global OUT NAK status */
+            __IO uint32_t SDIS : 1;                         /*!< Soft disconnect         */
+            __IO uint32_t GINSTS : 1;                       /*!< Global IN NAK status    */
+            __IO uint32_t GONSTS : 1;                       /*!< Global OUT NAK status   */
             __IO uint32_t TCTL : 3;                         /*!< Test control */
-            __IO uint32_t SGINAK : 1;                       /*!< Set global IN NAK */
-            __IO uint32_t CGINAK : 1;                       /*!< Clear global IN NAK */
-            __IO uint32_t SGONAK : 1;                       /*!< Set global OUT NAK */
-            __IO uint32_t CGONAK : 1;                       /*!< Clear global OUT NAK */
+            __IO uint32_t SGINAK : 1;                       /*!< Set global IN NAK         */
+            __IO uint32_t CGINAK : 1;                       /*!< Clear global IN NAK       */
+            __IO uint32_t SGONAK : 1;                       /*!< Set global OUT NAK        */
+            __IO uint32_t CGONAK : 1;                       /*!< Clear global OUT NAK      */
             __IO uint32_t POPRGDNE : 1;                     /*!< Power-on programming done */
                  uint32_t __RESERVED0 : 20;
         } b;
         __IO uint32_t w;
-    } DCTL;                                                 /*!< dev Control Register         Address offset : 0x804 */
+    } DCTL;                                                 /*!< dev Control Register         804h */
     union {
         struct {
-            __IO uint32_t SUSPSTS : 1;                      /*!< Suspend status */
+            __IO uint32_t SUSPSTS : 1;                      /*!< Suspend status   */
             __IO uint32_t ENUMSPD : 2;                      /*!< Enumerated speed */
-            __IO uint32_t EERR : 1;                         /*!< Erratic error */
+            __IO uint32_t EERR : 1;                         /*!< Erratic error     */
                  uint32_t __RESERVED0 : 4;
             __IO uint32_t FNSOF : 14;                       /*!< Frame number of the received SOF */
                  uint32_t __RESERVED1 : 10;
         } b;
         __IO uint32_t w;
-    } DSTS;                                                 /*!< dev Status Register (RO)     Address offset : 0x808 */
+    } DSTS;                                                 /*!< dev Status Register (RO)     808h */
          uint32_t __RESERVED7;
     union {
         struct {
-            __IO uint32_t XFRCM : 1;                        /*!< Transfer completed interrupt mask */
-            __IO uint32_t EPDM : 1;                         /*!< Endpoint disabled interrupt mask */
+            __IO uint32_t XFRCM : 1;                        /*!< Transfer completed interrupt mask                 */
+            __IO uint32_t EPDM : 1;                         /*!< Endpoint disabled interrupt mask                  */
                  uint32_t __RESERVED0 : 1;
             __IO uint32_t TOM : 1;                          /*!< Timeout condition mask (nonisochronous endpoints) */
-            __IO uint32_t ITTXFEMSK : 1;                    /*!< IN token received when TxFIFO empty mask */
-            __IO uint32_t INEPNMM : 1;                      /*!< IN token received with EP mismatch mask */
-            __IO uint32_t INEPNEM : 1;                      /*!< IN endpoint NAK effective mask */
+            __IO uint32_t ITTXFEMSK : 1;                    /*!< IN token received when TxFIFO empty mask          */
+            __IO uint32_t INEPNMM : 1;                      /*!< IN token received with EP mismatch mask           */
+            __IO uint32_t INEPNEM : 1;                      /*!< IN endpoint NAK effective mask                    */
                  uint32_t __RESERVED1 : 1;
-            __IO uint32_t TXFURM : 1;                       /*!< FIFO underrun mask */
-            __IO uint32_t BIM : 1;                          /*!< BNA interrupt mask */
+            __IO uint32_t TXFURM : 1;                       /*!< FIFO underrun mask                                */
+            __IO uint32_t BIM : 1;                          /*!< BNA interrupt mask                                */
                  uint32_t __RESERVED2 : 22;
         } b;
         __IO uint32_t w;
-    } DIEPMSK;                                              /* !< dev IN Endpoint Mask        Address offset : 0x810 */
+    } DIEPMSK;                                              /*!< dev IN Endpoint Mask         810h */
     union {
         struct {
             __IO uint32_t XFRCM : 1;                        /*!< Transfer completed interrupt mask */
-            __IO uint32_t EPDM : 1;                         /*!< Endpoint disabled interrupt mask */
+            __IO uint32_t EPDM : 1;                         /*!< Endpoint disabled interrupt mask               */
                  uint32_t __RESERVED0 : 1;
-            __IO uint32_t STUPM : 1;                        /*!< SETUP phase done mask */
+            __IO uint32_t STUPM : 1;                        /*!< SETUP phase done mask                          */
             __IO uint32_t OTEPDM : 1;                       /*!< OUT token received when endpoint disabled mask */
                  uint32_t __RESERVED1 : 1;
             __IO uint32_t B2BSTUP : 1;                      /*!< Back-to-back SETUP packets received mask */
                  uint32_t __RESERVED2 : 1;
-            __IO uint32_t OPEM : 1;                         /*!< OUT packet error mask */
-            __IO uint32_t BOIM : 1;                         /*!< BNA interrupt mask */
+            __IO uint32_t OPEM : 1;                         /*!< OUT packet error mask                          */
+            __IO uint32_t BOIM : 1;                         /*!< BNA interrupt mask                             */
                  uint32_t __RESERVED3 : 22;
         } b;
         __IO uint32_t w;
-    } DOEPMSK;                                              /*!< dev OUT Endpoint Mask        Address offset : 0x814 */
+    } DOEPMSK;                                              /*!< dev OUT Endpoint Mask        814h */
     union {
         struct {
-            __IO uint32_t IEPINT : 16;                      /*!< IN endpoint interrupt bits */
+            __IO uint32_t IEPINT : 16;                      /*!< IN endpoint interrupt bits  */
             __IO uint32_t OEPINT : 16;                      /*!< OUT endpoint interrupt bits */
         } b;
         __IO uint32_t w;
-    } DAINT;                                                /*!< dev All Endpoints Itr Reg    Address offset : 0x818 */
+    } DAINT;                                                /*!< dev All Endpoints Itr Reg    818h */
     union {
         struct {
             __IO uint32_t IEPM : 16;                        /*!< IN EP interrupt mask bits */
             __IO uint32_t OEPM : 16;                        /*!< OUT EP interrupt mask bits */
         } b;
         __IO uint32_t w;
-    } DAINTMSK;                                             /*!< dev All Endpoints Itr Mask   Address offset : 0x81C */
+    } DAINTMSK;                                             /*!< dev All Endpoints Itr Mask   81Ch */
          uint32_t __RESERVED8[2];
-    __IO uint32_t DVBUSDIS;                                 /*!< dev VBUS discharge Register  Address offset : 0x828 */
-    __IO uint32_t DVBUSPULSE;                               /*!< dev VBUS Pulse Register      Address offset : 0x82C */
+    __IO uint32_t DVBUSDIS;                                 /*!< dev VBUS discharge Register  828h */
+    __IO uint32_t DVBUSPULSE;                               /*!< dev VBUS Pulse Register      82Ch */
     union {
         struct {
             __IO uint32_t NONISOTHREN : 1;                  /*!< Nonisochronous IN endpoints threshold enable */
@@ -7104,23 +7076,23 @@ typedef struct {
                  uint32_t __RESERVED2 : 4;
         } b;
         __IO uint32_t w;
-    } DTHRCTL;                                              /*!< dev thr                      Address offset : 0x830 */
-    __IO uint32_t DIEPEMPMSK;                               /*!< dev empty msk                Address offset : 0x834 */
+    } DTHRCTL;                                              /*!< dev threshold                830h */
+    __IO uint32_t DIEPEMPMSK;                               /*!< dev empty msk                834h */
     union {
         struct {
                  uint32_t __RESERVED0 : 1;
-            __IO uint32_t IEP1INT : 1;                      /*!< IN endpoint 1interrupt bit */
+            __IO uint32_t IEP1INT : 1;                      /*!< IN endpoint 1interrupt bit   */
                  uint32_t __RESERVED1 : 15;
             __IO uint32_t OEP1INT : 1;                      /*!< OUT endpoint 1 interrupt bit */
                  uint32_t __RESERVED2 : 14;
         } b;
         __IO uint32_t w;
-    } DEACHINT;                                             /*!< dedicated EP interrupt       Address offset : 0x838 */
-    __IO uint32_t DEACHMSK;                                 /*!< dedicated EP msk             Address offset : 0x83C */
+    } DEACHINT;                                             /*!< dedicated EP interrupt       838h */
+    __IO uint32_t DEACHMSK;                                 /*!< dedicated EP msk             83Ch */
          uint32_t __RESERVED9;
-    __IO uint32_t DINEP1MSK;                                /*!< dedicated EP mask            Address offset : 0x844 */
+    __IO uint32_t DINEP1MSK;                                /*!< dedicated EP mask            844h */
          uint32_t __RESERVED10[15];
-    __IO uint32_t DOUTEP1MSK;                               /*!< dedicated EP msk             Address offset : 0x884 */
+    __IO uint32_t DOUTEP1MSK;                               /*!< dedicated EP msk             884h */
          uint32_t __RESERVED11[30];
     USB_OTG_INEndpointTypeDef IEP[8];
          uint32_t __RESERVED12[64];
@@ -19926,7 +19898,7 @@ typedef struct {
 #define USART_CR1_TCIE                USART_CR1_TCIE_Msk                       /*!<Transmission Complete Interrupt Enable */
 #define USART_CR1_TXEIE_Pos           (7U)                                     
 #define USART_CR1_TXEIE_Msk           (0x1U << USART_CR1_TXEIE_Pos)            /*!< 0x00000080 */
-#define USART_CR1_TXEIE               USART_CR1_TXEIE_Msk                      /*!<PE Interrupt Enable                    */
+#define USART_CR1_TXEIE               USART_CR1_TXEIE_Msk                      /*!<TXE Interrupt Enable                   */
 #define USART_CR1_PEIE_Pos            (8U)                                     
 #define USART_CR1_PEIE_Msk            (0x1U << USART_CR1_PEIE_Pos)             /*!< 0x00000100 */
 #define USART_CR1_PEIE                USART_CR1_PEIE_Msk                       /*!<PE Interrupt Enable                    */
@@ -21738,92 +21710,6 @@ typedef struct {
 #define USB_OTG_DAINTMSK_OEPM_Msk                (0xFFFFU << USB_OTG_DAINTMSK_OEPM_Pos) /*!< 0xFFFF0000 */
 #define USB_OTG_DAINTMSK_OEPM                    USB_OTG_DAINTMSK_OEPM_Msk     /*!< OUT EP interrupt mask bits */
 
-/********************  Bit definition for OTG register  ********************/
-
-#define USB_OTG_CHNUM_Pos                        (0U)                          
-#define USB_OTG_CHNUM_Msk                        (0xFU << USB_OTG_CHNUM_Pos)   /*!< 0x0000000F */
-#define USB_OTG_CHNUM                            USB_OTG_CHNUM_Msk             /*!< Channel number */
-#define USB_OTG_CHNUM_0                          (0x1U << USB_OTG_CHNUM_Pos)   /*!< 0x00000001 */
-#define USB_OTG_CHNUM_1                          (0x2U << USB_OTG_CHNUM_Pos)   /*!< 0x00000002 */
-#define USB_OTG_CHNUM_2                          (0x4U << USB_OTG_CHNUM_Pos)   /*!< 0x00000004 */
-#define USB_OTG_CHNUM_3                          (0x8U << USB_OTG_CHNUM_Pos)   /*!< 0x00000008 */
-#define USB_OTG_BCNT_Pos                         (4U)                          
-#define USB_OTG_BCNT_Msk                         (0x7FFU << USB_OTG_BCNT_Pos)  /*!< 0x00007FF0 */
-#define USB_OTG_BCNT                             USB_OTG_BCNT_Msk              /*!< Byte count */
-
-#define USB_OTG_DPID_Pos                         (15U)                         
-#define USB_OTG_DPID_Msk                         (0x3U << USB_OTG_DPID_Pos)    /*!< 0x00018000 */
-#define USB_OTG_DPID                             USB_OTG_DPID_Msk              /*!< Data PID */
-#define USB_OTG_DPID_0                           (0x1U << USB_OTG_DPID_Pos)    /*!< 0x00008000 */
-#define USB_OTG_DPID_1                           (0x2U << USB_OTG_DPID_Pos)    /*!< 0x00010000 */
-
-#define USB_OTG_PKTSTS_Pos                       (17U)                         
-#define USB_OTG_PKTSTS_Msk                       (0xFU << USB_OTG_PKTSTS_Pos)  /*!< 0x001E0000 */
-#define USB_OTG_PKTSTS                           USB_OTG_PKTSTS_Msk            /*!< Packet status */
-#define USB_OTG_PKTSTS_0                         (0x1U << USB_OTG_PKTSTS_Pos)  /*!< 0x00020000 */
-#define USB_OTG_PKTSTS_1                         (0x2U << USB_OTG_PKTSTS_Pos)  /*!< 0x00040000 */
-#define USB_OTG_PKTSTS_2                         (0x4U << USB_OTG_PKTSTS_Pos)  /*!< 0x00080000 */
-#define USB_OTG_PKTSTS_3                         (0x8U << USB_OTG_PKTSTS_Pos)  /*!< 0x00100000 */
-
-#define USB_OTG_EPNUM_Pos                        (0U)                          
-#define USB_OTG_EPNUM_Msk                        (0xFU << USB_OTG_EPNUM_Pos)   /*!< 0x0000000F */
-#define USB_OTG_EPNUM                            USB_OTG_EPNUM_Msk             /*!< Endpoint number */
-#define USB_OTG_EPNUM_0                          (0x1U << USB_OTG_EPNUM_Pos)   /*!< 0x00000001 */
-#define USB_OTG_EPNUM_1                          (0x2U << USB_OTG_EPNUM_Pos)   /*!< 0x00000002 */
-#define USB_OTG_EPNUM_2                          (0x4U << USB_OTG_EPNUM_Pos)   /*!< 0x00000004 */
-#define USB_OTG_EPNUM_3                          (0x8U << USB_OTG_EPNUM_Pos)   /*!< 0x00000008 */
-
-#define USB_OTG_FRMNUM_Pos                       (21U)                         
-#define USB_OTG_FRMNUM_Msk                       (0xFU << USB_OTG_FRMNUM_Pos)  /*!< 0x01E00000 */
-#define USB_OTG_FRMNUM                           USB_OTG_FRMNUM_Msk            /*!< Frame number */
-#define USB_OTG_FRMNUM_0                         (0x1U << USB_OTG_FRMNUM_Pos)  /*!< 0x00200000 */
-#define USB_OTG_FRMNUM_1                         (0x2U << USB_OTG_FRMNUM_Pos)  /*!< 0x00400000 */
-#define USB_OTG_FRMNUM_2                         (0x4U << USB_OTG_FRMNUM_Pos)  /*!< 0x00800000 */
-#define USB_OTG_FRMNUM_3                         (0x8U << USB_OTG_FRMNUM_Pos)  /*!< 0x01000000 */
-
-/********************  Bit definition for OTG register  ********************/
-
-#define USB_OTG_CHNUM_Pos                        (0U)                          
-#define USB_OTG_CHNUM_Msk                        (0xFU << USB_OTG_CHNUM_Pos)   /*!< 0x0000000F */
-#define USB_OTG_CHNUM                            USB_OTG_CHNUM_Msk             /*!< Channel number */
-#define USB_OTG_CHNUM_0                          (0x1U << USB_OTG_CHNUM_Pos)   /*!< 0x00000001 */
-#define USB_OTG_CHNUM_1                          (0x2U << USB_OTG_CHNUM_Pos)   /*!< 0x00000002 */
-#define USB_OTG_CHNUM_2                          (0x4U << USB_OTG_CHNUM_Pos)   /*!< 0x00000004 */
-#define USB_OTG_CHNUM_3                          (0x8U << USB_OTG_CHNUM_Pos)   /*!< 0x00000008 */
-#define USB_OTG_BCNT_Pos                         (4U)                          
-#define USB_OTG_BCNT_Msk                         (0x7FFU << USB_OTG_BCNT_Pos)  /*!< 0x00007FF0 */
-#define USB_OTG_BCNT                             USB_OTG_BCNT_Msk              /*!< Byte count */
-
-#define USB_OTG_DPID_Pos                         (15U)                         
-#define USB_OTG_DPID_Msk                         (0x3U << USB_OTG_DPID_Pos)    /*!< 0x00018000 */
-#define USB_OTG_DPID                             USB_OTG_DPID_Msk              /*!< Data PID */
-#define USB_OTG_DPID_0                           (0x1U << USB_OTG_DPID_Pos)    /*!< 0x00008000 */
-#define USB_OTG_DPID_1                           (0x2U << USB_OTG_DPID_Pos)    /*!< 0x00010000 */
-
-#define USB_OTG_PKTSTS_Pos                       (17U)                         
-#define USB_OTG_PKTSTS_Msk                       (0xFU << USB_OTG_PKTSTS_Pos)  /*!< 0x001E0000 */
-#define USB_OTG_PKTSTS                           USB_OTG_PKTSTS_Msk            /*!< Packet status */
-#define USB_OTG_PKTSTS_0                         (0x1U << USB_OTG_PKTSTS_Pos)  /*!< 0x00020000 */
-#define USB_OTG_PKTSTS_1                         (0x2U << USB_OTG_PKTSTS_Pos)  /*!< 0x00040000 */
-#define USB_OTG_PKTSTS_2                         (0x4U << USB_OTG_PKTSTS_Pos)  /*!< 0x00080000 */
-#define USB_OTG_PKTSTS_3                         (0x8U << USB_OTG_PKTSTS_Pos)  /*!< 0x00100000 */
-
-#define USB_OTG_EPNUM_Pos                        (0U)                          
-#define USB_OTG_EPNUM_Msk                        (0xFU << USB_OTG_EPNUM_Pos)   /*!< 0x0000000F */
-#define USB_OTG_EPNUM                            USB_OTG_EPNUM_Msk             /*!< Endpoint number */
-#define USB_OTG_EPNUM_0                          (0x1U << USB_OTG_EPNUM_Pos)   /*!< 0x00000001 */
-#define USB_OTG_EPNUM_1                          (0x2U << USB_OTG_EPNUM_Pos)   /*!< 0x00000002 */
-#define USB_OTG_EPNUM_2                          (0x4U << USB_OTG_EPNUM_Pos)   /*!< 0x00000004 */
-#define USB_OTG_EPNUM_3                          (0x8U << USB_OTG_EPNUM_Pos)   /*!< 0x00000008 */
-
-#define USB_OTG_FRMNUM_Pos                       (21U)                         
-#define USB_OTG_FRMNUM_Msk                       (0xFU << USB_OTG_FRMNUM_Pos)  /*!< 0x01E00000 */
-#define USB_OTG_FRMNUM                           USB_OTG_FRMNUM_Msk            /*!< Frame number */
-#define USB_OTG_FRMNUM_0                         (0x1U << USB_OTG_FRMNUM_Pos)  /*!< 0x00200000 */
-#define USB_OTG_FRMNUM_1                         (0x2U << USB_OTG_FRMNUM_Pos)  /*!< 0x00400000 */
-#define USB_OTG_FRMNUM_2                         (0x4U << USB_OTG_FRMNUM_Pos)  /*!< 0x00800000 */
-#define USB_OTG_FRMNUM_3                         (0x8U << USB_OTG_FRMNUM_Pos)  /*!< 0x01000000 */
-
 /********************  Bit definition for USB_OTG_GRXFSIZ register  ********************/
 #define USB_OTG_GRXFSIZ_RXFD_Pos                 (0U)                          
 #define USB_OTG_GRXFSIZ_RXFD_Msk                 (0xFFFFU << USB_OTG_GRXFSIZ_RXFD_Pos) /*!< 0x0000FFFF */
@@ -22469,6 +22355,48 @@ typedef struct {
 #define USB_OTG_PCGCCTL_PHYSUSP_Msk              (0x1U << USB_OTG_PCGCCTL_PHYSUSP_Pos) /*!< 0x00000010 */
 #define USB_OTG_PCGCCTL_PHYSUSP                  USB_OTG_PCGCCTL_PHYSUSP_Msk   /*!<Bit 1 */
 
+/* Legacy define */
+/********************  Bit definition for OTG register  ********************/
+#define USB_OTG_CHNUM_Pos                        (0U)                          
+#define USB_OTG_CHNUM_Msk                        (0xFU << USB_OTG_CHNUM_Pos)   /*!< 0x0000000F */
+#define USB_OTG_CHNUM                            USB_OTG_CHNUM_Msk             /*!< Channel number */
+#define USB_OTG_CHNUM_0                          (0x1U << USB_OTG_CHNUM_Pos)   /*!< 0x00000001 */
+#define USB_OTG_CHNUM_1                          (0x2U << USB_OTG_CHNUM_Pos)   /*!< 0x00000002 */
+#define USB_OTG_CHNUM_2                          (0x4U << USB_OTG_CHNUM_Pos)   /*!< 0x00000004 */
+#define USB_OTG_CHNUM_3                          (0x8U << USB_OTG_CHNUM_Pos)   /*!< 0x00000008 */
+#define USB_OTG_BCNT_Pos                         (4U)                          
+#define USB_OTG_BCNT_Msk                         (0x7FFU << USB_OTG_BCNT_Pos)  /*!< 0x00007FF0 */
+#define USB_OTG_BCNT                             USB_OTG_BCNT_Msk              /*!< Byte count */
+
+#define USB_OTG_DPID_Pos                         (15U)                         
+#define USB_OTG_DPID_Msk                         (0x3U << USB_OTG_DPID_Pos)    /*!< 0x00018000 */
+#define USB_OTG_DPID                             USB_OTG_DPID_Msk              /*!< Data PID */
+#define USB_OTG_DPID_0                           (0x1U << USB_OTG_DPID_Pos)    /*!< 0x00008000 */
+#define USB_OTG_DPID_1                           (0x2U << USB_OTG_DPID_Pos)    /*!< 0x00010000 */
+
+#define USB_OTG_PKTSTS_Pos                       (17U)                         
+#define USB_OTG_PKTSTS_Msk                       (0xFU << USB_OTG_PKTSTS_Pos)  /*!< 0x001E0000 */
+#define USB_OTG_PKTSTS                           USB_OTG_PKTSTS_Msk            /*!< Packet status */
+#define USB_OTG_PKTSTS_0                         (0x1U << USB_OTG_PKTSTS_Pos)  /*!< 0x00020000 */
+#define USB_OTG_PKTSTS_1                         (0x2U << USB_OTG_PKTSTS_Pos)  /*!< 0x00040000 */
+#define USB_OTG_PKTSTS_2                         (0x4U << USB_OTG_PKTSTS_Pos)  /*!< 0x00080000 */
+#define USB_OTG_PKTSTS_3                         (0x8U << USB_OTG_PKTSTS_Pos)  /*!< 0x00100000 */
+
+#define USB_OTG_EPNUM_Pos                        (0U)                          
+#define USB_OTG_EPNUM_Msk                        (0xFU << USB_OTG_EPNUM_Pos)   /*!< 0x0000000F */
+#define USB_OTG_EPNUM                            USB_OTG_EPNUM_Msk             /*!< Endpoint number */
+#define USB_OTG_EPNUM_0                          (0x1U << USB_OTG_EPNUM_Pos)   /*!< 0x00000001 */
+#define USB_OTG_EPNUM_1                          (0x2U << USB_OTG_EPNUM_Pos)   /*!< 0x00000002 */
+#define USB_OTG_EPNUM_2                          (0x4U << USB_OTG_EPNUM_Pos)   /*!< 0x00000004 */
+#define USB_OTG_EPNUM_3                          (0x8U << USB_OTG_EPNUM_Pos)   /*!< 0x00000008 */
+
+#define USB_OTG_FRMNUM_Pos                       (21U)                         
+#define USB_OTG_FRMNUM_Msk                       (0xFU << USB_OTG_FRMNUM_Pos)  /*!< 0x01E00000 */
+#define USB_OTG_FRMNUM                           USB_OTG_FRMNUM_Msk            /*!< Frame number */
+#define USB_OTG_FRMNUM_0                         (0x1U << USB_OTG_FRMNUM_Pos)  /*!< 0x00200000 */
+#define USB_OTG_FRMNUM_1                         (0x2U << USB_OTG_FRMNUM_Pos)  /*!< 0x00400000 */
+#define USB_OTG_FRMNUM_2                         (0x4U << USB_OTG_FRMNUM_Pos)  /*!< 0x00800000 */
+#define USB_OTG_FRMNUM_3                         (0x8U << USB_OTG_FRMNUM_Pos)  /*!< 0x01000000 */
 /**
   * @}
   */ 
