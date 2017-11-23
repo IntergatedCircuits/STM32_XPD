@@ -38,12 +38,6 @@
 #endif
 #define DMA_CHANNEL_NUMBER(CHANNEL)   ((((uint32_t)(CHANNEL) & 0xFF) - 8) / 20)
 
-static const XPD_CtrlFnType dma_clkCtrl[] = {
-        XPD_DMA1_ClockCtrl,
-#ifdef DMA2
-        XPD_DMA2_ClockCtrl
-#endif
-};
 static uint8_t dma_users[] = {
         0,
 #ifdef DMA2
@@ -51,20 +45,28 @@ static uint8_t dma_users[] = {
 #endif
 };
 
-static void dma_clockCtrl(DMA_HandleType * hdma, FunctionalState ClockState)
+static void dma_clockEnable(DMA_HandleType * hdma)
 {
     uint32_t bo = DMA_BASE_OFFSET(hdma->Inst);
 
-    if (ClockState == DISABLE)
+    if (dma_users[bo] == 0)
     {
-        CLEAR_BIT(dma_users[bo], 1 << DMA_CHANNEL_NUMBER(hdma->Inst));
-    }
-    else
-    {
-        SET_BIT(dma_users[bo], 1 << DMA_CHANNEL_NUMBER(hdma->Inst));
+        XPD_RCC_ClockEnable(RCC_POS_DMA1 + bo);
     }
 
-    dma_clkCtrl[bo]((dma_users[bo] > 0) ? ENABLE : DISABLE);
+    SET_BIT(dma_users[bo], 1 << DMA_CHANNEL_NUMBER(hdma->Inst));
+}
+
+static void dma_clockDisable(DMA_HandleType * hdma)
+{
+    uint32_t bo = DMA_BASE_OFFSET(hdma->Inst);
+
+    CLEAR_BIT(dma_users[bo], 1 << DMA_CHANNEL_NUMBER(hdma->Inst));
+
+    if (dma_users[bo] == 0)
+    {
+        XPD_RCC_ClockDisable(RCC_POS_DMA1 + bo);
+    }
 }
 
 static void dma_calcBase(DMA_HandleType * hdma)
@@ -85,7 +87,7 @@ static void dma_calcBase(DMA_HandleType * hdma)
 XPD_ReturnType XPD_DMA_Init(DMA_HandleType * hdma, const DMA_InitType * Config)
 {
     /* enable DMA clock */
-    dma_clockCtrl(hdma, ENABLE);
+    dma_clockEnable(hdma);
 
     hdma->Inst->CCR.b.PL         = Config->Priority;
     DMA_REG_BIT(hdma,CCR,DIR)    = Config->Direction;
@@ -114,23 +116,25 @@ XPD_ReturnType XPD_DMA_Init(DMA_HandleType * hdma, const DMA_InitType * Config)
  */
 XPD_ReturnType XPD_DMA_Deinit(DMA_HandleType * hdma)
 {
-    XPD_DMA_Disable(hdma);
+    /* Verify that the channel is used */
+    if (DMA_REG_BIT(hdma, CCR, EN) != 0)
+    {
+        XPD_DMA_Disable(hdma);
 
-    /* configuration reset */
-    hdma->Inst->CCR.w = 0;
+        /* configuration reset */
+        hdma->Inst->CCR.w = 0;
 
-    hdma->Inst->CNDTR = 0;
-    hdma->Inst->CPAR = 0;
+        hdma->Inst->CNDTR = 0;
+        hdma->Inst->CPAR = 0;
 
-    hdma->Inst->CMAR = 0;
-
-    /* Clear all interrupt flags at correct offset within the register */
-    XPD_DMA_ClearFlag(hdma, HT);
-    XPD_DMA_ClearFlag(hdma, TC);
-    XPD_DMA_ClearFlag(hdma, TE);
+        /* Clear all interrupt flags */
+        hdma->Base->IFCR.w =
+           (DMA_IFCR_CHTIF1 | DMA_IFCR_CTCIF1 | DMA_IFCR_CTEIF1)
+                    << (uint32_t)hdma->ChannelOffset;
+    }
 
     /* disable DMA clock */
-    dma_clockCtrl(hdma, DISABLE);
+    dma_clockDisable(hdma);
 
     return XPD_OK;
 }

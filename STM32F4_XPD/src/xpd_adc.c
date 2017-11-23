@@ -154,7 +154,7 @@ static void adc_initInternalChannel(ADC_HandleType * hadc, uint8_t Channel)
 XPD_ReturnType XPD_ADC_Init(ADC_HandleType * hadc, const ADC_InitType * Config)
 {
     /* Enable clock */
-    XPD_SAFE_CALLBACK(hadc->ClockCtrl, ENABLE);
+    XPD_RCC_ClockEnable(hadc->CtrlPos);
 
     /* Apply configuration */
     ADC_REG_BIT(hadc,CR1,SCAN)  = Config->ScanMode;
@@ -210,7 +210,7 @@ XPD_ReturnType XPD_ADC_Deinit(ADC_HandleType * hadc)
     XPD_SAFE_CALLBACK(hadc->Callbacks.DepDeinit, hadc);
 
     /* Disable clock */
-    XPD_SAFE_CALLBACK(hadc->ClockCtrl, DISABLE);
+    XPD_RCC_ClockDisable(hadc->CtrlPos);
 
     return XPD_OK;
 }

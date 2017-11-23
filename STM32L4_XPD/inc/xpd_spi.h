@@ -27,6 +27,7 @@
 #include "xpd_common.h"
 #include "xpd_config.h"
 #include "xpd_dma.h"
+#include "xpd_rcc.h"
 
 /** @defgroup SPI
  * @{ */
@@ -114,7 +115,6 @@ typedef struct
 #ifdef SPI_BB
     SPI_BitBand_TypeDef * Inst_BB;           /*!< The address of the peripheral instance in the bit-band region */
 #endif
-    XPD_CtrlFnType ClockCtrl;                /*!< Function pointer for RCC clock control */
     struct {
         XPD_HandleCallbackType DepInit;      /*!< Callback to initialize module dependencies (GPIOs, IRQs, DMAs) */
         XPD_HandleCallbackType DepDeinit;    /*!< Callback to restore module dependencies (GPIOs, IRQs, DMAs) */
@@ -130,6 +130,7 @@ typedef struct
     }DMA;                                    /*   DMA handle references */
     DataStreamType RxStream;                 /*!< Data reception stream */
     DataStreamType TxStream;                 /*!< Data transmission stream */
+    RCC_PositionType CtrlPos;                /*!< Relative position for reset and clock control */
 #if defined(USE_XPD_SPI_ERROR_DETECT) || defined(USE_XPD_DMA_ERROR_DETECT)
     volatile SPI_ErrorType Errors;           /*!< Transfer errors */
 #endif
@@ -152,7 +153,7 @@ typedef struct
  */
 #define         NEW_SPI_HANDLE(INSTANCE, INIT_FN, DEINIT_FN)    \
     {.Inst = (INSTANCE), .Inst_BB = SPI_BB(INSTANCE),           \
-     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,                   \
+     .CtrlPos = RCC_POS_##INSTANCE,                             \
      .Callbacks.DepInit   = (INIT_FN),                          \
      .Callbacks.DepDeinit = (DEINIT_FN)}
 
@@ -174,7 +175,7 @@ typedef struct
  */
 #define         NEW_SPI_HANDLE(INSTANCE, INIT_FN, DEINIT_FN)    \
     {.Inst = (INSTANCE),                                        \
-     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,                   \
+     .CtrlPos = RCC_POS_##INSTANCE,                             \
      .Callbacks.DepInit   = (INIT_FN),                          \
      .Callbacks.DepDeinit = (DEINIT_FN)}
 
@@ -298,7 +299,6 @@ void            XPD_SPI_Stop_DMA            (SPI_HandleType * hspi);
 /** @} */
 
 #define XPD_SPI_API
-#include "xpd_rcc_gen.h"
 #include "xpd_rcc_pc.h"
 #undef XPD_SPI_API
 

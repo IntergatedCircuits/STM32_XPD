@@ -222,7 +222,7 @@ static void spi_dmaErrorRedirect(void * hdma)
 XPD_ReturnType XPD_SPI_Init(SPI_HandleType * hspi, const SPI_InitType * Config)
 {
     /* enable clock */
-    XPD_SAFE_CALLBACK(hspi->ClockCtrl, ENABLE);
+    XPD_RCC_ClockEnable(hspi->CtrlPos);
 
     XPD_SPI_Disable(hspi);
 
@@ -315,7 +315,7 @@ XPD_ReturnType XPD_SPI_Deinit(SPI_HandleType * hspi)
     XPD_SAFE_CALLBACK(hspi->Callbacks.DepDeinit, hspi);
 
     /* Disable clock */
-    XPD_SAFE_CALLBACK(hspi->ClockCtrl, DISABLE);
+    XPD_RCC_ClockDisable(hspi->CtrlPos);
 
     return XPD_OK;
 }

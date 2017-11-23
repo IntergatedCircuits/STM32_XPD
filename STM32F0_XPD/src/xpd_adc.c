@@ -46,11 +46,6 @@
 #define ADC_ENDFLAG_SEQUENCE    (ADC_IER_EOSIE)
 #define ADC_ENDFLAG_CONVERSION  (ADC_IER_EOCIE)
 
-static void adc_clockCtrl(ADC_HandleType * hadc, FunctionalState ClockState)
-{
-    XPD_ADC1_ClockCtrl(ClockState);
-}
-
 static void adc_dmaConversionRedirect(void *hdma)
 {
     ADC_HandleType* hadc = (ADC_HandleType*) ((DMA_HandleType*) hdma)->Owner;
@@ -174,7 +169,7 @@ XPD_ReturnType XPD_ADC_Init(ADC_HandleType * hadc, const ADC_InitType * Config)
     XPD_ReturnType result = XPD_ERROR;
 
     /* enable clock */
-    adc_clockCtrl(hadc, ENABLE);
+    XPD_RCC_ClockEnable(RCC_POS_ADC1);
 
     hadc->ConversionCount = 0;
 
@@ -262,7 +257,7 @@ XPD_ReturnType XPD_ADC_Deinit(ADC_HandleType * hadc)
     XPD_SAFE_CALLBACK(hadc->Callbacks.DepDeinit, hadc);
 
     /* disable clock */
-    adc_clockCtrl(hadc, DISABLE);
+    XPD_RCC_ClockDisable(RCC_POS_ADC1);
 
     return XPD_OK;
 }

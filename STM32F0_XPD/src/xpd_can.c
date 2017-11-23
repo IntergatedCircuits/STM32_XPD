@@ -247,7 +247,7 @@ XPD_ReturnType XPD_CAN_Init(CAN_HandleType * hcan, const CAN_InitType * Config)
     uint32_t timeout = INAK_TIMEOUT;
 
     /* enable peripheral clock */
-    hcan->ClockCtrl(ENABLE);
+    XPD_RCC_ClockEnable(hcan->CtrlPos);
 
     /* Dependencies initialization */
     XPD_SAFE_CALLBACK(hcan->Callbacks.DepInit, hcan);
@@ -314,7 +314,7 @@ XPD_ReturnType XPD_CAN_Deinit(CAN_HandleType * hcan)
     if ((hcan->Inst != CAN1) || !CAN1_SLAVE_FILTERS_ACTIVE())
 #endif
     {
-        hcan->ClockCtrl(DISABLE);
+        XPD_RCC_ClockDisable(hcan->CtrlPos);
     }
 
     return XPD_OK;

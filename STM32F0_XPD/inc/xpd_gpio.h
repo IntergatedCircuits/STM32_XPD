@@ -78,6 +78,9 @@ typedef struct
 
 /** @} */
 
+#define GPIO_PORT_OFFSET(GPIOX) \
+    (((uint32_t)(GPIOX) - (uint32_t)GPIOA_BASE) >> 10)
+
 /** @addtogroup GPIO_Alternate_function_map
  * @{ */
 #define GPIO_ADC_AF ((uint8_t)0x10) /*!< Use this macro with ANALOG mode to set the ASC bit (connect to ADC) */

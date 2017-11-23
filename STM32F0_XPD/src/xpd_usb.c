@@ -259,7 +259,7 @@ XPD_ReturnType XPD_USB_Init(USB_HandleType * husb, const USB_InitType * Config)
     uint32_t i;
 
     /* Enable peripheral clock */
-    XPD_USB_ClockCtrl(ENABLE);
+    XPD_RCC_ClockEnable(RCC_POS_USB);
 
     /* Init endpoints structures (USB FS has 8 endpoints) */
     for (i = 0; i < USB_ENDPOINT_COUNT; i++)
@@ -346,7 +346,7 @@ XPD_ReturnType XPD_USB_Deinit(USB_HandleType * husb)
     XPD_SAFE_CALLBACK(husb->Callbacks.DepDeinit, husb);
 
     /* Peripheral clock disabled */
-    XPD_USB_ClockCtrl(DISABLE);
+    XPD_RCC_ClockDisable(RCC_POS_USB);
 
     return XPD_OK;
 }

@@ -24,7 +24,7 @@
 
 #include "xpd_exti.h"
 
-XPD_ValueCallbackType XPD_EXTI_Callbacks[] = {
+XPD_ValueCallbackType XPD_EXTI_Callbacks[16] = {
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 };

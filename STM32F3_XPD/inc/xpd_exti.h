@@ -36,7 +36,8 @@
 /** @brief EXTI setup structure */
 typedef struct
 {
-    XPD_ValueCallbackType ITCallback; /*!< Callback for the interrupt line, the passed parameter is the line number */
+    XPD_ValueCallbackType ITCallback; /*!< Callback for the GPIO Pin interrupt line,
+                                           the passed parameter is the line number */
     EdgeType              Edge;       /*!< The selected edges trigger a reaction */
     ReactionType          Reaction;   /*!< Type of generated reaction for the detected edge */
 }EXTI_InitType;
@@ -46,8 +47,8 @@ typedef struct
 /** @defgroup EXTI_Exported_Variables EXTI Exported Variables
  * @{ */
 
-/** @brief EXTI callbacks container array */
-extern XPD_ValueCallbackType XPD_EXTI_Callbacks[];
+/** @brief EXTI GPIO Pin callbacks container array */
+extern XPD_ValueCallbackType XPD_EXTI_Callbacks[16];
 
 /** @} */
 
@@ -64,15 +65,9 @@ void            XPD_EXTI_Deinit         (uint8_t Line);
 __STATIC_INLINE FlagStatus XPD_EXTI_GetFlag(uint8_t Line)
 {
 #ifdef EXTI_BB
-    if (Line < 32)
-        return EXTI_BB->PR[Line];
-    else
-        return EXTI_BB->PR2[Line - 32];
+    return EXTI_BB->PR[Line];
 #else
-    if (Line < 32)
-        return (EXTI->PR >> (uint32_t)Line) & 1;
-    else
-        return (EXTI->PR2 >> ((uint32_t)Line - 32)) & 1;
+    return (EXTI->PR >> (uint32_t)Line) & 1;
 #endif
 }
 
@@ -83,15 +78,9 @@ __STATIC_INLINE FlagStatus XPD_EXTI_GetFlag(uint8_t Line)
 __STATIC_INLINE void XPD_EXTI_ClearFlag(uint8_t Line)
 {
 #ifdef EXTI_BB
-    if (Line < 32)
-        EXTI_BB->PR[Line] = 1;
-    else
-        EXTI_BB->PR2[Line - 32] = 1;
+    EXTI_BB->PR[Line] = 1;
 #else
-    if (Line < 32)
-        EXTI->PR = 1 << (uint32_t)Line;
-    else
-        EXTI->PR2 = 1 << ((uint32_t)Line - 32);
+    EXTI->PR = 1 << (uint32_t)Line;
 #endif
 }
 
@@ -102,15 +91,9 @@ __STATIC_INLINE void XPD_EXTI_ClearFlag(uint8_t Line)
 __STATIC_INLINE void XPD_EXTI_GenerateIT(uint8_t Line)
 {
 #ifdef EXTI_BB
-    if (Line < 32)
-        EXTI_BB->SWIER[Line] = 1;
-    else
-        EXTI_BB->SWIER2[Line - 32] = 1;
+    EXTI_BB->SWIER[Line] = 1;
 #else
-    if (Line < 32)
-        SET_BIT(EXTI->SWIER, 1 << (uint32_t)Line);
-    else
-        SET_BIT(EXTI->SWIER2, 1 << ((uint32_t)Line - 32));
+    SET_BIT(EXTI->SWIER, 1 << (uint32_t)Line);
 #endif
 }
 
@@ -124,7 +107,11 @@ __STATIC_INLINE void XPD_EXTI_IRQHandler(uint8_t Line)
     {
         XPD_EXTI_ClearFlag(Line);
 
-        XPD_SAFE_CALLBACK(XPD_EXTI_Callbacks[Line], Line);
+        /* GPIO callbacks only */
+        if (Line < 16)
+        {
+            XPD_SAFE_CALLBACK(XPD_EXTI_Callbacks[Line], Line);
+        }
     }
 }
 
