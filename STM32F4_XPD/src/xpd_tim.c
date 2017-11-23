@@ -120,7 +120,7 @@ static const XPD_HandleCallbackType tim_dmaRedirects[] = {
 XPD_ReturnType XPD_TIM_Init(TIM_HandleType * htim, const TIM_Counter_InitType * Config)
 {
     /* enable clock */
-    XPD_SAFE_CALLBACK(htim->ClockCtrl, ENABLE);
+    XPD_RCC_ClockEnable(htim->CtrlPos);
 
     /* Dependencies initialization */
     XPD_SAFE_CALLBACK(htim->Callbacks.DepInit,htim);
@@ -158,7 +158,7 @@ XPD_ReturnType XPD_TIM_Deinit(TIM_HandleType * htim)
     XPD_TIM_Counter_Stop(htim);
 
     /* disable clock */
-    XPD_SAFE_CALLBACK(htim->ClockCtrl, DISABLE);
+    XPD_RCC_ClockDisable(htim->CtrlPos);
 
     /* Deinitialize peripheral dependencies */
     XPD_SAFE_CALLBACK(htim->Callbacks.DepDeinit,htim);

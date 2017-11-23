@@ -259,7 +259,7 @@ XPD_ReturnType XPD_USB_Init(USB_HandleType * husb, const USB_InitType * Config)
     uint32_t i;
 
     /* Enable peripheral clock */
-    XPD_USB_ClockCtrl(ENABLE);
+    XPD_RCC_ClockEnable(RCC_POS_USB);
 
     /* Init endpoints structures (USB FS has 8 endpoints) */
     for (i = 0; i < USB_ENDPOINT_COUNT; i++)
@@ -346,7 +346,7 @@ XPD_ReturnType XPD_USB_Deinit(USB_HandleType * husb)
     XPD_SAFE_CALLBACK(husb->Callbacks.DepDeinit, husb);
 
     /* Peripheral clock disabled */
-    XPD_USB_ClockCtrl(DISABLE);
+    XPD_RCC_ClockDisable(RCC_POS_USB);
 
     return XPD_OK;
 }
@@ -1153,7 +1153,6 @@ static void usb_readPacket(USB_OTG_TypeDef * USBx, uint8_t * Data, uint16_t Leng
     for (; wordCount > 0; wordCount--, Data += 4)
     {
         *(__packed uint32_t *) Data = USBx->DFIFO[0].DR;
-
     }
 }
 
@@ -1189,17 +1188,17 @@ XPD_ReturnType XPD_USB_Init(USB_HandleType * husb, const USB_InitType * Config)
 #ifdef USB_OTG_HS
     if (((uint32_t)husb->Inst) == ((uint32_t)USB_OTG_HS))
     {
-        XPD_OTG_HS_ClockCtrl(ENABLE);
+        XPD_RCC_ClockEnable(RCC_POS_OTG_HS);
 
         /* ULPI HS interface */
         if (Config->Speed == USB_SPEED_HIGH)
         {
-            XPD_OTG_HS_ULPI_ClockCtrl(ENABLE);
+            XPD_RCC_ClockEnable(RCC_POS_OTG_HS_ULPI);
         }
 
-        XPD_OTG_HS_Reset();
+        XPD_RCC_Reset(RCC_POS_OTG_HS);
     }
-    /* OTG_FS does not support Hgh speed ULPI interface */
+    /* OTG_FS does not support High speed ULPI interface */
     else if (Config->Speed == USB_SPEED_HIGH)
     {
         return XPD_ERROR;
@@ -1208,9 +1207,9 @@ XPD_ReturnType XPD_USB_Init(USB_HandleType * husb, const USB_InitType * Config)
 #endif
     /* Embedded FS interface */
     {
-        XPD_OTG_FS_ClockCtrl(ENABLE);
+        XPD_RCC_ClockEnable(RCC_POS_OTG_FS);
 
-        XPD_OTG_FS_Reset();
+        XPD_RCC_Reset(RCC_POS_OTG_FS);
 
         /* Select FS Embedded PHY */
         USB_REG_BIT(husb,GUSBCFG,PHYSEL) = 1;
@@ -1396,18 +1395,18 @@ XPD_ReturnType XPD_USB_Deinit(USB_HandleType * husb)
 #ifdef USB_OTG_HS
     if (((uint32_t)husb->Inst) == ((uint32_t)USB_OTG_HS))
     {
-        XPD_OTG_HS_ClockCtrl(DISABLE);
+        XPD_RCC_ClockDisable(RCC_POS_OTG_HS);
 
         /* ULPI HS interface */
         if (USB_REG_BIT(husb,GUSBCFG,PHYSEL) == 0)
         {
-            XPD_OTG_HS_ULPI_ClockCtrl(DISABLE);
+            XPD_RCC_ClockDisable(RCC_POS_OTG_HS_ULPI);
         }
     }
     else
 #endif
     {
-        XPD_OTG_FS_ClockCtrl(DISABLE);
+        XPD_RCC_ClockDisable(RCC_POS_OTG_FS);
     }
 
     return XPD_OK;
@@ -2153,25 +2152,6 @@ void XPD_USB_IRQHandler(USB_HandleType * husb)
                 husb->LinkState = USB_LPM_L2;
                 XPD_SAFE_CALLBACK(husb->Callbacks.Suspend, husb->User);
             }
-        }
-
-        /* Handle Connection event Interrupt */
-        if ((gints & USB_OTG_GINTSTS_SRQINT) != 0)
-        {
-            XPD_USB_ClearFlag(husb, SRQINT);
-            XPD_SAFE_CALLBACK(husb->Callbacks.Connected, husb->User);
-        }
-
-        /* Handle Disconnection event Interrupt */
-        if ((gints & USB_OTG_GINTSTS_OTGINT) != 0)
-        {
-            if ((husb->Inst->GOTGINT.w & USB_OTG_GOTGINT_SEDET) != 0)
-            {
-                XPD_SAFE_CALLBACK(husb->Callbacks.Disconnected, husb->User);
-            }
-
-            /* Clear all flags */
-            husb->Inst->GOTGINT.w = ~0;
         }
 
         /* Handle SOF Interrupt */

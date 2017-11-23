@@ -68,17 +68,6 @@
 #endif
 
 #if (ADC_COUNT > 1)
-static const XPD_CtrlFnType adc_clkCtrl[] = {
-#if (ADC_COUNT == 1)
-        XPD_ADC1_ClockCtrl
-#elif (ADC_COUNT == 2)
-        XPD_ADC12_ClockCtrl
-#elif (ADC_COUNT == 4)
-        XPD_ADC12_ClockCtrl,
-        XPD_ADC34_ClockCtrl
-#endif
-};
-
 static volatile uint8_t adc_users[] = {
         0,
 #if (ADC_COUNT == 4)
@@ -86,7 +75,7 @@ static volatile uint8_t adc_users[] = {
 #endif
 };
 
-static void adc_clockCtrl(ADC_HandleType * hadc, FunctionalState ClockState)
+static void adc_clockEnable(ADC_HandleType * hadc)
 {
     uint8_t adcx = ADC_INDEX(hadc);
 #if (ADC_COUNT == 4)
@@ -95,19 +84,33 @@ static void adc_clockCtrl(ADC_HandleType * hadc, FunctionalState ClockState)
     uint8_t index = 0;
 #endif
 
-    if (ClockState == DISABLE)
+    if (adc_users[index] == 0)
     {
-        CLEAR_BIT(adc_users[index], 1 << adcx);
-    }
-    else
-    {
-        SET_BIT(adc_users[index], 1 << adcx);
+        XPD_RCC_ClockEnable(RCC_POS_ADC12 + index);
     }
 
-    adc_clkCtrl[index]((adc_users[index] > 0) ? ENABLE : DISABLE);
+    SET_BIT(adc_users[index], 1 << adcx);
+}
+
+static void adc_clockDisable(ADC_HandleType * hadc)
+{
+    uint8_t adcx = ADC_INDEX(hadc);
+#if (ADC_COUNT == 4)
+    uint8_t index = adcx / 2;
+#else
+    uint8_t index = 0;
+#endif
+
+    CLEAR_BIT(adc_users[index], 1 << adcx);
+
+    if (adc_users[index] == 0)
+    {
+        XPD_RCC_ClockDisable(RCC_POS_ADC12 + index);
+    }
 }
 #else
-#define adc_clockCtrl(HANDLE, STATE)    (XPD_ADC1_ClockCtrl(STATE))
+#define adc_clockEnable(HANDLE)    (XPD_RCC_ClockEnable(RCC_POS_ADC1))
+#define adc_clockDisable(HANDLE)   (XPD_RCC_ClockDisable(RCC_POS_ADC1))
 #endif
 
 __STATIC_INLINE uint32_t adc_getMultiCfgr(ADC_HandleType * hadc, uint32_t dual)
@@ -377,7 +380,7 @@ XPD_ReturnType XPD_ADC_Init(ADC_HandleType * hadc, const ADC_InitType * Config)
     XPD_ReturnType result = XPD_ERROR;
 
     /* enable clock */
-    adc_clockCtrl(hadc, ENABLE);
+    adc_clockEnable(hadc);
 
     /* Initialize ADC API internal variables */
     hadc->InjectedContextQueue = 0;
@@ -498,7 +501,7 @@ XPD_ReturnType XPD_ADC_Deinit(ADC_HandleType * hadc)
     XPD_SAFE_CALLBACK(hadc->Callbacks.DepDeinit, hadc);
 
     /* disable clock */
-    adc_clockCtrl(hadc, DISABLE);
+    adc_clockDisable(hadc);
 
     return XPD_OK;
 }

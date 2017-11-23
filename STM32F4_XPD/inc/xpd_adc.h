@@ -28,6 +28,7 @@
 #include "xpd_config.h"
 #include "xpd_adc_calc.h"
 #include "xpd_dma.h"
+#include "xpd_rcc.h"
 
 /** @defgroup ADC
  * @{ */
@@ -181,7 +182,6 @@ typedef struct
 #ifdef ADC_BB
     ADC_BitBand_TypeDef * Inst_BB;                  /*!< The address of the peripheral instance in the bit-band region */
 #endif
-    XPD_CtrlFnType ClockCtrl;                       /*!< Function pointer for RCC clock control */
     struct {
         XPD_HandleCallbackType DepInit;             /*!< Callback to initialize module dependencies (GPIOs, IRQs, DMAs) */
         XPD_HandleCallbackType DepDeinit;           /*!< Callback to restore module dependencies (GPIOs, IRQs, DMAs) */
@@ -195,6 +195,7 @@ typedef struct
     struct {
         DMA_HandleType * Conversion;                /*!< DMA handle for update transfer */
     }DMA;                                           /*   DMA handle references */
+    RCC_PositionType CtrlPos;                       /*!< Relative position for reset and clock control */
     volatile uint8_t ActiveConversions;             /*!< ADC number of current regular conversion rank */
 #if defined(USE_XPD_ADC_ERROR_DETECT) || defined(USE_XPD_DMA_ERROR_DETECT)
     volatile ADC_ErrorType Errors;                  /*!< Conversion errors */
@@ -252,7 +253,7 @@ typedef struct
  */
 #define         NEW_ADC_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)      \
     {.Inst = (INSTANCE), .Inst_BB = ADC_BB(INSTANCE),           \
-     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,                   \
+     .CtrlPos = RCC_POS_##INSTANCE,                             \
      .Callbacks.DepInit   = (INIT_FN),                          \
      .Callbacks.DepDeinit = (DEINIT_FN)}
 
@@ -283,7 +284,7 @@ typedef struct
  */
 #define         NEW_ADC_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)      \
     {.Inst = (INSTANCE),                                        \
-     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,                   \
+     .CtrlPos = RCC_POS_##INSTANCE,                             \
      .Callbacks.DepInit   = (INIT_FN),                          \
      .Callbacks.DepDeinit = (DEINIT_FN)}
 
@@ -549,9 +550,5 @@ __STATIC_INLINE uint32_t XPD_ADC_MultiMode_GetValues(ADC_HandleType * hadc)
 #endif /* ADC123_COMMON */
 
 /** @} */
-
-#define XPD_ADC_API
-#include "xpd_rcc_gen.h"
-#undef XPD_ADC_API
 
 #endif /* __XPD_ADC_H_ */

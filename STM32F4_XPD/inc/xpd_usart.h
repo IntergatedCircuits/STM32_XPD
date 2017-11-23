@@ -27,6 +27,8 @@
 #include "xpd_common.h"
 #include "xpd_config.h"
 #include "xpd_dma.h"
+#include "xpd_rcc.h"
+
 /** @defgroup USART
  * @{ */
 
@@ -105,7 +107,6 @@ typedef struct
 #ifdef USART_BB
     USART_BitBand_TypeDef * Inst_BB;         /*!< The address of the peripheral instance in the bit-band region */
 #endif
-    XPD_CtrlFnType ClockCtrl;                /*!< Function pointer for RCC clock control */
     struct {
         XPD_HandleCallbackType DepInit;      /*!< Callback to initialize module dependencies (GPIOs, IRQs, DMAs) */
         XPD_HandleCallbackType DepDeinit;    /*!< Callback to restore module dependencies (GPIOs, IRQs, DMAs) */
@@ -124,6 +125,7 @@ typedef struct
     }DMA;                                    /*   DMA handle references */
     DataStreamType RxStream;                 /*!< Data reception stream */
     DataStreamType TxStream;                 /*!< Data transmission stream */
+    RCC_PositionType CtrlPos;                /*!< Relative position for reset and clock control */
 #if defined(USE_XPD_USART_ERROR_DETECT) || defined(USE_XPD_DMA_ERROR_DETECT)
     volatile USART_ErrorType Errors;         /*!< Transfer errors */
 #endif
@@ -143,7 +145,7 @@ typedef struct
  */
 #define         NEW_USART_HANDLE(INSTANCE, INIT_FN, DEINIT_FN)  \
     {.Inst = (INSTANCE), .Inst_BB = USART_BB(INSTANCE),         \
-     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,                   \
+     .CtrlPos = RCC_POS_##INSTANCE,                             \
      .Callbacks.DepInit   = (INIT_FN),                          \
      .Callbacks.DepDeinit = (DEINIT_FN)}
 
@@ -165,7 +167,7 @@ typedef struct
  */
 #define         NEW_USART_HANDLE(INSTANCE, INIT_FN, DEINIT_FN)  \
     {.Inst = (INSTANCE),                                        \
-     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,                   \
+     .CtrlPos = RCC_POS_##INSTANCE,                             \
      .Callbacks.DepInit   = (INIT_FN),                          \
      .Callbacks.DepDeinit = (DEINIT_FN)}
 
@@ -240,7 +242,9 @@ typedef struct
 
 #if (USART_PERIPHERAL_VERSION > 1)
 /* macros for cross-compatibility */
+#ifndef USART_ICR_NECF
 #define USART_ICR_NECF      USART_ICR_NCF
+#endif
 #define USART_ISR_WU        USART_ISR_WUF
 #define USART_ISR_WU_Pos    USART_ISR_WUF_Pos
 #define USART_ISR_LBD       USART_ISR_LBDF
@@ -636,7 +640,6 @@ XPD_ReturnType  XPD_RS485_Init              (USART_HandleType * husart, const US
 /** @} */
 
 #define XPD_USART_API
-#include "xpd_rcc_gen.h"
 #include "xpd_rcc_pc.h"
 #undef XPD_USART_API
 

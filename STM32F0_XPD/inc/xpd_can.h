@@ -26,6 +26,7 @@
 
 #include "xpd_common.h"
 #include "xpd_config.h"
+#include "xpd_rcc.h"
 
 /** @defgroup CAN
  * @{ */
@@ -137,7 +138,6 @@ typedef struct
 #ifdef CAN_BB
     CAN_BitBand_TypeDef * Inst_BB;         /*!< The address of the peripheral instance in the bit-band region */
 #endif
-    XPD_CtrlFnType ClockCtrl;              /*!< Function pointer for RCC clock control */
     struct {
         XPD_HandleCallbackType DepInit;    /*!< Callback to initialize module dependencies (GPIOs, IRQs) */
         XPD_HandleCallbackType DepDeinit;  /*!< Callback to restore module dependencies (GPIOs, IRQs) */
@@ -146,6 +146,7 @@ typedef struct
         XPD_HandleCallbackType Error;      /*!< Error detection callback */
     } Callbacks;                           /*   Handle Callbacks */
     CAN_FrameType * RxFrame[2];            /*!< [Internal] Pointers to where the received frames will be stored */
+    RCC_PositionType CtrlPos;              /*!< Relative position for reset and clock control */
     volatile uint8_t State;                /*!< [Internal] CAN interrupt-controlled communication state */
 }CAN_HandleType;
 
@@ -163,7 +164,7 @@ typedef struct
  */
 #define         NEW_CAN_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)      \
     {.Inst = (INSTANCE), .Inst_BB = CAN_BB(INSTANCE),           \
-     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,                   \
+     .CtrlPos = RCC_POS_##INSTANCE,                             \
      .Callbacks.DepInit   = (INIT_FN),                          \
      .Callbacks.DepDeinit = (DEINIT_FN)}
 
@@ -185,7 +186,7 @@ typedef struct
  */
 #define         NEW_CAN_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)      \
     {.Inst = (INSTANCE),                                        \
-     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,                   \
+     .CtrlPos = RCC_POS_##INSTANCE,                             \
      .Callbacks.DepInit   = (INIT_FN),                          \
      .Callbacks.DepDeinit = (DEINIT_FN)}
 
@@ -405,9 +406,5 @@ XPD_ReturnType  XPD_CAN_Receive_IT          (CAN_HandleType * hcan, CAN_FrameTyp
 /** @} */
 
 /** @} */
-
-#define XPD_CAN_API
-#include "xpd_rcc_gen.h"
-#undef XPD_CAN_API
 
 #endif /* __XPD_CAN_H_ */

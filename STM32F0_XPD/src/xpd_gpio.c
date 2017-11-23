@@ -24,8 +24,6 @@
 #include "xpd_gpio.h"
 #include "xpd_rcc.h"
 
-#define GPIO_PORT_OFFSET(__GPIOx__) (((uint32_t)(__GPIOx__) - (uint32_t)GPIOA_BASE) >> 10)
-
 #ifdef PWR_CR3_APC
 static struct {
     __IO uint32_t PUCR;
@@ -40,58 +38,22 @@ static struct {
 #endif
 #endif
 
-static const XPD_CtrlFnType gpio_clockCtrl[] = {
-#ifdef GPIOA
-        XPD_GPIOA_ClockCtrl,
-#else
-        NULL,
-#endif
-#ifdef GPIOB
-        XPD_GPIOB_ClockCtrl,
-#else
-        NULL,
-#endif
-#ifdef GPIOC
-        XPD_GPIOC_ClockCtrl,
-#else
-        NULL,
-#endif
-#ifdef GPIOD
-        XPD_GPIOD_ClockCtrl,
-#else
-        NULL,
-#endif
-#ifdef GPIOE
-        XPD_GPIOE_ClockCtrl,
-#else
-        NULL,
-#endif
-#ifdef GPIOF
-        XPD_GPIOF_ClockCtrl,
-#else
-        NULL,
-#endif
-#ifdef GPIOG
-        XPD_GPIOG_ClockCtrl,
-#else
-        NULL,
-#endif
-#ifdef GPIOH
-        XPD_GPIOH_ClockCtrl,
-#endif
-#ifdef GPIOI
-        XPD_GPIOI_ClockCtrl,
-#endif
-#ifdef GPIOJ
-        XPD_GPIOJ_ClockCtrl,
-#endif
-#ifdef GPIOK
-        XPD_GPIOK_ClockCtrl,
-#endif
-};
-
 /** @defgroup GPIO
  * @{ */
+
+static void gpio_clockEnable(GPIO_TypeDef * GPIOx)
+{
+#if defined(GPIOH) && (RCC_POS_GPIOH < RCC_POS_GPIOA)
+    if (GPIOx == GPIOH)
+    {
+        XPD_RCC_ClockEnable(RCC_POS_GPIOH);
+    }
+    else
+#endif
+    {
+        XPD_RCC_ClockEnable(RCC_POS_GPIOA + GPIO_PORT_OFFSET(GPIOx));
+    }
+}
 
 /** @defgroup GPIO_Exported_Functions GPIO Exported Functions
  * @{ */
@@ -112,7 +74,7 @@ void XPD_GPIO_InitPort(GPIO_TypeDef * GPIOx, const GPIO_InitType * Config)
     uint32_t reg;
 
     /* enable GPIO clock */
-    gpio_clockCtrl[GPIO_PORT_OFFSET(GPIOx)](ENABLE);
+    gpio_clockEnable(GPIOx);
 
 #ifdef PWR_CR3_APC
     switch (Config->PowerDownPull)
@@ -247,7 +209,7 @@ void XPD_GPIO_InitPin(GPIO_TypeDef * GPIOx, uint8_t Pin, const GPIO_InitType * C
     (uint32_t) Pin;
 
     /* enable GPIO clock */
-    gpio_clockCtrl[GPIO_PORT_OFFSET(GPIOx)](ENABLE);
+    gpio_clockEnable(GPIOx);
 
 #ifdef PWR_CR3_APC
     /* configure pull direction in power down */

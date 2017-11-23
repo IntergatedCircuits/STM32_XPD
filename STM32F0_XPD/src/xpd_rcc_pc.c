@@ -66,7 +66,7 @@ void XPD_ADC_ClockConfig(ADC_ClockSourceType ClockSource)
         RCC_REG_BIT(CR2, HSI14ON) = 0;
     }
 
-    XPD_ADC1_ClockCtrl(ENABLE);
+    XPD_RCC_ClockEnable(RCC_POS_ADC1);
 
     /* Peripheral configuration can only be applied when ADC is in OFF state */
     if ((ADC1->CR.w & (ADC_CR_ADSTART | ADC_CR_ADEN)) == 0)

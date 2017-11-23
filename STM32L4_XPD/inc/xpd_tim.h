@@ -27,6 +27,7 @@
 #include "xpd_common.h"
 #include "xpd_config.h"
 #include "xpd_dma.h"
+#include "xpd_rcc.h"
 
 #if defined(TIM_CCR5_CCR5) && defined(TIM_CCR6_CCR6)
 #define TIM_SUPPORTED_CHANNEL_COUNT   6
@@ -88,7 +89,6 @@ typedef struct
 #ifdef TIM_BB
     TIM_BitBand_TypeDef * Inst_BB;           /*!< The address of the peripheral instance in the bit-band region */
 #endif
-    XPD_CtrlFnType ClockCtrl;                /*!< Function pointer for RCC clock control */
     struct {
         XPD_HandleCallbackType DepInit;      /*!< Callback to initialize module dependencies (GPIOs, IRQs, DMAs) */
         XPD_HandleCallbackType DepDeinit;    /*!< Callback to restore module dependencies (GPIOs, IRQs, DMAs) */
@@ -106,6 +106,7 @@ typedef struct
         DMA_HandleType * Channel[4];         /*!< DMA handles for channel transfers */
         DMA_HandleType * Burst;              /*!< DMA handle for burst transfers */
     }DMA;                                    /*   DMA handle references */
+    RCC_PositionType CtrlPos;                /*!< Relative position for reset and clock control */
     volatile TIM_ChannelType ActiveChannel;  /*!< The currently active timer channel */
 }TIM_HandleType;
 
@@ -123,7 +124,7 @@ typedef struct
  */
 #define         NEW_TIM_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)  \
     {.Inst = (INSTANCE), .Inst_BB = TIM_BB(INSTANCE),       \
-     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,               \
+     .CtrlPos = RCC_POS_##INSTANCE,                             \
      .Callbacks.DepInit   = (INIT_FN),                      \
      .Callbacks.DepDeinit = (DEINIT_FN)}
 
@@ -145,7 +146,7 @@ typedef struct
  */
 #define         NEW_TIM_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)  \
     {.Inst = (INSTANCE),                                    \
-     .ClockCtrl = XPD_##INSTANCE##_ClockCtrl,               \
+     .CtrlPos = RCC_POS_##INSTANCE,                             \
      .Callbacks.DepInit   = (INIT_FN),                      \
      .Callbacks.DepDeinit = (DEINIT_FN)}
 
@@ -849,7 +850,6 @@ void            XPD_TIM_SlaveConfig         (TIM_HandleType * htim, const TIM_Sl
 /** @} */
 
 #define XPD_TIM_API
-#include "xpd_rcc_gen.h"
 #include "xpd_rcc_pc.h"
 #undef XPD_TIM_API
 

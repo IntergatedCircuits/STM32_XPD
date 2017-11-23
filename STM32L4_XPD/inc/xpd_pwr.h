@@ -255,7 +255,7 @@ __STATIC_INLINE void XPD_PWR_VddIO2(FunctionalState NewState)
  */
 __STATIC_INLINE void XPD_PWR_InternalWakeUpLine(FunctionalState NewState)
 {
-    PWR_REG_BIT(CR3, EIWF) = NewState;
+    PWR_REG_BIT(CR3, EIWUL) = NewState;
 }
 
 /** @} */

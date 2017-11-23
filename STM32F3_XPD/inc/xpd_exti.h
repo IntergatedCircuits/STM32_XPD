@@ -36,7 +36,8 @@
 /** @brief EXTI setup structure */
 typedef struct
 {
-    XPD_ValueCallbackType ITCallback; /*!< Callback for the interrupt line, the passed parameter is the line number */
+    XPD_ValueCallbackType ITCallback; /*!< Callback for the GPIO Pin interrupt line,
+                                           the passed parameter is the line number */
     EdgeType              Edge;       /*!< The selected edges trigger a reaction */
     ReactionType          Reaction;   /*!< Type of generated reaction for the detected edge */
 }EXTI_InitType;
@@ -46,8 +47,8 @@ typedef struct
 /** @defgroup EXTI_Exported_Variables EXTI Exported Variables
  * @{ */
 
-/** @brief EXTI callbacks container array */
-extern XPD_ValueCallbackType XPD_EXTI_Callbacks[];
+/** @brief EXTI GPIO Pin callbacks container array */
+extern XPD_ValueCallbackType XPD_EXTI_Callbacks[16];
 
 /** @} */
 
@@ -124,7 +125,11 @@ __STATIC_INLINE void XPD_EXTI_IRQHandler(uint8_t Line)
     {
         XPD_EXTI_ClearFlag(Line);
 
-        XPD_SAFE_CALLBACK(XPD_EXTI_Callbacks[Line], Line);
+        /* GPIO callbacks only */
+        if (Line < 16)
+        {
+            XPD_SAFE_CALLBACK(XPD_EXTI_Callbacks[Line], Line);
+        }
     }
 }
 

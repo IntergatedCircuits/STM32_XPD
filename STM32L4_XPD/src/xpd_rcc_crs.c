@@ -43,7 +43,7 @@ void XPD_CRS_Init(const CRS_InitType * Config)
     /* Configure automatic synchronization */
     if (Config->Source != CRS_SYNC_SOURCE_NONE)
     {
-        XPD_CRS_ClockCtrl(ENABLE);
+        XPD_RCC_ClockEnable(RCC_POS_CRS);
         CRS->CR.w = 0;
 
         switch (Config->Source)
@@ -75,13 +75,13 @@ void XPD_CRS_Init(const CRS_InitType * Config)
     /* If non-default calibration is used, set it */
     else if (Config->CalibVal != HSI48_CALIBRATION_DEFAULT_VALUE)
     {
-        XPD_CRS_ClockCtrl(ENABLE);
+        XPD_RCC_ClockEnable(RCC_POS_CRS);
         CRS->CR.w = (Config->CalibVal << CRS_CR_TRIM_Pos) & CRS_CR_TRIM_Msk;
     }
     /* No functionality is requested, turn off */
     else
     {
-        XPD_CRS_ClockCtrl(DISABLE);
+        XPD_RCC_ClockDisable(RCC_POS_CRS);
     }
 }
 
@@ -90,7 +90,7 @@ void XPD_CRS_Init(const CRS_InitType * Config)
  */
 void XPD_CRS_Deinit(void)
 {
-    XPD_CRS_ClockCtrl(DISABLE);
+    XPD_RCC_ClockDisable(RCC_POS_CRS);
 }
 
 /**
@@ -159,7 +159,6 @@ CRS_StatusType XPD_CRS_GetStatus(void)
  */
 void XPD_CRS_IRQHandler(void)
 {
-    CRS_StatusType status = 0;
     uint32_t isr = CRS->ISR.w;
     uint32_t cr = CRS->CR.w;
 

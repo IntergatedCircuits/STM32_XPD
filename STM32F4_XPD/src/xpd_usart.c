@@ -160,7 +160,7 @@ static XPD_ReturnType usart_init1(USART_HandleType * husart, const USART_InitTyp
     uint8_t framesize;
 
     /* enable clock */
-    XPD_SAFE_CALLBACK(husart->ClockCtrl, ENABLE);
+    XPD_RCC_ClockEnable(husart->CtrlPos);
 
     /* Dependencies initialization */
     XPD_SAFE_CALLBACK(husart->Callbacks.DepInit, husart);
@@ -254,7 +254,7 @@ XPD_ReturnType XPD_USART_Deinit(USART_HandleType * husart)
     XPD_SAFE_CALLBACK(husart->Callbacks.DepDeinit, husart);
 
     /* disable clock */
-    XPD_SAFE_CALLBACK(husart->ClockCtrl, DISABLE);
+    XPD_RCC_ClockDisable(husart->CtrlPos);
 
 	return XPD_OK;
 }

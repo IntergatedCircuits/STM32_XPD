@@ -216,10 +216,10 @@ void XPD_Init(void)
     XPD_InitTimer();
 
     /* Enable clock for PWR */
-    XPD_PWR_ClockCtrl(ENABLE);
+    XPD_RCC_ClockEnable(RCC_POS_PWR);
 
     /* Enable SYSCFG clock  */
-    XPD_SYSCFG_ClockCtrl(ENABLE);
+    XPD_RCC_ClockEnable(RCC_POS_SYSCFG);
 }
 
 /**

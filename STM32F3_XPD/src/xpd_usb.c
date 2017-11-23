@@ -259,7 +259,7 @@ XPD_ReturnType XPD_USB_Init(USB_HandleType * husb, const USB_InitType * Config)
     uint32_t i;
 
     /* Enable peripheral clock */
-    XPD_USB_ClockCtrl(ENABLE);
+    XPD_RCC_ClockEnable(RCC_POS_USB);
 
     /* Init endpoints structures (USB FS has 8 endpoints) */
     for (i = 0; i < USB_ENDPOINT_COUNT; i++)
@@ -346,7 +346,7 @@ XPD_ReturnType XPD_USB_Deinit(USB_HandleType * husb)
     XPD_SAFE_CALLBACK(husb->Callbacks.DepDeinit, husb);
 
     /* Peripheral clock disabled */
-    XPD_USB_ClockCtrl(DISABLE);
+    XPD_RCC_ClockDisable(RCC_POS_USB);
 
     return XPD_OK;
 }
@@ -826,7 +826,8 @@ void XPD_USB_IRQHandler(USB_HandleType * husb)
                 ep->Transfer.size   += count;
                 ep->Transfer.buffer += count;
 
-                /* If the last packet of the data, transfer is complete */
+                /* If the last packet of the data, transfer is complete
+                 * TODO 64 byte single message is not handled */
                 if ((ep->Transfer.length == 0) || (count < ep->MaxPacketSize))
                 {
                     /* Reception finished */
