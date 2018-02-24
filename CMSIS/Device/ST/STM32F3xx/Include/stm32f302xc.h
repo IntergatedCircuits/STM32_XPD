@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    stm32f302xc.h
   * @author  Benedek Kupper
-  * @version V0.2
-  * @date    2016-10-31
+  * @version 0.3
+  * @date    2018-01-28
   * @brief   CMSIS STM32F302xC Devices Peripheral Access Layer Header File.
   *
   *          This file contains:
@@ -11,20 +11,19 @@
   *           - Peripheral's registers declarations and bits definition
   *           - Macros to access peripheral's registers hardware
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
 /**
   ******************************************************************************
@@ -56,21 +55,20 @@
   *
   ******************************************************************************
   */
-
-/** @addtogroup CMSIS_Device
-  * @{
-  */
-
-/** @addtogroup stm32f302xc
-  * @{
-  */
-
 #ifndef __STM32F302xC_H
 #define __STM32F302xC_H
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif /* __cplusplus */
+
+/** @addtogroup CMSIS
+  * @{
+  */
+
+/** @addtogroup STM32F302xC
+  * @{
+  */
 
 /** @addtogroup Configuration_section_for_CMSIS
   * @{
@@ -88,7 +86,7 @@
 /**
   * @}
   */
-   
+
 /** @addtogroup Peripheral_interrupt_number_definition
   * @{
   */
@@ -4416,20 +4414,20 @@ typedef struct {
 typedef struct {
     union {
         struct {
-            __IO uint32_t EA : 4;                           /*!<  EndPoint Address */
-            __IO uint32_t STAT_TX : 2;                      /*!<  EndPoint TX Status */
-            __IO uint32_t DTOG_TX : 1;                      /*!<  EndPoint Data TOGGLE TX */
-            __IO uint32_t CTR_TX : 1;                       /*!<  EndPoint Correct TRansfer TX */
-            __IO uint32_t KIND : 1;                         /*!<  EndPoint KIND */
-            __IO uint32_t TYPE : 2;                         /*!<  EndPoint TYPE */
-            __IO uint32_t SETUP : 1;                        /*!<  EndPoint SETUP */
-            __IO uint32_t STAT_RX : 2;                      /*!<  EndPoint RX Status */
-            __IO uint32_t DTOG_RX : 1;                      /*!<  EndPoint Data TOGGLE RX */
-            __IO uint32_t CTR_RX : 1;                       /*!<  EndPoint Correct TRansfer RX */
-                 uint32_t __RESERVED1 : 16;
+            __IO uint16_t EA : 4;                           /*!<  EndPoint Address */
+            __IO uint16_t STAT_TX : 2;                      /*!<  EndPoint TX Status */
+            __IO uint16_t DTOG_TX : 1;                      /*!<  EndPoint Data TOGGLE TX */
+            __IO uint16_t CTR_TX : 1;                       /*!<  EndPoint Correct TRansfer TX */
+            __IO uint16_t KIND : 1;                         /*!<  EndPoint KIND */
+            __IO uint16_t TYPE : 2;                         /*!<  EndPoint TYPE */
+            __IO uint16_t SETUP : 1;                        /*!<  EndPoint SETUP */
+            __IO uint16_t STAT_RX : 2;                      /*!<  EndPoint RX Status */
+            __IO uint16_t DTOG_RX : 1;                      /*!<  EndPoint Data TOGGLE RX */
+            __IO uint16_t CTR_RX : 1;                       /*!<  EndPoint Correct TRansfer RX */
         } b;
-        __IO uint32_t w;
-    } EP[8];                                                /*!< USB endpoint register */
+        __IO uint16_t w;
+             uint32_t __RESERVED;
+    } EPR[8];                                               /*!< USB endpoint register */
          uint32_t __RESERVED0[8];
     union {
         struct {
@@ -4505,7 +4503,7 @@ typedef struct {
         __IO uint32_t DTOG_RX;                              /*!<  EndPoint Data TOGGLE RX */
         __IO uint32_t CTR_RX;                               /*!<  EndPoint Correct TRansfer RX */
              uint32_t __RESERVED0[16];
-    } EP[8];                                                /*!< USB endpoint register */
+    } EPR[8];                                               /*!< USB endpoint register */
          uint32_t __RESERVED0[8][32];
     struct {
         __IO uint32_t FRES;                                 /*!< Force USB RESet */
@@ -4606,7 +4604,9 @@ typedef struct {
     } SR;                                                   /*!< WWDG Status register,        Address offset: 0x08 */
 } WWDG_BitBand_TypeDef;
 
-
+/**
+  * @}
+  */
 
 /** @addtogroup Peripheral_memory_map
   * @{
@@ -4812,11 +4812,7 @@ typedef struct {
   * @}
   */
 
-/** @addtogroup Exported_constants
-  * @{
-  */
-
-  /** @addtogroup Peripheral_Registers_Bits_Definition
+/** @addtogroup Peripheral_registers_bits
   * @{
   */
 
@@ -16081,11 +16077,7 @@ typedef struct {
   * @}
   */
 
- /**
-  * @}
-  */
-
-/** @addtogroup Exported_macros
+/** @addtogroup Peripheral_properties
   * @{
   */
 
@@ -16570,50 +16562,7 @@ typedef struct {
   * @}
   */
 
-
-/******************************************************************************/
-/*  For a painless codes migration between the STM32F3xx device product       */
-/*  lines, the aliases defined below are put in place to overcome the         */
-/*  differences in the interrupt handlers and IRQn definitions.               */
-/*  No need to update developed interrupt code when moving across             */ 
-/*  product lines within the same STM32F3 Family                              */
-/******************************************************************************/
-
-/* Aliases for __IRQn */
-#define ADC1_IRQn       ADC1_2_IRQn
-#define COMP1_2_3_IRQn  COMP1_2_IRQn
-#define COMP2_IRQn      COMP1_2_IRQn
-#define COMP_IRQn       COMP1_2_IRQn
-#define COMP4_5_6_IRQn  COMP4_6_IRQn
-#define TIM15_IRQn      TIM1_BRK_TIM15_IRQn
-#define TIM18_DAC2_IRQn TIM1_CC_IRQn
-#define TIM17_IRQn      TIM1_TRG_COM_TIM17_IRQn
-#define TIM16_IRQn      TIM1_UP_TIM16_IRQn
-#define TIM6_DAC1_IRQn  TIM6_DAC_IRQn
-#define CEC_IRQn        USBWakeUp_IRQn
-#define USBWakeUp_IRQn  USBWakeUp_RMP_IRQn
-#define CAN_TX_IRQn     USB_HP_CAN_TX_IRQn
-#define CAN_RX0_IRQn    USB_LP_CAN_RX0_IRQn
-
-
-/* Aliases for __IRQHandler */
-#define ADC1_IRQHandler       ADC1_2_IRQHandler
-#define COMP1_2_3_IRQHandler  COMP1_2_IRQHandler
-#define COMP2_IRQHandler      COMP1_2_IRQHandler
-#define COMP_IRQHandler       COMP1_2_IRQHandler
-#define COMP4_5_6_IRQHandler  COMP4_6_IRQHandler
-#define TIM15_IRQHandler      TIM1_BRK_TIM15_IRQHandler
-#define TIM18_DAC2_IRQHandler TIM1_CC_IRQHandler
-#define TIM17_IRQHandler      TIM1_TRG_COM_TIM17_IRQHandler
-#define TIM16_IRQHandler      TIM1_UP_TIM16_IRQHandler
-#define TIM6_DAC1_IRQHandler  TIM6_DAC_IRQHandler
-#define CEC_IRQHandler        USBWakeUp_IRQHandler
-#define USBWakeUp_IRQHandler  USBWakeUp_RMP_IRQHandler
-#define CAN_TX_IRQHandler     USB_HP_CAN_TX_IRQHandler
-#define CAN_RX0_IRQHandler    USB_LP_CAN_RX0_IRQHandler
-
-
-/** @defgroup ADC_Internal_Channels ADC Internal Channels
+/** @addtogroup ADC_Internal_channels
   * @{
   */
 
@@ -16634,24 +16583,23 @@ typedef struct {
   * @}
   */
 
-/** @defgroup ADC_Calibration_Values ADC Calibration Values
+/** @addtogroup ADC_Calibration_values
   * @{
   */
 
 typedef struct
 {
-    const uint16_t CAL_LOW;
-    const uint16_t __RESERVED[4];
-    const uint16_t CAL_HIGH;
-}ADC_TempSensorCalibrationTypeDef;
+    const uint16_t TEMPSENSOR_LOW;
+    const uint16_t VREFINT;
+    const uint16_t __RESERVED[3];
+    const uint16_t TEMPSENSOR_HIGH;
+}ADC_CalibrationTypeDef;
 
-#define ADC_CAL_mV          3300
+#define ADC_VREF_CAL_mV     3300
 
-#define ADC_TEMPSENSOR      ((ADC_TempSensorCalibrationTypeDef *)((uint32_t)0x1FFFF7B8U))
-#define ADC_TEMPSENSOR_CAL_LOW      30
-#define ADC_TEMPSENSOR_CAL_HIGH     110
-
-#define ADC_VREFINT_CAL     (*((const uint16_t *)((uint32_t)0x1FFFF7BAU)))
+#define ADC_CALIB           ((ADC_CalibrationTypeDef *)((uint32_t)0x1FFFF7B8U))
+#define ADC_TEMP_CAL_LOW_C  30
+#define ADC_TEMP_CAL_HIGH_C 110
 
 #define ADC_VBAT_SCALER     2
 
@@ -16659,18 +16607,21 @@ typedef struct
   * @}
   */
 
-/** @defgroup Unique_Device_ID Unique Device ID
-  * @brief    Use the macro as it was defined as: uint32_t DEVICE_ID_REG[3]
+/** @addtogroup Device_Internal_Oscillators
   * @{
   */
 
-#define DEVICE_ID_REG        ((const uint32_t *)UID_BASE)
+/** @brief Value of the internal high speed oscillator in Hz */
+#define HSI_VALUE_Hz        8000000U
+
+/** @brief Approximate value of the internal low speed oscillator in Hz */
+#define LSI_VALUE_Hz        40000U
 
 /**
   * @}
   */
 
-/** @defgroup Device_Programming Addresses for device programming
+/** @addtogroup Device_Programming
   * @{
   */
 
@@ -16679,7 +16630,7 @@ typedef struct
 #define DEVICE_ID_REG        ((const uint32_t *)UID_BASE)
 
 /** @brief Device Flash Memory Size in kB */
-#define DEVICE_FLASH_SIZE_KB (*((const uint16_t *)FLASHSIZE_BASE))
+#define DEVICE_FLASH_SIZE_kB (*((const uint16_t *)FLASHSIZE_BASE))
 
 /** @brief System Memory Start Address */
 #define SYSTEM_MEMORY_ADDR   ((void *)0x1FFFD800U)
@@ -16688,7 +16639,7 @@ typedef struct
   * @}
   */
 
-/** @defgroup GPIO_Alternate_function_map GPIO Alternate function map
+/** @addtogroup GPIO_Alternate_function_map
   * @{
   */
 
@@ -16782,13 +16733,46 @@ typedef struct
   * @}
   */
 
-/** @defgroup RCC_Internal_Oscillators RCC Internal Oscillators
-  * @{
-  */
+/******************************************************************************/
+/*  For a painless codes migration between the STM32F3xx device product       */
+/*  lines, the aliases defined below are put in place to overcome the         */
+/*  differences in the interrupt handlers and IRQn definitions.               */
+/*  No need to update developed interrupt code when moving across             */
+/*  product lines within the same STM32F3 Family                              */
+/******************************************************************************/
 
-#define HSI_VALUE 8000000U  /* Value of the internal high speed oscillator in Hz */
+/* Aliases for __IRQn */
+#define ADC1_IRQn       ADC1_2_IRQn
+#define COMP1_2_3_IRQn  COMP1_2_IRQn
+#define COMP2_IRQn      COMP1_2_IRQn
+#define COMP_IRQn       COMP1_2_IRQn
+#define COMP4_5_6_IRQn  COMP4_6_IRQn
+#define TIM15_IRQn      TIM1_BRK_TIM15_IRQn
+#define TIM18_DAC2_IRQn TIM1_CC_IRQn
+#define TIM17_IRQn      TIM1_TRG_COM_TIM17_IRQn
+#define TIM16_IRQn      TIM1_UP_TIM16_IRQn
+#define TIM6_DAC1_IRQn  TIM6_DAC_IRQn
+#define CEC_IRQn        USBWakeUp_IRQn
+#define USBWakeUp_IRQn  USBWakeUp_RMP_IRQn
+#define CAN_TX_IRQn     USB_HP_CAN_TX_IRQn
+#define CAN_RX0_IRQn    USB_LP_CAN_RX0_IRQn
 
-#define LSI_VALUE 40000U    /* Approximate value of the internal low speed oscillator in Hz */
+
+/* Aliases for __IRQHandler */
+#define ADC1_IRQHandler       ADC1_2_IRQHandler
+#define COMP1_2_3_IRQHandler  COMP1_2_IRQHandler
+#define COMP2_IRQHandler      COMP1_2_IRQHandler
+#define COMP_IRQHandler       COMP1_2_IRQHandler
+#define COMP4_5_6_IRQHandler  COMP4_6_IRQHandler
+#define TIM15_IRQHandler      TIM1_BRK_TIM15_IRQHandler
+#define TIM18_DAC2_IRQHandler TIM1_CC_IRQHandler
+#define TIM17_IRQHandler      TIM1_TRG_COM_TIM17_IRQHandler
+#define TIM16_IRQHandler      TIM1_UP_TIM16_IRQHandler
+#define TIM6_DAC1_IRQHandler  TIM6_DAC_IRQHandler
+#define CEC_IRQHandler        USBWakeUp_IRQHandler
+#define USBWakeUp_IRQHandler  USBWakeUp_RMP_IRQHandler
+#define CAN_TX_IRQHandler     USB_HP_CAN_TX_IRQHandler
+#define CAN_RX0_IRQHandler    USB_LP_CAN_RX0_IRQHandler
 
 /**
   * @}

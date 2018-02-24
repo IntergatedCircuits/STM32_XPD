@@ -2,31 +2,30 @@
   ******************************************************************************
   * @file    stm32f042x6.h
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2017-01-08
-  * @brief   CMSIS Cortex-M0 Device Peripheral Access Layer Header File. 
-  *          This file contains all the peripheral register's definitions, bits 
-  *          definitions and memory mapping for STM32F0xx devices.            
-  *            
+  * @version 0.2
+  * @date    2018-01-28
+  * @brief   CMSIS Cortex-M0 Device Peripheral Access Layer Header File.
+  *          This file contains all the peripheral register's definitions, bits
+  *          definitions and memory mapping for STM32F0xx devices.
+  *
   *          This file contains:
   *           - Data structures and the address mapping for all peripherals
   *           - Peripheral's registers declarations and bits definition
   *           - Macros to access peripheral's registers hardware
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
 /**
   ******************************************************************************
@@ -58,25 +57,25 @@
   *
   ******************************************************************************
   */
-                                                           
-/** @addtogroup CMSIS
-  * @{
-  */
-
-/** @addtogroup stm32f042x6
-  * @{
-  */
-    
 #ifndef __STM32F042x6_H
 #define __STM32F042x6_H
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif /* __cplusplus */
 
-  /** @addtogroup Configuration_section_for_CMSIS
+/** @addtogroup CMSIS
   * @{
   */
+
+/** @addtogroup STM32F042x6
+  * @{
+  */
+
+/** @addtogroup Configuration_section_for_CMSIS
+  * @{
+  */
+
 /**
  * @brief Configuration of the Cortex-M0 Processor and Core Peripherals
  */
@@ -84,11 +83,11 @@
 #define __MPU_PRESENT             0 /*!< STM32F0xx do not provide MPU                  */
 #define __NVIC_PRIO_BITS          2 /*!< STM32F0xx uses 2 Bits for the Priority Levels */
 #define __Vendor_SysTickConfig    0     /*!< Set to 1 if different SysTick Config is used */
- 
+
 /**
   * @}
   */
-   
+
 /** @addtogroup Peripheral_interrupt_number_definition
   * @{
   */
@@ -144,7 +143,6 @@ typedef enum
 
 #include "core_cm0.h"            /* Cortex-M0 processor and core peripherals */
 #include "system_stm32f0xx.h"    /* STM32F0xx System Header */
-#include <stdint.h>
 
 /** @addtogroup Peripheral_registers_structures
   * @{
@@ -932,10 +930,70 @@ typedef struct {
   * @brief General Purpose I/O
   */
 typedef struct {
-    __IO uint32_t MODER;                                    /*!< GPIO port mode register,               Address offset: 0x00      */
-    __IO uint32_t OTYPER;                                   /*!< GPIO port output type register,        Address offset: 0x04      */
-    __IO uint32_t OSPEEDR;                                  /*!< GPIO port output speed register,       Address offset: 0x08      */
-    __IO uint32_t PUPDR;                                    /*!< GPIO port pull-up/pull-down register,  Address offset: 0x0C      */
+    union {
+        struct {
+            __IO uint32_t MODER0 : 2;
+            __IO uint32_t MODER1 : 2;
+            __IO uint32_t MODER2 : 2;
+            __IO uint32_t MODER3 : 2;
+            __IO uint32_t MODER4 : 2;
+            __IO uint32_t MODER5 : 2;
+            __IO uint32_t MODER6 : 2;
+            __IO uint32_t MODER7 : 2;
+            __IO uint32_t MODER8 : 2;
+            __IO uint32_t MODER9 : 2;
+            __IO uint32_t MODER10 : 2;
+            __IO uint32_t MODER11 : 2;
+            __IO uint32_t MODER12 : 2;
+            __IO uint32_t MODER13 : 2;
+            __IO uint32_t MODER14 : 2;
+            __IO uint32_t MODER15 : 2;
+        } b;
+        __IO uint32_t w;
+    } MODER;                                                /*!< GPIO port mode register,                     Address offset: 0x00      */
+    __IO uint32_t OTYPER;                                   /*!< GPIO port output type register,              Address offset: 0x04      */
+    union {
+        struct {
+            __IO uint32_t OSPEEDR0 : 2;
+            __IO uint32_t OSPEEDR1 : 2;
+            __IO uint32_t OSPEEDR2 : 2;
+            __IO uint32_t OSPEEDR3 : 2;
+            __IO uint32_t OSPEEDR4 : 2;
+            __IO uint32_t OSPEEDR5 : 2;
+            __IO uint32_t OSPEEDR6 : 2;
+            __IO uint32_t OSPEEDR7 : 2;
+            __IO uint32_t OSPEEDR8 : 2;
+            __IO uint32_t OSPEEDR9 : 2;
+            __IO uint32_t OSPEEDR10 : 2;
+            __IO uint32_t OSPEEDR11 : 2;
+            __IO uint32_t OSPEEDR12 : 2;
+            __IO uint32_t OSPEEDR13 : 2;
+            __IO uint32_t OSPEEDR14 : 2;
+            __IO uint32_t OSPEEDR15 : 2;
+        } b;
+        __IO uint32_t w;
+    } OSPEEDR;                                              /*!< GPIO port output speed register,             Address offset: 0x08      */
+    union {
+        struct {
+            __IO uint32_t PUPDR0 : 2;
+            __IO uint32_t PUPDR1 : 2;
+            __IO uint32_t PUPDR2 : 2;
+            __IO uint32_t PUPDR3 : 2;
+            __IO uint32_t PUPDR4 : 2;
+            __IO uint32_t PUPDR5 : 2;
+            __IO uint32_t PUPDR6 : 2;
+            __IO uint32_t PUPDR7 : 2;
+            __IO uint32_t PUPDR8 : 2;
+            __IO uint32_t PUPDR9 : 2;
+            __IO uint32_t PUPDR10 : 2;
+            __IO uint32_t PUPDR11 : 2;
+            __IO uint32_t PUPDR12 : 2;
+            __IO uint32_t PUPDR13 : 2;
+            __IO uint32_t PUPDR14 : 2;
+            __IO uint32_t PUPDR15 : 2;
+        } b;
+        __IO uint32_t w;
+    } PUPDR;                                                /*!< GPIO port pull-up/pull-down register,  Address offset: 0x0C      */
     __I  uint32_t IDR;                                      /*!< GPIO port input data register,         Address offset: 0x10      */
     __IO uint32_t ODR;                                      /*!< GPIO port output data register,        Address offset: 0x14      */
     __IO uint32_t BSRR;                                     /*!< GPIO port bit set/reset register,      Address offset: 0x18      */
@@ -2384,20 +2442,20 @@ typedef struct {
 typedef struct {
     union {
         struct {
-            __IO uint32_t EA : 4;                           /*!<  EndPoint Address */
-            __IO uint32_t STAT_TX : 2;                      /*!<  EndPoint TX Status */
-            __IO uint32_t DTOG_TX : 1;                      /*!<  EndPoint Data TOGGLE TX */
-            __IO uint32_t CTR_TX : 1;                       /*!<  EndPoint Correct TRansfer TX */
-            __IO uint32_t KIND : 1;                         /*!<  EndPoint KIND */
-            __IO uint32_t TYPE : 2;                         /*!<  EndPoint TYPE */
-            __IO uint32_t SETUP : 1;                        /*!<  EndPoint SETUP */
-            __IO uint32_t STAT_RX : 2;                      /*!<  EndPoint RX Status */
-            __IO uint32_t DTOG_RX : 1;                      /*!<  EndPoint Data TOGGLE RX */
-            __IO uint32_t CTR_RX : 1;                       /*!<  EndPoint Correct TRansfer RX */
-                 uint32_t __RESERVED1 : 16;
+            __IO uint16_t EA : 4;                           /*!<  EndPoint Address */
+            __IO uint16_t STAT_TX : 2;                      /*!<  EndPoint TX Status */
+            __IO uint16_t DTOG_TX : 1;                      /*!<  EndPoint Data TOGGLE TX */
+            __IO uint16_t CTR_TX : 1;                       /*!<  EndPoint Correct TRansfer TX */
+            __IO uint16_t KIND : 1;                         /*!<  EndPoint KIND */
+            __IO uint16_t TYPE : 2;                         /*!<  EndPoint TYPE */
+            __IO uint16_t SETUP : 1;                        /*!<  EndPoint SETUP */
+            __IO uint16_t STAT_RX : 2;                      /*!<  EndPoint RX Status */
+            __IO uint16_t DTOG_RX : 1;                      /*!<  EndPoint Data TOGGLE RX */
+            __IO uint16_t CTR_RX : 1;                       /*!<  EndPoint Correct TRansfer RX */
         } b;
-        __IO uint32_t w;
-    } EP[8];                                                /*!< USB endpoint register */
+        __IO uint16_t w;
+             uint32_t __RESERVED;
+    } EPR[8];                                               /*!< USB endpoint register */
          uint32_t __RESERVED0[8];
     union {
         struct {
@@ -2525,7 +2583,7 @@ typedef struct {
 /** 
   * @}
   */
-  
+
 /** @addtogroup Peripheral_memory_map
   * @{
   */
@@ -2595,10 +2653,10 @@ typedef struct {
 /**
   * @}
   */
-  
+
 /** @addtogroup Peripheral_declaration
   * @{
-  */  
+  */
 
 #define TIM2                ((TIM_TypeDef *) TIM2_BASE)
 #define TIM3                ((TIM_TypeDef *) TIM3_BASE)
@@ -2642,15 +2700,12 @@ typedef struct {
 #define GPIOC               ((GPIO_TypeDef *) GPIOC_BASE)
 #define GPIOF               ((GPIO_TypeDef *) GPIOF_BASE)
 #define USB                 ((USB_TypeDef *) USB_BASE)
+
 /**
   * @}
   */
 
-/** @addtogroup Exported_constants
-  * @{
-  */
-
-  /** @addtogroup Peripheral_Registers_Bits_Definition
+/** @addtogroup Peripheral_registers_bits
   * @{
   */
 
@@ -12244,12 +12299,7 @@ typedef struct {
   * @}
   */
 
- /**
-  * @}
-  */
-
-
-/** @addtogroup Exported_macro
+/** @addtogroup Peripheral_properties
   * @{
   */
 
@@ -12304,7 +12354,7 @@ typedef struct {
 /****************************** RTC Instances *********************************/
 #define IS_RTC_ALL_INSTANCE(INSTANCE)  ((INSTANCE) == RTC)
 
-/****************************** SMBUS Instances *********************************/
+/****************************** SMBUS Instances *******************************/
 #define IS_SMBUS_ALL_INSTANCE(INSTANCE) ((INSTANCE) == I2C1)
 
 /****************************** SPI Instances *********************************/
@@ -12529,14 +12579,14 @@ typedef struct {
 #define IS_USART_INSTANCE(INSTANCE) (((INSTANCE) == USART1) || \
                                      ((INSTANCE) == USART2))
                                      
-/******************** USART Instances : auto Baud rate detection **************/                                     
+/******************** USART Instances : auto Baud rate detection **************/
 #define IS_USART_AUTOBAUDRATE_DETECTION_INSTANCE(INSTANCE) ((INSTANCE) == USART1)
-                                                                                              
+
 /******************** UART Instances : Asynchronous mode **********************/
 #define IS_UART_INSTANCE(INSTANCE)   (((INSTANCE) == USART1) || \
                                       ((INSTANCE) == USART2))
 
-/******************** UART Instances : Half-Duplex mode **********************/
+/******************** UART Instances : Half-Duplex mode ***********************/
 #define IS_UART_HALFDUPLEX_INSTANCE(INSTANCE)   (((INSTANCE) == USART1) || \
                                                  ((INSTANCE) == USART2))
 
@@ -12552,11 +12602,11 @@ typedef struct {
 /* Old macro definition maintained for legacy purpose */
 #define IS_UART_WAKEUP_INSTANCE         IS_UART_WAKEUP_FROMSTOP_INSTANCE
 
-/****************** UART Instances : Driver enable detection ********************/
+/****************** UART Instances : Driver enable detection ******************/
 #define IS_UART_DRIVER_ENABLE_INSTANCE(INSTANCE) (((INSTANCE) == USART1) || \
                                                   ((INSTANCE) == USART2))
 
-/****************************** USB Instances ********************************/
+/****************************** USB Instances *********************************/
 #define IS_USB_ALL_INSTANCE(INSTANCE)  ((INSTANCE) == USB)
 
 /****************************** WWDG Instances ********************************/
@@ -12566,38 +12616,7 @@ typedef struct {
   * @}
   */
 
-
-/******************************************************************************/
-/*  For a painless codes migration between the STM32F0xx device product       */
-/*  lines, the aliases defined below are put in place to overcome the         */
-/*  differences in the interrupt handlers and IRQn definitions.               */
-/*  No need to update developed interrupt code when moving across             */
-/*  product lines within the same STM32F0 Family                              */
-/******************************************************************************/
-
-/* Aliases for __IRQn */
-#define ADC1_COMP_IRQn             ADC1_IRQn
-#define DMA1_Ch1_IRQn              DMA1_Channel1_IRQn
-#define DMA1_Ch2_3_DMA2_Ch1_2_IRQn DMA1_Channel2_3_IRQn
-#define DMA1_Channel4_5_6_7_IRQn   DMA1_Channel4_5_IRQn
-#define DMA1_Ch4_7_DMA2_Ch3_5_IRQn DMA1_Channel4_5_IRQn
-#define PVD_IRQn                   PVD_VDDIO2_IRQn
-#define VDDIO2_IRQn                PVD_VDDIO2_IRQn
-#define RCC_IRQn                   RCC_CRS_IRQn
-
-
-/* Aliases for __IRQHandler */
-#define ADC1_COMP_IRQHandler             ADC1_IRQHandler
-#define DMA1_Ch1_IRQHandler              DMA1_Channel1_IRQHandler
-#define DMA1_Ch2_3_DMA2_Ch1_2_IRQHandler DMA1_Channel2_3_IRQHandler
-#define DMA1_Channel4_5_6_7_IRQHandler   DMA1_Channel4_5_IRQHandler
-#define DMA1_Ch4_7_DMA2_Ch3_5_IRQHandler DMA1_Channel4_5_IRQHandler
-#define PVD_IRQHandler                   PVD_VDDIO2_IRQHandler
-#define VDDIO2_IRQHandler                PVD_VDDIO2_IRQHandler
-#define RCC_IRQHandler                   RCC_CRS_IRQHandler
-
-
-/** @defgroup ADC_Internal_Channels ADC Internal Channels
+/** @addtogroup ADC_Internal_channels
   * @{
   */
 
@@ -12609,24 +12628,23 @@ typedef struct {
   * @}
   */
 
-/** @defgroup ADC_Calibration_Values ADC Calibration Values
+/** @addtogroup ADC_Calibration_values
   * @{
   */
 
 typedef struct
 {
-    const uint16_t CAL_LOW;
-    const uint16_t __RESERVED[4];
-    const uint16_t CAL_HIGH;
-}ADC_TempSensorCalibrationTypeDef;
+    const uint16_t TEMPSENSOR_LOW;
+    const uint16_t VREFINT;
+    const uint16_t __RESERVED[3];
+    const uint16_t TEMPSENSOR_HIGH;
+}ADC_CalibrationTypeDef;
 
-#define ADC_CAL_mV          3300
+#define ADC_VREF_CAL_mV     3300
 
-#define ADC_TEMPSENSOR      ((ADC_TempSensorCalibrationTypeDef *)((uint32_t)0x1FFFF7B8U))
-#define ADC_TEMPSENSOR_CAL_LOW      30
-#define ADC_TEMPSENSOR_CAL_HIGH     110
-
-#define ADC_VREFINT_CAL     (*((const uint16_t *)((uint32_t)0x1FFFF7BAU)))
+#define ADC_CALIB           ((ADC_CalibrationTypeDef *)((uint32_t)0x1FFFF7B8U))
+#define ADC_TEMP_CAL_LOW_C  30
+#define ADC_TEMP_CAL_HIGH_C 110
 
 #define ADC_VBAT_SCALER     2
 
@@ -12634,7 +12652,24 @@ typedef struct
   * @}
   */
 
-/** @defgroup Device_Programming Addresses for device programming
+/** @addtogroup Device_Internal_oscillators
+  * @{
+  */
+
+/** @brief Value of the HSI48 internal oscillator in Hz */
+#define HSI48_VALUE_Hz      48000000U
+
+/** @brief Value of the internal high speed oscillator in Hz */
+#define HSI_VALUE_Hz        8000000U
+
+/** @brief Approximate value of the internal low speed oscillator in Hz */
+#define LSI_VALUE_Hz        40000U
+
+/**
+  * @}
+  */
+
+/** @addtogroup Device_Programming
   * @{
   */
 
@@ -12643,7 +12678,7 @@ typedef struct
 #define DEVICE_ID_REG        ((const uint32_t *)UID_BASE)
 
 /** @brief Device Flash Memory Size in kB */
-#define DEVICE_FLASH_SIZE_KB (*((const uint16_t *)FLASHSIZE_BASE))
+#define DEVICE_FLASH_SIZE_kB (*((const uint16_t *)FLASHSIZE_BASE))
 
 /** @brief System Memory Start Address */
 #define SYSTEM_MEMORY_ADDR   ((void *)0x1FFFC400U)
@@ -12652,9 +12687,10 @@ typedef struct
   * @}
   */
 
-/** @defgroup GPIO_Alternate_function_map GPIO Alternate function map
+/** @addtogroup GPIO_Alternate_function_map
   * @{
   */
+
 /* AF 0 */
 #define GPIO_EVENTOUT_AF0     ((uint8_t)0x00)  /*!< AF0: EVENTOUT Alternate Function mapping  */
 #define GPIO_SWDIO_AF0        ((uint8_t)0x00)  /*!< AF0: SWDIO Alternate Function mapping     */
@@ -12713,15 +12749,34 @@ typedef struct
   * @}
   */
 
-/** @defgroup RCC_Internal_Oscillators RCC Internal Oscillators
-  * @{
-  */
+/******************************************************************************/
+/*  For a painless codes migration between the STM32F0xx device product       */
+/*  lines, the aliases defined below are put in place to overcome the         */
+/*  differences in the interrupt handlers and IRQn definitions.               */
+/*  No need to update developed interrupt code when moving across             */
+/*  product lines within the same STM32F0 Family                              */
+/******************************************************************************/
 
-#define HSI48_VALUE 48000000U   /* Value of the HSI48 Internal oscillator in Hz */
+/* Aliases for __IRQn */
+#define ADC1_COMP_IRQn             ADC1_IRQn
+#define DMA1_Ch1_IRQn              DMA1_Channel1_IRQn
+#define DMA1_Ch2_3_DMA2_Ch1_2_IRQn DMA1_Channel2_3_IRQn
+#define DMA1_Channel4_5_6_7_IRQn   DMA1_Channel4_5_IRQn
+#define DMA1_Ch4_7_DMA2_Ch3_5_IRQn DMA1_Channel4_5_IRQn
+#define PVD_IRQn                   PVD_VDDIO2_IRQn
+#define VDDIO2_IRQn                PVD_VDDIO2_IRQn
+#define RCC_IRQn                   RCC_CRS_IRQn
 
-#define HSI_VALUE 8000000U      /* Value of the internal high speed oscillator in Hz */
 
-#define LSI_VALUE 40000U        /* Approximate value of the internal low speed oscillator in Hz */
+/* Aliases for __IRQHandler */
+#define ADC1_COMP_IRQHandler             ADC1_IRQHandler
+#define DMA1_Ch1_IRQHandler              DMA1_Channel1_IRQHandler
+#define DMA1_Ch2_3_DMA2_Ch1_2_IRQHandler DMA1_Channel2_3_IRQHandler
+#define DMA1_Channel4_5_6_7_IRQHandler   DMA1_Channel4_5_IRQHandler
+#define DMA1_Ch4_7_DMA2_Ch3_5_IRQHandler DMA1_Channel4_5_IRQHandler
+#define PVD_IRQHandler                   PVD_VDDIO2_IRQHandler
+#define VDDIO2_IRQHandler                PVD_VDDIO2_IRQHandler
+#define RCC_IRQHandler                   RCC_CRS_IRQHandler
 
 /**
   * @}

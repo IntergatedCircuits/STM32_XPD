@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    stm32f417xx.h
   * @author  Benedek Kupper
-  * @version V0.2
-  * @date    2016-11-05
+  * @version 0.3
+  * @date    2018-01-28
   * @brief   CMSIS STM32F417xx Device Peripheral Access Layer Header File.
   *
   *          This file contains:
@@ -11,20 +11,19 @@
   *           - Peripheral's registers declarations and bits definition
   *           - Macros to access peripheral's registers hardware
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
 /**
   ******************************************************************************
@@ -56,21 +55,20 @@
   *
   ******************************************************************************
   */
-
-/** @addtogroup CMSIS_Device
-  * @{
-  */
-
-/** @addtogroup stm32f417xx
-  * @{
-  */
-    
 #ifndef __STM32F417xx_H
 #define __STM32F417xx_H
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif /* __cplusplus */
+
+/** @addtogroup CMSIS
+  * @{
+  */
+
+/** @addtogroup STM32F417xx
+  * @{
+  */
 
 /** @addtogroup Configuration_section_for_CMSIS
   * @{
@@ -7056,14 +7054,10 @@ typedef struct {
   * @}
   */
 
-/** @addtogroup Exported_constants
+/** @addtogroup Peripheral_registers_bits
   * @{
   */
-  
-  /** @addtogroup Peripheral_Registers_Bits_Definition
-  * @{
-  */
-    
+
 /******************************************************************************/
 /*                         Peripheral Registers_Bits_Definition               */
 /******************************************************************************/
@@ -21149,11 +21143,7 @@ typedef struct {
   * @}
   */ 
 
-/**
-  * @}
-  */
-
-/** @addtogroup Exported_macros
+/** @addtogroup Peripheral_properties
   * @{
   */
 
@@ -21582,62 +21572,11 @@ typedef struct {
 /****************************** WWDG Instances ********************************/
 #define IS_WWDG_ALL_INSTANCE(INSTANCE)  ((INSTANCE) == WWDG)
 
-/****************************** USB Exported Constants ************************/
-#define USB_OTG_FS_HOST_MAX_CHANNEL_NBR                8U
-#define USB_OTG_FS_MAX_IN_ENDPOINTS                    4U    /* Including EP0 */
-#define USB_OTG_FS_MAX_OUT_ENDPOINTS                   4U    /* Including EP0 */
-#define USB_OTG_FS_TOTAL_FIFO_SIZE                     1280U /* in Bytes */
-
-/*
- * @brief Specific devices reset values definitions
- */
-#define RCC_PLLCFGR_RST_VALUE              0x24003010U
-#define RCC_PLLI2SCFGR_RST_VALUE           0x20003000U
-
-#define RCC_MAX_FREQUENCY           168000000U         /*!< Max frequency of family in Hz*/
-#define RCC_MAX_FREQUENCY_SCALE1    RCC_MAX_FREQUENCY  /*!< Maximum frequency for system clock at power scale1, in Hz */
-#define RCC_MAX_FREQUENCY_SCALE2    144000000U         /*!< Maximum frequency for system clock at power scale2, in Hz */
-#define RCC_PLLVCO_OUTPUT_MIN       100000000U       /*!< Frequency min for PLLVCO output, in Hz */
-#define RCC_PLLVCO_INPUT_MIN           950000U       /*!< Frequency min for PLLVCO input, in Hz  */
-#define RCC_PLLVCO_INPUT_MAX          2100000U       /*!< Frequency max for PLLVCO input, in Hz  */
-#define RCC_PLLVCO_OUTPUT_MAX       432000000U       /*!< Frequency max for PLLVCO output, in Hz */
-
-#define RCC_PLLN_MIN_VALUE                 50U
-#define RCC_PLLN_MAX_VALUE                432U
-
-#define FLASH_SCALE1_LATENCY1_FREQ   30000000U      /*!< HCLK frequency to set FLASH latency 1 in power scale 1  */
-#define FLASH_SCALE1_LATENCY2_FREQ   60000000U      /*!< HCLK frequency to set FLASH latency 2 in power scale 1  */
-#define FLASH_SCALE1_LATENCY3_FREQ   90000000U      /*!< HCLK frequency to set FLASH latency 3 in power scale 1  */
-#define FLASH_SCALE1_LATENCY4_FREQ   120000000U     /*!< HCLK frequency to set FLASH latency 4 in power scale 1  */
-#define FLASH_SCALE1_LATENCY5_FREQ   150000000U     /*!< HCLK frequency to set FLASH latency 5 in power scale 1  */
-
-#define FLASH_SCALE2_LATENCY1_FREQ   30000000U      /*!< HCLK frequency to set FLASH latency 1 in power scale 2  */
-#define FLASH_SCALE2_LATENCY2_FREQ   60000000U      /*!< HCLK frequency to set FLASH latency 2 in power scale 2  */
-#define FLASH_SCALE2_LATENCY3_FREQ   90000000U      /*!< HCLK frequency to set FLASH latency 3 in power scale 2  */
-#define FLASH_SCALE2_LATENCY4_FREQ   12000000U      /*!< HCLK frequency to set FLASH latency 4 in power scale 2  */
-
-#define USB_OTG_HS_HOST_MAX_CHANNEL_NBR                12U
-#define USB_OTG_HS_MAX_IN_ENDPOINTS                    6U    /* Including EP0 */
-#define USB_OTG_HS_MAX_OUT_ENDPOINTS                   6U    /* Including EP0 */
-#define USB_OTG_HS_TOTAL_FIFO_SIZE                     4096U /* in Bytes */
-/******************************************************************************/
-/*  For a painless codes migration between the STM32F4xx device product       */
-/*  lines, the aliases defined below are put in place to overcome the         */
-/*  differences in the interrupt handlers and IRQn definitions.               */
-/*  No need to update developed interrupt code when moving across             */
-/*  product lines within the same STM32F4 Family                              */
-/******************************************************************************/
-/* Aliases for __IRQn */
-#define FMC_IRQn              FSMC_IRQn
-
-/* Aliases for __IRQHandler */
-#define FMC_IRQHandler        FSMC_IRQHandler
-
 /**
   * @}
   */
 
-/** @defgroup ADC_Internal_Channels ADC Internal Channels
+/** @addtogroup ADC_Internal_channels
   * @{
   */
 
@@ -21649,23 +21588,22 @@ typedef struct {
   * @}
   */
 
-/** @defgroup ADC_Calibration_Values ADC Calibration Values
+/** @addtogroup ADC_Calibration_values
   * @{
   */
 
 typedef struct
 {
-    const uint16_t CAL_LOW;
-    const uint16_t CAL_HIGH;
-}ADC_TempSensorCalibrationTypeDef;
+    const uint16_t VREFINT;
+    const uint16_t TEMPSENSOR_LOW;
+    const uint16_t TEMPSENSOR_HIGH;
+}ADC_CalibrationTypeDef;
 
-#define ADC_CAL_mV          3300
+#define ADC_VREF_CAL_mV     3300
 
-#define ADC_TEMPSENSOR      ((ADC_TempSensorCalibrationTypeDef *)((uint32_t)0x1FFF7A2CU))
-#define ADC_TEMPSENSOR_CAL_LOW      30
-#define ADC_TEMPSENSOR_CAL_HIGH     110
-
-#define ADC_VREFINT_CAL     (*((const uint16_t *)((uint32_t)0x1FFF7A2AU)))
+#define ADC_CALIB           ((ADC_CalibrationTypeDef *)((uint32_t)0x1FFF7A2AU))
+#define ADC_TEMP_CAL_LOW_C  30
+#define ADC_TEMP_CAL_HIGH_C 110
 
 #define ADC_VBAT_SCALER     2
 
@@ -21673,7 +21611,21 @@ typedef struct
   * @}
   */
 
-/** @defgroup Device_Programming Addresses for device programming
+/** @addtogroup Device_Internal_Oscillators
+  * @{
+  */
+
+/** @brief Value of the internal high speed oscillator in Hz */
+#define HSI_VALUE_Hz        16000000U
+
+/** @brief Approximate value of the internal low speed oscillator in Hz */
+#define LSI_VALUE_Hz        32000U
+
+/**
+  * @}
+  */
+
+/** @addtogroup Device_Programming
   * @{
   */
 
@@ -21682,7 +21634,7 @@ typedef struct
 #define DEVICE_ID_REG        ((const uint32_t *)UID_BASE)
 
 /** @brief Device Flash Memory Size in kB */
-#define DEVICE_FLASH_SIZE_KB (*((const uint16_t *)FLASHSIZE_BASE))
+#define DEVICE_FLASH_SIZE_kB (*((const uint16_t *)FLASHSIZE_BASE))
 
 /** @brief System Memory Start Address */
 #define SYSTEM_MEMORY_ADDR   ((void *)0x1FFF0000U)
@@ -21691,7 +21643,7 @@ typedef struct
   * @}
   */
 
-/** @defgroup GPIO_Alternate_function_map GPIO Alternate function map
+/** @addtogroup GPIO_Alternate_function_map
   * @{
   */
 
@@ -21771,17 +21723,56 @@ typedef struct
   * @}
   */
 
-/** @defgroup RCC_Internal_Oscillators RCC Internal Oscillators
-  * @{
-  */
+/****************************** USB Exported Constants ************************/
+#define USB_OTG_FS_HOST_MAX_CHANNEL_NBR                8U
+#define USB_OTG_FS_MAX_IN_ENDPOINTS                    4U    /* Including EP0 */
+#define USB_OTG_FS_MAX_OUT_ENDPOINTS                   4U    /* Including EP0 */
+#define USB_OTG_FS_TOTAL_FIFO_SIZE                     1280U /* in Bytes */
 
-#define HSI_VALUE 16000000U /* Value of the internal high speed oscillator in Hz */
+/*
+ * @brief Specific devices reset values definitions
+ */
+#define RCC_PLLCFGR_RST_VALUE              0x24003010U
+#define RCC_PLLI2SCFGR_RST_VALUE           0x20003000U
 
-#define LSI_VALUE 32000U    /* Approximate value of the internal low speed oscillator in Hz */
+#define RCC_MAX_FREQUENCY           168000000U         /*!< Max frequency of family in Hz*/
+#define RCC_MAX_FREQUENCY_SCALE1    RCC_MAX_FREQUENCY  /*!< Maximum frequency for system clock at power scale1, in Hz */
+#define RCC_MAX_FREQUENCY_SCALE2    144000000U         /*!< Maximum frequency for system clock at power scale2, in Hz */
+#define RCC_PLLVCO_OUTPUT_MIN       100000000U       /*!< Frequency min for PLLVCO output, in Hz */
+#define RCC_PLLVCO_INPUT_MIN           950000U       /*!< Frequency min for PLLVCO input, in Hz  */
+#define RCC_PLLVCO_INPUT_MAX          2100000U       /*!< Frequency max for PLLVCO input, in Hz  */
+#define RCC_PLLVCO_OUTPUT_MAX       432000000U       /*!< Frequency max for PLLVCO output, in Hz */
 
-/**
-  * @}
-  */
+#define RCC_PLLN_MIN_VALUE                 50U
+#define RCC_PLLN_MAX_VALUE                432U
+
+#define FLASH_SCALE1_LATENCY1_FREQ   30000000U      /*!< HCLK frequency to set FLASH latency 1 in power scale 1  */
+#define FLASH_SCALE1_LATENCY2_FREQ   60000000U      /*!< HCLK frequency to set FLASH latency 2 in power scale 1  */
+#define FLASH_SCALE1_LATENCY3_FREQ   90000000U      /*!< HCLK frequency to set FLASH latency 3 in power scale 1  */
+#define FLASH_SCALE1_LATENCY4_FREQ   120000000U     /*!< HCLK frequency to set FLASH latency 4 in power scale 1  */
+#define FLASH_SCALE1_LATENCY5_FREQ   150000000U     /*!< HCLK frequency to set FLASH latency 5 in power scale 1  */
+
+#define FLASH_SCALE2_LATENCY1_FREQ   30000000U      /*!< HCLK frequency to set FLASH latency 1 in power scale 2  */
+#define FLASH_SCALE2_LATENCY2_FREQ   60000000U      /*!< HCLK frequency to set FLASH latency 2 in power scale 2  */
+#define FLASH_SCALE2_LATENCY3_FREQ   90000000U      /*!< HCLK frequency to set FLASH latency 3 in power scale 2  */
+#define FLASH_SCALE2_LATENCY4_FREQ   12000000U      /*!< HCLK frequency to set FLASH latency 4 in power scale 2  */
+
+#define USB_OTG_HS_HOST_MAX_CHANNEL_NBR                12U
+#define USB_OTG_HS_MAX_IN_ENDPOINTS                    6U    /* Including EP0 */
+#define USB_OTG_HS_MAX_OUT_ENDPOINTS                   6U    /* Including EP0 */
+#define USB_OTG_HS_TOTAL_FIFO_SIZE                     4096U /* in Bytes */
+/******************************************************************************/
+/*  For a painless codes migration between the STM32F4xx device product       */
+/*  lines, the aliases defined below are put in place to overcome the         */
+/*  differences in the interrupt handlers and IRQn definitions.               */
+/*  No need to update developed interrupt code when moving across             */
+/*  product lines within the same STM32F4 Family                              */
+/******************************************************************************/
+/* Aliases for __IRQn */
+#define FMC_IRQn              FSMC_IRQn
+
+/* Aliases for __IRQHandler */
+#define FMC_IRQHandler        FSMC_IRQHandler
 
 /**
   * @}

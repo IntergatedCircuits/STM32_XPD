@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    stm32l476xx.h
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2017-04-10
+  * @version 0.2
+  * @date    2018-01-28
   * @brief   CMSIS STM32L476xx Device Peripheral Access Layer Header File.
   *
   *          This file contains:
@@ -11,20 +11,19 @@
   *           - Peripheral's registers declarations and bits definition
   *           - Macros to access peripheral's registers hardware
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
 /**
   ******************************************************************************
@@ -56,21 +55,20 @@
   *
   ******************************************************************************
   */
-
-/** @addtogroup CMSIS_Device
-  * @{
-  */
-
-/** @addtogroup stm32l476xx
-  * @{
-  */
-
 #ifndef __STM32L476xx_H
 #define __STM32L476xx_H
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif /* __cplusplus */
+
+/** @addtogroup CMSIS
+  * @{
+  */
+
+/** @addtogroup STM32L476xx
+  * @{
+  */
 
 /** @addtogroup Configuration_section_for_CMSIS
   * @{
@@ -8438,11 +8436,7 @@ typedef struct {
   * @}
   */
 
-/** @addtogroup Exported_constants
-  * @{
-  */
-
-/** @addtogroup Peripheral_Registers_Bits_Definition
+/** @addtogroup Peripheral_registers_bits
   * @{
   */
 
@@ -24888,11 +24882,7 @@ typedef struct {
   * @}
   */
 
-/**
-  * @}
-  */
-
-/** @addtogroup Exported_macros
+/** @addtogroup Peripheral_properties
   * @{
   */
 
@@ -25469,40 +25459,7 @@ typedef struct {
   * @}
   */
 
-
-/******************************************************************************/
-/*  For a painless codes migration between the STM32L4xx device product       */
-/*  lines, the aliases defined below are put in place to overcome the         */
-/*  differences in the interrupt handlers and IRQn definitions.               */
-/*  No need to update developed interrupt code when moving across             */
-/*  product lines within the same STM32L4 Family                              */
-/******************************************************************************/
-
-/* Aliases for __IRQn */
-#define ADC1_IRQn                      ADC1_2_IRQn
-#define TIM1_TRG_COM_IRQn              TIM1_TRG_COM_TIM17_IRQn
-#define TIM8_IRQn                      TIM8_UP_IRQn
-#define HASH_RNG_IRQn                  RNG_IRQn
-#define DFSDM0_IRQn                    DFSDM1_FLT0_IRQn
-#define DFSDM1_IRQn                    DFSDM1_FLT1_IRQn
-#define DFSDM2_IRQn                    DFSDM1_FLT2_IRQn
-#define DFSDM3_IRQn                    DFSDM1_FLT3_IRQn
-
-/* Aliases for __IRQHandler */
-#define ADC1_IRQHandler                ADC1_2_IRQHandler
-#define TIM1_TRG_COM_IRQHandler        TIM1_TRG_COM_TIM17_IRQHandler
-#define TIM8_IRQHandler                TIM8_UP_IRQHandler
-#define HASH_RNG_IRQHandler            RNG_IRQHandler
-#define DFSDM0_IRQHandler              DFSDM1_FLT0_IRQHandler
-#define DFSDM1_IRQHandler              DFSDM1_FLT1_IRQHandler
-#define DFSDM2_IRQHandler              DFSDM1_FLT2_IRQHandler
-#define DFSDM3_IRQHandler              DFSDM1_FLT3_IRQHandler
-
-/**
-  * @}
-  */
-
-/** @defgroup ADC_Internal_Channels ADC Internal Channels
+/** @addtogroup ADC_Internal_channels
   * @{
   */
 
@@ -25534,24 +25491,23 @@ typedef struct {
   * @}
   */
 
-/** @defgroup ADC_Calibration_Values ADC Calibration Values
+/** @addtogroup ADC_Calibration_values
   * @{
   */
 
 typedef struct
 {
-    const uint16_t CAL_LOW;
-    const uint16_t __RESERVED[10];
-    const uint16_t CAL_HIGH;
-}ADC_TempSensorCalibrationTypeDef;
+    const uint16_t TEMPSENSOR_LOW;
+    const uint16_t VREFINT;
+    const uint16_t __RESERVED[9];
+    const uint16_t TEMPSENSOR_HIGH;
+}ADC_CalibrationTypeDef;
 
-#define ADC_CAL_mV          3000
+#define ADC_VREF_CAL_mV     3000
 
-#define ADC_TEMPSENSOR      ((ADC_TempSensorCalibrationTypeDef *)((uint32_t)0x1FFF75A8))
-#define ADC_TEMPSENSOR_CAL_LOW      30
-#define ADC_TEMPSENSOR_CAL_HIGH     110
-
-#define ADC_VREFINT_CAL     (*((const uint16_t *)((uint32_t)0x1FFF75AA)))
+#define ADC_CALIB           ((ADC_CalibrationTypeDef *)((uint32_t)0x1FFF75A8U))
+#define ADC_TEMP_CAL_LOW_C  30
+#define ADC_TEMP_CAL_HIGH_C 130
 
 #define ADC_VBAT_SCALER     3
 
@@ -25559,7 +25515,21 @@ typedef struct
   * @}
   */
 
-/** @defgroup Device_Programming Addresses for device programming
+/** @addtogroup Device_Internal_oscillators
+  * @{
+  */
+
+/** @brief Value of the internal high speed oscillator in Hz */
+#define HSI_VALUE_Hz        16000000U
+
+/** @brief Approximate value of the internal low speed oscillator in Hz */
+#define LSI_VALUE_Hz        32000U
+
+/**
+  * @}
+  */
+
+/** @addtogroup Device_Programming
   * @{
   */
 
@@ -25568,7 +25538,7 @@ typedef struct
 #define DEVICE_ID_REG        ((const uint32_t *)UID_BASE)
 
 /** @brief Device Flash Memory Size in kB */
-#define DEVICE_FLASH_SIZE_KB (*((const uint16_t *)FLASHSIZE_BASE))
+#define DEVICE_FLASH_SIZE_kB (*((const uint16_t *)FLASHSIZE_BASE))
 
 /** @brief System Memory Start Address */
 #define SYSTEM_MEMORY_ADDR   ((void *)0x1FFF00000U)
@@ -25577,7 +25547,7 @@ typedef struct
   * @}
   */
 
-/** @defgroup GPIO_Alternate_function_map GPIO Alternate function map
+/** @addtogroup GPIO_Alternate_function_map
   * @{
   */
 
@@ -25671,13 +25641,33 @@ typedef struct
   * @}
   */
 
-/** @defgroup RCC_Internal_Oscillators RCC Internal Oscillators
-  * @{
-  */
+/******************************************************************************/
+/*  For a painless codes migration between the STM32L4xx device product       */
+/*  lines, the aliases defined below are put in place to overcome the         */
+/*  differences in the interrupt handlers and IRQn definitions.               */
+/*  No need to update developed interrupt code when moving across             */
+/*  product lines within the same STM32L4 Family                              */
+/******************************************************************************/
 
-#define HSI_VALUE 16000000U /* Value of the internal high speed oscillator in Hz */
+/* Aliases for __IRQn */
+#define ADC1_IRQn                      ADC1_2_IRQn
+#define TIM1_TRG_COM_IRQn              TIM1_TRG_COM_TIM17_IRQn
+#define TIM8_IRQn                      TIM8_UP_IRQn
+#define HASH_RNG_IRQn                  RNG_IRQn
+#define DFSDM0_IRQn                    DFSDM1_FLT0_IRQn
+#define DFSDM1_IRQn                    DFSDM1_FLT1_IRQn
+#define DFSDM2_IRQn                    DFSDM1_FLT2_IRQn
+#define DFSDM3_IRQn                    DFSDM1_FLT3_IRQn
 
-#define LSI_VALUE 32000U    /* Approximate value of the internal low speed oscillator in Hz */
+/* Aliases for __IRQHandler */
+#define ADC1_IRQHandler                ADC1_2_IRQHandler
+#define TIM1_TRG_COM_IRQHandler        TIM1_TRG_COM_TIM17_IRQHandler
+#define TIM8_IRQHandler                TIM8_UP_IRQHandler
+#define HASH_RNG_IRQHandler            RNG_IRQHandler
+#define DFSDM0_IRQHandler              DFSDM1_FLT0_IRQHandler
+#define DFSDM1_IRQHandler              DFSDM1_FLT1_IRQHandler
+#define DFSDM2_IRQHandler              DFSDM1_FLT2_IRQHandler
+#define DFSDM3_IRQHandler              DFSDM1_FLT3_IRQHandler
 
 /**
   * @}
