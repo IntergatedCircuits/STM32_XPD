@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    core_cm0plus.h
   * @author  Benedek Kupper
-  * @version V0.3
+  * @version 0.3
   * @date    2018-01-28
   * @brief   CMSIS Cortex-M0+ Core Peripheral Access Layer Header File
   */

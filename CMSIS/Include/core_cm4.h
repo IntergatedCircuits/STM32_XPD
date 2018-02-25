@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    core_cm4.h
   * @author  Benedek Kupper
-  * @version V0.3
+  * @version 0.3
   * @date    2018-01-28
   * @brief   CMSIS Cortex-M4 Core Peripheral Access Layer Header File
   */
@@ -2538,7 +2538,7 @@ __STATIC_INLINE uint32_t SCB_GetFPUType(void)
 {
   uint32_t mvfr0;
 
-  mvfr0 = FPU->MVFR0;
+  mvfr0 = FPU->MVFR0.w;
   if      ((mvfr0 & (FPU_MVFR0_Single_precision_Msk | FPU_MVFR0_Double_precision_Msk)) == 0x020U)
   {
     return 1U;           /* Single precision FPU */

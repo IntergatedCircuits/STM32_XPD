@@ -1159,10 +1159,70 @@ typedef struct {
   * @brief General Purpose I/O
   */
 typedef struct {
-    __IO uint32_t MODER;                                    /*!< GPIO port mode register,               Address offset: 0x00      */
-    __IO uint32_t OTYPER;                                   /*!< GPIO port output type register,        Address offset: 0x04      */
-    __IO uint32_t OSPEEDR;                                  /*!< GPIO port output speed register,       Address offset: 0x08      */
-    __IO uint32_t PUPDR;                                    /*!< GPIO port pull-up/pull-down register,  Address offset: 0x0C      */
+    union {
+        struct {
+            __IO uint32_t MODER0 : 2;
+            __IO uint32_t MODER1 : 2;
+            __IO uint32_t MODER2 : 2;
+            __IO uint32_t MODER3 : 2;
+            __IO uint32_t MODER4 : 2;
+            __IO uint32_t MODER5 : 2;
+            __IO uint32_t MODER6 : 2;
+            __IO uint32_t MODER7 : 2;
+            __IO uint32_t MODER8 : 2;
+            __IO uint32_t MODER9 : 2;
+            __IO uint32_t MODER10 : 2;
+            __IO uint32_t MODER11 : 2;
+            __IO uint32_t MODER12 : 2;
+            __IO uint32_t MODER13 : 2;
+            __IO uint32_t MODER14 : 2;
+            __IO uint32_t MODER15 : 2;
+        } b;
+        __IO uint32_t w;
+    } MODER;                                                /*!< GPIO port mode register,                     Address offset: 0x00      */
+    __IO uint32_t OTYPER;                                   /*!< GPIO port output type register,              Address offset: 0x04      */
+    union {
+        struct {
+            __IO uint32_t OSPEEDR0 : 2;
+            __IO uint32_t OSPEEDR1 : 2;
+            __IO uint32_t OSPEEDR2 : 2;
+            __IO uint32_t OSPEEDR3 : 2;
+            __IO uint32_t OSPEEDR4 : 2;
+            __IO uint32_t OSPEEDR5 : 2;
+            __IO uint32_t OSPEEDR6 : 2;
+            __IO uint32_t OSPEEDR7 : 2;
+            __IO uint32_t OSPEEDR8 : 2;
+            __IO uint32_t OSPEEDR9 : 2;
+            __IO uint32_t OSPEEDR10 : 2;
+            __IO uint32_t OSPEEDR11 : 2;
+            __IO uint32_t OSPEEDR12 : 2;
+            __IO uint32_t OSPEEDR13 : 2;
+            __IO uint32_t OSPEEDR14 : 2;
+            __IO uint32_t OSPEEDR15 : 2;
+        } b;
+        __IO uint32_t w;
+    } OSPEEDR;                                              /*!< GPIO port output speed register,             Address offset: 0x08      */
+    union {
+        struct {
+            __IO uint32_t PUPDR0 : 2;
+            __IO uint32_t PUPDR1 : 2;
+            __IO uint32_t PUPDR2 : 2;
+            __IO uint32_t PUPDR3 : 2;
+            __IO uint32_t PUPDR4 : 2;
+            __IO uint32_t PUPDR5 : 2;
+            __IO uint32_t PUPDR6 : 2;
+            __IO uint32_t PUPDR7 : 2;
+            __IO uint32_t PUPDR8 : 2;
+            __IO uint32_t PUPDR9 : 2;
+            __IO uint32_t PUPDR10 : 2;
+            __IO uint32_t PUPDR11 : 2;
+            __IO uint32_t PUPDR12 : 2;
+            __IO uint32_t PUPDR13 : 2;
+            __IO uint32_t PUPDR14 : 2;
+            __IO uint32_t PUPDR15 : 2;
+        } b;
+        __IO uint32_t w;
+    } PUPDR;                                                /*!< GPIO port pull-up/pull-down register,  Address offset: 0x0C      */
     __I  uint32_t IDR;                                      /*!< GPIO port input data register,         Address offset: 0x10      */
     __IO uint32_t ODR;                                      /*!< GPIO port output data register,        Address offset: 0x14      */
     __IO uint32_t BSRR;                                     /*!< GPIO port bit set/reset register,      Address offset: 0x18      */

@@ -1,9 +1,11 @@
-/******************************************************************************
- * @file     mpu_armv7.h
- * @brief    CMSIS MPU API for Armv7-M MPU
- * @version  V5.0.4
- * @date     10. January 2018
- ******************************************************************************/
+/**
+  ******************************************************************************
+  * @file    mpu_armv7.h
+  * @author  Benedek Kupper
+  * @version 0.1
+  * @date    2018-02-25
+  * @brief   CMSIS MPU API for Armv7-M MPU
+  */
 /*
  * Copyright (c) 2017-2018 Arm Limited. All rights reserved.
  *
@@ -116,9 +118,9 @@ __STATIC_INLINE void ARM_MPU_Enable(uint32_t MPU_Control)
 {
   __DSB();
   __ISB();
-  MPU->CTRL = MPU_Control | MPU_CTRL_ENABLE_Msk;
+  MPU->CTRL.w = MPU_Control | MPU_CTRL_ENABLE_Msk;
 #ifdef SCB_SHCSR_MEMFAULTENA_Msk
-  SCB->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
+  SCB->SHCSR.w |= SCB_SHCSR_MEMFAULTENA_Msk;
 #endif
 }
 
@@ -129,9 +131,9 @@ __STATIC_INLINE void ARM_MPU_Disable(void)
   __DSB();
   __ISB();
 #ifdef SCB_SHCSR_MEMFAULTENA_Msk
-  SCB->SHCSR &= ~SCB_SHCSR_MEMFAULTENA_Msk;
+  SCB->SHCSR.w &= ~SCB_SHCSR_MEMFAULTENA_Msk;
 #endif
-  MPU->CTRL  &= ~MPU_CTRL_ENABLE_Msk;
+  MPU->CTRL.w &= ~MPU_CTRL_ENABLE_Msk;
 }
 
 /** Clear and disable the given MPU region.
@@ -140,7 +142,7 @@ __STATIC_INLINE void ARM_MPU_Disable(void)
 __STATIC_INLINE void ARM_MPU_ClrRegion(uint32_t rnr)
 {
   MPU->RNR = rnr;
-  MPU->RASR = 0U;
+  MPU->RASR.w = 0U;
 }
 
 /** Configure an MPU region.
@@ -149,8 +151,8 @@ __STATIC_INLINE void ARM_MPU_ClrRegion(uint32_t rnr)
 */   
 __STATIC_INLINE void ARM_MPU_SetRegion(uint32_t rbar, uint32_t rasr)
 {
-  MPU->RBAR = rbar;
-  MPU->RASR = rasr;
+  MPU->RBAR.w = rbar;
+  MPU->RASR.w = rasr;
 }
 
 /** Configure the given MPU region.
@@ -161,8 +163,8 @@ __STATIC_INLINE void ARM_MPU_SetRegion(uint32_t rbar, uint32_t rasr)
 __STATIC_INLINE void ARM_MPU_SetRegionEx(uint32_t rnr, uint32_t rbar, uint32_t rasr)
 {
   MPU->RNR = rnr;
-  MPU->RBAR = rbar;
-  MPU->RASR = rasr;
+  MPU->RBAR.w = rbar;
+  MPU->RASR.w = rasr;
 }
 
 /** Memcopy with strictly ordered memory access, e.g. for register targets.
