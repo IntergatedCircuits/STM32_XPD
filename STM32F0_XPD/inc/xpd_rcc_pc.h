@@ -2,26 +2,24 @@
   ******************************************************************************
   * @file    xpd_rcc_pc.h
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2016-01-16
+  * @version 0.2
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers RCC Peripheral Clocks Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
-
 #if   defined(XPD_ADC_API)
 
 /** @addtogroup ADC
@@ -40,13 +38,12 @@ typedef enum
     ADC_CLOCKSOURCE_PCLK_DIV4 = 2, /*!< PCLK / 4 clock source */
     ADC_CLOCKSOURCE_HSI14     = 0, /*!< 14 MHz HSI clock source */
 }ADC_ClockSourceType;
-
 /** @} */
 
 /** @addtogroup ADC_Clock_Source_Exported_Functions
  * @{ */
-void            XPD_ADC_ClockConfig         (ADC_ClockSourceType ClockSource);
-uint32_t        XPD_ADC_GetClockFreq        (void);
+void            ADC_vClockConfig        (ADC_ClockSourceType eClockSource);
+uint32_t        ADC_ulClockFreq_Hz      (void);
 /** @} */
 
 /** @} */
@@ -68,7 +65,7 @@ uint32_t        XPD_ADC_GetClockFreq        (void);
 typedef enum
 {
     CEC_CLOCKSOURCE_HSI_DIV244 = 0, /*!< HSI / 244 clock source */
-#ifdef LSE_VALUE
+#ifdef LSE_VALUE_Hz
     CEC_CLOCKSOURCE_LSE        = 1  /*!< LSE clock source */
 #endif
 }CEC_ClockSourceType;
@@ -76,8 +73,8 @@ typedef enum
 
 /** @addtogroup CEC_Clock_Source_Exported_Functions
  * @{ */
-void            XPD_CEC_ClockConfig         (CEC_ClockSourceType ClockSource);
-uint32_t        XPD_CEC_GetClockFreq        (void);
+void            CEC_vClockConfig        (CEC_ClockSourceType eClockSource);
+uint32_t        CEC_ulClockFreq_Hz      (void);
 /** @} */
 
 /** @} */
@@ -105,8 +102,8 @@ typedef enum
 
 /** @addtogroup I2C_Clock_Source_Exported_Functions
  * @{ */
-void            XPD_I2C_ClockConfig         (I2C_HandleType * hi2c, I2C_ClockSourceType ClockSource);
-uint32_t        XPD_I2C_GetClockFreq        (I2C_HandleType * hi2c);
+void            I2C_vClockConfig        (I2C_HandleType * pxI2C, I2C_ClockSourceType eClockSource);
+uint32_t        I2C_ulClockFreq_Hz      (I2C_HandleType * pxI2C);
 /** @} */
 
 /** @} */
@@ -127,11 +124,11 @@ uint32_t        XPD_I2C_GetClockFreq        (I2C_HandleType * hi2c);
 typedef enum
 {
     RTC_CLOCKSOURCE_NONE      = 0, /*!< no clock source */
-#ifdef LSE_VALUE
+#ifdef LSE_VALUE_Hz
     RTC_CLOCKSOURCE_LSE       = 1, /*!< LSE clock source */
 #endif
     RTC_CLOCKSOURCE_LSI       = 2, /*!< LSI clock source */
-#ifdef HSE_VALUE
+#ifdef HSE_VALUE_Hz
     RTC_CLOCKSOURCE_HSE_DIV32 = 3, /*!< HSE / 32 clock source */
 #endif
 }RTC_ClockSourceType;
@@ -139,8 +136,8 @@ typedef enum
 
 /** @addtogroup RTC_Clock_Source_Exported_Functions
  * @{ */
-XPD_ReturnType  XPD_RTC_ClockConfig         (RTC_ClockSourceType ClockSource);
-uint32_t        XPD_RTC_GetClockFreq        (void);
+XPD_ReturnType  RTC_eClockConfig        (RTC_ClockSourceType eClockSource);
+uint32_t        RTC_ulClockFreq_Hz      (void);
 /** @} */
 
 /** @} */
@@ -157,7 +154,7 @@ uint32_t        XPD_RTC_GetClockFreq        (void);
 
 /** @addtogroup TIM_Clock_Source_Exported_Functions
  * @{ */
-uint32_t        XPD_TIM_GetClockFreq        (TIM_HandleType * htim);
+uint32_t        TIM_ulClockFreq_Hz      (TIM_HandleType * pxTIM);
 /** @} */
 
 /** @} */
@@ -180,7 +177,7 @@ typedef enum
 {
     USART_CLOCKSOURCE_PCLKx   = 0, /*!< default clock source */
     USART_CLOCKSOURCE_SYSCLK  = 1, /*!< SYSCLK clock source */
-#ifdef LSE_VALUE
+#ifdef LSE_VALUE_Hz
     USART_CLOCKSOURCE_LSE     = 2, /*!< LSE clock source */
 #endif
     USART_CLOCKSOURCE_HSI     = 3, /*!< HSI clock source */
@@ -189,8 +186,8 @@ typedef enum
 
 /** @addtogroup USART_Clock_Source_Exported_Functions
  * @{ */
-void            XPD_USART_ClockConfig       (USART_HandleType * husart, USART_ClockSourceType ClockSource);
-uint32_t        XPD_USART_GetClockFreq      (USART_HandleType * husart);
+void            USART_vClockConfig      (USART_HandleType * pxUSART, USART_ClockSourceType eClockSource);
+uint32_t        USART_ulClockFreq_Hz    (USART_HandleType * pxUSART);
 /** @} */
 
 /** @} */
@@ -212,7 +209,7 @@ uint32_t        XPD_USART_GetClockFreq      (USART_HandleType * husart);
 typedef enum
 {
     USB_CLOCKSOURCE_PLL         = 1, /*!< PLL clock source */
-#ifdef RCC_CFGR_SW_HSI48
+#ifdef RCC_HSI48_SUPPORT
     USB_CLOCKSOURCE_HSI48       = 0, /*!< 48 MHz HSI clock source */
 #endif
 }USB_ClockSourceType;
@@ -220,11 +217,10 @@ typedef enum
 
 /** @addtogroup USB_Clock_Source_Exported_Functions
  * @{ */
-void            XPD_USB_ClockConfig         (USB_ClockSourceType ClockSource);
+void            USB_vClockConfig        (USB_ClockSourceType eClockSource);
 /** @} */
 
 /** @} */
 
 /** @} */
-
 #endif

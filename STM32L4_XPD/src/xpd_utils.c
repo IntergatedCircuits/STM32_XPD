@@ -2,29 +2,27 @@
   ******************************************************************************
   * @file    xpd_utils.c
   * @author  Benedek Kupper
-  * @version V0.2
-  * @date    2017-04-26
-  * @brief   STM32 eXtensible Peripheral Drivers Utilities Module
+  * @version 0.3
+  * @date    2018-01-28
+  * @brief   STM32 eXtensible Peripheral Drivers Utilities
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
-#include "xpd_utils.h"
-#include "xpd_rcc.h"
-#include "xpd_core.h"
-#include "xpd_flash.h"
+#include <xpd_utils.h>
+#include <xpd_rcc.h>
+#include <xpd_core.h>
 
 extern uint32_t SystemCoreClock;
 
@@ -40,105 +38,111 @@ extern uint32_t SystemCoreClock;
  */
 
 /**
- * @brief Millisecond timer initializer utility. [overrideable]
+ * @brief Millisecond timer initializer utility.
  */
-__weak void XPD_InitTimer(void)
+__weak void XPD_vInitTimer(void)
 {
     /* Enable SysTick and configure 1ms tick */
-    XPD_SysTick_Init(SystemCoreClock / 1000, SYSTICK_CLOCKSOURCE_HCLK);
-    XPD_SysTick_Enable();
+    (void)SysTick_eInit(SYSTICK_CLOCKSOURCE_HCLK, SystemCoreClock / 1000);
+    SysTick_vStart();
 }
 
 /**
  * @brief Inserts code delay of the specified time in milliseconds.
  * @note  The milliseconds based waiting utilities shall not be used concurrently.
  *        The time of the preempted waiters do not elapse.
- * @param milliseconds: the desired delay in ms
+ * @param ulMilliseconds: the desired delay in ms
  */
-__weak void XPD_Delay_ms(uint32_t milliseconds)
+__weak void XPD_vDelay_ms(uint32_t ulMilliseconds)
 {
     /* Initially clear flag */
-    __IO uint32_t dummy = SysTick->CTRL.b.COUNTFLAG;
-    while (milliseconds != 0)
+    (void) SysTick->CTRL.b.COUNTFLAG;
+    while (ulMilliseconds != 0)
     {
         /* COUNTFLAG returns 1 if timer counted to 0 since the last flag read */
-        milliseconds -= SysTick->CTRL.b.COUNTFLAG;
+        ulMilliseconds -= SysTick->CTRL.b.COUNTFLAG;
     }
 }
 
 /**
  * @brief Inserts code delay of the specified time in microseconds.
- * @param microseconds: the desired delay in us
+ * @param ulMicroseconds: the desired delay in us
  */
-__weak void XPD_Delay_us(uint32_t microseconds)
+__weak void XPD_vDelay_us(uint32_t ulMicroseconds)
 {
-    microseconds *= SystemCoreClock / 1000000;
-    while (microseconds != 0)
+    ulMicroseconds *= SystemCoreClock / 1000000;
+    while (ulMicroseconds != 0)
     {
-        microseconds--;
+        ulMicroseconds--;
     }
 }
 
 /**
- * @brief Waits until the masked value read from address matches the input match, or until times out. [overrideable]
+ * @brief Waits until the masked value read from address matches the input ulMatch, or until times out.
  * @note  The milliseconds based waiting utilities shall not be used concurrently.
  *        The time of the preempted waiters do not elapse.
- * @param varAddress: the word address that needs to be monitored
- * @param bitSelector: a bit mask that selects which bits should be considered
- * @param match: the expected value to wait for
- * @param mstimeout: pointer to the timeout in ms
- * @return TIMEOUT if timed out, or OK if match occurred within the deadline
+ * @param pulVarAddress: the word address that needs to be monitored
+ * @param ulBitSelector: a bit mask that selects which bits should be considered
+ * @param ulMatch: the expected value to wait for
+ * @param pulTimeout: pointer to the timeout in ms
+ * @return TIMEOUT if timed out, or OK if ulMatch occurred within the deadline
  */
-__weak XPD_ReturnType XPD_WaitForMatch(
-        volatile uint32_t * varAddress, uint32_t bitSelector, uint32_t match,
-        uint32_t * mstimeout)
+__weak XPD_ReturnType XPD_eWaitForMatch(
+        volatile uint32_t * pulVarAddress,
+        uint32_t            ulBitSelector,
+        uint32_t            ulMatch,
+        uint32_t *          pulTimeout)
 {
-    /* Initially clear flag */
-    __IO uint32_t dummy = SysTick->CTRL.b.COUNTFLAG;
-    XPD_ReturnType result = XPD_OK;
+    XPD_ReturnType eResult = XPD_OK;
 
-    while ((*varAddress & bitSelector) != match)
+    /* Initially clear flag */
+    (void) SysTick->CTRL.b.COUNTFLAG;
+
+    while ((*pulVarAddress & ulBitSelector) != ulMatch)
     {
-        if (*mstimeout == 0)
+        if (*pulTimeout == 0)
         {
-            result = XPD_TIMEOUT;
+            eResult = XPD_TIMEOUT;
             break;
         }
         /* COUNTFLAG returns 1 if timer counted to 0 since the last flag read */
-        *mstimeout -= SysTick->CTRL.b.COUNTFLAG;
+        *pulTimeout -= SysTick->CTRL.b.COUNTFLAG;
     }
-    return result;
+    return eResult;
 }
 
 /**
- * @brief Waits until the masked value read from address differs from the input match, or until times out. [overrideable]
+ * @brief Waits until the masked value read from address differs from the input ulMatch, or until times out. [overrideable]
  * @note  The milliseconds based waiting utilities shall not be used concurrently.
  *        The time of the preempted waiters do not elapse.
- * @param varAddress: the word address that needs to be monitored
- * @param bitSelector: a bit mask that selects which bits should be considered
- * @param match: the initial value that needs to differ
- * @param mstimeout: pointer to the timeout in ms
- * @return TIMEOUT if timed out, or OK if match occurred within the deadline
+ * @param pulVarAddress: the word address that needs to be monitored
+ * @param ulBitSelector: a bit mask that selects which bits should be considered
+ * @param ulMatch: the initial value that needs to differ
+ * @param pulTimeout: pointer to the timeout in ms
+ * @return TIMEOUT if timed out, or OK if ulMatch occurred within the deadline
  */
-__weak XPD_ReturnType XPD_WaitForDiff(
-        volatile uint32_t * varAddress, uint32_t bitSelector, uint32_t match,
-        uint32_t * mstimeout)
+__weak XPD_ReturnType XPD_eWaitForDiff(
+        volatile uint32_t * pulVarAddress,
+        uint32_t            ulBitSelector,
+        uint32_t            ulMatch,
+        uint32_t *          pulTimeout)
 {
-    /* Initially clear flag */
-    __IO uint32_t dummy = SysTick->CTRL.b.COUNTFLAG;
-    XPD_ReturnType result = XPD_OK;
+    XPD_ReturnType eResult = XPD_OK;
 
-    while ((*varAddress & bitSelector) == match)
+    /* Initially clear flag */
+    (void) SysTick->CTRL.b.COUNTFLAG;
+
+    while ((*pulVarAddress & ulBitSelector) == ulMatch)
     {
-        if (*mstimeout == 0)
+        if (*pulTimeout == 0)
         {
-            result = XPD_TIMEOUT;
+            eResult = XPD_TIMEOUT;
             break;
         }
         /* COUNTFLAG returns 1 if timer counted to 0 since the last flag read */
-        *mstimeout -= SysTick->CTRL.b.COUNTFLAG;
+        *pulTimeout -= SysTick->CTRL.b.COUNTFLAG;
     }
-    return result;
+    return eResult;
 }
 
 /** @} */
@@ -150,52 +154,52 @@ __weak XPD_ReturnType XPD_WaitForDiff(
 
 /**
  * @brief Reads new register data to the stream and updates its context.
- * @param reg: pointer to the register to read from
- * @param stream: pointer to the destination stream
+ * @param pulReg: pointer to the register to read from
+ * @param pxStream: pointer to the destination stream
  */
-void XPD_ReadToStream(volatile uint32_t * reg, DataStreamType * stream)
+void XPD_vReadToStream(const uint32_t * pulReg, DataStreamType * pxStream)
 {
     /* Different size of data transferred */
-    switch (stream->size)
+    switch (pxStream->size)
     {
         case 1:
-            *((uint8_t*) stream->buffer) = *((__IO uint8_t  *)reg);
+            *((uint8_t*) pxStream->buffer) = *((const uint8_t  *)pulReg);
             break;
         case 2:
-            *((uint16_t*)stream->buffer) = *((__IO uint16_t *)reg);
+            *((uint16_t*)pxStream->buffer) = *((const uint16_t *)pulReg);
             break;
         default:
-            *((uint32_t*)stream->buffer) = *((__IO uint32_t *)reg);
+            *((uint32_t*)pxStream->buffer) = *((const uint32_t *)pulReg);
             break;
     }
     /* Stream context update */
-    stream->buffer += stream->size;
-    stream->length--;
+    pxStream->buffer += pxStream->size;
+    pxStream->length--;
 }
 
 /**
  * @brief Writes a new stream data element to the register and updates the stream context.
- * @param reg: pointer to the register to write to
- * @param stream: pointer to the source stream
+ * @param pulReg: pointer to the register to write to
+ * @param pxStream: pointer to the source stream
  */
-void XPD_WriteFromStream(volatile uint32_t * reg, DataStreamType * stream)
+void XPD_vWriteFromStream(uint32_t * pulReg, DataStreamType * pxStream)
 {
     /* Different size of data transferred */
-    switch (stream->size)
+    switch (pxStream->size)
     {
         case 1:
-            *((__IO uint8_t  *)reg) = *((uint8_t*) stream->buffer);
+            *((uint8_t  *)pulReg) = *((uint8_t*) pxStream->buffer);
             break;
         case 2:
-            *((__IO uint16_t *)reg) = *((uint16_t*)stream->buffer);
+            *((uint16_t *)pulReg) = *((uint16_t*)pxStream->buffer);
             break;
         default:
-            *((__IO uint32_t *)reg) = *((uint32_t*)stream->buffer);
+            *((uint32_t *)pulReg) = *((uint32_t*)pxStream->buffer);
             break;
     }
     /* Stream context update */
-    stream->buffer += stream->size;
-    stream->length--;
+    pxStream->buffer += pxStream->size;
+    pxStream->length--;
 }
 
 /** @} */
@@ -210,47 +214,47 @@ void XPD_WriteFromStream(volatile uint32_t * reg, DataStreamType * stream)
  *        @arg System Timer utility
  *        @arg Enable PWR and SYSCFG clocks
  */
-void XPD_Init(void)
+void XPD_vInit(void)
 {
     /* Configure systick timer */
-    XPD_InitTimer();
+    XPD_vInitTimer();
 
     /* Enable clock for PWR */
-    XPD_RCC_ClockEnable(RCC_POS_PWR);
+    RCC_vClockEnable(RCC_POS_PWR);
 
     /* Enable SYSCFG clock  */
-    XPD_RCC_ClockEnable(RCC_POS_SYSCFG);
+    RCC_vClockEnable(RCC_POS_SYSCFG);
 }
 
 /**
  * @brief Deinitializes the basic services of the device:
  *        @arg Resets all peripherals
  */
-void XPD_Deinit(void)
+void XPD_vDeinit(void)
 {
     /* Reset of all peripherals */
 #if defined(AHBPERIPH_BASE) || defined(RCC_AHBRSTR_GPIOARST)
-    XPD_RCC_ResetAHB();
+    RCC_vResetAHB();
 #else
 #if defined(AHB1PERIPH_BASE)
-    XPD_RCC_ResetAHB1();
+    RCC_vResetAHB1();
 #endif
 #if defined(AHB2PERIPH_BASE)
-    XPD_RCC_ResetAHB2();
+    RCC_vResetAHB2();
 #endif
 #if defined(AHB3PERIPH_BASE) || defined(RCC_AHB3RSTR_FSMCRST) || defined(RCC_AHB3RSTR_FMCRST)
-    XPD_RCC_ResetAHB3();
+    RCC_vResetAHB3();
 #endif
 #endif
 
 #if defined(APBPERIPH_BASE)
-    XPD_RCC_ResetAPB();
+    RCC_vResetAPB();
 #else
 #if defined(APB1PERIPH_BASE)
-    XPD_RCC_ResetAPB1();
+    RCC_vResetAPB1();
 #endif
 #if defined(APB2PERIPH_BASE)
-    XPD_RCC_ResetAPB2();
+    RCC_vResetAPB2();
 #endif
 #endif
 }
@@ -258,28 +262,28 @@ void XPD_Deinit(void)
 /**
  * @brief Resets the MCU peripherals to their startup state and
  *        boots to the application at the specified address
- * @param StartAddress: The address of the application to be started
+ * @param pvStartAddress: The address of the application to be started
  * @note  Before starting the new application the user shall ensure
  *        the integrity of the program. This should include:
  *        @arg Checking address for valid RAM pointer
  *        @arg Checking address+4 (first PC value) for odd value
  */
-void XPD_BootTo(void * StartAddress)
+void XPD_vBootTo(void * pvStartAddress)
 {
-    void (*startApplication)(void) = *((const void **)(StartAddress + 4));
+    void (*pxStartApplication)(void) = *((const void **)(pvStartAddress + 4));
 
     /* Reset clock configuration */
-    XPD_RCC_Deinit();
+    RCC_vDeinit();
     /* Reset all peripherals */
-    XPD_Deinit();
+    XPD_vDeinit();
     /* Disable SysTick interrupt as well */
-    XPD_SysTick_DisableIT();
+    SysTick_vStop_IT();
 
     /* Set the main stack pointer */
-    __set_MSP(*((const uint32_t *)StartAddress));
+    __set_MSP(*((const uint32_t *)pvStartAddress));
 
     /* Jump to application */
-    startApplication();
+    pxStartApplication();
 }
 
 /** @} */

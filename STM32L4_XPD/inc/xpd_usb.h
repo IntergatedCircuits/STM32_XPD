@@ -2,256 +2,92 @@
   ******************************************************************************
   * @file    xpd_usb.h
   * @author  Benedek Kupper
-  * @date    2017-04-23
+  * @version 0.3
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers Universal Serial Bus Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
 #ifndef __XPD_USB_H_
 #define __XPD_USB_H_
 
-#include "xpd_common.h"
-#include "xpd_config.h"
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
-#if defined(USB) || defined(USB_OTG_FS)
+#include <xpd_common.h>
+
+#if   defined(USB_OTG_FS)
+#include <xpd_usb_otg.h>
+
+#define USB_vInit           USB_vDevInit
+#define USB_vDeinit         USB_vDevDeinit
+#define USB_vStart_IT       USB_vDevStart_IT
+#define USB_vStop_IT        USB_vDevStop_IT
+#define USB_vIRQHandler     USB_vDevIRQHandler
+
+#elif defined(USB)
+#include <xpd_usb_wrapper.h>
+
 /** @defgroup USB
  * @{ */
 
 /** @defgroup USB_Exported_Types USB Exported Types
  * @{ */
 
-/** @brief USB device speed types */
-typedef enum
-{
-    USB_SPEED_FULL = 0, /*!< Default USB device speed */
-#ifdef USB_OTG_HS
-    USB_SPEED_HIGH = 1, /*!< High speed is only available with ULPI physical interface in HS core */
-#endif
-}USB_SpeedType;
-
-/** @brief USB configuration structure */
-typedef struct
-{
-    USB_SpeedType   Speed;              /*!< Device speed selection */
-    FunctionalState SOF;                /*!< StartOfFrame signal interrupt and callback activation */
-    FunctionalState LowPowerMode;       /*!< Low power mode activation */
-#if defined(USB_OTG_GLPMCFG_LPMEN) || defined(USB_LPMCSR_LMPEN)
-    FunctionalState LinkPowerMgmt;      /*!< Link Power Management L1 sleep mode support */
-#endif
-#if (USB_DATA_WORD_ALIGNED == 1) && defined(USB_OTG_GAHBCFG_DMAEN)
-    FunctionalState DMA;                /*!< Use dedicated DMA for data transfer */
-#endif
-}USB_InitType;
-
-/** @brief USB Endpoint types */
-typedef enum
-{
-    USB_EP_TYPE_CONTROL     = 0, /*!< Control endpoint type */
-    USB_EP_TYPE_ISOCHRONOUS = 1, /*!< Isochronous endpoint type */
-    USB_EP_TYPE_BULK        = 2, /*!< Bulk endpoint type */
-    USB_EP_TYPE_INTERRUPT   = 3  /*!< Interrupt endpoint type */
-}USB_EndPointType;
-
-/** @brief USB Endpoint management structure */
-typedef struct
-{
-    DataStreamType      Transfer;       /*!< Endpoint data transfer context */
-    uint16_t            FifoSize;       /*!< Data FIFO size */
-    uint16_t            MaxPacketSize;  /*!< Endpoint Max packet size [0..512] */
-    USB_EndPointType    Type;           /*!< Endpoint type */
-    boolean_t           Stalled;        /*!< Endpoint stall status */
-}USB_EndPointHandleType;
-
-/** @brief Device Link power state */
-typedef enum
-{
-    USB_LPM_L0 = 0,     /*!< Device connected and active */
-#if defined(USB_OTG_GLPMCFG_LPMEN) || defined(USB_LPMCSR_LMPEN)
-    USB_LPM_L1 = 1,     /*!< Device in L1 sleep mode */
-#endif
-    USB_LPM_L2 = 2,     /*!< Device suspended */
-    USB_LPM_L3 = 3,     /*!< Device disconnected from bus */
-}USB_LinkStateType;
-
-#if defined(USB_OTG_GCCFG_BCDEN) || defined(USB_BCDR_BCDEN)
 /** @brief USB Power Source types */
 typedef enum
 {
-    USB_BCD_NO_DATA_CONTACT          = 0, /*!< Data lines are floating on the device side */
-    USB_BCD_STANDARD_DOWNSTREAM_PORT = 1, /*!< Standard Downstream Port */
-    USB_BCD_CHARGING_DOWNSTREAM_PORT = 2, /*!< Charging Downstream Port detected */
-    USB_BCD_DEDICATED_CHARGING_PORT  = 3, /*!< Dedicated Charging Port detected */
-    USB_BCD_PS2_PROPRIETARY_PORT     = 4, /*!< PS2 or proprietary charging port detected */
+    USB_BCD_NO_DATA_CONTACT          = 0,   /*!< Data lines are floating on the device side */
+    USB_BCD_STANDARD_DOWNSTREAM_PORT = 1,   /*!< Standard Downstream Port */
+    USB_BCD_CHARGING_DOWNSTREAM_PORT = 2,   /*!< Charging Downstream Port detected */
+    USB_BCD_DEDICATED_CHARGING_PORT  = 3,   /*!< Dedicated Charging Port detected */
+    USB_BCD_PS2_PROPRIETARY_PORT     = 4,   /*!< PS2 or proprietary charging port detected */
+    USB_BCD_NOT_SUPPORTED            = 0xFF /*!< Battery Charge Detection is not supported on the device */
 }USB_ChargerType;
-#endif
-
-/** @brief USB Handle structure */
-typedef struct
-{
-    USB_OTG_TypeDef * Inst;                                     /*!< The address of the peripheral instance used by the handle */
-#ifdef USB_OTG_BB
-    USB_OTG_BitBand_TypeDef * Inst_BB;                          /*!< The address of the peripheral instance in the bit-band region */
-#endif
-    void *                      User;                           /*!< Pointer to upper stack handler */
-    struct {
-        XPD_HandleCallbackType DepInit;                         /*!< Callback to initialize module dependencies */
-        XPD_HandleCallbackType DepDeinit;                       /*!< Callback to restore module dependencies */
-        int (*SetupStage)       (void *, uint8_t *);            /*!< SETUP packet received */
-        int (*DataOutStage)     (void *, uint8_t, uint8_t *);   /*!< OUT data received */
-        int (*DataInStage)      (void *, uint8_t, uint8_t *);   /*!< IN data transmitted */
-        int (*SOF)              (void *);                       /*!< StartOfFrame signal */
-        int (*Reset)            (void *);                       /*!< Device reset */
-        int (*Suspend)          (void *);                       /*!< Suspend request */
-        int (*Resume)           (void *);                       /*!< Resume request */
-        int (*Connected)        (void *);                       /*!< Device connected to bus */
-        int (*Disconnected)     (void *);                       /*!< Device disconnected from bus */
-    }Callbacks;                                                 /*   Handle Callbacks */
-    uint32_t                    Setup[12];                      /*!< Setup packet buffer */
-    struct {
-        USB_EndPointHandleType  IN[6];                          /*!< IN endpoint status */
-        USB_EndPointHandleType  OUT[6];                         /*!< OUT endpoint status */
-    }EP;                                                        /*   Endpoint management */
-#ifdef USB
-    uint16_t                    BdtSize;                        /*!< PMA Buffer Descriptor Table size */
-    uint16_t                    PmaOffset;                      /*!< End of Packet Memory */
-#endif
-    uint8_t                     DeviceAddress;                  /*!< USB Address */
-    FunctionalState             LowPowerMode;                   /*!< Low power mode activation */
-    USB_SpeedType               Speed;                          /*!< Currently available speed */
-    USB_LinkStateType           LinkState;                      /*!< Device link status */
-#if (USB_DATA_WORD_ALIGNED == 1) && defined(USB_OTG_GAHBCFG_DMAEN)
-    FunctionalState             DMA;                            /*!< DMA activation */
-#endif
-}USB_HandleType;
-
-/** @} */
 
 /** @defgroup USB_Exported_Macros USB Exported Macros
  * @{ */
 
-#if   defined(USB_OTG_FS)
-#ifdef USB_OTG_BB
 /**
- * @brief  USB Handle initializer macro
- * @param  INSTANCE: specifies the USB peripheral instance.
- * @param  INIT_FN: specifies the dependency initialization function to call back.
- * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
- */
-#define         NEW_USB_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)          \
-     {  .Inst = (INSTANCE), .LinkState = USB_LPM_L3,                \
-        .Inst_BB = USB_OTG_BB(INSTANCE),                            \
-        .Callbacks.DepInit = (INIT_FN), .Callbacks.DepDeinit = (DEINIT_FN)}
-
-/**
- * @brief USB register bit accessing macro
+ * @brief USB Instance to handle binder macro
  * @param HANDLE: specifies the peripheral handle.
- * @param REG: specifies the register name.
- * @param BIT: specifies the register bit name.
+ * @param INSTANCE: specifies the USB peripheral instance.
  */
-#define USB_REG_BIT(HANDLE, REG, BIT) ((HANDLE)->Inst_BB->REG.BIT)
-
-#else
-/**
- * @brief  USB Handle initializer macro
- * @param  INSTANCE: specifies the USB peripheral instance.
- * @param  INIT_FN: specifies the dependency initialization function to call back.
- * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
- */
-#define         NEW_USB_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)          \
-     {  .Inst = (INSTANCE), .LinkState = USB_LPM_L3,                \
-        .Callbacks.DepInit = (INIT_FN), .Callbacks.DepDeinit = (DEINIT_FN)}
-
-/**
- * @brief USB register bit accessing macro
- * @param HANDLE: specifies the peripheral handle.
- * @param REG: specifies the register name.
- * @param BIT: specifies the register bit name.
- */
-#define USB_REG_BIT(HANDLE, REG, BIT) ((HANDLE)->Inst->REG.b.BIT)
-
-#endif /* USB_OTG_BB */
-
-/**
- * @brief  Get the specified USB flag.
- * @param  HANDLE: specifies the USB Handle.
- * @param  FLAG_NAME: specifies the flag to return.
- *         This parameter can be one of the following values:
- *            @arg ESOF:    Expected start of frame
- *            @arg SOF:     Start of frame
- *            @arg RESET:   Reset
- *            @arg SUSP:    Suspend
- *            @arg WKUP:    Wake up
- *            @arg ERR:     Error
- *            @arg PMAOVR:  DMA overrun
- *            @arg CTR:     Correct transfer
- */
-#define         XPD_USB_GetFlag( HANDLE, FLAG_NAME)     \
-    (USB_REG_BIT(HANDLE,GINTSTS,FLAG_NAME))
-
-/**
- * @brief  Clear the specified USB flag.
- * @param  HANDLE: specifies the USB Handle.
- * @param  FLAG_NAME: specifies the flag to clear.
- *         This parameter can be one of the following values:
- *            @arg ESOF:    Expected start of frame
- *            @arg SOF:     Start of frame
- *            @arg RESET:   Reset
- *            @arg SUSP:    Suspend
- *            @arg WKUP:    Wake up
- *            @arg ERR:     Error
- *            @arg PMAOVR:  DMA overrun
- *            @arg CTR:     Correct transfer
- */
-#define         XPD_USB_ClearFlag(HANDLE, FLAG_NAME)    \
-    ((HANDLE)->Inst->GINTSTS.w = USB_OTG_GINTSTS_##FLAG_NAME)
-
-/**
- * @brief  Macro to access the BESL value in the peripheral.
- * @param  HANDLE: specifies the USB Handle.
- */
-#define         XPD_USB_BESL(HANDLE)                ((HANDLE)->Inst->GLPMCFG.b.BESL)
-
-#elif defined(USB)
-/**
- * @brief  USB Handle initializer macro
- * @param  INSTANCE: specifies the USB peripheral instance.
- * @param  INIT_FN: specifies the dependency initialization function to call back.
- * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
- */
-#define         NEW_USB_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)          \
-     {  .User = NULL, .LinkState = USB_LPM_L3,                      \
-        .Callbacks.DepInit = (INIT_FN), .Callbacks.DepDeinit = (DEINIT_FN)}
+#define         USB_INST2HANDLE(HANDLE,INSTANCE)    ((void)INSTANCE)
 
 #ifdef USB_BB
 /**
  * @brief USB register bit accessing macro
  * @param HANDLE: specifies the peripheral handle.
- * @param REG: specifies the register name.
- * @param BIT: specifies the register bit name.
+ * @param REG_NAME: specifies the register name.
+ * @param BIT_NAME: specifies the register bit name.
  */
-#define USB_REG_BIT(HANDLE, REG_NAME, BIT_NAME) (USB_BB->REG_NAME.BIT_NAME)
+#define         USB_REG_BIT(HANDLE, REG_NAME, BIT_NAME) \
+    (USB_BB->REG_NAME.BIT_NAME)
 
 #else
 /**
  * @brief USB register bit accessing macro
  * @param HANDLE: specifies the peripheral handle.
- * @param REG: specifies the register name.
- * @param BIT: specifies the register bit name.
+ * @param REG_NAME: specifies the register name.
+ * @param BIT_NAME: specifies the register bit name.
  */
-#define USB_REG_BIT(HANDLE, REG_NAME, BIT_NAME) (USB->REG_NAME.b.BIT_NAME)
+#define         USB_REG_BIT(HANDLE, REG_NAME, BIT_NAME) \
+    (USB->REG_NAME.b.BIT_NAME)
 
 #endif /* USB_BB */
 
@@ -270,7 +106,7 @@ typedef struct
  *            @arg PMAOVR:  Packet memory overrun
  *            @arg CTR:     Correct transfer
  */
-#define         XPD_USB_EnableIT( HANDLE, IT_NAME)      \
+#define         USB_IT_ENABLE( HANDLE, IT_NAME)         \
     (USB_REG_BIT(HANDLE,CNTR,IT_NAME##M) = 1)
 
 /**
@@ -288,7 +124,7 @@ typedef struct
  *            @arg PMAOVR:  Packet memory overrun
  *            @arg CTR:     Correct transfer
  */
-#define         XPD_USB_DisableIT( HANDLE, IT_NAME)     \
+#define         USB_IT_DISABLE( HANDLE, IT_NAME)        \
     (USB_REG_BIT(HANDLE,CNTR,IT_NAME##M) = 0)
 
 /**
@@ -306,7 +142,7 @@ typedef struct
  *            @arg PMAOVR:  Packet memory overrun
  *            @arg CTR:     Correct transfer
  */
-#define         XPD_USB_GetFlag( HANDLE, FLAG_NAME)     \
+#define         USB_FLAG_STATUS( HANDLE, FLAG_NAME)     \
     (USB_REG_BIT(HANDLE,ISTR,FLAG_NAME))
 
 /**
@@ -323,85 +159,57 @@ typedef struct
  *            @arg PMAOVR:  Packet memory overrun
  *            @arg CTR:     Correct transfer
  */
-#define         XPD_USB_ClearFlag(HANDLE, FLAG_NAME)    \
+#define         USB_FLAG_CLEAR(HANDLE, FLAG_NAME)       \
     (USB_REG_BIT(HANDLE,ISTR,FLAG_NAME) = 0)
 
-/**
- * @brief  Macro to access the BESL value in the peripheral.
- * @param  HANDLE: specifies the USB Handle.
- */
-#define         XPD_USB_BESL(HANDLE)                (USB->LPMCSR.b.BESL)
-
-/** @brief Compatibility macro */
-#define         XPD_USB_EP_Flush(HANDLE,EP_NUMBER)  ((void)0)
-
-/** @brief Compatibility macro */
-#define         XPD_USB_PHY_ClockCtrl(HANDLE,SWITCH)((void)0)
-
-#endif
-
-/** @brief USB OTG FS Wake up line number */
-#define USB_OTG_FS_WAKEUP_EXTI_LINE     18
-
-/** @brief USB Wake up line initialization values */
-#define         USB_WAKEUP_EXTI_INIT                    \
-    {   .ITCallback = NULL,                             \
-        .Edge       = EDGE_RISING,                      \
-        .Reaction   = REACTION_IT }
-
+/** @brief USB Wake up line number */
+#define         USB_WAKEUP_EXTI_LINE            18
 
 /** @} */
 
 /** @addtogroup USB_Exported_Functions
  * @{ */
-XPD_ReturnType  XPD_USB_Init                    (USB_HandleType * husb, const USB_InitType * Config);
-XPD_ReturnType  XPD_USB_Deinit                  (USB_HandleType * husb);
+void            USB_vInit               (USB_HandleType * pxUSB, const USB_InitType * pxConfig);
+void            USB_vDeinit             (USB_HandleType * pxUSB);
 
-void            XPD_USB_Start                   (USB_HandleType * husb);
-void            XPD_USB_Stop                    (USB_HandleType * husb);
+void            USB_vStart_IT           (USB_HandleType * pxUSB);
+void            USB_vStop_IT            (USB_HandleType * pxUSB);
 
-void            XPD_USB_SetAddress              (USB_HandleType * husb, uint8_t Address);
+void            USB_vSetAddress         (USB_HandleType * pxUSB, uint8_t ucAddress);
 
-void            XPD_USB_EP_BufferInit           (USB_HandleType * husb, uint8_t EpAddress,
-                                                 uint16_t BufferSize);
+void            USB_vEpOpen             (USB_HandleType * pxUSB, uint8_t ucEpAddress,
+                                         USB_EndPointType eType, uint16_t usMaxPacketSize);
+void            USB_vEpClose            (USB_HandleType * pxUSB, uint8_t ucEpAddress);
+void            USB_vEpSetStall         (USB_HandleType * pxUSB, uint8_t ucEpAddress);
+void            USB_vEpClearStall       (USB_HandleType * pxUSB, uint8_t ucEpAddress);
 
-void            XPD_USB_EP_Open                 (USB_HandleType * husb, uint8_t EpAddress,
-                                                 USB_EndPointType Type, uint16_t MaxPacketSize);
-void            XPD_USB_EP_Close                (USB_HandleType * husb, uint8_t EpAddress);
+void            USB_vEpSend             (USB_HandleType * pxUSB, uint8_t ucEpAddress,
+                                         const uint8_t * pucData, uint16_t usLength);
+void            USB_vEpReceive          (USB_HandleType * pxUSB, uint8_t ucEpAddress,
+                                         uint8_t * pucData, uint16_t usLength);
 
-void            XPD_USB_EP_Receive              (USB_HandleType * husb, uint8_t EpAddress,
-                                                 uint8_t * Data, uint16_t Length);
-uint16_t        XPD_USB_EP_GetRxCount           (USB_HandleType * husb, uint8_t EpAddress);
+void            USB_vSetRemoteWakeup    (USB_HandleType * pxUSB);
+void            USB_vClearRemoteWakeup  (USB_HandleType * pxUSB);
 
-void            XPD_USB_EP_Transmit             (USB_HandleType * husb, uint8_t EpAddress,
-                                                 uint8_t * Data, uint16_t Length);
-#ifndef XPD_USB_EP_Flush
-void            XPD_USB_EP_Flush                (USB_HandleType * husb, uint8_t EpAddress);
-#endif
+void            USB_vIRQHandler         (USB_HandleType * pxUSB);
 
-void            XPD_USB_EP_SetStall             (USB_HandleType * husb, uint8_t EpAddress);
-void            XPD_USB_EP_ClearStall           (USB_HandleType * husb, uint8_t EpAddress);
+USB_ChargerType USB_eChargerDetect      (USB_HandleType * pxUSB);
 
-void            XPD_USB_IRQHandler              (USB_HandleType * husb);
-
-#ifndef XPD_USB_PHY_ClockCtrl
-void            XPD_USB_PHY_ClockCtrl           (USB_HandleType * husb, FunctionalState NewState);
-#endif
-
-void            XPD_USB_ActivateRemoteWakeup    (USB_HandleType * husb);
-void            XPD_USB_DeActivateRemoteWakeup  (USB_HandleType * husb);
-
-#if defined(USB_OTG_GCCFG_BCDEN) || defined(USB_BCDR_BCDEN)
-USB_ChargerType XPD_USB_ChargerDetect           (USB_HandleType * husb);
-#endif
+/* Used internally, has a weak definition */
+void            USB_vAllocateEPs        (USB_HandleType * pxUSB);
 /** @} */
 
 /** @} */
 
 #define XPD_USB_API
-#include "xpd_rcc_pc.h"
+#include <xpd_rcc_pc.h>
+#include <xpd_syscfg.h>
 #undef XPD_USB_API
 
-#endif /* USB_OTG_FS */
+#endif /* defined(USB) */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __XPD_USB_H_ */

@@ -2,36 +2,35 @@
   ******************************************************************************
   * @file    xpd_pwr.c
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2017-01-28
+  * @version 0.2
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers Power Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
-#include "xpd_pwr.h"
-#include "xpd_rcc.h"
-#include "xpd_utils.h"
+#include <xpd_pwr.h>
+#include <xpd_rcc.h>
+#include <xpd_utils.h>
 
 /** @addtogroup PWR
  * @{ */
 
-#define PWR_BKPREG_TIMEOUT     1000
-#define PWR_VOSRDY_TIMEOUT     1000
-#define PWR_OVERDRIVE_TIMEOUT  1000
-#define PWR_UNDERDRIVE_TIMEOUT 1000
+#define PWR_BKPREG_TIMEOUT          1000
+#define PWR_VOSRDY_TIMEOUT          1000
+#define PWR_OVERDRIVE_TIMEOUT       1000
+#define PWR_UNDERDRIVE_TIMEOUT      1000
 
 /** @addtogroup PWR_Core
  * @{ */
@@ -42,17 +41,17 @@
 /**
  * @brief Enters Sleep mode.
  * @note  In Sleep mode, all I/O pins keep the same state as in Run mode.
- * @param WakeUpOn: Specifies if SLEEP mode is exited with WFI or WFE instruction
+ * @param eWakeUpOn: Specifies if SLEEP mode is exited with WFI or WFE instruction
  *           This parameter can be one of the following values:
  *            @arg REACTION_IT: enter SLEEP mode with WFI instruction
  *            @arg REACTION_EVENT: enter SLEEP mode with WFE instruction
  */
-void XPD_PWR_SleepMode(ReactionType WakeUpOn)
+void PWR_vSleepMode(ReactionType eWakeUpOn)
 {
     /* Clear SLEEPDEEP bit of Cortex System Control Register */
     SCB->SCR.b.SLEEPDEEP = 0;
 
-    if (WakeUpOn == REACTION_IT)
+    if (eWakeUpOn == REACTION_IT)
     {
         /* Request Wait For Interrupt */
         __WFI();
@@ -75,22 +74,22 @@ void XPD_PWR_SleepMode(ReactionType WakeUpOn)
  *         startup delay is incurred when waking up from Stop mode.
  *         By keeping the internal regulator ON during Stop mode (Stop 0), the consumption
  *         is higher although the startup time is reduced.
- * @param WakeUpOn: Specifies if STOP mode is exited with WFI or WFE instruction
+ * @param eWakeUpOn: Specifies if STOP mode is exited with WFI or WFE instruction
  *           This parameter can be one of the following values:
  *            @arg REACTION_IT: enter SLEEP mode with WFI instruction
  *            @arg REACTION_EVENT: enter SLEEP mode with WFE instruction
- * @param Regulator: Specifies the regulator state in STOP mode
+ * @param eRegulator: Specifies the regulator state in STOP mode
  * @note  Using Underdrive mode, the 1.2V domain is preserved in reduced leakage mode. This
  *        mode is only available when the main regulator or the low power regulator
  *        is in low voltage mode
  */
-void XPD_PWR_StopMode(ReactionType WakeUpOn, PWR_RegulatorType Regulator)
+void PWR_vStopMode(ReactionType eWakeUpOn, PWR_RegulatorType eRegulator)
 {
 #ifdef PWR_CR_UDEN
     /* Enable the Under-drive Mode when selected */
-    if (Regulator & (PWR_CR_LPUDS | PWR_CR_MRUDS) != 0)
+    if (eRegulator & (PWR_CR_LPUDS | PWR_CR_MRUDS) != 0)
     {
-        uint32_t timeout = PWR_UNDERDRIVE_TIMEOUT;
+        uint32_t ulTimeout = PWR_UNDERDRIVE_TIMEOUT;
 
         /* Clear Under-drive flag */
         PWR_REG_BIT(CSR,UDSWRDY) = 0;
@@ -99,9 +98,10 @@ void XPD_PWR_StopMode(ReactionType WakeUpOn, PWR_RegulatorType Regulator)
         PWR_REG_BIT(CR,UDEN) = 1;
 
         /* If Underdrive setting is successful, set STOP mode with underdrive */
-        if (XPD_OK == XPD_WaitForMatch(&RCC->CR.w, PWR_CSR_UDSWRDY, PWR_CSR_UDSWRDY, &timeout))
+        if (XPD_OK == XPD_eWaitForMatch(&RCC->CR.w,
+                PWR_CSR_UDSWRDY, PWR_CSR_UDSWRDY, &ulTimeout))
         {
-            MODIFY_REG(PWR->CR.w, PWR_CR_LPUDS | PWR_CR_MRUDS, Regulator);
+            MODIFY_REG(PWR->CR.w, PWR_CR_LPUDS | PWR_CR_MRUDS, eRegulator);
         }
     }
 #endif
@@ -109,13 +109,13 @@ void XPD_PWR_StopMode(ReactionType WakeUpOn, PWR_RegulatorType Regulator)
     PWR_REG_BIT(CR,PDDS) = 0;
 
     /* Set LPDS bit according to Regulator value */
-    PWR_REG_BIT(CR,LPDS) = Regulator;
+    PWR_REG_BIT(CR,LPDS) = eRegulator;
 
     /* Set SLEEPDEEP bit of Cortex System Control Register */
     SCB->SCR.b.SLEEPDEEP = 1;
 
     /* Select STOP mode entry */
-    if (WakeUpOn == REACTION_IT)
+    if (eWakeUpOn == REACTION_IT)
     {
         /* Request Wait For Interrupt */
         __WFI();
@@ -140,7 +140,7 @@ void XPD_PWR_StopMode(ReactionType WakeUpOn, PWR_RegulatorType Regulator)
  *            Alarm out, or RTC clock calibration out,
  *          - WKUP pins if enabled.
  */
-void XPD_PWR_StandbyMode(void)
+void PWR_vStandbyMode(void)
 {
     /* Select STANDBY mode */
     PWR_REG_BIT(CR,PDDS) = 1;
@@ -158,48 +158,49 @@ void XPD_PWR_StandbyMode(void)
 
 /**
  * @brief Sets the Backup Regulator state.
- * @param NewState: the new backup regulator state to set
- * @retval ERROR if backup access is locked, TIMEOUT when setting timed out, OK when successful
+ * @param eNewState: the new backup regulator state to set
+ * @return ERROR if backup access is locked, TIMEOUT when setting timed out, OK when successful
  */
-XPD_ReturnType XPD_PWR_BackupRegulatorCtrl(FunctionalState NewState)
+XPD_ReturnType XPD_PWR_BackupRegulatorCtrl(FunctionalState eNewState)
 {
-    XPD_ReturnType result = XPD_ERROR;
+    XPD_ReturnType eResult = XPD_ERROR;
 
     /* BRE can only be written when backup access is enabled */
     if (PWR_REG_BIT(CR,DBP) != 0)
     {
-        uint32_t timeout = PWR_BKPREG_TIMEOUT;
+        uint32_t ulTimeout = PWR_BKPREG_TIMEOUT;
 
-        PWR_REG_BIT(CSR,BRE) = NewState;
+        PWR_REG_BIT(CSR,BRE) = eNewState;
 
-        result = XPD_WaitForMatch(&PWR->CSR.w, PWR_CSR_BRR, PWR_CSR_BRR * NewState, &timeout);
+        eResult = XPD_eWaitForMatch(&PWR->CSR.w,
+                PWR_CSR_BRR, PWR_CSR_BRR * eNewState, &ulTimeout);
     }
-    return result;
+    return eResult;
 }
 
 /**
  * @brief Enables the WakeUp PINx functionality.
- * @param WakeUpPin: Specifies the Power Wake-Up pin to enable.
+ * @param ucWakeUpPin: Specifies the Power Wake-Up pin to enable.
  */
-void XPD_PWR_WakeUpPin_Enable(uint8_t WakeUpPin)
+void PWR_vWakeUpPin_Enable(uint8_t ucWakeUpPin)
 {
-    switch (WakeUpPin)
+    switch (ucWakeUpPin)
     {
         case 1:
 #ifdef PWR_CSR_EWUP1
-            PWR_REG_BIT(CSR, EWUP1) = ENABLE;
+            PWR_REG_BIT(CSR, EWUP1) = 1;
 #else
-            PWR_REG_BIT(CSR, EWUP) = ENABLE;
+            PWR_REG_BIT(CSR, EWUP) = 1;
 #endif
             break;
 #if defined(PWR_CSR_EWUP2)
         case 2:
-            PWR_REG_BIT(CSR, EWUP2) = ENABLE;
+            PWR_REG_BIT(CSR, EWUP2) = 1;
             break;
 #endif
 #if defined(PWR_CSR_EWUP3)
         case 3:
-            PWR_REG_BIT(CSR, EWUP3) = ENABLE;
+            PWR_REG_BIT(CSR, EWUP3) = 1;
             break;
 #endif
     }
@@ -207,27 +208,27 @@ void XPD_PWR_WakeUpPin_Enable(uint8_t WakeUpPin)
 
 /**
  * @brief Disables the WakeUp PINx functionality.
- * @param WakeUpPin: Specifies the Power Wake-Up pin to disable.
+ * @param ucWakeUpPin: Specifies the Power Wake-Up pin to disable.
  */
-void XPD_PWR_WakeUpPin_Disable(uint8_t WakeUpPin)
+void PWR_vWakeUpPin_Disable(uint8_t ucWakeUpPin)
 {
-    switch (WakeUpPin)
+    switch (ucWakeUpPin)
     {
         case 1:
 #if defined(PWR_CSR_EWUP1)
-            PWR_REG_BIT(CSR, EWUP1) = DISABLE;
+            PWR_REG_BIT(CSR, EWUP1) = 0;
 #else
-            PWR_REG_BIT(CSR, EWUP) = DISABLE;
+            PWR_REG_BIT(CSR, EWUP) = 0;
 #endif
             break;
 #if defined(PWR_CSR_EWUP2)
         case 2:
-            PWR_REG_BIT(CSR, EWUP2) = DISABLE;
+            PWR_REG_BIT(CSR, EWUP2) = 0;
             break;
 #endif
 #if defined(PWR_CSR_EWUP3)
         case 3:
-            PWR_REG_BIT(CSR, EWUP3) = DISABLE;
+            PWR_REG_BIT(CSR, EWUP3) = 0;
             break;
 #endif
     }
@@ -236,14 +237,14 @@ void XPD_PWR_WakeUpPin_Disable(uint8_t WakeUpPin)
 #ifdef PWR_CSR_WUPP
 /**
  * @brief Sets the WakeUp Pin polarity.
- * @param WakeUpPin: Specifies the Wake-Up pin to configure.
- * @param RisingOrFalling: the polarity. Permitted values:
+ * @param ucWakeUpPin: Specifies the Wake-Up pin to configure.
+ * @param eRisingOrFalling: the polarity. Permitted values:
              @arg @ref EdgeType::EDGE_RISING
              @arg @ref EdgeType::EDGE_FALLING
  */
-void XPD_PWR_WakeUpPin_SetPolarity(uint8_t WakeUpPin, EdgeType RisingOrFalling)
+void PWR_vWakeUpPin_SetPolarity(uint8_t ucWakeUpPin, EdgeType eRisingOrFalling)
 {
-    if (RisingOrFalling == EDGE_FALLING)
+    if (eRisingOrFalling == EDGE_FALLING)
     {
         PWR_REG_BIT(CSR,WUPP) = 1;
     }
@@ -267,75 +268,78 @@ void XPD_PWR_WakeUpPin_SetPolarity(uint8_t WakeUpPin, EdgeType RisingOrFalling)
 
 /**
  * @brief Sets the new Regulator Voltage Scaling configuration.
- * @param Scaling the new scaling value
+ * @param eScaling the new scaling value
  * @return ERROR if operation is blocked, TIMEOUT if setting fails, OK when successful
  */
-XPD_ReturnType XPD_PWR_VoltageScaleConfig(PWR_RegVoltScaleType Scaling)
+XPD_ReturnType PWR_eVoltageScaleConfig(PWR_RegVoltScaleType eScaling)
 {
-    XPD_ReturnType result;
-    uint32_t timeout = PWR_VOSRDY_TIMEOUT;
+    XPD_ReturnType eResult;
+    uint32_t ulTimeout = PWR_VOSRDY_TIMEOUT;
 
 #ifdef PWR_CR_VOS_1
     /* Check if the PLL is used as system clock or not */
-    if (XPD_RCC_GetSYSCLKSource() == PLL)
+    if (RCC->CFGR.b.SWS == PLL)
     {
-        result = XPD_ERROR;
+        eResult = XPD_ERROR;
     }
     else
 #endif
     {
 #ifdef PWR_CR_VOS_1
-        boolean_t pll_on = RCC_REG_BIT(CR,PLLRDY);
+        boolean_t bPllOn = RCC_REG_BIT(CR,PLLRDY);
 
-        if (pll_on)
+        if (bPllOn)
         {
             /* disable the main PLL. */
-            RCC_REG_BIT(CR,PLLON) = OSC_OFF;
+            RCC_REG_BIT(CR,PLLON) = 0;
 
             /* wait until PLL is disabled */
-            result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_PLLRDY, 0, RCC_PLL_TIMEOUT);
-            if (result != XPD_OK)
+            eResult = XPD_eWaitForMatch(&RCC->CR.w,
+                    RCC_CR_PLLRDY, 0, RCC_PLL_TIMEOUT);
+            if (eResult != XPD_OK)
             {
-                return result;
+                return eResult;
             }
         }
 #endif
-        PWR->CR.b.VOS = Scaling;
+        PWR->CR.b.VOS = eScaling;
 
 #ifdef PWR_CR_VOS_1
-        if (pll_on)
+        if (bPllOn)
         {
             /* enable the main PLL. */
-            RCC_REG_BIT(CR,PLLON) = OSC_ON;
+            RCC_REG_BIT(CR,PLLON) = 1;
 
             /* wait until PLL is enabled */
-            result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_PLLRDY, RCC_CR_PLLRDY, RCC_PLL_TIMEOUT);
-            if (result != XPD_OK)
+            eResult = XPD_eWaitForMatch(&RCC->CR.w,
+                    RCC_CR_PLLRDY, RCC_CR_PLLRDY, RCC_PLL_TIMEOUT);
+            if (eResult != XPD_OK)
             {
-                return result;
+                return eResult;
             }
         }
 #endif
-        result = XPD_WaitForMatch(&PWR->CSR.w, PWR_CSR_VOSRDY, PWR_CSR_VOSRDY, &timeout);
+        eResult = XPD_eWaitForMatch(&PWR->CSR.w,
+                PWR_CSR_VOSRDY, PWR_CSR_VOSRDY, &ulTimeout);
     }
-    return result;
+    return eResult;
 }
 
 #if defined(PWR_CR_MRLVDS) && defined(PWR_CR_LPLVDS)
 /**
  * @brief Sets the low voltage mode for the selected regulator.
- * @param Regulator: the regulator to configure
- * @param NewState: the low voltage mode state to set
+ * @param eRegulator: the regulator to configure
+ * @param eNewState: the low voltage mode state to set
  */
-void XPD_PWR_RegLowVoltageConfig(PWR_RegulatorType Regulator, FunctionalState NewState)
+void PWR_vRegLowVoltageConfig(PWR_RegulatorType eRegulator, FunctionalState eNewState)
 {
-    if (Regulator == PWR_MAINREGULATOR)
+    if (eRegulator == PWR_MAINREGULATOR)
     {
-        PWR_REG_BIT(CR,MRLVDS) = NewState;
+        PWR_REG_BIT(CR,MRLVDS) = eNewState;
     }
     else
     {
-        PWR_REG_BIT(CR,LPLVDS) = NewState;
+        PWR_REG_BIT(CR,LPLVDS) = eNewState;
     }
 }
 #endif
@@ -361,27 +365,29 @@ void XPD_PWR_RegLowVoltageConfig(PWR_RegulatorType Regulator, FunctionalState Ne
  *         During the Over-drive switch activation, no peripheral clocks should be enabled.
  * @retval TIMEOUT if setting fails, OK when successful
  */
-XPD_ReturnType XPD_PWR_OverDrive_Enable(void)
+XPD_ReturnType PWR_vOverDrive_Enable(void)
 {
-    XPD_ReturnType result;
-    uint32_t timeout = PWR_OVERDRIVE_TIMEOUT;
+    XPD_ReturnType eResult;
+    uint32_t ulTimeout = PWR_OVERDRIVE_TIMEOUT;
 
     /* Enable the Overdrive to extend the clock frequency to 180 Mhz */
-    PWR_REG_BIT(CR, ODEN) = ENABLE;
+    PWR_REG_BIT(CR, ODEN) = 1;
 
     /* Wait until Overdrive is ready */
-    result = XPD_WaitForMatch(&RCC->CR.w, PWR_CSR_ODRDY, PWR_CSR_ODRDY, &timeout);
+    eResult = XPD_eWaitForMatch(&RCC->CR.w,
+            PWR_CSR_ODRDY, PWR_CSR_ODRDY, &ulTimeout);
 
-    if (result == XPD_OK)
+    if (eResult == XPD_OK)
     {
         /* Enable the Overdrive switch */
-        PWR_REG_BIT(CR, ODSWEN) = ENABLE;
+        PWR_REG_BIT(CR, ODSWEN) = 1;
 
         /* Wait until Overdrive SW is ready */
-        result = XPD_WaitForMatch(&RCC->CR.w, PWR_CSR_ODSWRDY, PWR_CSR_ODSWRDY, &timeout);
+        eResult = XPD_eWaitForMatch(&RCC->CR.w,
+                PWR_CSR_ODSWRDY, PWR_CSR_ODSWRDY, &ulTimeout);
     }
 
-    return result;
+    return eResult;
 }
 
 /**
@@ -391,33 +397,34 @@ XPD_ReturnType XPD_PWR_OverDrive_Enable(void)
  *         During the Over-drive switch activation, no peripheral clocks should be enabled.
  * @retval TIMEOUT if setting fails, OK when successful
  */
-XPD_ReturnType XPD_PWR_OverDrive_Disable(void)
+XPD_ReturnType PWR_vOverDrive_Disable(void)
 {
-    XPD_ReturnType result;
-    uint32_t timeout = PWR_OVERDRIVE_TIMEOUT;
+    XPD_ReturnType eResult;
+    uint32_t ulTimeout = PWR_OVERDRIVE_TIMEOUT;
 
     /* Disable the Over-drive switch */
-    PWR_REG_BIT(CR, ODSWEN) = DISABLE;
+    PWR_REG_BIT(CR, ODSWEN) = 0;
 
     /* Wait until Overdrive SW is not ready */
-    result = XPD_WaitForMatch(&RCC->CR.w, PWR_CSR_ODSWRDY, 0, &timeout);
+    eResult = XPD_eWaitForMatch(&RCC->CR.w,
+            PWR_CSR_ODSWRDY, 0, &ulTimeout);
 
-    if (result == XPD_OK)
+    if (eResult == XPD_OK)
     {
         /* Disable the Over-drive switch */
-        PWR_REG_BIT(CR, ODEN) = DISABLE;
+        PWR_REG_BIT(CR, ODEN) = 0;
 
         /* Wait until Overdrive is not ready */
-        result = XPD_WaitForMatch(&RCC->CR.w, PWR_CSR_ODRDY, 0, &timeout);
+        eResult = XPD_eWaitForMatch(&RCC->CR.w,
+                PWR_CSR_ODRDY, 0, &ulTimeout);
     }
 
-    return result;
+    return eResult;
 }
 
 /** @} */
 
 /** @} */
-
 #endif /* PWR_CR_ODEN */
 
 /** @} */

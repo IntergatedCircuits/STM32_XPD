@@ -2,33 +2,54 @@
   ******************************************************************************
   * @file    xpd_nvic.h
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2016-02-14
+  * @version 0.2
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers NVIC Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
 #ifndef __XPD_NVIC_H_
 #define __XPD_NVIC_H_
 
-#include "xpd_common.h"
-#include "xpd_config.h"
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+#include <xpd_common.h>
 
 /** @defgroup NVIC
  * @{ */
+
+#if (__CORTEX_M >= 3)
+/** @defgroup NVIC_Exported_Types NVIC Exported Types
+ * @{ */
+
+/** @brief NVIC priority group types used for NVIC_SetPriorityGrouping() */
+typedef enum
+{
+    NVIC_PRIOGROUP_0PRE_4SUB = 7, /*!< 0 preemption priority bits, 4 subpriority bits */
+    NVIC_PRIOGROUP_1PRE_3SUB = 6, /*!< 1 preemption priority bits, 3 subpriority bits */
+    NVIC_PRIOGROUP_2PRE_2SUB = 5, /*!< 2 preemption priority bits, 2 subpriority bits */
+    NVIC_PRIOGROUP_3PRE_1SUB = 4, /*!< 3 preemption priority bits, 1 subpriority bits */
+    NVIC_PRIOGROUP_4PRE_0SUB = 3  /*!< 4 preemption priority bits, 0 subpriority bits */
+}NVIC_PrioGroupType;
+
+/** @} */
+
+#endif /* (__CORTEX_M >= 3) */
 
 /** @defgroup NVIC_Exported_Macros NVIC Exported Macros
  * @{ */
@@ -42,56 +63,67 @@
  * @brief  Returns the currently active interrupt line.
  * @retval The @ref IRQn_Type that is currently being executed
  */
-#define         XPD_NVIC_GetCurrentIRQ()                                    \
-    ((IRQn_Type)(((IPSR_Type)__get_IPSR()).b.ISR) - 16)
+__STATIC_INLINE IRQn_Type NVIC_GetCurrentIRQ(void)
+{
+    return ((IRQn_Type)(((IPSR_Type)__get_IPSR()).b.ISR) - 16);
+}
 
 /**
  * @brief  Enable all exceptions with configurable priority (default).
  */
-#define         XPD_NVIC_EnableAllIRQs()                                    \
-    (__set_PRIMASK(0))
+__STATIC_INLINE void NVIC_EnableAllIRQs(void)
+{
+    __set_PRIMASK(0);
+}
 
 /**
  * @brief  Disable all exceptions with configurable priority.
  */
-#define         XPD_NVIC_DisableAllIRQs()                                   \
-    (__set_PRIMASK(1))
+__STATIC_INLINE void NVIC_DisableAllIRQs(void)
+{
+    __set_PRIMASK(1);
+}
 
-/* Kept for compatibility, not supported on Cortex M0 */
-#define         XPD_NVIC_SetPriorityGroup(PRIOGROUP)                        \
-    ((void)0)
-
-/**
- * @brief  NVIC interrupt priority enable redirection macro.
- * @param  IRQN: the selected @ref IRQn_Type line to enable
- */
-#define         XPD_NVIC_EnableIRQ(IRQN)                                    \
-    NVIC_EnableIRQ(IRQN)
-
-/**
- * @brief  NVIC interrupt priority disable redirection macro.
- * @param  IRQN: the selected @ref IRQn_Type line to disable
- */
-#define         XPD_NVIC_DisableIRQ(IRQN)                                   \
-    NVIC_EnableIRQ(IRQN)
+#if (__CORTEX_M >= 3)
 
 /**
  * @brief  NVIC interrupt priority configuration setting macro.
- * @param  IRQN: the selected @ref IRQn_Type line to configure
- * @param  PREEMPT_PRIO: the preemption priority value
- * @param  SUB_PRIO: the subpriority value
+ * @param  IRQn: the selected @ref IRQn_Type line to configure
+ * @param  PreemptPriority: the preemption priority value
+ * @param  SubPriority: the subpriority value
  */
-#define         XPD_NVIC_SetPriorityConfig(IRQN,PREEMPT_PRIO,SUB_PRIO)      \
-    NVIC_SetPriority((IRQN), (SUB_PRIO))
+__STATIC_INLINE void NVIC_SetPriorityConfig(IRQn_Type IRQn,
+        uint32_t PreemptPriority,
+        uint32_t SubPriority)
+{
+    NVIC_SetPriority(IRQn,
+            NVIC_EncodePriority(NVIC_GetPriorityGrouping(),
+                    PreemptPriority, SubPriority));
+}
+
+#else
 
 /**
- * @brief System reset redirection macro.
+ * @brief  NVIC interrupt priority configuration setting macro.
+ * @param  IRQn: the selected @ref IRQn_Type line to configure
+ * @param  PreemptPriority: unused
+ * @param  SubPriority: the priority value
  */
-#define         XPD_SystemReset()                                           \
-    NVIC_SystemReset()
+__STATIC_INLINE void NVIC_SetPriorityConfig(IRQn_Type IRQn,
+        uint32_t PreemptPriority,
+        uint32_t SubPriority)
+{
+    NVIC_SetPriority(IRQn, SubPriority);
+}
+
+#endif /* (__CORTEX_M >= 3) */
 
 /** @} */
 
 /** @} */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __XPD_NVIC_H_ */

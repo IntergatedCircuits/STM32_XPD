@@ -2,26 +2,25 @@
   ******************************************************************************
   * @file    xpd_pwr.c
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2016-11-01
+  * @version 0.2
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers Power Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
-#include "xpd_pwr.h"
+#include <xpd_pwr.h>
 
 /** @addtogroup PWR
  * @{ */
@@ -35,17 +34,17 @@
 /**
  * @brief Enters Sleep mode.
  * @note  In Sleep mode, all I/O pins keep the same state as in Run mode.
- * @param WakeUpOn: Specifies if SLEEP mode is exited with WFI or WFE instruction
+ * @param eWakeUpOn: Specifies if SLEEP mode is exited with WFI or WFE instruction
  *           This parameter can be one of the following values:
  *            @arg REACTION_IT: enter SLEEP mode with WFI instruction
  *            @arg REACTION_EVENT: enter SLEEP mode with WFE instruction
  */
-void XPD_PWR_SleepMode(ReactionType WakeUpOn)
+void PWR_vSleepMode(ReactionType eWakeUpOn)
 {
     /* Clear SLEEPDEEP bit of Cortex System Control Register */
     SCB->SCR.b.SLEEPDEEP = 0;
 
-    if (WakeUpOn == REACTION_IT)
+    if (eWakeUpOn == REACTION_IT)
     {
         /* Request Wait For Interrupt */
         __WFI();
@@ -68,25 +67,25 @@ void XPD_PWR_SleepMode(ReactionType WakeUpOn)
  *         startup delay is incurred when waking up from Stop mode.
  *         By keeping the internal regulator ON during Stop mode, the consumption
  *         is higher although the startup time is reduced.
- * @param WakeUpOn: Specifies if STOP mode is exited with WFI or WFE instruction
+ * @param eWakeUpOn: Specifies if STOP mode is exited with WFI or WFE instruction
  *           This parameter can be one of the following values:
  *            @arg REACTION_IT: enter SLEEP mode with WFI instruction
  *            @arg REACTION_EVENT: enter SLEEP mode with WFE instruction
- * @param Regulator: Specifies the regulator state in STOP mode
+ * @param eRegulator: Specifies the regulator state in STOP mode
  */
-void XPD_PWR_StopMode(ReactionType WakeUpOn, PWR_RegulatorType Regulator)
+void PWR_vStopMode(ReactionType eWakeUpOn, PWR_RegulatorType eRegulator)
 {
     /* Clear PDDS bit */
     PWR_REG_BIT(CR,PDDS) = 0;
 
-    /* Set LPDS bit according to Regulator value */
-    PWR_REG_BIT(CR,LPDS) = Regulator;
+    /* Set LPDS bit according to eRegulator value */
+    PWR_REG_BIT(CR,LPDS) = eRegulator;
 
     /* Set SLEEPDEEP bit of Cortex System Control Register */
     SCB->SCR.b.SLEEPDEEP = 1;
 
     /* Select STOP mode entry */
-    if (WakeUpOn == REACTION_IT)
+    if (eWakeUpOn == REACTION_IT)
     {
         /* Request Wait For Interrupt */
         __WFI();
@@ -111,7 +110,7 @@ void XPD_PWR_StopMode(ReactionType WakeUpOn, PWR_RegulatorType Regulator)
  *            Alarm out, or RTC clock calibration out,
  *          - WKUP pins if enabled.
  */
-void XPD_PWR_StandbyMode(void)
+void PWR_vStandbyMode(void)
 {
     /* Select STANDBY mode */
     PWR_REG_BIT(CR,PDDS) = 1;
@@ -129,29 +128,29 @@ void XPD_PWR_StandbyMode(void)
 
 /**
  * @brief Enables the WakeUp PINx functionality.
- * @param WakeUpPin: Specifies the Power Wake-Up pin to enable.
+ * @param ucWakeUpPin: Specifies the Power Wake-Up pin to enable.
  *         Check CSR register for the available EWUP bits.
  */
-void XPD_PWR_WakeUpPin_Enable(uint8_t WakeUpPin)
+void PWR_vWakeUpPin_Enable(uint8_t ucWakeUpPin)
 {
 #ifdef PWR_BB
-    *(__IO uint32_t *)(&PWR_BB->CSR.EWUP1 + WakeUpPin - 1) = ENABLE;
+    *(__IO uint32_t *)(&PWR_BB->CSR.EWUP1 + ucWakeUpPin - 1) = 1;
 #else
-    SET_BIT(PWR->CSR.w, (PWR_CSR_EWUP1 << (WakeUpPin - 1)));
+    SET_BIT(PWR->CSR.w, (PWR_CSR_EWUP1 << (ucWakeUpPin - 1)));
 #endif
 }
 
 /**
  * @brief Disables the WakeUp PINx functionality.
- * @param WakeUpPin: Specifies the Power Wake-Up pin to disable.
+ * @param ucWakeUpPin: Specifies the Power Wake-Up pin to disable.
  *         Check CSR register for the available EWUP bits.
  */
-void XPD_PWR_WakeUpPin_Disable(uint8_t WakeUpPin)
+void PWR_vWakeUpPin_Disable(uint8_t ucWakeUpPin)
 {
 #ifdef PWR_BB
-    *(__IO uint32_t *)(&PWR_BB->CSR.EWUP1 + WakeUpPin - 1) = DISABLE;
+    *(__IO uint32_t *)(&PWR_BB->CSR.EWUP1 + ucWakeUpPin - 1) = 0;
 #else
-    CLEAR_BIT(PWR->CSR.w, (PWR_CSR_EWUP1 << (WakeUpPin - 1)));
+    CLEAR_BIT(PWR->CSR.w, (PWR_CSR_EWUP1 << (ucWakeUpPin - 1)));
 #endif
 }
 

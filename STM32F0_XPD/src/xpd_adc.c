@@ -2,31 +2,28 @@
   ******************************************************************************
   * @file    xpd_adc.c
   * @author  Benedek Kupper
-  * @version V0.2
-  * @date    2016-07-06
+  * @version 0.3
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers Analog Digital Converter Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
 
-#include "xpd_adc.h"
-#include "xpd_rcc.h"
-#include "xpd_utils.h"
-
-#if defined(USE_XPD_ADC)
+#include <xpd_adc.h>
+#include <xpd_rcc.h>
+#include <xpd_utils.h>
 
 /** @addtogroup ADC
  * @{ */
@@ -46,41 +43,41 @@
 #define ADC_ENDFLAG_SEQUENCE    (ADC_IER_EOSIE)
 #define ADC_ENDFLAG_CONVERSION  (ADC_IER_EOCIE)
 
-static void adc_dmaConversionRedirect(void *hdma)
+static void ADC_prvDmaConversionRedirect(void *pxDMA)
 {
-    ADC_HandleType* hadc = (ADC_HandleType*) ((DMA_HandleType*) hdma)->Owner;
+    ADC_HandleType* pxADC = (ADC_HandleType*) ((DMA_HandleType*) pxDMA)->Owner;
 
-    XPD_SAFE_CALLBACK(hadc->Callbacks.ConvComplete, hadc);
+    XPD_SAFE_CALLBACK(pxADC->Callbacks.ConvComplete, pxADC);
 }
 
-#ifdef USE_XPD_DMA_ERROR_DETECT
-static void adc_dmaErrorRedirect(void *hdma)
+#ifdef __XPD_DMA_ERROR_DETECT
+static void ADC_prvDmaErrorRedirect(void *pxDMA)
 {
-    ADC_HandleType* hadc = (ADC_HandleType*) ((DMA_HandleType*) hdma)->Owner;
+    ADC_HandleType* pxADC = (ADC_HandleType*) ((DMA_HandleType*) pxDMA)->Owner;
 
     /* Update error code */
-    hadc->Errors |= ADC_ERROR_DMA;
+    pxADC->Errors |= ADC_ERROR_DMA;
 
-    XPD_SAFE_CALLBACK(hadc->Callbacks.Error, hadc);
+    XPD_SAFE_CALLBACK(pxADC->Callbacks.Error, pxADC);
 }
 #endif
 
 /* Enables the peripheral */
-static boolean_t adcx_enable(ADC_TypeDef * ADCx)
+static boolean_t ADC_prvEnableInst(ADC_TypeDef * ADCx)
 {
     /* Requirements:
      * ADCAL, ADSTP, JADSTP, ADSTART, JADSTART, ADDIS, ADEN = 0 */
-    boolean_t success = (0 == (ADCx->CR.w & (ADC_CR_ADEN | ADC_STARTCTRL
+    boolean_t eSuccess = (0 == (ADCx->CR.w & (ADC_CR_ADEN | ADC_STARTCTRL
             | ADC_STOPCTRL | ADC_CR_ADCAL | ADC_CR_ADDIS)));
-    if (success)
+    if (eSuccess)
     {
         SET_BIT(ADCx->CR.w, ADC_CR_ADEN);
     }
-    return success;
+    return eSuccess;
 }
 
 /* Disables the peripheral */
-static void adcx_disable(ADC_TypeDef * ADCx)
+static void ADC_prvDisableInst(ADC_TypeDef * ADCx)
 {
     /* Requirements:
      * ADEN = 1, ADSTART, JADSTART = 0 */
@@ -92,27 +89,27 @@ static void adcx_disable(ADC_TypeDef * ADCx)
 }
 
 /* Enables an internal channel for conversion */
-static void adc_initInternalChannel(ADC_HandleType * hadc, uint8_t Channel)
+static void ADC_prvInitInternalChannel(ADC_HandleType * pxADC, uint8_t ucChannel)
 {
-    uint32_t chbit = 0;
+    uint32_t ulChBit = 0;
 
     /* Map channel to enable bit */
-    switch (Channel)
+    switch (ucChannel)
     {
 #ifdef ADC1_VBAT_CHANNEL
         case ADC1_VBAT_CHANNEL:
             /* enable the VBAT input */
-            { chbit = ADC_CCR_VBATEN; }
+            { ulChBit = ADC_CCR_VBATEN; }
             break;
 #endif
         case ADC1_VREFINT_CHANNEL:
             /* enable the VREF input */
-            { chbit = ADC_CCR_VREFEN; }
+            { ulChBit = ADC_CCR_VREFEN; }
             break;
 
         case ADC1_TEMPSENSOR_CHANNEL:
             /* enable the TS input */
-            { chbit = ADC_CCR_TSEN; }
+            { ulChBit = ADC_CCR_TSEN; }
             break;
 
         default:
@@ -120,210 +117,201 @@ static void adc_initInternalChannel(ADC_HandleType * hadc, uint8_t Channel)
     }
 
     /* Check if setting is valid */
-    if ((chbit != 0) && ((ADC->CCR.w & chbit) == 0))
+    if ((ulChBit != 0) && ((ADC->CCR.w & ulChBit) == 0))
     {
-        SET_BIT(ADC->CCR.w, chbit);
+        SET_BIT(ADC->CCR.w, ulChBit);
 
-        if (Channel == ADC1_TEMPSENSOR_CHANNEL)
+        if (ucChannel == ADC1_TEMPSENSOR_CHANNEL)
         {
             /* wait temperature sensor stabilization */
-            XPD_Delay_us(ADC_TEMPSENSOR_DELAY_US);
+            XPD_vDelay_us(ADC_TEMPSENSOR_DELAY_US);
         }
     }
 }
 
 /* Stops ongoing conversions */
-static void adc_stopConversion(ADC_HandleType * hadc, uint32_t convFlag)
+static void ADC_prvStopConversion(ADC_HandleType * pxADC, uint32_t ulConvFlag)
 {
-    uint32_t timeout = ADC_STOP_CONVERSION_TIMEOUT;
+    uint32_t ulTimeout = ADC_STOP_CONVERSION_TIMEOUT;
 
     /* Verification if ADC is not already stopped (on regular and injected
      * groups) to bypass this function if not needed. */
-    if ((hadc->Inst->CR.w & ADC_STARTCTRL) != 0)
+    if ((pxADC->Inst->CR.w & ADC_STARTCTRL) != 0)
     {
         {
             /* Software is allowed to set ADSTP only when ADSTART=1 and ADDIS=0 */
-            if ((hadc->Inst->CR.w & (ADC_CR_ADSTART | ADC_CR_ADDIS)) == ADC_CR_ADSTART)
+            if ((pxADC->Inst->CR.w & (ADC_CR_ADSTART | ADC_CR_ADDIS)) == ADC_CR_ADSTART)
             {
                 /* Stop conversions on regular group */
-                ADC_REG_BIT(hadc, CR, ADSTP) = 1;
+                ADC_REG_BIT(pxADC, CR, ADSTP) = 1;
             }
         }
 
         /* Wait for conversion effectively stopped */
-        XPD_WaitForMatch(&hadc->Inst->CR.w, convFlag, 0, &timeout);
+        XPD_eWaitForMatch(&pxADC->Inst->CR.w, ulConvFlag, 0, &ulTimeout);
     }
 }
 
-/** @addtogroup ADC_Core_Exported_Functions
+/** @ingroup ADC_Core
+ * @defgroup ADC_Core_Exported_Functions ADC Core Exported Functions
  * @{ */
 
 /**
  * @brief Initializes the ADC peripheral using the setup configuration.
- * @param hadc: pointer to the ADC handle structure
- * @param Config: pointer to ADC setup configuration
- * @return ERROR if input is incorrect, OK if success
+ * @param pxADC: pointer to the ADC handle structure
+ * @param pxConfig: pointer to ADC setup configuration
  */
-XPD_ReturnType XPD_ADC_Init(ADC_HandleType * hadc, const ADC_InitType * Config)
+void ADC_vInit(ADC_HandleType * pxADC, const ADC_InitType * pxConfig)
 {
-    XPD_ReturnType result = XPD_ERROR;
-
     /* enable clock */
-    XPD_RCC_ClockEnable(RCC_POS_ADC1);
-
-    hadc->ConversionCount = 0;
+    RCC_vClockEnable(RCC_POS_ADC1);
 
     /* Set used EndFlag */
-    if (Config->EndFlagSelection == ADC_EOC_SEQUENCE)
+    if (pxConfig->EndFlagSelection == ADC_EOC_SEQUENCE)
     {
-        hadc->EndFlagSelection = ADC_ENDFLAG_SEQUENCE;
+        pxADC->EndFlagSelection = ADC_ENDFLAG_SEQUENCE;
     }
     else
     {
-        hadc->EndFlagSelection = ADC_ENDFLAG_CONVERSION;
+        pxADC->EndFlagSelection = ADC_ENDFLAG_CONVERSION;
     }
 
     /* Configuration of ADC parameters if previous preliminary actions are
      * correctly completed and if there is no conversion ongoing on regular group */
-    if (ADC_REG_BIT(hadc, CR, ADSTART) == 0)
+    if (ADC_REG_BIT(pxADC, CR, ADSTART) == 0)
     {
         /* Configuration of ADC */
-        if (ADC_REG_BIT(hadc, CR, ADEN) == 0)
+        if (ADC_REG_BIT(pxADC, CR, ADEN) == 0)
         {
-            hadc->Inst->CFGR1.b.RES       = Config->Resolution;
+            pxADC->Inst->CFGR1.b.RES       = pxConfig->Resolution;
         }
-        ADC_REG_BIT(hadc, CFGR1, CONT)    = Config->ContinuousMode;
-        ADC_REG_BIT(hadc, CFGR1, ALIGN)   = Config->LeftAlignment;
-        ADC_REG_BIT(hadc, CFGR1, SCANDIR) = Config->ScanDirection;
-        ADC_REG_BIT(hadc, CFGR1, AUTOFF)  = Config->LPAutoPowerOff;
-        ADC_REG_BIT(hadc, CFGR1, WAIT)    = Config->LPAutoWait;
-        ADC_REG_BIT(hadc, CFGR1, DMACFG)  = Config->ContinuousDMARequests;
+        ADC_REG_BIT(pxADC, CFGR1, CONT)    = pxConfig->ContinuousMode;
+        ADC_REG_BIT(pxADC, CFGR1, ALIGN)   = pxConfig->LeftAlignment;
+        ADC_REG_BIT(pxADC, CFGR1, SCANDIR) = pxConfig->ScanDirection;
+        ADC_REG_BIT(pxADC, CFGR1, AUTOFF)  = pxConfig->LPAutoPowerOff;
+        ADC_REG_BIT(pxADC, CFGR1, WAIT)    = pxConfig->LPAutoWait;
+        ADC_REG_BIT(pxADC, CFGR1, DMACFG)  = pxConfig->ContinuousDMARequests;
 
         /* external trigger configuration */
-        if (Config->Trigger.Source == ADC_TRIGGER_SOFTWARE)
+        if (pxConfig->Trigger.Source == ADC_TRIGGER_SOFTWARE)
         {
             /* reset the external trigger */
-            CLEAR_BIT(hadc->Inst->CFGR1.w, ADC_CFGR1_EXTSEL | ADC_CFGR1_EXTEN);
+            CLEAR_BIT(pxADC->Inst->CFGR1.w, ADC_CFGR1_EXTSEL | ADC_CFGR1_EXTEN);
         }
         else
         {
             /* select external trigger and polarity to start conversion */
-            hadc->Inst->CFGR1.b.EXTSEL = Config->Trigger.Source;
-            hadc->Inst->CFGR1.b.EXTEN  = Config->Trigger.Edge;
+            pxADC->Inst->CFGR1.b.EXTSEL = pxConfig->Trigger.Source;
+            pxADC->Inst->CFGR1.b.EXTEN  = pxConfig->Trigger.Edge;
         }
 
         /* Enable discontinuous mode only if continuous mode is disabled */
-        if ((Config->DiscontinuousCount != 0) && (Config->ContinuousMode == DISABLE))
+        if ((pxConfig->DiscontinuousCount != 0) && (pxConfig->ContinuousMode == DISABLE))
         {
-            ADC_REG_BIT(hadc, CFGR1, DISCEN) = 1;
+            ADC_REG_BIT(pxADC, CFGR1, DISCEN) = 1;
         }
         else
         {
-            ADC_REG_BIT(hadc, CFGR1, DISCEN) = 0;
+            ADC_REG_BIT(pxADC, CFGR1, DISCEN) = 0;
         }
-
-        result = XPD_OK;
     }
 
     /* dependencies initialization */
-    XPD_SAFE_CALLBACK(hadc->Callbacks.DepInit, hadc);
-
-    return result;
+    XPD_SAFE_CALLBACK(pxADC->Callbacks.DepInit, pxADC);
 }
 
 /**
  * @brief Deinitializes the ADC peripheral.
- * @param hadc: pointer to the ADC handle structure
- * @return ERROR if input is incorrect, OK if success
+ * @param pxADC: pointer to the ADC handle structure
  */
-XPD_ReturnType XPD_ADC_Deinit(ADC_HandleType * hadc)
+void ADC_vDeinit(ADC_HandleType * pxADC)
 {
     /* Stop potential conversion on going, on regular and injected groups */
-    adc_stopConversion(hadc, ADC_STARTCTRL);
+    ADC_prvStopConversion(pxADC, ADC_STARTCTRL);
 
     /* Disable the ADC peripheral */
-    adcx_disable(hadc->Inst);
+    ADC_prvDisableInst(pxADC->Inst);
 
     /* Reset register IER */
-    hadc->Inst->IER.w = 0;
+    pxADC->Inst->IER.w = 0;
 
     /* Reset register ISR */
-    hadc->Inst->ISR.w = ~0;
+    pxADC->Inst->ISR.w = ~0;
 
     /* Reset register CFGR1 */
-    hadc->Inst->CFGR1.w = 0;
+    pxADC->Inst->CFGR1.w = 0;
 
     /* Deinitialize peripheral dependencies */
-    XPD_SAFE_CALLBACK(hadc->Callbacks.DepDeinit, hadc);
+    XPD_SAFE_CALLBACK(pxADC->Callbacks.DepDeinit, pxADC);
 
     /* disable clock */
-    XPD_RCC_ClockDisable(RCC_POS_ADC1);
-
-    return XPD_OK;
+    RCC_vClockDisable(RCC_POS_ADC1);
 }
 
 /**
  * @brief Initializes the regular ADC channels for conversion using the setup configuration.
- * @param hadc: pointer to the ADC handle structure
- * @param Channels: ADC regular channel configuration array pointer
- * @param ChannelCount: number of channels to configure
+ * @param pxADC: pointer to the ADC handle structure
+ * @param axChannels: ADC regular channel configuration array pointer
+ * @param ucChannelCount: number of channels to configure
  *
  * @note  This device line does not support channel ordering, the conversion scan goes through the
  *        activated channels either in ascending or descending order, depending on ScanDirection.
  * @note  This device line does not support channel-wise sample time configuration,
  *        simply the first element's setting will be applied for all channels.
  */
-void XPD_ADC_ChannelConfig(ADC_HandleType * hadc, const ADC_ChannelInitType * Channels,
-        uint8_t ChannelCount)
+void ADC_vChannelConfig(
+        ADC_HandleType *            pxADC,
+        const ADC_ChannelInitType   axChannels[],
+        uint8_t                     ucChannelCount)
 {
     /* No ongoing conversion on regular group */
-    if (ADC_REG_BIT(hadc, CR, ADSTART) == 0)
+    if (ADC_REG_BIT(pxADC, CR, ADSTART) == 0)
     {
-        uint8_t i;
-        uint8_t wdgUsers = 0;
+        uint8_t i, ucWdgUsers = 0;
+        uint32_t ulCHSELR = 0;
 
         /* Set common sampling time */
-        hadc->Inst->SMPR.b.SMP = Channels[0].SampleTime;
-
-        /* Initially reset channel selection */
-        hadc->Inst->CHSELR = 0;
+        pxADC->Inst->SMPR.b.SMP = axChannels[0].SampleTime;
 
         /* Set each active channel's bit */
-        for (i = 0; i < ChannelCount; i++)
+        for (i = 0; i < ucChannelCount; i++)
         {
-            SET_BIT(hadc->Inst->CHSELR, 1 << Channels[i].Number);
+            SET_BIT(ulCHSELR, 1 << axChannels[i].Number);
 
             /* Internal channel configuration (if applicable) */
-            adc_initInternalChannel(hadc, Channels[i].Number);
+            ADC_prvInitInternalChannel(pxADC, axChannels[i].Number);
 
             /* If a watchdog is used for the channel, set it in the configuration */
-            if (Channels[i].Watchdog != ADC_AWD_NONE)
+            if (axChannels[i].Watchdog != ADC_AWD_NONE)
             {
-                hadc->Inst->CFGR1.b.AWD1CH = Channels[i].Number;
-                wdgUsers++;
+                pxADC->Inst->CFGR1.b.AWD1CH = axChannels[i].Number;
+                ucWdgUsers++;
             }
         }
 
+        /* Apply channel selection */
+        pxADC->Inst->CHSELR = ulCHSELR;
+
         /* Set conversion count */
-        hadc->ConversionCount = ChannelCount;
+        pxADC->ConversionCount = ucChannelCount;
 
         /* Determine watchdog configuration based on user count */
-        switch (wdgUsers)
+        switch (ucWdgUsers)
         {
             case 0:
-                CLEAR_BIT(hadc->Inst->CFGR1.w,
+                CLEAR_BIT(pxADC->Inst->CFGR1.w,
                         ADC_CFGR1_AWD1SGL | ADC_CFGR1_AWD1EN);
                 break;
 
             case 1:
-                SET_BIT(hadc->Inst->CFGR1.w,
+                SET_BIT(pxADC->Inst->CFGR1.w,
                         ADC_CFGR1_AWD1SGL | ADC_CFGR1_AWD1EN);
                 break;
 
             default:
                 /* All regular channels will be monitored,
                  * even if they were not configured so! */
-                MODIFY_REG(hadc->Inst->CFGR1.w,
+                MODIFY_REG(pxADC->Inst->CFGR1.w,
                         ADC_CFGR1_AWD1SGL | ADC_CFGR1_AWD1EN, ADC_CFGR1_AWD1EN);
                 break;
         }
@@ -332,284 +320,291 @@ void XPD_ADC_ChannelConfig(ADC_HandleType * hadc, const ADC_ChannelInitType * Ch
 
 /**
  * @brief Enables the ADC peripheral and starts conversion if the trigger is software.
- * @param hadc: pointer to the ADC handle structure
+ * @param pxADC: pointer to the ADC handle structure
  */
-void XPD_ADC_Start(ADC_HandleType * hadc)
+void ADC_vStart(ADC_HandleType * pxADC)
 {
     /* If low power mode AutoPowerOff is enabled,
      * power-on/off phases are performed automatically by hardware */
-    if (ADC_REG_BIT(hadc, CR, ADSTART) == 0)
+    if (ADC_REG_BIT(pxADC, CR, ADSTART) == 0)
     {
         /* ADC turn ON */
-        if ((ADC_REG_BIT(hadc, CFGR1, AUTOFF) == 0) && adcx_enable(hadc->Inst))
+        if ((ADC_REG_BIT(pxADC, CFGR1, AUTOFF) == 0) && ADC_prvEnableInst(pxADC->Inst))
         {
             /* Wait until ADRDY flag is set ( < 1us) */
-            uint32_t timeout = 1;
-            XPD_WaitForMatch(&hadc->Inst->ISR.w, ADC_ISR_ADRDY, ADC_ISR_ADRDY, &timeout);
+            uint32_t ulTimeout = 1;
+            XPD_eWaitForMatch(&pxADC->Inst->ISR.w, ADC_ISR_ADRDY, ADC_ISR_ADRDY, &ulTimeout);
         }
 
         /* clear regular group conversion flag and overrun flag */
-        SET_BIT(hadc->Inst->ISR.w, ADC_ISR_EOC | ADC_ISR_EOS | ADC_ISR_OVR);
+        SET_BIT(pxADC->Inst->ISR.w, ADC_ISR_EOC | ADC_ISR_EOS | ADC_ISR_OVR);
 
         /* if ADC is either not in multimode, or the multimode master,
          * enable software conversion of regular channels */
         {
-            ADC_REG_BIT(hadc, CR, ADSTART) = 1;
+            ADC_REG_BIT(pxADC, CR, ADSTART) = 1;
         }
 
-#if defined(USE_XPD_ADC_ERROR_DETECT) || defined(USE_XPD_DMA_ERROR_DETECT)
-        hadc->Errors = ADC_ERROR_NONE;
+#if defined(__XPD_ADC_ERROR_DETECT) || defined(__XPD_DMA_ERROR_DETECT)
+        pxADC->Errors = ADC_ERROR_NONE;
 #endif
     }
 }
 
 /**
  * @brief Stops the ADC peripheral.
- * @param hadc: pointer to the ADC handle structure
+ * @param pxADC: pointer to the ADC handle structure
  */
-void XPD_ADC_Stop(ADC_HandleType * hadc)
+void ADC_vStop(ADC_HandleType * pxADC)
 {
-    uint32_t timeout = 1;
+    uint32_t ulTimeout = 1;
 
     /* 1. Stop potential ongoing conversions */
-    adc_stopConversion(hadc, ADC_STARTCTRL);
+    ADC_prvStopConversion(pxADC, ADC_STARTCTRL);
 
-    adcx_disable(hadc->Inst);
+    ADC_prvDisableInst(pxADC->Inst);
 
-    XPD_WaitForMatch(&hadc->Inst->ISR.w, ADC_ISR_ADRDY, 0, &timeout);
+    XPD_eWaitForMatch(&pxADC->Inst->ISR.w, ADC_ISR_ADRDY, 0, &ulTimeout);
 }
 
 /**
  * @brief Polls the status of the ADC operation(s).
- * @param hadc: pointer to the ADC handle structure
- * @param Operation: the type of operation to check
- * @param Timeout: the timeout in ms for the polling.
+ * @param pxADC: pointer to the ADC handle structure
+ * @param eOperation: the type of operation to check
+ * @param ulTimeout: the timeout in ms for the polling.
  * @return ERROR if there was an input error, TIMEOUT if timed out, OK if successful
  */
-XPD_ReturnType XPD_ADC_PollStatus(ADC_HandleType * hadc, ADC_OperationType Operation, uint32_t Timeout)
+XPD_ReturnType ADC_ePollStatus(
+        ADC_HandleType *    pxADC,
+        ADC_OperationType   eOperation,
+        uint32_t            ulTimeout)
 {
-    XPD_ReturnType result = XPD_OK;
+    XPD_ReturnType eResult = XPD_OK;
 
-    if ((Operation == ADC_OPERATION_CONVERSION)
-            && ((hadc->EndFlagSelection & ADC_IER_EOSIE) != 0))
+    if ((eOperation == ADC_OPERATION_CONVERSION)
+            && ((pxADC->EndFlagSelection & ADC_IER_EOSIE) != 0))
     {
-        Operation = ADC_ISR_EOS;
+        eOperation = ADC_ISR_EOS;
     }
 
     /* Polling for single conversion is not allowed when DMA is used,
      * and EOC is raised on end of single conversion */
-    if (Operation == ADC_OPERATION_CONVERSION)
+    if (eOperation == ADC_OPERATION_CONVERSION)
     {
-        if (ADC_REG_BIT(hadc, CFGR1, DMAEN) == 1)
-        { result = XPD_ERROR; }
+        if (ADC_REG_BIT(pxADC, CFGR1, DMAEN) == 1)
+        { eResult = XPD_ERROR; }
     }
 
     /* Wait until operation flag is set */
-    if (result == XPD_OK)
+    if (eResult == XPD_OK)
     {
-        result = XPD_WaitForMatch(&hadc->Inst->ISR.w, Operation, Operation, &Timeout);
+        eResult = XPD_eWaitForMatch(&pxADC->Inst->ISR.w, eOperation, eOperation, &ulTimeout);
 
         /* Clear end of conversion flag of regular group if low power feature
          * "LowPowerAutoWait " is disabled, to not interfere with this feature
          * until data register is read. */
-        if ((result == XPD_OK) && ((Operation & (ADC_ISR_EOC | ADC_ISR_EOS)) != 0)
-            && (ADC_REG_BIT(hadc, CFGR1, WAIT) == 0))
+        if ((eResult == XPD_OK) && ((eOperation & (ADC_ISR_EOC | ADC_ISR_EOS)) != 0)
+            && (ADC_REG_BIT(pxADC, CFGR1, WAIT) == 0))
         {
-            SET_BIT(hadc->Inst->ISR.w, Operation);
+            SET_BIT(pxADC->Inst->ISR.w, eOperation);
         }
     }
-    return result;
+    return eResult;
 }
 
 /**
  * @brief Enables the ADC peripheral and interrupts, and starts conversion
  *        if the trigger is software.
- * @param hadc: pointer to the ADC handle structure
+ * @param pxADC: pointer to the ADC handle structure
  */
-void XPD_ADC_Start_IT(ADC_HandleType * hadc)
+void ADC_vStart_IT(ADC_HandleType * pxADC)
 {
     /* Choose interrupt source based on EOC config */
-    uint32_t its = hadc->EndFlagSelection;
+    uint32_t ulITs = pxADC->EndFlagSelection;
 
-#ifdef USE_XPD_ADC_ERROR_DETECT
+#ifdef __XPD_ADC_ERROR_DETECT
     /* ADC overrun and end of conversion interrupt for regular group */
-    its |= ADC_IER_OVRIE;
+    ulITs |= ADC_IER_OVRIE;
 #endif
 
-    MODIFY_REG(hadc->Inst->IER.w, (ADC_IER_EOCIE | ADC_IER_EOSIE | ADC_IER_OVRIE), its);
+    MODIFY_REG(pxADC->Inst->IER.w, (ADC_IER_EOCIE | ADC_IER_EOSIE | ADC_IER_OVRIE), ulITs);
 
-    XPD_ADC_Start(hadc);
+    ADC_vStart(pxADC);
 }
 
 /**
  * @brief Stops the ADC peripheral and disables interrupts.
- * @param hadc: pointer to the ADC handle structure
+ * @param pxADC: pointer to the ADC handle structure
  */
-void XPD_ADC_Stop_IT(ADC_HandleType * hadc)
+void ADC_vStop_IT(ADC_HandleType * pxADC)
 {
-    XPD_ADC_Stop(hadc);
+    ADC_vStop(pxADC);
 
     /* ADC end of conversion interrupt for regular and injected group */
-    CLEAR_BIT(hadc->Inst->IER.w, hadc->EndFlagSelection | ADC_IER_OVRIE);
+    CLEAR_BIT(pxADC->Inst->IER.w, pxADC->EndFlagSelection | ADC_IER_OVRIE);
 }
 
 /**
  * @brief ADC interrupt handler that provides handle callbacks.
- * @param hadc: pointer to the ADC handle structure
+ * @param pxADC: pointer to the ADC handle structure
  */
-void XPD_ADC_IRQHandler(ADC_HandleType * hadc)
+void ADC_vIRQHandler(ADC_HandleType * pxADC)
 {
-    uint32_t isr = hadc->Inst->ISR.w;
-    uint32_t ier = hadc->Inst->IER.w;
+    uint32_t ulISR = pxADC->Inst->ISR.w;
+    uint32_t ulIER = pxADC->Inst->IER.w;
 
     /* End of conversion flag for regular channels */
-    if (    ((isr & (ADC_ISR_EOC | ADC_ISR_EOS)) != 0)
-         && ((ier & (ADC_IER_EOCIE | ADC_IER_EOSIE)) != 0))
+    if (    ((ulISR & (ADC_ISR_EOC | ADC_ISR_EOS)) != 0)
+         && ((ulIER & (ADC_IER_EOCIE | ADC_IER_EOSIE)) != 0))
     {
-        uint32_t cfgr = hadc->Inst->CFGR1.w;
+        uint32_t ulCFGR = pxADC->Inst->CFGR1.w;
 
         /* If the conversion is not continuous / external triggered */
-        if ((cfgr & (ADC_CFGR1_CONT | ADC_CFGR1_EXTEN)) == 0)
+        if ((ulCFGR & (ADC_CFGR1_CONT | ADC_CFGR1_EXTEN)) == 0)
         {
             /* End of sequence */
-            if (((isr & ADC_ISR_EOS) != 0) && (ADC_REG_BIT(hadc, CR, ADSTART) == 0))
+            if (((ulISR & ADC_ISR_EOS) != 0) && (ADC_REG_BIT(pxADC, CR, ADSTART) == 0))
             {
                 /* Disable the ADC end of conversion interrupt for regular group */
-                CLEAR_BIT(hadc->Inst->IER.w, ADC_IER_EOCIE | ADC_IER_EOSIE);
+                CLEAR_BIT(pxADC->Inst->IER.w, ADC_IER_EOCIE | ADC_IER_EOSIE);
             }
         }
 
         /* Clear the ADC flag for regular end of conversion */
-        SET_BIT(hadc->Inst->ISR.w, ADC_ISR_EOC | ADC_ISR_EOS);
+        SET_BIT(pxADC->Inst->ISR.w, ADC_ISR_EOC | ADC_ISR_EOS);
 
         /* Conversion complete callback */
-        XPD_SAFE_CALLBACK(hadc->Callbacks.ConvComplete, hadc);
+        XPD_SAFE_CALLBACK(pxADC->Callbacks.ConvComplete, pxADC);
     }
 
     /* Check analog watchdog flag */
-    if (    ((isr & ADC_ISR_AWD1) != 0)
-         && ((ier & ADC_IER_AWD1IE) != 0))
+    if (    ((ulISR & ADC_ISR_AWD1) != 0)
+         && ((ulIER & ADC_IER_AWD1IE) != 0))
     {
         /* watchdog callback */
-        XPD_SAFE_CALLBACK(hadc->Callbacks.Watchdog, hadc);
+        XPD_SAFE_CALLBACK(pxADC->Callbacks.Watchdog, pxADC);
 
         /* clear the watchdog flag only after callback,
          * so watchdog status can be determined */
-        XPD_ADC_ClearFlag(hadc, AWD1);
+        ADC_FLAG_CLEAR(pxADC, AWD1);
     }
 
-#ifdef USE_XPD_ADC_ERROR_DETECT
+#ifdef __XPD_ADC_ERROR_DETECT
     /* Check Overrun flag */
-    if (    ((isr & ADC_ISR_OVR) != 0)
-         && ((ier & ADC_IER_OVRIE) != 0))
+    if (    ((ulISR & ADC_ISR_OVR) != 0)
+         && ((ulIER & ADC_IER_OVRIE) != 0))
     {
         /* Update error code */
-        hadc->Errors |= ADC_ERROR_OVERRUN;
+        pxADC->Errors |= ADC_ERROR_OVERRUN;
 
         /* Clear the Overrun flag */
-        XPD_ADC_ClearFlag(hadc, OVR);
+        ADC_FLAG_CLEAR(pxADC, OVR);
 
         /* Error callback */
-        XPD_SAFE_CALLBACK(hadc->Callbacks.Error, hadc);
+        XPD_SAFE_CALLBACK(pxADC->Callbacks.Error, pxADC);
     }
 #endif
 }
 
 /**
  * @brief Sets up and enables a DMA transfer for the ADC regular conversions.
- * @param hadc: pointer to the ADC handle structure
- * @param Address: memory address to the conversion data storage
- * @return ERROR if the DMA is used by other peripheral, OK otherwise
+ * @param pxADC: pointer to the ADC handle structure
+ * @param pvAddress: memory address to the conversion data storage
+ * @return BUSY if the DMA is used by other peripheral, OK otherwise
  */
-XPD_ReturnType XPD_ADC_Start_DMA(ADC_HandleType * hadc, void * Address)
+XPD_ReturnType ADC_eStart_DMA(ADC_HandleType * pxADC, void * pvAddress)
 {
-    XPD_ReturnType result = XPD_ERROR;
+    XPD_ReturnType eResult = XPD_ERROR;
 
     {
         /* Set up DMA for transfer */
-        result = XPD_DMA_Start_IT(hadc->DMA.Conversion,
-                (void *)&hadc->Inst->DR, Address, hadc->ConversionCount);
+        eResult = DMA_eStart_IT(pxADC->DMA.Conversion,
+                (void *)&pxADC->Inst->DR, pvAddress, pxADC->ConversionCount);
 
         /* If the DMA is currently used, return with error */
-        if (result == XPD_OK)
+        if (eResult == XPD_OK)
         {
             /* Set the callback owner */
-            hadc->DMA.Conversion->Owner = hadc;
+            pxADC->DMA.Conversion->Owner = pxADC;
 
             /* Set the DMA transfer callbacks */
-            hadc->DMA.Conversion->Callbacks.Complete     = adc_dmaConversionRedirect;
-#ifdef USE_XPD_DMA_ERROR_DETECT
-            hadc->DMA.Conversion->Callbacks.Error        = adc_dmaErrorRedirect;
+            pxADC->DMA.Conversion->Callbacks.Complete     = ADC_prvDmaConversionRedirect;
+#ifdef __XPD_DMA_ERROR_DETECT
+            pxADC->DMA.Conversion->Callbacks.Error        = ADC_prvDmaErrorRedirect;
 #endif
 
-#ifdef USE_XPD_ADC_ERROR_DETECT
+#ifdef __XPD_ADC_ERROR_DETECT
             /* Enable ADC overrun interrupt */
-            XPD_ADC_EnableIT(hadc, OVR);
+            ADC_IT_ENABLE(pxADC, OVR);
 #endif
 
             /* Enable ADC DMA mode */
-            ADC_REG_BIT(hadc, CFGR1, DMAEN) = 1;
+            ADC_REG_BIT(pxADC, CFGR1, DMAEN) = 1;
 
-            XPD_ADC_Start(hadc);
+            ADC_vStart(pxADC);
         }
     }
 
-    return result;
+    return eResult;
 }
 
 /**
  * @brief Disables the ADC and its DMA transfer.
- * @param hadc: pointer to the ADC handle structure
+ * @param pxADC: pointer to the ADC handle structure
  */
-void XPD_ADC_Stop_DMA(ADC_HandleType * hadc)
+void ADC_vStop_DMA(ADC_HandleType * pxADC)
 {
     /* Disable the Peripheral */
-    XPD_ADC_Stop(hadc);
+    ADC_vStop(pxADC);
 
-#ifdef USE_XPD_ADC_ERROR_DETECT
+#ifdef __XPD_ADC_ERROR_DETECT
     /* Disable ADC overrun interrupt */
-    XPD_ADC_DisableIT(hadc, OVR);
+    ADC_IT_DISABLE(pxADC, OVR);
 #endif
     /* Disable the selected ADC DMA mode */
-    ADC_REG_BIT(hadc, CFGR1, DMAEN) = 0;
+    ADC_REG_BIT(pxADC, CFGR1, DMAEN) = 0;
 
     /* Disable the ADC DMA Stream */
-    XPD_DMA_Stop_IT(hadc->DMA.Conversion);
+    DMA_vStop_IT(pxADC->DMA.Conversion);
 }
 
 /**
  * @brief Initializes the analog watchdog using the setup configuration.
- * @param hadc: pointer to the ADC handle structure
- * @param Watchdog: the analog watchdog selection
- * @param Config: pointer to analog watchdog setup configuration
+ * @param pxADC: pointer to the ADC handle structure
+ * @param eWatchdog: the analog watchdog selection
+ * @param usLowThd: low threshold of the watchdog
+ * @param usHighThd: high threshold of the watchdog
  */
-void XPD_ADC_WatchdogConfig(ADC_HandleType * hadc, ADC_WatchdogType Watchdog,
-        const ADC_WatchdogThresholdType * Config)
+void ADC_vWatchdogConfig(
+        ADC_HandleType *    pxADC,
+        ADC_WatchdogType    eWatchdog,
+        uint16_t            usLowThd,
+        uint16_t            usHighThd)
 {
     /* Configure when ADC is stopped */
-    if ((Watchdog != ADC_AWD_NONE) && ((hadc->Inst->CR.w & ADC_STARTCTRL) == 0))
+    if ((eWatchdog != ADC_AWD_NONE) && ((pxADC->Inst->CR.w & ADC_STARTCTRL) == 0))
     {
-        uint32_t scaling = hadc->Inst->CFGR1.b.RES * 2;
+        uint32_t ulScaling = pxADC->Inst->CFGR1.b.RES * 2;
 
         /* Analog watchdogs configuration */
         {
             /* Shift the offset in function of the selected ADC resolution:
              * Thresholds have to be left-aligned on bit 11, the LSB (right bits)
              * are set to 0 */
-            hadc->Inst->TR.w = (Config->High  << (16 + scaling))
-                    | (Config->Low  << scaling);
+            pxADC->Inst->TR.w = (usHighThd  << (16 + ulScaling))
+                               | (usLowThd  << ulScaling);
         }
     }
 }
 
 /**
  * @brief Returns the currently active analog watchdog.
- * @param hadc: pointer to the ADC handle structure
+ * @param pxADC: pointer to the ADC handle structure
  * @return Set if the watchdog is active, 0 otherwise
  */
-ADC_WatchdogType XPD_ADC_WatchdogStatus(ADC_HandleType * hadc)
+ADC_WatchdogType ADC_eWatchdogStatus(ADC_HandleType * pxADC)
 {
-    return XPD_ADC_GetFlag(hadc, AWD1);
+    return ADC_FLAG_STATUS(pxADC, AWD1);
 }
 
 /** @} */
@@ -624,27 +619,27 @@ ADC_WatchdogType XPD_ADC_WatchdogStatus(ADC_HandleType * hadc)
 
 /**
  * @brief Executes an ADC self-calibration sequence.
- * @param hadc: pointer to the ADC handle structure
- * @param Differential: unused
+ * @param pxADC: pointer to the ADC handle structure
+ * @param eDifferential: unused
  * @return Result of the operation
  */
-XPD_ReturnType XPD_ADC_Calibrate(ADC_HandleType * hadc, boolean_t Differential)
+XPD_ReturnType ADC_eCalibrate(ADC_HandleType * pxADC, boolean_t eDifferential)
 {
-    XPD_ReturnType result = XPD_ERROR;
+    XPD_ReturnType eResult = XPD_ERROR;
 
     /* Calibration prerequisite: ADC must be disabled. */
-    if (ADC_REG_BIT(hadc, CR, ADEN) == 0)
+    if (ADC_REG_BIT(pxADC, CR, ADEN) == 0)
     {
-        uint32_t timeout = ADC_CALIBRATION_TIMEOUT;
+        uint32_t ulTimeout = ADC_CALIBRATION_TIMEOUT;
 
         /* Start ADC calibration */
-        ADC_REG_BIT(hadc, CR, ADCAL) = 1;
+        ADC_REG_BIT(pxADC, CR, ADCAL) = 1;
 
         /* Wait for ADCAL to return to 0 */
-        result = XPD_WaitForDiff(&hadc->Inst->CR.w,
-                ADC_CR_ADCAL, ADC_CR_ADCAL, &timeout);
+        eResult = XPD_eWaitForDiff(&pxADC->Inst->CR.w,
+                ADC_CR_ADCAL, ADC_CR_ADCAL, &ulTimeout);
     }
-    return result;
+    return eResult;
 }
 
 /** @} */
@@ -652,5 +647,3 @@ XPD_ReturnType XPD_ADC_Calibrate(ADC_HandleType * hadc, boolean_t Differential)
 /** @} */
 
 /** @} */
-
-#endif /* USE_XPD_ADC */

@@ -2,26 +2,25 @@
   ******************************************************************************
   * @file    xpd_rcc.c
   * @author  Benedek Kupper
-  * @version V0.2
-  * @date    2017-11-21
+  * @version 0.3
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers RCC Peripherals Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
-#include "xpd_rcc.h"
+#include <xpd_rcc.h>
 
 /** @addtogroup RCC
  * @{ */
@@ -37,96 +36,96 @@ typedef union {
     uint16_t w;
 } rccPosType;
 
-#define PPOS    ((rccPosType)PeriphPos)
+#define PPOS    ((rccPosType)ePeriphPos)
 
 /** @defgroup RCC_Peripheral_Control_Exported_Functions RCC Peripheral Control Exported Functions
  * @{ */
 
 /**
  * @brief Enables the clock of the peripheral.
- * @param PeriphPos: Relative position of the peripheral control bit
+ * @param ePeriphPos: Relative position of the peripheral control bit
  *        in the RCC register space
  */
-void XPD_RCC_ClockEnable(RCC_PositionType PeriphPos)
+void RCC_vClockEnable(RCC_PositionType ePeriphPos)
 {
 #ifdef RCC_BB
-    __IO uint32_t *pEN = PERIPH_BB(&RCC->AHB1ENR.w);
-    pEN[PeriphPos] = 1;
+    __IO uint32_t *pulEN = PERIPH_BB(&RCC->AHB1ENR.w);
+    pulEN[ePeriphPos] = 1;
 
     /* Read back to ensure effect */
-    (void) pEN[PeriphPos];
+    (void) pulEN[ePeriphPos];
 #else
-    __IO uint32_t *pENR = &RCC->AHB1ENR.w + PPOS.regIndex;
-    SET_BIT(*pENR, 1 << PPOS.bitIndex);
+    __IO uint32_t *pulENR = &RCC->AHB1ENR.w + PPOS.regIndex;
+    SET_BIT(*pulENR, 1 << PPOS.bitIndex);
 
     /* Read back to ensure effect */
-    (void) *pENR;
+    (void) *pulENR;
 #endif
 }
 
 /**
  * @brief Disables the clock of the peripheral.
- * @param PeriphPos: Relative position of the peripheral control bit
+ * @param ePeriphPos: Relative position of the peripheral control bit
  *        in the RCC register space
  */
-void XPD_RCC_ClockDisable(RCC_PositionType PeriphPos)
+void RCC_vClockDisable(RCC_PositionType ePeriphPos)
 {
 #ifdef RCC_BB
-    __IO uint32_t *pEN = PERIPH_BB(&RCC->AHB1ENR.w);
-    pEN[PeriphPos] = 0;
+    __IO uint32_t *pulEN = PERIPH_BB(&RCC->AHB1ENR.w);
+    pulEN[ePeriphPos] = 0;
 #else
-    __IO uint32_t *pENR = &RCC->AHB1ENR.w + PPOS.regIndex;
-    CLEAR_BIT(*pENR, 1 << PPOS.bitIndex);
+    __IO uint32_t *pulENR = &RCC->AHB1ENR.w + PPOS.regIndex;
+    CLEAR_BIT(*pulENR, 1 << PPOS.bitIndex);
 #endif
 }
 
 /**
  * @brief Enables the clock of the peripheral during sleep mode.
- * @param PeriphPos: Relative position of the peripheral control bit
+ * @param ePeriphPos: Relative position of the peripheral control bit
  *        in the RCC register space
  */
-void XPD_RCC_SleepClockEnable(RCC_PositionType PeriphPos)
+void RCC_vSleepClockEnable(RCC_PositionType ePeriphPos)
 {
 #ifdef RCC_BB
-    __IO uint32_t *pSMEN = PERIPH_BB(&RCC->AHB1SMENR.w);
-    pSMEN[PeriphPos] = 1;
+    __IO uint32_t *pulSMEN = PERIPH_BB(&RCC->AHB1SMENR.w);
+    pulSMEN[ePeriphPos] = 1;
 #else
-    __IO uint32_t *pSMENR = &RCC->AHB1SMENR.w + PPOS.regIndex;
-    SET_BIT(*pSMENR, 1 << PPOS.bitIndex);
+    __IO uint32_t *pulSMENR = &RCC->AHB1SMENR.w + PPOS.regIndex;
+    SET_BIT(*pulSMENR, 1 << PPOS.bitIndex);
 #endif
 }
 
 /**
  * @brief Disables the clock of the peripheral during sleep mode.
- * @param PeriphPos: Relative position of the peripheral control bit
+ * @param ePeriphPos: Relative position of the peripheral control bit
  *        in the RCC register space
  */
-void XPD_RCC_SleepClockDisable(RCC_PositionType PeriphPos)
+void RCC_vSleepClockDisable(RCC_PositionType ePeriphPos)
 {
 #ifdef RCC_BB
-    __IO uint32_t *pSMEN = PERIPH_BB(&RCC->AHB1SMENR.w);
-    pSMEN[PeriphPos] = 0;
+    __IO uint32_t *pulSMEN = PERIPH_BB(&RCC->AHB1SMENR.w);
+    pulSMEN[ePeriphPos] = 0;
 #else
-    __IO uint32_t *pSMENR = &RCC->AHB1SMENR.w + PPOS.regIndex;
-    CLEAR_BIT(*pSMENR, 1 << PPOS.bitIndex);
+    __IO uint32_t *pulSMENR = &RCC->AHB1SMENR.w + PPOS.regIndex;
+    CLEAR_BIT(*pulSMENR, 1 << PPOS.bitIndex);
 #endif
 }
 
 /**
  * @brief Forces and releases a reset on the peripheral.
- * @param PeriphPos: Relative position of the peripheral control bit
+ * @param ePeriphPos: Relative position of the peripheral control bit
  *        in the RCC register space
  */
-void XPD_RCC_Reset(RCC_PositionType PeriphPos)
+void RCC_vReset(RCC_PositionType ePeriphPos)
 {
 #ifdef RCC_BB
-    __IO uint32_t *pRST = PERIPH_BB(&RCC->AHB1RSTR.w);
-    pRST[PeriphPos] = 1;
-    pRST[PeriphPos] = 0;
+    __IO uint32_t *pulRST = PERIPH_BB(&RCC->AHB1RSTR.w);
+    pulRST[ePeriphPos] = 1;
+    pulRST[ePeriphPos] = 0;
 #else
-    __IO uint32_t *pRSTR = &RCC->AHB1RSTR.w;
-    SET_BIT  (*pRSTR, 1 << PPOS.bitIndex);
-    CLEAR_BIT(*pRSTR, 1 << PPOS.bitIndex);
+    __IO uint32_t *pulRSTR = &RCC->AHB1RSTR.w;
+    SET_BIT  (*pulRSTR, 1 << PPOS.bitIndex);
+    CLEAR_BIT(*pulRSTR, 1 << PPOS.bitIndex);
 #endif
 }
 

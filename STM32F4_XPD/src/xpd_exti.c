@@ -2,29 +2,28 @@
   ******************************************************************************
   * @file    xpd_exti.c
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2016-01-17
+  * @version 0.2
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers EXTI Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
 
-#include "xpd_exti.h"
+#include <xpd_exti.h>
 
-XPD_ValueCallbackType XPD_EXTI_Callbacks[] = {
+XPD_ValueCallbackType EXTI_xPinCallbacks[16] = {
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 };
@@ -37,105 +36,90 @@ XPD_ValueCallbackType XPD_EXTI_Callbacks[] = {
 
 /**
  * @brief Configures the EXTI line according to the setup parameters.
- * @param Line: the selected EXTI line
- * @param Config: pointer to the setup structure
+ * @param ucLine: the selected EXTI line
+ * @param pxConfig: pointer to the setup structure
  */
-void XPD_EXTI_Init(uint8_t Line, const EXTI_InitType * Config)
+void EXTI_vInit(uint8_t ucLine, const EXTI_InitType * pxConfig)
 {
 #ifdef RCC_APB2ENR_EXTITEN
-    XPD_EXTI_ClockCtrl(ENABLE);
+    RCC_vClockEnable(RCC_POS_EXTI);
 #endif
 
-    /* GPIO callbacks only */
-    if (Line < 16)
-    {
-        if (Config->Reaction & REACTION_IT)
-        {
-            XPD_EXTI_Callbacks[Line] = Config->ITCallback;
-        }
-        else
-        {
-            XPD_EXTI_Callbacks[Line] = NULL;
-        }
-    }
-
 #ifdef EXTI_BB
-    EXTI_BB->IMR[Line] = Config->Reaction;
+    EXTI_BB->IMR[ucLine] = pxConfig->Reaction;
 
-    EXTI_BB->EMR[Line] = Config->Reaction >> 1;
+    EXTI_BB->EMR[ucLine] = pxConfig->Reaction >> 1;
 
-    EXTI_BB->RTSR[Line] = Config->Edge;
+    EXTI_BB->RTSR[ucLine] = pxConfig->Edge;
 
-    EXTI_BB->FTSR[Line] = Config->Edge >> 1;
+    EXTI_BB->FTSR[ucLine] = pxConfig->Edge >> 1;
 #else
-    uint32_t linebit = 1 << Line;
+    uint32_t ulLineBit = 1 << ucLine;
 
     /* set EXTI line configuration */
-    if (Config->Reaction & REACTION_IT)
+    if (pxConfig->Reaction & REACTION_IT)
     {
-        SET_BIT(EXTI->IMR, linebit);
+        SET_BIT(EXTI->IMR, ulLineBit);
     }
     else
     {
-        CLEAR_BIT(EXTI->IMR, linebit);
+        CLEAR_BIT(EXTI->IMR, ulLineBit);
     }
 
-    if (Config->Reaction & REACTION_EVENT)
+    if (pxConfig->Reaction & REACTION_EVENT)
     {
-        SET_BIT(EXTI->EMR, linebit);
+        SET_BIT(EXTI->EMR, ulLineBit);
     }
     else
     {
-        CLEAR_BIT(EXTI->EMR, linebit);
+        CLEAR_BIT(EXTI->EMR, ulLineBit);
     }
 
     /* set rising and falling edge configuration */
-    if (Config->Edge & EDGE_RISING)
+    if (pxConfig->Edge & EDGE_RISING)
     {
-        SET_BIT(EXTI->RTSR, linebit);
+        SET_BIT(EXTI->RTSR, ulLineBit);
     }
     else
     {
-        CLEAR_BIT(EXTI->RTSR, linebit);
+        CLEAR_BIT(EXTI->RTSR, ulLineBit);
     }
 
-    if (Config->Edge & EDGE_FALLING)
+    if (pxConfig->Edge & EDGE_FALLING)
     {
-        SET_BIT(EXTI->FTSR, linebit);
+        SET_BIT(EXTI->FTSR, ulLineBit);
     }
     else
     {
-        CLEAR_BIT(EXTI->FTSR, linebit);
+        CLEAR_BIT(EXTI->FTSR, ulLineBit);
     }
 #endif
 }
 
 /**
  * @brief Restores the EXTI line to its default state.
- * @param Line: the selected EXTI line
+ * @param ucLine: the selected EXTI line
  */
-void XPD_EXTI_Deinit(uint8_t Line)
+void EXTI_vDeinit(uint8_t ucLine)
 {
-    XPD_EXTI_Callbacks[Line] = NULL;
-
 #ifdef EXTI_BB
     /* Clear EXTI line configuration */
-    EXTI_BB->IMR[Line] = 0;
-    EXTI_BB->EMR[Line] = 0;
+    EXTI_BB->IMR[ucLine] = 0;
+    EXTI_BB->EMR[ucLine] = 0;
 
     /* Clear Rising Falling edge configuration */
-    EXTI_BB->RTSR[Line] = 0;
-    EXTI_BB->FTSR[Line] = 0;
+    EXTI_BB->RTSR[ucLine] = 0;
+    EXTI_BB->FTSR[ucLine] = 0;
 #else
-    uint32_t linebit = 1 << Line;
+    uint32_t ulLineBit = 1 << ucLine;
 
     /* Clear EXTI line configuration */
-    CLEAR_BIT(EXTI->IMR, linebit);
-    CLEAR_BIT(EXTI->EMR, linebit);
+    CLEAR_BIT(EXTI->IMR, ulLineBit);
+    CLEAR_BIT(EXTI->EMR, ulLineBit);
 
     /* Clear Rising Falling edge configuration */
-    CLEAR_BIT(EXTI->RTSR, linebit);
-    CLEAR_BIT(EXTI->FTSR, linebit);
+    CLEAR_BIT(EXTI->RTSR, ulLineBit);
+    CLEAR_BIT(EXTI->FTSR, ulLineBit);
 #endif
 }
 

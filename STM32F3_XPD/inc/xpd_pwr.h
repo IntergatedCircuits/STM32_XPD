@@ -2,30 +2,33 @@
   ******************************************************************************
   * @file    xpd_pwr.h
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2016-11-01
+  * @version 0.2
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers Power Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
 #ifndef __XPD_PWR_H_
 #define __XPD_PWR_H_
 
-#include "xpd_common.h"
-#include "xpd_config.h"
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+#include <xpd_common.h>
 
 /** @defgroup PWR
  * @{ */
@@ -57,7 +60,7 @@ typedef enum
  *            @arg PVDO:        Power Voltage Detector output flag
  *            @arg VREFINTRDYF: VREFINT reference voltage ready
  */
-#define         XPD_PWR_GetFlag(FLAG_NAME)      \
+#define         PWR_FLAG_STATUS(FLAG_NAME)      \
     (PWR_REG_BIT(CSR,FLAG_NAME))
 
 /**
@@ -67,53 +70,65 @@ typedef enum
  *            @arg WUF:         Wake up flag
  *            @arg SBF:         Standby flag
  */
-#define         XPD_PWR_ClearFlag(FLAG_NAME)    \
+#define         PWR_FLAG_CLEAR(FLAG_NAME)       \
     (PWR_REG_BIT(CR,C##FLAG_NAME) = 1)
 
 #ifdef PWR_BB
-#define PWR_REG_BIT(_REG_NAME_, _BIT_NAME_) (PWR_BB->_REG_NAME_._BIT_NAME_)
+/**
+ * @brief PWR register bit accessing macro
+ * @param REG_NAME: specifies the register name.
+ * @param BIT_NAME: specifies the register bit name.
+ */
+#define         PWR_REG_BIT(REG_NAME, BIT_NAME) \
+    (PWR_BB->REG_NAME.BIT_NAME)
 #else
-#define PWR_REG_BIT(_REG_NAME_, _BIT_NAME_) (PWR->_REG_NAME_.b._BIT_NAME_)
+/**
+ * @brief PWR register bit accessing macro
+ * @param REG_NAME: specifies the register name.
+ * @param BIT_NAME: specifies the register bit name.
+ */
+#define         PWR_REG_BIT(REG_NAME, BIT_NAME) \
+    (PWR->REG_NAME.b.BIT_NAME)
 #endif
 
 /** @} */
 
-/** @addtogroup PWR_Exported_Functions PWR Exported Functions
+/** @addtogroup PWR_Exported_Functions
  * @{ */
-void            XPD_PWR_SleepMode           (ReactionType WakeUpOn);
-void            XPD_PWR_StopMode            (ReactionType WakeUpOn, PWR_RegulatorType Regulator);
-void            XPD_PWR_StandbyMode         (void);
+void            PWR_vSleepMode           (ReactionType eWakeUpOn);
+void            PWR_vStopMode            (ReactionType eWakeUpOn, PWR_RegulatorType eRegulator);
+void            PWR_vStandbyMode         (void);
 
-void            XPD_PWR_WakeUpPin_Enable    (uint8_t WakeUpPin);
-void            XPD_PWR_WakeUpPin_Disable   (uint8_t WakeUpPin);
+void            PWR_vWakeUpPin_Enable    (uint8_t ucWakeUpPin);
+void            PWR_vWakeUpPin_Disable   (uint8_t ucWakeUpPin);
 
 /**
  * @brief Send Event on Pending bit enables disabled interrupts to wake up
  *        a system from WaitForEvent.
- * @param NewState: the new SEVONPEND value to set
+ * @param eNewState: the new SEVONPEND value to set
  */
-__STATIC_INLINE void XPD_PWR_SEVONPEND(FunctionalState NewState)
+__STATIC_INLINE void PWR_vSEVONPEND(FunctionalState eNewState)
 {
-    SCB->SCR.b.SEVONPEND = NewState;
+    SCB->SCR.b.SEVONPEND = eNewState;
 }
 
 /**
  * @brief Sleep on Exit bit enables to enter sleep mode
  *        on return from an ISR to Thread mode.
- * @param NewState: the new SLEEPONEXIT value to set
+ * @param eNewState: the new SLEEPONEXIT value to set
  */
-__STATIC_INLINE void XPD_PWR_SLEEPONEXIT(FunctionalState NewState)
+__STATIC_INLINE void PWR_vSLEEPONEXIT(FunctionalState eNewState)
 {
-    SCB->SCR.b.SLEEPONEXIT = NewState;
+    SCB->SCR.b.SLEEPONEXIT = eNewState;
 }
 
 /**
  * @brief Sleep Deep bit enables to enter deep sleep mode.
- * @param NewState: the new SLEEPONEXIT value to set
+ * @param eNewState: the new SLEEPONEXIT value to set
  */
-__STATIC_INLINE void XPD_PWR_SLEEPDEEP(FunctionalState NewState)
+__STATIC_INLINE void PWR_vSLEEPDEEP(FunctionalState eNewState)
 {
-    SCB->SCR.b.SLEEPDEEP = NewState;
+    SCB->SCR.b.SLEEPDEEP = eNewState;
 }
 
 /** @} */
@@ -129,95 +144,27 @@ __STATIC_INLINE void XPD_PWR_SLEEPDEEP(FunctionalState NewState)
 /**
  * @brief Enables or disables access to the backup domain
  *        (RTC registers, RTC backup data registers when present).
- * @param NewState: the new backup access state to set
+ * @param eNewState: the new backup access state to set
  * @note  If the HSE divided by 32 is used as the RTC clock, the
  *         Backup Domain Access should be kept enabled.
  */
-__STATIC_INLINE void XPD_PWR_BackupAccess(FunctionalState NewState)
+__STATIC_INLINE void PWR_vBackupAccess(FunctionalState eNewState)
 {
-    PWR_REG_BIT(CR,DBP) = NewState;
+    PWR_REG_BIT(CR,DBP) = eNewState;
 }
+
+/** @} */
 
 /** @} */
 
 /** @} */
 
 #ifdef PWR_CR_PLS
-#include "xpd_exti.h"
-
-/** @defgroup PWR_Voltage_Detector PWR Voltage Detector
- * @{ */
-
-/** @defgroup PWR_PVD_Exported_Types PWR PVD Exported Types
- * @{ */
-
-/** @brief PVD levels */
-typedef enum
-{
-    PWR_PVDLEVEL_2V2 = 0, /*!< 2.2V voltage detector level */
-    PWR_PVDLEVEL_2V3 = 1, /*!< 2.3V voltage detector level */
-    PWR_PVDLEVEL_2V4 = 2, /*!< 2.4V voltage detector level */
-    PWR_PVDLEVEL_2V5 = 3, /*!< 2.5V voltage detector level */
-    PWR_PVDLEVEL_2V6 = 4, /*!< 2.6V voltage detector level */
-    PWR_PVDLEVEL_2V7 = 5, /*!< 2.7V voltage detector level */
-    PWR_PVDLEVEL_2V8 = 6, /*!< 2.8V voltage detector level */
-    PWR_PVDLEVEL_2V9 = 7  /*!< 2.9V voltage detector level */
-} PWR_PVDLevelType;
-
-/** @brief PVD configuration structure */
-typedef struct
-{
-    PWR_PVDLevelType Level; /*!< Voltage detector level to trigger reaction */
-    EXTI_InitType    ExtI;  /*!< External interrupt configuration */
-} PWR_PVD_InitType;
-
-/** @} */
-
-/** @defgroup PWR_PVD_Exported_Macros PWR PVD Exported Macros
- * @{ */
-
-/** @brief PVD EXTI line number */
-#define PWR_PVD_EXTI_LINE               16
-/** @} */
-
-/** @defgroup PWR_PVD_Exported_Functions PWR PVD Exported Functions
- * @{ */
-
-/**
- * @brief Configures the voltage threshold monitoring by the Power Voltage Detector(PVD).
- * @param Config: configuration structure that contains the monitored voltage level
- *         and the EXTI configuration.
- */
-__STATIC_INLINE void XPD_PWR_PVD_Init(const PWR_PVD_InitType * Config)
-{
-    /* Set PLS bits according to PVDLevel value */
-    PWR->CR.b.PLS = Config->Level;
-
-    /* External interrupt line 16 Connected to the PVD EXTI Line */
-    XPD_EXTI_Init(PWR_PVD_EXTI_LINE, &Config->ExtI);
-}
-
-/**
- * @brief Enables the Power Voltage Detector (PVD).
- */
-__STATIC_INLINE void XPD_PWR_PVD_Enable(void)
-{
-    PWR_REG_BIT(CR,PVDE) = ENABLE;
-}
-
-/**
- * @brief Disables the Power Voltage Detector (PVD).
- */
-__STATIC_INLINE void XPD_PWR_PVD_Disable(void)
-{
-    PWR_REG_BIT(CR,PVDE) = DISABLE;
-}
-
-/** @} */
-
-/** @} */
+#include <xpd_pvd.h>
 #endif /* PWR_CR_PLS */
 
-/** @} */
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __XPD_PWR_H_ */

@@ -1,38 +1,44 @@
 /**
   ******************************************************************************
-  * @file    xpd_rcc_crs.h
+  * @file    xpd_crs.h
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2017-05-08
+  * @version 0.2
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers Clock Recovery System
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
-#ifndef __XPD_RCC_CRS_H_
-#define __XPD_RCC_CRS_H_
+#ifndef __XPD_CRS_H_
+#define __XPD_CRS_H_
 
-#ifdef CRS
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+#include <xpd_common.h>
+
+#if defined(CRS)
 
 /** @addtogroup RCC
  * @{ */
 
-/** @defgroup RCC_CRS RCC Clock Recovery System
+/** @defgroup CRS Clock Recovery System
  * @{ */
 
-/** @defgroup RCC_CRS_Exported_Types RCC CRS Exported Types
+/** @defgroup CRS_Exported_Types CRS Exported Types
  * @{ */
 
 /** @brief CRS synchronization source selection */
@@ -40,7 +46,7 @@ typedef enum
 {
     CRS_SYNC_SOURCE_NONE     = 0,   /*!< No automatic synchronization */
     CRS_SYNC_SOURCE_GPIO     = 4,   /*!< Synchronization on GPIO input signal */
-#ifdef LSE_VALUE
+#ifdef LSE_VALUE_Hz
     CRS_SYNC_SOURCE_LSE      = 1,   /*!< Synchronization on LSE oscillator */
 #endif
     CRS_SYNC_SOURCE_USB      = 2,   /*!< Synchronization on USB StartOfFrame signals */
@@ -72,15 +78,43 @@ typedef struct
                                          Typical trimming step: 0.14% */
 }CRS_InitType;
 
+/** @brief CRS callbacks container structure */
+typedef struct {
+    XPD_SimpleCallbackType SyncSuccess;  /*!< SYNC OK flag requested interrupt */
+    XPD_SimpleCallbackType SyncWarning;  /*!< SYNC WARN flag requested interrupt */
+    XPD_SimpleCallbackType SyncExpected; /*!< ESYNC flag requested interrupt */
+    XPD_SimpleCallbackType SyncError;    /*!< a SYNC error flag requested interrupt */
+}CRS_CalllbacksType;
+
+/** @} */
+
+/** @defgroup CRS_Exported_Variables CRS Exported Variables
+ * @{ */
+
+/** @brief CRS callbacks container struct */
+extern CRS_CalllbacksType CRS_xCallbacks;
+
 /** @} */
 
 /** @defgroup CRS_Exported_Macros CRS Exported Macros
  * @{ */
 
 #ifdef CRS_BB
-#define CRS_REG_BIT(REG_NAME, BIT_NAME) (CRS_BB->REG_NAME.BIT_NAME)
+/**
+ * @brief CRS register bit accessing macro
+ * @param REG_NAME: specifies the register name.
+ * @param BIT_NAME: specifies the register bit name.
+ */
+#define         CRS_REG_BIT(REG_NAME, BIT_NAME)     \
+    (CRS_BB->REG_NAME.BIT_NAME)
 #else
-#define CRS_REG_BIT(REG_NAME, BIT_NAME) (CRS->REG_NAME.b.BIT_NAME)
+/**
+ * @brief CRS register bit accessing macro
+ * @param REG_NAME: specifies the register name.
+ * @param BIT_NAME: specifies the register bit name.
+ */
+#define         CRS_REG_BIT(REG_NAME, BIT_NAME)     \
+    (CRS->REG_NAME.b.BIT_NAME)
 #endif
 
 #define CRS_ISR_SYNCERRF        (CRS_ISR_SYNCERR)
@@ -102,7 +136,7 @@ typedef struct
  *            @arg ESYNC:    Expected SYNC event
  *            @arg ERR:      SYNC errors
  */
-#define         XPD_CRS_EnableIT(IT_NAME)   \
+#define         CRS_IT_ENABLE(IT_NAME)              \
     (CRS_REG_BIT(CR,IT_NAME##IE) = 1)
 
 /**
@@ -114,7 +148,7 @@ typedef struct
  *            @arg ESYNC:    Expected SYNC event
  *            @arg ERR:      SYNC errors
  */
-#define         XPD_CRS_DisableIT(IT_NAME)   \
+#define         CRS_IT_DISABLE(IT_NAME)             \
     (CRS_REG_BIT(CR,IT_NAME##IE) = 0)
 
 /**
@@ -128,7 +162,7 @@ typedef struct
  *            @arg SYNCERR:  SYNC error
  *            @arg TRIMOVF:  Trimming overflow or underflow
  */
-#define         XPD_CRS_GetFlag(FLAG_NAME)  \
+#define         CRS_FLAG_STATUS(FLAG_NAME)          \
     CRS_REG_BIT(ISR,FLAG_NAME##F)
 
 /**
@@ -140,46 +174,46 @@ typedef struct
  *            @arg ESYNC:    Expected SYNC event
  *            @arg ERR:      SYNC errors
   */
-#define         XPD_CRS_ClearFlag(FLAG_NAME)     \
+#define         CRS_FLAG_CLEAR(FLAG_NAME)           \
     (CRS->ICR.w = (((CRS_ISR_##FLAG_NAME##F) & CRS_ERROR_FLAGS_MASK) != 0) ? \
      CRS_ICR_ERRC : (CRS_ISR_##FLAG_NAME##F))
 
 /** @} */
 
-/** @addtogroup RCC_CRS_Exported_Functions
+/** @addtogroup CRS_Exported_Functions
  * @{ */
-void            XPD_CRS_Init                    (const CRS_InitType * Config);
-void            XPD_CRS_Deinit                  (void);
+void            CRS_vInit                (const CRS_InitType * pxConfig);
+void            CRS_vDeinit              (void);
 
-int32_t         XPD_CRS_GetErrorValue           (void);
-XPD_ReturnType  XPD_CRS_PollStatus              (CRS_StatusType * Status, uint32_t Timeout);
-CRS_StatusType  XPD_CRS_GetStatus               (void);
-void            XPD_CRS_IRQHandler              (void);
+int32_t         CRS_lGetErrorValue       (void);
+XPD_ReturnType  CRS_ePollStatus          (CRS_StatusType * peStatus, uint32_t ulTimeout);
+CRS_StatusType  CRS_eGetStatus           (void);
+void            CRS_vIRQHandler          (void);
 
 /**
  * @brief Generates a software synchronization event.
  */
-__STATIC_INLINE void XPD_CRS_GenerateSync(void)
+__STATIC_INLINE void CRS_vGenerateSync(void)
 {
     CRS_REG_BIT(CR,SWSYNC) = 1;
 }
 
 /**
  * @brief Sets the new state for the frequency error counter.
- * @param NewState: the new setting
+ * @param eNewState: the new setting
  */
-__STATIC_INLINE void XPD_CRS_FreqErrorCounter(FunctionalState NewState)
+__STATIC_INLINE void CRS_vFreqErrorCounter(FunctionalState eNewState)
 {
-    CRS_REG_BIT(CR,CEN) = NewState;
+    CRS_REG_BIT(CR,CEN) = eNewState;
 }
 
 /**
  * @brief Sets the new state for the automatic calibration.
- * @param NewState: the new setting
+ * @param eNewState: the new setting
  */
-__STATIC_INLINE void XPD_CRS_AutoCalibration(FunctionalState NewState)
+__STATIC_INLINE void CRS_vAutoCalibration(FunctionalState eNewState)
 {
-    CRS_REG_BIT(CR,AUTOTRIMEN) = NewState;
+    CRS_REG_BIT(CR,AUTOTRIMEN) = eNewState;
 }
 
 /** @} */
@@ -190,4 +224,8 @@ __STATIC_INLINE void XPD_CRS_AutoCalibration(FunctionalState NewState)
 
 #endif /* CRS */
 
-#endif /* __XPD_RCC_CRS_H_ */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __XPD_CRS_H_ */

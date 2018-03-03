@@ -2,30 +2,33 @@
   ******************************************************************************
   * @file    xpd_systick.h
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2016-02-14
+  * @version 0.2
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers SysTick Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
 #ifndef __XPD_SYSTICK_H_
 #define __XPD_SYSTICK_H_
 
-#include "xpd_common.h"
-#include "xpd_config.h"
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+#include <xpd_common.h>
 
 /** @defgroup SysTick
  * @{ */
@@ -47,22 +50,30 @@ typedef enum
 
 /**
  * @brief Configures the SysTick timer and interrupt generation
- * @param Period: the amount of timer counts until the counter reset
  * @param ClockSource: clock source of the timer
- * @return ERROR if the Period is too large to fit in the 24 bit register, OK if successful
+ * @param Period: the amount of timer counts until the counter reset
+ * @return ERROR if the Period is too large to fit in the 24 bit register,
+ *         OK if successful
  */
-__STATIC_INLINE XPD_ReturnType XPD_SysTick_Init(uint32_t Period, SysTick_ClockSourceType ClockSource)
+__STATIC_INLINE XPD_ReturnType SysTick_eInit(
+        SysTick_ClockSourceType eClockSource,
+        uint32_t                ulPeriod)
 {
     /* check against counter size (24 bits) */
-    if ((--Period) > SysTick_LOAD_RELOAD_Msk)
+    if ((--ulPeriod) > SysTick_LOAD_RELOAD_Msk)
     {
-        return XPD_ERROR;                        /* Reload value impossible */
+        return XPD_ERROR;
     }
     else
     {
-        SysTick->LOAD = Period;                  /* set reload register */
-        SysTick->VAL  = 0;                       /* reset the SysTick Counter Value */
-        SysTick->CTRL.b.CLKSOURCE = ClockSource; /* set clock source */
+        /* set reload register */
+        SysTick->LOAD = ulPeriod;
+
+        /* reset the SysTick Counter Value */
+        SysTick->VAL  = 0;
+
+        /* set clock source */
+        SysTick->CTRL.b.CLKSOURCE = eClockSource;
 
         return XPD_OK;
     }
@@ -71,7 +82,7 @@ __STATIC_INLINE XPD_ReturnType XPD_SysTick_Init(uint32_t Period, SysTick_ClockSo
 /**
  * @brief Enables the SysTick timer
  */
-__STATIC_INLINE void XPD_SysTick_Enable(void)
+__STATIC_INLINE void SysTick_vStart(void)
 {
     SysTick->CTRL.b.ENABLE = 1;
 }
@@ -79,15 +90,32 @@ __STATIC_INLINE void XPD_SysTick_Enable(void)
 /**
  * @brief Disables the SysTick timer
  */
-__STATIC_INLINE void XPD_SysTick_Disable(void)
+__STATIC_INLINE void SysTick_vStop(void)
 {
     SysTick->CTRL.b.ENABLE = 0;
 }
 
 /**
+ * @brief Starts the SysTick timer with interrupt generation
+ */
+__STATIC_INLINE void SysTick_vStart_IT(void)
+{
+    SysTick->VAL = 0;
+    SET_BIT(SysTick->CTRL.w, SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_ENABLE_Msk);
+}
+
+/**
+ * @brief Stops the SysTick timer with interrupt generation
+ */
+__STATIC_INLINE void SysTick_vStop_IT(void)
+{
+    CLEAR_BIT(SysTick->CTRL.w, SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_ENABLE_Msk);
+}
+
+/**
  * @brief Enables the SysTick interrupt request
  */
-__STATIC_INLINE void XPD_SysTick_EnableIT(void)
+__STATIC_INLINE void SysTick_IT_Enable(void)
 {
     SysTick->CTRL.b.TICKINT = 1;
 }
@@ -95,25 +123,7 @@ __STATIC_INLINE void XPD_SysTick_EnableIT(void)
 /**
  * @brief Disables the SysTick interrupt request
  */
-__STATIC_INLINE void XPD_SysTick_DisableIT(void)
-{
-    SysTick->CTRL.b.TICKINT = 0;
-}
-
-/**
- * @brief Starts the SysTick timer with interrupt generation
- */
-__STATIC_INLINE void XPD_SysTick_Start_IT(void)
-{
-    SysTick->VAL = 0;                        /* reset the SysTick Counter Value */
-    SysTick->CTRL.b.TICKINT = 1;             /* enable interrupt generation */
-    SysTick->CTRL.b.ENABLE = 1;              /* enable counter */
-}
-
-/**
- * @brief Stops the SysTick timer with interrupt generation
- */
-__STATIC_INLINE void XPD_SysTick_Stop_IT(void)
+__STATIC_INLINE void SysTick_IT_Disable(void)
 {
     SysTick->CTRL.b.TICKINT = 0;
 }
@@ -123,5 +133,9 @@ __STATIC_INLINE void XPD_SysTick_Stop_IT(void)
 /** @} */
 
 /** @} */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __XPD_SYSTICK_H_ */

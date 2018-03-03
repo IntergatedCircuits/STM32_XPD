@@ -2,32 +2,35 @@
   ******************************************************************************
   * @file    xpd_usart.h
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2017-03-27
+  * @version 0.2
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers USART Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
 #ifndef __XPD_USART_H_
 #define __XPD_USART_H_
 
-#include "xpd_common.h"
-#include "xpd_config.h"
-#include "xpd_dma.h"
-#include "xpd_rcc.h"
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+#include <xpd_common.h>
+#include <xpd_dma.h>
+#include <xpd_rcc.h>
 
 /** @defgroup USART
  * @{ */
@@ -37,11 +40,11 @@
 
 /* Determine which version of the peripheral is available */
 #if   defined(USART_ISR_WUF)
-#define USART_PERIPHERAL_VERSION    3
+#define __USART_PERIPHERAL_VERSION    3
 #elif defined(USART_ISR_BUSY)
-#define USART_PERIPHERAL_VERSION    2
+#define __USART_PERIPHERAL_VERSION    2
 #else
-#define USART_PERIPHERAL_VERSION    1
+#define __USART_PERIPHERAL_VERSION    1
 #endif
 
 /** @defgroup USART_Common_Exported_Types USART Common Exported Types
@@ -64,30 +67,26 @@ typedef enum
     USART_PARITY_ODD  = 3  /*!< Parity bit addition turns the sum of bits odd */
 }USART_ParityType;
 
-/** @brief USART setup structure */
-typedef struct
+/** @brief USART communication directions */
+typedef enum
 {
-    uint32_t              BaudRate;      /*!< The USART communication baud rate */
-    FunctionalState       Transmitter;   /*!< Sets the module's transmitter capacity */
-    FunctionalState       Receiver;      /*!< Sets the module's receiver capacity */
-    uint8_t               DataSize;      /*!< Specifies the USART frame data size in bits */
-    USART_StopBitsType    StopBits;      /*!< The number of stop bits transmitted */
-    FunctionalState       SingleSample;  /*!< Sets the sampling to 1/bit from default 3/bit */
-    USART_ParityType      Parity;        /*!< Specifies if the last frame bit is the parity and how it is calculated */
-}USART_InitType;
+    USART_DIR_TX    = USART_CR1_TE,                 /*!< Transmitter role only */
+    USART_DIR_RX    = USART_CR1_RE,                 /*!< Receiver role only */
+    USART_DIR_TX_RX = USART_CR1_TE | USART_CR1_RE,  /*!< Full-duplex communication */
+}USART_DirectionType;
 
-#if (USART_PERIPHERAL_VERSION > 1)
 /** @brief USART inversion selection */
 typedef enum
 {
-    USART_INVERT_NONE           = 0,                  /*!< No logical signals are inverted */
-    USART_INVERT_TX             = USART_CR2_TXINV,    /*!< TX signal inversion is selected */
-    USART_INVERT_RX             = USART_CR2_RXINV,    /*!< RX signal inversion is selected */
-    USART_INVERT_DATA           = USART_CR2_DATAINV,  /*!< Data inversion is selected */
-    USART_INVERT_BIT_ORDER      = USART_CR2_MSBFIRST, /*!< Bit order inversion is selected (MSB first) */
-    USART_INVERT_PIN_DIRECTIONS = USART_CR2_SWAP,     /*!< TX and RX pins are swapped */
-}USART_InversionType;
+    USART_INVERT_NONE           = 0x00, /*!< No logical signals are inverted */
+#ifdef USART_CR2_DATAINV
+    USART_INVERT_TX             = 0x04, /*!< TX signal inversion is selected */
+    USART_INVERT_RX             = 0x02, /*!< RX signal inversion is selected */
+    USART_INVERT_DATA           = 0x08, /*!< Data inversion is selected */
+    USART_INVERT_BIT_ORDER      = 0x10, /*!< Bit order inversion is selected (MSB first) */
+    USART_INVERT_PIN_DIRECTIONS = 0x01, /*!< TX and RX pins are swapped */
 #endif
+}USART_InversionType;
 
 /** @brief USART error types */
 typedef enum
@@ -115,7 +114,7 @@ typedef struct
         XPD_HandleCallbackType Break;        /*!< LIN break detection callback */
         XPD_HandleCallbackType Idle;         /*!< Idle callback */
         XPD_HandleCallbackType ClearToSend;  /*!< Clear To Send callback */
-#if defined(USE_XPD_USART_ERROR_DETECT) || defined(USE_XPD_DMA_ERROR_DETECT)
+#if defined(__XPD_USART_ERROR_DETECT) || defined(__XPD_DMA_ERROR_DETECT)
         XPD_HandleCallbackType Error;        /*!< Error callbacks */
 #endif
     }Callbacks;                              /*   Handle Callbacks */
@@ -126,7 +125,7 @@ typedef struct
     DataStreamType RxStream;                 /*!< Data reception stream */
     DataStreamType TxStream;                 /*!< Data transmission stream */
     RCC_PositionType CtrlPos;                /*!< Relative position for reset and clock control */
-#if defined(USE_XPD_USART_ERROR_DETECT) || defined(USE_XPD_DMA_ERROR_DETECT)
+#if defined(__XPD_USART_ERROR_DETECT) || defined(__XPD_DMA_ERROR_DETECT)
     volatile USART_ErrorType Errors;         /*!< Transfer errors */
 #endif
 }USART_HandleType;
@@ -138,44 +137,39 @@ typedef struct
 
 #ifdef USART_BB
 /**
- * @brief  USART Handle initializer macro
- * @param  INSTANCE: specifies the SPI peripheral instance.
- * @param  INIT_FN: specifies the dependency initialization function to call back.
- * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
+ * @brief USART Instance to handle binder macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param INSTANCE: specifies the USART peripheral instance.
  */
-#define         NEW_USART_HANDLE(INSTANCE, INIT_FN, DEINIT_FN)  \
-    {.Inst = (INSTANCE), .Inst_BB = USART_BB(INSTANCE),         \
-     .CtrlPos = RCC_POS_##INSTANCE,                             \
-     .Callbacks.DepInit   = (INIT_FN),                          \
-     .Callbacks.DepDeinit = (DEINIT_FN)}
+#define         USART_INST2HANDLE(HANDLE,INSTANCE)              \
+    ((HANDLE)->Inst    = (INSTANCE),                            \
+     (HANDLE)->Inst_BB = USART_BB(INSTANCE),                    \
+     (HANDLE)->CtrlPos = RCC_POS_##INSTANCE)
 
 /**
  * @brief USART register bit accessing macro
  * @param HANDLE: specifies the peripheral handle.
- * @param REG: specifies the register name.
- * @param BIT: specifies the register bit name.
+ * @param REG_NAME: specifies the register name.
+ * @param BIT_NAME: specifies the register bit name.
  */
 #define         USART_REG_BIT(HANDLE, REG_NAME, BIT_NAME)       \
     ((HANDLE)->Inst_BB->REG_NAME.BIT_NAME)
 
 #else
 /**
- * @brief  USART Handle initializer macro
- * @param  INSTANCE: specifies the SPI peripheral instance.
- * @param  INIT_FN: specifies the dependency initialization function to call back.
- * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
+ * @brief USART Instance to handle binder macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param INSTANCE: specifies the USART peripheral instance.
  */
-#define         NEW_USART_HANDLE(INSTANCE, INIT_FN, DEINIT_FN)  \
-    {.Inst = (INSTANCE),                                        \
-     .CtrlPos = RCC_POS_##INSTANCE,                             \
-     .Callbacks.DepInit   = (INIT_FN),                          \
-     .Callbacks.DepDeinit = (DEINIT_FN)}
+#define         USART_INST2HANDLE(HANDLE,INSTANCE)              \
+    ((HANDLE)->Inst    = (INSTANCE),                            \
+     (HANDLE)->CtrlPos = RCC_POS_##INSTANCE)
 
 /**
  * @brief USART register bit accessing macro
  * @param HANDLE: specifies the peripheral handle.
- * @param REG: specifies the register name.
- * @param BIT: specifies the register bit name.
+ * @param REG_NAME: specifies the register name.
+ * @param BIT_NAME: specifies the register bit name.
  */
 #define         USART_REG_BIT(HANDLE, REG_NAME, BIT_NAME)       \
     ((HANDLE)->Inst->REG_NAME.b.BIT_NAME)
@@ -196,9 +190,10 @@ typedef struct
  *            @arg LBD:     LIN break detection
  *            @arg CTS:     Clear To Send
  *            @arg WU:      Wake Up
+ *            @arg CM:      Character Match
  */
-#define         XPD_USART_EnableIT(  HANDLE,  IT_NAME)          \
-    (__XPD_USART_##IT_NAME##IECtrl(HANDLE, ENABLE))
+#define         USART_IT_ENABLE(  HANDLE,  IT_NAME)             \
+    (__XPD_USART_##IT_NAME##IECTRL(HANDLE, ENABLE))
 
 /**
  * @brief  Disable the specified USART interrupt.
@@ -214,9 +209,10 @@ typedef struct
  *            @arg LBD:     LIN break detection
  *            @arg CTS:     Clear To Send
  *            @arg WU:      Wake Up
+ *            @arg CM:      Character Match
  */
-#define         XPD_USART_DisableIT( HANDLE,  IT_NAME)          \
-        (__XPD_USART_##IT_NAME##IECtrl(HANDLE, DISABLE))
+#define         USART_IT_DISABLE( HANDLE,  IT_NAME)             \
+        (__XPD_USART_##IT_NAME##IECTRL(HANDLE, DISABLE))
 
 /**
  * @brief  Resume the specified USART DMA requests.
@@ -226,7 +222,7 @@ typedef struct
  *            @arg T:       Transmit
  *            @arg R:       Receive
  */
-#define         XPD_USART_EnableDMA(HANDLE, DMA_NAME)           \
+#define         USART_DMA_ENABLE(HANDLE, DMA_NAME)              \
     (SPI_REG_BIT((HANDLE), CR3, DMA##DMA_NAME) = 1)
 
 /**
@@ -237,10 +233,10 @@ typedef struct
  *            @arg T:       Transmit
  *            @arg R:       Receive
  */
-#define         XPD_USART_DisableDMA(HANDLE, DMA_NAME)          \
+#define         USART_DMA_DISABLE(HANDLE, DMA_NAME)             \
     (SPI_REG_BIT((HANDLE), CR3, DMA##DMA_NAME) = 0)
 
-#if (USART_PERIPHERAL_VERSION > 1)
+#if (__USART_PERIPHERAL_VERSION > 1)
 /* macros for cross-compatibility */
 #ifndef USART_ICR_NECF
 #define USART_ICR_NECF      USART_ICR_NCF
@@ -270,8 +266,10 @@ typedef struct
  *            @arg LBD:     LIN break detection
  *            @arg CTS:     Clear To Send
  *            @arg WU:      Wake Up
+ *            @arg ABRF:    Auto BaudRate detection Finished
+ *            @arg ABRE:    Auto BaudRate detection Error
  */
-#define         XPD_USART_GetFlag(  HANDLE, FLAG_NAME)          \
+#define         USART_FLAG_STATUS(  HANDLE, FLAG_NAME)          \
     (((HANDLE)->Inst->ISR.w >> USART_ISR_##FLAG_NAME##_Pos) & 1)
 
 /**
@@ -290,7 +288,7 @@ typedef struct
  *            @arg CTS:     Clear To Send
  *            @arg WU:      Wake Up
  */
-#define         XPD_USART_ClearFlag(HANDLE, FLAG_NAME)          \
+#define         USART_FLAG_CLEAR(HANDLE, FLAG_NAME)             \
     ((USART_ISR_##FLAG_NAME != USART_ISR_RXNE) ?                \
     ((HANDLE)->Inst->ICR.w = USART_ICR_##FLAG_NAME##CF) :       \
     ((HANDLE)->Inst->RQR.w = USART_RQR_RXFRQ))
@@ -312,7 +310,7 @@ typedef struct
  *            @arg LBD:     LIN break detection
  *            @arg CTS:     Clear To Send
  */
-#define         XPD_USART_GetFlag(  HANDLE, FLAG_NAME)          \
+#define         USART_FLAG_STATUS(  HANDLE, FLAG_NAME)          \
     (USART_REG_BIT((HANDLE),SR,FLAG_NAME))
 
 /**
@@ -331,72 +329,143 @@ typedef struct
  *            @arg LBD:     LIN break detection
  *            @arg CTS:     Clear To Send
  */
-#define         XPD_USART_ClearFlag(HANDLE, FLAG_NAME)          \
+#define         USART_FLAG_CLEAR(HANDLE, FLAG_NAME)             \
     do { if(USART_SR_##FLAG_NAME##_Pos <= USART_SR_RXNE_Pos)    \
-       { __IO uint32_t _x_ = (HANDLE)->Inst->SR.w;              \
-       _x_ = (HANDLE)->Inst->DR; } else                         \
-       {(USART_REG_BIT((HANDLE),SR,FLAG_NAME) = 0);}} while(0)
+          {(void)(HANDLE)->Inst->SR.w;(void)(HANDLE)->Inst->DR;}\
+       else{(USART_REG_BIT((HANDLE),SR,FLAG_NAME)=0);}}while(0)
 
-#endif /* (USART_PERIPHERAL_VERSION > 1) */
+#endif /* (__USART_PERIPHERAL_VERSION > 1) */
 
-#define __XPD_USART_IDLEIECtrl(     HANDLE, NEWSTATE)           \
+#define __XPD_USART_IDLEIECTRL(     HANDLE, NEWSTATE)           \
     (USART_REG_BIT((HANDLE),CR1,IDLEIE) = NEWSTATE)
 
-#define __XPD_USART_RXNEIECtrl(HANDLE, NEWSTATE)                \
+#define __XPD_USART_RXNEIECTRL(HANDLE, NEWSTATE)                \
     (USART_REG_BIT((HANDLE),CR1,RXNEIE) = NEWSTATE)
 
-#define __XPD_USART_TCIECtrl(HANDLE, NEWSTATE)                  \
+#define __XPD_USART_TCIECTRL(HANDLE, NEWSTATE)                  \
     (USART_REG_BIT((HANDLE),CR1,TCIE) = NEWSTATE)
 
-#define __XPD_USART_TXEIECtrl(HANDLE, NEWSTATE)                 \
+#define __XPD_USART_TXEIECTRL(HANDLE, NEWSTATE)                 \
     (USART_REG_BIT((HANDLE),CR1,TXEIE) = NEWSTATE)
 
-#define __XPD_USART_PEIECtrl(HANDLE, NEWSTATE)                  \
+#define __XPD_USART_PEIECTRL(HANDLE, NEWSTATE)                  \
     (USART_REG_BIT((HANDLE),CR1,PEIE) = NEWSTATE)
 
-#define __XPD_USART_LBDIECtrl(HANDLE, NEWSTATE)                 \
+#define __XPD_USART_CMIECTRL(HANDLE, NEWSTATE)                  \
+    (USART_REG_BIT((HANDLE),CR1,CMIE) = NEWSTATE)
+
+#define __XPD_USART_LBDIECTRL(HANDLE, NEWSTATE)                 \
     (USART_REG_BIT((HANDLE),CR2,LBDIE) = NEWSTATE)
 
-#define __XPD_USART_EIECtrl(HANDLE, NEWSTATE)                   \
+#define __XPD_USART_EIECTRL(HANDLE, NEWSTATE)                   \
     (USART_REG_BIT((HANDLE),CR3,EIE) = NEWSTATE)
 
-#define __XPD_USART_CTSIECtrl(HANDLE, NEWSTATE)                 \
+#define __XPD_USART_CTSIECTRL(HANDLE, NEWSTATE)                 \
     (USART_REG_BIT((HANDLE),CR3,CTSIE) = NEWSTATE)
 
-#define __XPD_USART_WUIECtrl(HANDLE, NEWSTATE)                  \
+#define __XPD_USART_WUIECTRL(HANDLE, NEWSTATE)                  \
     (USART_REG_BIT((HANDLE),CR3,WUFIE) = NEWSTATE)
 
 /** @} */
 
 /** @addtogroup USART_Common_Exported_Functions
  * @{ */
-XPD_ReturnType  XPD_USART_Deinit            (USART_HandleType * husart);
+void            USART_vDeinit               (USART_HandleType * pxUSART);
 
-void            XPD_USART_Enable            (USART_HandleType * husart);
-void            XPD_USART_Disable           (USART_HandleType * husart);
+void            USART_vSetDirection         (USART_HandleType * pxUSART,
+                                             USART_DirectionType eDirection);
 
-XPD_ReturnType  XPD_USART_Transmit          (USART_HandleType * husart, void * TxData,
-                                             uint16_t Length, uint32_t Timeout);
-XPD_ReturnType  XPD_USART_Receive           (USART_HandleType * husart, void * RxData,
-                                             uint16_t Length, uint32_t Timeout);
-XPD_ReturnType  XPD_USART_TransmitReceive   (USART_HandleType * husart, void * TxData, void * RxData,
-                                             uint16_t Length, uint32_t Timeout);
+XPD_ReturnType  USART_eGetStatus            (USART_HandleType * pxUSART);
+XPD_ReturnType  USART_ePollStatus           (USART_HandleType * pxUSART,
+                                             uint32_t ulTimeout);
 
-void            XPD_USART_Transmit_IT       (USART_HandleType * husart, void * TxData, uint16_t Length);
-void            XPD_USART_Receive_IT        (USART_HandleType * husart, void * RxData, uint16_t Length);
+XPD_ReturnType  USART_eTransmit             (USART_HandleType * pxUSART,
+                                             void * pvTxData,
+                                             uint16_t usLength,
+                                             uint32_t ulTimeout);
 
-void            XPD_USART_IRQHandler        (USART_HandleType * husart);
+XPD_ReturnType  USART_eSend                 (USART_HandleType * pxUSART,
+                                             void * pvTxData,
+                                             uint16_t usLength,
+                                             uint32_t ulTimeout);
 
-XPD_ReturnType  XPD_USART_Transmit_DMA      (USART_HandleType * husart, void * TxData, uint16_t Length);
-XPD_ReturnType  XPD_USART_Receive_DMA       (USART_HandleType * husart, void * RxData, uint16_t Length);
-XPD_ReturnType  XPD_USART_TransmitReceive_DMA(USART_HandleType* husart, void * TxData,
-                                             void * RxData, uint16_t Length);
-void            XPD_USART_Stop_DMA          (USART_HandleType * husart);
+XPD_ReturnType  USART_eReceive              (USART_HandleType * pxUSART,
+                                             void * pvRxData,
+                                             uint16_t usLength,
+                                             uint32_t ulTimeout);
 
-#if (USART_PERIPHERAL_VERSION > 1)
-void            XPD_USART_InversionConfig   (USART_HandleType * husart, USART_InversionType Inversions);
-void            XPD_USART_OverrunConfig     (USART_HandleType * husart, FunctionalState Mode);
+XPD_ReturnType  USART_eSendReceive          (USART_HandleType * pxUSART,
+                                             void * pvTxData,
+                                             void * pvRxData,
+                                             uint16_t usLength,
+                                             uint32_t ulTimeout);
+
+
+void            USART_vTransmit_IT          (USART_HandleType * pxUSART,
+                                             void * pvTxData,
+                                             uint16_t usLength);
+
+void            USART_vSend_IT              (USART_HandleType * pxUSART,
+                                             void * pvTxData,
+                                             uint16_t usLength);
+
+void            USART_vReceive_IT           (USART_HandleType * pxUSART,
+                                             void * pvRxData,
+                                             uint16_t usLength);
+
+void            USART_vTransmitReceive_IT   (USART_HandleType * pxUSART,
+                                             void * pvTxData,
+                                             void * pvRxData,
+                                             uint16_t usLength);
+
+void            USART_vSendReceive_IT       (USART_HandleType * pxUSART,
+                                             void * pvTxData,
+                                             void * pvRxData,
+                                             uint16_t usLength);
+
+void            USART_vIRQHandler           (USART_HandleType * pxUSART);
+
+
+XPD_ReturnType  USART_eTransmit_DMA         (USART_HandleType * pxUSART,
+                                             void * pvTxData,
+                                             uint16_t usLength);
+
+XPD_ReturnType  USART_eSend_DMA             (USART_HandleType * pxUSART,
+                                             void * pvTxData,
+                                             uint16_t usLength);
+
+XPD_ReturnType  USART_eReceive_DMA          (USART_HandleType * pxUSART,
+                                             void * pvRxData,
+                                             uint16_t usLength);
+
+XPD_ReturnType  USART_eTransmitReceive_DMA  (USART_HandleType * pxUSART,
+                                             void * pvTxData,
+                                             void * pvRxData,
+                                             uint16_t usLength);
+
+XPD_ReturnType  USART_eSendReceive_DMA      (USART_HandleType * pxUSART,
+                                             void * pvTxData,
+                                             void * pvRxData,
+                                             uint16_t usLength);
+
+void            USART_vStop_DMA             (USART_HandleType * pxUSART);
+
+#ifdef USART_CR3_OVRDIS
+void            USART_vOverrunEnable        (USART_HandleType * pxUSART);
+void            USART_vOverrunDisable       (USART_HandleType * pxUSART);
 #endif
+
+#ifdef USART_CR2_ABREN
+/**
+ * @brief Initiates an auto baudrate detection.
+ * @param pxUSART: pointer to the USART handle structure
+ */
+__STATIC_INLINE void USART_vBaudrateDetect(USART_HandleType * pxUSART)
+{
+    USART_REG_BIT(pxUSART,CR2,ABREN) = 1;
+}
+#endif /* USART_CR2_ABREN */
+
 /** @} */
 
 /** @} */
@@ -416,47 +485,44 @@ typedef enum
     UART_FLOWCONTROL_RTS_CTS = 3  /*!< Request To Send and Clear To Send signals are used */
 }UART_FlowControlType;
 
-/** @brief UART setup structure */
-typedef struct {
-    UART_FlowControlType FlowControl;   /*!< Hardware flow control select */
-    FunctionalState      OverSampling8; /*!< When the over sampling 8 is enabled (instead of 16),
-                                             higher baudrate is available */
-    FunctionalState      HalfDuplex;    /*!< Half-duplex communication select */
-}UART_InitType;
-
-#if (USART_PERIPHERAL_VERSION > 1)
 /** @brief UART baudrate detection strategy */
 typedef enum
 {
-    UART_BAUDRATE_FIXED = 0,            /*!< Fixed baudrate is used (auto baudrate detection is disabled) */
+    UART_BAUDRATE_FIXED = 0,               /*!< Fixed baudrate is used (auto baudrate detection is disabled) */
 
 #ifdef USART_CR2_ABREN
-
-    UART_BAUDRATE_AUTO_STARTBIT_MODE =  /*!< START bit is measured from falling to rising edge (D0=1) */
-            USART_CR2_ABREN,
-    UART_BAUDRATE_AUTO_2FALLING_MODE =  /*!< START + LSB=1 bits are measured from falling to falling edge (D0=1, D1=0) */
-            USART_CR2_ABREN | USART_CR2_ABRMODE_0,
-
+    UART_BAUDRATE_AUTO_STARTBIT_MODE  = 1, /*!< START bit is measured from falling to rising edge (D0=1) */
+    UART_BAUDRATE_AUTO_2FALLING_MODE  = 3, /*!< START + LSB=1 bits are measured from falling to falling edge (D0=1, D1=0) */
 #ifdef USART_CR2_ABRMODE_1
-
-    UART_BAUDRATE_AUTO_0X7FFRAME_MODE = /*!< START to MSB=0 bits are measured from falling to falling edge */
-            USART_CR2_ABREN | USART_CR2_ABRMODE_1,
-    UART_BAUDRATE_AUTO_0X55FRAME_MODE = /*!< Combination of the above methods */
-            USART_CR2_ABREN | USART_CR2_ABRMODE
+    UART_BAUDRATE_AUTO_0X7FFRAME_MODE = 5, /*!< START to MSB=0 bits are measured from falling to falling edge */
+    UART_BAUDRATE_AUTO_0X55FRAME_MODE = 7, /*!< Combination of the above methods */
 #endif
 #endif
 }UART_BaudrateModeType;
-#endif
+
+/** @brief UART setup structure */
+typedef struct {
+    uint32_t              Baudrate;      /*!< The USART communication baud rate */
+    USART_DirectionType   Directions;    /*!< Selects the module's transmitter and/or receiver capacity */
+    uint8_t               DataSize;      /*!< Specifies the USART frame data size in bits */
+    USART_StopBitsType    StopBits;      /*!< The number of stop bits transmitted */
+    FunctionalState       SingleSample;  /*!< Sets the sampling to 1/bit from default 3/bit */
+    USART_ParityType      Parity;        /*!< Specifies if the last frame bit is the parity and how it is calculated */
+    USART_InversionType   Inversions;    /*!< Specifies which inversions to activate */
+
+    UART_FlowControlType  FlowControl;   /*!< Hardware flow control select */
+    FunctionalState       OverSampling8; /*!< When the over sampling 8 is enabled (instead of 16),
+                                              higher baudrate is available */
+    FunctionalState       HalfDuplex;    /*!< Half-duplex communication select */
+    UART_BaudrateModeType BaudrateMode;  /*!< Baudrate detection mode */
+}UART_InitType;
 
 /** @} */
 
 /** @addtogroup UART_Exported_Functions
  * @{ */
-XPD_ReturnType  XPD_UART_Init               (USART_HandleType * husart, const USART_InitType * Common,
-                                             const UART_InitType * Config);
-#if (USART_PERIPHERAL_VERSION > 1)
-void            XPD_UART_BaudrateModeConfig (USART_HandleType * husart, UART_BaudrateModeType Mode);
-#endif
+void            USART_vInitAsync            (USART_HandleType * pxUSART,
+                                             const UART_InitType * pxConfig);
 /** @} */
 
 /** @} */
@@ -469,18 +535,27 @@ void            XPD_UART_BaudrateModeConfig (USART_HandleType * husart, UART_Bau
 
 /** @brief USRT setup structure */
 typedef struct {
-    ActiveLevelType   Polarity;      /*!< Steady state of the serial clock */
-    ClockPhaseType    Phase;         /*!< The clock transition on which the bit capture is made */
-    FunctionalState   LastBit;       /*!< The clock pulse for the last transmitted data bit (MSB)
-                                          has to be provided */
+    uint32_t              Baudrate;      /*!< The USART communication baud rate */
+    uint8_t               DataSize;      /*!< Specifies the USART frame data size in bits */
+    USART_StopBitsType    StopBits;      /*!< The number of stop bits transmitted */
+    FunctionalState       SingleSample;  /*!< Sets the sampling to 1/bit from default 3/bit */
+    USART_ParityType      Parity;        /*!< Specifies if the last frame bit is the parity and how it is calculated */
+    USART_InversionType   Inversions;    /*!< Specifies which inversions to activate */
+
+    struct {
+        ActiveLevelType   Polarity;      /*!< Steady state of the serial clock */
+        ClockPhaseType    Phase;         /*!< The clock transition on which the bit capture is made */
+        FunctionalState   LastBit;       /*!< The clock pulse for the last transmitted data bit (MSB)
+                                              has to be provided */
+    }Clock;                              /*   Output clock settings */
 }USRT_InitType;
 
 /** @} */
 
 /** @addtogroup USRT_Exported_Functions
  * @{ */
-XPD_ReturnType  XPD_USRT_Init               (USART_HandleType * husart, const USART_InitType * Common,
-                                             const USRT_InitType * Config);
+void            USART_vInitSync             (USART_HandleType * pxUSART,
+                                             const USRT_InitType * pxConfig);
 /** @} */
 
 /** @} */
@@ -488,11 +563,25 @@ XPD_ReturnType  XPD_USRT_Init               (USART_HandleType * husart, const US
 /** @defgroup LIN Local Interconnect Network
  * @{ */
 
+/** @defgroup USRT_Exported_Types USRT Exported Types
+ * @{ */
+
+/** @brief USRT setup structure */
+typedef struct {
+    uint32_t              Baudrate;      /*!< The USART communication baud rate */
+    USART_InversionType   Inversions;    /*!< Specifies which inversions to activate */
+
+    UART_BaudrateModeType BaudrateMode;  /*!< Baudrate detection mode */
+    uint8_t               BreakSize;     /*!< Bit size of the break frame for detection [10 .. 11] */
+}LIN_InitType;
+
+/** @} */
+
 /** @addtogroup LIN_Exported_Functions
  * @{ */
-XPD_ReturnType  XPD_LIN_Init                (USART_HandleType * husart, const USART_InitType * Common,
-                                             uint8_t BreakSize);
-void            XPD_LIN_SendBreak           (USART_HandleType * husart);
+void            USART_vInitLIN              (USART_HandleType * pxUSART,
+                                             const LIN_InitType * pxConfig);
+void            USART_vSendBreak            (USART_HandleType * pxUSART);
 /** @} */
 
 /** @} */
@@ -510,7 +599,7 @@ typedef enum
     MSUART_UNMUTE_ADDRESSED     = 1, /*!< Unmute on matching Address Mark (address MSB = 1, data MSB = 0) */
 }MSUART_UnmuteType;
 
-#if (USART_PERIPHERAL_VERSION > 2)
+#if (__USART_PERIPHERAL_VERSION > 2)
 /** @brief MSUART wakeup selection */
 typedef enum
 {
@@ -522,28 +611,94 @@ typedef enum
 
 /** @brief MSUART setup structure */
 typedef struct {
-    FunctionalState      OverSampling8;     /*!< When the over sampling 8 is enabled (instead of 16),
-                                                 higher baudrate is available */
-    FunctionalState      HalfDuplex;        /*!< Half-duplex communication select */
-    uint8_t              Address;           /*!< Specifies the slave device address */
-    uint8_t              AddressLength;     /*!< Specifies the address length (default 4 or 7 bits) */
-    MSUART_UnmuteType    UnmuteMethod;      /*!< Specifies the activation strategy from Mute */
+    uint32_t              Baudrate;      /*!< The USART communication baud rate */
+    USART_DirectionType   Directions;    /*!< Selects the module's transmitter and/or receiver capacity */
+    uint8_t               DataSize;      /*!< Specifies the USART frame data size in bits */
+    USART_StopBitsType    StopBits;      /*!< The number of stop bits transmitted */
+    FunctionalState       SingleSample;  /*!< Sets the sampling to 1/bit from default 3/bit */
+    USART_ParityType      Parity;        /*!< Specifies if the last frame bit is the parity and how it is calculated */
+    USART_InversionType   Inversions;    /*!< Specifies which inversions to activate */
 
-#if (USART_PERIPHERAL_VERSION > 2)
-    MSUART_WakeUpType    WakeUpMethod;      /*!< Specifies the activation strategy from STOP mode */
+    FunctionalState       OverSampling8; /*!< When the over sampling 8 is enabled (instead of 16),
+                                              higher baudrate is available */
+    FunctionalState       HalfDuplex;    /*!< Half-duplex communication select */
+    UART_BaudrateModeType BaudrateMode;  /*!< Baudrate detection mode */
+    uint8_t               Address;       /*!< Specifies the slave device address */
+    uint8_t               AddressLength; /*!< Specifies the address length (default 4 or 7 bits) */
+    MSUART_UnmuteType     UnmuteMethod;  /*!< Specifies the activation strategy from Mute */
+
+#if (__USART_PERIPHERAL_VERSION > 2)
+    MSUART_WakeUpType     WakeUpMethod;  /*!< Specifies the activation strategy from STOP mode */
 #endif
 }MSUART_InitType;
 /** @} */
 
 /** @addtogroup MSUART_Exported_Functions
  * @{ */
-XPD_ReturnType  XPD_MSUART_Init             (USART_HandleType * husart, const USART_InitType * Common,
-                                             const MSUART_InitType * Config);
-void            XPD_MSUART_MuteCtrl         (USART_HandleType * husart, FunctionalState NewState);
+void            USART_vInitMultiSlave       (USART_HandleType * pxUSART,
+                                             const MSUART_InitType * pxConfig);
 
-#if (USART_PERIPHERAL_VERSION > 2)
-void            XPD_MSUART_StopModeCtrl     (USART_HandleType * husart, FunctionalState NewState);
+/**
+ * @brief Mutes the MultiSlave UART
+ * @param pxUSART: pointer to the USART handle structure
+ */
+__STATIC_INLINE void USART_vMute(USART_HandleType * pxUSART)
+{
+#if (__USART_PERIPHERAL_VERSION > 1)
+    USART_REG_BIT(pxUSART, CR1, MME) = 1;
+
+    /* Send actual mute request */
+    pxUSART->Inst->RQR.w = USART_RQR_MMRQ;
+#else
+    USART_REG_BIT(pxUSART, CR1, RWU) = 1;
 #endif
+}
+
+/**
+ * @brief Unmutes the MultiSlave UART
+ * @param pxUSART: pointer to the USART handle structure
+ */
+__STATIC_INLINE void USART_vUnmute(USART_HandleType * pxUSART)
+{
+#if (__USART_PERIPHERAL_VERSION > 1)
+    USART_REG_BIT(pxUSART, CR1, MME) = 0;
+#else
+    USART_REG_BIT(pxUSART, CR1, RWU) = 0;
+#endif
+}
+
+#if (__USART_PERIPHERAL_VERSION > 2)
+/**
+ * @brief Enables the Stop mode for the UART
+ * @note  The UART is able to wake up the MCU from Stop 1 mode as long as UART clock is HSI or LSE.
+ * @note  There shall be no ongoing transfer in the UART when Stop mode is entered.
+ * @param pxUSART: pointer to the USART handle structure
+ */
+__STATIC_INLINE void USART_vStopModeEnable(USART_HandleType * pxUSART)
+{
+    /* Enable RXNE interrupt when it is the wake up source */
+    if(pxUSART->Inst->CR3.b.WUS == MSUART_WAKEUP_DATA_RECEIVED)
+    {
+        USART_IT_ENABLE(pxUSART, RXNE);
+    }
+    /* Otherwise enable dedicated interrupt */
+    else
+    {
+        USART_IT_ENABLE(pxUSART, WU);
+    }
+    USART_REG_BIT(pxUSART, CR1, UESM) = 1;
+}
+
+/**
+ * @brief Disables the Stop mode for the UART
+ * @param pxUSART: pointer to the USART handle structure
+ */
+__STATIC_INLINE void USART_vStopModeDisable(USART_HandleType * pxUSART)
+{
+    USART_REG_BIT(pxUSART, CR1, UESM) = 0;
+}
+#endif
+
 /** @} */
 
 /** @} */
@@ -557,30 +712,36 @@ void            XPD_MSUART_StopModeCtrl     (USART_HandleType * husart, Function
 /** @brief SmartCard setup structure */
 typedef struct
 {
-    uint8_t         GuardTime;    /*!< Delays the raising of TC flag by a number of baud clocks */
-    FunctionalState NACK;         /*!< Enable to force frame error at the end of received frame
-                                       with detected parity error */
-    struct {
-        ActiveLevelType Polarity; /*!< Steady state of the serial clock */
-        ClockPhaseType  Phase;    /*!< The clock transition on which the bit capture is made */
-        uint8_t         Divider;  /*!< Prescaler value that divides the peripheral clock
-                                       before SCLK output [2, 4, ... 62] */
-    }Clock;                       /*   Output clock settings */
+    uint32_t              Baudrate;      /*!< The USART communication baud rate */
+    USART_DirectionType   Directions;    /*!< Selects the module's transmitter and/or receiver capacity */
+    uint8_t               DataSize;      /*!< Specifies the USART frame data size in bits */
+    FunctionalState       SingleSample;  /*!< Sets the sampling to 1/bit from default 3/bit */
+    USART_ParityType      Parity;        /*!< Specifies how the parity is calculated */
+    USART_InversionType   Inversions;    /*!< Specifies which inversions to activate */
 
-#if (USART_PERIPHERAL_VERSION > 1)
-    uint32_t        RxTimeout;    /*!< Specifies the receiver timeout value in baud block count for
-                                       Character Wait Time (CWT) and Block Wait Time (BWT). Set to 0 to disable. */
-    uint8_t         BlockLength;  /*!< Specifies the SmartCard Block Length in T = 1 Reception mode */
-    uint8_t         AutoRetries;  /*!< Specifies the number of retries in receive and transmit mode
-                                       before reaching error state [0..7] */
+    uint8_t               GuardTime;     /*!< Delays the raising of TC flag by a number of baud clocks */
+    FunctionalState       NACK;          /*!< Enable to force frame error at the end of received frame
+                                              with detected parity error */
+    struct {
+        ActiveLevelType   Polarity;      /*!< Steady state of the serial clock */
+        ClockPhaseType    Phase;         /*!< The clock transition on which the bit capture is made */
+        uint8_t           Divider;       /*!< Prescaler value that divides the peripheral clock
+                                              before SCLK output [2, 4, ... 62] */
+    }Clock;                              /*   Output clock settings */
+#if (__USART_PERIPHERAL_VERSION > 1)
+    uint32_t        RxTimeout;           /*!< Specifies the receiver timeout value in baud block count for
+                                              Character Wait Time (CWT) and Block Wait Time (BWT). Set to 0 to disable. */
+    uint8_t         BlockLength;         /*!< Specifies the SmartCard Block Length in T = 1 Reception mode */
+    uint8_t         AutoRetries;         /*!< Specifies the number of retries in receive and transmit mode
+                                              before reaching error state [0 .. 7] */
 #endif
 }SmartCard_InitType;
 /** @} */
 
 /** @addtogroup SmartCard_Exported_Functions
  * @{ */
-XPD_ReturnType  XPD_SmartCard_Init          (USART_HandleType * husart, const USART_InitType * Common,
-                                             const SmartCard_InitType * Config);
+void            USART_vInitSmartCard        (USART_HandleType * pxUSART,
+                                             const SmartCard_InitType * pxConfig);
 /** @} */
 
 /** @} */
@@ -594,19 +755,24 @@ XPD_ReturnType  XPD_SmartCard_Init          (USART_HandleType * husart, const US
 /** @brief IrDA setup structure */
 typedef struct
 {
-    uint8_t         Prescaler;    /*!< The prescaler provides time base for pulse detection (pulse > 2*tPrescaler) */
-    FunctionalState LowPowerMode; /*!< Low power mode - different modulation scheme */
+    uint32_t              Baudrate;      /*!< The USART communication baud rate */
+    uint8_t               DataSize;      /*!< Specifies the USART frame data size in bits */
+    USART_ParityType      Parity;        /*!< Specifies if the last frame bit is the parity and how it is calculated */
+    USART_InversionType   Inversions;    /*!< Specifies which inversions to activate */
+
+    uint8_t               Prescaler;     /*!< The prescaler provides time base for pulse detection (pulse > 2*tPrescaler) */
+    FunctionalState       LowPowerMode;  /*!< Low power mode - different modulation scheme */
 }IrDA_InitType;
 
 /** @addtogroup IrDA_Exported_Functions
  * @{ */
-XPD_ReturnType  XPD_IrDA_Init               (USART_HandleType * husart, const USART_InitType * Common,
-                                             const IrDA_InitType * Config);
+void            USART_vInitIrDA             (USART_HandleType * pxUSART,
+                                             const IrDA_InitType * pxConfig);
 /** @} */
 
 /** @} */
 
-#if (USART_PERIPHERAL_VERSION > 1)
+#if (__USART_PERIPHERAL_VERSION > 1)
 /** @defgroup RS485 RS485 interface
  * @{ */
 
@@ -616,22 +782,31 @@ XPD_ReturnType  XPD_IrDA_Init               (USART_HandleType * husart, const US
 /** @brief RS485 setup structure */
 typedef struct
 {
-    FunctionalState      OverSampling8;   /*!< When the over sampling 8 is enabled (instead of 16),
+    uint32_t              Baudrate;       /*!< The USART communication baud rate */
+    USART_DirectionType   Directions;     /*!< Selects the module's transmitter and/or receiver capacity */
+    uint8_t               DataSize;       /*!< Specifies the USART frame data size in bits */
+    USART_StopBitsType    StopBits;       /*!< The number of stop bits transmitted */
+    FunctionalState       SingleSample;   /*!< Sets the sampling to 1/bit from default 3/bit */
+    USART_ParityType      Parity;         /*!< Specifies if the last frame bit is the parity and how it is calculated */
+    USART_InversionType   Inversions;     /*!< Specifies which inversions to activate */
+
+    FunctionalState       OverSampling8;  /*!< When the over sampling 8 is enabled (instead of 16),
                                                higher baudrate is available */
-    FunctionalState      HalfDuplex;      /*!< Half-duplex communication select */
+    FunctionalState       HalfDuplex;     /*!< Half-duplex communication select */
+    UART_BaudrateModeType BaudrateMode;   /*!< Baudrate detection mode */
     struct {
-        ActiveLevelType  Polarity;        /*!< Polarity of the Driver Enable signal */
-        uint8_t          AssertionTime;   /*!< The time between the activation of the DE signal
+        ActiveLevelType   Polarity;       /*!< Polarity of the Driver Enable signal */
+        uint8_t           AssertionTime;  /*!< The time between the activation of the DE signal
                                                and the beginning of the start bit in sample time units */
-        uint8_t          DeassertionTime; /*!< The time between the end of the last transmitted stop bit and the
+        uint8_t           DeassertionTime;/*!< The time between the end of the last transmitted stop bit and the
                                                deactivation of the DE (Driver Enable) signal in sample time units */
     }DE;                                  /*   Driver Enable signal configuration */
 }RS485_InitType;
 
 /** @addtogroup RS485_Exported_Functions
  * @{ */
-XPD_ReturnType  XPD_RS485_Init              (USART_HandleType * husart, const USART_InitType * Common,
-                                             const RS485_InitType * Config);
+void            USART_vInitRS485            (USART_HandleType * pxUSART,
+                                             const RS485_InitType * pxConfig);
 /** @} */
 
 /** @} */
@@ -640,7 +815,11 @@ XPD_ReturnType  XPD_RS485_Init              (USART_HandleType * husart, const US
 /** @} */
 
 #define XPD_USART_API
-#include "xpd_rcc_pc.h"
+#include <xpd_rcc_pc.h>
 #undef XPD_USART_API
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __XPD_USART_H_ */

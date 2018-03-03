@@ -2,30 +2,27 @@
   ******************************************************************************
   * @file    xpd_tim.c
   * @author  Benedek Kupper
-  * @version V0.2
-  * @date    2016-05-28
+  * @version 0.3
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers Timer Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
 
-#include "xpd_tim.h"
-#include "xpd_utils.h"
-
-#ifdef USE_XPD_TIM
+#include <xpd_tim.h>
+#include <xpd_utils.h>
 
 /** @addtogroup TIM
  * @{ */
@@ -43,68 +40,68 @@
 
 #define TIM_ACTIVE_CHANNELS(HANDLE) (HANDLE->Inst->CCER.w & TIM_ALL_CHANNELS)
 
-#ifdef USE_XPD_DMA_ERROR_DETECT
-static void tim_dmaErrorRedirect(void *hdma)
+#ifdef __XPD_DMA_ERROR_DETECT
+static void TIM_prvDmaErrorRedirect(void *pxDMA)
 {
-    TIM_HandleType* htim = (TIM_HandleType*) ((DMA_HandleType*) hdma)->Owner;
+    TIM_HandleType* pxTIM = (TIM_HandleType*) ((DMA_HandleType*) pxDMA)->Owner;
 
-    XPD_SAFE_CALLBACK(htim->Callbacks.Error, htim);
+    XPD_SAFE_CALLBACK(pxTIM->Callbacks.Error, pxTIM);
 }
 #endif
-static void tim_dmaUpdateRedirect(void *hdma)
+static void TIM_prvDmaUpdateRedirect(void *pxDMA)
 {
-    TIM_HandleType* htim = (TIM_HandleType*) ((DMA_HandleType*) hdma)->Owner;
+    TIM_HandleType* pxTIM = (TIM_HandleType*) ((DMA_HandleType*) pxDMA)->Owner;
 
-    XPD_SAFE_CALLBACK(htim->Callbacks.Update, htim);
+    XPD_SAFE_CALLBACK(pxTIM->Callbacks.Update, pxTIM);
 }
-static void tim_dmaChannelEventRedirect1(void *hdma)
+static void TIM_prvDmaChannelEventRedirect1(void *pxDMA)
 {
-    TIM_HandleType* htim = (TIM_HandleType*) ((DMA_HandleType*) hdma)->Owner;
+    TIM_HandleType* pxTIM = (TIM_HandleType*) ((DMA_HandleType*) pxDMA)->Owner;
 
-    htim->ActiveChannel = TIM_CHANNEL_1;
-    XPD_SAFE_CALLBACK(htim->Callbacks.ChannelEvent, htim);
+    pxTIM->ActiveChannel = TIM_CH1;
+    XPD_SAFE_CALLBACK(pxTIM->Callbacks.ChannelEvent, pxTIM);
 }
-static void tim_dmaChannelEventRedirect2(void *hdma)
+static void TIM_prvDmaChannelEventRedirect2(void *pxDMA)
 {
-    TIM_HandleType* htim = (TIM_HandleType*) ((DMA_HandleType*) hdma)->Owner;
+    TIM_HandleType* pxTIM = (TIM_HandleType*) ((DMA_HandleType*) pxDMA)->Owner;
 
-    htim->ActiveChannel = TIM_CHANNEL_2;
-    XPD_SAFE_CALLBACK(htim->Callbacks.ChannelEvent, htim);
+    pxTIM->ActiveChannel = TIM_CH2;
+    XPD_SAFE_CALLBACK(pxTIM->Callbacks.ChannelEvent, pxTIM);
 }
-static void tim_dmaChannelEventRedirect3(void *hdma)
+static void TIM_prvDmaChannelEventRedirect3(void *pxDMA)
 {
-    TIM_HandleType* htim = (TIM_HandleType*) ((DMA_HandleType*) hdma)->Owner;
+    TIM_HandleType* pxTIM = (TIM_HandleType*) ((DMA_HandleType*) pxDMA)->Owner;
 
-    htim->ActiveChannel = TIM_CHANNEL_3;
-    XPD_SAFE_CALLBACK(htim->Callbacks.ChannelEvent, htim);
+    pxTIM->ActiveChannel = TIM_CH3;
+    XPD_SAFE_CALLBACK(pxTIM->Callbacks.ChannelEvent, pxTIM);
 }
-static void tim_dmaChannelEventRedirect4(void *hdma)
+static void TIM_prvDmaChannelEventRedirect4(void *pxDMA)
 {
-    TIM_HandleType* htim = (TIM_HandleType*) ((DMA_HandleType*) hdma)->Owner;
+    TIM_HandleType* pxTIM = (TIM_HandleType*) ((DMA_HandleType*) pxDMA)->Owner;
 
-    htim->ActiveChannel = TIM_CHANNEL_4;
-    XPD_SAFE_CALLBACK(htim->Callbacks.ChannelEvent,htim);
+    pxTIM->ActiveChannel = TIM_CH4;
+    XPD_SAFE_CALLBACK(pxTIM->Callbacks.ChannelEvent,pxTIM);
 }
-static void tim_dmaTriggerCallbackRedirect(void *hdma)
+static void TIM_prvDmaTriggerCallbackRedirect(void *pxDMA)
 {
-    TIM_HandleType* htim = (TIM_HandleType*) ((DMA_HandleType*) hdma)->Owner;
+    TIM_HandleType* pxTIM = (TIM_HandleType*) ((DMA_HandleType*) pxDMA)->Owner;
 
-    XPD_SAFE_CALLBACK(htim->Callbacks.Trigger,htim);
+    XPD_SAFE_CALLBACK(pxTIM->Callbacks.Trigger,pxTIM);
 }
-static void tim_dmaCommutationCallbackRedirect(void *hdma)
+static void TIM_prvDmaCommutationCallbackRedirect(void *pxDMA)
 {
-    TIM_HandleType* htim = (TIM_HandleType*) ((DMA_HandleType*) hdma)->Owner;
+    TIM_HandleType* pxTIM = (TIM_HandleType*) ((DMA_HandleType*) pxDMA)->Owner;
 
-    XPD_SAFE_CALLBACK(htim->Callbacks.Commutation,htim);
+    XPD_SAFE_CALLBACK(pxTIM->Callbacks.Commutation,pxTIM);
 }
-static const XPD_HandleCallbackType tim_dmaRedirects[] = {
-        tim_dmaUpdateRedirect,
-        tim_dmaChannelEventRedirect1,
-        tim_dmaChannelEventRedirect2,
-        tim_dmaChannelEventRedirect3,
-        tim_dmaChannelEventRedirect4,
-        tim_dmaCommutationCallbackRedirect,
-        tim_dmaTriggerCallbackRedirect,
+static const XPD_HandleCallbackType TIM_apxDmaRedirects[] = {
+        TIM_prvDmaUpdateRedirect,
+        TIM_prvDmaChannelEventRedirect1,
+        TIM_prvDmaChannelEventRedirect2,
+        TIM_prvDmaChannelEventRedirect3,
+        TIM_prvDmaChannelEventRedirect4,
+        TIM_prvDmaCommutationCallbackRedirect,
+        TIM_prvDmaTriggerCallbackRedirect,
 };
 
 /** @defgroup TIM_Common_Exported_Functions TIM Common Exported Functions
@@ -113,340 +110,302 @@ static const XPD_HandleCallbackType tim_dmaRedirects[] = {
 
 /**
  * @brief Initializes the TIM peripheral using the setup configuration.
- * @param htim: pointer to the TIM handle structure
- * @param Config: pointer to TIM setup configuration
- * @return ERROR if input is incorrect, OK if success
+ * @param pxTIM: pointer to the TIM handle structure
+ * @param pxConfig: pointer to TIM setup configuration
  */
-XPD_ReturnType XPD_TIM_Init(TIM_HandleType * htim, const TIM_Counter_InitType * Config)
+void TIM_vInit(TIM_HandleType * pxTIM, const TIM_InitType * pxConfig)
 {
-    /* enable clock */
-    XPD_RCC_ClockEnable(htim->CtrlPos);
+    /* enable clock, reset peripheral */
+    RCC_vClockEnable(pxTIM->CtrlPos);
+    RCC_vReset(pxTIM->CtrlPos);
 
-    /* Dependencies initialization */
-    XPD_SAFE_CALLBACK(htim->Callbacks.DepInit,htim);
+    TIM_REG_BIT(pxTIM, CR1, DIR) = pxConfig->Mode;
+    pxTIM->Inst->CR1.b.CMS       = pxConfig->Mode >> 1;
+    pxTIM->Inst->CR1.b.CKD       = pxConfig->ClockDivision;
 
-    TIM_REG_BIT(htim, CR1, DIR) = Config->Mode;
-    htim->Inst->CR1.b.CMS       = Config->Mode >> 1;
-    htim->Inst->CR1.b.CKD       = Config->ClockDivision;
+    pxTIM->Inst->ARR             = (uint32_t)(pxConfig->Period - 1);
+    pxTIM->Inst->PSC             = (uint32_t)(pxConfig->Prescaler - 1);
 
-    htim->Inst->ARR             = (uint32_t)(Config->Period - 1);
-    htim->Inst->PSC             = (uint32_t)(Config->Prescaler - 1);
-
-    htim->Inst->RCR             = Config->RepetitionCounter;
+    pxTIM->Inst->RCR             = pxConfig->RepetitionCounter;
 
     /* Generate an update event to reload the prescaler
      and the repetition counter (only for advanced TIM) value immediately */
-    XPD_TIM_GenerateEvent(htim, U);
-    XPD_TIM_ClearFlag(htim, U);
+    TIM_EVENT_SET(pxTIM, U);
+    TIM_FLAG_CLEAR(pxTIM, U);
 
-    return XPD_OK;
+    /* Dependencies initialization */
+    XPD_SAFE_CALLBACK(pxTIM->Callbacks.DepInit,pxTIM);
 }
 
 /**
  * @brief Deinitializes the TIM peripheral.
- * @param htim: pointer to the TIM handle structure
- * @return ERROR if input is incorrect, OK if success
+ * @param pxTIM: pointer to the TIM handle structure
  */
-XPD_ReturnType XPD_TIM_Deinit(TIM_HandleType * htim)
+void TIM_vDeinit(TIM_HandleType * pxTIM)
 {
-    XPD_TIM_Output_Disable(htim);
+    TIM_vOutputDisable(pxTIM);
 
     /* disable all channels */
-    CLEAR_BIT(htim->Inst->CCER.w, TIM_ALL_CHANNELS);
+    CLEAR_BIT(pxTIM->Inst->CCER.w, TIM_ALL_CHANNELS);
 
-    /* disable the TIM Peripheral Clock */
-    XPD_TIM_Counter_Stop(htim);
-
-    /* disable clock */
-    XPD_RCC_ClockDisable(htim->CtrlPos);
+    /* stop the timer */
+    TIM_vCounterStop(pxTIM);
 
     /* Deinitialize peripheral dependencies */
-    XPD_SAFE_CALLBACK(htim->Callbacks.DepDeinit,htim);
+    XPD_SAFE_CALLBACK(pxTIM->Callbacks.DepDeinit,pxTIM);
 
-    return XPD_OK;
+    /* disable clock */
+    RCC_vClockDisable(pxTIM->CtrlPos);
+}
+
+/**
+ * @brief TIM common interrupt handler that provides handle callbacks (break handling excluded).
+ * @param pxTIM: pointer to the TIM handle structure
+ */
+void TIM_vIRQHandler(TIM_HandleType * pxTIM)
+{
+    TIM_vIRQHandler_UP(pxTIM);
+    TIM_vIRQHandler_CC(pxTIM);
+    TIM_vIRQHandler_TRG(pxTIM);
+    TIM_vIRQHandler_COM(pxTIM);
+    /* leave out break interrupt, timers that have break also have separate interrupt line */
+    /*TIM_vIRQHandler_BRK(pxTIM);*/
 }
 
 /**
  * @brief Enables the TIM counter and update interrupt.
- * @param htim: pointer to the TIM handle structure
+ * @param pxTIM: pointer to the TIM handle structure
  */
-void XPD_TIM_Counter_Start_IT(TIM_HandleType * htim)
+void TIM_vCounterStart_IT(TIM_HandleType * pxTIM)
 {
     /* enable the TIM Update interrupt */
-    XPD_TIM_EnableIT(htim, U);
+    TIM_IT_ENABLE(pxTIM, U);
 
     /* enable the counter */
-    XPD_TIM_Counter_Start(htim);
+    TIM_vCounterStart(pxTIM);
 }
 
 /**
  * @brief Disables the TIM counter and update interrupt.
- * @param htim: pointer to the TIM handle structure
+ * @param pxTIM: pointer to the TIM handle structure
  */
-void XPD_TIM_Counter_Stop_IT(TIM_HandleType * htim)
+void TIM_vCounterStop_IT(TIM_HandleType * pxTIM)
 {
-    XPD_TIM_DisableIT(htim, U);
+    TIM_IT_DISABLE(pxTIM, U);
 
     /* disable the counter */
-    XPD_TIM_Counter_Stop(htim);
+    TIM_vCounterStop(pxTIM);
+}
+
+/**
+ * @brief TIM update interrupt handler that provides handle callbacks.
+ * @param pxTIM: pointer to the TIM handle structure
+ */
+void TIM_vIRQHandler_UP(TIM_HandleType * pxTIM)
+{
+    /* TIM update event */
+    if (TIM_FLAG_STATUS(pxTIM, U) != 0)
+    {
+        /* Clear interrupt flag */
+        TIM_FLAG_CLEAR(pxTIM, U);
+
+        XPD_SAFE_CALLBACK(pxTIM->Callbacks.Update, pxTIM);
+    }
 }
 
 /**
  * @brief Sets up and enables a DMA transfer for the TIM counter.
- * @param htim: pointer to the TIM handle structure
- * @param Address: memory address of the counter data
- * @param Length: the amount of data to be transferred
+ * @param pxTIM: pointer to the TIM handle structure
+ * @param pvAddress: memory address of the counter data
+ * @param usLength: the amount of data to be transferred
  * @return BUSY if the DMA is used by other peripheral, OK otherwise
  */
-XPD_ReturnType XPD_TIM_Counter_Start_DMA(TIM_HandleType * htim, void * Address, uint16_t Length)
+XPD_ReturnType TIM_eCounterStart_DMA(TIM_HandleType * pxTIM, void * pvAddress, uint16_t usLength)
 {
-    XPD_ReturnType result;
+    XPD_ReturnType eResult;
 
     /* Set up DMA for transfer */
-    result = XPD_DMA_Start_IT(htim->DMA.Update, (void*)&htim->Inst->ARR, Address, Length);
+    eResult = DMA_eStart_IT(pxTIM->DMA.Update,
+            (void*)&pxTIM->Inst->ARR, pvAddress, usLength);
 
     /* If the DMA is currently used, return with error */
-    if (result == XPD_OK)
+    if (eResult == XPD_OK)
     {
         /* Set the callback owner */
-        htim->DMA.Update->Owner = htim;
+        pxTIM->DMA.Update->Owner = pxTIM;
 
         /* Set the DMA transfer callbacks */
-        htim->DMA.Update->Callbacks.Complete = tim_dmaUpdateRedirect;
-#ifdef USE_XPD_DMA_ERROR_DETECT
-        htim->DMA.Update->Callbacks.Error    = tim_dmaErrorRedirect;
+        pxTIM->DMA.Update->Callbacks.Complete = TIM_prvDmaUpdateRedirect;
+#ifdef __XPD_DMA_ERROR_DETECT
+        pxTIM->DMA.Update->Callbacks.Error    = TIM_prvDmaErrorRedirect;
 #endif
 
         /* enable the TIM Update DMA request */
-        TIM_REG_BIT(htim, DIER, UDE) = 1;
+        TIM_REG_BIT(pxTIM, DIER, UDE) = 1;
 
         /* enable the counter */
-        XPD_TIM_Counter_Start(htim);
+        TIM_vCounterStart(pxTIM);
     }
 
-    return result;
+    return eResult;
 }
 
 /**
  * @brief Disables the TIM counter and DMA transfer.
- * @param htim: pointer to the TIM handle structure
+ * @param pxTIM: pointer to the TIM handle structure
  */
-void XPD_TIM_Counter_Stop_DMA(TIM_HandleType * htim)
+void TIM_vCounterStop_DMA(TIM_HandleType * pxTIM)
 {
     /* disable the update DMA request */
-    TIM_REG_BIT(htim, DIER, UDE) = 0;
+    TIM_REG_BIT(pxTIM, DIER, UDE) = 0;
 
-    XPD_DMA_Stop_IT(htim->DMA.Update);
+    DMA_vStop_IT(pxTIM->DMA.Update);
 
     /* disable the counter */
-    XPD_TIM_Counter_Stop(htim);
+    TIM_vCounterStop(pxTIM);
 }
 
 /**
  * @brief Starts the selected timer channel (and the timer if required).
- * @param htim: pointer to the TIM handle structure
- * @param Channel: the selected capture/compare channel to use
+ * @param pxTIM: pointer to the TIM handle structure
+ * @param eChannel: the selected capture/compare channel to use
  */
-void XPD_TIM_Channel_Start(TIM_HandleType * htim, TIM_ChannelType Channel)
+void TIM_vChannelStart(TIM_HandleType * pxTIM, TIM_ChannelType eChannel)
 {
-    uint32_t ccer = htim->Inst->CCER.w;
+    uint32_t ulCCER = pxTIM->Inst->CCER.w;
 
-    htim->Inst->CCER.w = ccer | ((TIM_CCER_CC1E | TIM_CCER_CC1NE) << (4 * Channel));
+    pxTIM->Inst->CCER.w = ulCCER | ((TIM_CCER_CC1E | TIM_CCER_CC1NE) << (4 * eChannel));
 
-    if ((ccer & TIM_ALL_CHANNELS) == 0)
+    if ((ulCCER & TIM_ALL_CHANNELS) == 0)
     {
-        XPD_TIM_Counter_Start(htim);
+        TIM_vCounterStart(pxTIM);
     }
 }
 
 /**
  * @brief Stops the selected timer channel (and the timer if required).
- * @param htim: pointer to the TIM handle structure
- * @param Channel: the selected capture/compare channel to use
+ * @param pxTIM: pointer to the TIM handle structure
+ * @param eChannel: the selected capture/compare channel to use
  */
-void XPD_TIM_Channel_Stop(TIM_HandleType * htim, TIM_ChannelType Channel)
+void TIM_vChannelStop(TIM_HandleType * pxTIM, TIM_ChannelType eChannel)
 {
-    uint32_t ccer = htim->Inst->CCER.w & (~((TIM_CCER_CC1E | TIM_CCER_CC1NE) << (4 * Channel)));
+    uint32_t ulCCER = pxTIM->Inst->CCER.w & (~((TIM_CCER_CC1E | TIM_CCER_CC1NE) << (4 * eChannel)));
 
-    htim->Inst->CCER.w = ccer;
+    pxTIM->Inst->CCER.w = ulCCER;
 
-    if ((ccer & TIM_ALL_CHANNELS) == 0)
+    if ((ulCCER & TIM_ALL_CHANNELS) == 0)
     {
-        XPD_TIM_Counter_Stop(htim);
+        TIM_vCounterStop(pxTIM);
     }
 }
 
 /**
  * @brief Starts the selected timer channel (and the timer if required)
  *        and enables the channel event interrupt.
- * @param htim: pointer to the TIM handle structure
- * @param Channel: the selected capture/compare channel to use
+ * @param pxTIM: pointer to the TIM handle structure
+ * @param eChannel: the selected capture/compare channel to use
  */
-void XPD_TIM_Channel_Start_IT(TIM_HandleType * htim, TIM_ChannelType Channel)
+void TIM_vChannelStart_IT(TIM_HandleType * pxTIM, TIM_ChannelType eChannel)
 {
-    SET_BIT(htim->Inst->DIER.w, (TIM_DIER_CC1IE << (uint32_t)Channel) | TIM_DIER_BIE);
+    SET_BIT(pxTIM->Inst->DIER.w, (TIM_DIER_CC1IE << (uint32_t)eChannel) | TIM_DIER_BIE);
 
-    XPD_TIM_Channel_Start(htim, Channel);
+    TIM_vChannelStart(pxTIM, eChannel);
 }
 
 /**
  * @brief Stops the selected timer channel (and the timer if required)
  *        and disables the channel event interrupt.
- * @param htim: pointer to the TIM handle structure
- * @param Channel: the selected capture/compare channel to use
+ * @param pxTIM: pointer to the TIM handle structure
+ * @param eChannel: the selected capture/compare channel to use
  */
-void XPD_TIM_Channel_Stop_IT(TIM_HandleType * htim, TIM_ChannelType Channel)
+void TIM_vChannelStop_IT(TIM_HandleType * pxTIM, TIM_ChannelType eChannel)
 {
-    CLEAR_BIT(htim->Inst->DIER.w, (TIM_DIER_CC1IE << (uint32_t)Channel) | TIM_DIER_BIE);
+    CLEAR_BIT(pxTIM->Inst->DIER.w, (TIM_DIER_CC1IE << (uint32_t)eChannel) | TIM_DIER_BIE);
 
-    XPD_TIM_Channel_Stop(htim, Channel);
+    TIM_vChannelStop(pxTIM, eChannel);
+}
+
+/**
+ * @brief TIM channel event interrupt handler that provides handle callbacks.
+ * @param pxTIM: pointer to the TIM handle structure
+ */
+void TIM_vIRQHandler_CC(TIM_HandleType * pxTIM)
+{
+    TIM_ChannelType eChannel = TIM_CH1;
+    uint32_t ulFlags = (pxTIM->Inst->SR.w
+            & (TIM_SR_CC1IF | TIM_SR_CC2IF | TIM_SR_CC3IF | TIM_SR_CC4IF)
+            ) >> TIM_SR_CC1IF_Pos;
+
+    /* Iterate through active channel flags */
+    while (ulFlags > 0)
+    {
+        if ((ulFlags & 1) != 0)
+        {
+            /* Clear interrupt flag */
+            TIM_CH_FLAG_CLEAR(pxTIM, eChannel);
+
+            /* Provide channel number for interrupt callback context */
+            pxTIM->ActiveChannel = eChannel;
+            XPD_SAFE_CALLBACK(pxTIM->Callbacks.ChannelEvent, pxTIM);
+        }
+        eChannel++;
+        ulFlags >>= 1;
+    }
 }
 
 /**
  * @brief Starts the selected timer channel (and the timer if required)
  *        using a DMA transfer to provide channel pulse values.
- * @param htim: pointer to the TIM handle structure
- * @param Channel: the selected capture/compare channel to use
- * @param Address: the memory start address of the pulse values
- * @param Length: the memory size of the pulse values
+ * @param pxTIM: pointer to the TIM handle structure
+ * @param eChannel: the selected capture/compare channel to use
+ * @param pvAddress: the memory start address of the pulse values
+ * @param usLength: the memory size of the pulse values
  * @return BUSY if the DMA is used by other peripheral, OK otherwise
  */
-XPD_ReturnType XPD_TIM_Channel_Start_DMA(TIM_HandleType * htim, TIM_ChannelType Channel,
-        void * Address, uint16_t Length)
+XPD_ReturnType TIM_eChannelStart_DMA(
+        TIM_HandleType *    pxTIM,
+        TIM_ChannelType     eChannel,
+        void *              pvAddress,
+        uint16_t            usLength)
 {
-    XPD_ReturnType result;
+    XPD_ReturnType eResult;
 
     /* Set up DMA for transfer */
-    result = XPD_DMA_Start_IT(htim->DMA.Channel[Channel], (void*)&((&htim->Inst->CCR1)[Channel]),
-            Address, Length);
+    eResult = DMA_eStart_IT(pxTIM->DMA.Channel[eChannel],
+            (void*)&((&pxTIM->Inst->CCR1)[eChannel]), pvAddress, usLength);
 
     /* If the DMA is currently used, return with error */
-    if (result == XPD_OK)
+    if (eResult == XPD_OK)
     {
         /* Set the callback owner */
-        htim->DMA.Channel[Channel]->Owner = htim;
+        pxTIM->DMA.Channel[eChannel]->Owner = pxTIM;
 
         /* set the DMA complete callback */
-        htim->DMA.Channel[Channel]->Callbacks.Complete = tim_dmaRedirects[Channel + 1];
-#ifdef USE_XPD_DMA_ERROR_DETECT
-        htim->DMA.Channel[Channel]->Callbacks.Error    = tim_dmaErrorRedirect;
+        pxTIM->DMA.Channel[eChannel]->Callbacks.Complete = TIM_apxDmaRedirects[1 + eChannel];
+#ifdef __XPD_DMA_ERROR_DETECT
+        pxTIM->DMA.Channel[eChannel]->Callbacks.Error    = TIM_prvDmaErrorRedirect;
 #endif
 
-        XPD_TIM_Channel_EnableDMA(htim, Channel);
+        TIM_CH_DMA_ENABLE(pxTIM, eChannel);
 
-        XPD_TIM_Channel_Start(htim, Channel);
+        TIM_vChannelStart(pxTIM, eChannel);
     }
-    return result;
+    return eResult;
 }
 
 /**
  * @brief Stops the selected timer channel (and the timer if required)
  *        and disables the DMA requests.
- * @param htim: pointer to the TIM handle structure
- * @param Channel: the selected capture/compare channel to use
+ * @param pxTIM: pointer to the TIM handle structure
+ * @param eChannel: the selected capture/compare channel to use
  */
-void XPD_TIM_Channel_Stop_DMA(TIM_HandleType * htim, TIM_ChannelType Channel)
+void TIM_vChannelStop_DMA(TIM_HandleType * pxTIM, TIM_ChannelType eChannel)
 {
-    XPD_TIM_Channel_DisableDMA(htim, Channel);
+    TIM_CH_DMA_DISABLE(pxTIM, eChannel);
 
-    XPD_DMA_Stop_IT(htim->DMA.Channel[Channel]);
+    DMA_vStop_IT(pxTIM->DMA.Channel[eChannel]);
 
-    XPD_TIM_Channel_Stop(htim, Channel);
-}
-
-/**
- * @brief TIM update interrupt handler that provides handle callbacks.
- * @param htim: pointer to the TIM handle structure
- */
-void XPD_TIM_UP_IRQHandler(TIM_HandleType * htim)
-{
-    /* TIM update event */
-    if (XPD_TIM_GetFlag(htim, U) != 0)
-    {
-        /* Clear interrupt flag */
-        XPD_TIM_ClearFlag(htim, U);
-
-        XPD_SAFE_CALLBACK(htim->Callbacks.Update, htim);
-    }
-}
-
-/**
- * @brief TIM channel event interrupt handler that provides handle callbacks.
- * @param htim: pointer to the TIM handle structure
- */
-void XPD_TIM_CC_IRQHandler(TIM_HandleType * htim)
-{
-    uint32_t sr = (htim->Inst->SR.w & (TIM_SR_CC1IF | TIM_SR_CC2IF | TIM_SR_CC3IF | TIM_SR_CC4IF)) >> 1;
-    TIM_ChannelType ch;
-
-    /* Iterate through active channel flags */
-    for (ch = TIM_CHANNEL_1; sr > 0; ch++, sr >>= 1)
-    {
-        if ((sr & 1) != 0)
-        {
-            /* Clear interrupt flag */
-            XPD_TIM_Channel_ClearFlag(htim, ch);
-
-            /* Provide channel number for interrupt callback context */
-            htim->ActiveChannel = ch;
-            XPD_SAFE_CALLBACK(htim->Callbacks.ChannelEvent, htim);
-        }
-    }
-}
-
-/**
- * @brief TIM break event interrupt handler that provides handle callbacks.
- * @param htim: pointer to the TIM handle structure
- */
-void XPD_TIM_BRK_IRQHandler(TIM_HandleType * htim)
-{
-    /* TIM Break input event */
-    if (XPD_TIM_GetFlag(htim, B) != 0)
-    {
-        /* Clear interrupt flag */
-        XPD_TIM_ClearFlag(htim, B);
-
-        XPD_SAFE_CALLBACK(htim->Callbacks.Break, htim);
-    }
-}
-
-/**
- * @brief TIM trigger and commutation interrupt handler that provides handle callbacks.
- * @param htim: pointer to the TIM handle structure
- */
-void XPD_TIM_TRG_COM_IRQHandler(TIM_HandleType * htim)
-{
-    uint32_t sr = htim->Inst->SR.w;
-
-    /* TIM Trigger detection event */
-    if ((sr & TIM_SR_TIF) != 0)
-    {
-        /* clear interrupt flag */
-        XPD_TIM_ClearFlag(htim, T);
-
-        XPD_SAFE_CALLBACK(htim->Callbacks.Trigger, htim);
-    }
-    /* TIM commutation event */
-    if ((sr & TIM_SR_COMIF) != 0)
-    {
-        /* clear interrupt flag */
-        XPD_TIM_ClearFlag(htim, COM);
-
-        XPD_SAFE_CALLBACK(htim->Callbacks.Commutation, htim);
-    }
-}
-
-/**
- * @brief TIM common interrupt handler that provides handle callbacks (break handling excluded).
- * @param htim: pointer to the TIM handle structure
- */
-void XPD_TIM_IRQHandler(TIM_HandleType * htim)
-{
-    XPD_TIM_UP_IRQHandler(htim);
-    XPD_TIM_CC_IRQHandler(htim);
-    XPD_TIM_TRG_COM_IRQHandler(htim);
-    /* leave out break interrupt, timers that have break also have separate interrupt line */
-    /*XPD_TIM_BRK_IRQHandler(htim);*/
+    TIM_vChannelStop(pxTIM, eChannel);
 }
 
 /** @} */
@@ -461,57 +420,61 @@ void XPD_TIM_IRQHandler(TIM_HandleType * htim)
 
 /**
  * @brief Sets up burst DMA transfer for the timer and enables the selected DMA requests.
- * @param htim: pointer to the TIM handle structure
- * @param Config: pointer to the burst transfer configuration
- * @param Address: the memory start address of the pulse values
- * @param Length: the memory size of the pulse values
+ * @param pxTIM: pointer to the TIM handle structure
+ * @param pxConfig: pointer to the burst transfer configuration
+ * @param pvAddress: the memory start address of the pulse values
+ * @param usLength: the memory size of the pulse values
  * @return BUSY if the DMA is used by other peripheral, OK otherwise
  */
-XPD_ReturnType XPD_TIM_Burst_Start_DMA(TIM_HandleType * htim, const TIM_Burst_InitType * Config,
-        void * Address, uint16_t Length)
+XPD_ReturnType TIM_eBurstStart_DMA(
+        TIM_HandleType *            pxTIM,
+        const TIM_BurstInitType *   pxConfig,
+        void *                      pvAddress,
+        uint16_t                    usLength)
 {
-    XPD_ReturnType result;
-    DMA_HandleType * hdma = htim->DMA.Burst;
+    XPD_ReturnType eResult;
+    DMA_HandleType * pxDMA = pxTIM->DMA.Burst;
 
     /* Set the DMA start address location - relative to timer start address */
-    htim->Inst->DCR.b.DBA = Config->RegIndex;
+    pxTIM->Inst->DCR.b.DBA = pxConfig->RegIndex;
     /* Set the DMA burst transfer length */
-    htim->Inst->DCR.b.DBL = Length - 1;
+    pxTIM->Inst->DCR.b.DBL = usLength - 1;
 
     /* Set up DMA for transfer */
-    result = XPD_DMA_Start_IT(hdma, (void*)&htim->Inst->DMAR, Address, Length);
+    eResult = DMA_eStart_IT(pxDMA,
+            (void*)&pxTIM->Inst->DMAR, pvAddress, usLength);
 
     /* If the DMA is currently used, return with error */
-    if (result == XPD_OK)
+    if (eResult == XPD_OK)
     {
         /* Set the callback owner */
-        hdma->Owner = htim;
+        pxDMA->Owner = pxTIM;
 
         /* set the DMA complete callback */
-        hdma->Callbacks.Complete     = tim_dmaRedirects[Config->Source];
-#ifdef USE_XPD_DMA_ERROR_DETECT
-        hdma->Callbacks.Error        = tim_dmaErrorRedirect;
+        pxDMA->Callbacks.Complete     = TIM_apxDmaRedirects[pxConfig->Source];
+#ifdef __XPD_DMA_ERROR_DETECT
+        pxDMA->Callbacks.Error        = TIM_prvDmaErrorRedirect;
 #endif
 
         /* Enable the selected DMA request */
-        SET_BIT(htim->Inst->DIER.w, TIM_DIER_UDE << Config->Source);
+        SET_BIT(pxTIM->Inst->DIER.w, TIM_DIER_UDE << pxConfig->Source);
     }
-    return result;
+    return eResult;
 }
 
 /**
  * @brief Stops the selected (burst) DMA request.
- * @param htim: pointer to the TIM handle structure
+ * @param pxTIM: pointer to the TIM handle structure
  * @param Source: pointer to the burst transfer configuration
  */
-void XPD_TIM_Burst_Stop_DMA(TIM_HandleType * htim, TIM_BurstSourceType Source)
+void TIM_vBurstStop_DMA(TIM_HandleType * pxTIM, TIM_EventType Source)
 {
-    DMA_HandleType * hdma = htim->DMA.Burst;
+    DMA_HandleType * pxDMA = pxTIM->DMA.Burst;
 
     /* Disable the selected DMA request */
-    CLEAR_BIT(htim->Inst->DIER.w, TIM_DIER_UDE << Source);
+    CLEAR_BIT(pxTIM->Inst->DIER.w, TIM_DIER_UDE << Source);
 
-    XPD_DMA_Stop_IT(hdma);
+    DMA_vStop_IT(pxDMA);
 }
 
 /** @} */
@@ -528,220 +491,259 @@ void XPD_TIM_Burst_Stop_DMA(TIM_HandleType * htim, TIM_BurstSourceType Source)
 
 /**
  * @brief Initializes a compare channel using the setup configuration.
- * @param htim: pointer to the TIM handle structure
- * @param Channel: the selected compare channel to use
- * @param Config: pointer to TIM compare channel setup configuration
+ * @param pxTIM: pointer to the TIM handle structure
+ * @param eChannel: the selected compare channel to use
+ * @param pxConfig: pointer to TIM compare channel setup configuration
  */
-void XPD_TIM_Output_ChannelConfig(TIM_HandleType * htim, TIM_ChannelType Channel, const TIM_Output_InitType * Config)
+void TIM_vOutputChannelConfig(
+        TIM_HandleType *            pxTIM,
+        TIM_ChannelType             eChannel,
+        const TIM_OutputInitType *  pxConfig)
 {
     /* set the output compare polarities (0 is active high) */
     {
-        uint32_t pol = 0;
+        uint32_t ulPol = 0;
 
-        if (Config->Polarity == ACTIVE_LOW)
+        if (pxConfig->Polarity == ACTIVE_LOW)
         {
-            pol  = TIM_CCER_CC1P;
+            ulPol  = TIM_CCER_CC1P;
         }
-        if (Config->CompPolarity == ACTIVE_LOW)
+        if (pxConfig->CompPolarity == ACTIVE_LOW)
         {
-            pol |= TIM_CCER_CC1NP;
+            ulPol |= TIM_CCER_CC1NP;
         }
 
-        MODIFY_REG(htim->Inst->CCER.w, 0xF << (Channel * 4), pol << (Channel * 4));
+        MODIFY_REG(pxTIM->Inst->CCER.w, 0xF << (eChannel * 4), ulPol << (eChannel * 4));
     }
     /* output mode configuration */
     {
-        __IO uint32_t * pccmr;
-        uint32_t chcfg, choffset = (Channel & 1) * 8;
+        __IO uint32_t * pulCCMR;
+        uint32_t ulChCfg, ulChOffset = (eChannel & 1) * 8;
 
         /* get related CCMR register */
 #if TIM_SUPPORTED_CHANNEL_COUNT > 5
-        if (Channel > TIM_CHANNEL_4)
+        if (eChannel > TIM_CH4)
         {
-            pccmr = &htim->Inst->CCMR3.w;
+            pulCCMR = &pxTIM->Inst->CCMR3.w;
         }
         else
 #endif
-        if (Channel < TIM_CHANNEL_3)
+        if (eChannel < TIM_CH3)
         {
-            pccmr = &htim->Inst->CCMR1.w;
+            pulCCMR = &pxTIM->Inst->CCMR1.w;
         }
         else
         {
-            pccmr = &htim->Inst->CCMR2.w;
+            pulCCMR = &pxTIM->Inst->CCMR2.w;
         }
 
         /* add output configuration */
-        chcfg = (Config->Mode << TIM_CCMR1_OC1M_Pos) & TIM_CCMR1_OC1M;
+        ulChCfg = (pxConfig->Mode << TIM_CCMR1_OC1M_Pos) & TIM_CCMR1_OC1M;
 
         /* for PWM modes, enable preload and fast mode */
-        if (Config->Mode >= TIM_OUTPUT_PWM1)
+        if (pxConfig->Mode >= TIM_OUTPUT_PWM1)
         {
-            chcfg |= TIM_CCMR1_OC1PE | TIM_CCMR1_OC1FE;
+            ulChCfg |= TIM_CCMR1_OC1PE | TIM_CCMR1_OC1FE;
         }
 
         /* apply configuration */
-        *pccmr = (*pccmr
+        *pulCCMR = (*pulCCMR
                  &((TIM_CCMR1_CC2S | TIM_CCMR1_OC2CE | TIM_CCMR1_OC2FE |
-                    TIM_CCMR1_OC2M | TIM_CCMR1_OC2PE) >> choffset))
-                | (chcfg << choffset);
+                    TIM_CCMR1_OC2M | TIM_CCMR1_OC2PE) >> ulChOffset))
+                | (ulChCfg << ulChOffset);
     }
 
     /* Set the Output Idle states */
     {
-        uint32_t idle;
+        uint32_t ulIdle;
 
-        idle = (Config->IdleState & 1) | ((Config->CompIdleState & 1) << 1);
-        idle = idle << (Channel * 2 + 8);
+        ulIdle = (pxConfig->IdleState & 1) | ((pxConfig->CompIdleState & 1) << 1);
+        ulIdle = ulIdle << (eChannel * 2 + 8);
 
-        MODIFY_REG(htim->Inst->CR2.w,(TIM_CR2_OIS1 | TIM_CR2_OIS1N) << (Channel * 2), idle);
+        MODIFY_REG(pxTIM->Inst->CR2.w,(TIM_CR2_OIS1 | TIM_CR2_OIS1N) << (eChannel * 2), ulIdle);
     }
 }
 
 /**
  * @brief Sets up a selected Break feature using the input configuration.
- * @param htim: pointer to the TIM handle structure
- * @param BreakNumber: the Break line to configure (1 or 2)
- * @param Config: pointer to TIM Break setup configuration
+ * @param pxTIM: pointer to the TIM handle structure
+ * @param ucBreakLine: the Break line to configure (1 or 2)
+ * @param pxConfig: pointer to TIM Break setup configuration
  */
-void XPD_TIM_Output_BreakConfig(TIM_HandleType * htim, uint8_t BreakLine, const TIM_Output_BreakInitType * Config)
+void TIM_vBreakConfig(
+        TIM_HandleType *            pxTIM,
+        uint8_t                     ucBreakLine,
+        const TIM_BreakInitType *   pxConfig)
 {
 #ifdef TIM_BDTR_BK2E
-    if (BreakLine > 1)
+    if (ucBreakLine > 1)
     {
         /* break2 configuration */
-        TIM_REG_BIT(htim, BDTR, BK2E) = Config->State;
-        TIM_REG_BIT(htim, BDTR, BK2P) = 1 - Config->Polarity;
-        htim->Inst->BDTR.b.BK2F       = Config->Filter;
+        TIM_REG_BIT(pxTIM, BDTR, BK2E) = pxConfig->State;
+        TIM_REG_BIT(pxTIM, BDTR, BK2P) = 1 - pxConfig->Polarity;
+        pxTIM->Inst->BDTR.b.BK2F       = pxConfig->Filter;
     }
     else
 #endif
     {
         /* break configuration */
-        TIM_REG_BIT(htim, BDTR, BKE)  = Config->State;
-        TIM_REG_BIT(htim, BDTR, BKP)  = 1 - Config->Polarity;
+        TIM_REG_BIT(pxTIM, BDTR, BKE)  = pxConfig->State;
+        TIM_REG_BIT(pxTIM, BDTR, BKP)  = 1 - pxConfig->Polarity;
 #ifdef TIM_BDTR_BKF
-        htim->Inst->BDTR.b.BKF        = Config->Filter;
+        pxTIM->Inst->BDTR.b.BKF        = pxConfig->Filter;
 #endif
+    }
+}
+
+/**
+ * @brief TIM break event interrupt handler that provides handle callbacks.
+ * @param pxTIM: pointer to the TIM handle structure
+ */
+void TIM_vIRQHandler_BRK(TIM_HandleType * pxTIM)
+{
+    /* TIM Break input event */
+    if (TIM_FLAG_STATUS(pxTIM, B) != 0)
+    {
+        /* Clear interrupt flag */
+        TIM_FLAG_CLEAR(pxTIM, B);
+
+        XPD_SAFE_CALLBACK(pxTIM->Callbacks.Break, pxTIM);
     }
 }
 
 /**
  * @brief Sets up the output drive configuration of the timer.
- * @param htim: pointer to the TIM handle structure
- * @param Config: pointer to TIM break setup configuration
+ * @param pxTIM: pointer to the TIM handle structure
+ * @param pxConfig: pointer to TIM break setup configuration
  */
-void XPD_TIM_Output_DriveConfig(TIM_HandleType * htim, const TIM_Output_DriveType * Config)
+void TIM_vDriveConfig(TIM_HandleType * pxTIM, const TIM_DriveInitType * pxConfig)
 {
-    uint8_t deadtime;
+    uint8_t ucDeadtime;
 
     /* Revert the configuration characteristic */
-    if (Config->DeadCounts < 128)
+    if (pxConfig->DeadCounts < 128)
     {
         /* dead counts = DTG */
-        deadtime = Config->DeadCounts;
+        ucDeadtime = pxConfig->DeadCounts;
     }
-    else if (Config->DeadCounts < 256)
+    else if (pxConfig->DeadCounts < 256)
     {
         /* dead counts =(64+DTG[5:0])*2 */
-        deadtime = 0x80 | ((Config->DeadCounts / 2) - 64);
+        ucDeadtime = 0x80 | ((pxConfig->DeadCounts / 2) - 64);
     }
-    else if (Config->DeadCounts < 512)
+    else if (pxConfig->DeadCounts < 512)
     {
         /* dead counts =(32+DTG[4:0])*8 */
-        deadtime = 0xC0 | ((Config->DeadCounts / 8) - 32);
+        ucDeadtime = 0xC0 | ((pxConfig->DeadCounts / 8) - 32);
     }
-    else if (Config->DeadCounts < 1008)
+    else if (pxConfig->DeadCounts < 1008)
     {
         /* dead counts =(32+DTG[4:0])*16 */
-        deadtime = 0xE0 | ((Config->DeadCounts / 16) - 32);
+        ucDeadtime = 0xE0 | ((pxConfig->DeadCounts / 16) - 32);
     }
     else
     {
         /* saturation */
-        deadtime = 255;
+        ucDeadtime = 255;
     }
 
-    htim->Inst->BDTR.b.DTG        = deadtime;
-    TIM_REG_BIT(htim, BDTR, AOE)  = Config->AutomaticOutput;
-    TIM_REG_BIT(htim, BDTR, OSSI) = Config->IdleOffState;
-    TIM_REG_BIT(htim, BDTR, OSSR) = Config->RunOffState;
+    pxTIM->Inst->BDTR.b.DTG        = ucDeadtime;
+    TIM_REG_BIT(pxTIM, BDTR, AOE)  = pxConfig->AutomaticOutput;
+    TIM_REG_BIT(pxTIM, BDTR, OSSI) = pxConfig->IdleOffState;
+    TIM_REG_BIT(pxTIM, BDTR, OSSR) = pxConfig->RunOffState;
 }
 
 /**
  * @brief Sets up the OCxREF clearing feature for a selected channel
- * @param htim: pointer to the TIM handle structure
- * @param Channel: the selected compare channel to configure
- * @param OCREF_CLR_IN: OCREFClear input signal selection
+ * @param pxTIM: pointer to the TIM handle structure
+ * @param eChannel: the selected compare channel to configure
+ * @param eOCREF_CLR_IN: OCREFClear input signal selection
  */
-void XPD_TIM_Output_OCRefClearConfig(TIM_HandleType * htim, TIM_ChannelType Channel,
-        TIM_OCRefClearSourceType OCREF_CLR_IN)
+void TIM_vOCRefClearConfig(
+        TIM_HandleType *            pxTIM,
+        TIM_ChannelType             eChannel,
+        TIM_OCRefClearSourceType    eOCREF_CLR_IN)
 {
-    __IO uint32_t * pccmr;
-    uint32_t choffset = (Channel & 1) * 8;
+    __IO uint32_t * pulCCMR;
+    uint32_t ulChOffset = (eChannel & 1) * 8;
 
     /* get related CCMR register */
 #if TIM_SUPPORTED_CHANNEL_COUNT > 5
-    if (Channel > TIM_CHANNEL_4)
+    if (eChannel > TIM_CH4)
     {
-        pccmr = &htim->Inst->CCMR3.w;
+        pulCCMR = &pxTIM->Inst->CCMR3.w;
     }
     else
 #endif
-    if (Channel < TIM_CHANNEL_3)
+    if (eChannel < TIM_CH3)
     {
-        pccmr = &htim->Inst->CCMR1.w;
+        pulCCMR = &pxTIM->Inst->CCMR1.w;
     }
     else
     {
-        pccmr = &htim->Inst->CCMR2.w;
+        pulCCMR = &pxTIM->Inst->CCMR2.w;
     }
 
-    if (OCREF_CLR_IN == TIM_OCREFCLEAR_SOURCE_NONE)
+    if (eOCREF_CLR_IN == TIM_OCREFCLEAR_SOURCE_NONE)
     {
         /* clear configuration from channel */
-        CLEAR_BIT(*pccmr, TIM_CCMR1_OC1CE << choffset);
+        CLEAR_BIT(*pulCCMR, TIM_CCMR1_OC1CE << ulChOffset);
     }
     else
     {
         /* apply configuration */
-        SET_BIT(*pccmr, TIM_CCMR1_OC1CE << choffset);
+        SET_BIT(*pulCCMR, TIM_CCMR1_OC1CE << ulChOffset);
 
 #ifdef TIM_SMCR_OCCS
         /* select ocref_clr_int source */
-        TIM_REG_BIT(htim,SMCR,OCCS) = OCREF_CLR_IN;
+        TIM_REG_BIT(pxTIM,SMCR,OCCS) = eOCREF_CLR_IN;
 #endif
     }
 }
 
 /**
  * @brief Configures the commutation source
- * @param htim: pointer to the TIM handle structure
+ * @param pxTIM: pointer to the TIM handle structure
  * @param ComSource
  */
-void XPD_TIM_Output_CommutationConfig(TIM_HandleType * htim, TIM_CommutationSourceType ComSource)
+void TIM_vCommutationConfig(TIM_HandleType * pxTIM, TIM_CommutationSourceType eComSource)
 {
-    if (ComSource > TIM_COMSOURCE_SOFTWARE)
+    if (eComSource > TIM_COMSOURCE_SOFTWARE)
     {
         /* Set TRGI if used for commutation */
-        MODIFY_REG(htim->Inst->SMCR.w, TIM_SMCR_TS, ComSource);
+        MODIFY_REG(pxTIM->Inst->SMCR.w, TIM_SMCR_TS, eComSource);
 
         /* Select the Commutation event source */
-        SET_BIT(htim->Inst->CR2.w, TIM_CR2_CCPC | TIM_CR2_CCUS);
+        SET_BIT(pxTIM->Inst->CR2.w, TIM_CR2_CCPC | TIM_CR2_CCUS);
     }
     else
     {
         /* Select the Commutation event source */
-        CLEAR_BIT(htim->Inst->CR2.w, TIM_CR2_CCPC | TIM_CR2_CCUS);
+        CLEAR_BIT(pxTIM->Inst->CR2.w, TIM_CR2_CCPC | TIM_CR2_CCUS);
 
-        if (ComSource == TIM_COMSOURCE_SOFTWARE)
+        if (eComSource == TIM_COMSOURCE_SOFTWARE)
         {
             /* Select the Capture Compare preload feature */
-            TIM_REG_BIT(htim,CR2,CCPC) = 1;
+            TIM_REG_BIT(pxTIM,CR2,CCPC) = 1;
         }
     }
 }
 
+/**
+ * @brief TIM commutation interrupt handler that provides handle callbacks.
+ * @param pxTIM: pointer to the TIM handle structure
+ */
+void TIM_vIRQHandler_COM(TIM_HandleType * pxTIM)
+{
+    /* TIM commutation event */
+    if (TIM_FLAG_STATUS(pxTIM, COM) != 0)
+    {
+        /* clear interrupt flag */
+        TIM_FLAG_CLEAR(pxTIM, COM);
+
+        XPD_SAFE_CALLBACK(pxTIM->Callbacks.Commutation, pxTIM);
+    }
+}
 /** @} */
 
 /** @} */
@@ -756,49 +758,52 @@ void XPD_TIM_Output_CommutationConfig(TIM_HandleType * htim, TIM_CommutationSour
 
 /**
  * @brief Initializes a compare channel using the setup configuration.
- * @param htim: pointer to the TIM handle structure
- * @param Channel: the selected compare channel to use
- * @param Config: pointer to TIM compare channel setup configuration
+ * @param pxTIM: pointer to the TIM handle structure
+ * @param eChannel: the selected compare channel to use
+ * @param pxConfig: pointer to TIM compare channel setup configuration
  */
-void XPD_TIM_Input_ChannelConfig(TIM_HandleType * htim, TIM_ChannelType Channel, const TIM_Input_InitType * Config)
+void TIM_vInputChannelConfig(
+        TIM_HandleType *            pxTIM,
+        TIM_ChannelType             eChannel,
+        const TIM_InputInitType *   pxConfig)
 {
     /* Set the input polarity, disable channel */
     {
-        uint32_t pol = 0;
+        uint32_t ulPol = 0;
 
-        if (Config->Polarity == ACTIVE_LOW)
+        if (pxConfig->Polarity == ACTIVE_LOW)
         {
-            pol = TIM_CCER_CC1P;
+            ulPol = TIM_CCER_CC1P;
         }
 
-        MODIFY_REG(htim->Inst->CCER.w, 0xF << (Channel * 4), pol << (Channel * 4));
+        MODIFY_REG(pxTIM->Inst->CCER.w, 0xF << (eChannel * 4), ulPol << (eChannel * 4));
     }
 
     /* Input mode configuration */
     {
-        __IO uint32_t * pccmr;
-        uint32_t chcfg, choffset = (Channel & 1) * 8;
+        __IO uint32_t * pulCCMR;
+        uint32_t ulChCfg, ulChOffset = (eChannel & 1) * 8;
 
         /* get related CCMR register */
-        if (Channel < TIM_CHANNEL_3)
+        if (eChannel < TIM_CH3)
         {
-            pccmr = &htim->Inst->CCMR1.w;
+            pulCCMR = &pxTIM->Inst->CCMR1.w;
         }
         else
         {
-            pccmr = &htim->Inst->CCMR2.w;
+            pulCCMR = &pxTIM->Inst->CCMR2.w;
         }
 
         /* Assemble input configuration */
-        chcfg =   ((Config->Filter << TIM_CCMR1_IC1F_Pos) & TIM_CCMR1_IC1F)
-                | ((Config->Prescaler << TIM_CCMR1_IC1PSC_Pos) & TIM_CCMR1_IC1PSC)
-                |  (Config->Source & TIM_CCMR1_CC1S);
+        ulChCfg = ((pxConfig->Filter << TIM_CCMR1_IC1F_Pos) & TIM_CCMR1_IC1F)
+                | ((pxConfig->Prescaler << TIM_CCMR1_IC1PSC_Pos) & TIM_CCMR1_IC1PSC)
+                |  (pxConfig->Source & TIM_CCMR1_CC1S);
 
         /* apply configuration */
-        *pccmr = (*pccmr
+        *pulCCMR = (*pulCCMR
                  &((TIM_CCMR1_CC2S | TIM_CCMR1_OC2CE | TIM_CCMR1_OC2FE |
-                    TIM_CCMR1_OC2M | TIM_CCMR1_OC2PE) >> choffset))
-                | (chcfg << choffset);
+                    TIM_CCMR1_OC2M | TIM_CCMR1_OC2PE) >> ulChOffset))
+                | (ulChCfg << ulChOffset);
     }
 }
 
@@ -814,66 +819,66 @@ void XPD_TIM_Input_ChannelConfig(TIM_HandleType * htim, TIM_ChannelType Channel,
 
 /**
  * @brief Sets up the master configuration of the timer.
- * @param htim: pointer to the TIM handle structure
- * @param Config: pointer to TIM master setup configuration
+ * @param pxTIM: pointer to the TIM handle structure
+ * @param pxConfig: pointer to TIM master setup configuration
  */
-void XPD_TIM_MasterConfig(TIM_HandleType * htim, const TIM_MasterConfigType * Config)
+void TIM_vMasterConfig(TIM_HandleType * pxTIM, const TIM_MasterConfigType * pxConfig)
 {
     /* select the TRGO source */
-    htim->Inst->CR2.b.MMS = Config->MasterTrigger;
+    pxTIM->Inst->CR2.b.MMS = pxConfig->MasterTrigger;
 
 #ifdef TIM_CR2_MMS2
     /* select the TRGO2 source */
-    htim->Inst->CR2.b.MMS2 = Config->MasterTrigger2;
+    pxTIM->Inst->CR2.b.MMS2 = pxConfig->MasterTrigger2;
 #endif
 
     /* configure the MSM bit - delay TRGI to synchronize with TRGO */
-    TIM_REG_BIT(htim,SMCR,MSM) = Config->MasterSlaveMode;
+    TIM_REG_BIT(pxTIM,SMCR,MSM) = pxConfig->MasterSlaveMode;
 }
 
 /**
  * @brief Sets up the slave configuration of the timer.
- * @param htim: pointer to the TIM handle structure
- * @param Config: pointer to TIM slave setup configuration
+ * @param pxTIM: pointer to the TIM handle structure
+ * @param pxConfig: pointer to TIM slave setup configuration
  */
-void XPD_TIM_SlaveConfig(TIM_HandleType * htim, const TIM_SlaveConfigType * Config)
+void TIM_vSlaveConfig(TIM_HandleType * pxTIM, const TIM_SlaveConfigType * pxConfig)
 {
     /* Set the mandatory configuration elements */
-    MODIFY_REG(htim->Inst->SMCR.w,
+    MODIFY_REG(pxTIM->Inst->SMCR.w,
             TIM_SMCR_ECE | TIM_SMCR_ETPS | TIM_SMCR_TS | TIM_SMCR_SMS,
-            Config->SlaveMode | Config->SlaveTrigger);
+            pxConfig->SlaveMode | pxConfig->SlaveTrigger);
 
     /* Configure the trigger prescaler, filter, and polarity (where applicable) */
-    switch (Config->SlaveTrigger)
+    switch (pxConfig->SlaveTrigger)
     {
         case TIM_TRGI_TI1:
         case TIM_TRGI_TI1_ED:
         {
             /* Set the input polarity, disable channel */
-            CLEAR_BIT(htim->Inst->CCER.w, 0xF);
+            CLEAR_BIT(pxTIM->Inst->CCER.w, 0xF);
 
-            if (Config->Polarity == ACTIVE_LOW)
+            if (pxConfig->Polarity == ACTIVE_LOW)
             {
-                TIM_REG_BIT(htim,CCER,CC1P) = 1;
+                TIM_REG_BIT(pxTIM,CCER,CC1P) = 1;
             }
 
             /* Set the filter */
-            htim->Inst->CCMR1.IC.C1F = Config->Filter;
+            pxTIM->Inst->CCMR1.IC.C1F = pxConfig->Filter;
             break;
         }
 
         case TIM_TRGI_TI2:
         {
             /* Set the input polarity, disable channel */
-            CLEAR_BIT(htim->Inst->CCER.w, 0xF0);
+            CLEAR_BIT(pxTIM->Inst->CCER.w, 0xF0);
 
-            if (Config->Polarity == ACTIVE_LOW)
+            if (pxConfig->Polarity == ACTIVE_LOW)
             {
-                TIM_REG_BIT(htim,CCER,CC2P) = 1;
+                TIM_REG_BIT(pxTIM,CCER,CC2P) = 1;
             }
 
             /* Set the filter */
-            htim->Inst->CCMR1.IC.C2F = Config->Filter;
+            pxTIM->Inst->CCMR1.IC.C2F = pxConfig->Filter;
             break;
         }
 
@@ -881,9 +886,9 @@ void XPD_TIM_SlaveConfig(TIM_HandleType * htim, const TIM_SlaveConfigType * Conf
         case TIM_TRGI_ETR_MODE2:
         {
             /* Configure the external trigger settings */
-            htim->Inst->SMCR.b.ETF  = Config->Filter;
-            htim->Inst->SMCR.b.ETPS = Config->Prescaler;
-            htim->Inst->SMCR.b.ETP  = Config->Polarity;
+            pxTIM->Inst->SMCR.b.ETF  = pxConfig->Filter;
+            pxTIM->Inst->SMCR.b.ETPS = pxConfig->Prescaler;
+            pxTIM->Inst->SMCR.b.ETP  = pxConfig->Polarity;
             break;
         }
 
@@ -892,10 +897,24 @@ void XPD_TIM_SlaveConfig(TIM_HandleType * htim, const TIM_SlaveConfigType * Conf
     }
 }
 
-/** @} */
+/**
+ * @brief TIM trigger interrupt handler that provides handle callbacks.
+ * @param pxTIM: pointer to the TIM handle structure
+ */
+void TIM_vIRQHandler_TRG(TIM_HandleType * pxTIM)
+{
+    /* TIM Trigger detection event */
+    if (TIM_FLAG_STATUS(pxTIM, T) != 0)
+    {
+        /* clear interrupt flag */
+        TIM_FLAG_CLEAR(pxTIM, T);
+
+        XPD_SAFE_CALLBACK(pxTIM->Callbacks.Trigger, pxTIM);
+    }
+}
 
 /** @} */
 
 /** @} */
 
-#endif /* USE_XPD_TIM */
+/** @} */

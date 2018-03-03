@@ -2,30 +2,27 @@
   ******************************************************************************
   * @file    xpd_usart.c
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2016-05-01
+  * @version 0.2
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers USART Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
 
-#include "xpd_usart.h"
-#include "xpd_utils.h"
-
-#if defined(USE_XPD_USART)
+#include <xpd_usart.h>
+#include <xpd_utils.h>
 
 /** @addtogroup USART
  * @{ */
@@ -40,151 +37,159 @@
 #define USART_HALF_DUPLEX_MODE(HANDLE) (USART_REG_BIT(HANDLE, CR3, HDSEL) != 0)
 
 #define USART_APPLY_CONFIG(HANDLE, REG, MASK, CONFIG)                               \
-    do{ uint32_t cr1 = (HANDLE)->Inst->CR1.w; uint32_t uartEn = cr1 & USART_CR1_UE; \
-    if (uartEn != 0) { husart->Inst->CR1.w = cr1 & ~USART_CR1_UE; }                 \
+    do{ uint32_t ulCR1 = (HANDLE)->Inst->CR1.w; uint32_t uartEn = ulCR1 & USART_CR1_UE; \
+    if (uartEn != 0) { pxUSART->Inst->CR1.w = ulCR1 & ~USART_CR1_UE; }                 \
     MODIFY_REG((HANDLE)->Inst->REG.w, (MASK), (CONFIG));                            \
-    husart->Inst->CR1.w |= uartEn;} while (0)
+    pxUSART->Inst->CR1.w |= uartEn;} while (0)
 
-#if defined(USE_XPD_USART_ERROR_DETECT) || defined(USE_XPD_DMA_ERROR_DETECT)
+#if defined(__XPD_USART_ERROR_DETECT) || defined(__XPD_DMA_ERROR_DETECT)
 #define USART_RESET_ERRORS(HANDLE)    ((HANDLE)->Errors = USART_ERROR_NONE)
 #else
 #define USART_RESET_ERRORS(HANDLE)    ((void)0)
 #endif
 
-#if (USART_PERIPHERAL_VERSION > 1)
+#if (__USART_PERIPHERAL_VERSION > 1)
 #define USART_STATR(HANDLE)         ((HANDLE)->Inst->ISR.w)
 #define USART_STATF(FLAG_NAME)      (USART_ISR_##FLAG_NAME)
 #define USART_RXDR(HANDLE)          ((HANDLE)->Inst->RDR)
 #define USART_TXDR(HANDLE)          ((HANDLE)->Inst->TDR)
+
+#define USART_INVERSION_MASK        (USART_CR2_TXINV | USART_CR2_RXINV | USART_CR2_DATAINV | USART_CR2_MSBFIRST | USART_CR2_SWAP)
+#define USART_BAUDRATEMODE_MASK     (USART_CR2_ABREN | USART_CR2_ABRMODE)
 #else
 #define USART_STATR(HANDLE)         ((HANDLE)->Inst->SR.w)
 #define USART_STATF(FLAG_NAME)      (USART_SR_##FLAG_NAME)
 #define USART_RXDR(HANDLE)          ((HANDLE)->Inst->DR)
 #define USART_TXDR(HANDLE)          ((HANDLE)->Inst->DR)
+
+#define USART_INVERSION_MASK        0
+#define USART_BAUDRATEMODE_MASK     0
 #endif
 
-#ifdef USE_XPD_DMA_ERROR_DETECT
-static void usart_dmaErrorRedirect(void *hdma)
+#ifdef __XPD_DMA_ERROR_DETECT
+static void USART_prvDmaErrorRedirect(void *pxDMA)
 {
-    USART_HandleType * husart = (USART_HandleType*) ((DMA_HandleType*) hdma)->Owner;
+    USART_HandleType * pxUSART = (USART_HandleType*) ((DMA_HandleType*) pxDMA)->Owner;
 
-    husart->Errors |= USART_ERROR_DMA;
+    pxUSART->Errors |= USART_ERROR_DMA;
 
-    XPD_SAFE_CALLBACK(husart->Callbacks.Error, husart);
+    XPD_SAFE_CALLBACK(pxUSART->Callbacks.Error, pxUSART);
 }
 #endif
 
-static void usart_dmaTransmitRedirect(void *hdma)
+static void USART_prvDmaTransmitRedirect(void *pxDMA)
 {
-    USART_HandleType * husart = (USART_HandleType*) ((DMA_HandleType*) hdma)->Owner;
+    USART_HandleType * pxUSART = (USART_HandleType*) ((DMA_HandleType*) pxDMA)->Owner;
 
     /* DMA normal mode */
-    if (XPD_DMA_CircularMode((DMA_HandleType*)hdma) == 0)
+    if (DMA_eCircularMode((DMA_HandleType*)pxDMA) == 0)
     {
         /* Disable Tx DMA Request */
-        USART_REG_BIT(husart, CR3, DMAT) = 0;
-
-        /* Transmit complete interrupt will provide callback */
-        XPD_USART_EnableIT(husart, TC);
+        USART_REG_BIT(pxUSART, CR3, DMAT) = 0;
 
         /* Update stream status */
-        husart->TxStream.buffer += husart->TxStream.length * husart->TxStream.size;
-        husart->TxStream.length = 0;
+        pxUSART->TxStream.buffer += pxUSART->TxStream.length * pxUSART->TxStream.size;
+        pxUSART->TxStream.length = 0;
     }
-    /* DMA circular mode */
-    else
+
+    /* If the completion of the character sending isn't waited for,
+     * provide callback now */
+    if (USART_REG_BIT(pxUSART, CR1, TCIE) == 0)
     {
-        XPD_SAFE_CALLBACK(husart->Callbacks.Transmit, husart);
+        XPD_SAFE_CALLBACK(pxUSART->Callbacks.Transmit, pxUSART);
     }
 }
 
-static void usart_dmaReceiveRedirect(void *hdma)
+static void USART_prvDmaReceiveRedirect(void *pxDMA)
 {
-    USART_HandleType * husart = (USART_HandleType*) ((DMA_HandleType*) hdma)->Owner;
+    USART_HandleType * pxUSART = (USART_HandleType*) ((DMA_HandleType*) pxDMA)->Owner;
 
     /* DMA normal mode */
-    if (XPD_DMA_CircularMode((DMA_HandleType*)hdma) == 0)
+    if (DMA_eCircularMode((DMA_HandleType*)pxDMA) == 0)
     {
         /* Disable Rx DMA Request */
-        USART_REG_BIT(husart, CR3, DMAR) = 0;
+        USART_REG_BIT(pxUSART, CR3, DMAR) = 0;
 
         /* Update stream status */
-        husart->RxStream.buffer += husart->RxStream.length * husart->RxStream.size;
-        husart->RxStream.length = 0;
+        pxUSART->RxStream.buffer += pxUSART->RxStream.length * pxUSART->RxStream.size;
+        pxUSART->RxStream.length = 0;
     }
-    XPD_SAFE_CALLBACK(husart->Callbacks.Receive, husart);
+    XPD_SAFE_CALLBACK(pxUSART->Callbacks.Receive, pxUSART);
 }
 
 /* Calculates and configures the baudrate */
-static void usart_baudrateConfig(USART_HandleType * husart, uint32_t baudrate)
+static void USART_prvSetBaudrate(USART_HandleType * pxUSART, uint32_t ulBaudrate)
 {
-#if (USART_PERIPHERAL_VERSION > 1)
-    if (USART_REG_BIT(husart, CR1, OVER8) == 0)
+#if (__USART_PERIPHERAL_VERSION > 1)
+    if (USART_REG_BIT(pxUSART, CR1, OVER8) == 0)
     {
-        husart->Inst->BRR.w = (XPD_USART_GetClockFreq(husart) + (baudrate / 2)) / baudrate;
+        pxUSART->Inst->BRR.w = (USART_ulClockFreq_Hz(pxUSART) + (ulBaudrate / 2)) / ulBaudrate;
     }
     else
     {
-        uint32_t tmp = ((XPD_USART_GetClockFreq(husart) * 2) + (baudrate / 2)) / baudrate;
-        husart->Inst->BRR.w = (tmp & USART_BRR_DIV_MANTISSA) | ((tmp & USART_BRR_DIV_FRACTION) >> 1);
+        uint32_t ulTmp = ((USART_ulClockFreq_Hz(pxUSART) * 2) + (ulBaudrate / 2)) / ulBaudrate;
+        pxUSART->Inst->BRR.w = (ulTmp & USART_BRR_DIV_MANTISSA) | ((ulTmp & USART_BRR_DIV_FRACTION) >> 1);
     }
 #else
-    uint32_t over8   = USART_REG_BIT(husart, CR1, OVER8);
-    uint32_t div     = XPD_USART_GetClockFreq(husart) * 25 / ((4 >> over8) * baudrate);
-    uint32_t divmant = div / 100;
-    uint32_t divfraq = ((div - (divmant * 100)) * (16 >> over8) + 50) / 100;
+    uint32_t ulOver8   = USART_REG_BIT(pxUSART, CR1, OVER8);
+    uint32_t ulDiv     = USART_ulClockFreq_Hz(pxUSART) * 25 / ((4 >> ulOver8) * ulBaudrate);
+    uint32_t ulDivMant = ulDiv / 100;
+    uint32_t ulDivFraq = ((ulDiv - (ulDivMant * 100)) * (16 >> ulOver8) + 50) / 100;
 
     /* Mantissa is filled with the USARTDIV integer part + fractional overflow */
-    husart->Inst->BRR.b.DIV_Mantissa = divmant + (divfraq >> (4 - over8));
+    pxUSART->Inst->BRR.b.DIV_Mantissa = ulDivMant + (ulDivFraq >> (4 - ulOver8));
     /* Fraction gets the fractional part (4 - over8 bits) */
-    husart->Inst->BRR.b.DIV_Fraction = divfraq & (0xf >> over8);
+    pxUSART->Inst->BRR.b.DIV_Fraction = ulDivFraq & (0xf >> ulOver8);
 #endif
 }
 
-/* Sets the communication direction in half-duplex mode */
-static void usart_setDirection(USART_HandleType * husart, uint32_t direction)
+/* Enables the USART peripheral */
+__STATIC_INLINE void USART_prvEnable(USART_HandleType * pxUSART)
 {
-    if ((USART_HALF_DUPLEX_MODE(husart)) && ((husart->Inst->CR1.w & (USART_CR1_TE | USART_CR1_RE)) != direction))
-    {
-        uint32_t cr1 = husart->Inst->CR1.w;
-        CLEAR_BIT(cr1, USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
-        husart->Inst->CR1.w = cr1;
-        SET_BIT(cr1, USART_CR1_UE | direction);
-        husart->Inst->CR1.w = cr1;
-    }
+    USART_REG_BIT(pxUSART,CR1,UE) = 1;
 }
 
-/* First stage of initialization */
-static XPD_ReturnType usart_init1(USART_HandleType * husart, const USART_InitType * Common)
+/* Disables the USART peripheral */
+__STATIC_INLINE void USART_prvDisable(USART_HandleType * pxUSART)
 {
-    uint8_t framesize;
+    USART_REG_BIT(pxUSART,CR1,UE) = 0;
+}
+
+#ifdef IS_UART_WAKEUP_FROMSTOP_INSTANCE
+static void USART_prvWaitIdle(USART_HandleType * pxUSART)
+{
+    uint32_t ulTimeout = 1000;
+    uint32_t ulFlags = (USART_ISR_TEACK | USART_ISR_REACK) &
+            ((pxUSART->Inst->CR1.w & (USART_CR1_TE | USART_CR1_RE)) <<
+                    (USART_ISR_TEACK_Pos - USART_CR1_TE_Pos));
+
+    (void) XPD_eWaitForMatch(&pxUSART->Inst->ISR.w, ulFlags, ulFlags, &ulTimeout);
+}
+#endif
+
+static void USART_prvPreinit(USART_HandleType * pxUSART, uint8_t ucDataSize, USART_ParityType eParity)
+{
+    uint8_t ucFrameSize = ucDataSize + (eParity != USART_PARITY_NONE) ? 1 : 0;
 
     /* enable clock */
-    XPD_RCC_ClockEnable(husart->CtrlPos);
+    RCC_vClockEnable(pxUSART->CtrlPos);
+
+    pxUSART->Inst->CR1.w = (eParity << USART_CR1_PS_Pos) & (USART_CR1_PS | USART_CR1_PCE);
+    pxUSART->Inst->CR2.w = 0;
+    pxUSART->Inst->CR3.w = 0;
 
     /* Dependencies initialization */
-    XPD_SAFE_CALLBACK(husart->Callbacks.DepInit, husart);
+    XPD_SAFE_CALLBACK(pxUSART->Callbacks.DepInit, pxUSART);
 
-    husart->Inst->CR1.w = 0;
-    husart->Inst->CR2.w = 0;
-    husart->Inst->CR3.w = 0;
-
-    /* configure frame format and mode */
-    framesize = Common->DataSize + (uint8_t)(Common->Parity != USART_PARITY_NONE);
-
-    USART_REG_BIT(husart, CR1, PS)     = Common->Parity;
-    USART_REG_BIT(husart, CR1, PCE)    = Common->Parity >> 1;
-    husart->Inst->CR2.b.STOP           = Common->StopBits;
 #ifdef USART_CR1_M1
-    USART_REG_BIT(husart, CR1, M0)     = (uint32_t)(framesize > 8);
-    USART_REG_BIT(husart, CR1, M1)     = (uint32_t)(framesize < 8);
+    USART_REG_BIT(pxUSART, CR1, M0)     = (ucFrameSize > 8) ? 1 : 0;
+    USART_REG_BIT(pxUSART, CR1, M1)     = (ucFrameSize < 8) ? 1 : 0;
 #else
-    USART_REG_BIT(husart, CR1, M)      = (uint32_t)(framesize > 8);
+    USART_REG_BIT(pxUSART, CR1, M)      = (ucFrameSize > 8) ? 1 : 0;
 #endif
-    USART_REG_BIT(husart, CR3, ONEBIT) = Common->SingleSample;
 
     /* Set data transfer size */
-    switch (husart->Inst->CR1.w & (USART_CR1_M | USART_CR1_PCE))
+    switch (pxUSART->Inst->CR1.w & (USART_CR1_M | USART_CR1_PCE))
     {
         /* data size = 9, no parity -> mask = 0x1FF */
 #ifdef USART_CR1_M0
@@ -192,7 +197,7 @@ static XPD_ReturnType usart_init1(USART_HandleType * husart, const USART_InitTyp
 #else
         case USART_CR1_M:
 #endif
-            husart->TxStream.size = husart->RxStream.size = 2;
+            pxUSART->TxStream.size = pxUSART->RxStream.size = 2;
             break;
 
 #ifdef USART_CR1_M1
@@ -205,37 +210,10 @@ static XPD_ReturnType usart_init1(USART_HandleType * husart, const USART_InitTyp
         case USART_CR1_PCE:
         /* data size = 8, or = 9 with parity -> mask = 0xFF */
         default:
-            husart->TxStream.size = husart->RxStream.size = 1;
+            pxUSART->TxStream.size = pxUSART->RxStream.size = 1;
             break;
     }
-    husart->TxStream.length = husart->RxStream.length = 0;
-
-    return XPD_OK;
-}
-
-/* Second stage of initialization - after specific configuration is done */
-static XPD_ReturnType usart_init2(USART_HandleType * husart, const USART_InitType * Common)
-{
-    XPD_ReturnType result = XPD_OK;
-
-    /* baudrate configuration */
-    usart_baudrateConfig(husart, Common->BaudRate);
-
-    USART_REG_BIT(husart, CR1, TE) = Common->Transmitter;
-    USART_REG_BIT(husart, CR1, RE) = Common->Receiver;
-
-    XPD_USART_Enable(husart);
-
-#ifdef IS_UART_WAKEUP_FROMSTOP_INSTANCE
-    if (IS_UART_WAKEUP_FROMSTOP_INSTANCE(husart->Inst))
-    {
-        uint32_t timeout = 1000;
-        uint32_t flags = (Common->Transmitter * USART_ISR_TEACK) | (Common->Receiver * USART_ISR_REACK);
-
-        result = XPD_WaitForMatch(&husart->Inst->ISR.w, flags, flags, &timeout);
-    }
-#endif
-    return result;
+    pxUSART->TxStream.length = pxUSART->RxStream.length = 0;
 }
 
 /** @defgroup USART_Common_Exported_Functions USART Common Exported Functions
@@ -243,629 +221,827 @@ static XPD_ReturnType usart_init2(USART_HandleType * husart, const USART_InitTyp
 
 /**
  * @brief Restores the USART peripheral to its default inactive state
- * @param husart: pointer to the USART handle structure
+ * @param pxUSART: pointer to the USART handle structure
  * @return ERROR if input is incorrect, OK if success
  */
-XPD_ReturnType XPD_USART_Deinit(USART_HandleType * husart)
+void USART_vDeinit(USART_HandleType * pxUSART)
 {
-    XPD_USART_Disable(husart);
+    USART_prvDisable(pxUSART);
 
     /* Deinitialize peripheral dependencies */
-    XPD_SAFE_CALLBACK(husart->Callbacks.DepDeinit, husart);
+    XPD_SAFE_CALLBACK(pxUSART->Callbacks.DepDeinit, pxUSART);
 
     /* disable clock */
-    XPD_RCC_ClockDisable(husart->CtrlPos);
-
-	return XPD_OK;
+    RCC_vClockDisable(pxUSART->CtrlPos);
 }
 
 /**
- * @brief Enables the USART peripheral.
- * @param husart: pointer to the USART handle structure
+ * @brief Sets the communication direction in half-duplex mode.
+ * @param pxUSART: pointer to the USART handle structure
+ * @param eDirection: desired communication direction(s)
  */
-void XPD_USART_Enable(USART_HandleType * husart)
+void USART_vSetDirection(USART_HandleType * pxUSART, USART_DirectionType eDirection)
 {
-    USART_REG_BIT(husart,CR1,UE) = 1;
-}
+    uint32_t ulCR1 = pxUSART->Inst->CR1.w;
 
-/**
- * @brief Disables the USART peripheral.
- * @param husart: pointer to the USART handle structure
- */
-void XPD_USART_Disable(USART_HandleType * husart)
-{
-    USART_REG_BIT(husart,CR1,UE) = 0;
+    if ((ulCR1 & (USART_CR1_TE | USART_CR1_RE)) != eDirection)
+    {
+        CLEAR_BIT(ulCR1, USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
+        pxUSART->Inst->CR1.w = ulCR1;
+        SET_BIT(ulCR1, USART_CR1_UE | eDirection);
+        pxUSART->Inst->CR1.w = ulCR1;
+    }
 }
 
 /**
  * @brief Determines the current status of USART peripheral.
- * @param husart: pointer to the USART handle structure
+ * @param pxUSART: pointer to the USART handle structure
  * @return BUSY if a transmission is in progress, OK if USART is ready for new transfer
  */
-XPD_ReturnType XPD_USART_GetStatus(USART_HandleType * husart)
+XPD_ReturnType USART_eGetStatus(USART_HandleType * pxUSART)
 {
-    return ((USART_STATR(husart) & (USART_STATF(RXNE) | USART_STATF(TC))) != 0)
+    return ((USART_STATR(pxUSART) & (USART_STATF(RXNE) | USART_STATF(TC))) != 0)
             ? XPD_OK : XPD_BUSY;
 }
 
 /**
  * @brief Polls the status of the USART transfer.
- * @param husart: pointer to the USART handle structure
- * @param Timeout: the timeout in ms for the polling.
+ * @param pxUSART: pointer to the USART handle structure
+ * @param ulTimeout: the timeout in ms for the polling.
  * @return ERROR if there were transfer errors, TIMEOUT if timed out, OK if successful
  */
-XPD_ReturnType XPD_USART_PollStatus(USART_HandleType * husart, uint32_t Timeout)
+XPD_ReturnType USART_ePollStatus(USART_HandleType * pxUSART, uint32_t ulTimeout)
 {
-#ifdef USE_XPD_USART_ERROR_DETECT
+#ifdef __XPD_USART_ERROR_DETECT
     /* wait until not busy, or until an error is present */
-    XPD_ReturnType result = XPD_WaitForDiff(&USART_STATR(husart),
+    XPD_ReturnType eResult = XPD_eWaitForDiff(&USART_STATR(pxUSART),
             USART_STATF(RXNE) | USART_STATF(TC) | USART_STATF(PE) |
             USART_STATF(FE)   | USART_STATF(NE) | USART_STATF(ORE),
-            0, &Timeout);
+            0, &ulTimeout);
 
     /* Error checks */
-    if (XPD_USART_GetFlag(husart, PE))
+    if (USART_FLAG_STATUS(pxUSART, PE))
     {
         /* Update error code */
-        husart->Errors |= USART_ERROR_PARITY;
+        pxUSART->Errors |= USART_ERROR_PARITY;
 
         /* Clear the transfer error flag */
-        XPD_USART_ClearFlag(husart, PE);
+        USART_FLAG_CLEAR(pxUSART, PE);
 
-        result = XPD_ERROR;
+        eResult = XPD_ERROR;
     }
-    if (XPD_USART_GetFlag(husart, NE))
+    if (USART_FLAG_STATUS(pxUSART, NE))
     {
         /* Update error code */
-        husart->Errors |= USART_ERROR_NOISE;
+        pxUSART->Errors |= USART_ERROR_NOISE;
 
         /* Clear the transfer error flag */
-        XPD_USART_ClearFlag(husart, NE);
+        USART_FLAG_CLEAR(pxUSART, NE);
 
-        result = XPD_ERROR;
+        eResult = XPD_ERROR;
     }
-    if (XPD_USART_GetFlag(husart, FE))
+    if (USART_FLAG_STATUS(pxUSART, FE))
     {
         /* Update error code */
-        husart->Errors |= USART_ERROR_FRAME;
+        pxUSART->Errors |= USART_ERROR_FRAME;
 
         /* Clear the transfer error flag */
-        XPD_USART_ClearFlag(husart, FE);
+        USART_FLAG_CLEAR(pxUSART, FE);
 
-        result = XPD_ERROR;
+        eResult = XPD_ERROR;
     }
-    if (XPD_USART_GetFlag(husart, ORE))
+    if (USART_FLAG_STATUS(pxUSART, ORE))
     {
         /* Update error code */
-        husart->Errors |= USART_ERROR_OVERRUN;
+        pxUSART->Errors |= USART_ERROR_OVERRUN;
 
         /* Clear the transfer error flag */
-        XPD_USART_ClearFlag(husart, ORE);
+        USART_FLAG_CLEAR(pxUSART, ORE);
 
-        result = XPD_ERROR;
+        eResult = XPD_ERROR;
     }
 #else
-    XPD_ReturnType result = XPD_WaitForDiff(&USART_STATR(husart),
-            USART_STATF(RXNE) | USART_STATF(TC), 0, &Timeout);
+    XPD_ReturnType eResult = XPD_eWaitForDiff(&USART_STATR(pxUSART),
+            USART_STATF(RXNE) | USART_STATF(TC), 0, &ulTimeout);
 #endif
-    return result;
+    return eResult;
 }
 
 /**
  * @brief Transmits data over USART.
- * @param husart: pointer to the USART handle structure
- * @param TxData: pointer to the data buffer
- * @param Length: amount of data transfers
- * @param Timeout: available time for successful transmission in ms
+ * @param pxUSART: pointer to the USART handle structure
+ * @param pvTxData: pointer to the data buffer
+ * @param usLength: amount of data transfers
+ * @param ulTimeout: available time for successful transmission in ms
  * @return TIMEOUT if transmission or reception times out,
  *         OK if transfer is completed
  */
-XPD_ReturnType XPD_USART_Transmit(USART_HandleType * husart, void * TxData, uint16_t Length, uint32_t Timeout)
+XPD_ReturnType USART_eTransmit(
+        USART_HandleType *  pxUSART,
+        void *              pvTxData,
+        uint16_t            usLength,
+        uint32_t            ulTimeout)
 {
-    XPD_ReturnType result;
+    XPD_ReturnType eResult;
 
     /* save stream info */
-    husart->TxStream.buffer = TxData;
-    husart->TxStream.length = Length;
-    USART_RESET_ERRORS(husart);
+    pxUSART->TxStream.buffer = pvTxData;
+    pxUSART->TxStream.length = usLength;
+    USART_RESET_ERRORS(pxUSART);
 
-    /* The direction has to be set in half-duplex mode */
-    usart_setDirection(husart, USART_CR1_TE);
-
-    while (husart->TxStream.length > 0)
+    while (pxUSART->TxStream.length > 0)
     {
         /* wait for empty transmit buffer */
-        result = XPD_WaitForDiff(&USART_STATR(husart), USART_STATF(TXE), 0, &Timeout);
-        if (result != XPD_OK)
+        eResult = XPD_eWaitForDiff(&USART_STATR(pxUSART), USART_STATF(TXE), 0, &ulTimeout);
+        if (eResult != XPD_OK)
         {
-            return result;
+            return eResult;
         }
 
-        XPD_WriteFromStream((__IO uint32_t*)&USART_TXDR(husart), &husart->TxStream);
+        XPD_vWriteFromStream((uint32_t*)&USART_TXDR(pxUSART), &pxUSART->TxStream);
     }
     /* wait for the last transmission to finish */
-    result = XPD_WaitForDiff(&USART_STATR(husart), USART_STATF(TC), 0, &Timeout);
+    eResult = XPD_eWaitForDiff(&USART_STATR(pxUSART), USART_STATF(TC), 0, &ulTimeout);
 
     /* Clear overrun flag because received data is not read */
-    XPD_USART_ClearFlag(husart, ORE);
+    USART_FLAG_CLEAR(pxUSART, ORE);
 
-    return result;
+    return eResult;
+}
+
+/**
+ * @brief Transmits data over USART and waits for the completion of the transfer.
+ * @param pxUSART: pointer to the USART handle structure
+ * @param pvTxData: pointer to the data buffer
+ * @param usLength: amount of data transfers
+ * @param ulTimeout: available time for successful transmission in ms
+ * @return TIMEOUT if transmission or reception times out,
+ *         OK if transfer is completed
+ */
+XPD_ReturnType USART_eSend(
+        USART_HandleType *  pxUSART,
+        void *              pvTxData,
+        uint16_t            usLength,
+        uint32_t            ulTimeout)
+{
+    XPD_ReturnType eResult = USART_eTransmit(pxUSART, pvTxData, usLength, ulTimeout);
+
+    if (eResult == XPD_OK)
+    {
+        /* wait for the last transmission to finish */
+        eResult = XPD_eWaitForDiff(&USART_STATR(pxUSART), USART_STATF(TC), 0, &ulTimeout);
+
+        /* Clear overrun flag because received data is not read */
+        USART_FLAG_CLEAR(pxUSART, ORE);
+    }
+
+    return eResult;
 }
 
 /**
  * @brief Receives data over USART.
- * @param husart: pointer to the USART handle structure
- * @param RxData: pointer to the data buffer
- * @param Length: amount of data transfers
- * @param Timeout: available time for successful transmission in ms
+ * @param pxUSART: pointer to the USART handle structure
+ * @param pvRxData: pointer to the data buffer
+ * @param usLength: amount of data transfers
+ * @param ulTimeout: available time for successful transmission in ms
  * @return TIMEOUT if transmission or reception times out,
  *         ERROR if a reception error occurs,
  *         OK if transfer is completed
  */
-XPD_ReturnType XPD_USART_Receive(USART_HandleType * husart, void * RxData, uint16_t Length, uint32_t Timeout)
+XPD_ReturnType USART_eReceive(
+        USART_HandleType *  pxUSART,
+        void *              pvRxData,
+        uint16_t            usLength,
+        uint32_t            ulTimeout)
 {
-    XPD_ReturnType result;
+    XPD_ReturnType eResult;
 
     /* save stream info */
-    husart->RxStream.buffer = RxData;
-    husart->RxStream.length = Length;
-    USART_RESET_ERRORS(husart);
+    pxUSART->RxStream.buffer = pvRxData;
+    pxUSART->RxStream.length = usLength;
+    USART_RESET_ERRORS(pxUSART);
 
-    /* The direction has to be set in half-duplex mode */
-    usart_setDirection(husart, USART_CR1_RE);
-
-    while (husart->RxStream.length > 0)
+    while (pxUSART->RxStream.length > 0)
     {
         /* Send data to generate clock */
-        if (USART_SYNCHRONOUS_MODE(husart) && (XPD_USART_GetFlag(husart, TXE) != 0))
+        if (USART_SYNCHRONOUS_MODE(pxUSART) && (USART_FLAG_STATUS(pxUSART, TXE) != 0))
         {
-            USART_TXDR(husart) = 0;
+            USART_TXDR(pxUSART) = 0;
         }
 
         /* Wait for not empty receive buffer */
-        result = XPD_WaitForDiff(&USART_STATR(husart), USART_STATF(RXNE), 0, &Timeout);
-        if (result != XPD_OK)
+        eResult = XPD_eWaitForDiff(&USART_STATR(pxUSART), USART_STATF(RXNE), 0, &ulTimeout);
+        if (eResult != XPD_OK)
         {
-            return result;
+            return eResult;
         }
 
-        XPD_ReadToStream((__IO uint32_t*)&USART_RXDR(husart), &husart->RxStream);
+        XPD_vReadToStream((const uint32_t*)&USART_RXDR(pxUSART), &pxUSART->RxStream);
     }
-    return result;
+    return eResult;
 }
 
 /**
  * @brief Simultaneously transmits and receives data over USART (full duplex communication).
- * @param husart: pointer to the USART handle structure
- * @param TxData: pointer to the transmitted data buffer
- * @param RxData: pointer to the received data buffer
- * @param Length: amount of data transfers
- * @param Timeout: available time for successful transfer in ms
+ * @param pxUSART: pointer to the USART handle structure
+ * @param pvTxData: pointer to the transmitted data buffer
+ * @param pvRxData: pointer to the received data buffer
+ * @param usLength: amount of data transfers
+ * @param ulTimeout: available time for successful transfer in ms
  * @return TIMEOUT if transmission or reception times out,
  *         ERROR if a reception error occurs,
  *         OK if transfer is completed
  */
-XPD_ReturnType XPD_USART_TransmitReceive(USART_HandleType * husart, void * TxData, void * RxData, uint16_t Length, uint32_t Timeout)
+XPD_ReturnType USART_eTransmitReceive(
+        USART_HandleType *  pxUSART,
+        void *              pvTxData,
+        void *              pvRxData,
+        uint16_t            usLength,
+        uint32_t            ulTimeout)
 {
-    XPD_ReturnType result;
+    XPD_ReturnType eResult;
 
     /* save stream info */
-    husart->TxStream.buffer = TxData;
-    husart->TxStream.length = Length;
-    husart->RxStream.buffer = RxData;
-    husart->RxStream.length = Length;
-    USART_RESET_ERRORS(husart);
+    pxUSART->TxStream.buffer = pvTxData;
+    pxUSART->TxStream.length = usLength;
+    pxUSART->RxStream.buffer = pvRxData;
+    pxUSART->RxStream.length = usLength;
+    USART_RESET_ERRORS(pxUSART);
 
-    while ((husart->TxStream.length + husart->RxStream.length) > 0)
+    while ((pxUSART->TxStream.length + pxUSART->RxStream.length) > 0)
     {
         /* wait for buffer change */
-        result = XPD_WaitForDiff(&USART_STATR(husart), USART_STATF(TXE) | USART_STATF(RXNE), 0, &Timeout);
-        if (result != XPD_OK)
+        eResult = XPD_eWaitForDiff(&USART_STATR(pxUSART),
+                USART_STATF(TXE) | USART_STATF(RXNE), 0, &ulTimeout);
+        if (eResult != XPD_OK)
         {
-            return result;
+            return eResult;
         }
 
         /* Time to transmit */
-        if ((husart->TxStream.length > 0) && (XPD_USART_GetFlag(husart, TXE)))
+        if ((pxUSART->TxStream.length > 0) && (USART_FLAG_STATUS(pxUSART, TXE)))
         {
-            XPD_WriteFromStream((__IO uint32_t*)&USART_TXDR(husart), &husart->TxStream);
+            XPD_vWriteFromStream((uint32_t*)&USART_TXDR(pxUSART), &pxUSART->TxStream);
         }
 
         /* Time to receive */
-        if ((husart->RxStream.length > 0) && (XPD_USART_GetFlag(husart, RXNE)))
+        if ((pxUSART->RxStream.length > 0) && (USART_FLAG_STATUS(pxUSART, RXNE)))
         {
-            XPD_ReadToStream((__IO uint32_t*)&USART_RXDR(husart), &husart->RxStream);
+            XPD_vReadToStream((const uint32_t*)&USART_RXDR(pxUSART), &pxUSART->RxStream);
         }
     }
-    return result;
+
+    return eResult;
+}
+
+/**
+ * @brief Simultaneously transmits and receives data over USART (full duplex communication).
+ * @param pxUSART: pointer to the USART handle structure
+ * @param pvTxData: pointer to the transmitted data buffer
+ * @param pvRxData: pointer to the received data buffer
+ * @param usLength: amount of data transfers
+ * @param ulTimeout: available time for successful transfer in ms
+ * @return TIMEOUT if transmission or reception times out,
+ *         ERROR if a reception error occurs,
+ *         OK if transfer is completed
+ */
+XPD_ReturnType USART_eSendReceive(
+        USART_HandleType *  pxUSART,
+        void *              pvTxData,
+        void *              pvRxData,
+        uint16_t            usLength,
+        uint32_t            ulTimeout)
+{
+    XPD_ReturnType eResult = USART_eTransmitReceive(pxUSART,
+            pvTxData, pvRxData, usLength, ulTimeout);
+
+    if (eResult == XPD_OK)
+    {
+        /* wait for the last transmission to finish */
+        eResult = XPD_eWaitForDiff(&USART_STATR(pxUSART),
+                USART_STATF(TC), 0, &ulTimeout);
+    }
+
+    return eResult;
 }
 
 /**
  * @brief Starts interrupt-driven data transmission over USART.
- * @param husart: pointer to the USART handle structure
- * @param TxData: pointer to the data buffer
- * @param Length: amount of data transfers
+ * @param pxUSART: pointer to the USART handle structure
+ * @param pvTxData: pointer to the data buffer
+ * @param usLength: amount of data transfers
  */
-void XPD_USART_Transmit_IT(USART_HandleType * husart, void * TxData, uint16_t Length)
+void USART_vTransmit_IT(
+        USART_HandleType *  pxUSART,
+        void *              pvTxData,
+        uint16_t            usLength)
 {
     /* save stream info */
-    husart->TxStream.buffer = TxData;
-    husart->TxStream.length = Length;
-    USART_RESET_ERRORS(husart);
-
-    /* The direction has to be set in half-duplex mode */
-    usart_setDirection(husart, USART_CR1_TE);
+    pxUSART->TxStream.buffer = pvTxData;
+    pxUSART->TxStream.length = usLength;
+    USART_RESET_ERRORS(pxUSART);
 
     /* Enable TXE interrupt */
-    XPD_USART_EnableIT(husart, TXE);
+    USART_IT_ENABLE(pxUSART, TXE);
+}
+
+/**
+ * @brief Starts interrupt-driven data transmission over USART.
+ * @param pxUSART: pointer to the USART handle structure
+ * @param pvTxData: pointer to the data buffer
+ * @param usLength: amount of data transfers
+ */
+void USART_vSend_IT(
+        USART_HandleType *  pxUSART,
+        void *              pvTxData,
+        uint16_t            usLength)
+{
+    /* save stream info */
+    pxUSART->TxStream.buffer = pvTxData;
+    pxUSART->TxStream.length = usLength;
+    USART_RESET_ERRORS(pxUSART);
+
+    /* Enable TXE and TC interrupts */
+    USART_IT_ENABLE(pxUSART, TXE);
+    USART_IT_ENABLE(pxUSART, TC);
 }
 
 /**
  * @brief Starts interrupt-driven data reception over USART.
  * @note  In synchronous mode the user has to ensure data transmission in order to generate clock.
- * @param husart: pointer to the USART handle structure
- * @param TxData: pointer to the data buffer
- * @param Length: amount of data transfers
+ * @param pxUSART: pointer to the USART handle structure
+ * @param pvTxData: pointer to the data buffer
+ * @param usLength: amount of data transfers
  */
-void XPD_USART_Receive_IT(USART_HandleType * husart, void * RxData, uint16_t Length)
+void USART_vReceive_IT(
+        USART_HandleType *  pxUSART,
+        void *              pvRxData,
+        uint16_t            usLength)
 {
     /* save stream info */
-    husart->RxStream.buffer = RxData;
-    husart->RxStream.length = Length;
-    USART_RESET_ERRORS(husart);
+    pxUSART->RxStream.buffer = pvRxData;
+    pxUSART->RxStream.length = usLength;
+    USART_RESET_ERRORS(pxUSART);
 
-#ifdef USE_XPD_USART_ERROR_DETECT
-    XPD_USART_EnableIT(husart, PE);
-    XPD_USART_EnableIT(husart, E);
+#ifdef __XPD_USART_ERROR_DETECT
+    USART_IT_ENABLE(pxUSART, PE);
+    USART_IT_ENABLE(pxUSART, E);
 #endif
     /* Enable RXNE interrupt */
-    XPD_USART_EnableIT(husart, RXNE);
-
-    /* The direction has to be set in half-duplex mode */
-    usart_setDirection(husart, USART_CR1_RE);
+    USART_IT_ENABLE(pxUSART, RXNE);
 }
 
 /**
  * @brief Starts interrupt-driven full-duplex data transfer over USART.
- * @param husart: pointer to the USART handle structure
- * @param TxData: pointer to the transmitted data buffer
- * @param RxData: pointer to the received data buffer
- * @param Length: amount of data transfers
+ * @param pxUSART: pointer to the USART handle structure
+ * @param pvTxData: pointer to the transmitted data buffer
+ * @param pvRxData: pointer to the received data buffer
+ * @param usLength: amount of data transfers
  */
-void XPD_USART_TransmitReceive_IT(USART_HandleType * husart, void * TxData, void * RxData, uint16_t Length)
+void USART_vTransmitReceive_IT(
+        USART_HandleType *  pxUSART,
+        void *              pvTxData,
+        void *              pvRxData,
+        uint16_t            usLength)
 {
     /* save stream info */
-    husart->TxStream.buffer = TxData;
-    husart->TxStream.length = Length;
-    husart->RxStream.buffer = RxData;
-    husart->RxStream.length = Length;
-    USART_RESET_ERRORS(husart);
+    pxUSART->TxStream.buffer = pvTxData;
+    pxUSART->TxStream.length = usLength;
+    pxUSART->RxStream.buffer = pvRxData;
+    pxUSART->RxStream.length = usLength;
+    USART_RESET_ERRORS(pxUSART);
 
-#ifdef USE_XPD_USART_ERROR_DETECT
-    XPD_USART_EnableIT(husart, PE);
-    XPD_USART_EnableIT(husart, E);
+#ifdef __XPD_USART_ERROR_DETECT
+    USART_IT_ENABLE(pxUSART, PE);
+    USART_IT_ENABLE(pxUSART, E);
 #endif
     /* Enable TXE, RXNE interrupt */
-    XPD_USART_EnableIT(husart, RXNE);
-    XPD_USART_EnableIT(husart, TXE);
+    USART_IT_ENABLE(pxUSART, RXNE);
+    USART_IT_ENABLE(pxUSART, TXE);
+}
+
+/**
+ * @brief Starts interrupt-driven full-duplex data transfer over USART.
+ * @param pxUSART: pointer to the USART handle structure
+ * @param pvTxData: pointer to the transmitted data buffer
+ * @param pvRxData: pointer to the received data buffer
+ * @param usLength: amount of data transfers
+ */
+void USART_vSendReceive_IT(
+        USART_HandleType *  pxUSART,
+        void *              pvTxData,
+        void *              pvRxData,
+        uint16_t            usLength)
+{
+    /* save stream info */
+    pxUSART->TxStream.buffer = pvTxData;
+    pxUSART->TxStream.length = usLength;
+    pxUSART->RxStream.buffer = pvRxData;
+    pxUSART->RxStream.length = usLength;
+    USART_RESET_ERRORS(pxUSART);
+
+#ifdef __XPD_USART_ERROR_DETECT
+    USART_IT_ENABLE(pxUSART, PE);
+    USART_IT_ENABLE(pxUSART, E);
+#endif
+    /* Enable TXE, TC, RXNE interrupt */
+    USART_IT_ENABLE(pxUSART, RXNE);
+    USART_IT_ENABLE(pxUSART, TXE);
+    USART_IT_ENABLE(pxUSART, TC);
 }
 
 /**
  * @brief USART transfer interrupt handler that provides handle callbacks.
- * @param husart: pointer to the USART handle structure
+ * @param pxUSART: pointer to the USART handle structure
  */
-void XPD_USART_IRQHandler(USART_HandleType * husart)
+void USART_vIRQHandler(USART_HandleType * pxUSART)
 {
-    uint32_t sr  = USART_STATR(husart);
-    uint32_t cr1 = husart->Inst->CR1.w;
-    uint32_t cr2 = husart->Inst->CR2.w;
-    uint32_t cr3 = husart->Inst->CR3.w;
+    uint32_t ulSR  = USART_STATR(pxUSART);
+    uint32_t ulCR1 = pxUSART->Inst->CR1.w;
+    uint32_t ulCR2 = pxUSART->Inst->CR2.w;
+    uint32_t ulCR3 = pxUSART->Inst->CR3.w;
 
-#ifdef USE_XPD_USART_ERROR_DETECT
+#ifdef __XPD_USART_ERROR_DETECT
     /* parity error */
-    if (((sr & USART_STATF(PE)) != 0) && ((cr1 & USART_CR1_PEIE) != 0))
+    if (((ulSR & USART_STATF(PE)) != 0) && ((ulCR1 & USART_CR1_PEIE) != 0))
     {
-        husart->Errors |= USART_ERROR_PARITY;
-        XPD_USART_ClearFlag(husart, PE);
+        pxUSART->Errors |= USART_ERROR_PARITY;
+        USART_FLAG_CLEAR(pxUSART, PE);
     }
     /* channel errors */
-    if ((cr3 & USART_CR3_EIE) != 0)
+    if ((ulCR3 & USART_CR3_EIE) != 0)
     {
-        if ((sr & USART_STATF(NE)) != 0)
+        if ((ulSR & USART_STATF(NE)) != 0)
         {
-            husart->Errors |= USART_ERROR_NOISE;
-            XPD_USART_ClearFlag(husart, NE);
+            pxUSART->Errors |= USART_ERROR_NOISE;
+            USART_FLAG_CLEAR(pxUSART, NE);
         }
-        if ((sr & USART_STATF(FE)) != 0)
+        if ((ulSR & USART_STATF(FE)) != 0)
         {
-            husart->Errors |= USART_ERROR_FRAME;
-            XPD_USART_ClearFlag(husart, FE);
+            pxUSART->Errors |= USART_ERROR_FRAME;
+            USART_FLAG_CLEAR(pxUSART, FE);
         }
-        if ((sr & USART_STATF(ORE)) != 0)
+        if ((ulSR & USART_STATF(ORE)) != 0)
         {
-            husart->Errors |= USART_ERROR_OVERRUN;
-            XPD_USART_ClearFlag(husart, ORE);
+            pxUSART->Errors |= USART_ERROR_OVERRUN;
+            USART_FLAG_CLEAR(pxUSART, ORE);
         }
     }
-    if (husart->Errors != USART_ERROR_NONE)
+    if (pxUSART->Errors != USART_ERROR_NONE)
     {
-        XPD_SAFE_CALLBACK(husart->Callbacks.Error, husart);
+        XPD_SAFE_CALLBACK(pxUSART->Callbacks.Error, pxUSART);
     }
 #endif
 
     /* successful reception */
-    if (((sr & USART_STATF(RXNE)) != 0) && ((cr1 & USART_CR1_RXNEIE) != 0))
+    if (((ulSR & USART_STATF(RXNE)) != 0) && ((ulCR1 & USART_CR1_RXNEIE) != 0))
     {
-        XPD_ReadToStream((__IO uint32_t*)&USART_RXDR(husart), &husart->RxStream);
+        XPD_vReadToStream((const uint32_t*)&USART_RXDR(pxUSART), &pxUSART->RxStream);
 
         /* End of reception */
-        if (husart->RxStream.length == 0)
+        if (pxUSART->RxStream.length == 0)
         {
-            XPD_USART_DisableIT(husart, RXNE);
-#ifdef USE_XPD_USART_ERROR_DETECT
-            XPD_USART_DisableIT(husart, PE);
-            XPD_USART_DisableIT(husart, E);
+            USART_IT_DISABLE(pxUSART, RXNE);
+#ifdef __XPD_USART_ERROR_DETECT
+            USART_IT_DISABLE(pxUSART, PE);
+            USART_IT_DISABLE(pxUSART, E);
 #endif
 
             /* reception finished callback */
-            XPD_SAFE_CALLBACK(husart->Callbacks.Receive, husart);
+            XPD_SAFE_CALLBACK(pxUSART->Callbacks.Receive, pxUSART);
         }
     }
 
     /* successful transmission */
-    if (((sr & USART_STATF(TXE)) != 0) && ((cr1 & USART_CR1_TXEIE) != 0))
+    if (((ulSR & USART_STATF(TXE)) != 0) && ((ulCR1 & USART_CR1_TXEIE) != 0))
     {
-        XPD_WriteFromStream(&USART_TXDR(husart), &husart->TxStream);
+        XPD_vWriteFromStream((uint32_t*)&USART_TXDR(pxUSART), &pxUSART->TxStream);
 
-        /* last transmission, disable TXE, enable transmit complete interrupt */
-        if (husart->TxStream.length == 0)
+        /* last transmission, disable TXE */
+        if (pxUSART->TxStream.length == 0)
         {
-            XPD_USART_DisableIT(husart, TXE);
-            XPD_USART_EnableIT(husart, TC);
+            USART_IT_DISABLE(pxUSART, TXE);
+
+            /* callback if transmit completion isn't waited for */
+            if ((ulCR1 & USART_CR1_TCIE) != 0)
+            {
+                XPD_SAFE_CALLBACK(pxUSART->Callbacks.Transmit, pxUSART);
+            }
         }
     }
 
-    /* last element in data stream is transmitted successfully */
-    else if (((sr & USART_STATF(TC)) != 0) && ((cr1 & USART_CR1_TCIE) != 0))
+    /* last element in data stream is sent successfully */
+    else if (((ulSR & USART_STATF(TC)) != 0) && ((ulCR1 & USART_CR1_TCIE) != 0))
     {
-        XPD_USART_ClearFlag(husart, TC);
-        XPD_USART_DisableIT(husart, TC);
+        USART_FLAG_CLEAR(pxUSART, TC);
 
-        /* transmission finished callback */
-        XPD_SAFE_CALLBACK(husart->Callbacks.Transmit, husart);
+        /* data is successfully sent */
+        if (pxUSART->TxStream.length == 0)
+        {
+            USART_IT_DISABLE(pxUSART, TC);
+
+            /* transmission finished callback */
+            XPD_SAFE_CALLBACK(pxUSART->Callbacks.Transmit, pxUSART);
+        }
     }
 
     /* IDLE detected */
-    if (((sr & USART_STATF(IDLE)) != 0) && ((cr1 & USART_CR1_IDLEIE) != 0))
+    if (((ulSR & USART_STATF(IDLE)) != 0) && ((ulCR1 & USART_CR1_IDLEIE) != 0))
     {
-        XPD_USART_ClearFlag(husart, IDLE);
+        USART_FLAG_CLEAR(pxUSART, IDLE);
 
-        XPD_SAFE_CALLBACK(husart->Callbacks.Idle, husart);
+        XPD_SAFE_CALLBACK(pxUSART->Callbacks.Idle, pxUSART);
     }
 
     /* LIN break detected */
-    if (((sr & USART_STATF(LBD)) != 0) && ((cr2 & USART_CR2_LBDIE) != 0))
+    if (((ulSR & USART_STATF(LBD)) != 0) && ((ulCR2 & USART_CR2_LBDIE) != 0))
     {
-        XPD_USART_ClearFlag(husart, LBD);
+        USART_FLAG_CLEAR(pxUSART, LBD);
 
-        XPD_SAFE_CALLBACK(husart->Callbacks.Break, husart);
+        XPD_SAFE_CALLBACK(pxUSART->Callbacks.Break, pxUSART);
     }
 
     /* CTS detected */
-    if (((sr & USART_STATF(CTS)) != 0) && ((cr3 & USART_CR3_CTSIE) != 0))
+    if (((ulSR & USART_STATF(CTS)) != 0) && ((ulCR3 & USART_CR3_CTSIE) != 0))
     {
-        XPD_USART_ClearFlag(husart, CTS);
+        USART_FLAG_CLEAR(pxUSART, CTS);
 
-        XPD_SAFE_CALLBACK(husart->Callbacks.ClearToSend, husart);
+        XPD_SAFE_CALLBACK(pxUSART->Callbacks.ClearToSend, pxUSART);
     }
 
-#if (USART_PERIPHERAL_VERSION > 2)
+#if (__USART_PERIPHERAL_VERSION > 2)
     /* UART wakeup from Stop mode interrupt occurred */
-    if(((sr & USART_ISR_WUF) != 0) && ((cr3 & USART_CR3_WUFIE) != 0))
+    if(((ulSR & USART_ISR_WUF) != 0) && ((ulCR3 & USART_CR3_WUFIE) != 0))
     {
-        XPD_USART_ClearFlag(husart, WU);
+        USART_FLAG_CLEAR(pxUSART, WU);
     }
 #endif
 }
 
 /**
  * @brief Starts DMA-managed data transmission over USART.
- * @param husart: pointer to the USART handle structure
- * @param TxData: pointer to the data buffer
- * @param Length: amount of data transfers
+ * @param pxUSART: pointer to the USART handle structure
+ * @param pvTxData: pointer to the data buffer
+ * @param usLength: amount of data transfers
  * @return BUSY if DMA is in use, OK if transfer is started
  */
-XPD_ReturnType XPD_USART_Transmit_DMA(USART_HandleType * husart, void * TxData, uint16_t Length)
+XPD_ReturnType USART_eTransmit_DMA(
+        USART_HandleType *  pxUSART,
+        void *              pvTxData,
+        uint16_t            usLength)
 {
-    XPD_ReturnType result;
+    XPD_ReturnType eResult;
 
     /* save stream info */
-    husart->TxStream.buffer = TxData;
-    husart->TxStream.length = Length;
+    pxUSART->TxStream.buffer = pvTxData;
+    pxUSART->TxStream.length = usLength;
 
     /* Set up DMA for transfer */
-    result = XPD_DMA_Start_IT(husart->DMA.Transmit, (void*) &USART_TXDR(husart), TxData, Length);
+    eResult = DMA_eStart_IT(pxUSART->DMA.Transmit,
+            (void*)&USART_TXDR(pxUSART), pvTxData, usLength);
 
-    if (result == XPD_OK)
+    if (eResult == XPD_OK)
     {
         /* Set the callback owner */
-        husart->DMA.Transmit->Owner = husart;
+        pxUSART->DMA.Transmit->Owner = pxUSART;
 
         /* Set the DMA transfer callbacks */
-        husart->DMA.Transmit->Callbacks.Complete     = usart_dmaTransmitRedirect;
-#ifdef USE_XPD_DMA_ERROR_DETECT
-        husart->DMA.Transmit->Callbacks.Error        = usart_dmaErrorRedirect;
+        pxUSART->DMA.Transmit->Callbacks.Complete     = USART_prvDmaTransmitRedirect;
+#ifdef __XPD_DMA_ERROR_DETECT
+        pxUSART->DMA.Transmit->Callbacks.Error        = USART_prvDmaErrorRedirect;
 #endif
-        USART_RESET_ERRORS(husart);
+        USART_RESET_ERRORS(pxUSART);
 
-        /* The direction has to be set in half-duplex mode */
-        usart_setDirection(husart, USART_CR1_TE);
+        USART_FLAG_CLEAR(pxUSART, TC);
 
-        XPD_USART_ClearFlag(husart, TC);
-
-        USART_REG_BIT(husart, CR3, DMAT) = 1;
+        USART_REG_BIT(pxUSART, CR3, DMAT) = 1;
     }
-    return result;
+    return eResult;
+}
+
+/**
+ * @brief Starts DMA-managed data transmission over USART.
+ * @param pxUSART: pointer to the USART handle structure
+ * @param pvTxData: pointer to the data buffer
+ * @param usLength: amount of data transfers
+ * @return BUSY if DMA is in use, OK if transfer is started
+ */
+XPD_ReturnType USART_eSend_DMA(
+        USART_HandleType *  pxUSART,
+        void *              pvTxData,
+        uint16_t            usLength)
+{
+    XPD_ReturnType eResult = USART_eTransmit_DMA(pxUSART, pvTxData, usLength);
+
+    if (eResult == XPD_OK)
+    {
+        USART_IT_ENABLE(pxUSART, TC);
+    }
+
+    return eResult;
 }
 
 /**
  * @brief Starts DMA-managed data reception over USART.
  * @note  In synchronous mode the user has to ensure data transmission in order to generate clock.
- * @param husart: pointer to the USART handle structure
- * @param RxData: pointer to the data buffer
- * @param Length: amount of data transfers
+ * @param pxUSART: pointer to the USART handle structure
+ * @param pvRxData: pointer to the data buffer
+ * @param usLength: amount of data transfers
  * @return BUSY if DMA is in use, OK if transfer is started
  */
-XPD_ReturnType XPD_USART_Receive_DMA(USART_HandleType * husart, void * RxData, uint16_t Length)
+XPD_ReturnType USART_eReceive_DMA(
+        USART_HandleType *  pxUSART,
+        void *              pvRxData,
+        uint16_t            usLength)
 {
-    XPD_ReturnType result;
+    XPD_ReturnType eResult;
 
     /* save stream info */
-    husart->RxStream.buffer = RxData;
-    husart->RxStream.length = Length;
+    pxUSART->RxStream.buffer = pvRxData;
+    pxUSART->RxStream.length = usLength;
 
     /* Set up DMA for transfer */
-    result = XPD_DMA_Start_IT(husart->DMA.Receive, (void*) &USART_RXDR(husart), RxData, Length);
+    eResult = DMA_eStart_IT(pxUSART->DMA.Receive,
+            (void*)&USART_RXDR(pxUSART), pvRxData, usLength);
 
-    if (result == XPD_OK)
+    if (eResult == XPD_OK)
     {
         /* Set the callback owner */
-        husart->DMA.Receive->Owner = husart;
+        pxUSART->DMA.Receive->Owner = pxUSART;
 
         /* Set the DMA transfer callbacks */
-        husart->DMA.Receive->Callbacks.Complete     = usart_dmaReceiveRedirect;
-#ifdef USE_XPD_DMA_ERROR_DETECT
-        husart->DMA.Receive->Callbacks.Error        = usart_dmaErrorRedirect;
+        pxUSART->DMA.Receive->Callbacks.Complete     = USART_prvDmaReceiveRedirect;
+#ifdef __XPD_DMA_ERROR_DETECT
+        pxUSART->DMA.Receive->Callbacks.Error        = USART_prvDmaErrorRedirect;
 #endif
-        USART_RESET_ERRORS(husart);
+        USART_RESET_ERRORS(pxUSART);
 
-        XPD_USART_ClearFlag(husart, ORE);
+        USART_FLAG_CLEAR(pxUSART, ORE);
 
-        USART_REG_BIT(husart, CR3, DMAR) = 1;
-
-        /* The direction has to be set in half-duplex mode */
-        usart_setDirection(husart, USART_CR1_RE);
+        USART_REG_BIT(pxUSART, CR3, DMAR) = 1;
     }
-    return result;
+    return eResult;
 }
 
 /**
  * @brief Starts DMA-managed full-duplex data transfer over USART.
- * @param husart: pointer to the USART handle structure
- * @param TxData: pointer to the transmitted data buffer
- * @param RxData: pointer to the received data buffer
- * @param Length: amount of data transfers
+ * @param pxUSART: pointer to the USART handle structure
+ * @param pvTxData: pointer to the transmitted data buffer
+ * @param pvRxData: pointer to the received data buffer
+ * @param usLength: amount of data transfers
  * @return BUSY if DMA is in use, OK if transfer is started
  */
-XPD_ReturnType XPD_USART_TransmitReceive_DMA(USART_HandleType * husart, void * TxData, void * RxData, uint16_t Length)
+XPD_ReturnType USART_eTransmitReceive_DMA(
+        USART_HandleType *  pxUSART,
+        void *              pvTxData,
+        void *              pvRxData,
+        uint16_t            usLength)
 {
-    XPD_ReturnType result;
+    XPD_ReturnType eResult;
 
     /* save stream info */
-    husart->TxStream.buffer = TxData;
-    husart->TxStream.length = Length;
-    husart->RxStream.buffer = RxData;
-    husart->RxStream.length = Length;
+    pxUSART->TxStream.buffer = pvTxData;
+    pxUSART->TxStream.length = usLength;
+    pxUSART->RxStream.buffer = pvRxData;
+    pxUSART->RxStream.length = usLength;
 
     /* Set up DMAs for transfers */
-    result = XPD_DMA_Start_IT(husart->DMA.Receive, (void*) &USART_RXDR(husart), RxData, Length);
+    eResult = DMA_eStart_IT(pxUSART->DMA.Receive,
+            (void*)&USART_RXDR(pxUSART), pvRxData, usLength);
 
-    if (result == XPD_OK)
+    if (eResult == XPD_OK)
     {
-        result = XPD_DMA_Start_IT(husart->DMA.Transmit, (void*) &USART_TXDR(husart), TxData, Length);
+        eResult = DMA_eStart_IT(pxUSART->DMA.Transmit,
+                (void*)&USART_TXDR(pxUSART), pvTxData, usLength);
 
         /* If one DMA allocation failed, reset the other and exit */
-        if (result != XPD_OK)
+        if (eResult != XPD_OK)
         {
-            XPD_DMA_Stop_IT(husart->DMA.Receive);
-            return result;
+            DMA_vStop_IT(pxUSART->DMA.Receive);
+            return eResult;
         }
 
         /* Set the callback owner */
-        husart->DMA.Transmit->Owner = husart;
-        husart->DMA.Receive->Owner  = husart;
+        pxUSART->DMA.Transmit->Owner = pxUSART;
+        pxUSART->DMA.Receive->Owner  = pxUSART;
 
         /* Set the DMA transfer callbacks */
-        husart->DMA.Transmit->Callbacks.Complete     = usart_dmaTransmitRedirect;
-        husart->DMA.Receive->Callbacks.Complete      = usart_dmaReceiveRedirect;
-#ifdef USE_XPD_DMA_ERROR_DETECT
-        husart->DMA.Transmit->Callbacks.Error        = usart_dmaErrorRedirect;
-        husart->DMA.Receive->Callbacks.Error         = usart_dmaErrorRedirect;
+        pxUSART->DMA.Transmit->Callbacks.Complete     = USART_prvDmaTransmitRedirect;
+        pxUSART->DMA.Receive->Callbacks.Complete      = USART_prvDmaReceiveRedirect;
+#ifdef __XPD_DMA_ERROR_DETECT
+        pxUSART->DMA.Transmit->Callbacks.Error        = USART_prvDmaErrorRedirect;
+        pxUSART->DMA.Receive->Callbacks.Error         = USART_prvDmaErrorRedirect;
 #endif
-        USART_RESET_ERRORS(husart);
+        USART_RESET_ERRORS(pxUSART);
 
-        XPD_USART_ClearFlag(husart, ORE);
-        XPD_USART_ClearFlag(husart, TC);
+        USART_FLAG_CLEAR(pxUSART, ORE);
+        USART_FLAG_CLEAR(pxUSART, TC);
 
-        USART_REG_BIT(husart, CR3, DMAR) = 1;
-        USART_REG_BIT(husart, CR3, DMAT) = 1;
+        USART_REG_BIT(pxUSART, CR3, DMAR) = 1;
+        USART_REG_BIT(pxUSART, CR3, DMAT) = 1;
     }
-    return result;
+    return eResult;
+}
+
+/**
+ * @brief Starts DMA-managed full-duplex data transfer over USART.
+ * @param pxUSART: pointer to the USART handle structure
+ * @param pvTxData: pointer to the transmitted data buffer
+ * @param pvRxData: pointer to the received data buffer
+ * @param usLength: amount of data transfers
+ * @return BUSY if DMA is in use, OK if transfer is started
+ */
+XPD_ReturnType USART_eSendReceive_DMA(
+        USART_HandleType *  pxUSART,
+        void *              pvTxData,
+        void *              pvRxData,
+        uint16_t            usLength)
+{
+    XPD_ReturnType eResult = USART_eTransmitReceive_DMA(pxUSART, pvTxData, pvRxData, usLength);
+
+    if (eResult == XPD_OK)
+    {
+        USART_IT_ENABLE(pxUSART, TC);
+    }
+
+    return eResult;
 }
 
 /**
  * @brief Stops all ongoing DMA-managed transfers over USART.
- * @param husart: pointer to the USART handle structure
+ * @param pxUSART: pointer to the USART handle structure
  */
-void XPD_USART_Stop_DMA(USART_HandleType * husart)
+void USART_vStop_DMA(USART_HandleType * pxUSART)
 {
     /* Transmit DMA disable */
-    if (USART_REG_BIT(husart,CR3,DMAT) != 0)
+    if (USART_REG_BIT(pxUSART,CR3,DMAT) != 0)
     {
         uint16_t remaining;
-        USART_REG_BIT(husart,CR3,DMAT) = 0;
+        USART_REG_BIT(pxUSART,CR3,DMAT) = 0;
 
         /* Read remaining transfer count */
-        remaining = XPD_DMA_GetStatus(husart->DMA.Transmit);
+        remaining = DMA_usGetStatus(pxUSART->DMA.Transmit);
 
         /* Update transfer context */
-        husart->TxStream.buffer += (husart->TxStream.length - remaining)
-                * husart->TxStream.size;
-        husart->TxStream.length = remaining;
+        pxUSART->TxStream.buffer += (pxUSART->TxStream.length - remaining)
+                * pxUSART->TxStream.size;
+        pxUSART->TxStream.length = remaining;
 
-        XPD_DMA_Stop_IT(husart->DMA.Transmit);
+        DMA_vStop_IT(pxUSART->DMA.Transmit);
     }
     /* Receive DMA disable */
-    if (USART_REG_BIT(husart,CR3,DMAR) != 0)
+    if (USART_REG_BIT(pxUSART,CR3,DMAR) != 0)
     {
         uint16_t remaining;
-        USART_REG_BIT(husart,CR3,DMAR) = 0;
+        USART_REG_BIT(pxUSART,CR3,DMAR) = 0;
 
         /* Read remaining transfer count */
-        remaining = XPD_DMA_GetStatus(husart->DMA.Receive);
+        remaining = DMA_usGetStatus(pxUSART->DMA.Receive);
 
         /* Update transfer context */
-        husart->RxStream.buffer += (husart->RxStream.length - remaining)
-                * husart->RxStream.size;
-        husart->RxStream.length = remaining;
+        pxUSART->RxStream.buffer += (pxUSART->RxStream.length - remaining)
+                * pxUSART->RxStream.size;
+        pxUSART->RxStream.length = remaining;
 
-        XPD_DMA_Stop_IT(husart->DMA.Receive);
+        DMA_vStop_IT(pxUSART->DMA.Receive);
     }
 }
 
-#if (USART_PERIPHERAL_VERSION > 1)
+#ifdef USART_CR3_OVRDIS
 /**
- * @brief Sets the selected inversion configuration for the USART
- * @param husart: pointer to the USART handle structure
- * @param Inversions: the selected logical levels and order to invert
+ * @brief Sets the overrun detection configuration for the USART (enabled by default)
+ * @param pxUSART: pointer to the USART handle structure
  */
-void XPD_USART_InversionConfig(USART_HandleType * husart, USART_InversionType Inversions)
+void USART_vOverrunEnable(USART_HandleType * pxUSART)
 {
-    USART_APPLY_CONFIG(husart, CR2,
-            USART_CR2_TXINV | USART_CR2_RXINV | USART_CR2_DATAINV | USART_CR2_MSBFIRST | USART_CR2_SWAP,
-            Inversions);
+    uint32_t ulCR1 = pxUSART->Inst->CR1.w;
+    uint32_t ulUE = ulCR1 & USART_CR1_UE;
+
+    if (ulUE != 0)
+    {
+        pxUSART->Inst->CR1.w = ulCR1 & ~USART_CR1_UE;
+    }
+    USART_REG_BIT(pxUSART,CR3,OVRDIS) = 0;
+    pxUSART->Inst->CR1.w |= ulUE;
 }
 
 /**
  * @brief Sets the overrun detection configuration for the USART (enabled by default)
- * @param husart: pointer to the USART handle structure
- * @param Mode: the selected detection strategy
+ * @param pxUSART: pointer to the USART handle structure
  */
-void XPD_USART_OverrunConfig(USART_HandleType * husart, FunctionalState Mode)
+void USART_vOverrunDisable(USART_HandleType * pxUSART)
 {
-    USART_APPLY_CONFIG(husart, CR3, USART_CR3_OVRDIS, (1 - Mode) << USART_CR3_OVRDIS_Pos);
+    uint32_t ulCR1 = pxUSART->Inst->CR1.w;
+    uint32_t ulUE = ulCR1 & USART_CR1_UE;
+
+    if (ulUE != 0)
+    {
+        pxUSART->Inst->CR1.w = ulCR1 & ~USART_CR1_UE;
+    }
+    USART_REG_BIT(pxUSART,CR3,OVRDIS) = 1;
+    pxUSART->Inst->CR1.w |= ulUE;
 }
-#endif
+#endif /* USART_CR3_OVRDIS */
 
 /** @} */
 
@@ -879,41 +1055,53 @@ void XPD_USART_OverrunConfig(USART_HandleType * husart, FunctionalState Mode)
 
 /**
  * @brief Initializes the USART peripheral in asynchronous mode using the setup configuration
- * @param husart: pointer to the USART handle structure
- * @param Common: General peripheral setup configuration
- * @param Config: UART setup configuration
- * @return ERROR if input is incorrect, OK if success
+ * @param pxUSART: pointer to the USART handle structure
+ * @param pxConfig: UART setup configuration
  */
-XPD_ReturnType XPD_UART_Init(USART_HandleType * husart,
-        const USART_InitType * Common, const UART_InitType * Config)
+void USART_vInitAsync(USART_HandleType * pxUSART, const UART_InitType * pxConfig)
 {
-    XPD_ReturnType result = usart_init1(husart, Common);
+    USART_prvPreinit(pxUSART, pxConfig->DataSize, pxConfig->Parity);
 
+    pxUSART->Inst->CR2.b.STOP           = pxConfig->StopBits;
+    USART_REG_BIT(pxUSART, CR3, HDSEL)  = pxConfig->HalfDuplex;
+#ifdef IS_LPUART_INSTANCE
+    if (!IS_LPUART_INSTANCE(pxUSART->Inst))
     {
-        /* configure UART specific settings */
-        USART_REG_BIT(husart, CR1, OVER8) = Config->OverSampling8;
-        USART_REG_BIT(husart, CR3, HDSEL) = Config->HalfDuplex;
-
-        /* configure hardware flow control */
-        husart->Inst->CR3.w |= (USART_CR3_RTSE | USART_CR3_CTSE) & ((uint32_t)Config->FlowControl << USART_CR3_RTSE_Pos);
-
-        result = usart_init2(husart, Common);
+        USART_REG_BIT(pxUSART, CR1, OVER8)  = pxConfig->OverSampling8;
+        USART_REG_BIT(pxUSART, CR3, ONEBIT) = pxConfig->SingleSample;
     }
-
-    return result;
-}
-
-#if (USART_PERIPHERAL_VERSION > 1)
-/**
- * @brief Sets the baudrate detection strategy for the UART
- * @param husart: pointer to the USART handle structure
- * @param Mode: the selected detection strategy
- */
-void XPD_UART_BaudrateModeConfig(USART_HandleType * husart, UART_BaudrateModeType Mode)
-{
-    USART_APPLY_CONFIG(husart, CR2, USART_CR2_ABREN | USART_CR2_ABRMODE, Mode);
-}
 #endif
+
+    /* configure hardware flow control */
+    SET_BIT(pxUSART->Inst->CR3.w, (USART_CR3_RTSE | USART_CR3_CTSE) &
+            ((uint32_t)pxConfig->FlowControl << USART_CR3_RTSE_Pos));
+
+#if (USART_INVERSION_MASK != 0)
+    /* set inversions */
+    SET_BIT(pxUSART->Inst->CR2.w, USART_INVERSION_MASK &
+            ((uint32_t)pxConfig->Inversions << USART_CR2_SWAP_Pos));
+#endif
+
+#if (USART_BAUDRATEMODE_MASK != 0)
+    /* set the baudrate detection strategy for the UART */
+    SET_BIT(pxUSART->Inst->CR2.w, USART_BAUDRATEMODE_MASK &
+            ((uint32_t)pxConfig->BaudrateMode << USART_CR2_ABREN_Pos));
+#endif
+
+    /* baudrate configuration */
+    USART_prvSetBaudrate(pxUSART, pxConfig->Baudrate);
+
+    /* enable USART with the selected directions */
+    SET_BIT(pxUSART->Inst->CR1.w, USART_CR1_UE |
+            ((USART_CR1_TE | USART_CR1_RE) & pxConfig->Directions));
+
+#ifdef IS_UART_WAKEUP_FROMSTOP_INSTANCE
+    if (IS_UART_WAKEUP_FROMSTOP_INSTANCE(pxUSART->Inst))
+    {
+        USART_prvWaitIdle(pxUSART);
+    }
+#endif
+}
 
 /** @} */
 
@@ -927,29 +1115,41 @@ void XPD_UART_BaudrateModeConfig(USART_HandleType * husart, UART_BaudrateModeTyp
 
 /**
  * @brief Initializes the USART peripheral in synchronous mode using the setup configuration
- * @param husart: pointer to the USART handle structure
- * @param Common: General peripheral setup configuration
- * @param Config: USRT setup configuration
- * @return ERROR if input is incorrect, OK if success
+ * @param pxUSART: pointer to the USART handle structure
+ * @param pxConfig: USRT setup configuration
  */
-XPD_ReturnType XPD_USRT_Init(USART_HandleType * husart,
-        const USART_InitType * Common, const USRT_InitType * Config)
+void USART_vInitSync(USART_HandleType * pxUSART, const USRT_InitType * pxConfig)
 {
-    XPD_ReturnType result = usart_init1(husart, Common);
+    USART_prvPreinit(pxUSART, pxConfig->DataSize, pxConfig->Parity);
 
+    /* configure clock settings and stop mode */
+    USART_REG_BIT(pxUSART, CR1, OVER8)  = ENABLE;
+    USART_REG_BIT(pxUSART, CR2, CLKEN)  = ENABLE;
+    USART_REG_BIT(pxUSART, CR2, CPOL)   = pxConfig->Clock.Polarity;
+    USART_REG_BIT(pxUSART, CR2, CPHA)   = pxConfig->Clock.Phase;
+    USART_REG_BIT(pxUSART, CR2, LBCL)   = pxConfig->Clock.LastBit;
+    pxUSART->Inst->CR2.b.STOP           = pxConfig->StopBits;
+    USART_REG_BIT(pxUSART, CR3, ONEBIT) = pxConfig->SingleSample;
+
+#if (USART_INVERSION_MASK != 0)
+    /* set inversions */
+    SET_BIT(pxUSART->Inst->CR2.w, USART_INVERSION_MASK &
+            ((uint32_t)pxConfig->Inversions << USART_CR2_SWAP_Pos));
+#endif
+
+    /* baudrate configuration */
+    USART_prvSetBaudrate(pxUSART, pxConfig->Baudrate);
+
+    /* enable USART with both directions */
+    SET_BIT(pxUSART->Inst->CR1.w, USART_CR1_UE |
+            USART_CR1_TE | USART_CR1_RE);
+
+#ifdef IS_UART_WAKEUP_FROMSTOP_INSTANCE
+    if (IS_UART_WAKEUP_FROMSTOP_INSTANCE(pxUSART->Inst))
     {
-        /* configure clock settings and stop mode */
-        USART_REG_BIT(husart, CR1, OVER8) = ENABLE;
-        USART_REG_BIT(husart, CR2, CLKEN) = ENABLE;
-        USART_REG_BIT(husart, CR2, CPOL)  = Config->Polarity;
-        USART_REG_BIT(husart, CR2, CPHA)  = Config->Phase;
-        USART_REG_BIT(husart, CR2, LBCL)  = Config->LastBit;
-        USART_REG_BIT(husart, CR1, TE)    = ENABLE;
-
-        result = usart_init2(husart, Common);
+        USART_prvWaitIdle(pxUSART);
     }
-
-    return result;
+#endif
 }
 
 /** @} */
@@ -964,37 +1164,53 @@ XPD_ReturnType XPD_USRT_Init(USART_HandleType * husart,
 
 /**
  * @brief Sets the UART peripheral in LIN protocol mode
- * @param husart: pointer to the USART handle structure
- * @param Common: General peripheral setup configuration
- * @param BreakSize: bit size of the break frame for detection [10..11]
- * @return ERROR if input is incorrect, OK if success
+ * @param pxUSART: pointer to the USART handle structure
+ * @param pxConfig: LIN setup configuration
  */
-XPD_ReturnType XPD_LIN_Init(USART_HandleType * husart, const USART_InitType * Common, uint8_t BreakSize)
+void USART_vInitLIN(USART_HandleType * pxUSART, const LIN_InitType * pxConfig)
 {
-    XPD_ReturnType result = usart_init1(husart, Common);
+    USART_prvPreinit(pxUSART, 8, USART_PARITY_NONE);
 
+    /* Set LIN mode, break length */
+    pxUSART->Inst->CR2.w = USART_CR2_LINEN | (pxConfig->BreakSize > 10) ? USART_CR2_LBDL : 0;
+
+#if (USART_INVERSION_MASK != 0)
+    /* set inversions */
+    SET_BIT(pxUSART->Inst->CR2.w, USART_INVERSION_MASK &
+            ((uint32_t)pxConfig->Inversions << USART_CR2_SWAP_Pos));
+#endif
+
+#if (USART_BAUDRATEMODE_MASK != 0)
+    /* set the baudrate detection strategy for the UART */
+    SET_BIT(pxUSART->Inst->CR2.w, USART_BAUDRATEMODE_MASK &
+            ((uint32_t)pxConfig->BaudrateMode << USART_CR2_ABREN_Pos));
+#endif
+
+    /* baudrate configuration */
+    USART_prvSetBaudrate(pxUSART, pxConfig->Baudrate);
+
+    /* enable USART with both directions */
+    SET_BIT(pxUSART->Inst->CR1.w, USART_CR1_UE |
+            USART_CR1_TE | USART_CR1_RE);
+
+#ifdef IS_UART_WAKEUP_FROMSTOP_INSTANCE
+    if (IS_UART_WAKEUP_FROMSTOP_INSTANCE(pxUSART->Inst))
     {
-        uint32_t bdl = (BreakSize > 10) ? USART_CR2_LBDL : 0;
-
-        /* Set LIN mode, stop bits to 1, break length */
-        husart->Inst->CR2.w = (husart->Inst->CR2.w & ~(USART_CR2_LBDL | USART_CR2_STOP)) | USART_CR2_LINEN | bdl;
-
-        result = usart_init2(husart, Common);
+        USART_prvWaitIdle(pxUSART);
     }
-
-    return result;
+#endif
 }
 
 /**
  * @brief Sends a BREAK frame
- * @param husart: pointer to the USART handle structure
+ * @param pxUSART: pointer to the USART handle structure
  */
-void XPD_LIN_SendBreak(USART_HandleType * husart)
+void USART_vSendBreak(USART_HandleType * pxUSART)
 {
-#if (USART_PERIPHERAL_VERSION > 1)
-    husart->Inst->RQR.w = USART_RQR_SBKRQ;
+#if (__USART_PERIPHERAL_VERSION > 1)
+    pxUSART->Inst->RQR.w = USART_RQR_SBKRQ;
 #else
-    USART_REG_BIT(husart, CR1, SBK) = 1;
+    USART_REG_BIT(pxUSART, CR1, SBK) = 1;
 #endif
 }
 
@@ -1010,91 +1226,62 @@ void XPD_LIN_SendBreak(USART_HandleType * husart)
 
 /**
  * @brief Sets the UART peripheral in MultiProcessor slave mode
- * @param husart: pointer to the USART handle structure
- * @param Common: General peripheral setup configuration
- * @param Config: MultiSlave UART setup configuration
- * @return ERROR if input is incorrect, OK if success
+ * @param pxUSART: pointer to the USART handle structure
+ * @param pxConfig: MultiSlave UART setup configuration
  */
-XPD_ReturnType XPD_MSUART_Init(USART_HandleType * husart,
-        const USART_InitType * Common, const MSUART_InitType * Config)
+void USART_InitMultiSlave(USART_HandleType * pxUSART, const MSUART_InitType * pxConfig)
 {
-    XPD_ReturnType result = usart_init1(husart, Common);
+    USART_prvPreinit(pxUSART, pxConfig->DataSize, pxConfig->Parity);
 
+    pxUSART->Inst->CR2.b.STOP           = pxConfig->StopBits;
+    USART_REG_BIT(pxUSART, CR1, OVER8)  = pxConfig->OverSampling8;
+    USART_REG_BIT(pxUSART, CR3, ONEBIT) = pxConfig->SingleSample;
+    USART_REG_BIT(pxUSART, CR3, HDSEL)  = pxConfig->HalfDuplex;
+
+    /* configure multislave settings */
+    USART_REG_BIT(pxUSART, CR1, WAKE)  = pxConfig->UnmuteMethod;
+#if (__USART_PERIPHERAL_VERSION > 2)
+    pxUSART->Inst->CR3.b.WUS           = pxConfig->WakeUpMethod;
+#endif
+
+    if ((pxConfig->UnmuteMethod == MSUART_UNMUTE_ADDRESSED)
+#if (__USART_PERIPHERAL_VERSION > 2)
+     || (pxConfig->WakeUpMethod == MSUART_WAKEUP_ADDRESSED)
+#endif
+     )
     {
-        /* configure UART specific settings */
-        USART_REG_BIT(husart, CR1, OVER8) = Config->OverSampling8;
-        USART_REG_BIT(husart, CR3, HDSEL) = Config->HalfDuplex;
-
-        /* configure multislave settings */
-        USART_REG_BIT(husart, CR1, WAKE)  = Config->UnmuteMethod;
-#if (USART_PERIPHERAL_VERSION > 2)
-        husart->Inst->CR3.b.WUS           = Config->WakeUpMethod;
-#endif
-
-        if ((Config->UnmuteMethod == MSUART_UNMUTE_ADDRESSED)
-#if (USART_PERIPHERAL_VERSION > 2)
-         || (Config->WakeUpMethod == MSUART_WAKEUP_ADDRESSED)
-#endif
-         )
-        {
-            husart->Inst->CR2.b.ADD           = Config->Address;
+        pxUSART->Inst->CR2.b.ADD           = pxConfig->Address;
 #ifdef USART_CR2_ADDM7
-            USART_REG_BIT(husart, CR2, ADDM7) = (uint32_t)(Config->Address == 7);
+        USART_REG_BIT(pxUSART, CR2, ADDM7) = (pxConfig->AddressLength == 7) ? 1 : 0;
 #endif
-        }
-        result = usart_init2(husart, Common);
     }
 
-    return result;
-}
+#if (USART_INVERSION_MASK != 0)
+    /* set inversions */
+    SET_BIT(pxUSART->Inst->CR2.w, USART_INVERSION_MASK &
+            ((uint32_t)pxConfig->Inversions << USART_CR2_SWAP_Pos));
+#endif
 
-/**
- * @brief Sets the Mute state for the UART
- * @param husart: pointer to the USART handle structure
- * @param NewState: Mute state to set
- */
-void XPD_MSUART_MuteCtrl(USART_HandleType * husart, FunctionalState NewState)
-{
-#if (USART_PERIPHERAL_VERSION > 1)
-    USART_REG_BIT(husart, CR1, MME) = NewState;
+#if (USART_BAUDRATEMODE_MASK != 0)
+    /* set the baudrate detection strategy for the UART */
+    SET_BIT(pxUSART->Inst->CR2.w, USART_BAUDRATEMODE_MASK &
+            ((uint32_t)pxConfig->BaudrateMode << USART_CR2_ABREN_Pos));
+#endif
 
-    if (NewState != DISABLE)
+    /* baudrate configuration */
+    USART_prvSetBaudrate(pxUSART, pxConfig->Baudrate);
+
+    /* enable USART with the selected directions */
+    SET_BIT(pxUSART->Inst->CR1.w, USART_CR1_UE |
+            ((USART_CR1_TE | USART_CR1_RE) & pxConfig->Directions));
+
+#ifdef IS_UART_WAKEUP_FROMSTOP_INSTANCE
+    if (IS_UART_WAKEUP_FROMSTOP_INSTANCE(pxUSART->Inst))
     {
-        /* Send actual mute request */
-        husart->Inst->RQR.w = USART_RQR_MMRQ;
+        USART_prvWaitIdle(pxUSART);
     }
-#else
-    USART_REG_BIT(husart, CR1, RWU) = NewState;
 #endif
 }
-
-#if (USART_PERIPHERAL_VERSION > 2)
-/**
- * @brief Sets the Stop mode for the UART
- * @note  The UART is able to wake up the MCU from Stop 1 mode as long as UART clock is HSI or LSE.
- * @note  There shall be no ongoing transfer in the UART when Stop mode is entered.
- * @param husart: pointer to the USART handle structure
- * @param NewState: Mute state to set
- */
-void XPD_MSUART_StopModeCtrl(USART_HandleType * husart, FunctionalState NewState)
-{
-    /* When enabling Stop mode: */
-    if (NewState != DISABLE)
-    {
-        /* Enable RXNE interrupt when it is the wake up source */
-        if(husart->Inst->CR3.b.WUS == MSUART_WAKEUP_DATA_RECEIVED)
-        {
-            XPD_USART_EnableIT(husart, RXNE);
-        }
-        /* Otherwise enable dedicated interrupt */
-        else
-        {
-            XPD_USART_EnableIT(husart, WU);
-        }
-    }
-    USART_REG_BIT(husart, CR1, UESM) = NewState;
-}
-#endif
 
 /** @} */
 
@@ -1108,44 +1295,60 @@ void XPD_MSUART_StopModeCtrl(USART_HandleType * husart, FunctionalState NewState
 
 /**
  * @brief Sets the UART peripheral in SmartCard mode
- * @param husart: pointer to the USART handle structure
- * @param Common: General peripheral setup configuration
- * @param Config: SmartCard setup configuration
- * @return ERROR if input is incorrect, OK if success
+ * @param pxUSART: pointer to the USART handle structure
+ * @param pxConfig: SmartCard setup configuration
  */
-XPD_ReturnType XPD_SmartCard_Init(USART_HandleType * husart,
-        const USART_InitType * Common, const SmartCard_InitType * Config)
+void USART_vInitSmartCard(USART_HandleType * pxUSART, const SmartCard_InitType * pxConfig)
 {
-    XPD_ReturnType result = usart_init1(husart, Common);
+    USART_prvPreinit(pxUSART, 8, USART_PARITY_EVEN | pxConfig->Parity);
 
+    /* Set Smartcard features, output clock */
+    USART_REG_BIT(pxUSART, CR3, SCEN)   = ENABLE;
+    pxUSART->Inst->CR2.b.STOP           = USART_STOPBITS_1p5;
+    USART_REG_BIT(pxUSART, CR3, NACK)   = pxConfig->NACK;
+    pxUSART->Inst->GTPR.b.GT            = pxConfig->GuardTime;
+    USART_REG_BIT(pxUSART, CR3, ONEBIT) = pxConfig->SingleSample;
+
+    /* Optional clock */
+    USART_REG_BIT(pxUSART, CR2, CLKEN)  = ENABLE;
+    USART_REG_BIT(pxUSART, CR2, CPOL)   = pxConfig->Clock.Polarity;
+    USART_REG_BIT(pxUSART, CR2, CPHA)   = pxConfig->Clock.Phase;
+    pxUSART->Inst->GTPR.b.PSC           = pxConfig->Clock.Divider / 2;
+
+#if (__USART_PERIPHERAL_VERSION > 1)
+    pxUSART->Inst->CR3.b.SCARCNT        = pxConfig->AutoRetries;
+    pxUSART->Inst->RTOR.b.BLEN          = pxConfig->BlockLength;
+
+    if (pxConfig->RxTimeout > 0)
     {
-        /* Set Smartcard features, output clock */
-        USART_REG_BIT(husart, CR3, SCEN) = ENABLE;
-        USART_REG_BIT(husart, CR3, NACK) = Config->NACK;
-        husart->Inst->GTPR.b.GT          = Config->GuardTime;
-        husart->Inst->GTPR.b.PSC         = Config->Clock.Divider / 2;
-        USART_REG_BIT(husart, CR2, CPOL) = Config->Clock.Polarity;
-        USART_REG_BIT(husart, CR2, CPHA) = Config->Clock.Phase;
-
-#if (USART_PERIPHERAL_VERSION > 1)
-        husart->Inst->CR3.b.SCARCNT      = Config->AutoRetries;
-        husart->Inst->RTOR.b.BLEN        = Config->BlockLength;
-
-        if (Config->RxTimeout > 0)
-        {
-            USART_REG_BIT(husart, CR2, RTOEN) = ENABLE;
-            husart->Inst->RTOR.b.RTO          = Config->RxTimeout;
-        }
-        else
-        {
-            USART_REG_BIT(husart, CR2, RTOEN) = DISABLE;
-        }
+        USART_REG_BIT(pxUSART, CR2, RTOEN) = ENABLE;
+        pxUSART->Inst->RTOR.b.RTO          = pxConfig->RxTimeout;
+    }
+    else
+    {
+        USART_REG_BIT(pxUSART, CR2, RTOEN) = DISABLE;
+    }
 #endif
 
-        result = usart_init2(husart, Common);
-    }
+#if (USART_INVERSION_MASK != 0)
+    /* set inversions */
+    SET_BIT(pxUSART->Inst->CR2.w, USART_INVERSION_MASK &
+            ((uint32_t)pxConfig->Inversions << USART_CR2_SWAP_Pos));
+#endif
 
-    return result;
+    /* baudrate configuration */
+    USART_prvSetBaudrate(pxUSART, pxConfig->Baudrate);
+
+    /* enable USART with transmit direction by default */
+    SET_BIT(pxUSART->Inst->CR1.w, USART_CR1_UE |
+            USART_CR1_TE);
+
+#ifdef IS_UART_WAKEUP_FROMSTOP_INSTANCE
+    if (IS_UART_WAKEUP_FROMSTOP_INSTANCE(pxUSART->Inst))
+    {
+        USART_prvWaitIdle(pxUSART);
+    }
+#endif
 }
 
 /** @} */
@@ -1160,27 +1363,38 @@ XPD_ReturnType XPD_SmartCard_Init(USART_HandleType * husart,
 
 /**
  * @brief Sets the UART peripheral in IrDA mode
- * @param husart: pointer to the USART handle structure
- * @param Common: General peripheral setup configuration
- * @param Config: IrDA setup configuration
- * @return ERROR if input is incorrect, OK if success
+ * @param pxUSART: pointer to the USART handle structure
+ * @param pxConfig: IrDA setup configuration
  */
-XPD_ReturnType XPD_IrDA_Init(USART_HandleType * husart,
-        const USART_InitType * Common, const IrDA_InitType * Config)
+void USART_vInitIrDA(USART_HandleType * pxUSART, const IrDA_InitType * pxConfig)
 {
-    XPD_ReturnType result = usart_init1(husart, Common);
+    USART_prvPreinit(pxUSART, pxConfig->DataSize, pxConfig->Parity);
 
+    /* IrDA features configuration */
+    pxUSART->Inst->GTPR.b.PSC           = pxConfig->Prescaler;
+    pxUSART->Inst->CR2.b.STOP           = 0;
+    USART_REG_BIT(pxUSART, CR3, IRLP)   = pxConfig->LowPowerMode;
+    USART_REG_BIT(pxUSART, CR3, IREN)   = ENABLE;
+
+#if (USART_INVERSION_MASK != 0)
+    /* set inversions */
+    SET_BIT(pxUSART->Inst->CR2.w, USART_INVERSION_MASK &
+            ((uint32_t)pxConfig->Inversions << USART_CR2_SWAP_Pos));
+#endif
+
+    /* baudrate configuration */
+    USART_prvSetBaudrate(pxUSART, pxConfig->Baudrate);
+
+    /* enable USART with transmit direction by default */
+    SET_BIT(pxUSART->Inst->CR1.w, USART_CR1_UE |
+            USART_CR1_TE);
+
+#ifdef IS_UART_WAKEUP_FROMSTOP_INSTANCE
+    if (IS_UART_WAKEUP_FROMSTOP_INSTANCE(pxUSART->Inst))
     {
-        /* IrDA features configuration */
-        husart->Inst->GTPR.b.PSC         = Config->Prescaler;
-        husart->Inst->CR2.b.STOP         = 0;
-        USART_REG_BIT(husart, CR3, IRLP) = Config->LowPowerMode;
-        USART_REG_BIT(husart, CR3, IREN) = ENABLE;
-
-        result = usart_init2(husart, Common);
+        USART_prvWaitIdle(pxUSART);
     }
-
-    return result;
+#endif
 }
 
 /** @} */
@@ -1196,31 +1410,49 @@ XPD_ReturnType XPD_IrDA_Init(USART_HandleType * husart,
 
 /**
  * @brief Sets the UART peripheral in RS485 mode
- * @param husart: pointer to the USART handle structure
- * @param Common: General peripheral setup configuration
- * @param Config: RS485 setup configuration
- * @return ERROR if input is incorrect, OK if success
+ * @param pxUSART: pointer to the USART handle structure
+ * @param pxConfig: RS485 setup configuration
  */
-XPD_ReturnType XPD_RS485_Init(USART_HandleType * husart,
-        const USART_InitType * Common, const RS485_InitType * Config)
+void USART_vInitRS485(USART_HandleType * pxUSART, const RS485_InitType * pxConfig)
 {
-    XPD_ReturnType result = usart_init1(husart, Common);
+    USART_prvPreinit(pxUSART, pxConfig->DataSize, pxConfig->Parity);
 
+    pxUSART->Inst->CR2.b.STOP           = pxConfig->StopBits;
+    USART_REG_BIT(pxUSART, CR3, HDSEL)  = pxConfig->HalfDuplex;
+    USART_REG_BIT(pxUSART, CR1, OVER8)  = pxConfig->OverSampling8;
+    USART_REG_BIT(pxUSART, CR3, ONEBIT) = pxConfig->SingleSample;
+
+    /* configure DE signal */
+    USART_REG_BIT(pxUSART, CR3, DEM)    = ENABLE;
+    USART_REG_BIT(pxUSART, CR3, DEP)    = pxConfig->DE.Polarity;
+    pxUSART->Inst->CR1.b.DEAT           = pxConfig->DE.AssertionTime;
+    pxUSART->Inst->CR1.b.DEDT           = pxConfig->DE.DeassertionTime;
+
+#if (USART_INVERSION_MASK != 0)
+    /* set inversions */
+    SET_BIT(pxUSART->Inst->CR2.w, USART_INVERSION_MASK &
+            ((uint32_t)pxConfig->Inversions << USART_CR2_SWAP_Pos));
+#endif
+
+#if (USART_BAUDRATEMODE_MASK != 0)
+    /* set the baudrate detection strategy for the UART */
+    SET_BIT(pxUSART->Inst->CR2.w, USART_BAUDRATEMODE_MASK &
+            ((uint32_t)pxConfig->BaudrateMode << USART_CR2_ABREN_Pos));
+#endif
+
+    /* baudrate configuration */
+    USART_prvSetBaudrate(pxUSART, pxConfig->Baudrate);
+
+    /* enable USART with the selected directions */
+    SET_BIT(pxUSART->Inst->CR1.w, USART_CR1_UE |
+            ((USART_CR1_TE | USART_CR1_RE) & pxConfig->Directions));
+
+#ifdef IS_UART_WAKEUP_FROMSTOP_INSTANCE
+    if (IS_UART_WAKEUP_FROMSTOP_INSTANCE(pxUSART->Inst))
     {
-        /* configure UART specific settings */
-        USART_REG_BIT(husart, CR1, OVER8) = Config->OverSampling8;
-        USART_REG_BIT(husart, CR3, HDSEL) = Config->HalfDuplex;
-
-        /* configure DE signal */
-        USART_REG_BIT(husart, CR3, DEM)   = ENABLE;
-        USART_REG_BIT(husart, CR3, DEP)   = Config->DE.Polarity;
-        husart->Inst->CR1.b.DEAT          = Config->DE.AssertionTime;
-        husart->Inst->CR1.b.DEDT          = Config->DE.DeassertionTime;
-
-        result = usart_init2(husart, Common);
+        USART_prvWaitIdle(pxUSART);
     }
-
-    return result;
+#endif
 }
 
 /** @} */
@@ -1229,5 +1461,3 @@ XPD_ReturnType XPD_RS485_Init(USART_HandleType * husart,
 #endif
 
 /** @} */
-
-#endif /* USE_XPD_USART */

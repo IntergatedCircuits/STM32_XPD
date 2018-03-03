@@ -2,30 +2,33 @@
   ******************************************************************************
   * @file    xpd_dma.h
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2016-01-19
+  * @version 0.2
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers DMA Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
 #ifndef __XPD_DMA_H_
 #define __XPD_DMA_H_
 
-#include "xpd_common.h"
-#include "xpd_config.h"
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+#include <xpd_common.h>
 
 /** @defgroup DMA
  * @{ */
@@ -87,10 +90,10 @@ typedef enum
 /** @brief DMA channel setup structure */
 typedef struct
 {
-    uint8_t           Channel;          /*!< Channel selection for the DMA stream [0 .. 7] */
-    DMA_DirectionType Direction;        /*!< DMA stream direction */
-    DMA_ModeType      Mode;             /*!< DMA operating mode */
-    LevelType         Priority;         /*!< DMA bus arbitration priority level */
+    uint8_t           Channel;           /*!< Channel selection for the DMA stream [0 .. 7] */
+    DMA_DirectionType Direction;         /*!< DMA stream direction */
+    DMA_ModeType      Mode;              /*!< DMA operating mode */
+    LevelType         Priority;          /*!< DMA bus arbitration priority level */
     struct {
         FunctionalState   Increment;     /*!< The address is incremented after each transfer */
         DMA_AlignmentType DataAlignment; /*!< The data width */
@@ -110,22 +113,22 @@ typedef struct
 /** @brief DMA stream handle structure */
 typedef struct
 {
-    DMA_Stream_TypeDef * Inst;               /*!< The address of the peripheral instance used by the handle */
+    DMA_Stream_TypeDef * Inst;                /*!< The address of the peripheral instance used by the handle */
 #ifdef DMA_Stream_BB
-    DMA_Stream_BitBand_TypeDef * Inst_BB;    /*!< The address of the peripheral instance in the bit-band region */
+    DMA_Stream_BitBand_TypeDef * Inst_BB;     /*!< The address of the peripheral instance in the bit-band region */
 #endif
-    DMA_TypeDef * Base;                      /*!< [Internal] The address of the master DMA used by the handle */
-    uint8_t StreamOffset;                    /*!< [Internal] The offset of the stream in the master DMA */
+    DMA_TypeDef * Base;                       /*!< [Internal] The address of the master DMA used by the handle */
+    uint8_t StreamOffset;                     /*!< [Internal] The offset of the stream in the master DMA */
     struct {
-        XPD_HandleCallbackType Complete;     /*!< DMA transfer complete callback */
-        XPD_HandleCallbackType HalfComplete; /*!< DMA transfer half complete callback */
-#ifdef USE_XPD_DMA_ERROR_DETECT
-        XPD_HandleCallbackType Error;        /*!< DMA transfer error callback */
+        XPD_HandleCallbackType Complete;      /*!< DMA transfer complete callback */
+        XPD_HandleCallbackType HalfComplete;  /*!< DMA transfer half complete callback */
+#ifdef __XPD_DMA_ERROR_DETECT
+        XPD_HandleCallbackType Error;         /*!< DMA transfer error callback */
 #endif
-    } Callbacks;                             /*   Handle Callbacks */
-    void * Owner;                            /*!< [Internal] The pointer of the peripheral handle which uses this handle */
-#ifdef USE_XPD_DMA_ERROR_DETECT
-    volatile DMA_ErrorType Errors;           /*!< Transfer errors */
+    } Callbacks;                              /*   Handle Callbacks */
+    void * Owner;                             /*!< [Internal] The pointer of the peripheral handle which uses this handle */
+#ifdef __XPD_DMA_ERROR_DETECT
+    volatile DMA_ErrorType Errors;            /*!< Transfer errors */
 #endif
 }DMA_HandleType;
 
@@ -136,34 +139,37 @@ typedef struct
 
 #ifdef DMA_Stream_BB
 /**
- * @brief  DMA Handle initializer macro
- * @param  INSTANCE: specifies the DMA stream instance.
+ * @brief DMA Instance to handle binder macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param INSTANCE: specifies the DMA peripheral instance.
  */
-#define         NEW_DMA_HANDLE(INSTANCE)                    \
-    {.Inst = (INSTANCE), .Inst_BB = DMA_Stream_BB(INSTANCE)}
+#define         DMA_INST2HANDLE(HANDLE,INSTANCE)            \
+    ((HANDLE)->Inst    = (INSTANCE),                        \
+     (HANDLE)->Inst_BB = DMA_Stream_BB(INSTANCE))
 
 /**
  * @brief DMA register bit accessing macro
  * @param HANDLE: specifies the peripheral handle.
- * @param REG: specifies the register name.
- * @param BIT: specifies the register bit name.
+ * @param REG_NAME: specifies the register name.
+ * @param BIT_NAME: specifies the register bit name.
  */
 #define         DMA_REG_BIT(HANDLE, REG_NAME, BIT_NAME)     \
     ((HANDLE)->Inst_BB->REG_NAME.BIT_NAME)
 
 #else
 /**
- * @brief  DMA Handle initializer macro
- * @param  INSTANCE: specifies the DMA stream instance.
+ * @brief DMA Instance to handle binder macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param INSTANCE: specifies the DMA peripheral instance.
  */
-#define         NEW_DMA_HANDLE(INSTANCE)                    \
-    {.Inst = (INSTANCE)}
+#define         DMA_INST2HANDLE(HANDLE,INSTANCE)            \
+    ((HANDLE)->Inst    = (INSTANCE))
 
 /**
  * @brief DMA register bit accessing macro
  * @param HANDLE: specifies the peripheral handle.
- * @param REG: specifies the register name.
- * @param BIT: specifies the register bit name.
+ * @param REG_NAME: specifies the register name.
+ * @param BIT_NAME: specifies the register bit name.
  */
 #define         DMA_REG_BIT(HANDLE, REG_NAME, BIT_NAME)     \
     ((HANDLE)->Inst->REG_NAME.b.BIT_NAME)
@@ -181,7 +187,7 @@ typedef struct
  *            @arg DME:     Direct Mode Error Interrupt
  *            @arg FE:      FIFO Error Interrupt
  */
-#define         XPD_DMA_EnableIT( HANDLE,  IT_NAME)         \
+#define         DMA_IT_ENABLE( HANDLE,  IT_NAME)            \
     __XPD_DMA_ITConfig_##IT_NAME(HANDLE, 1)
 
 /**
@@ -195,7 +201,7 @@ typedef struct
  *            @arg DME:     Direct Mode Error Interrupt
  *            @arg FE:      FIFO Error Interrupt
  */
-#define         XPD_DMA_DisableIT(HANDLE,   IT_NAME)        \
+#define         DMA_IT_DISABLE(HANDLE,   IT_NAME)           \
     __XPD_DMA_ITConfig_##IT_NAME(HANDLE, 0)
 
 /**
@@ -209,7 +215,7 @@ typedef struct
  *            @arg DME:     Direct Mode Error
  *            @arg FE:      FIFO Error
  */
-#define         XPD_DMA_GetFlag(  HANDLE, FLAG_NAME)        \
+#define         DMA_FLAG_STATUS(  HANDLE, FLAG_NAME)        \
     (((HANDLE)->Base->LISR.w >> (DMA_LISR_##FLAG_NAME##IF0_Pos \
             + (uint32_t)((HANDLE)->StreamOffset))) & 1)
 
@@ -224,16 +230,9 @@ typedef struct
  *            @arg DME:     Direct Mode Error
  *            @arg FE:      FIFO Error
  */
-#define         XPD_DMA_ClearFlag(HANDLE, FLAG_NAME)        \
+#define         DMA_FLAG_CLEAR(HANDLE, FLAG_NAME)           \
     ((HANDLE)->Base->LIFCR.w = (DMA_LIFCR_C##FLAG_NAME##IF0 \
             << (uint32_t)((HANDLE)->StreamOffset)))
-
-/**
- * @brief  Provides the circular mode of DMA stream.
- * @param  HANDLE: specifies the DMA Handle.
- */
-#define         XPD_DMA_CircularMode(HANDLE)                \
-        (DMA_REG_BIT((HANDLE), CR, CIRC))
 
 #define         __XPD_DMA_ITConfig_TC(HANDLE,VALUE)         \
     (DMA_REG_BIT((HANDLE),CR,TCIE) = (VALUE))
@@ -250,41 +249,56 @@ typedef struct
 
 /** @addtogroup DMA_Exported_Functions
  * @{ */
-XPD_ReturnType  XPD_DMA_Init            (DMA_HandleType * hdma, const DMA_InitType * Config);
-XPD_ReturnType  XPD_DMA_Deinit          (DMA_HandleType * hdma);
+void            DMA_vInit           (DMA_HandleType * pxDMA, const DMA_InitType * pxConfig);
+void            DMA_vDeinit         (DMA_HandleType * pxDMA);
 
-void            XPD_DMA_Enable          (DMA_HandleType * hdma);
-void            XPD_DMA_Disable         (DMA_HandleType * hdma);
+XPD_ReturnType  DMA_eStart          (DMA_HandleType * pxDMA, void * pvPeriphAddress,
+                                     void * pvMemAddress, uint16_t usDataCount);
+XPD_ReturnType  DMA_eStart_IT       (DMA_HandleType * pxDMA, void * pvPeriphAddress,
+                                     void * pvMemAddress, uint16_t usDataCount);
+void            DMA_vStop           (DMA_HandleType * pxDMA);
+void            DMA_vStop_IT        (DMA_HandleType * pxDMA);
 
-XPD_ReturnType  XPD_DMA_Start           (DMA_HandleType * hdma, void * PeriphAddress,
-                                         void * MemAddress, uint16_t DataCount);
-XPD_ReturnType  XPD_DMA_Start_IT        (DMA_HandleType * hdma, void * PeriphAddress,
-                                         void * MemAddress, uint16_t DataCount);
-XPD_ReturnType  XPD_DMA_Stop            (DMA_HandleType * hdma);
-void            XPD_DMA_Stop_IT         (DMA_HandleType * hdma);
+uint16_t        DMA_usGetStatus     (DMA_HandleType * pxDMA);
+XPD_ReturnType  DMA_ePollStatus     (DMA_HandleType * pxDMA, DMA_OperationType eOperation,
+                                     uint32_t ulTimeout);
 
-uint16_t        XPD_DMA_GetStatus       (DMA_HandleType * hdma);
-XPD_ReturnType  XPD_DMA_PollStatus      (DMA_HandleType * hdma, DMA_OperationType Operation, uint32_t Timeout);
+void            DMA_vIRQHandler     (DMA_HandleType * pxDMA);
 
-void            XPD_DMA_IRQHandler      (DMA_HandleType * hdma);
+uint32_t        DMA_ulActiveMemory  (DMA_HandleType * pxDMA);
+void            DMA_vSetSwapMemory  (DMA_HandleType * pxDMA, void * pvAddress);
 
-uint32_t        XPD_DMA_GetActiveMemory (DMA_HandleType * hdma);
-void            XPD_DMA_SetSwapMemory   (DMA_HandleType * hdma, void * Address);
+/**
+ * @brief  Provides the circular mode of DMA stream.
+ * @param  HANDLE: specifies the DMA Handle.
+ */
+__STATIC_INLINE boolean_t DMA_eCircularMode(DMA_HandleType * pxDMA)
+{
+    return DMA_REG_BIT(pxDMA, CR, CIRC);
+}
 
-#ifdef USE_XPD_DMA_ERROR_DETECT
+#ifdef __XPD_DMA_ERROR_DETECT
 /**
  * @brief Gets the error state of the DMA stream.
- * @param hdma: pointer to the DMA stream handle structure
+ * @param pxDMA: pointer to the DMA stream handle structure
  * @return Current DMA error state
  */
-__STATIC_INLINE DMA_ErrorType XPD_DMA_GetError(DMA_HandleType * hdma)
+__STATIC_INLINE DMA_ErrorType DMA_eGetError(DMA_HandleType * pxDMA)
 {
-    return hdma->Errors;
+    return pxDMA->Errors;
 }
 #endif
 
 /** @} */
 
 /** @} */
+
+#define XPD_DMA_API
+#include <xpd_syscfg.h>
+#undef XPD_DMA_API
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __XPD_DMA_H_ */

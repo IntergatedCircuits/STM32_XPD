@@ -2,31 +2,36 @@
   ******************************************************************************
   * @file    xpd_can.h
   * @author  Benedek Kupper
-  * @version V0.2
-  * @date    2017-08-02
+  * @version 0.3
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers CAN Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
 #ifndef __XPD_CAN_H_
 #define __XPD_CAN_H_
 
-#include "xpd_common.h"
-#include "xpd_config.h"
-#include "xpd_rcc.h"
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+#include <xpd_common.h>
+#include <xpd_rcc.h>
+
+#if defined(CAN) || defined(CAN1)
 
 /** @defgroup CAN
  * @{ */
@@ -43,15 +48,19 @@ typedef enum
     CAN_MODE_SILENTLOOPBACK = 3, /*!< CAN Tx and Rx are exclusively connected  */
 }CAN_ModeType;
 
+/** @brief CAN bit timing configuration */
+typedef struct
+{
+    uint16_t Prescaler; /*!< CAN bus sampler clock prescaler from PCLKx. Permitted values: @arg 1 .. 1024 */
+    uint8_t  BS1;       /*!< Bit segment 1 of bit timing. Permitted values: @arg 1 .. 16 */
+    uint8_t  BS2;       /*!< Bit segment 2 of bit timing. Permitted values: @arg 1 .. 8 */
+    uint8_t  SJW;       /*!< Synchronization jump width. Permitted values: @arg 1 .. 4 */
+}CAN_TimingConfigType;
+
 /** @brief CAN setup structure */
 typedef struct
 {
-    struct {
-        uint16_t Prescaler; /*!< CAN bus sampler clock prescaler from PCLKx. Permitted values: @arg 1 .. 1024 */
-        uint8_t  BS1;       /*!< Bit segment 1 of bit timing. Permitted values: @arg 1 .. 16 */
-        uint8_t  BS2;       /*!< Bit segment 2 of bit timing. Permitted values: @arg 1 .. 8 */
-        uint8_t  SJW;       /*!< Synchronization jump width. Permitted values: @arg 1 .. 4 */
-    }Timing;                /*   Bit timing configuration */
+    CAN_TimingConfigType Timing;
     union {
         struct {
             CAN_ModeType    Mode : 2; /*!< CAN test mode selection */
@@ -157,44 +166,39 @@ typedef struct
 
 #ifdef CAN_BB
 /**
- * @brief  CAN Handle initializer macro
- * @param  INSTANCE: specifies the CAN peripheral instance.
- * @param  INIT_FN: specifies the dependency initialization function to call back.
- * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
+ * @brief CAN Instance to handle binder macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param INSTANCE: specifies the CAN peripheral instance.
  */
-#define         NEW_CAN_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)      \
-    {.Inst = (INSTANCE), .Inst_BB = CAN_BB(INSTANCE),           \
-     .CtrlPos = RCC_POS_##INSTANCE,                             \
-     .Callbacks.DepInit   = (INIT_FN),                          \
-     .Callbacks.DepDeinit = (DEINIT_FN)}
+#define         CAN_INST2HANDLE(HANDLE,INSTANCE)                \
+    ((HANDLE)->Inst    = (INSTANCE),                            \
+     (HANDLE)->Inst_BB = CAN_BB(INSTANCE),                      \
+     (HANDLE)->CtrlPos = RCC_POS_##INSTANCE)
 
 /**
  * @brief CAN register bit accessing macro
  * @param HANDLE: specifies the peripheral handle.
- * @param REG: specifies the register name.
- * @param BIT: specifies the register bit name.
+ * @param REG_NAME: specifies the register name.
+ * @param BIT_NAME: specifies the register bit name.
  */
 #define         CAN_REG_BIT(HANDLE, REG_NAME, BIT_NAME)         \
     ((HANDLE)->Inst_BB->REG_NAME.BIT_NAME)
 
 #else
 /**
- * @brief  CAN Handle initializer macro
- * @param  INSTANCE: specifies the CAN peripheral instance.
- * @param  INIT_FN: specifies the dependency initialization function to call back.
- * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
+ * @brief CAN Instance to handle binder macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param INSTANCE: specifies the CAN peripheral instance.
  */
-#define         NEW_CAN_HANDLE(INSTANCE,INIT_FN,DEINIT_FN)      \
-    {.Inst = (INSTANCE),                                        \
-     .CtrlPos = RCC_POS_##INSTANCE,                             \
-     .Callbacks.DepInit   = (INIT_FN),                          \
-     .Callbacks.DepDeinit = (DEINIT_FN)}
+#define         CAN_INST2HANDLE(HANDLE,INSTANCE)                \
+    ((HANDLE)->Inst    = (INSTANCE),                            \
+     (HANDLE)->CtrlPos = RCC_POS_##INSTANCE)
 
 /**
  * @brief CAN register bit accessing macro
  * @param HANDLE: specifies the peripheral handle.
- * @param REG: specifies the register name.
- * @param BIT: specifies the register bit name.
+ * @param REG_NAME: specifies the register name.
+ * @param BIT_NAME: specifies the register bit name.
  */
 #define         CAN_REG_BIT(HANDLE, REG_NAME, BIT_NAME)         \
     ((HANDLE)->Inst->REG_NAME.b.BIT_NAME)
@@ -221,7 +225,7 @@ typedef struct
  *            @arg WKU:     Wakeup Interrupt
  *            @arg SLK:     Sleep Interrupt
  */
-#define         XPD_CAN_EnableIT(   HANDLE, IT_NAME)            \
+#define         CAN_IT_ENABLE(HANDLE, IT_NAME)                  \
     (CAN_REG_BIT((HANDLE),IER,IT_NAME##IE) = 1)
 
 /**
@@ -244,7 +248,7 @@ typedef struct
  *            @arg WKU:     Wakeup Interrupt
  *            @arg SLK:     Sleep Interrupt
  */
-#define         XPD_CAN_DisableIT(  HANDLE, IT_NAME)            \
+#define         CAN_IT_DISABLE(HANDLE, IT_NAME)                 \
     (CAN_REG_BIT((HANDLE),IER,IT_NAME##IE) = 0)
 
 /**
@@ -258,7 +262,7 @@ typedef struct
  *            @arg FOVR:    FIFO Overrun
  * @return The state of the flag.
  */
-#define         XPD_CAN_GetRxFlag(  HANDLE, FIFO, FLAG_NAME)    \
+#define         CAN_RXFLAG_STATUS(HANDLE, FIFO, FLAG_NAME)      \
     (CAN_REG_BIT((HANDLE),RFR[FIFO],FLAG_NAME))
 
 /**
@@ -271,7 +275,7 @@ typedef struct
  *            @arg FULL:    FIFO Full
  *            @arg FOVR:    FIFO Overrun
  */
-#define         XPD_CAN_ClearRxFlag(HANDLE, FIFO, FLAG_NAME)    \
+#define         CAN_RXFLAG_CLEAR(HANDLE, FIFO, FLAG_NAME)       \
     ((HANDLE)->Inst->RFR[FIFO].w = CAN_RF0R_##FLAG_NAME##0)
 
 /**
@@ -287,7 +291,7 @@ typedef struct
  *            @arg ABRQ:    Abort Request
  * @return The state of the flag.
  */
-#define         XPD_CAN_GetTxFlag(  HANDLE, MB, FLAG_NAME)      \
+#define         CAN_TXFLAG_STATUS(HANDLE, MB, FLAG_NAME)        \
     (((HANDLE)->Inst->TSR.w & (CAN_TSR_##FLAG_NAME##0 << (8 * (MB)))) != 0 ? 1 : 0)
 
 /**
@@ -302,7 +306,7 @@ typedef struct
  *            @arg TERR:    Transmission Error
  *            @arg ABRQ:    Abort Request
  */
-#define         XPD_CAN_ClearTxFlag(HANDLE, MB, FLAG_NAME)      \
+#define         CAN_TXFLAG_CLEAR(HANDLE, MB, FLAG_NAME)         \
     ((HANDLE)->Inst->TSR.w = CAN_TSR_##FLAG_NAME##0 << (8 * (MB)))
 
 /**
@@ -315,7 +319,7 @@ typedef struct
  *            @arg BOF:     Bus Off
  * @return The state of the flag.
  */
-#define         XPD_CAN_GetErrorFlag(   HANDLE, FLAG_NAME)      \
+#define         CAN_ERRFLAG_STATUS(HANDLE, FLAG_NAME)           \
     (CAN_REG_BIT((HANDLE),ESR,FLAG_NAME##F))
 
 /**
@@ -327,7 +331,7 @@ typedef struct
  *            @arg EPV:     Error Passive
  *            @arg BOF:     Bus Off
  */
-#define         XPD_CAN_ClearErrorFlag( HANDLE, FLAG_NAME)      \
+#define         CAN_ERRFLAG_CLEAR(HANDLE, FLAG_NAME)            \
     ((HANDLE)->Inst->ESR.w = CAN_ESR_##FLAG_NAME##F)
 
 /**
@@ -342,7 +346,7 @@ typedef struct
  *            @arg INAK:    Initialization Acknowledge
  * @return The state of the flag.
  */
-#define         XPD_CAN_GetFlag(    HANDLE, FLAG_NAME)          \
+#define         CAN_FLAG_STATUS(HANDLE, FLAG_NAME)              \
     (CAN_REG_BIT((HANDLE),MSR,FLAG_NAME))
 
 /**
@@ -356,7 +360,7 @@ typedef struct
  *            @arg SLAK:    Sleep Acknowledge
  *            @arg INAK:    Initialization Acknowledge
  */
-#define         XPD_CAN_ClearFlag(  HANDLE, FLAG_NAME)          \
+#define         CAN_FLAG_CLEAR(HANDLE, FLAG_NAME)               \
     ((HANDLE)->Inst->MSR.w = CAN_MSR_##FLAG_NAME)
 
 /** @} */
@@ -364,47 +368,58 @@ typedef struct
 /** @addtogroup CAN_Exported_Functions
  * @{ */
 
-/** @addtogroup CAN_Exported_Functions_IRQ
- * @{ */
-void            XPD_CAN_TX_IRQHandler       (CAN_HandleType * hcan);
-void            XPD_CAN_RX0_IRQHandler      (CAN_HandleType * hcan);
-void            XPD_CAN_RX1_IRQHandler      (CAN_HandleType * hcan);
-void            XPD_CAN_SCE_IRQHandler      (CAN_HandleType * hcan);
-/** @} */
+XPD_ReturnType  CAN_eBitrateConfig      (uint32_t ulBitrate, CAN_TimingConfigType * pxTimingConfig);
 
 /** @addtogroup CAN_Exported_Functions_State
  * @{ */
-XPD_ReturnType  XPD_CAN_Init                (CAN_HandleType * hcan, const CAN_InitType * Config);
-XPD_ReturnType  XPD_CAN_Deinit              (CAN_HandleType * hcan);
+XPD_ReturnType  CAN_eInit               (CAN_HandleType * pxCAN, const CAN_InitType * pxConfig);
+void            CAN_vDeinit             (CAN_HandleType * pxCAN);
 
-XPD_ReturnType  XPD_CAN_Sleep               (CAN_HandleType * hcan);
-XPD_ReturnType  XPD_CAN_WakeUp              (CAN_HandleType * hcan);
+XPD_ReturnType  CAN_eSleep              (CAN_HandleType * pxCAN);
+XPD_ReturnType  CAN_eWakeUp             (CAN_HandleType * pxCAN);
 
-CAN_ErrorType   XPD_CAN_GetError            (CAN_HandleType * hcan);
+CAN_ErrorType   CAN_eGetError           (CAN_HandleType * pxCAN);
+
+void            CAN_vIRQHandlerSCE      (CAN_HandleType * pxCAN);
 /** @} */
 
 /** @addtogroup CAN_Exported_Functions_Filter
  * @{ */
-XPD_ReturnType  XPD_CAN_FilterBankConfig    (CAN_HandleType * hcan, uint8_t NewSize);
-XPD_ReturnType  XPD_CAN_FilterConfig        (CAN_HandleType * hcan, const CAN_FilterType * Filters,
-                                             uint8_t * MatchIndexes, uint8_t FilterCount);
+XPD_ReturnType  CAN_eFilterBankConfig   (CAN_HandleType * pxCAN, uint8_t ucNewSize);
+XPD_ReturnType  CAN_eFilterConfig       (CAN_HandleType * pxCAN, const CAN_FilterType axFilters[],
+                                         uint8_t aucMatchIndexes[], uint8_t ucFilterCount);
 /** @} */
 
 /** @addtogroup CAN_Exported_Functions_Transmit
  * @{ */
-XPD_ReturnType  XPD_CAN_Post                (CAN_HandleType * hcan, CAN_FrameType * Frame, uint32_t Timeout);
-XPD_ReturnType  XPD_CAN_Transmit            (CAN_HandleType * hcan, CAN_FrameType * Frame, uint32_t Timeout);
-XPD_ReturnType  XPD_CAN_Transmit_IT         (CAN_HandleType * hcan, CAN_FrameType * Frame);
+XPD_ReturnType  CAN_ePost               (CAN_HandleType * pxCAN, CAN_FrameType * pxFrame,
+                                         uint32_t ulTimeout);
+XPD_ReturnType  CAN_eSend               (CAN_HandleType * pxCAN, CAN_FrameType * pxFrame,
+                                         uint32_t ulTimeout);
+XPD_ReturnType  CAN_eSend_IT            (CAN_HandleType * pxCAN, CAN_FrameType * pxFrame);
+
+void            CAN_vIRQHandlerTX       (CAN_HandleType * pxCAN);
 /** @} */
 
 /** @addtogroup CAN_Exported_Functions_Receive
  * @{ */
-XPD_ReturnType  XPD_CAN_Receive             (CAN_HandleType * hcan, CAN_FrameType * Frame, uint8_t FIFONumber, uint32_t Timeout);
-XPD_ReturnType  XPD_CAN_Receive_IT          (CAN_HandleType * hcan, CAN_FrameType * Frame, uint8_t FIFONumber);
+XPD_ReturnType  CAN_eReceive            (CAN_HandleType * pxCAN, CAN_FrameType * pxFrame,
+                                         uint8_t ucFIFONumber, uint32_t ulTimeout);
+XPD_ReturnType  CAN_eReceive_IT         (CAN_HandleType * pxCAN, CAN_FrameType * pxFrame,
+                                         uint8_t ucFIFONumber);
+
+void            CAN_vIRQHandlerRX0      (CAN_HandleType * pxCAN);
+void            CAN_vIRQHandlerRX1      (CAN_HandleType * pxCAN);
 /** @} */
 
 /** @} */
 
 /** @} */
+
+#endif /* defined(CAN) || defined(CAN1) */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __XPD_CAN_H_ */

@@ -2,30 +2,33 @@
   ******************************************************************************
   * @file    xpd_utils.h
   * @author  Benedek Kupper
-  * @version V0.2
-  * @date    2017-04-26
-  * @brief   STM32 eXtensible Peripheral Drivers Utilities Module
+  * @version 0.3
+  * @date    2018-01-28
+  * @brief   STM32 eXtensible Peripheral Drivers Utilities
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
 #ifndef __XPD_UTILS_H_
 #define __XPD_UTILS_H_
 
-#include "xpd_common.h"
-#include "xpd_config.h"
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+#include <xpd_common.h>
 
 /** @defgroup XPD_Utils XPD Utilities
  * @{ */
@@ -35,7 +38,7 @@
 
 #ifndef XPD_ENTER_CRITICAL
 /**
- * @brief Enters a critical section by disabling interrupts. [overrideable]
+ * @brief Enters a critical section by disabling interrupts.
  * @param HANDLE: pointer to the requester handle
  */
 #define XPD_ENTER_CRITICAL(HANDLE)
@@ -43,7 +46,7 @@
 
 #ifndef XPD_EXIT_CRITICAL
 /**
- * @brief Leaves a critical section by enabling interrupts. [overrideable]
+ * @brief Leaves a critical section by enabling interrupts.
  * @param HANDLE: pointer to the requester handle
  */
 #define XPD_EXIT_CRITICAL(HANDLE)
@@ -56,30 +59,34 @@
 
 /** @addtogroup XPD_Exported_Functions_Timer
  * @{ */
-void            XPD_InitTimer           (void);
-void            XPD_Delay_ms            (uint32_t milliseconds);
-void            XPD_Delay_us            (uint32_t microseconds);
-XPD_ReturnType  XPD_WaitForMatch        (volatile uint32_t * varAddress, uint32_t bitSelector,
-                                         uint32_t            match,      uint32_t * mstimeout);
-XPD_ReturnType  XPD_WaitForDiff         (volatile uint32_t * varAddress, uint32_t bitSelector,
-                                         uint32_t            match,      uint32_t * mstimeout);
+void            XPD_vInitTimer          (void);
+void            XPD_vDelay_ms           (uint32_t ulMilliseconds);
+void            XPD_vDelay_us           (uint32_t ulMicroseconds);
+XPD_ReturnType  XPD_eWaitForMatch       (volatile uint32_t * pulVarAddress, uint32_t ulBitSelector,
+                                         uint32_t            ulMatch,       uint32_t * pulTimeout);
+XPD_ReturnType  XPD_eWaitForDiff        (volatile uint32_t * pulVarAddress, uint32_t ulBitSelector,
+                                         uint32_t            ulMatch,       uint32_t * pulTimeout);
 /** @} */
 
 /** @addtogroup XPD_Exported_Functions_Stream
  * @{ */
-void            XPD_ReadToStream        (volatile uint32_t * reg, DataStreamType * stream);
-void            XPD_WriteFromStream     (volatile uint32_t * reg, DataStreamType * stream);
+void            XPD_vReadToStream       (const uint32_t * pulReg, DataStreamType * pxStream);
+void            XPD_vWriteFromStream    (uint32_t * pulReg, DataStreamType * pxStream);
 /** @} */
 
 /** @addtogroup XPD_Exported_Functions_Init
  * @{ */
-void            XPD_Init                (void);
-void            XPD_Deinit              (void);
-void            XPD_BootTo              (void * StartAddress);
+void            XPD_vInit               (void);
+void            XPD_vDeinit             (void);
+void            XPD_vBootTo             (void * pvStartAddress);
 /** @} */
 
 /** @} */
 
 /** @} */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __XPD_UTILS_H_ */

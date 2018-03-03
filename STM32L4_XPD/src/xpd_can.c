@@ -2,29 +2,28 @@
   ******************************************************************************
   * @file    xpd_can.c
   * @author  Benedek Kupper
-  * @version V0.2
-  * @date    2017-08-02
+  * @version 0.3
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers CAN Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
-#include "xpd_can.h"
-#include "xpd_utils.h"
+#include <xpd_can.h>
+#include <xpd_utils.h>
 
-#ifdef USE_XPD_CAN
+#if defined(CAN) || defined(CAN1)
 
 /** @addtogroup CAN
  * @{ */
@@ -39,7 +38,7 @@
 /* Timeout for SLAK bit [ms] */
 #define SLAK_TIMEOUT      (10)
 
-#ifdef USE_XPD_CAN_ERROR_DETECT
+#ifdef __XPD_CAN_ERROR_DETECT
 #define CAN_ERROR_INTERRUPTS    (CAN_IER_BOFIE | CAN_IER_EPVIE | CAN_IER_EWGIE | CAN_IER_LECIE)
 #else
 #define CAN_ERROR_INTERRUPTS     0
@@ -76,7 +75,7 @@
     ((CAN1->FA1R & (~((1 << CAN1->FMR.b.CAN2SB) - 1))) != 0)
 
 #else
-#define CAN_MASTER(HANDLE)              ((HANDLE)->Inst)
+#define CAN_MASTER(HANDLE)              (CAN)
 #define FILTERBANK_NUMBER(HANDLE)       14
 #define FILTERBANK_OFFSET(HANDLE)       0
 #define FILTERBANK_COUNT(HANDLE)        (FILTERBANK_NUMBER(HANDLE))
@@ -91,6 +90,9 @@
     (CANx->REG_NAME.b.BIT_NAME)
 #endif
 
+#define CAN_INPUT_CLOCK_RATE    \
+    (RCC_ulClockFreq_Hz(PCLK1))
+
 /* Filter types */
 #define FILTER_SIZE_FLAG_Pos    2
 #define FILTER_SIZE_FLAG        4
@@ -98,135 +100,171 @@
 #define FILTER_MODE_FLAG        2
 #define FMI_INVALID             0xFF
 
-static const uint8_t filterTypeSpace[] = {2, 4, 1, 2};
+static const uint8_t can_aucFilterTypeSpace[] = {2, 4, 1, 2};
 
 /** @defgroup CAN_Private_Functions CAN Private Functions
  * @{ */
 
 /**
  * @brief Gets an empty transmit mailbox.
- * @param hcan: pointer to the CAN handle structure
- * @param mailbox: Set to the lowest number empty mailbox
+ * @param pxCAN: pointer to the CAN handle structure
+ * @param pucMb: Set to the lowest number empty mailbox
  * @return BUSY if all mailboxes are full, OK if empty mailbox found
  */
-__STATIC_INLINE XPD_ReturnType can_getEmptyMailbox(CAN_HandleType * hcan, uint8_t * mailbox)
+__STATIC_INLINE XPD_ReturnType CAN_prvGetEmptyMailbox(CAN_HandleType * pxCAN, uint8_t * pucMb)
 {
-    XPD_ReturnType result = XPD_BUSY;
-    uint32_t reg = hcan->Inst->TSR.w;
+    XPD_ReturnType eResult = XPD_BUSY;
+    uint32_t ulTSR = pxCAN->Inst->TSR.w;
 
     /* Check if at least one mailbox is empty */
-    if ((reg & CAN_TSR_TME) != 0)
+    if ((ulTSR & CAN_TSR_TME) != 0)
     {
-        *mailbox = (reg & CAN_TSR_CODE) >> CAN_TSR_CODE_Pos;
-        result = XPD_OK;
+        *pucMb = (ulTSR & CAN_TSR_CODE) >> CAN_TSR_CODE_Pos;
+        eResult = XPD_OK;
     }
-    return result;
+    return eResult;
 }
 
 /**
  * @brief Puts the frame data in an empty transmit mailbox, and requests transmission.
- * @param hcan: pointer to the CAN handle structure
- * @param Frame: pointer to the frame to transmit
+ * @param pxCAN: pointer to the CAN handle structure
+ * @param pxFrame: pointer to the frame to transmit
  * @return BUSY if all mailboxes are in use, OK if transmission scheduling was successful
  */
-static XPD_ReturnType can_frameTransmit(CAN_HandleType * hcan, CAN_FrameType * Frame)
+static XPD_ReturnType CAN_prvFrameTransmit(CAN_HandleType * pxCAN, CAN_FrameType * pxFrame)
 {
-    uint8_t transmitmailbox;
-    XPD_ReturnType result;
+    /* save the mailbox number to the Index field */
+    XPD_ReturnType eResult = CAN_prvGetEmptyMailbox(pxCAN, &pxFrame->Index);
 
-    result = can_getEmptyMailbox(hcan, &transmitmailbox);
-
-    if (result == XPD_OK)
+    if (eResult == XPD_OK)
     {
-        uint32_t temp = 3;
+        uint8_t ucOffset = 3;
 
         /* set up the Id */
-        if ((Frame->Id.Type & CAN_IDTYPE_EXT_DATA) == CAN_IDTYPE_STD_DATA)
+        if ((pxFrame->Id.Type & CAN_IDTYPE_EXT_DATA) == CAN_IDTYPE_STD_DATA)
         {
-            temp = 21;
+            ucOffset = 21;
         }
-        hcan->Inst->sTxMailBox[transmitmailbox].TIR.w = ((Frame->Id.Value << temp) | (uint32_t)Frame->Id.Type);
+        pxCAN->Inst->sTxMailBox[pxFrame->Index].TIR.w = ((pxFrame->Id.Value << ucOffset) | (uint32_t)pxFrame->Id.Type);
 
         /* set up the DLC */
-        hcan->Inst->sTxMailBox[transmitmailbox].TDTR.b.DLC = (uint32_t) Frame->DLC;
+        pxCAN->Inst->sTxMailBox[pxFrame->Index].TDTR.b.DLC = (uint32_t) pxFrame->DLC;
 
         /* set up the data field */
-        hcan->Inst->sTxMailBox[transmitmailbox].TDLR.w = Frame->Data.Word[0];
-        hcan->Inst->sTxMailBox[transmitmailbox].TDHR.w = Frame->Data.Word[1];
+        pxCAN->Inst->sTxMailBox[pxFrame->Index].TDLR.w = pxFrame->Data.Word[0];
+        pxCAN->Inst->sTxMailBox[pxFrame->Index].TDHR.w = pxFrame->Data.Word[1];
 
         /* request transmission */
-        CAN_REG_BIT(hcan,sTxMailBox[transmitmailbox].TIR,TXRQ) = 1;
-
-        /* save the mailbox number to the Index field */
-        Frame->Index = transmitmailbox;
+        CAN_REG_BIT(pxCAN,sTxMailBox[pxFrame->Index].TIR,TXRQ) = 1;
     }
 
-    return result;
+    return eResult;
 }
 
 /**
  * @brief Gets the data from the receive FIFO to the receive frame pointer of the handle
  *        and flushes the frame from the FIFO.
- * @param hcan: pointer to the CAN handle structure
- * @param FIFONumber: the selected receive FIFO [0 .. 1]
+ * @param pxCAN: pointer to the CAN handle structure
+ * @param ucFIFONumber: the selected receive FIFO [0 .. 1]
  */
-static void can_frameReceive(CAN_HandleType * hcan, uint8_t FIFONumber)
+static void CAN_prvFrameReceive(CAN_HandleType * pxCAN, uint8_t ucFIFONumber)
 {
-    if (hcan->RxFrame[FIFONumber] != NULL)
+    uint32_t ulRIR  = pxCAN->Inst->sFIFOMailBox[ucFIFONumber].RIR.w;
+    uint32_t ulRDTR = pxCAN->Inst->sFIFOMailBox[ucFIFONumber].RDTR.w;
+
+    /* Get the Id */
+    pxCAN->RxFrame[ucFIFONumber]->Id.Type = ulRIR & CAN_IDTYPE_EXT_RTR;
+
+    if ((pxCAN->RxFrame[ucFIFONumber]->Id.Type & CAN_IDTYPE_EXT_DATA) == CAN_IDTYPE_STD_DATA)
     {
-        /* copy the FIFO data to stack */
-        CAN_FIFOMailBox_TypeDef rxFIFO = hcan->Inst->sFIFOMailBox[FIFONumber];
-
-        /* Get the Id */
-        hcan->RxFrame[FIFONumber]->Id.Type = rxFIFO.RIR.w & CAN_IDTYPE_EXT_RTR;
-
-        if ((hcan->RxFrame[FIFONumber]->Id.Type & CAN_IDTYPE_EXT_DATA) == CAN_IDTYPE_STD_DATA)
-        {
-            hcan->RxFrame[FIFONumber]->Id.Value = rxFIFO.RIR.w >> 21;
-        }
-        else
-        {
-            hcan->RxFrame[FIFONumber]->Id.Value = rxFIFO.RIR.w >> 3;
-        }
-
-        /* Get the DLC */
-        hcan->RxFrame[FIFONumber]->DLC = rxFIFO.RDTR.b.DLC;
-        /* Get the FMI */
-        hcan->RxFrame[FIFONumber]->Index = rxFIFO.RDTR.b.FMI;
-        /* Get the data field */
-        hcan->RxFrame[FIFONumber]->Data.Word[0] = rxFIFO.RDLR.w;
-        hcan->RxFrame[FIFONumber]->Data.Word[1] = rxFIFO.RDHR.w;
-
-        /* Release the FIFO */
-        XPD_CAN_ClearRxFlag(hcan, FIFONumber, RFOM);
+        pxCAN->RxFrame[ucFIFONumber]->Id.Value = ulRIR >> 21;
     }
+    else
+    {
+        pxCAN->RxFrame[ucFIFONumber]->Id.Value = ulRIR >> 3;
+    }
+
+    /* Get the DLC */
+    pxCAN->RxFrame[ucFIFONumber]->DLC = ulRDTR & 0xF;
+    /* Get the FMI */
+    pxCAN->RxFrame[ucFIFONumber]->Index = ulRDTR >> 4;
+
+    /* Get the data field */
+    pxCAN->RxFrame[ucFIFONumber]->Data.Word[0] =
+            pxCAN->Inst->sFIFOMailBox[ucFIFONumber].RDLR.w;
+    pxCAN->RxFrame[ucFIFONumber]->Data.Word[1] =
+            pxCAN->Inst->sFIFOMailBox[ucFIFONumber].RDHR.w;
+
+    /* Release the FIFO */
+    CAN_RXFLAG_CLEAR(pxCAN, ucFIFONumber, RFOM);
 }
 
 /**
  * @brief Resets the receive filter bank configurations for the CAN peripheral.
- * @param hcan: pointer to the CAN handle structure
+ * @param pxCAN: pointer to the CAN handle structure
  */
-__STATIC_INLINE void can_filterReset(CAN_HandleType * hcan)
+__STATIC_INLINE void CAN_prvFilterReset(CAN_HandleType * pxCAN)
 {
-    uint32_t fbOffset = FILTERBANK_OFFSET(hcan);
-    uint32_t mask     = (1 << FILTERBANK_COUNT(hcan)) - 1;
+    uint32_t ucFBOffset = FILTERBANK_OFFSET(pxCAN);
+    uint32_t ulMask     = (1 << FILTERBANK_COUNT(pxCAN)) - 1;
 
 #ifdef CAN2
 #ifdef CAN3
-    if (hcan->Inst != CAN3)
+    if (pxCAN->Inst != CAN3)
 #endif /* CAN3 */
     {
-        XPD_CAN1_ClockCtrl(ENABLE);
+        RCC_vClockEnable(RCC_POS_CAN1);
     }
 #endif /* CAN2 */
 
-    CLEAR_BIT(CAN_MASTER(hcan)->FA1R, mask << fbOffset);
+    CLEAR_BIT(CAN_MASTER(pxCAN)->FA1R, ulMask << ucFBOffset);
 }
 
 /** @} */
 
 /** @defgroup CAN_Exported_Functions CAN Exported Functions
  * @{ */
+
+/**
+ * @brief Attempts to calculate a possible bit timing setup based on the desired bitrate.
+ * @param ulBitrate: The target bitrate to achieve
+ * @param pxConfig: The timing configuration to set
+ * @return OK if successful, ERROR if bitrate is not supported
+ */
+XPD_ReturnType CAN_eBitrateConfig(uint32_t ulBitrate, CAN_TimingConfigType * pxTimingConfig)
+{
+    XPD_ReturnType eResult = XPD_ERROR;
+
+    /* 1bit: 4TQ <= 1TQ sync + 2-16TQ BS1 + 1-8TQ BS2 <= 25TQ */
+    uint32_t ulOvers = CAN_INPUT_CLOCK_RATE / ulBitrate;
+    uint32_t ulTQs = 25;
+    uint32_t ulPres;
+
+    do{
+        ulPres = ulOvers / ulTQs;
+
+        /* Division without remainder? */
+        if (0 == (ulOvers - (ulTQs * ulPres)))
+        {
+            ulTQs--;
+            pxTimingConfig->Prescaler = ulPres;
+
+            /* Sample point is set at 2/3 of the bit */
+            pxTimingConfig->BS1 = (ulTQs * 2) / 3;
+            pxTimingConfig->BS2 = ulTQs - pxTimingConfig->BS1;
+
+            /* Simply set to valid value, not part of the bitrate */
+            pxTimingConfig->SJW = 4;
+
+            eResult = XPD_OK;
+            break;
+        }
+        ulTQs--;
+
+    }while (ulTQs >= 4);
+
+    return eResult;
+}
 
 /** @defgroup CAN_Exported_Functions_State CAN State Management Functions
  *  @brief    CAN initialization, state and error management
@@ -237,129 +275,138 @@ __STATIC_INLINE void can_filterReset(CAN_HandleType * hcan)
 
 /**
  * @brief Initializes the CAN peripheral using the setup configuration.
- * @param hcan: pointer to the CAN handle structure
- * @param Config: pointer to CAN setup configuration
+ * @param pxCAN: pointer to the CAN handle structure
+ * @param pxConfig: pointer to CAN setup configuration
  * @return ERROR if input is incorrect, TIMEOUT if initialization failed, OK if success
  */
-XPD_ReturnType XPD_CAN_Init(CAN_HandleType * hcan, const CAN_InitType * Config)
+XPD_ReturnType CAN_eInit(CAN_HandleType * pxCAN, const CAN_InitType * pxConfig)
 {
-    XPD_ReturnType result = XPD_OK;
-    uint32_t timeout = INAK_TIMEOUT;
+    XPD_ReturnType eResult = XPD_OK;
+    uint32_t ulTimeout = INAK_TIMEOUT;
 
     /* enable peripheral clock */
-    XPD_RCC_ClockEnable(hcan->CtrlPos);
-
-    /* Dependencies initialization */
-    XPD_SAFE_CALLBACK(hcan->Callbacks.DepInit, hcan);
-
-    /* exit from sleep mode */
-    CAN_REG_BIT(hcan, MCR, SLEEP) = 0;
-
-    /* request initialization */
-    CAN_REG_BIT(hcan, MCR, INRQ) = 1;
-
-    result = XPD_WaitForMatch(&hcan->Inst->MSR.w, CAN_MSR_INAK, CAN_MSR_INAK, &timeout);
-    if(result != XPD_OK)
-    {
-        return result;
-    }
-
-    /* set the features (except for mode) */
-    MODIFY_REG(hcan->Inst->MCR.w, 0xFC, Config->wSettings);
-
-    /* set the bit timing register (with test mode) */
-    hcan->Inst->BTR.w = (uint32_t)Config->wSettings << 30;
-    hcan->Inst->BTR.b.SJW = (uint32_t)Config->Timing.SJW - 1;
-    hcan->Inst->BTR.b.TS1 = (uint32_t)Config->Timing.BS1 - 1;
-    hcan->Inst->BTR.b.TS2 = (uint32_t)Config->Timing.BS2 - 1;
-    hcan->Inst->BTR.b.BRP = (uint32_t)Config->Timing.Prescaler - 1;
-
-    /* request leave initialization */
-    CAN_REG_BIT(hcan, MCR, INRQ) = 0;
-
-    result = XPD_WaitForMatch(&hcan->Inst->MSR.w, CAN_MSR_INAK, 0, &timeout);
-    if(result != XPD_OK)
-    {
-        return result;
-    }
+    RCC_vClockEnable(pxCAN->CtrlPos);
 
     /* reset operation state */
-    hcan->State = 0;
+    pxCAN->State = 0;
 
-    /* reset filter banks */
-    can_filterReset(hcan);
+    /* Dependencies initialization */
+    XPD_SAFE_CALLBACK(pxCAN->Callbacks.DepInit, pxCAN);
 
-    return result;
+    /* exit from sleep mode */
+    CAN_REG_BIT(pxCAN, MCR, SLEEP) = 0;
+
+    /* request initialization */
+    CAN_REG_BIT(pxCAN, MCR, INRQ) = 1;
+
+    eResult = XPD_eWaitForMatch(&pxCAN->Inst->MSR.w,
+            CAN_MSR_INAK, CAN_MSR_INAK, &ulTimeout);
+
+    if(eResult == XPD_OK)
+    {
+        /* set the features (except for mode) */
+        MODIFY_REG(pxCAN->Inst->MCR.w, 0xFC, pxConfig->wSettings);
+
+        /* set the bit timing register (with test mode) */
+        pxCAN->Inst->BTR.w = (uint32_t)pxConfig->wSettings << 30;
+        pxCAN->Inst->BTR.b.SJW = (uint32_t)pxConfig->Timing.SJW - 1;
+        pxCAN->Inst->BTR.b.TS1 = (uint32_t)pxConfig->Timing.BS1 - 1;
+        pxCAN->Inst->BTR.b.TS2 = (uint32_t)pxConfig->Timing.BS2 - 1;
+        pxCAN->Inst->BTR.b.BRP = (uint32_t)pxConfig->Timing.Prescaler - 1;
+
+        /* request leave initialization */
+        CAN_REG_BIT(pxCAN, MCR, INRQ) = 0;
+
+        eResult = XPD_eWaitForMatch(&pxCAN->Inst->MSR.w,
+                CAN_MSR_INAK, 0, &ulTimeout);
+    }
+
+    return eResult;
 }
 
 /**
  * @brief Restores the CAN peripheral to its default inactive state.
- * @param hcan: pointer to the CAN handle structure
- * @return ERROR if input is incorrect, OK if success
+ * @param pxCAN: pointer to the CAN handle structure
  */
-XPD_ReturnType XPD_CAN_Deinit(CAN_HandleType * hcan)
+void CAN_vDeinit(CAN_HandleType * pxCAN)
 {
     /* Disable all interrupt requests */
-    hcan->Inst->IER.w = 0;
+    pxCAN->Inst->IER.w = 0;
 
     /* Disable filters */
-    can_filterReset(hcan);
+    CAN_prvFilterReset(pxCAN);
 
     /* Deinitialize peripheral dependencies */
-    XPD_SAFE_CALLBACK(hcan->Callbacks.DepDeinit, hcan);
+    XPD_SAFE_CALLBACK(pxCAN->Callbacks.DepDeinit, pxCAN);
 
     /* Disable peripheral clock */
 #ifdef CAN2
     /* Master clock is only off when no filters are used */
-    if ((hcan->Inst != CAN1) || !CAN1_SLAVE_FILTERS_ACTIVE())
+    if ((pxCAN->Inst != CAN1) || !CAN1_SLAVE_FILTERS_ACTIVE())
 #endif
     {
-        XPD_RCC_ClockDisable(hcan->CtrlPos);
+        RCC_vClockDisable(pxCAN->CtrlPos);
     }
-
-    return XPD_OK;
 }
 
 /**
  * @brief Requests sleep mode for CAN controller.
- * @param hcan: pointer to the CAN handle structure
+ * @param pxCAN: pointer to the CAN handle structure
  * @return TIMEOUT if timed out, OK if sleep mode is entered
  */
-XPD_ReturnType XPD_CAN_Sleep(CAN_HandleType * hcan)
+XPD_ReturnType CAN_eSleep(CAN_HandleType * pxCAN)
 {
-    uint32_t timeout = SLAK_TIMEOUT;
-    CAN_REG_BIT(hcan, MCR, INRQ) = 0;
-    CAN_REG_BIT(hcan, MCR, SLEEP) = 1;
+    uint32_t ulTimeout = SLAK_TIMEOUT;
+    CAN_REG_BIT(pxCAN, MCR, INRQ) = 0;
+    CAN_REG_BIT(pxCAN, MCR, SLEEP) = 1;
 
-    return XPD_WaitForMatch(&hcan->Inst->MSR.w, CAN_MSR_SLAK, CAN_MSR_SLAK, &timeout);
+    return XPD_eWaitForMatch(&pxCAN->Inst->MSR.w,
+            CAN_MSR_SLAK, CAN_MSR_SLAK, &ulTimeout);
 }
 
 /**
  * @brief Requests wake up for CAN controller.
- * @param hcan: pointer to the CAN handle structure
+ * @param pxCAN: pointer to the CAN handle structure
  * @return TIMEOUT if timed out, OK if sleep mode is left
  */
-XPD_ReturnType XPD_CAN_WakeUp(CAN_HandleType * hcan)
+XPD_ReturnType CAN_eWakeUp(CAN_HandleType * pxCAN)
 {
-    uint32_t timeout = SLAK_TIMEOUT;
-    CAN_REG_BIT(hcan, MCR, SLEEP) = 0;
+    uint32_t ulTimeout = SLAK_TIMEOUT;
+    CAN_REG_BIT(pxCAN, MCR, SLEEP) = 0;
 
-    return XPD_WaitForMatch(&hcan->Inst->MSR.w, CAN_MSR_SLAK, 0, &timeout);
+    return XPD_eWaitForMatch(&pxCAN->Inst->MSR.w,
+            CAN_MSR_SLAK, 0, &ulTimeout);
 }
 
 /**
  * @brief Gets the error state of the CAN peripheral and clears its last error code.
- * @param hcan: pointer to the CAN handle structure
+ * @param pxCAN: pointer to the CAN handle structure
  * @return Current CAN error state
  */
-CAN_ErrorType XPD_CAN_GetError(CAN_HandleType * hcan)
+CAN_ErrorType CAN_eGetError(CAN_HandleType * pxCAN)
 {
-    CAN_ErrorType errors = (hcan->Inst->ESR.w) & (CAN_ESR_LEC | CAN_ESR_BOFF | CAN_ESR_EPVF | CAN_ESR_EWGF);
+    CAN_ErrorType eErrors = (pxCAN->Inst->ESR.w) &
+            (CAN_ESR_LEC | CAN_ESR_BOFF | CAN_ESR_EPVF | CAN_ESR_EWGF);
 
     /* clear last error code */
-    hcan->Inst->ESR.b.LEC = 0;
+    pxCAN->Inst->ESR.b.LEC = 0;
 
-    return errors;
+    return eErrors;
+}
+
+/**
+ * @brief CAN state change and error interrupt handler that provides handle callbacks.
+ * @param pxCAN: pointer to the CAN handle structure
+ */
+void CAN_vIRQHandlerSCE(CAN_HandleType * pxCAN)
+{
+    /* check if errors are configured for interrupt and present */
+    if (    ((pxCAN->Inst->IER.w & (CAN_IER_BOFIE | CAN_IER_EPVIE | CAN_IER_EWGIE | CAN_IER_LECIE)) != 0)
+         && ((pxCAN->Inst->ESR.w & (CAN_ESR_LEC | CAN_ESR_BOFF | CAN_ESR_EPVF | CAN_ESR_EWGF)) != 0))
+    {
+        /* call error callback function if interrupt is not by state change */
+        XPD_SAFE_CALLBACK(pxCAN->Callbacks.Error, pxCAN);
+    }
 }
 
 /** @} */
@@ -374,93 +421,130 @@ CAN_ErrorType XPD_CAN_GetError(CAN_HandleType * hcan)
 
 /**
  * @brief Waits for an empty transmit mailbox and posts the frame in it.
- * @param hcan: pointer to the CAN handle structure
- * @param Frame: pointer to the frame to transmit
- * @param Timeout: available time for getting a mailbox
+ * @param pxCAN: pointer to the CAN handle structure
+ * @param pxFrame: pointer to the frame to transmit
+ * @param ulTimeout: available time for getting a mailbox
  * @return TIMEOUT if timed out, OK if frame is posted in a mailbox
  */
-XPD_ReturnType XPD_CAN_Post(CAN_HandleType * hcan, CAN_FrameType * Frame, uint32_t Timeout)
+XPD_ReturnType CAN_ePost(
+        CAN_HandleType *    pxCAN,
+        CAN_FrameType *     pxFrame,
+        uint32_t            ulTimeout)
 {
-    XPD_ReturnType result;
+    XPD_ReturnType eResult = XPD_eWaitForDiff(&pxCAN->Inst->TSR.w,
+            CAN_TSR_TME, 0, &ulTimeout);
 
-    result = XPD_WaitForDiff(&hcan->Inst->TSR.w, CAN_TSR_TME, 0, &Timeout);
-
-    if (result == XPD_OK)
+    if (eResult == XPD_OK)
     {
         /* Empty mailbox available, post frame */
-        result = can_frameTransmit(hcan, Frame);
+        (void)CAN_prvFrameTransmit(pxCAN, pxFrame);
     }
 
-    return result;
+    return eResult;
 }
 
 /**
  * @brief Transmits a frame and waits for completion until times out.
- * @param hcan: pointer to the CAN handle structure
- * @param Frame: pointer to the frame to transmit
- * @param Timeout: available time for getting a mailbox and successfully sending the frame
+ * @param pxCAN: pointer to the CAN handle structure
+ * @param pxFrame: pointer to the frame to transmit
+ * @param ulTimeout: available time for getting a mailbox and successfully sending the frame
  * @return BUSY if no empty mailbox was available, TIMEOUT if timed out, OK if frame is sent
  */
-XPD_ReturnType XPD_CAN_Transmit(CAN_HandleType * hcan, CAN_FrameType * Frame, uint32_t Timeout)
+XPD_ReturnType CAN_eSend(
+        CAN_HandleType *    pxCAN,
+        CAN_FrameType *     pxFrame,
+        uint32_t            ulTimeout)
 {
-    XPD_ReturnType result;
-
-    do
-    {
-        result = XPD_WaitForDiff(&hcan->Inst->TSR.w, CAN_TSR_TME, 0, &Timeout);
-
-        /* if getting free mailbox times out, exit with busy */
-        if (result != XPD_OK)
-        {
-            return XPD_BUSY;
-        }
-
-        /* get mailbox if available */
-        result = can_frameTransmit(hcan, Frame);
-
-    /* until free mailbox was found */
-    } while (result != XPD_OK);
+    XPD_ReturnType eResult = XPD_eWaitForDiff(&pxCAN->Inst->TSR.w,
+            CAN_TSR_TME, 0, &ulTimeout);
 
     /* wait if transmit mailbox was found */
+    if (eResult == XPD_OK)
     {
-        /* convert to txok flag for mailbox */
-        uint32_t txok = CAN_TSR_TXOK0 << (Frame->Index * 8);
+        uint32_t ulTXOK;
 
-        /* wait for txok with the remaining time */
-        result = XPD_WaitForMatch(&hcan->Inst->TSR.w, txok, txok, &Timeout);
+        (void)CAN_prvFrameTransmit(pxCAN, pxFrame);
+
+        /* convert to TXOK flag for mailbox */
+        ulTXOK = CAN_TSR_TXOK0 << (pxFrame->Index * 8);
+
+        /* wait for TXOK with the remaining time */
+        eResult = XPD_eWaitForMatch(&pxCAN->Inst->TSR.w, ulTXOK, ulTXOK, &ulTimeout);
 
         /* Abort frame if transmission has timed out */
-        if (result != XPD_OK)
+        if (eResult != XPD_OK)
         {
-            XPD_CAN_ClearTxFlag(hcan, Frame->Index, ABRQ);
+            CAN_TXFLAG_CLEAR(pxCAN, pxFrame->Index, ABRQ);
         }
     }
 
-    return result;
+    return eResult;
 }
 
 /**
  * @brief Sets up a frame transmission and produces completion callback using the interrupt stack.
- * @param hcan: pointer to the CAN handle structure
- * @param Frame: pointer to the frame to transmit
+ * @param pxCAN: pointer to the CAN handle structure
+ * @param pxFrame: pointer to the frame to transmit
  * @return BUSY if no empty mailbox was available, OK if frame is set for transmission
  */
-XPD_ReturnType XPD_CAN_Transmit_IT(CAN_HandleType * hcan, CAN_FrameType * Frame)
+XPD_ReturnType CAN_eSend_IT(
+        CAN_HandleType *    pxCAN,
+        CAN_FrameType *     pxFrame)
 {
-    uint32_t transmitmailbox;
-    XPD_ReturnType result;
+    XPD_ReturnType eResult;
 
-    result = can_frameTransmit(hcan, Frame);
+    eResult = CAN_prvFrameTransmit(pxCAN, pxFrame);
 
-    if (result == XPD_OK)
+    if (eResult == XPD_OK)
     {
-        SET_BIT(hcan->Inst->IER.w, CAN_ERROR_INTERRUPTS | CAN_TRANSMIT_INTERRUPTS);
+        SET_BIT(pxCAN->Inst->IER.w, CAN_ERROR_INTERRUPTS | CAN_TRANSMIT_INTERRUPTS);
 
         /* state bit is set for the transmit mailbox */
-        SET_BIT(hcan->State, 1 << Frame->Index);
+        SET_BIT(pxCAN->State, 1 << pxFrame->Index);
     }
 
-    return result;
+    return eResult;
+}
+
+/**
+ * @brief CAN transmit interrupt handler that provides handle callbacks.
+ * @param pxCAN: pointer to the CAN handle structure
+ */
+void CAN_vIRQHandlerTX(CAN_HandleType * pxCAN)
+{
+    /* check end of transmission */
+    if (CAN_REG_BIT(pxCAN,IER,TMEIE) && ((pxCAN->State & CAN_STATE_TRANSMIT) != 0))
+    {
+        uint32_t ulTxMB;
+
+        /* check all mailboxes for successful interrupt requests */
+        for (ulTxMB = 0; ulTxMB < 3; ulTxMB++)
+        {
+            uint8_t ucMbState = 1 << ulTxMB;
+            if (((pxCAN->State & ucMbState) != 0) && CAN_TXFLAG_STATUS(pxCAN, ulTxMB, TXOK))
+            {
+                CLEAR_BIT(pxCAN->State, ucMbState);
+
+                /* transmission complete callback */
+                XPD_SAFE_CALLBACK(pxCAN->Callbacks.Transmit, pxCAN);
+            }
+        }
+
+        /* if no more transmission requests are pending */
+        if ((pxCAN->State & CAN_STATE_TRANSMIT) == 0)
+        {
+            /* disable transmit interrupt */
+            uint32_t ulIEs = CAN_TRANSMIT_INTERRUPTS;
+
+#ifdef __XPD_CAN_ERROR_DETECT
+            if ((pxCAN->State & CAN_STATE_RECEIVE) == 0)
+            {
+                ulIEs |= CAN_ERROR_INTERRUPTS;
+            }
+#endif
+            CLEAR_BIT(pxCAN->Inst->IER.w, ulIEs);
+        }
+    }
 }
 
 /** @} */
@@ -474,199 +558,136 @@ XPD_ReturnType XPD_CAN_Transmit_IT(CAN_HandleType * hcan, CAN_FrameType * Frame)
 
 /**
  * @brief Waits for a received frame and gets it from the FIFO.
- * @param hcan: pointer to the CAN handle structure
- * @param Frame: pointer to the frame to put the received frame data to
- * @param FIFONumber: the selected receive FIFO [0 .. 1]
- * @param Timeout: available time for frame reception
+ * @param pxCAN: pointer to the CAN handle structure
+ * @param pxFrame: pointer to the frame to put the received frame data to
+ * @param ucFIFONumber: the selected receive FIFO [0 .. 1]
+ * @param ulTimeout: available time for frame reception
  * @return BUSY if FIFO is already in use, TIMEOUT if timed out, OK if frame is received
  */
-XPD_ReturnType XPD_CAN_Receive(CAN_HandleType * hcan, CAN_FrameType* Frame, uint8_t FIFONumber, uint32_t Timeout)
+XPD_ReturnType CAN_eReceive(
+        CAN_HandleType *    pxCAN,
+        CAN_FrameType *     pxFrame,
+        uint8_t             ucFIFONumber,
+        uint32_t            ulTimeout)
 {
-    XPD_ReturnType result = XPD_BUSY;
-    uint8_t recState = CAN_STATE_RECEIVE0 << FIFONumber;
+    XPD_ReturnType eResult = XPD_BUSY;
+    uint8_t ucRecState = CAN_STATE_RECEIVE0 << ucFIFONumber;
 
     /* check if FIFO is not in use */
-    if ((hcan->State & recState) == 0)
+    if ((pxCAN->State & ucRecState) == 0)
     {
-        SET_BIT(hcan->State, recState);
+        SET_BIT(pxCAN->State, ucRecState);
 
         /* save receive data target */
-        hcan->RxFrame[FIFONumber] = Frame;
+        pxCAN->RxFrame[ucFIFONumber] = pxFrame;
 
         /* wait until at least one frame is in FIFO */
-        result = XPD_WaitForDiff(&hcan->Inst->RFR[FIFONumber].w, CAN_RF0R_FMP0, 0, &Timeout);
+        eResult = XPD_eWaitForDiff(&pxCAN->Inst->RFR[ucFIFONumber].w, CAN_RF0R_FMP0, 0, &ulTimeout);
 
-        if (result == XPD_OK)
+        if (eResult == XPD_OK)
         {
             /* frame data is extracted */
-            can_frameReceive(hcan, FIFONumber);
+            CAN_prvFrameReceive(pxCAN, ucFIFONumber);
         }
     }
 
-    return result;
+    return eResult;
 }
 
 /**
  * @brief Requests a frame reception using the interrupt stack.
- * @param hcan: pointer to the CAN handle structure
- * @param Frame: pointer to the frame to put the received frame data to
- * @param FIFONumber: the selected receive FIFO [0 .. 1]
+ * @param pxCAN: pointer to the CAN handle structure
+ * @param pxFrame: pointer to the frame to put the received frame data to
+ * @param ucFIFONumber: the selected receive FIFO [0 .. 1]
  * @return BUSY if the FIFO is already in use, OK otherwise
  */
-XPD_ReturnType XPD_CAN_Receive_IT(CAN_HandleType * hcan, CAN_FrameType * Frame, uint8_t FIFONumber)
+XPD_ReturnType CAN_eReceive_IT(
+        CAN_HandleType *    pxCAN,
+        CAN_FrameType *     pxFrame,
+        uint8_t             ucFIFONumber)
 {
-    XPD_ReturnType result = XPD_BUSY;
-    uint8_t recState = CAN_STATE_RECEIVE0 << FIFONumber;
+    XPD_ReturnType eResult = XPD_BUSY;
+    uint8_t ucRecState = CAN_STATE_RECEIVE0 << ucFIFONumber;
 
     /* check if FIFO is not in use */
-    if ((hcan->State & recState) == 0)
+    if ((pxCAN->State & ucRecState) == 0)
     {
-        SET_BIT(hcan->State, recState);
+        SET_BIT(pxCAN->State, ucRecState);
 
         /* save receive data target */
-        hcan->RxFrame[FIFONumber] = Frame;
+        pxCAN->RxFrame[ucFIFONumber] = pxFrame;
 
-        SET_BIT(hcan->Inst->IER.w, CAN_ERROR_INTERRUPTS
-            | ((FIFONumber == 0) ? CAN_RECEIVE0_INTERRUPTS : CAN_RECEIVE1_INTERRUPTS));
+        SET_BIT(pxCAN->Inst->IER.w, CAN_ERROR_INTERRUPTS
+            | ((ucFIFONumber == 0) ? CAN_RECEIVE0_INTERRUPTS : CAN_RECEIVE1_INTERRUPTS));
 
-        result = XPD_OK;
+        eResult = XPD_OK;
     }
-    return result;
-}
-
-/** @} */
-
-/** @defgroup CAN_Exported_Functions_IRQ CAN Interrupt Handling Functions
- *  @brief    CAN interrupt handlers
- *  @details  These functions provide API for CAN interrupt handling.
- *            These functions shall be called from the interrupt request handlers
- *            of the CAN peripheral that is managed by the specified handle input.
- * @{
- */
-
-/**
- * @brief CAN transmit interrupt handler that provides handle callbacks.
- * @param hcan: pointer to the CAN handle structure
- */
-void XPD_CAN_TX_IRQHandler(CAN_HandleType * hcan)
-{
-    uint32_t temp, i;
-
-    /* check end of transmission */
-    if (CAN_REG_BIT(hcan,IER,TMEIE) && ((hcan->State & CAN_STATE_TRANSMIT) != 0))
-    {
-        /* check all mailboxes for successful interrupt requests */
-        for (i = 0; i < 3; i++)
-        {
-            temp = 1 << i;
-            if (((hcan->State & temp) != 0) && XPD_CAN_GetTxFlag(hcan, i, TXOK))
-            {
-                CLEAR_BIT(hcan->State, temp);
-
-                /* transmission complete callback */
-                XPD_SAFE_CALLBACK(hcan->Callbacks.Transmit, hcan);
-            }
-        }
-
-        /* if no more transmission requests are pending */
-        if ((hcan->State & CAN_STATE_TRANSMIT) == 0)
-        {
-            /* disable transmit interrupt */
-            temp = CAN_TRANSMIT_INTERRUPTS;
-
-#ifdef USE_XPD_CAN_ERROR_DETECT
-            if ((hcan->State & CAN_STATE_RECEIVE) == 0)
-            {
-                temp |= CAN_ERROR_INTERRUPTS;
-            }
-#endif
-            CLEAR_BIT(hcan->Inst->IER.w, temp);
-        }
-    }
+    return eResult;
 }
 
 /**
  * @brief CAN receive FIFO 0 interrupt handler that provides handle callbacks.
- * @param hcan: pointer to the CAN handle structure
+ * @param pxCAN: pointer to the CAN handle structure
  */
-void XPD_CAN_RX0_IRQHandler(CAN_HandleType * hcan)
+void CAN_vIRQHandlerRX0(CAN_HandleType * pxCAN)
 {
-    uint32_t temp;
-
     /* check reception completion */
-    if (CAN_REG_BIT(hcan,IER,FMP0IE) && (CAN_REG_BIT(hcan,RFR[0],FMP) != 0))
+    if (CAN_REG_BIT(pxCAN,IER,FMP0IE) && (CAN_REG_BIT(pxCAN,RFR[0],FMP) != 0))
     {
         /* get the FIFO contents to the requested frame structure */
-        can_frameReceive(hcan, 0);
+        CAN_prvFrameReceive(pxCAN, 0);
 
         /* only clear interrupt requests if they were enabled through XPD API */
-        if ((hcan->State & CAN_STATE_RECEIVE0) != 0)
+        if ((pxCAN->State & CAN_STATE_RECEIVE0) != 0)
         {
-            temp = CAN_RECEIVE0_INTERRUPTS;
+            uint32_t ulIEs = CAN_RECEIVE0_INTERRUPTS;
 
-#ifdef USE_XPD_CAN_ERROR_DETECT
-            if ((hcan->State & (CAN_STATE_TRANSMIT | CAN_STATE_RECEIVE1)) == 0)
+#ifdef __XPD_CAN_ERROR_DETECT
+            if ((pxCAN->State & (CAN_STATE_TRANSMIT | CAN_STATE_RECEIVE1)) == 0)
             {
-                temp |= CAN_ERROR_INTERRUPTS;
+                ulIEs |= CAN_ERROR_INTERRUPTS;
             }
 #endif
-            CLEAR_BIT(hcan->State, CAN_STATE_RECEIVE0);
+            CLEAR_BIT(pxCAN->State, CAN_STATE_RECEIVE0);
 
-            CLEAR_BIT(hcan->Inst->IER.w, temp);
+            CLEAR_BIT(pxCAN->Inst->IER.w, ulIEs);
         }
 
         /* receive complete callback */
-        XPD_SAFE_CALLBACK(hcan->Callbacks.Receive[0], hcan);
+        XPD_SAFE_CALLBACK(pxCAN->Callbacks.Receive[0], pxCAN);
     }
 }
 
 /**
  * @brief CAN receive FIFO 1 interrupt handler that provides handle callbacks.
- * @param hcan: pointer to the CAN handle structure
+ * @param pxCAN: pointer to the CAN handle structure
  */
-void XPD_CAN_RX1_IRQHandler(CAN_HandleType * hcan)
+void CAN_vIRQHandlerRX1(CAN_HandleType * pxCAN)
 {
-    uint32_t temp;
-
     /* check reception completion */
-    if (CAN_REG_BIT(hcan,IER,FMP1IE) && (CAN_REG_BIT(hcan,RFR[1],FMP) != 0))
+    if (CAN_REG_BIT(pxCAN,IER,FMP1IE) && (CAN_REG_BIT(pxCAN,RFR[1],FMP) != 0))
     {
         /* get the FIFO contents to the requested frame structure */
-        can_frameReceive(hcan, 1);
+        CAN_prvFrameReceive(pxCAN, 1);
 
         /* only clear interrupt requests if they were enabled through XPD API */
-        if ((hcan->State & CAN_STATE_RECEIVE1) != 0)
+        if ((pxCAN->State & CAN_STATE_RECEIVE1) != 0)
         {
-            temp = CAN_RECEIVE1_INTERRUPTS;
+            uint32_t ulIEs = CAN_RECEIVE1_INTERRUPTS;
 
-#ifdef USE_XPD_CAN_ERROR_DETECT
-            if ((hcan->State & (CAN_STATE_TRANSMIT | CAN_STATE_RECEIVE0)) == 0)
+#ifdef __XPD_CAN_ERROR_DETECT
+            if ((pxCAN->State & (CAN_STATE_TRANSMIT | CAN_STATE_RECEIVE0)) == 0)
             {
-                temp |= CAN_ERROR_INTERRUPTS;
+                ulIEs |= CAN_ERROR_INTERRUPTS;
             }
 #endif
-            CLEAR_BIT(hcan->State, CAN_STATE_RECEIVE1);
+            CLEAR_BIT(pxCAN->State, CAN_STATE_RECEIVE1);
 
-            CLEAR_BIT(hcan->Inst->IER.w, temp);
+            CLEAR_BIT(pxCAN->Inst->IER.w, ulIEs);
         }
 
         /* receive complete callback */
-        XPD_SAFE_CALLBACK(hcan->Callbacks.Receive[1], hcan);
-    }
-}
-
-/**
- * @brief CAN state change and error interrupt handler that provides handle callbacks.
- * @param hcan: pointer to the CAN handle structure
- */
-void XPD_CAN_SCE_IRQHandler(CAN_HandleType * hcan)
-{
-    /* check if errors are configured for interrupt and present */
-    if (    ((hcan->Inst->IER.w & (CAN_IER_BOFIE | CAN_IER_EPVIE | CAN_IER_EWGIE | CAN_IER_LECIE)) != 0)
-         && ((hcan->Inst->ESR.w & (CAN_ESR_LEC | CAN_ESR_BOFF | CAN_ESR_EPVF | CAN_ESR_EWGF)) != 0))
-    {
-        /* call error callback function if interrupt is not by state change */
-        XPD_SAFE_CALLBACK(hcan->Callbacks.Error, hcan);
+        XPD_SAFE_CALLBACK(pxCAN->Callbacks.Receive[1], pxCAN);
     }
 }
 
@@ -684,32 +705,35 @@ void XPD_CAN_SCE_IRQHandler(CAN_HandleType * hcan)
 /**
  * @brief Configures the receive filters for the peripheral and provides each filter
  *        its own Filter Match Index (FMI).
- * @param hcan: pointer to the CAN handle structure
- * @param Filters: filter configuration list (array)
- * @param MatchIndexes: array to fill with the FMI of the filters
- * @param FilterCount: the number of input filters to configure
+ * @param pxCAN: pointer to the CAN handle structure
+ * @param axFilters: filter configuration list (array)
+ * @param aucMatchIndexes: array to fill with the FMI of the filters
+ * @param ucFilterCount: the number of input filters to configure
  * @return ERROR if filters cannot fit in the filter bank, OK if filters are added
  */
-XPD_ReturnType XPD_CAN_FilterConfig(CAN_HandleType * hcan, const CAN_FilterType * Filters,
-        uint8_t * MatchIndexes, uint8_t FilterCount)
+XPD_ReturnType CAN_eFilterConfig(
+        CAN_HandleType *        pxCAN,
+        const CAN_FilterType    axFilters[],
+        uint8_t                 aucMatchIndexes[],
+        uint8_t                 ucFilterCount)
 {
-    XPD_ReturnType result = XPD_OK;
-    uint8_t i, base, fbDemand = 0, currentFMI = 0;
-    CAN_TypeDef * CANx = CAN_MASTER(hcan);
+    XPD_ReturnType eResult = XPD_OK;
+    uint8_t i, ucBase, ucFBDemand = 0, ucCurrentFMI = 0;
+    CAN_TypeDef * CANx = CAN_MASTER(pxCAN);
 #ifdef CAN_BB
     CAN_BitBand_TypeDef * CANx_BB = CAN_BB(CANx);
 #endif
 
-    uint8_t fbOffset = FILTERBANK_OFFSET(hcan);
-    uint8_t fbCount  = FILTERBANK_COUNT(hcan);
-    uint32_t mask    = (1 << fbCount) - 1;
+    uint8_t ucFBOffset = FILTERBANK_OFFSET(pxCAN);
+    uint8_t ucFBCount  = FILTERBANK_COUNT(pxCAN);
+    uint32_t ulMask    = (1 << ucFBCount) - 1;
 
 #ifdef CAN2
 #ifdef CAN3
-    if (hcan->Inst != CAN3)
+    if (pxCAN->Inst != CAN3)
 #endif /* CAN3 */
     {
-        XPD_CAN1_ClockCtrl(ENABLE);
+        RCC_vClockEnable(RCC_POS_CAN1);
     }
 #endif /* CAN2 */
 
@@ -717,18 +741,18 @@ XPD_ReturnType XPD_CAN_FilterConfig(CAN_HandleType * hcan, const CAN_FilterType 
     CANx_REG_BIT(FMR,FINIT) = 1;
 
     /* Deactivate all filter banks assigned to this peripheral */
-    CLEAR_BIT(CANx->FA1R, mask << fbOffset);
+    CLEAR_BIT(CANx->FA1R, ulMask << ucFBOffset);
 
     /* Initially set invalid value to FMI, to indicate missing configuration */
-    for (i = 0; i < FilterCount; i++)
+    for (i = 0; i < ucFilterCount; i++)
     {
-        MatchIndexes[i] = FMI_INVALID;
+        aucMatchIndexes[i] = FMI_INVALID;
     }
 
-    for (base = 0; base < FilterCount; base++)
+    for (ucBase = 0; ucBase < ucFilterCount; ucBase++)
     {
         /* If the current filter is not configured, it has a yet unprocessed type */
-        if (MatchIndexes[base] == FMI_INVALID)
+        if (aucMatchIndexes[ucBase] == FMI_INVALID)
         {
             uint8_t fbankIndex, fbankPos = 255;
             uint8_t currentType, currentSize, type;
@@ -738,12 +762,12 @@ XPD_ReturnType XPD_CAN_FilterConfig(CAN_HandleType * hcan, const CAN_FilterType 
                 CAN_FilterRegister_TypeDef filterReg;
             }FilterBank;
 
-            currentType = Filters[base].FIFO
-                       | (Filters[base].Mode         & CAN_FILTER_MATCH)
-                       | (Filters[base].Pattern.Type & CAN_IDTYPE_EXT_DATA);
-            currentSize = filterTypeSpace[currentType >> 1];
+            currentType = axFilters[ucBase].FIFO
+                       | (axFilters[ucBase].Mode         & CAN_FILTER_MATCH)
+                       | (axFilters[ucBase].Pattern.Type & CAN_IDTYPE_EXT_DATA);
+            currentSize = can_aucFilterTypeSpace[currentType >> 1];
             type = currentType;
-            i = base;
+            i = ucBase;
 
             do {
                 /* If the type of the currently indexed filter matches the base */
@@ -752,20 +776,20 @@ XPD_ReturnType XPD_CAN_FilterConfig(CAN_HandleType * hcan, const CAN_FilterType 
                     /* If the current filter bank is full, set up another one */
                     if (fbankPos >= currentSize)
                     {
-                        fbankIndex = fbDemand + fbOffset;
+                        fbankIndex = ucFBDemand + ucFBOffset;
 
                         /* Check against overrun of used filter banks */
-                        if ((fbDemand + 1) > fbCount)
+                        if ((ucFBDemand + 1) > ucFBCount)
                         {
-                            base = FilterCount;
-                            result = XPD_ERROR;
+                            ucBase = ucFilterCount;
+                            eResult = XPD_ERROR;
                             break;
                         }
 
                         /* Configure new filter bank type */
 #ifdef CAN_BB
                         /* Setting filter FIFO assignment */
-                        CANx_BB->FFA1R[fbankIndex] = Filters[i].FIFO;
+                        CANx_BB->FFA1R[fbankIndex] = axFilters[i].FIFO;
 
                         /* Setting filter mode */
                         CANx_BB->FM1R[fbankIndex]  = type >> FILTER_MODE_FLAG_Pos;
@@ -776,7 +800,7 @@ XPD_ReturnType XPD_CAN_FilterConfig(CAN_HandleType * hcan, const CAN_FilterType 
                         uint32_t fbIndexMask = 1 << fbankIndex;
 
                         /* Setting filter FIFO assignment */
-                        if (Filters[i].FIFO == 0)
+                        if (axFilters[i].FIFO == 0)
                         {   CLEAR_BIT(CANx->FFA1R, fbIndexMask); }
                         else
                         {   SET_BIT(CANx->FFA1R, fbIndexMask); }
@@ -795,22 +819,22 @@ XPD_ReturnType XPD_CAN_FilterConfig(CAN_HandleType * hcan, const CAN_FilterType 
 #endif /* CAN_BB */
 
                         fbankPos = 0;
-                        fbDemand++;
+                        ucFBDemand++;
                     }
 
                     /* Set the identifier pattern depending on the filter scale */
                     if ((currentType & FILTER_SIZE_FLAG) == 0)
                     {
-                        FilterBank.u16[fbankPos] = (Filters[i].Pattern.Value << 5)
-                                                 | (Filters[i].Pattern.Type  << 2);
+                        FilterBank.u16[fbankPos] = (axFilters[i].Pattern.Value << 5)
+                                                 | (axFilters[i].Pattern.Type  << 2);
 
                         /* Set the masking bits */
                         if ((currentType & FILTER_MODE_FLAG) == 0)
                         {
-                            FilterBank.u16[fbankPos + 1] = (Filters[i].Mask << 5);
+                            FilterBank.u16[fbankPos + 1] = (axFilters[i].Mask << 5);
 
                             /* If mask does not pass any type, set the type bits */
-                            if (Filters[i].Mode == CAN_FILTER_MASK)
+                            if (axFilters[i].Mode == CAN_FILTER_MASK)
                             {
                                 FilterBank.u16[fbankPos + 1] |= CAN_IDTYPE_EXT_RTR << 2;
                             }
@@ -818,17 +842,17 @@ XPD_ReturnType XPD_CAN_FilterConfig(CAN_HandleType * hcan, const CAN_FilterType 
                     }
                     else
                     {
-                        FilterBank.u32[fbankPos] = (Filters[i].Pattern.Value << 3)
-                                                 | (Filters[i].Pattern.Type);
+                        FilterBank.u32[fbankPos] = (axFilters[i].Pattern.Value << 3)
+                                                 | (axFilters[i].Pattern.Type);
 
                         /* Set the masking bits */
                         if ((currentType & FILTER_MODE_FLAG) == 0)
                         {
                             /* Filter bank size fixes the mask field location */
-                            FilterBank.u32[1] = (Filters[i].Mask << 3);
+                            FilterBank.u32[1] = (axFilters[i].Mask << 3);
 
                             /* If mask does not pass any type, set the type bits */
-                            if (Filters[i].Mode == CAN_FILTER_MASK)
+                            if (axFilters[i].Mode == CAN_FILTER_MASK)
                             {
                                 FilterBank.u32[1] |= CAN_IDTYPE_EXT_RTR;
                             }
@@ -836,12 +860,12 @@ XPD_ReturnType XPD_CAN_FilterConfig(CAN_HandleType * hcan, const CAN_FilterType 
                     }
 
                     /* Set the current filter's FMI */
-                    MatchIndexes[i] = currentFMI + fbankPos;
+                    aucMatchIndexes[i] = ucCurrentFMI + fbankPos;
 
                     /* If the last element of the bank */
                     if ((fbankPos + 1) >= currentSize)
                     {
-                        currentFMI += currentSize;
+                        ucCurrentFMI += currentSize;
 
                         /* Set the configured bank in the peripheral */
                         CANx->sFilterRegister[fbankIndex] = FilterBank.filterReg;
@@ -864,16 +888,16 @@ XPD_ReturnType XPD_CAN_FilterConfig(CAN_HandleType * hcan, const CAN_FilterType 
 
                 /* Advance to the next filter */
                 i++;
-                type = Filters[i].FIFO
-                    | (Filters[i].Mode         & CAN_FILTER_MATCH)
-                    | (Filters[i].Pattern.Type & CAN_IDTYPE_EXT_DATA);
+                type = axFilters[i].FIFO
+                    | (axFilters[i].Mode         & CAN_FILTER_MATCH)
+                    | (axFilters[i].Pattern.Type & CAN_IDTYPE_EXT_DATA);
 
-            } while (i < FilterCount);
+            } while (i < ucFilterCount);
 
             /* If the last bank was not filled completely */
             if (fbankPos < currentSize)
             {
-                currentFMI += currentSize;
+                ucCurrentFMI += currentSize;
 
                 /* Set the configured bank in the peripheral */
                 CANx->sFilterRegister[fbankIndex] = FilterBank.filterReg;
@@ -882,65 +906,65 @@ XPD_ReturnType XPD_CAN_FilterConfig(CAN_HandleType * hcan, const CAN_FilterType 
     }
 
     /* Activate all configured filter banks */
-    mask = (1 << fbDemand) - 1;
-    SET_BIT(CANx->FA1R, mask << fbOffset);
+    ulMask = (1 << ucFBDemand) - 1;
+    SET_BIT(CANx->FA1R, ulMask << ucFBOffset);
 
     /* Exit filter initialization */
     CANx_REG_BIT(FMR,FINIT) = 0;
 
-    return result;
+    return eResult;
 }
 
 /**
  * @brief Sets the filter bank size for the CAN peripheral.
  * @note  This operation resets the filter configuration for the slave CAN controller.
- * @param hcan: pointer to the CAN handle structure
- * @param NewSize: the new filter bank size for the CAN peripheral [0 .. 28]
+ * @param pxCAN: pointer to the CAN handle structure
+ * @param ucNewSize: the new filter bank size for the CAN peripheral [0 .. 28]
  * @return ERROR if size is invalid, or if size change would disable master CAN filters, OK if successful
  */
-XPD_ReturnType XPD_CAN_FilterBankConfig(CAN_HandleType * hcan, uint8_t NewSize)
+XPD_ReturnType CAN_eFilterBankConfig(CAN_HandleType * pxCAN, uint8_t ucNewSize)
 {
-    XPD_ReturnType result = XPD_ERROR;
+    XPD_ReturnType eResult = XPD_ERROR;
 
 #ifdef CAN3
-    if (hcan->Inst == CAN3)
+    if (pxCAN->Inst == CAN3)
     { /* Simply return with error */ }
     else
 #endif /* CAN3 */
 #ifdef CAN2
-    if (NewSize <= 28)
+    if (ucNewSize <= 28)
     {
-        uint32_t masterMask;
+        uint32_t ulMasterMask;
 
-        XPD_CAN1_ClockCtrl(ENABLE);
+        RCC_vClockEnable(RCC_POS_CAN1);
 
-        masterMask = (1 << CAN1->FMR.b.CAN2SB) - 1;
+        ulMasterMask = (1 << CAN1->FMR.b.CAN2SB) - 1;
 
         /* Slave CAN bank size is counted from the end */
-        if (hcan->Inst != CAN1)
+        if (pxCAN->Inst != CAN1)
         {
-            NewSize = 28 - NewSize;
+            ucNewSize = 28 - ucNewSize;
         }
 
         /* Do not allow the master CAN to lose active filters */
-        if (((CAN1->FA1R & masterMask) & (0xFFFF << NewSize)) == 0)
+        if (((CAN1->FA1R & ulMasterMask) & (0xFFFF << ucNewSize)) == 0)
         {
             CAN1->FMR.b.FINIT = 1;
 
             /* Deactivate slave CAN filter banks */
-            CLEAR_BIT(CAN1->FA1R, ~masterMask);
+            CLEAR_BIT(CAN1->FA1R, ~ulMasterMask);
 
             /* select the start slave bank */
-            CAN1->FMR.b.CAN2SB = NewSize;
+            CAN1->FMR.b.CAN2SB = ucNewSize;
 
             CAN1->FMR.b.FINIT = 0;
 
-            result = XPD_OK;
+            eResult = XPD_OK;
         }
     }
 #endif /* CAN2 */
 
-    return result;
+    return eResult;
 }
 
 /** @} */
@@ -949,4 +973,4 @@ XPD_ReturnType XPD_CAN_FilterBankConfig(CAN_HandleType * hcan, uint8_t NewSize)
 
 /** @} */
 
-#endif /* USE_XPD_CAN */
+#endif /* defined(CAN) || defined(CAN1) */

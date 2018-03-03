@@ -2,49 +2,48 @@
   ******************************************************************************
   * @file    xpd_rcc_pc.c
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2016-01-16
+  * @version 0.2
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers RCC Peripheral Clocks Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
-#include "xpd_rcc.h"
-#include "xpd_utils.h"
+#include <xpd_rcc.h>
+#include <xpd_adc.h>
+#include <xpd_cec.h>
+#include <xpd_i2c.h>
+#include <xpd_pwr.h>
+#include <xpd_rtc.h>
+#include <xpd_tim.h>
+#include <xpd_usart.h>
+#include <xpd_usb.h>
+#include <xpd_utils.h>
 
-#if defined(USE_XPD_ADC)
-#include "xpd_adc.h"
-
-/** @addtogroup ADC
- * @{ */
-
-/** @addtogroup ADC_Clock_Source
- * @{ */
-
-/** @defgroup ADC_Clock_Source_Exported_Functions ADC Clock Source Exported Functions
+/** @ingroup ADC_Clock_Source
+ * @defgroup ADC_Clock_Source_Exported_Functions ADC Clock Source Exported Functions
  * @{ */
 
 /**
  * @brief Sets the new source clock for the ADCs.
- * @param ClockSource: the new source clock which should be configured
+ * @param eClockSource: the new source clock which should be configured
  */
-void XPD_ADC_ClockConfig(ADC_ClockSourceType ClockSource)
+void ADC_vClockConfig(ADC_ClockSourceType eClockSource)
 {
-    if (ClockSource == ADC_CLOCKSOURCE_HSI14)
+    if (eClockSource == ADC_CLOCKSOURCE_HSI14)
     {
-        uint32_t timeout = RCC_HSI14_TIMEOUT;
+        uint32_t ulTimeout = RCC_HSI14_TIMEOUT;
 
         /* Disable ADC control of the oscillator */
         RCC_REG_BIT(CR2, HSI14DIS) = 1;
@@ -53,7 +52,7 @@ void XPD_ADC_ClockConfig(ADC_ClockSourceType ClockSource)
         RCC_REG_BIT(CR2, HSI14ON) = 1;
 
         /* Wait until HSI14 is ready */
-        if (XPD_OK == XPD_WaitForMatch(&RCC->CR2.w, RCC_CR2_HSI14RDY, RCC_CR2_HSI14RDY, &timeout))
+        if (XPD_OK == XPD_eWaitForMatch(&RCC->CR2.w, RCC_CR2_HSI14RDY, RCC_CR2_HSI14RDY, &ulTimeout))
         {
             /* Enable ADC control of the oscillator */
             RCC_REG_BIT(CR2, HSI14DIS) = 0;
@@ -66,12 +65,12 @@ void XPD_ADC_ClockConfig(ADC_ClockSourceType ClockSource)
         RCC_REG_BIT(CR2, HSI14ON) = 0;
     }
 
-    XPD_RCC_ClockEnable(RCC_POS_ADC1);
+    RCC_vClockEnable(RCC_POS_ADC1);
 
     /* Peripheral configuration can only be applied when ADC is in OFF state */
     if ((ADC1->CR.w & (ADC_CR_ADSTART | ADC_CR_ADEN)) == 0)
     {
-        ADC1->CFGR2.b.CKMODE = ClockSource;
+        ADC1->CFGR2.b.CKMODE = eClockSource;
     }
 }
 
@@ -79,108 +78,85 @@ void XPD_ADC_ClockConfig(ADC_ClockSourceType ClockSource)
  * @brief Returns the input clock frequency of the ADCs.
  * @return The clock frequency of the ADCs in Hz
  */
-uint32_t XPD_ADC_GetClockFreq(void)
+uint32_t ADC_ulClockFreq_Hz(void)
 {
-    ADC_ClockSourceType ClockSource = ADC1->CFGR2.b.CKMODE;
+    ADC_ClockSourceType eClockSource = ADC1->CFGR2.b.CKMODE;
 
-    if (ClockSource == ADC_CLOCKSOURCE_HSI14)
+    if (eClockSource == ADC_CLOCKSOURCE_HSI14)
     {
         return 14000000;
     }
     else
     {
-        return XPD_RCC_GetClockFreq(PCLK1) / (ClockSource * 2);
+        return RCC_ulClockFreq_Hz(PCLK1) / (eClockSource * 2);
     }
 }
 
 /** @} */
 
-/** @} */
+#if defined(CEC)
 
-/** @} */
-#endif /* USE_XPD_ADC */
-
-#if defined(USE_XPD_CEC)
-#include "xpd_cec.h"
-
-/** @addtogroup CEC
- * @{ */
-
-/** @addtogroup CEC_Clock_Source
- * @{ */
-
-/** @defgroup CEC_Clock_Source_Exported_Functions CEC Clock Source Exported Functions
+/** @ingroup CEC_Clock_Source
+ * @defgroup CEC_Clock_Source_Exported_Functions CEC Clock Source Exported Functions
  * @{ */
 
 /**
  * @brief Sets the new source clock for the CEC.
- * @param ClockSource: the new source clock which should be configured
+ * @param eClockSource: the new source clock which should be configured
  */
-void XPD_CEC_ClockConfig(CEC_ClockSourceType ClockSource)
+void CEC_vClockConfig(CEC_ClockSourceType eClockSource)
 {
-    RCC_REG_BIT(CFGR3,CECSW) = ClockSource;
+    RCC_REG_BIT(CFGR3,CECSW) = eClockSource;
 }
 
 /**
  * @brief Returns the input clock frequency of the CEC.
  * @return The clock frequency of the CEC in Hz
  */
-uint32_t XPD_CEC_GetClockFreq(void)
+uint32_t CEC_ulClockFreq_Hz(void)
 {
-#ifdef LSE_VALUE
+#ifdef LSE_VALUE_Hz
     if (RCC_REG_BIT(CFGR3,CECSW) != CEC_CLOCKSOURCE_HSI_DIV244)
     {
-        return LSE_VALUE;
+        return LSE_VALUE_Hz;
     }
     else
 #endif
     {
-        return HSI_VALUE / 244;
+        return HSI_VALUE_Hz / 244;
     }
 }
 
 /** @} */
 
-/** @} */
+#endif /* defined(CEC) */
 
-/** @} */
-
-#endif /* USE_XPD_CEC */
-
-#if defined(USE_XPD_I2C)
-#include "xpd_i2c.h"
-
-/** @addtogroup I2C
- * @{ */
-
-/** @addtogroup I2C_Clock_Source
- * @{ */
-
-/** @defgroup I2C_Clock_Source_Exported_Functions I2C Clock Source Exported Functions
+/** @ingroup I2C_Clock_Source
+ * @defgroup I2C_Clock_Source_Exported_Functions I2C Clock Source Exported Functions
  * @{ */
 
 /**
  * @brief Sets the new source clock for the selected I2C.
- * @param hi2c: pointer to the I2C handle structure
- * @param ClockSource: the new source clock which should be configured
+ * @param pxI2C: pointer to the I2C handle structure
+ * @param eClockSource: the new source clock which should be configured
  */
-void XPD_I2C_ClockConfig(I2C_HandleType * hi2c, I2C_ClockSourceType ClockSource)
+void I2C_vClockConfig(I2C_HandleType * pxI2C, I2C_ClockSourceType eClockSource)
 {
-    switch ((uint32_t)hi2c->Inst)
+    switch ((uint32_t)pxI2C->Inst)
     {
 #ifdef RCC_CFGR3_I2C1SW
         case I2C1_BASE:
-            RCC_REG_BIT(CFGR3,I2C1SW) = ClockSource;
+            RCC_REG_BIT(CFGR3,I2C1SW) = eClockSource;
             break;
 #endif
 #ifdef RCC_CFGR3_I2C2SW
         case I2C2_BASE:
-            RCC_REG_BIT(CFGR3,I2C2SW) = ClockSource;
+            RCC_REG_BIT(CFGR3,I2C2SW) = eClockSource;
             break;
 #endif
 #ifdef RCC_CFGR3_I2C3SW
         case I2C3_BASE:
-            RCC_REG_BIT(CFGR3,I2C3SW) = ClockSource;
+            RCC_REG_BIT(CFGR3,I2C3SW) = eClockSource;
             break;
 #endif
         default:
@@ -190,146 +166,126 @@ void XPD_I2C_ClockConfig(I2C_HandleType * hi2c, I2C_ClockSourceType ClockSource)
 
 /**
  * @brief Returns the input clock frequency of the I2C.
- * @param hi2c: pointer to the I2C handle structure
+ * @param pxI2C: pointer to the I2C handle structure
  * @return The clock frequency of the I2C in Hz
  */
-uint32_t XPD_I2C_GetClockFreq(I2C_HandleType * hi2c)
+uint32_t I2C_ulClockFreq_Hz(I2C_HandleType * pxI2C)
 {
-    I2C_ClockSourceType source;
-    uint32_t freq;
+    I2C_ClockSourceType eSource;
 
-    switch ((uint32_t)hi2c->Inst)
+    switch ((uint32_t)pxI2C->Inst)
     {
 #ifdef RCC_CFGR3_I2C1SW
         case I2C1_BASE:
-            source = RCC_REG_BIT(CFGR3,I2C1SW);
+            eSource = RCC_REG_BIT(CFGR3,I2C1SW);
             break;
 #endif
 #ifdef RCC_CFGR3_I2C2SW
         case I2C2_BASE:
-            source = RCC_REG_BIT(CFGR3,I2C2SW);
+            eSource = RCC_REG_BIT(CFGR3,I2C2SW);
             break;
 #endif
 #ifdef RCC_CFGR3_I2C3SW
         case I2C3_BASE:
-            source = RCC_REG_BIT(CFGR3,I2C3SW);
+            eSource = RCC_REG_BIT(CFGR3,I2C3SW);
             break;
 #endif
         default:
-            source = I2C_CLOCKSOURCE_HSI;
+            eSource = I2C_CLOCKSOURCE_HSI;
             break;
     }
     /* get the value for the configured source */
-    if (source == I2C_CLOCKSOURCE_HSI)
+    if (eSource == I2C_CLOCKSOURCE_HSI)
     {
-        return HSI_VALUE;
+        return HSI_VALUE_Hz;
     }
     else
     {
-        return XPD_RCC_GetClockFreq(SYSCLK);
+        return RCC_ulClockFreq_Hz(SYSCLK);
     }
 }
 
 /** @} */
 
-/** @} */
-
-/** @} */
-
-#endif /* USE_XPD_I2C */
-
-#if defined(USE_XPD_RTC)
-#include "xpd_pwr.h"
-#include "xpd_rtc.h"
-#include "xpd_utils.h"
-
-/** @addtogroup RTC
- * @{ */
-
-/** @addtogroup RTC_Clock_Source
- * @{ */
-
-/** @defgroup RTC_Clock_Source_Exported_Functions RTC Clock Source Exported Functions
+/** @ingroup RTC_Clock_Source
+ * @defgroup RTC_Clock_Source_Exported_Functions RTC Clock Source Exported Functions
  * @{ */
 
 /**
  * @brief Sets the new source clock for the RTC.
- * @param ClockSource: the new source clock which should be configured
+ * @param eClockSource: the new source clock which should be configured
  * @return Result of the operation
  */
-XPD_ReturnType XPD_RTC_ClockConfig(RTC_ClockSourceType ClockSource)
+XPD_ReturnType RTC_eClockConfig(RTC_ClockSourceType eClockSource)
 {
-    uint32_t bdcr;
-    XPD_ReturnType result;
+    uint32_t ulBDCR;
+    XPD_ReturnType eResult;
+    uint32_t ulTimeout = RCC_DBP_TIMEOUT;
 
     /* enable write access to backup domain */
     PWR_REG_BIT(CR,DBP) = 1;
 
     /* wait for backup domain write protection disable */
-    result = XPD_WaitForMatch(&PWR->CR.w, PWR_CR_DBP, PWR_CR_DBP, RCC_DBP_TIMEOUT);
-    if (result != XPD_OK)
-    {
-        return result;
-    }
+    eResult = XPD_eWaitForMatch(&PWR->CR.w,
+            PWR_CR_DBP, PWR_CR_DBP, &ulTimeout);
 
     /* reset the backup domain only if the RTC clock source selection is modified */
-    if (RCC->BDCR.b.RTCSEL != ClockSource)
+    if ((eResult == XPD_OK) && (RCC->BDCR.b.RTCSEL != eClockSource))
     {
         /* store the content of BDCR register before the reset of backup domain */
-        bdcr = (RCC->BDCR.w & ~(RCC_BDCR_RTCSEL));
+        ulBDCR = (RCC->BDCR.w & ~(RCC_BDCR_RTCSEL));
 
         /* RTC clock selection can be changed only if the backup domain is reset */
         RCC_REG_BIT(BDCR,BDRST) = 1;
         RCC_REG_BIT(BDCR,BDRST) = 0;
 
         /* restore the Content of BDCR register */
-        RCC->BDCR.w = bdcr;
+        RCC->BDCR.w = ulBDCR;
 
         /* wait for LSERDY if LSE was enabled */
-        if ((bdcr & RCC_BDCR_LSERDY) != 0)
+        if ((ulBDCR & RCC_BDCR_LSERDY) != 0)
         {
-            result = XPD_WaitForMatch(&RCC->BDCR.w, RCC_BDCR_LSERDY, RCC_BDCR_LSERDY, RCC_LSE_TIMEOUT);
-            if (result != XPD_OK)
-            {
-                return result;
-            }
+            ulTimeout = RCC_LSE_TIMEOUT;
+
+            eResult = XPD_eWaitForMatch(&RCC->BDCR.w,
+                    RCC_BDCR_LSERDY, RCC_BDCR_LSERDY, &ulTimeout);
         }
 
         /* set clock source if no error was encountered */
-        RCC->BDCR.b.RTCSEL = ClockSource;
+        RCC->BDCR.b.RTCSEL = eClockSource;
     }
-    return result;
+    return eResult;
 }
 
 /**
  * @brief Returns the input clock frequency of the RTC.
  * @return The clock frequency of the RTC in Hz
  */
-uint32_t XPD_RTC_GetClockFreq(void)
+uint32_t RTC_ulClockFreq_Hz(void)
 {
-    uint32_t srcclk;
+    RTC_ClockSourceType eSrcClk;
 
     /* Get the current RTC source */
-    srcclk = RCC->BDCR.b.RTCSEL;
+    eSrcClk = RCC->BDCR.b.RTCSEL;
 
-#ifdef LSE_VALUE
+#ifdef LSE_VALUE_Hz
     /* Check if LSE is ready and if RTC clock selection is LSE */
-    if ((srcclk == RTC_CLOCKSOURCE_LSE) && (RCC_REG_BIT(BDCR,LSERDY) != 0))
+    if ((eSrcClk == RTC_CLOCKSOURCE_LSE) && (RCC_REG_BIT(BDCR,LSERDY) != 0))
     {
-        return LSE_VALUE;
+        return LSE_VALUE_Hz;
     }
     else
 #endif
     /* Check if LSI is ready and if RTC clock selection is LSI */
-    if ((srcclk == RTC_CLOCKSOURCE_LSI) && (RCC_REG_BIT(CSR,LSIRDY) != 0))
+    if ((eSrcClk == RTC_CLOCKSOURCE_LSI) && (RCC_REG_BIT(CSR,LSIRDY) != 0))
     {
-        return LSI_VALUE;
+        return LSI_VALUE_Hz;
     }
-#ifdef HSE_VALUE
+#ifdef HSE_VALUE_Hz
     /* Check if HSE is ready  and if RTC clock selection is HSE / x */
-    else if ((srcclk == RTC_CLOCKSOURCE_HSE_DIV32) && (RCC_REG_BIT(CR,HSERDY) != 0))
+    else if ((eSrcClk == RTC_CLOCKSOURCE_HSE_DIV32) && (RCC_REG_BIT(CR,HSERDY) != 0))
     {
-        return HSE_VALUE / 32;
+        return HSE_VALUE_Hz / 32;
     }
 #endif
     /* Clock not enabled for RTC */
@@ -341,98 +297,71 @@ uint32_t XPD_RTC_GetClockFreq(void)
 
 /** @} */
 
-/** @} */
-
-/** @} */
-#endif /* USE_XPD_RTC */
-
-#if defined(USE_XPD_TIM)
-#include "xpd_tim.h"
-
-/** @addtogroup TIM
- * @{ */
-
-/** @addtogroup TIM_Clock_Source
- * @{ */
-
-/** @defgroup TIM_Clock_Source_Exported_Functions TIM Clock Source Exported Functions
+/** @ingroup TIM_Clock_Source
+ * @defgroup TIM_Clock_Source_Exported_Functions TIM Clock Source Exported Functions
  * @{ */
 
 /**
  * @brief Returns the input clock frequency of the timer.
- * @param htim: pointer to the TIM handle structure
+ * @param pxTIM: pointer to the TIM handle structure
  * @return The clock frequency of the timer in Hz
  */
-uint32_t XPD_TIM_GetClockFreq(TIM_HandleType * htim)
+uint32_t TIM_ulClockFreq_Hz(TIM_HandleType * pxTIM)
 {
-    uint32_t freq;
+    uint32_t ulFreq;
 
     {
         {
-            freq = XPD_RCC_GetClockFreq(PCLK1);
+            ulFreq = RCC_ulClockFreq_Hz(PCLK1);
 
             /* if APB clock is divided, timer frequency is doubled */
             if ((RCC->CFGR.w & RCC_CFGR_PPRE) != 0)
             {
-                freq *= 2;
+                ulFreq *= 2;
             }
         }
     }
-    return freq;
+    return ulFreq;
 }
 
 /** @} */
 
-/** @} */
-
-/** @} */
-
-#endif /* USE_XPD_TIM */
-
-#if defined(USE_XPD_USART)
-#include "xpd_usart.h"
-
-/** @addtogroup USART
- * @{ */
-
-/** @addtogroup USART_Clock_Source
- * @{ */
-
-/** @defgroup USART_Clock_Source_Exported_Functions USART Clock Source Exported Functions
+/** @ingroup USART_Clock_Source
+ * @defgroup USART_Clock_Source_Exported_Functions USART Clock Source Exported Functions
  * @{ */
 
 /**
  * @brief Sets the new source clock for the selected USART.
- * @param husart: pointer to the USART handle structure
- * @param ClockSource: the new source clock which should be configured
+ * @param pxUSART: pointer to the USART handle structure
+ * @param eClockSource: the new source clock which should be configured
  */
-void XPD_USART_ClockConfig(USART_HandleType * husart, USART_ClockSourceType ClockSource)
+void USART_vClockConfig(USART_HandleType * pxUSART, USART_ClockSourceType eClockSource)
 {
-    switch ((uint32_t)husart->Inst)
+    switch ((uint32_t)pxUSART->Inst)
     {
 #ifdef RCC_CFGR3_USART1SW
         case USART1_BASE:
-            RCC->CFGR3.b.USART1SW = ClockSource;
+            RCC->CFGR3.b.USART1SW = eClockSource;
             break;
 #endif
 #ifdef RCC_CFGR3_USART2SW
         case USART2_BASE:
-            RCC->CFGR3.b.USART2SW = ClockSource;
+            RCC->CFGR3.b.USART2SW = eClockSource;
             break;
 #endif
 #ifdef RCC_CFGR3_USART3SW
         case USART3_BASE:
-            RCC->CFGR3.b.USART3SW = ClockSource;
+            RCC->CFGR3.b.USART3SW = eClockSource;
             break;
 #endif
 #ifdef RCC_CFGR3_UART4SW
         case UART4_BASE:
-            RCC->CFGR3.b.UART4SW = ClockSource;
+            RCC->CFGR3.b.UART4SW = eClockSource;
             break;
 #endif
 #ifdef RCC_CFGR3_UART5SW
         case UART5_BASE:
-            RCC->CFGR3.b.UART5SW = ClockSource;
+            RCC->CFGR3.b.UART5SW = eClockSource;
             break;
 #endif
         default:
@@ -442,97 +371,80 @@ void XPD_USART_ClockConfig(USART_HandleType * husart, USART_ClockSourceType Cloc
 
 /**
  * @brief Returns the input clock frequency of the USART.
- * @param husart: pointer to the USART handle structure
+ * @param pxUSART: pointer to the USART handle structure
  * @return The clock frequency of the USART in Hz
  */
-uint32_t XPD_USART_GetClockFreq(USART_HandleType * husart)
+uint32_t USART_ulClockFreq_Hz(USART_HandleType * pxUSART)
 {
-    USART_ClockSourceType source;
-    uint32_t freq;
+    USART_ClockSourceType eSource;
 
-    switch ((uint32_t)husart->Inst)
+    switch ((uint32_t)pxUSART->Inst)
     {
 #ifdef RCC_CFGR3_USART1SW
         case USART1_BASE:
-            source = RCC->CFGR3.b.USART1SW;
+            eSource = RCC->CFGR3.b.USART1SW;
             break;
 #endif
 #ifdef RCC_CFGR3_USART2SW
         case USART2_BASE:
-            source = RCC->CFGR3.b.USART2SW;
+            eSource = RCC->CFGR3.b.USART2SW;
             break;
 #endif
 #ifdef RCC_CFGR3_USART3SW
         case USART3_BASE:
-            source = RCC->CFGR3.b.USART3SW;
+            eSource = RCC->CFGR3.b.USART3SW;
             break;
 #endif
 #ifdef RCC_CFGR3_UART4SW
         case UART4_BASE:
-            source = RCC->CFGR3.b.UART4SW;
+            eSource = RCC->CFGR3.b.UART4SW;
             break;
 #endif
 #ifdef RCC_CFGR3_UART5SW
         case UART5_BASE:
-            source = RCC->CFGR3.b.UART5SW;
+            eSource = RCC->CFGR3.b.UART5SW;
             break;
 #endif
         default:
-            source = USART_CLOCKSOURCE_PCLKx;
+            eSource = USART_CLOCKSOURCE_PCLKx;
             break;
     }
     /* get the value for the configured source */
-    switch (source)
+    switch (eSource)
     {
         case USART_CLOCKSOURCE_SYSCLK:
-            return XPD_RCC_GetClockFreq(SYSCLK);
+            return RCC_ulClockFreq_Hz(SYSCLK);
 
         case USART_CLOCKSOURCE_HSI:
-            return HSI_VALUE;
+            return HSI_VALUE_Hz;
 
-#ifdef LSE_VALUE
+#ifdef LSE_VALUE_Hz
         case USART_CLOCKSOURCE_LSE:
-            return LSE_VALUE;
+            return LSE_VALUE_Hz;
 #endif
 
         default:
-            return XPD_RCC_GetClockFreq(PCLK1);
+            return RCC_ulClockFreq_Hz(PCLK1);
     }
 }
 
 /** @} */
 
-/** @} */
+#if defined(USB)
 
-/** @} */
-
-#endif /* USE_XPD_USART */
-
-#if defined(USE_XPD_USB)
-#include "xpd_usb.h"
-
-/** @addtogroup USB
- * @{ */
-
-/** @addtogroup USB_Clock_Source
- * @{ */
-
-/** @defgroup USB_Clock_Source_Exported_Functions USB Clock Source Exported Functions
+/** @ingroup USB_Clock_Source
+ * @defgroup USB_Clock_Source_Exported_Functions USB Clock Source Exported Functions
  * @{ */
 
 /**
  * @brief Sets the new source clock for the USB.
- * @param ClockSource: the new source clock which should be configured
+ * @param eClockSource: the new source clock which should be configured
  */
-void XPD_USB_ClockConfig(USB_ClockSourceType ClockSource)
+void USB_vClockConfig(USB_ClockSourceType eClockSource)
 {
-    RCC_REG_BIT(CFGR3, USBSW) = ClockSource;
+    RCC_REG_BIT(CFGR3, USBSW) = eClockSource;
 }
 
 /** @} */
 
-/** @} */
-
-/** @} */
-
-#endif /* USE_XPD_USB */
+#endif /* USB */

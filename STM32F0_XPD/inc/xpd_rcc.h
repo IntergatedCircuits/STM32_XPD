@@ -2,49 +2,66 @@
   ******************************************************************************
   * @file    xpd_rcc.h
   * @author  Benedek Kupper
-  * @version V0.2
-  * @date    2017-11-21
+  * @version 0.3
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers RCC Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
 #ifndef __XPD_RCC_H_
 #define __XPD_RCC_H_
 
-#include "xpd_common.h"
-#include "xpd_config.h"
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+#include <xpd_common.h>
 
 /** @defgroup RCC
  * @{ */
 
 #ifdef RCC_BB
-#define RCC_REG_BIT(REG_NAME, BIT_NAME) (RCC_BB->REG_NAME.BIT_NAME)
+/**
+ * @brief RCC register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param REG_NAME: specifies the register name.
+ * @param BIT_NAME: specifies the register bit name.
+ */
+#define         RCC_REG_BIT(REG_NAME, BIT_NAME)     \
+    (RCC_BB->REG_NAME.BIT_NAME)
 #else
-#define RCC_REG_BIT(REG_NAME, BIT_NAME) (RCC->REG_NAME.b.BIT_NAME)
+/**
+ * @brief RCC register bit accessing macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param REG_NAME: specifies the register name.
+ * @param BIT_NAME: specifies the register bit name.
+ */
+#define         RCC_REG_BIT(REG_NAME, BIT_NAME)     \
+    (RCC->REG_NAME.b.BIT_NAME)
 #endif
 
-/* Disable Backup domain write protection state change timeout */
+/* Timeouts for RCC operations */
 #define RCC_DBP_TIMEOUT         ((uint32_t)100)
 #define RCC_CLOCKSWITCH_TIMEOUT ((uint32_t)5000)   /* 5 s    */
-#ifdef LSE_STARTUP_TIMEOUT
+#ifdef  LSE_STARTUP_TIMEOUT
 #define RCC_LSE_TIMEOUT         LSE_STARTUP_TIMEOUT
 #else
 #define RCC_LSE_TIMEOUT         ((uint32_t)5000)   /* 5 s    */
 #endif
-#ifdef HSE_STARTUP_TIMEOUT
+#ifdef  HSE_STARTUP_TIMEOUT
 #define RCC_HSE_TIMEOUT         HSE_STARTUP_TIMEOUT
 #else
 #define RCC_HSE_TIMEOUT         ((uint32_t)100)    /* 100 ms */
@@ -112,16 +129,20 @@ typedef uint16_t RCC_PositionType;
 
 /** @addtogroup RCC_Peripheral_Control_Exported_Functions
  * @{ */
-void            XPD_RCC_ClockEnable         (RCC_PositionType PeriphPos);
-void            XPD_RCC_ClockDisable        (RCC_PositionType PeriphPos);
-void            XPD_RCC_Reset               (RCC_PositionType PeriphPos);
+void            RCC_vClockEnable        (RCC_PositionType PeriphPos);
+void            RCC_vClockDisable       (RCC_PositionType PeriphPos);
+void            RCC_vReset              (RCC_PositionType PeriphPos);
 /** @} */
 
 /** @} */
 
-#include "xpd_rcc_cc.h"
-#include "xpd_rcc_crs.h"
-
 /** @} */
+
+#include <xpd_mco.h>
+#include <xpd_rcc_cc.h>
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __XPD_RCC_H_ */

@@ -2,30 +2,28 @@
   ******************************************************************************
   * @file    xpd_rcc_cc.c
   * @author  Benedek Kupper
-  * @version V0.2
-  * @date    2017-05-09
+  * @version 0.3
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers RCC Core Clocks Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
-#include "xpd_rcc.h"
-#include "xpd_gpio.h"
-#include "xpd_pwr.h"
-#include "xpd_utils.h"
-#include "xpd_flash.h"
+#include <xpd_rcc.h>
+#include <xpd_flash.h>
+#include <xpd_pwr.h>
+#include <xpd_utils.h>
 
 /** @addtogroup RCC
  * @{ */
@@ -34,78 +32,101 @@
  * @{ */
 
 #ifdef RCC_PLLP_DIV_2_31_SUPPORT
-#define RCC_SET_PLLP_CFG(PLL_NAME,VALUE)     (RCC->PLL_NAME##CFGR.b.PLL_NAME##PDIV = (VALUE))
+#define RCC_SET_PLLP_CFG(PLL_NAME,VALUE)     \
+    (RCC->PLL_NAME##CFGR.b.PLL_NAME##PDIV = (VALUE))
 #else
-#define RCC_SET_PLLP_CFG(PLL_NAME,VALUE)     (RCC_REG_BIT(PLL_NAME##CFGR,PLL_NAME##P) = ((VALUE) == 7) ? 0 : 1)
+#define RCC_SET_PLLP_CFG(PLL_NAME,VALUE)     \
+    (RCC_REG_BIT(PLL_NAME##CFGR,PLL_NAME##P) = ((VALUE) == 7) ? 0 : 1)
 #endif
 
-static const uint8_t msiTable[] = {1, 2, 4, 8, 16, 24, 32, 48};
-static const uint8_t AHBPrescTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9};
-#define APBPrescTable (&AHBPrescTable[4])
+static const uint8_t rcc_aucMsiTable[] =
+    {1, 2, 4, 8, 16, 24, 32, 48};
+
+static const uint8_t rcc_aucAHBPrescTable[] =
+    {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9};
+
+#define rcc_aucAPBPrescTable (&rcc_aucAHBPrescTable[4])
+
+static RCC_OscType rcc_eReadyOscillator = MSI;
+
+RCC_CallbacksType RCC_xCallbacks = { NULL, NULL, NULL };
 
 /* gets the appropriate FLASH latency for MSI range */
-static uint8_t rcc_getFlashLatencyForMSI(RCC_MSIFreqType clockRange)
+static uint8_t RCC_prvFlashLatencyForMSI(RCC_MSIFreqType eClockRange)
 {
-    uint8_t latency = 0;
+    uint8_t ucLatency = 0;
 
-    if (XPD_PWR_GetVoltageScale() == PWR_REGVOLT_SCALE1)
+    if (PWR_eGetVoltageScale() == PWR_REGVOLT_SCALE1)
     {
-        if (clockRange > MSI_32MHz)
+        if (eClockRange > MSI_32MHz)
         {
-            latency = 2; /* 2WS */
+            ucLatency = 2; /* 2WS */
         }
-        else if (clockRange > MSI_16MHz)
+        else if (eClockRange > MSI_16MHz)
         {
-            latency = 1; /* 1WS */
+            ucLatency = 1; /* 1WS */
         }
         /* else MSI <= 16Mhz default FLASH_LATENCY_0 0WS */
     }
     else
     {
-        if (clockRange > MSI_16MHz)
+        if (eClockRange > MSI_16MHz)
         {
-            latency = 3; /* 3WS */
+            ucLatency = 3; /* 3WS */
         }
-        else if (clockRange > MSI_8MHz)
+        else if (eClockRange > MSI_8MHz)
         {
             /* MSI 16Mhz */
-            latency = 2; /* 2WS */
+            ucLatency = 2; /* 2WS */
         }
-        else if (clockRange > MSI_4MHz)
+        else if (eClockRange > MSI_4MHz)
         {
             /* MSI 8Mhz */
-            latency = 1; /* 1WS */
+            ucLatency = 1; /* 1WS */
         }
         /* else MSI < 8Mhz default FLASH_LATENCY_0 0WS */
     }
 
-    return latency;
+    return ucLatency;
 }
 
-/* converts the general clock divider to the selected clock type's format */
-static uint32_t rcc_convertClockDivider(RCC_ClockType clockType, ClockDividerType divider)
+/* converts the general clock divider to HCLK format */
+__STATIC_INLINE uint32_t RCC_prvConvertHCLKDivider(ClockDividerType eDivider)
 {
-    if (divider == CLK_DIV1)
-    {
-        return (uint32_t)CLK_DIV1;
-    }
-    else
+    if (eDivider > CLK_DIV1)
     {
         /* actual division values start from 0, with the MSB bit set */
-        divider--;
-        if (clockType == HCLK)
+        eDivider--;
+        if (eDivider > CLK_DIV16)
         {
-            if (divider > CLK_DIV16)
-            {
-                divider--; /* skip DIV32 */
-            }
-            return (uint32_t)divider | 0x8;
+            eDivider--; /* skip DIV32 */
         }
-        else /* ((clockType == PCLK1) || (clockType == PCLK2)) || MCO */
-        {
-            return (uint32_t)divider | 0x4;
-        }
+        eDivider |= 0x8;
     }
+    return (uint32_t)eDivider;
+}
+
+/* converts the general clock divider to PCLK format */
+__STATIC_INLINE uint32_t RCC_prvConvertPCLKDivider(ClockDividerType eDivider)
+{
+    if (eDivider > CLK_DIV1)
+    {
+        /* actual division values start from 0, with the MSB bit set */
+        eDivider = 0x4 | (eDivider - 1);
+    }
+    return (uint32_t)eDivider;
+}
+
+/* Gets the input oscillator of the PLL. */
+RCC_OscType RCC_prvGetPLLSource(void)
+{
+    return RCC->PLLCFGR.b.PLLSRC - 1;
+}
+
+/* Gets the input oscillator of SYSCLK. */
+RCC_OscType RCC_prvGetSYSCLKSource(void)
+{
+    return RCC->CFGR.b.SWS;
 }
 
 /** @defgroup RCC_Core_Clocks_Exported_Functions RCC Core Exported Functions
@@ -118,227 +139,341 @@ static uint32_t rcc_convertClockDivider(RCC_ClockType clockType, ClockDividerTyp
 
 /**
  * Configures the multiple speed internal oscillator.
- * @param Config: pointer to the configuration parameters
+ * @param pxConfig: pointer to the configuration parameters
  * @return Result of the operation
  */
-XPD_ReturnType XPD_RCC_MSIConfig(const RCC_MSI_InitType * Config)
+XPD_ReturnType RCC_eMSI_Config(const RCC_MSI_InitType * pxConfig)
 {
-    XPD_ReturnType result = XPD_OK;
-    RCC_OscType sysclock = XPD_RCC_GetSYSCLKSource();
+    XPD_ReturnType eResult = XPD_ERROR;
+    RCC_OscType eSYSCLK = RCC_prvGetSYSCLKSource();
 
     /* Check if MSI is used as system clock */
-    if (sysclock == MSI)
+    if (eSYSCLK == MSI)
     {
-        /* When MSI is used as system clock it will not disabled */
-        if ((RCC_REG_BIT(CR,MSIRDY) != 0) && (Config->State != OSC_ON))
+        /* Just the calibration and MSI range change are allowed */
+        if (pxConfig->State != DISABLE)
         {
-            result = XPD_ERROR;
-        }
-        /* Otherwise, just the calibration and MSI range change are allowed */
-        else
-        {
-            uint8_t FlashLatency = rcc_getFlashLatencyForMSI(Config->ClockFreq);
+            uint8_t ucLatency = RCC_prvFlashLatencyForMSI(pxConfig->ClockFreq);
 
             /* Increasing the MSI range */
-            if (FlashLatency != XPD_FLASH_GetLatency())
+            if (ucLatency > FLASH_ucGetLatency())
             {
-                /* Program the new number of wait states to the LATENCY bits in the FLASH_ACR register */
-                XPD_FLASH_SetLatency(FlashLatency);
-
-                /* Check that the new number of wait states is taken into account to access the Flash
-                 memory by reading the FLASH_ACR register */
-                if (XPD_FLASH_GetLatency() != FlashLatency)
-                {
-                    return XPD_ERROR;
-                }
+                /* Program the new number of wait states
+                 * to the LATENCY bits in the FLASH_ACR register */
+                FLASH_vSetLatency(ucLatency);
             }
 
             /* Adjust the Clock range and the calibration value.*/
-            RCC_REG_BIT(CR, MSIRGSEL) = ENABLE;
-            RCC->CR.b.MSIRANGE   = Config->ClockFreq;
+            RCC_REG_BIT(CR, MSIRGSEL) = 1;
+            RCC->CR.b.MSIRANGE   = pxConfig->ClockFreq;
 
             /* Decreasing the MSI range */
-            if (FlashLatency != XPD_FLASH_GetLatency())
+            if (ucLatency != FLASH_ucGetLatency())
             {
-                /* Program the new number of wait states to the LATENCY bits in the FLASH_ACR register */
-                XPD_FLASH_SetLatency(FlashLatency);
-
-                /* Check that the new number of wait states is taken into account to access the Flash
-                 memory by reading the FLASH_ACR register */
-                if (XPD_FLASH_GetLatency() != FlashLatency)
-                {
-                    return XPD_ERROR;
-                }
+                /* Program the new number of wait states
+                 * to the LATENCY bits in the FLASH_ACR register */
+                FLASH_vSetLatency(ucLatency);
             }
 
             /* Update SystemCoreClock variable */
-            SystemCoreClock = XPD_RCC_GetOscFreq(MSI) >> AHBPrescTable[RCC->CFGR.b.HPRE];
+            SystemCoreClock = RCC_ulOscFreq_Hz(MSI) >>
+                    rcc_aucAHBPrescTable[RCC->CFGR.b.HPRE];
 
-            /* Configure the source of time base considering new system clocks settings */
-            XPD_InitTimer();
+            /* Configure the source of time base
+             * considering new system clocks settings */
+            XPD_vInitTimer();
+            eResult = XPD_OK;
         }
     }
     else
     {
+        uint32_t ulTimeout = RCC_MSI_TIMEOUT;
+
         /* Check the MSI State */
-        if (Config->State != OSC_OFF)
+        if (pxConfig->State != DISABLE)
         {
             /* Enable the Internal Medium Speed oscillator (MSI). */
-            RCC_REG_BIT(CR,MSION) = OSC_ON;
+            RCC_REG_BIT(CR,MSION) = ENABLE;
 
             /* Wait until MSI is ready */
-            result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_MSIRDY, RCC_CR_MSIRDY, RCC_MSI_TIMEOUT);
+            eResult = XPD_eWaitForMatch(&RCC->CR.w,
+                    RCC_CR_MSIRDY, RCC_CR_MSIRDY, &ulTimeout);
 
             /* Adjust the Clock range and the calibration value.*/
-            RCC_REG_BIT(CR, MSIRGSEL) = ENABLE;
-            RCC->CR.b.MSIRANGE   = Config->ClockFreq;
+            RCC_REG_BIT(CR, MSIRGSEL) = 1;
+            RCC->CR.b.MSIRANGE   = pxConfig->ClockFreq;
         }
         else
         {
-            /* Disable the Internal High Speed oscillator (MSI). */
-            XPD_RCC_HSIConfig(OSC_OFF);
+            /* Disable the Internal Medium Speed oscillator (MSI). */
+            RCC_REG_BIT(CR,MSION) = DISABLE;
 
             /* Wait until HSI is disabled */
-            result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_MSIRDY, 0, RCC_MSI_TIMEOUT);
+            eResult = XPD_eWaitForMatch(&RCC->CR.w,
+                    RCC_CR_MSIRDY, 0, &ulTimeout);
         }
     }
 
-#if defined(RCC_CR_MSIPLLEN) && (LSE_VALUE == 32768)
+#if defined(RCC_CR_MSIPLLEN) && (LSE_VALUE_Hz == 32768)
     /* When the LSE is ready and at 32.768kHz,
      * enable MSI calibration based on LSE */
     RCC_REG_BIT(CR,MSIPLLEN) = RCC_REG_BIT(BDCR,LSERDY) & RCC_REG_BIT(CR,MSIRDY);
 #endif
 
-    return result;
+    return eResult;
 }
 
 /**
- * Sets the new state of the high speed internal oscillator.
- * @param NewState: the new operation state
+ * @brief Enables the high speed internal oscillator.
  * @return Result of the operation
  */
-XPD_ReturnType XPD_RCC_HSIConfig(FunctionalState NewState)
+XPD_ReturnType RCC_eHSI_Enable(void)
 {
-    XPD_ReturnType result = XPD_OK;
-    RCC_OscType sysclock = XPD_RCC_GetSYSCLKSource();
+    uint32_t ulTimeout = RCC_HSI_TIMEOUT;
+
+    RCC_REG_BIT(CR,HSION) = ENABLE;
+
+    /* Wait until HSI is ready */
+    return XPD_eWaitForMatch(&RCC->CR.w,
+            RCC_CR_HSIRDY, RCC_CR_HSIRDY, &ulTimeout);
+}
+
+/**
+ * @brief If not used by the system, disables the high speed internal oscillator.
+ * @return Result of the operation
+ */
+XPD_ReturnType RCC_eHSI_Disable(void)
+{
+    XPD_ReturnType eResult = XPD_ERROR;
+    RCC_OscType eSYSCLK = RCC_prvGetSYSCLKSource();
 
     /* When the HSI is used as system clock or clock source for PLL
      * it is not allowed to be disabled */
-    if (     (sysclock == HSI)
-         || ((sysclock == PLL) && (XPD_RCC_GetPLLSource() == HSI))
-    )
+    if (!(     (eSYSCLK == HSI)
+           || ((eSYSCLK == PLL) && (RCC_prvGetPLLSource() == HSI))
+          ))
     {
-        /* When HSI is used as system clock it will not disabled */
-        if ((RCC_REG_BIT(CR,HSIRDY) != 0) && (NewState == OSC_OFF))
-        {
-            result = XPD_ERROR;
-        }
-    }
-    else
-    {
-        uint32_t timeout = RCC_HSI_TIMEOUT;
-        RCC_REG_BIT(CR,HSION) = NewState;
+        uint32_t ulTimeout = RCC_HSI_TIMEOUT;
+        RCC_REG_BIT(CR,HSION) = DISABLE;
 
-        /* Check the HSI State */
-        if (NewState != OSC_OFF)
-        {
-            /* Wait until HSI is ready */
-            result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_HSIRDY, RCC_CR_HSIRDY, &timeout);
-        }
-        else
-        {
-            /* Wait until HSI is disabled */
-            result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_HSIRDY, 0, &timeout);
-        }
+        /* Wait until HSI is disabled */
+        eResult = XPD_eWaitForMatch(&RCC->CR.w,
+                RCC_CR_HSIRDY, 0, &ulTimeout);
     }
-    return result;
+    return eResult;
 }
 
-#ifdef HSE_VALUE
 /**
- * Sets the new state of the high speed external oscillator.
- * @param NewState: the new operation state
+ * @brief Enables the low speed internal oscillator.
  * @return Result of the operation
  */
-XPD_ReturnType XPD_RCC_HSEConfig(RCC_OscStateType NewState)
+XPD_ReturnType RCC_eLSI_Enable(void)
 {
-    XPD_ReturnType result = XPD_OK;
-    RCC_OscType sysclock = XPD_RCC_GetSYSCLKSource();
+    uint32_t ulTimeout = RCC_LSI_TIMEOUT;
+
+    /* Enable the Internal Low Speed oscillator (LSI). */
+    RCC_REG_BIT(CSR,LSION) = ENABLE;
+
+    /* Wait until LSI is ready */
+    return XPD_eWaitForMatch(&RCC->CSR.w,
+            RCC_CSR_LSIRDY, RCC_CSR_LSIRDY, &ulTimeout);
+}
+
+/**
+ * @brief Disables the low speed internal oscillator.
+ * @return Result of the operation
+ */
+XPD_ReturnType RCC_eLSI_Disable(void)
+{
+    uint32_t ulTimeout = RCC_LSI_TIMEOUT;
+
+    /* Disable the Internal Low Speed oscillator (LSI). */
+    RCC_REG_BIT(CSR,LSION) = DISABLE;
+
+    /* Wait until LSI is disabled */
+    return XPD_eWaitForMatch(&RCC->CSR.w,
+            RCC_CSR_LSIRDY, 0, &ulTimeout);
+}
+
+#ifdef RCC_HSI48_SUPPORT
+/**
+ * @brief Enables the 48 MHz high speed internal oscillator.
+ * @return Result of the operation
+ */
+XPD_ReturnType RCC_eHSI48_Enable(void)
+{
+    uint32_t ulTimeout = RCC_HSI48_TIMEOUT;
+    RCC_REG_BIT(CRRCR,HSI48ON) = ENABLE;
+
+    /* Wait until HSI is ready */
+    return XPD_eWaitForMatch(&RCC->CRRCR.w,
+            RCC_CRRCR_HSI48RDY, RCC_CRRCR_HSI48RDY, &ulTimeout);
+}
+
+/**
+ * @brief If not used by the system, disables the 48 MHz high speed internal oscillator.
+ * @return Result of the operation
+ */
+XPD_ReturnType RCC_eHSI48_Disable(void)
+{
+    XPD_ReturnType eResult = XPD_ERROR;
+    RCC_OscType eSYSCLK = RCC_prvGetSYSCLKSource();
+
+    /* When the HSI48 is used as system clock or clock source for PLL
+     * it is not allowed to be disabled */
+    if (!(     (eSYSCLK == HSI48)
+           || ((eSYSCLK == PLL) && (RCC_prvGetPLLSource() == HSI48))
+          ))
+    {
+        uint32_t ulTimeout = RCC_HSI48_TIMEOUT;
+        RCC_REG_BIT(CRRCR,HSI48ON) = ENABLE;
+
+        /* Wait until HSI is disabled */
+        eResult = XPD_eWaitForMatch(&RCC->CRRCR.w,
+                RCC_CRRCR_HSI48RDY, 0, &ulTimeout);
+    }
+    return eResult;
+}
+#endif
+
+#ifdef HSE_VALUE_Hz
+/**
+ * @brief Sets the new state of the high speed external oscillator.
+ * @param eOscState: the new oscillator configuration
+ * @return Result of the operation
+ */
+XPD_ReturnType RCC_eHSE_Config(RCC_OscStateType eOscState)
+{
+    XPD_ReturnType eResult = XPD_ERROR;
+    RCC_OscType eSYSCLK = RCC_prvGetSYSCLKSource();
 
     /* When the HSE is used as system clock or clock source for PLL
      * it is not allowed to be disabled */
-    if (     (sysclock == HSE)
-         || ((sysclock == PLL) && (XPD_RCC_GetPLLSource() == HSE))
-    )
+    if (     (eSYSCLK == HSE)
+         || ((eSYSCLK == PLL) && (RCC_prvGetPLLSource() == HSE))
+         )
     {
-        if ((RCC_REG_BIT(CR,HSERDY) != 0) && (NewState == OSC_OFF))
+        /* OK if the configuration is already set */
+        if ((RCC_REG_BIT(CR,HSEON)  == (eOscState &  1)) &&
+            (RCC_REG_BIT(CR,HSEBYP) == (eOscState >> 1)))
         {
-            result = XPD_ERROR;
+            eResult = XPD_OK;
         }
     }
     else
     {
-        uint32_t timeout = RCC_HSE_TIMEOUT;
-        /* Reset HSEON and HSEBYP bits before configuring the HSE */
-        RCC_REG_BIT(CR,HSEON)  = 0;
-        RCC_REG_BIT(CR,HSEBYP) = 0;
+        uint32_t ulTimeout = RCC_HSE_TIMEOUT;
 
-        /* Wait until HSE is disabled */
-        result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_HSERDY, 0, &timeout);
+        if (eOscState == OSC_OFF)
+        {
+            RCC_REG_BIT(CR,HSEON)  = 0;
+            RCC_REG_BIT(CR,HSEBYP) = 0;
 
-        if ((result == XPD_OK) && (NewState != OSC_OFF))
+            /* Wait until HSE is disabled */
+            eResult = XPD_eWaitForMatch(&RCC->CR.w,
+                    RCC_CR_HSERDY, 0, &ulTimeout);
+        }
+        else
         {
             RCC_REG_BIT(CR,HSEON)  = 1;
-            RCC_REG_BIT(CR,HSEBYP) = NewState >> 1;
+            RCC_REG_BIT(CR,HSEBYP) = eOscState >> 1;
 
             /* Wait until HSE is ready */
-            result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_HSERDY, RCC_CR_HSERDY, &timeout);
+            eResult = XPD_eWaitForMatch(&RCC->CR.w,
+                    RCC_CR_HSERDY, RCC_CR_HSERDY, &ulTimeout);
         }
     }
-    return result;
+    return eResult;
+}
+#endif
+
+#ifdef LSE_VALUE_Hz
+/**
+ * @brief Sets the new state of the low speed external oscillator.
+ * @param eOscState: the new oscillator configuration
+ * @return Result of the operation
+ */
+XPD_ReturnType RCC_eLSE_Config(RCC_OscStateType eOscState)
+{
+    XPD_ReturnType eResult = XPD_OK;
+    uint32_t ulTimeout = RCC_DBP_TIMEOUT;
+
+    /* Enable write access to Backup domain */
+    PWR_REG_BIT(CR1,DBP) = 1;
+
+    /* Wait for Backup domain Write protection disable */
+    eResult = XPD_eWaitForMatch(&PWR->CR1.w,
+            PWR_CR1_DBP, PWR_CR1_DBP, &ulTimeout);
+
+    if (eResult == XPD_OK)
+    {
+        ulTimeout = RCC_LSE_TIMEOUT;
+
+        if (eOscState == OSC_OFF)
+        {
+            RCC_REG_BIT(BDCR,LSEON)  = 0;
+            RCC_REG_BIT(BDCR,LSEBYP) = 0;
+
+            /* Wait until HSE is disabled */
+            eResult = XPD_eWaitForMatch(&RCC->BDCR.w,
+                    RCC_BDCR_LSERDY, 0, &ulTimeout);
+        }
+        else
+        {
+            RCC_REG_BIT(BDCR,LSEON)  = 1;
+            RCC_REG_BIT(BDCR,LSEBYP) = eOscState >> 1;
+
+            /* Wait until HSE is ready */
+            eResult = XPD_eWaitForMatch(&RCC->BDCR.w,
+                    RCC_BDCR_LSERDY, RCC_BDCR_LSERDY, &ulTimeout);
+        }
+    }
+
+#if defined(RCC_CR_MSIPLLEN) && (LSE_VALUE_Hz == 32768)
+    /* When the LSE is ready and at 32.768kHz,
+     * enable MSI calibration based on LSE */
+    RCC_REG_BIT(CR,MSIPLLEN) = RCC_REG_BIT(BDCR,LSERDY) & RCC_REG_BIT(CR,MSIRDY);
+#endif
+
+    return eResult;
 }
 #endif
 
 /**
- * Configures the phase locked loop.
- * @param Config: pointer to the configuration parameters
+ * @brief Configures the phase locked loop.
+ * @param pxConfig: pointer to the configuration parameters
  * @return Result of the operation
  */
-XPD_ReturnType XPD_RCC_PLLConfig(const RCC_PLL_InitType * Config)
+XPD_ReturnType RCC_ePLL_Config(const RCC_PLL_InitType * pxConfig)
 {
-    XPD_ReturnType result = XPD_ERROR;
-    RCC_OscType sysclock = XPD_RCC_GetSYSCLKSource();
+    XPD_ReturnType eResult = XPD_ERROR;
+    RCC_OscType eSYSCLK = RCC_prvGetSYSCLKSource();
 
     /* Check if the PLL is used as system clock or not */
-    if (sysclock != PLL)
+    if (eSYSCLK != PLL)
     {
-        uint32_t timeout = RCC_PLL_TIMEOUT;
+        uint32_t ulTimeout = RCC_PLL_TIMEOUT;
         /* Disable the main PLL. */
-        RCC_REG_BIT(CR,PLLON) = OSC_OFF;
+        RCC_REG_BIT(CR,PLLON) = DISABLE;
 
-        if (Config->State != OSC_OFF)
+        if (pxConfig->State != DISABLE)
         {
-            /* Wait until PLL is disabled */
-            result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_PLLRDY, 0, &timeout);
+            /* Configure the main PLL clock source and multiplication factor */
+            RCC->PLLCFGR.b.PLLSRC = pxConfig->Source + 1;
 
-            if (result == XPD_OK)
-            {
-                /* Configure the main PLL clock source and multiplication factor. */
-                RCC->PLLCFGR.b.PLLSRC = Config->Source + 1;
+            RCC->PLLCFGR.b.PLLM = pxConfig->M - 1;
+            RCC->PLLCFGR.b.PLLN = pxConfig->N;
+            RCC_SET_PLLP_CFG(PLL, pxConfig->P);
+            RCC->PLLCFGR.b.PLLQ = (pxConfig->Q / 2) - 1;
+            RCC->PLLCFGR.b.PLLR = (pxConfig->R / 2) - 1;
 
-                RCC->PLLCFGR.b.PLLM = Config->M - 1;
-                RCC->PLLCFGR.b.PLLN = Config->N;
-                RCC_SET_PLLP_CFG(PLL, Config->P);
-                RCC->PLLCFGR.b.PLLQ = (Config->Q >> 1) - 1;
-                RCC->PLLCFGR.b.PLLR = (Config->R >> 1) - 1;
+            /* Enable the main PLL */
+            RCC_REG_BIT(CR,PLLON) = ENABLE;
+            RCC_REG_BIT(PLLCFGR,PLLREN) = ENABLE;
 
-                /* Enable the main PLL. */
-                RCC_REG_BIT(CR,PLLON) = OSC_ON;
-                RCC_REG_BIT(PLLCFGR,PLLREN) = ENABLE;
-
-                /* Wait until PLL is ready */
-                result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_PLLRDY, RCC_CR_PLLRDY, &timeout);
-            }
+            /* Wait until PLL is ready */
+            eResult = XPD_eWaitForMatch(&RCC->CR.w,
+                    RCC_CR_PLLRDY, RCC_CR_PLLRDY, &ulTimeout);
         }
         else
         {
@@ -351,286 +486,164 @@ XPD_ReturnType XPD_RCC_PLLConfig(const RCC_PLL_InitType * Config)
             {
                 RCC->PLLCFGR.b.PLLSRC = 0;
             }
-            CLEAR_BIT(RCC->PLLCFGR.w, RCC_PLLCFGR_PLLPEN | RCC_PLLCFGR_PLLQEN | RCC_PLLCFGR_PLLREN);
+            CLEAR_BIT(RCC->PLLCFGR.w,
+                RCC_PLLCFGR_PLLPEN | RCC_PLLCFGR_PLLQEN | RCC_PLLCFGR_PLLREN);
 
             /* Wait until PLL is ready */
-            result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_PLLRDY, 0, &timeout);
+            eResult = XPD_eWaitForMatch(&RCC->CR.w,
+                    RCC_CR_PLLRDY, 0, &ulTimeout);
         }
     }
-    return result;
+    return eResult;
 }
 
 /**
- * Configures the SAI1 phase locked loop.
- * @param Config: pointer to the configuration parameters
+ * @brief Configures the SAI1 phase locked loop.
+ * @param pxConfig: pointer to the configuration parameters
  * @return Result of the operation
  */
-XPD_ReturnType XPD_RCC_PLLSAI1Config(const RCC_PLL_InitType * Config)
+XPD_ReturnType RCC_ePLLSAI1_Config(const RCC_PLL_InitType * pxConfig)
 {
-    XPD_ReturnType result;
-    RCC_OscType pllsrc = XPD_RCC_GetPLLSource();
+    XPD_ReturnType eResult;
 
     /* Clock source and divider M is only applied if no other PLLs are configured yet */
-    if (pllsrc == NO_OSC)
+    if (RCC_prvGetPLLSource() == NO_OSC)
     {
         /* Configure the main PLL clock source and multiplication factor. */
-        RCC->PLLCFGR.b.PLLSRC = Config->Source + 1;
+        RCC->PLLCFGR.b.PLLSRC = pxConfig->Source + 1;
 
-        RCC->PLLCFGR.b.PLLM = Config->M - 1;
+        RCC->PLLCFGR.b.PLLM = pxConfig->M - 1;
     }
 
     {
-        uint32_t timeout = RCC_PLL_TIMEOUT;
+        uint32_t ulTimeout = RCC_PLL_TIMEOUT;
 
         /* Disable the PLLSAI1 */
         RCC_REG_BIT(CR, PLLSAI1ON) = DISABLE;
 
         /* Wait until PLLSAI1 is disabled */
-        result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_PLLSAI1RDY, 0, &timeout);
+        eResult = XPD_eWaitForMatch(&RCC->CR.w,
+                RCC_CR_PLLSAI1RDY, 0, &ulTimeout);
 
-        if ((result == XPD_OK) && (Config->State != OSC_OFF))
+        if ((eResult == XPD_OK) && (pxConfig->State != DISABLE))
         {
             /* Set SAI1 PLL parameters */
-            RCC->PLLSAI1CFGR.b.PLLSAI1N = Config->N;
-            RCC_SET_PLLP_CFG(PLLSAI1, Config->P);
-            RCC->PLLSAI1CFGR.b.PLLSAI1Q = (Config->Q >> 1) - 1;
-            RCC->PLLSAI1CFGR.b.PLLSAI1R = (Config->R >> 1) - 1;
+            RCC->PLLSAI1CFGR.b.PLLSAI1N = pxConfig->N;
+            RCC_SET_PLLP_CFG(PLLSAI1, pxConfig->P);
+            RCC->PLLSAI1CFGR.b.PLLSAI1Q = (pxConfig->Q >> 1) - 1;
+            RCC->PLLSAI1CFGR.b.PLLSAI1R = (pxConfig->R >> 1) - 1;
 
             /* Enable the PLLSAI1 */
             RCC_REG_BIT(CR, PLLSAI1ON) = ENABLE;
 
+            ulTimeout = RCC_PLL_TIMEOUT;
             /* Wait until PLLSAI1 is ready */
-            result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_PLLSAI1RDY, RCC_CR_PLLSAI1RDY, &timeout);
+            eResult = XPD_eWaitForMatch(&RCC->CR.w,
+                    RCC_CR_PLLSAI1RDY, RCC_CR_PLLSAI1RDY, &ulTimeout);
         }
     }
-    return result;
+    return eResult;
 }
 
 #ifdef RCC_PLLSAI2_SUPPORT
 /**
- * Configures the SAI2 phase locked loop.
- * @param Config: pointer to the configuration parameters (Q is not used)
+ * @brief Configures the SAI2 phase locked loop.
+ * @param pxConfig: pointer to the configuration parameters (Q is not used)
  * @return Result of the operation
  */
-XPD_ReturnType XPD_RCC_PLLSAI2Config(const RCC_PLL_InitType * Config)
+XPD_ReturnType RCC_ePLLSAI2_Config(const RCC_PLL_InitType * pxConfig)
 {
-    XPD_ReturnType result;
-    RCC_OscType pllsrc = XPD_RCC_GetPLLSource();
+    XPD_ReturnType eResult;
 
     /* Clock source and divider M is only applied if no other PLLs are configured yet */
-    if (pllsrc == NO_OSC)
+    if (RCC_prvGetPLLSource() == NO_OSC)
     {
         /* Configure the main PLL clock source and multiplication factor. */
-        RCC->PLLCFGR.b.PLLSRC = Config->Source + 1;
+        RCC->PLLCFGR.b.PLLSRC = pxConfig->Source + 1;
 
-        RCC->PLLCFGR.b.PLLM = Config->M - 1;
+        RCC->PLLCFGR.b.PLLM = pxConfig->M - 1;
     }
 
     {
-        uint32_t timeout = RCC_PLL_TIMEOUT;
+        uint32_t ulTimeout = RCC_PLL_TIMEOUT;
 
         /* Disable the PLLSAI2 */
         RCC_REG_BIT(CR, PLLSAI2ON) = DISABLE;
 
         /* Wait until PLLSAI2 is disabled */
-        result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_PLLSAI2RDY, 0, &timeout);
+        eResult = XPD_eWaitForMatch(&RCC->CR.w,
+                RCC_CR_PLLSAI2RDY, 0, &ulTimeout);
 
-        if ((result == XPD_OK) && (Config->State != OSC_OFF))
+        if ((eResult == XPD_OK) && (pxConfig->State != DISABLE))
         {
             /* Set SAI2 PLL parameters */
-            RCC->PLLSAI2CFGR.b.PLLSAI2N = Config->N;
-            RCC_SET_PLLP_CFG(PLLSAI2, Config->P);
-            RCC->PLLSAI2CFGR.b.PLLSAI2R = (Config->R >> 1) - 1;
+            RCC->PLLSAI2CFGR.b.PLLSAI2N = pxConfig->N;
+            RCC_SET_PLLP_CFG(PLLSAI2, pxConfig->P);
+            RCC->PLLSAI2CFGR.b.PLLSAI2R = (pxConfig->R >> 1) - 1;
 
             /* Enable the PLLSAI2 */
             RCC_REG_BIT(CR, PLLSAI2ON) = ENABLE;
 
+            ulTimeout = RCC_PLL_TIMEOUT;
             /* Wait until PLLSAI2 is ready */
-            result = XPD_WaitForMatch(&RCC->CR.w, RCC_CR_PLLSAI2RDY, RCC_CR_PLLSAI2RDY, &timeout);
+            eResult = XPD_eWaitForMatch(&RCC->CR.w,
+                    RCC_CR_PLLSAI2RDY, RCC_CR_PLLSAI2RDY, &ulTimeout);
         }
     }
-    return result;
+    return eResult;
 }
 #endif
-
-/**
- * Sets the new state of the low speed internal oscillator.
- * @param NewState: the new operation state
- * @return Result of the operation
- */
-XPD_ReturnType XPD_RCC_LSIConfig(FunctionalState NewState)
-{
-    XPD_ReturnType result = XPD_OK;
-    uint32_t timeout = RCC_LSI_TIMEOUT;
-
-    /* Check the LSI State */
-    if (NewState != OSC_OFF)
-    {
-        /* Enable the Internal Low Speed oscillator (LSI). */
-        RCC_REG_BIT(CSR,LSION) = OSC_ON;
-
-        /* Wait until LSI is ready */
-        result = XPD_WaitForMatch(&RCC->CSR.w, RCC_CSR_LSIRDY, RCC_CSR_LSIRDY, &timeout);
-    }
-    else
-    {
-        /* Disable the Internal Low Speed oscillator (LSI). */
-        RCC_REG_BIT(CSR,LSION) = OSC_OFF;
-
-        /* Wait until LSI is disabled */
-        result = XPD_WaitForMatch(&RCC->CSR.w, RCC_CSR_LSIRDY, 0, &timeout);
-    }
-    return result;
-}
-
-#ifdef LSE_VALUE
-/**
- * Sets the new state of the low speed external oscillator.
- * @param NewState: the new operation state
- * @return Result of the operation
- */
-XPD_ReturnType XPD_RCC_LSEConfig(RCC_OscStateType NewState)
-{
-    XPD_ReturnType result = XPD_OK;
-    uint32_t timeout = RCC_DBP_TIMEOUT;
-
-    /* Enable write access to Backup domain */
-    PWR_REG_BIT(CR1,DBP) = 1;
-
-    /* Wait for Backup domain Write protection disable */
-    result = XPD_WaitForMatch(&PWR->CR1.w, PWR_CR1_DBP, PWR_CR1_DBP, &timeout);
-    if (result != XPD_OK)
-    {
-        return result;
-    }
-
-    /* Reset LSEON and LSEBYP bits before configuring the LSE */
-    RCC_REG_BIT(BDCR,LSEON)  = 0;
-    RCC_REG_BIT(BDCR,LSEBYP) = 0;
-
-    timeout = RCC_LSE_TIMEOUT;
-    /* Wait until LSE is disabled */
-    result = XPD_WaitForMatch(&RCC->BDCR.w, RCC_BDCR_LSERDY, 0, &timeout);
-
-    /* Check the LSE State */
-    if ((result == XPD_OK) && (NewState != OSC_OFF))
-    {
-        RCC_REG_BIT(BDCR,LSEON)  = 1;
-        RCC_REG_BIT(BDCR,LSEBYP) = NewState >> 1;
-
-        /* Wait until LSE is ready */
-        result = XPD_WaitForMatch(&RCC->BDCR.w, RCC_BDCR_LSERDY, RCC_BDCR_LSERDY, &timeout);
-    }
-
-#if defined(RCC_CR_MSIPLLEN) && (LSE_VALUE == 32768)
-    /* When the LSE is ready and at 32.768kHz,
-     * enable MSI calibration based on LSE */
-    RCC_REG_BIT(CR,MSIPLLEN) = RCC_REG_BIT(BDCR,LSERDY) & RCC_REG_BIT(CR,MSIRDY);
-#endif
-
-    return result;
-}
-#endif
-
-#ifdef RCC_HSI48_SUPPORT
-/**
- * Sets the new state of the 48MHz internal oscillator.
- * @param NewState: the new operation state
- * @return Result of the operation
- */
-XPD_ReturnType XPD_RCC_HSI48Config(FunctionalState NewState)
-{
-    XPD_ReturnType result = XPD_OK;
-    uint32_t timeout = RCC_HSI48_TIMEOUT;
-
-    /* Check the LSI State */
-    if (NewState != OSC_OFF)
-    {
-        /* Enable the 48MHz oscillator  */
-        RCC_REG_BIT(CRRCR,HSI48ON) = OSC_ON;
-
-        /* Wait until LSI is ready */
-        result = XPD_WaitForMatch(&RCC->CRRCR.w, RCC_CRRCR_HSI48RDY, RCC_CRRCR_HSI48RDY, &timeout);
-    }
-    else
-    {
-        /* Disable the 48MHz oscillator  */
-        RCC_REG_BIT(CRRCR,HSI48ON) = OSC_OFF;
-
-        /* Wait until LSI is disabled */
-        result = XPD_WaitForMatch(&RCC->CRRCR.w, RCC_CRRCR_HSI48RDY, 0, &timeout);
-    }
-    return result;
-}
-#endif
-
-/**
- * @brief Gets the input oscillator of the PLL.
- * @return The oscillator connected to the PLL
- */
-RCC_OscType XPD_RCC_GetPLLSource(void)
-{
-    return RCC->PLLCFGR.b.PLLSRC - 1;
-}
-
-/**
- * @brief Gets the input oscillator of SYSCLK.
- * @return The oscillator connected to SYSCLK
- */
-RCC_OscType XPD_RCC_GetSYSCLKSource(void)
-{
-    return RCC->CFGR.b.SWS;
-}
 
 /**
  * @brief Gets the oscillator frequency.
- * @param Oscillator: the selected oscillator
+ * @param eOscillator: the selected oscillator
  * @return The frequency of the oscillator in Hz.
  */
-uint32_t XPD_RCC_GetOscFreq(RCC_OscType Oscillator)
+uint32_t RCC_ulOscFreq_Hz(RCC_OscType eOscillator)
 {
-    uint32_t m, n, r, freq;
-
-    switch (Oscillator)
+    switch (eOscillator)
     {
-#ifdef HSE_VALUE
+#ifdef HSE_VALUE_Hz
         case HSE:
-            return HSE_VALUE;
+            return HSE_VALUE_Hz;
 #endif
 
         case HSI:
-            return HSI_VALUE;
+            return HSI_VALUE_Hz;
 
         case MSI:
         {
-            uint32_t range = RCC->CR.b.MSIRANGE;
+            uint32_t ulRange = RCC->CR.b.MSIRANGE;
 
-            if (range < 4)
+            if (ulRange < 4)
             {
-                freq = (uint32_t)msiTable[range] * 100000;
+                return (uint32_t)rcc_aucMsiTable[ulRange] * 100000;
             }
             else
             {
-                freq = (uint32_t)msiTable[range - 4] * 1000000;
+                return (uint32_t)rcc_aucMsiTable[ulRange - 4] * 1000000;
             }
-            return freq;
         }
 
         case PLL:
         {
-            m = RCC->PLLCFGR.b.PLLM + 1;
-            n = RCC->PLLCFGR.b.PLLN;
-            r = (RCC->PLLCFGR.b.PLLR + 1) * 2;
+            uint32_t ulM, ulN, ulR;
 
-            return XPD_RCC_GetOscFreq(XPD_RCC_GetPLLSource()) * n / (m * r);
+            ulM = RCC->PLLCFGR.b.PLLM + 1;
+            ulN = RCC->PLLCFGR.b.PLLN;
+            ulR =(RCC->PLLCFGR.b.PLLR + 1) * 2;
+
+            /* Recursive call - different branch is entered */
+            return RCC_ulOscFreq_Hz(RCC_prvGetPLLSource())
+                    * ulN / (ulM * ulR);
         }
 
         case LSI:
-            return LSI_VALUE;
+            return LSI_VALUE_Hz;
 
-#ifdef LSE_VALUE
+#ifdef LSE_VALUE_Hz
         case LSE:
-            return LSE_VALUE;
+            return LSE_VALUE_Hz;
 #endif
 
         default:
@@ -638,88 +651,86 @@ uint32_t XPD_RCC_GetOscFreq(RCC_OscType Oscillator)
     }
 }
 
-static RCC_OscType rcc_readyOscillator = MSI;
-
 /**
  * @brief Gets the oscillator which was detected ready by the interrupt handler.
  * @return The oscillator which is currently ready
  */
-RCC_OscType XPD_RCC_GetReadyOsc(void)
+RCC_OscType RCC_eGetReadyOsc(void)
 {
-    return rcc_readyOscillator;
+    return rcc_eReadyOscillator;
 }
 
 /**
  * @brief RCC interrupt handler that provides oscillator ready callback.
  */
-void XPD_RCC_IRQHandler(void)
+void RCC_vIRQHandler(void)
 {
-    uint32_t cifr = RCC->CIFR.w;
-    uint32_t cier = RCC->CIFR.w;
+    uint32_t ulCIFR = RCC->CIFR.w;
+    uint32_t ulCIER = RCC->CIFR.w;
 
-#ifdef LSE_VALUE
+#ifdef LSE_VALUE_Hz
     /* Check RCC LSERDY flag  */
-    if (((cifr & RCC_CIFR_LSERDYF) != 0) && ((cier & RCC_CIER_LSERDYIE) != 0))
+    if (((ulCIFR & RCC_CIFR_LSERDYF) != 0) && ((ulCIER & RCC_CIER_LSERDYIE) != 0))
     {
         /* Clear RCC LSERDY pending bit */
-        XPD_RCC_ClearFlag(LSERDY);
+        RCC_FLAG_CLEAR(LSERDY);
 
         /* LSE Ready callback */
-        rcc_readyOscillator = LSE;
-        XPD_SAFE_CALLBACK(XPD_RCC_Callbacks.OscReady,);
+        rcc_eReadyOscillator = LSE;
+        XPD_SAFE_CALLBACK(RCC_xCallbacks.OscReady,);
     }
 #endif
     /* Check RCC LSIRDY flag  */
-    if (((cifr & RCC_CIFR_LSIRDYF) != 0) && ((cier & RCC_CIER_LSIRDYIE) != 0))
+    if (((ulCIFR & RCC_CIFR_LSIRDYF) != 0) && ((ulCIER & RCC_CIER_LSIRDYIE) != 0))
     {
         /* Clear RCC LSIRDY pending bit */
-        XPD_RCC_ClearFlag(LSIRDY);
+        RCC_FLAG_CLEAR(LSIRDY);
 
         /* LSI Ready callback */
-        rcc_readyOscillator = LSI;
-        XPD_SAFE_CALLBACK(XPD_RCC_Callbacks.OscReady,);
+        rcc_eReadyOscillator = LSI;
+        XPD_SAFE_CALLBACK(RCC_xCallbacks.OscReady,);
     }
     /* Check RCC PLLRDY flag  */
-    if (((cifr & RCC_CIFR_PLLRDYF) != 0) && ((cier & RCC_CIER_PLLRDYIE) != 0))
+    if (((ulCIFR & RCC_CIFR_PLLRDYF) != 0) && ((ulCIER & RCC_CIER_PLLRDYIE) != 0))
     {
         /* Clear RCC PLLRDY pending bit */
-        XPD_RCC_ClearFlag(PLLRDY);
+        RCC_FLAG_CLEAR(PLLRDY);
 
         /* PLL Ready callback */
-        rcc_readyOscillator = PLL;
-        XPD_SAFE_CALLBACK(XPD_RCC_Callbacks.OscReady,);
+        rcc_eReadyOscillator = PLL;
+        XPD_SAFE_CALLBACK(RCC_xCallbacks.OscReady,);
     }
-#ifdef HSE_VALUE
+#ifdef HSE_VALUE_Hz
     /* Check RCC HSERDY flag  */
-    if (((cifr & RCC_CIFR_HSERDYF) != 0) && ((cier & RCC_CIER_HSERDYIE) != 0))
+    if (((ulCIFR & RCC_CIFR_HSERDYF) != 0) && ((ulCIER & RCC_CIER_HSERDYIE) != 0))
     {
         /* Clear RCC HSERDY pending bit */
-        XPD_RCC_ClearFlag(HSERDY);
+        RCC_FLAG_CLEAR(HSERDY);
 
         /* HSE Ready callback */
-        rcc_readyOscillator = HSE;
-        XPD_SAFE_CALLBACK(XPD_RCC_Callbacks.OscReady,);
+        rcc_eReadyOscillator = HSE;
+        XPD_SAFE_CALLBACK(RCC_xCallbacks.OscReady,);
     }
 #endif
     /* Check RCC HSIRDY flag  */
-    if (((cifr & RCC_CIFR_HSIRDYF) != 0) && ((cier & RCC_CIER_HSIRDYIE) != 0))
+    if (((ulCIFR & RCC_CIFR_HSIRDYF) != 0) && ((ulCIER & RCC_CIER_HSIRDYIE) != 0))
     {
         /* Clear RCC HSIRDY pending bit */
-        XPD_RCC_ClearFlag(HSIRDY);
+        RCC_FLAG_CLEAR(HSIRDY);
 
         /* HSI Ready callback */
-        rcc_readyOscillator = HSI;
-        XPD_SAFE_CALLBACK(XPD_RCC_Callbacks.OscReady,);
+        rcc_eReadyOscillator = HSI;
+        XPD_SAFE_CALLBACK(RCC_xCallbacks.OscReady,);
     }
     /* Check RCC MSIRDY flag  */
-    if (((cifr & RCC_CIFR_MSIRDYF) != 0) && ((cier & RCC_CIER_MSIRDYIE) != 0))
+    if (((ulCIFR & RCC_CIFR_MSIRDYF) != 0) && ((ulCIER & RCC_CIER_MSIRDYIE) != 0))
     {
         /* Clear RCC MSIRDY pending bit */
-        XPD_RCC_ClearFlag(MSIRDY);
+        RCC_FLAG_CLEAR(MSIRDY);
 
         /* HSI Ready callback */
-        rcc_readyOscillator = MSI;
-        XPD_SAFE_CALLBACK(XPD_RCC_Callbacks.OscReady,);
+        rcc_eReadyOscillator = MSI;
+        XPD_SAFE_CALLBACK(RCC_xCallbacks.OscReady,);
     }
 }
 
@@ -732,24 +743,27 @@ void XPD_RCC_IRQHandler(void)
 
 /**
  * @brief Sets the new configuration for the AHB system clocks and the new matching flash latency.
- * @param SYSCLK_Source: @ref RCC_ClockType::SYSCLK input source selection. Permitted values:
+ * @param eSYSCLK_Source: @ref RCC_ClockType::SYSCLK input source selection. Permitted values:
              @arg @ref RCC_OscType::HSI
              @arg @ref RCC_OscType::HSE
              @arg @ref RCC_OscType::PLL
- * @param HCLK_Divider: Clock divider of @ref RCC_ClockType::HCLK clock. Must not be CLK_DIV32.
- * @param FlashLatency: the desired amount of flash wait states
+ * @param eHCLK_Divider: Clock divider of @ref RCC_ClockType::HCLK clock. Must not be CLK_DIV32.
+ * @param ucFlashLatency: the desired amount of flash wait states
  * @return Result of the operation
  * @note To correctly read data from FLASH memory, the number of wait states must be
  * correctly programmed according to the frequency of the CPU clock (HCLK) of the device.
  */
-XPD_ReturnType XPD_RCC_HCLKConfig(RCC_OscType SYSCLK_Source, ClockDividerType HCLK_Divider, uint8_t FlashLatency)
+XPD_ReturnType RCC_eHCLK_Config(
+        RCC_OscType         eSYSCLK_Source,
+        ClockDividerType    eHCLK_Divider,
+        uint8_t             ucFlashLatency)
 {
-    XPD_ReturnType result;
-    uint32_t clkDiv;
-    uint32_t timeout = RCC_CLOCKSWITCH_TIMEOUT;
+    XPD_ReturnType eResult;
+    uint32_t ulClkDiv;
+    uint32_t ulTimeout = RCC_CLOCKSWITCH_TIMEOUT;
 
     /* Checking whether the SYSCLK source is ready to be used */
-    switch (SYSCLK_Source)
+    switch (eSYSCLK_Source)
     {
         case MSI:
             /* Check the MSI ready flag */
@@ -767,7 +781,7 @@ XPD_ReturnType XPD_RCC_HCLKConfig(RCC_OscType SYSCLK_Source, ClockDividerType HC
             }
             break;
 
-#ifdef HSE_VALUE
+#ifdef HSE_VALUE_Hz
         case HSE:
             /* Check the HSE ready flag */
             if (RCC_REG_BIT(CR,HSERDY) == 0)
@@ -790,195 +804,93 @@ XPD_ReturnType XPD_RCC_HCLKConfig(RCC_OscType SYSCLK_Source, ClockDividerType HC
     }
 
     /* Increasing the CPU frequency */
-    if (FlashLatency > XPD_FLASH_GetLatency())
+    if (ucFlashLatency > FLASH_ucGetLatency())
     {
-        /* Program the new number of wait states to the LATENCY bits in the FLASH_ACR register */
-        XPD_FLASH_SetLatency(FlashLatency);
-
-        /* Check that the new number of wait states is taken into account to access the Flash
-         memory by reading the FLASH_ACR register */
-        if (XPD_FLASH_GetLatency() != FlashLatency)
-        {
-            return XPD_ERROR;
-        }
+        /* Program the new number of wait states
+         * to the LATENCY bits in the FLASH_ACR register */
+        FLASH_vSetLatency(ucFlashLatency);
     }
 
     /* Set SYSCLK source and HCLK prescaler */
-    clkDiv = rcc_convertClockDivider(HCLK, HCLK_Divider);
-    RCC->CFGR.b.HPRE = clkDiv;
-    RCC->CFGR.b.SW   = SYSCLK_Source;
+    ulClkDiv = RCC_prvConvertHCLKDivider(eHCLK_Divider);
+    RCC->CFGR.b.HPRE = ulClkDiv;
+    RCC->CFGR.b.SW   = eSYSCLK_Source;
 
     /* wait until the settings have been processed */
-    result = XPD_WaitForMatch(&RCC->CFGR.w, RCC_CFGR_SWS, SYSCLK_Source << 2, &timeout);
+    eResult = XPD_eWaitForMatch(&RCC->CFGR.w,
+            RCC_CFGR_SWS, eSYSCLK_Source << RCC_CFGR_SWS_Pos, &ulTimeout);
 
     /* Decreasing the CPU frequency */
-    if (FlashLatency != XPD_FLASH_GetLatency())
+    if (ucFlashLatency != FLASH_ucGetLatency())
     {
-        /* Program the new number of wait states to the LATENCY bits in the FLASH_ACR register */
-        XPD_FLASH_SetLatency(FlashLatency);
-
-        /* Check that the new number of wait states is taken into account to access the Flash
-         memory by reading the FLASH_ACR register */
-        if (XPD_FLASH_GetLatency() != FlashLatency)
-        {
-            return XPD_ERROR;
-        }
+        /* Program the new number of wait states
+         * to the LATENCY bits in the FLASH_ACR register */
+        FLASH_vSetLatency(ucFlashLatency);
     }
 
     /* Update SystemCoreClock variable */
-    SystemCoreClock = XPD_RCC_GetOscFreq(SYSCLK_Source) >> AHBPrescTable[clkDiv];
+    SystemCoreClock = RCC_ulOscFreq_Hz(eSYSCLK_Source) >>
+            rcc_aucAHBPrescTable[ulClkDiv];
 
-    /* Configure the source of time base considering new system clocks settings*/
-    XPD_InitTimer();
+    /* Configure the source of time base
+     * considering new system clocks settings*/
+    XPD_vInitTimer();
 
-    return result;
+    return eResult;
 }
 
 /**
- * @brief Sets the new configuration for an APB peripheral clock.
- * @param PCLKx: the selected peripheral clock. Permitted values:
-             @arg @ref RCC_ClockType::PCLK1
-             @arg @ref RCC_ClockType::PCLK2
- * @param HCLK_Divider: Clock divider of @ref RCC_ClockType::PCLK1 clock. Permitted values:
+ * @brief Sets the new configuration for the APB1 peripheral clock.
+ * @param ePCLK_Divider: Clock divider of @ref RCC_ClockType::PCLK1 clock. Permitted values:
              @arg @ref ClockDividerType::CLK_DIV1
              @arg @ref ClockDividerType::CLK_DIV2
              @arg @ref ClockDividerType::CLK_DIV4
              @arg @ref ClockDividerType::CLK_DIV8
              @arg @ref ClockDividerType::CLK_DIV16
- * @return Result of the operation
  */
-void XPD_RCC_PCLKConfig(RCC_ClockType PCLKx, ClockDividerType PCLK_Divider)
+void RCC_vPCLK1_Config(ClockDividerType ePCLK_Divider)
 {
-    uint32_t pprex = rcc_convertClockDivider(PCLKx, PCLK_Divider);
+    RCC->CFGR.b.PPRE1 = RCC_prvConvertPCLKDivider(ePCLK_Divider);
+}
 
-    switch (PCLKx)
-    {
-        case PCLK1:
-            RCC->CFGR.b.PPRE1 = pprex;
-            break;
-
-        case PCLK2:
-            RCC->CFGR.b.PPRE2 = pprex;
-            break;
-
-        default:
-            break;
-    }
+/**
+ * @brief Sets the new configuration for the APB2 peripheral clock.
+ * @param ePCLK_Divider: Clock divider of @ref RCC_ClockType::PCLK2 clock. Permitted values:
+             @arg @ref ClockDividerType::CLK_DIV1
+             @arg @ref ClockDividerType::CLK_DIV2
+             @arg @ref ClockDividerType::CLK_DIV4
+             @arg @ref ClockDividerType::CLK_DIV8
+             @arg @ref ClockDividerType::CLK_DIV16
+ */
+void RCC_vPCLK2_Config(ClockDividerType ePCLK_Divider)
+{
+    RCC->CFGR.b.PPRE2 = RCC_prvConvertPCLKDivider(ePCLK_Divider);
 }
 
 /**
  * @brief Gets the selected core clock frequency.
- * @param SelectedClock: the selected core clock
+ * @param eSelectedClock: the selected core clock
  * @return The frequency of the core clock in Hz.
  */
-uint32_t XPD_RCC_GetClockFreq(RCC_ClockType SelectedClock)
+uint32_t RCC_ulClockFreq_Hz(RCC_ClockType eSelectedClock)
 {
-    switch (SelectedClock)
+    switch (eSelectedClock)
     {
-    case HCLK:
-        return SystemCoreClock;
+        case HCLK:
+            return SystemCoreClock;
 
-    case SYSCLK:
-        return XPD_RCC_GetOscFreq(XPD_RCC_GetSYSCLKSource());
+        case SYSCLK:
+            return RCC_ulOscFreq_Hz(RCC_prvGetSYSCLKSource());
 
-    case PCLK1:
-        return SystemCoreClock >> APBPrescTable[RCC->CFGR.b.PPRE1];
+        case PCLK1:
+            return SystemCoreClock >> rcc_aucAPBPrescTable[RCC->CFGR.b.PPRE1];
 
-    case PCLK2:
-        return SystemCoreClock >> APBPrescTable[RCC->CFGR.b.PPRE2];
+        case PCLK2:
+            return SystemCoreClock >> rcc_aucAPBPrescTable[RCC->CFGR.b.PPRE2];
 
-    default:
-        return 0;
+        default:
+            return 0;
     }
-}
-
-/** @} */
-
-/** @defgroup RCC_Core_Clocks_Exported_Functions_MCO RCC Clock Outputs
- *  @brief    RCC microcontroller clock outputs
- * @{
- */
-
-/**
- * @brief Configures a master clock output
- * @param MCOx: the number of the MCO
- * @param MCOSource: clock source of the MCO
- * @param MCODiv: the clock division to be applied for the MCO
- */
-void XPD_RCC_MCO_Init(uint8_t MCOx, RCC_MCO1_ClockSourceType MCOSource, ClockDividerType MCODiv)
-{
-    const GPIO_InitType gpio = {
-        .Mode = GPIO_MODE_ALTERNATE,
-        .AlternateMap = GPIO_MCO_AF0,
-        .Output.Speed = VERY_HIGH,
-        .Output.Type = GPIO_OUTPUT_PUSHPULL,
-        .Pull = GPIO_PULL_FLOAT,
-        .PowerDownPull = GPIO_PULL_FLOAT,
-    };
-
-    {
-        /* MCO1 map: PA8 */
-        XPD_GPIO_InitPin(GPIOA, 8, &gpio);
-
-        RCC->CFGR.b.MCOSEL = MCOSource;
-        RCC->CFGR.b.MCOPRE = rcc_convertClockDivider(0xFF, MCODiv);
-    }
-}
-
-/**
- * @brief Disables a master clock output
- * @param MCOx: the number of the MCO
- */
-void XPD_RCC_MCO_Deinit(uint8_t MCOx)
-{
-        /* MCO1 map: PA8 */
-        XPD_GPIO_DeinitPin(GPIOA, 8);
-}
-
-/**
- * @brief Configures the dedicated low-speed clock output
- * @param LSCOSource: clock source of the LSCO
- */
-void XPD_RCC_LSCO_Init(RCC_LSCO_ClockSourceType LSCOSource)
-{
-    const GPIO_InitType gpio = {
-        .Mode = GPIO_MODE_ANALOG,
-        .AlternateMap = 0,
-        .Pull = GPIO_PULL_FLOAT,
-        .PowerDownPull = GPIO_PULL_FLOAT,
-    };
-    uint32_t access = PWR_REG_BIT(CR1,DBP);
-
-    /* Access must be granted first */
-    PWR_REG_BIT(CR1,DBP) = ENABLE;
-    {
-
-        /* LSCO map: PA2 */
-        XPD_GPIO_InitPin(GPIOA, 2, &gpio);
-
-        RCC_REG_BIT(BDCR,LSCOSEL) = LSCOSource;
-        RCC_REG_BIT(BDCR,LSCOEN)  = ENABLE;
-    }
-    /* Restore access state */
-    PWR_REG_BIT(CR1,DBP) = access;
-}
-
-/**
- * @brief Disables the dedicated low-speed clock output
- */
-void XPD_RCC_LSCO_Deinit(void)
-{
-    uint32_t access = PWR_REG_BIT(CR1,DBP);
-
-    /* Access must be granted first */
-    PWR_REG_BIT(CR1,DBP) = ENABLE;
-    {
-        /* LSCO map: PA2 */
-
-        RCC_REG_BIT(BDCR,LSCOEN)  = DISABLE;
-    }
-    /* Restore access state */
-    PWR_REG_BIT(CR1,DBP) = access;
 }
 
 /** @} */
@@ -991,7 +903,7 @@ void XPD_RCC_LSCO_Deinit(void)
 /**
  * @brief Resets the clock configuration to the default state.
  */
-void XPD_RCC_Deinit(void)
+void RCC_vDeinit(void)
 {
     /* Set MSION bit */
     RCC_REG_BIT(CR, MSION) = 1;
@@ -1026,7 +938,7 @@ void XPD_RCC_Deinit(void)
 /**
  * @brief Resets the AHB1 peripherals.
  */
-void XPD_RCC_ResetAHB1(void)
+void RCC_vResetAHB1(void)
 {
     RCC->AHB1RSTR.w = ~0;
     RCC->AHB1RSTR.w = 0;
@@ -1035,7 +947,7 @@ void XPD_RCC_ResetAHB1(void)
 /**
  * @brief Resets the AHB2 peripherals.
  */
-void XPD_RCC_ResetAHB2(void)
+void RCC_vResetAHB2(void)
 {
     RCC->AHB2RSTR.w = ~0;
     RCC->AHB2RSTR.w = 0;
@@ -1044,7 +956,7 @@ void XPD_RCC_ResetAHB2(void)
 /**
  * @brief Resets the AHB3 peripherals.
  */
-void XPD_RCC_ResetAHB3(void)
+void RCC_vResetAHB3(void)
 {
     RCC->AHB3RSTR.w = ~0;
     RCC->AHB3RSTR.w = 0;
@@ -1053,7 +965,7 @@ void XPD_RCC_ResetAHB3(void)
 /**
  * @brief Resets the APB1 peripherals.
  */
-void XPD_RCC_ResetAPB1(void)
+void RCC_vResetAPB1(void)
 {
     RCC->APB1RSTR1.w = ~0;
     RCC->APB1RSTR1.w = 0;
@@ -1064,32 +976,15 @@ void XPD_RCC_ResetAPB1(void)
 /**
  * @brief Resets the APB2 peripherals.
  */
-void XPD_RCC_ResetAPB2(void)
+void RCC_vResetAPB2(void)
 {
     RCC->APB2RSTR.w = ~0;
     RCC->APB2RSTR.w = 0;
 }
 
-/**
- * @brief Reads the reset source flags and optionally clears them.
- * @param Destructive: set to true if flags shall be cleared
- * @return The RCC peripheral determined reset source
- */
-RCC_ResetSourceType XPD_RCC_GetResetSource(boolean_t Destructive)
-{
-    uint32_t csr = RCC->CSR.w >> 24;
-
-    /* Clear flags when destructive is selected */
-    RCC_REG_BIT(CSR,RMVF) = Destructive;
-
-    return (RCC_ResetSourceType)csr;
-}
-
 /** @} */
 
 /** @} */
-
-XPD_RCC_CallbacksType XPD_RCC_Callbacks = { NULL, NULL, NULL };
 
 /** @} */
 

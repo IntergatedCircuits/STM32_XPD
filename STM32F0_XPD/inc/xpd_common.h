@@ -2,41 +2,33 @@
   ******************************************************************************
   * @file    xpd_common.h
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2016-01-01
+  * @version 0.2
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers Common Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
 #ifndef __XPD_COMMON_H_
 #define __XPD_COMMON_H_
 
-#include <stdint.h>
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
-/**
- * @mainpage STM32 eXtensible Peripheral Drivers for STM32F4 device family
- *
- * This documentation is part of the STM32_XPD peripheral driver package, available
- * <a href="http://github.com/IntergatedCircuits/STM32_XPD">here</a>.
- *
- * STM32_XPD is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- */
+#include <stdint.h>
 
 /** @defgroup Common
  * @{ */
@@ -52,14 +44,14 @@ typedef enum
 {
     RESET = 0, /*!< Reset value */
     SET   = 1  /*!< Set value */
-} FlagStatus;
+}FlagStatus;
 
 /** @brief Functional state type */
 typedef enum
 {
     DISABLE = 0, /*!< Disable value */
     ENABLE  = 1  /*!< Enable value */
-} FunctionalState;
+}FunctionalState;
 
 /** @brief XPD functions return type */
 typedef enum
@@ -68,7 +60,7 @@ typedef enum
     XPD_ERROR    = 1, /*!< Operation encountered an error */
     XPD_BUSY     = 2, /*!< Operation exited because it was already in progress */
     XPD_TIMEOUT  = 3  /*!< Operation timed out */
-} XPD_ReturnType;
+}XPD_ReturnType;
 
 /** @brief Occurrence reaction type */
 typedef enum
@@ -137,7 +129,7 @@ typedef struct
  * @brief Function pointer type for binary control function reference
  * @param NewState: the state to set
  */
-typedef void ( *XPD_CtrlFnType )            ( FunctionalState NewState );
+typedef void ( *XPD_CtrlCallbackType )      ( FunctionalState NewState );
 
 /**
  * @brief Callback function pointer type with no parameters
@@ -177,7 +169,7 @@ typedef void ( *XPD_HandleCallbackType )    ( void * Handle );
  * @param  CALLBACK: the function pointer
  * @param  PARAMETERS: the required parameters of the function
  */
-#define XPD_SAFE_CALLBACK(CALLBACK, ...)      \
+#define XPD_SAFE_CALLBACK(CALLBACK, ...)        \
     do{ if ((CALLBACK) != NULL) (void) CALLBACK(__VA_ARGS__); }while(0)
 
 /** @} */
@@ -190,7 +182,8 @@ typedef void ( *XPD_HandleCallbackType )    ( void * Handle );
 
 #define CLEAR_BIT(REG, BIT)   ((REG) &= ~(BIT))
 
-#define MODIFY_REG(REG, CLEARMASK, SETMASK)  ((REG) = (((REG) & (~(CLEARMASK))) | ((SETMASK) & (CLEARMASK))))
+#define MODIFY_REG(REG, CLEARMASK, SETMASK)  \
+    ((REG) = (((REG) & (~(CLEARMASK))) | ((SETMASK) & (CLEARMASK))))
 
 #define POSITION_VAL(VAL)     (__CLZ(__RBIT(VAL)))
 
@@ -203,7 +196,8 @@ typedef void ( *XPD_HandleCallbackType )    ( void * Handle );
 #endif /* __packed */
 #endif /* __GNUC__ */
 
-/* Macro to get variable aligned on 4-bytes, for __ICCARM__ the directive "#pragma data_alignment=4" must be used instead */
+/* Macro to get variable aligned on 4-bytes,
+ * for __ICCARM__ the directive "#pragma data_alignment=4" must be used instead */
 #if defined   (__GNUC__)        /* GNU Compiler */
 #ifndef __ALIGN_END
 #define __ALIGN_END    __attribute__ ((aligned (4)))
@@ -224,5 +218,10 @@ typedef void ( *XPD_HandleCallbackType )    ( void * Handle );
 #endif /* __ALIGN_BEGIN */
 #endif /* __GNUC__ */
 
+#include <xpd_config.h>
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __XPD_COMMON_H_ */

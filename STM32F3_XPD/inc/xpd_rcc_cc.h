@@ -2,30 +2,33 @@
   ******************************************************************************
   * @file    xpd_rcc_cc.h
   * @author  Benedek Kupper
-  * @version V0.2
-  * @date    2017-05-09
+  * @version 0.3
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers RCC Core Clocks Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
 #ifndef __XPD_RCC_CC_H_
 #define __XPD_RCC_CC_H_
 
-#include "xpd_common.h"
-#include "xpd_config.h"
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+#include <xpd_common.h>
 
 /** @addtogroup RCC
  * @{ */
@@ -40,12 +43,12 @@
 typedef enum
 {
     HSI    = 0, /*!< High speed internal oscillator */
-#ifdef HSE_VALUE
+#ifdef HSE_VALUE_Hz
     HSE    = 1, /*!< High speed external oscillator */
 #endif
     PLL    = 2, /*!< Phase locked loop */
     LSI    = 4, /*!< Low speed internal oscillator */
-#ifdef LSE_VALUE
+#ifdef LSE_VALUE_Hz
     LSE    = 5, /*!< Low speed external oscillator */
 #endif
     NO_OSC = -1,/*!< No oscillator available */
@@ -81,25 +84,6 @@ typedef enum
     PCLK2    = 8  /*!< APB2 bus clock */
 }RCC_ClockType;
 
-/** @brief RCC master clock output 1 clock source types */
-typedef enum
-{
-    MCO1_CLOCKSOURCE_NOCLOCK     = 0, /*!< MCO clock disabled */
-    MCO1_CLOCKSOURCE_LSI         = 2, /*!< LSI clock source */
-#ifdef LSE_VALUE
-    MCO1_CLOCKSOURCE_LSE         = 3, /*!< LSE clock source */
-#endif
-    MCO1_CLOCKSOURCE_SYSCLK      = 4,
-    MCO1_CLOCKSOURCE_HSI         = 5, /*!< HSI clock source */
-#ifdef HSE_VALUE
-    MCO1_CLOCKSOURCE_HSE         = 6, /*!< HSE clock source */
-#endif
-    MCO1_CLOCKSOURCE_PLLCLK_DIV2 = 7, /*!< PLL / 2 clock source */
-#ifdef RCC_CFGR_PLLNODIV
-    MCO1_CLOCKSOURCE_PLLCLK      = 0X17, /*!< PLL clock source */
-#endif
-}RCC_MCO1_ClockSourceType;
-
 /** @brief RCC reset source types */
 typedef enum
 {
@@ -122,7 +106,7 @@ typedef enum
 typedef struct {
     XPD_SimpleCallbackType OscReady; /*!< Oscillator ready callback */
     XPD_SimpleCallbackType CSS;      /*!< Clock Security System callback */
-}XPD_RCC_CallbacksType;
+}RCC_CallbacksType;
 
 /** @} */
 
@@ -130,7 +114,7 @@ typedef struct {
  * @{ */
 
 /** @brief RCC callbacks container struct */
-extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
+extern RCC_CallbacksType RCC_xCallbacks;
 
 /** @} */
 
@@ -147,7 +131,7 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
  *            @arg HSERDY:     Low Speed Internal oscillator ready
  *            @arg PLLRDY:     Phase Locked Loop ready
  */
-#define             XPD_RCC_EnableIT(IT_NAME)        \
+#define             RCC_IT_ENABLE(IT_NAME)              \
     (RCC_REG_BIT(CIR,IT_NAME##IE) = 1)
 
 /**
@@ -160,7 +144,7 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
  *            @arg HSERDY:     Low Speed Internal oscillator ready
  *            @arg PLLRDY:     Phase Locked Loop ready
  */
-#define             XPD_RCC_DisableIT(IT_NAME)       \
+#define             RCC_IT_DISABLE(IT_NAME)             \
     (RCC_REG_BIT(CIR,IT_NAME##IE) = 0)
 
 /**
@@ -174,7 +158,7 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
  *            @arg PLLRDY:     Phase Locked Loop ready
  *            @arg CSS:        Clock Security System
  */
-#define             XPD_RCC_GetFlag(FLAG_NAME)       \
+#define             RCC_FLAG_STATUS(FLAG_NAME)          \
     (RCC_REG_BIT(CIR,FLAG_NAME##F))
 
 /**
@@ -188,7 +172,7 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
  *            @arg PLLRDY:     Phase Locked Loop ready
  *            @arg CSS:        Clock Security System
  */
-#define             XPD_RCC_ClearFlag(FLAG_NAME)     \
+#define             RCC_FLAG_CLEAR(FLAG_NAME)           \
     (RCC_REG_BIT(CIR,FLAG_NAME##C) = 1)
 
 /** @} */
@@ -198,38 +182,33 @@ extern XPD_RCC_CallbacksType XPD_RCC_Callbacks;
 
 /** @addtogroup RCC_Core_Clocks_Exported_Functions_Oscillators
  * @{ */
-XPD_ReturnType      XPD_RCC_HSIConfig           (FunctionalState NewState);
-XPD_ReturnType      XPD_RCC_LSIConfig           (FunctionalState NewState);
-XPD_ReturnType      XPD_RCC_PLLConfig           (const RCC_PLL_InitType * Config);
-#ifdef HSE_VALUE
-XPD_ReturnType      XPD_RCC_HSEConfig           (RCC_OscStateType NewState);
+XPD_ReturnType      RCC_eHSI_Enable         (void);
+XPD_ReturnType      RCC_eHSI_Disable        (void);
+
+XPD_ReturnType      RCC_eLSI_Enable         (void);
+XPD_ReturnType      RCC_eLSI_Disable        (void);
+
+#ifdef HSE_VALUE_Hz
+XPD_ReturnType      RCC_eHSE_Config         (RCC_OscStateType eOscState);
 #endif
-#ifdef LSE_VALUE
-XPD_ReturnType      XPD_RCC_LSEConfig           (RCC_OscStateType NewState);
+#ifdef LSE_VALUE_Hz
+XPD_ReturnType      RCC_eLSE_Config         (RCC_OscStateType eOscState);
 #endif
 
-uint32_t            XPD_RCC_GetOscFreq          (RCC_OscType Oscillator);
+XPD_ReturnType      RCC_ePLL_Config         (const RCC_PLL_InitType * pxConfig);
+uint32_t            RCC_ulOscFreq_Hz        (RCC_OscType eOscillator);
 
-RCC_OscType         XPD_RCC_GetSYSCLKSource     (void);
-RCC_OscType         XPD_RCC_GetPLLSource        (void);
-
-void                XPD_RCC_IRQHandler          (void);
-RCC_OscType         XPD_RCC_GetReadyOsc         (void);
+void                RCC_vIRQHandler         (void);
+RCC_OscType         RCC_eGetReadyOsc        (void);
 /** @} */
 
 /** @addtogroup RCC_Core_Clocks_Exported_Functions_Clocks
  * @{ */
-XPD_ReturnType      XPD_RCC_HCLKConfig          (RCC_OscType SYSCLK_Source, ClockDividerType HCLK_Divider,
-                                                 uint8_t FlashLatency);
-void                XPD_RCC_PCLKConfig          (RCC_ClockType PCLKx, ClockDividerType PCLK_Divider);
-uint32_t            XPD_RCC_GetClockFreq        (RCC_ClockType SelectedClock);
-/** @} */
-
-/** @addtogroup RCC_Core_Clocks_Exported_Functions_MCO
- * @{ */
-void                XPD_RCC_MCO_Init            (uint8_t MCOx, RCC_MCO1_ClockSourceType MCOSource,
-                                                 ClockDividerType MCODiv);
-void                XPD_RCC_MCO_Deinit          (uint8_t MCOx);
+XPD_ReturnType      RCC_eHCLK_Config        (RCC_OscType eSYSCLK_Source, ClockDividerType eHCLK_Divider,
+                                             uint8_t ucFlashLatency);
+void                RCC_vPCLK1_Config       (ClockDividerType ePCLK_Divider);
+void                RCC_vPCLK2_Config       (ClockDividerType ePCLK_Divider);
+uint32_t            RCC_ulClockFreq_Hz      (RCC_ClockType eSelectedClock);
 /** @} */
 
 /** @defgroup RCC_Core_Clocks_Exported_Functions_CSS RCC Clock Security System
@@ -238,41 +217,57 @@ void                XPD_RCC_MCO_Deinit          (uint8_t MCOx);
  */
 
 /**
- * @brief RCC interrupt handler that provides Clock Security System callback.
+ * @brief RCC NMI interrupt handler that provides Clock Security System callback.
  */
-__STATIC_INLINE void XPD_NMI_IRQHandler(void)
+__STATIC_INLINE void CSS_vIRQHandler(void)
 {
     /* Check RCC CSSF flag  */
-    if (XPD_RCC_GetFlag(CSS) != 0)
+    if (RCC_FLAG_STATUS(CSS) != 0)
     {
         /* Clear RCC CSS pending bit */
-        XPD_RCC_ClearFlag(CSS);
+        RCC_FLAG_CLEAR(CSS);
 
         /* RCC Clock Security System interrupt user callback */
-        XPD_SAFE_CALLBACK(XPD_RCC_Callbacks.CSS,);
+        XPD_SAFE_CALLBACK(RCC_xCallbacks.CSS,);
     }
 }
 
 /**
  * @brief Enables or disables the Clock Security System
- * @param NewState: the CSS activation
+ * @param eNewState: the CSS activation
  */
-__STATIC_INLINE void XPD_RCC_CSS(FunctionalState NewState)
+__STATIC_INLINE void RCC_vCSS(FunctionalState eNewState)
 {
-    RCC_REG_BIT(CR,CSSON) = NewState;
+    RCC_REG_BIT(CR,CSSON) = eNewState;
 }
 
 /** @} */
 
 /** @addtogroup RCC_Core_Clocks_Exported_Functions_Reset
  * @{ */
-void                XPD_RCC_Deinit              (void);
+void                RCC_vDeinit             (void);
 
-void                XPD_RCC_ResetAHB            (void);
-void                XPD_RCC_ResetAPB1           (void);
-void                XPD_RCC_ResetAPB2           (void);
+void                RCC_vResetAHB           (void);
+void                RCC_vResetAPB1          (void);
+void                RCC_vResetAPB2          (void);
 
-RCC_ResetSourceType XPD_RCC_GetResetSource      (boolean_t Destructive);
+/**
+ * @brief Reads the reset source flags.
+ * @return The RCC peripheral determined reset source
+ */
+__STATIC_INLINE RCC_ResetSourceType RCC_eGetResetSource(void)
+{
+    return (RCC->CSR.w & (~RCC_CSR_RMVF)) >> 20;
+}
+
+/**
+ * @brief Clears the reset source flags from RCC.
+ */
+__STATIC_INLINE void RCC_vClearResetSource(void)
+{
+    RCC_REG_BIT(CSR,RMVF) = 1;
+}
+
 /** @} */
 
 /** @} */
@@ -280,5 +275,9 @@ RCC_ResetSourceType XPD_RCC_GetResetSource      (boolean_t Destructive);
 /** @} */
 
 /** @} */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __XPD_RCC_CC_H_ */

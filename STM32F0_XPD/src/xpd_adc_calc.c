@@ -2,101 +2,96 @@
   ******************************************************************************
   * @file    xpd_adc_calc.c
   * @author  Benedek Kupper
-  * @version V0.2
-  * @date    2017-07-16
+  * @version 1.0
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers ADC Calculations Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
 
-#include "xpd_adc_calc.h"
+#include <xpd_adc_calc.h>
 
-#if defined(USE_XPD_ADC)
-
-/** @addtogroup ADC
+/** @ingroup ADC_Calculations
+ * @defgroup ADC_Calculations_Exported_Functions ADC Calculations Exported Functions
  * @{ */
 
-/** @addtogroup ADC_Calculations
- * @{ */
-
-/** @defgroup ADC_Calculations_Exported_Functions ADC Calculations Exported Functions
- * @{ */
-
-static int32_t VDDA_mV = (int32_t)VDDA_VALUE;
+static int32_t lVDDA_mV = (int32_t)VDDA_VALUE;
 
 #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
-static float   VDDA_V  = ((float)VDDA_VALUE) / 1000.0;
+static float   fVDDA_V  = ((float)VDDA_VALUE) / 1000.0;
 
 /**
  * @brief Returns the VDDA value in voltage.
  * @return The VDDA voltage measured in Volts
  */
-float XPD_ADC_GetVDDA_V(void)
+float ADC_fGetVDDA_V(void)
 {
-    return VDDA_V;
+    return fVDDA_V;
 }
 
+#ifdef ADC_VBAT_SCALER
 /**
- * @brief Converts the (12 bit right aligned) VBAT measurement to voltage.
+ * @brief Converts the VBAT measurement to voltage.
+ * @param usVBatConversion: 12 bit right aligned ADC measurement value
  * @return The VBAT value in Volts
  */
-float XPD_ADC_GetVBAT_V(uint16_t vBatConversion)
+float ADC_fCalcVBAT_V(uint16_t usVBatConversion)
 {
     /* Convert to V from ADC range, multiply by scaler */
-    return (ADC_VBAT_SCALER * (float)vBatConversion * VDDA_V) / 4095.0;
+    return (ADC_VBAT_SCALER * (float)usVBatConversion * fVDDA_V) / 4095.0;
 }
+#endif
 
 /**
- * @brief Converts a (12 bit right aligned) channel measurement to voltage.
+ * @brief Converts a channel measurement to voltage.
+ * @param usChannelConversion: 12 bit right aligned ADC measurement value
  * @return The channel voltage level
  */
-float XPD_ADC_GetValue_V(uint16_t channelConversion)
+float ADC_fCalcExt_V(uint16_t usChannelConversion)
 {
     /* Convert to V from ADC range */
-    return ((float)channelConversion * VDDA_V) / 4095.0;
+    return ((float)usChannelConversion * fVDDA_V) / 4095.0;
 }
 
 /**
- * @brief Converts a (12 bit right aligned) temperature sensor measurement to degree Celsius.
+ * @brief Converts a temperature sensor measurement to degree Celsius.
+ * @param usTempConversion: 12 bit right aligned ADC measurement value
  * @return The temperature sensor's value in degree Celcius
  */
-float XPD_ADC_GetTemperature_C(uint16_t tempConversion)
+float ADC_fCalcTemp_C(uint16_t usTempConversion)
 {
     float temp;
-#if defined(ADC_TEMPSENSOR)
-    float tempdiff = (float)(ADC_TEMPSENSOR_CAL_HIGH - ADC_TEMPSENSOR_CAL_LOW);
+#if defined(ADC_TEMP_CAL_HIGH_C)
+    float tempdiff = (float)(ADC_TEMP_CAL_HIGH_C - ADC_TEMP_CAL_LOW_C);
     /*
      * Convert the conversion result as it was measured at 3.3V
-     * tempConvCorrected / VDDA_mV = tempConversion / 3300
+     * tempConvCorrected / VDDA_mV = usTempConversion / 3300
      * Calculate temperature from factory calibration data
      * (tempConvCorrected - CAL30)/(CAL110 - CAL30) = (Temp_C - 30)/(110 - 30)
      */
-    temp = (tempdiff * (float)tempConversion * VDDA_V) / ((float)ADC_CAL_mV / 1000.0);
-    temp -= tempdiff * (float)ADC_TEMPSENSOR->CAL_LOW;
-    temp /= (float)(ADC_TEMPSENSOR->CAL_HIGH - ADC_TEMPSENSOR->CAL_LOW);
-    temp += (float)ADC_TEMPSENSOR_CAL_LOW;
-#elif defined(ADC_TEMPSENSOR_LOW)
+    temp = (tempdiff * (float)usTempConversion * fVDDA_V) / ((float)ADC_VREF_CAL_mV / 1000.0);
+    temp -= tempdiff * (float)ADC_CALIB->TEMPSENSOR_LOW;
+    temp /= (float)(ADC_CALIB->TEMPSENSOR_HIGH - ADC_CALIB->TEMPSENSOR_LOW);
+    temp += (float)ADC_TEMP_CAL_LOW_C;
+#else
     /*
      * Calculate temperature using calibration at 30C and average slope:
      * temp = (V30 - Vsense)/Avg_slope + 30
      */
-    temp = ADC_TEMPSENSOR_SLOPE(XPD_ADC_GetValue_V(ADC_TEMPSENSOR_LOW - tempConversion))
-            + ADC_TEMPSENSOR_CAL_LOW;
-#else
-    temp = 0;
+    temp = ADC_TEMPSENSOR_SLOPE(ADC_fCalcExt_V(ADC_CALIB->TEMPSENSOR_LOW - usTempConversion))
+            + ADC_TEMP_CAL_LOW_C;
 #endif
     return temp;
 }
@@ -104,86 +99,84 @@ float XPD_ADC_GetTemperature_C(uint16_t tempConversion)
 
 /**
  * @brief Calculates the VDDA value in voltage and saves it for other calculations.
+ * @param usVRefintConversion: 12 bit right aligned ADC measurement value
  * @return The VDDA voltage measured in milliVolts
  */
-int32_t XPD_ADC_SetVDDA(uint16_t vRefintConversion)
+int32_t ADC_lCalcVDDA_mV(uint16_t usVRefintConversion)
 {
     /*
      * The reference voltage is measured at 3.3V, with 12 bit resolution
-     * VREFINT_CAL * 3300 / 4095 = vRefintConversion * VDD / 4095
+     * VREFINT_CAL * 3300 / 4095 = usVRefintConversion * VDD / 4095
      */
-    VDDA_mV = ((int32_t)ADC_VREFINT_CAL * ADC_CAL_mV) / (int32_t)vRefintConversion;
+    lVDDA_mV = ((int32_t)ADC_CALIB->VREFINT * ADC_VREF_CAL_mV) / (int32_t)usVRefintConversion;
 #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
-    VDDA_V  = ((float)ADC_VREFINT_CAL * ((float)ADC_CAL_mV / 1000.0)) / (float)vRefintConversion;
+    fVDDA_V  = ((float)ADC_CALIB->VREFINT * ((float)ADC_VREF_CAL_mV / 1000.0)) / (float)usVRefintConversion;
 #endif
-    return VDDA_mV;
+    return lVDDA_mV;
 }
 
 /**
  * @brief Returns the last measured VDDA value in voltage.
  * @return The VDDA voltage measured in milliVolts
  */
-int32_t XPD_ADC_GetVDDA_mV(void)
+int32_t ADC_lGetVDDA_mV(void)
 {
-    return VDDA_mV;
+    return lVDDA_mV;
 }
 
+#ifdef ADC_VBAT_SCALER
 /**
- * @brief Converts the (12 bit right aligned) VBAT measurement to voltage.
+ * @brief Converts the VBAT measurement to voltage.
+ * @param usVBatConversion: 12 bit right aligned ADC measurement value
  * @return The VBAT value in milliVolts
  */
-int32_t XPD_ADC_GetVBAT_mV(uint16_t vBatConversion)
+int32_t ADC_lCalcVBAT_mV(uint16_t usVBatConversion)
 {
     /* Convert to mV from ADC range, multiply by scaler */
-    return (ADC_VBAT_SCALER * (int32_t)vBatConversion * VDDA_mV) / 4095;
+    return (ADC_VBAT_SCALER * (int32_t)usVBatConversion * lVDDA_mV) / 4095;
 }
+#endif
 
 /**
- * @brief Converts a (12 bit right aligned) channel measurement to voltage.
+ * @brief Converts a channel measurement to voltage.
+ * @param usChannelConversion: 12 bit right aligned ADC measurement value
  * @return The channel voltage level
  */
-int32_t XPD_ADC_GetValue_mV(uint16_t channelConversion)
+int32_t ADC_lCalcExt_mV(uint16_t usChannelConversion)
 {
     /* Convert to mV from ADC range */
-    return ((int32_t)channelConversion * VDDA_mV) / 4095;
+    return ((int32_t)usChannelConversion * lVDDA_mV) / 4095;
 }
 
 /**
- * @brief Converts a (12 bit right aligned) temperature sensor measurement to degree Celsius.
+ * @brief Converts a temperature sensor measurement to degree Celsius.
+ * @param usTempConversion: 12 bit right aligned ADC measurement value
  * @return The temperature sensor's value in degree Celcius
  */
-int32_t XPD_ADC_GetTemperature(uint16_t tempConversion)
+int32_t ADC_lCalcTemp_C(uint16_t usTempConversion)
 {
     int32_t temp;
-#if defined(ADC_TEMPSENSOR)
-    int32_t tempdiff = ADC_TEMPSENSOR_CAL_HIGH - ADC_TEMPSENSOR_CAL_LOW;
+#if defined(ADC_TEMP_CAL_HIGH_C)
+    int32_t tempdiff = ADC_TEMP_CAL_HIGH_C - ADC_TEMP_CAL_LOW_C;
     /*
      * Convert the conversion result as it was measured at 3.3V
-     * tempConvCorrected / VDDA_mV = tempConversion / 3300
+     * tempConvCorrected / VDDA_mV = usTempConversion / 3300
      * Calculate temperature from factory calibration data
      * (tempConvCorrected - CAL30)/(CAL110 - CAL30) = (Temp_C - 30)/(110 - 30)
      */
-    temp = (tempdiff * (int32_t)tempConversion * VDDA_mV) / ADC_CAL_mV;
-    temp -= tempdiff * (int32_t)ADC_TEMPSENSOR->CAL_LOW;
-    temp /= (int32_t)(ADC_TEMPSENSOR->CAL_HIGH - ADC_TEMPSENSOR->CAL_LOW);
-    temp += ADC_TEMPSENSOR_CAL_LOW;
-#elif defined(ADC_TEMPSENSOR_LOW)
+    temp = (tempdiff * (int32_t)usTempConversion * lVDDA_mV) / ADC_VREF_CAL_mV;
+    temp -= tempdiff * (int32_t)ADC_CALIB->TEMPSENSOR_LOW;
+    temp /= (int32_t)(ADC_CALIB->TEMPSENSOR_HIGH - ADC_CALIB->TEMPSENSOR_LOW);
+    temp += ADC_TEMP_CAL_LOW_C;
+#else
     /*
      * Calculate temperature using calibration at 30C and average slope:
      * temp = (V30 - Vsense)/Avg_slope + 30
      */
-    temp = ADC_TEMPSENSOR_SLOPE(XPD_ADC_GetValue_mV(ADC_TEMPSENSOR_LOW - tempConversion))
-            + ADC_TEMPSENSOR_CAL_LOW;
-#else
-    temp = 0;
+    temp = ADC_TEMPSENSOR_SLOPE(ADC_lCalcExt_mV(ADC_CALIB->TEMPSENSOR_LOW - usTempConversion))
+            + ADC_TEMP_CAL_LOW_C;
 #endif
     return temp;
 }
 
 /** @} */
-
-/** @} */
-
-/** @} */
-
-#endif /* USE_XPD_ADC */

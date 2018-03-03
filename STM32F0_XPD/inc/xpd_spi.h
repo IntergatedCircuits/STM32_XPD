@@ -2,32 +2,35 @@
   ******************************************************************************
   * @file    xpd_spi.h
   * @author  Benedek Kupper
-  * @version V0.1
-  * @date    2017-01-04
+  * @version 0.2
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers SPI Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
 #ifndef __XPD_SPI_H_
 #define __XPD_SPI_H_
 
-#include "xpd_common.h"
-#include "xpd_config.h"
-#include "xpd_dma.h"
-#include "xpd_rcc.h"
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+#include <xpd_common.h>
+#include <xpd_dma.h>
+#include <xpd_rcc.h>
 
 /** @defgroup SPI
  * @{ */
@@ -91,7 +94,7 @@ typedef struct
                                              @arg @ref ClockDividerType::CLK_DIV128
                                              @arg @ref ClockDividerType::CLK_DIV256 */
     } Clock;
-#ifdef USE_XPD_SPI_ERROR_DETECT
+#ifdef __XPD_SPI_ERROR_DETECT
     uint8_t  CRC_Length;            /*!< Specifies the CRC length in bits. Permitted values: @arg 8, 16 */
     uint16_t CRC_Polynomial;        /*!< Specifies the CRC polynomial. */
 #endif
@@ -120,7 +123,7 @@ typedef struct
         XPD_HandleCallbackType DepDeinit;    /*!< Callback to restore module dependencies (GPIOs, IRQs, DMAs) */
         XPD_HandleCallbackType Transmit;     /*!< Data stream transmission successful callback */
         XPD_HandleCallbackType Receive;      /*!< Data stream reception successful callback */
-#if defined(USE_XPD_SPI_ERROR_DETECT) || defined(USE_XPD_DMA_ERROR_DETECT)
+#if defined(__XPD_SPI_ERROR_DETECT) || defined(__XPD_DMA_ERROR_DETECT)
         XPD_HandleCallbackType Error;        /*!< Error callbacks */
 #endif
     }Callbacks;                              /*   Handle Callbacks */
@@ -131,10 +134,10 @@ typedef struct
     DataStreamType RxStream;                 /*!< Data reception stream */
     DataStreamType TxStream;                 /*!< Data transmission stream */
     RCC_PositionType CtrlPos;                /*!< Relative position for reset and clock control */
-#if defined(USE_XPD_SPI_ERROR_DETECT) || defined(USE_XPD_DMA_ERROR_DETECT)
+#if defined(__XPD_SPI_ERROR_DETECT) || defined(__XPD_DMA_ERROR_DETECT)
     volatile SPI_ErrorType Errors;           /*!< Transfer errors */
 #endif
-#ifdef USE_XPD_SPI_ERROR_DETECT
+#ifdef __XPD_SPI_ERROR_DETECT
     uint8_t CRCSize;                         /*!< CRC size in bytes */
 #endif
 }SPI_HandleType;
@@ -146,47 +149,42 @@ typedef struct
 
 #ifdef SPI_BB
 /**
- * @brief  SPI Handle initializer macro
- * @param  INSTANCE: specifies the SPI peripheral instance.
- * @param  INIT_FN: specifies the dependency initialization function to call back.
- * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
+ * @brief SPI Instance to handle binder macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param INSTANCE: specifies the SPI peripheral instance.
  */
-#define         NEW_SPI_HANDLE(INSTANCE, INIT_FN, DEINIT_FN)    \
-    {.Inst = (INSTANCE), .Inst_BB = SPI_BB(INSTANCE),           \
-     .CtrlPos = RCC_POS_##INSTANCE,                             \
-     .Callbacks.DepInit   = (INIT_FN),                          \
-     .Callbacks.DepDeinit = (DEINIT_FN)}
+#define         SPI_INST2HANDLE(HANDLE,INSTANCE)            \
+    ((HANDLE)->Inst    = (INSTANCE),                        \
+     (HANDLE)->Inst_BB = SPI_BB(INSTANCE),                  \
+     (HANDLE)->CtrlPos = RCC_POS_##INSTANCE)
 
 /**
  * @brief SPI register bit accessing macro
  * @param HANDLE: specifies the peripheral handle.
- * @param REG: specifies the register name.
- * @param BIT: specifies the register bit name.
+ * @param REG_NAME: specifies the register name.
+ * @param BIT_NAME: specifies the register bit name.
  */
-#define         SPI_REG_BIT(_HANDLE_, _REG_NAME_, _BIT_NAME_)   \
-    ((_HANDLE_)->Inst_BB->_REG_NAME_._BIT_NAME_)
+#define         SPI_REG_BIT(_HANDLE_, REG_NAME, BIT_NAME)   \
+    ((_HANDLE_)->Inst_BB->REG_NAME.BIT_NAME)
 
 #else
 /**
- * @brief  SPI Handle initializer macro
- * @param  INSTANCE: specifies the SPI peripheral instance.
- * @param  INIT_FN: specifies the dependency initialization function to call back.
- * @param  DEINIT_FN: specifies the dependency deinitialization function to call back.
+ * @brief SPI Instance to handle binder macro
+ * @param HANDLE: specifies the peripheral handle.
+ * @param INSTANCE: specifies the SPI peripheral instance.
  */
-#define         NEW_SPI_HANDLE(INSTANCE, INIT_FN, DEINIT_FN)    \
-    {.Inst = (INSTANCE),                                        \
-     .CtrlPos = RCC_POS_##INSTANCE,                             \
-     .Callbacks.DepInit   = (INIT_FN),                          \
-     .Callbacks.DepDeinit = (DEINIT_FN)}
+#define         SPI_INST2HANDLE(HANDLE,INSTANCE)            \
+    ((HANDLE)->Inst    = (INSTANCE),                        \
+     (HANDLE)->CtrlPos = RCC_POS_##INSTANCE)
 
 /**
  * @brief SPI register bit accessing macro
  * @param HANDLE: specifies the peripheral handle.
- * @param REG: specifies the register name.
- * @param BIT: specifies the register bit name.
+ * @param REG_NAME: specifies the register name.
+ * @param BIT_NAME: specifies the register bit name.
  */
-#define         SPI_REG_BIT(_HANDLE_, _REG_NAME_, _BIT_NAME_)   \
-    ((_HANDLE_)->Inst->_REG_NAME_.b._BIT_NAME_)
+#define         SPI_REG_BIT(_HANDLE_, REG_NAME, BIT_NAME)   \
+    ((_HANDLE_)->Inst->REG_NAME.b.BIT_NAME)
 
 #endif /* SPI_BB */
 
@@ -199,7 +197,7 @@ typedef struct
  *            @arg RXNE:    Receive not empty
  *            @arg ERR:     Error
  */
-#define         XPD_SPI_EnableIT(HANDLE, IT_NAME)               \
+#define         SPI_IT_ENABLE(HANDLE, IT_NAME)               \
     (SPI_REG_BIT((HANDLE),CR2,IT_NAME##IE) = 1)
 
 /**
@@ -211,7 +209,7 @@ typedef struct
  *            @arg RXNE:    Receive not empty
  *            @arg ERR:     Error
  */
-#define         XPD_SPI_DisableIT(HANDLE, IT_NAME)              \
+#define         SPI_IT_DISABLE(HANDLE, IT_NAME)             \
     (SPI_REG_BIT((HANDLE),CR2,IT_NAME##IE) = 0)
 
 /**
@@ -222,7 +220,7 @@ typedef struct
  *            @arg T:       Transmit
  *            @arg R:       Receive
  */
-#define         XPD_SPI_EnableDMA(HANDLE, DMA_NAME)             \
+#define         SPI_DMA_ENABLE(HANDLE, DMA_NAME)            \
     (SPI_REG_BIT((HANDLE), CR2, DMA_NAME##XDMAEN) = 1)
 
 /**
@@ -233,7 +231,7 @@ typedef struct
  *            @arg T:       Transmit
  *            @arg R:       Receive
  */
-#define         XPD_SPI_DisableDMA(HANDLE, DMA_NAME)            \
+#define         SPI_DMA_DISABLE(HANDLE, DMA_NAME)           \
     (SPI_REG_BIT((HANDLE), CR2, DMA_NAME##XDMAEN) = 0)
 
 /**
@@ -250,7 +248,7 @@ typedef struct
  *            @arg BSY:     Busy
  *            @arg FRE:     TI frame format error
  */
-#define         XPD_SPI_GetFlag(HANDLE, FLAG_NAME)              \
+#define         SPI_FLAG_STATUS(HANDLE, FLAG_NAME)              \
     (SPI_REG_BIT((HANDLE),SR,FLAG_NAME))
 
 /**
@@ -260,46 +258,80 @@ typedef struct
  *         This parameter can be one of the following values:
  *            @arg CRCERR:  CRC error
  */
-#define         XPD_SPI_ClearFlag(HANDLE, FLAG_NAME)            \
+#define         SPI_FLAG_CLEAR(HANDLE, FLAG_NAME)            \
     (SPI_REG_BIT((HANDLE),SR,FLAG_NAME) = 0)
 
 /** @} */
 
 /** @addtogroup SPI_Exported_Functions
  * @{ */
-XPD_ReturnType  XPD_SPI_Init                (SPI_HandleType * hspi, const SPI_InitType * Config);
-XPD_ReturnType  XPD_SPI_Deinit              (SPI_HandleType * hspi);
-void            XPD_SPI_Enable              (SPI_HandleType * hspi);
-void            XPD_SPI_Disable             (SPI_HandleType * hspi);
+void            SPI_vInit               (SPI_HandleType * pxSPI,
+                                         const SPI_InitType * pxConfig);
 
-XPD_ReturnType  XPD_SPI_GetStatus           (SPI_HandleType * hspi);
-XPD_ReturnType  XPD_SPI_PollStatus          (SPI_HandleType * hspi, uint32_t Timeout);
+void            SPI_vDeinit             (SPI_HandleType * pxSPI);
 
-XPD_ReturnType  XPD_SPI_Transmit            (SPI_HandleType * hspi, void * TxData,
-                                             uint16_t Length, uint32_t Timeout);
-XPD_ReturnType  XPD_SPI_Receive             (SPI_HandleType * hspi, void * RxData,
-                                             uint16_t Length, uint32_t Timeout);
-XPD_ReturnType  XPD_SPI_TransmitReceive     (SPI_HandleType * hspi, void * TxData, void * RxData,
-                                             uint16_t Length, uint32_t Timeout);
+XPD_ReturnType  SPI_eGetStatus          (SPI_HandleType * pxSPI);
+XPD_ReturnType  SPI_ePollStatus         (SPI_HandleType * pxSPI,
+                                         uint32_t ulTimeout);
 
-void            XPD_SPI_Transmit_IT         (SPI_HandleType * hspi, void * TxData, uint16_t Length);
-void            XPD_SPI_Receive_IT          (SPI_HandleType * hspi, void * RxData, uint16_t Length);
-void            XPD_SPI_TransmitReceive_IT  (SPI_HandleType * hspi, void * TxData,
-                                             void * RxData, uint16_t Length);
 
-void            XPD_SPI_IRQHandler          (SPI_HandleType * hspi);
+XPD_ReturnType  SPI_eSend               (SPI_HandleType * pxSPI,
+                                         void * pvTxData,
+                                         uint16_t usLength,
+                                         uint32_t ulTimeout);
 
-XPD_ReturnType  XPD_SPI_Transmit_DMA        (SPI_HandleType * hspi, void * TxData, uint16_t Length);
-XPD_ReturnType  XPD_SPI_Receive_DMA         (SPI_HandleType * hspi, void * RxData, uint16_t Length);
-XPD_ReturnType  XPD_SPI_TransmitReceive_DMA (SPI_HandleType * hspi, void * TxData,
-                                             void * RxData, uint16_t Length);
-void            XPD_SPI_Stop_DMA            (SPI_HandleType * hspi);
+XPD_ReturnType  SPI_eReceive            (SPI_HandleType * pxSPI,
+                                         void * pvRxData,
+                                         uint16_t usLength,
+                                         uint32_t ulTimeout);
+
+XPD_ReturnType  SPI_eSendReceive        (SPI_HandleType * pxSPI,
+                                         void * pvTxData,
+                                         void * pvRxData,
+                                         uint16_t usLength,
+                                         uint32_t ulTimeout);
+
+
+void            SPI_vTransmit_IT        (SPI_HandleType * pxSPI,
+                                         void * pvTxData,
+                                         uint16_t usLength);
+
+void            SPI_vReceive_IT         (SPI_HandleType * pxSPI,
+                                         void * pvRxData,
+                                         uint16_t usLength);
+
+void            SPI_vTransmitReceive_IT (SPI_HandleType * pxSPI,
+                                         void * pvTxData,
+                                         void * pvRxData,
+                                         uint16_t usLength);
+
+void            SPI_vIRQHandler         (SPI_HandleType * pxSPI);
+
+
+XPD_ReturnType  SPI_eTransmit_DMA       (SPI_HandleType * pxSPI,
+                                         void * pvTxData,
+                                         uint16_t usLength);
+
+XPD_ReturnType  SPI_eReceive_DMA        (SPI_HandleType * pxSPI,
+                                         void * pvRxData,
+                                         uint16_t usLength);
+
+XPD_ReturnType  SPI_eSendReceive_DMA    (SPI_HandleType * pxSPI,
+                                         void * pvTxData,
+                                         void * pvRxData,
+                                         uint16_t usLength);
+
+void            SPI_vStop_DMA           (SPI_HandleType * pxSPI);
 /** @} */
 
 /** @} */
 
 #define XPD_SPI_API
-#include "xpd_rcc_pc.h"
+#include <xpd_rcc_pc.h>
 #undef XPD_SPI_API
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __XPD_SPI_H_ */

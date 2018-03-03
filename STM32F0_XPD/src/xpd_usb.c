@@ -2,66 +2,74 @@
   ******************************************************************************
  * @file    xpd_usb.c
  * @author  Benedek Kupper
- * @version V0.2
- * @date    2017-05-04
- * @brief   STM32 eXtensible Peripheral Drivers Universal Serial Bus Module
+  * @version 0.3
+  * @date    2018-01-28
+  * @brief   STM32 eXtensible Peripheral Drivers Universal Serial Bus Module
   *
- *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
- *  STM32_XPD is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
- *  STM32_XPD is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
- *  You should have received a copy of the GNU General Public License
- *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
  */
+#include <xpd_usb.h>
+#include <xpd_rcc.h>
+#include <xpd_utils.h>
 
-#include "xpd_usb.h"
-#include "xpd_rcc.h"
-#include "xpd_utils.h"
-
-#if defined(USE_XPD_USB) && defined(USB)
+#if defined(USB)
 
 /** @addtogroup USB
  * @{ */
 
-#define USB_MAX_PACKET_SIZE     64
-#define USB_ENDPOINT_COUNT      (sizeof(USB->EP) / sizeof(USB->EP[0])) /* 8 */
-
+/* The packet buffer memory SRAM access scheme differs in earlier versions */
 #ifdef USB_LPMCSR_LMPEN
 typedef struct {
-    __IO uint16_t TX_ADDR;
+         uint16_t TX_ADDR;
     __IO uint16_t TX_COUNT;
-    __IO uint16_t RX_ADDR;
+         uint16_t RX_ADDR;
     __IO uint16_t RX_COUNT;
-}USB_BufferDescriptor_TypeDef;
+}USB_BufferDescriptorType;
 
 typedef uint16_t USB_PacketAddressType;
 #else
 typedef struct {
-    __IO uint32_t TX_ADDR;
+         uint32_t TX_ADDR;
     __IO uint32_t TX_COUNT;
-    __IO uint32_t RX_ADDR;
+         uint32_t RX_ADDR;
     __IO uint32_t RX_COUNT;
-}USB_BufferDescriptor_TypeDef;
+}USB_BufferDescriptorType;
 
 typedef uint32_t USB_PacketAddressType;
 #endif
 
-#define USB_EP_BDT ((USB_BufferDescriptor_TypeDef *)(USB_PMAADDR + USB->BTABLE))
+#define USB_BTABLE_VALUE            0
+
+#ifdef USB_BTABLE_VALUE
+/* Optimized BufferDescriptorTable access */
+#define USB_EP_BDT ((USB_BufferDescriptorType *)(USB_PMAADDR + USB_BTABLE_VALUE))
+#else
+#define USB_EP_BDT ((USB_BufferDescriptorType *)(USB_PMAADDR + USB->BTABLE))
+#endif
+
+#define USB_RXCNT_NUM_BLOCK_Pos     10U
+#define USB_RXCNT_NUM_BLOCK_Msk     (0x1FU << USB_RXCNT_NUM_BLOCK_Pos)
+#define USB_RXCNT_BL_SIZE           0x8000
 
 #define USB_TOGGLE(EP_ID, BIT_NAME) \
-    (USB->EP[EP_ID].w = (USB->EP[EP_ID].w & USB_EPREG_MASK) | USB_EP_CTR_RX | USB_EP_CTR_TX | USB_EP_ ## BIT_NAME)
+    (USB->EPR[EP_ID].w = (USB->EPR[EP_ID].w & USB_EPREG_MASK)\
+            | USB_EP_CTR_RX | USB_EP_CTR_TX | USB_EP_ ## BIT_NAME)
 
 /* if the DTOG bit is not 1, write a 1 to it to toggle back to 0 */
 #define USB_TOGGLE_CLEAR(EP_ID, BIT_NAME) \
-do { if (USB_REG_BIT(husb,EP[EP_ID],BIT_NAME) != 0) USB_TOGGLE(EP_ID, BIT_NAME); }while(0)
+do { if (USB_REG_BIT(pxUSB,EPR[EP_ID],BIT_NAME) != 0) USB_TOGGLE(EP_ID, BIT_NAME); }while(0)
 
 #define USB_EPRX_TX_DTOG1    (USB_EPRX_DTOG1 | USB_EPTX_DTOG1)
 #define USB_EPRX_TX_DTOG2    (USB_EPRX_DTOG2 | USB_EPTX_DTOG2)
@@ -69,23 +77,19 @@ do { if (USB_REG_BIT(husb,EP[EP_ID],BIT_NAME) != 0) USB_TOGGLE(EP_ID, BIT_NAME);
 #define USB_EP_RX_TX_STALL   (USB_EP_RX_STALL | USB_EP_TX_STALL)
 
 #define USB_EP_SET_STATUS(EP_ID, DIRECTION, STATUS) \
-    do { __IO uint16_t epreg = USB->EP[EP_ID].w & USB_EP##DIRECTION##_DTOGMASK; \
-    if (USB_EP_##DIRECTION##_##STATUS & USB_EP##DIRECTION##_DTOG1) epreg ^= USB_EP##DIRECTION##_DTOG1; \
-    if (USB_EP_##DIRECTION##_##STATUS & USB_EP##DIRECTION##_DTOG2) epreg ^= USB_EP##DIRECTION##_DTOG2; \
-    USB->EP[EP_ID].w = epreg | USB_EP_CTR_RX | USB_EP_CTR_TX; } while(0)
+    (USB->EPR[EP_ID].w = ((USB->EPR[EP_ID].w & USB_EP##DIRECTION##_DTOGMASK)\
+    ^ USB_EP_##DIRECTION##_##STATUS) | USB_EP_CTR_RX | USB_EP_CTR_TX)
 
-#define USB_CLEAR_EP_FLAG(EP_ID, FLAG_NAME)     \
-        (USB->EP[EP_ID].w &= USB_EPREG_MASK & (~USB_EP_ ## FLAG_NAME))
+#define USB_EP_FLAG_CLEAR(EP_ID, FLAG_NAME)     \
+        (USB->EPR[EP_ID].w &= USB_EPREG_MASK & (~USB_EP_ ## FLAG_NAME))
 
-#define EP_IS_IN(HANDLE,ENDPOINT)   (((uint32_t)(ENDPOINT)) < ((uint32_t)(&(HANDLE)->EP.OUT[0])))
-#define EP_IS_OUT(HANDLE,ENDPOINT)  (!EP_IS_IN(HANDLE,ENDPOINT))
+#define USB_GET_EP_AT(HANDLE, NUMBER)   (((NUMBER) > 0x7F) ?            \
+        (&(HANDLE)->EP.IN[(NUMBER) & 0xF]) :                            \
+        (&(HANDLE)->EP.OUT[NUMBER]))
 
-#define USB_GET_EP_AT(HANDLE, NUMBER)  \
-    (((NUMBER) > 0x7F) ? (&((HANDLE)->EP.IN[(NUMBER) &= 0x7F])) : (&((HANDLE)->EP.OUT[NUMBER])))
+#define USB_EP_DOUBLE_BUFFERED(ENDPOINT)  ((ENDPOINT)->Type == USB_EP_TYPE_ISOCHRONOUS)
 
-#define USB_PMA_ALLOCATION(SIZE)    (SIZE)
-
-static const uint16_t usb_epTypeRemap[4] = {
+static const uint16_t usb_ausEpTypeRemap[4] = {
     USB_EP_CONTROL,
     USB_EP_ISOCHRONOUS,
     USB_EP_BULK,
@@ -93,156 +97,173 @@ static const uint16_t usb_epTypeRemap[4] = {
 };
 
 /* Writes user data to USB endpoint packet memory */
-static void usb_writePMA(uint8_t * sourceBuf, uint16_t pmaAddress, uint16_t dataCount)
+static void USB_prvWritePMA(uint8_t * pucSrcBuf, uint16_t usPmaAddress, uint16_t usDataCount)
 {
-    USB_PacketAddressType * dest = (USB_PacketAddressType *)USB_PMAADDR + (pmaAddress / 2);
+    USB_PacketAddressType * pxDst = (USB_PacketAddressType *)USB_PMAADDR + (usPmaAddress / 2);
+    uint16_t usWCount;
 
-    /* Check if input data is aligned */
-    if ((((uint32_t)sourceBuf) & 1) == 0)
+    /* Assemble halfwords and copy them to packet memory */
+    for (usWCount = (usDataCount + 1) / 2; usWCount > 0; usWCount--)
     {
-        uint16_t i;
-
-        for (i = 0; i < ((dataCount + 1) / 2); i++)
-        {
-            dest[i] = ((uint16_t*)sourceBuf)[i];
-        }
-    }
-    else
-    {
-        dataCount = (dataCount + 1) / 2;
-        while (dataCount--)
-        {
-            *dest = ((uint16_t)(sourceBuf[1]) << 8) | (uint16_t)(sourceBuf[0]);
-            dest++;
-            sourceBuf += 2;
-        }
+        *pxDst = ((uint16_t)(pucSrcBuf[1]) << 8) | (uint16_t)(pucSrcBuf[0]);
+        pxDst++;
+        pucSrcBuf += 2;
     }
 }
 
 /* Reads USB endpoint data from packet memory */
-static void usb_readPMA(uint8_t * destBuf, uint16_t pmaAddress, uint16_t dataCount)
+static void USB_prvReadPMA(uint8_t * pucDstBuf, uint16_t usPmaAddress, uint16_t usDataCount)
 {
-    USB_PacketAddressType * source = (USB_PacketAddressType *)USB_PMAADDR + (pmaAddress / 2);
+    USB_PacketAddressType * pxSrc = (USB_PacketAddressType *)USB_PMAADDR + (usPmaAddress / 2);
+    uint16_t usWCount;
 
-    /* Check if input data is aligned */
-    if ((((uint32_t)destBuf) & 1) == 0)
+    /* Copy each halfword into the byte buffer */
+    for (usWCount = usDataCount / 2; usWCount > 0; usWCount--)
     {
-        uint16_t i;
-        for (i = 0; i < ((dataCount + 1) / 2); i++)
-        {
-            ((uint16_t*)destBuf)[i] = source[i];
-        }
+        uint16_t usData = *pxSrc;
+        *pucDstBuf = usData;
+        pucDstBuf++;
+        *pucDstBuf = usData >> 8;
+        pucDstBuf++;
+        pxSrc++;
     }
-    else
+
+    /* The last, unaligned byte is filled if exists */
+    if ((usDataCount & 1) != 0)
     {
-        dataCount = (dataCount + 1) / 2;
-        while (dataCount--)
-        {
-            *destBuf = *source;
-            destBuf++;
-            *destBuf = (*source) >> 8;
-            destBuf++;
-            source++;
-        }
+        *pucDstBuf = (uint8_t)*pxSrc;
     }
 }
 
 /* Setting RX_COUNT requires special conversion */
-static uint16_t usb_epConvertRxCount(uint16_t count)
+static uint16_t USB_prvConvertRxCount(uint16_t usRxCount)
 {
-    uint16_t blocks;
-    if(count > 62)
+    uint16_t usBlocks;
+    if(usRxCount > 62)
     {
-        blocks = count >> 5;
-        if ((count & 0x1f) == 0)
-        {
-            blocks--;
-        }
-        blocks = (uint16_t)((blocks << 10) | 0x8000);
+        /* Rx count to blocks of 32 */
+        usBlocks = ((usRxCount + 31) >> 5) - 1;
+        usBlocks = USB_RXCNT_BL_SIZE | (usBlocks << USB_RXCNT_NUM_BLOCK_Pos);
     }
     else
     {
-        blocks = count >> 1;
-        if((count & 0x1) != 0)
-        {
-            blocks++;
-        }
-        blocks = (uint16_t)(blocks << 10);
+        /* Rx count to blocks of 2 */
+        usBlocks = (usRxCount + 1) >> 1;
+        usBlocks = (usBlocks << USB_RXCNT_NUM_BLOCK_Pos);
     }
-    return blocks;
+    return usBlocks;
+}
+
+/* Determines the next packet size based on the transfer progress and the EP MPS */
+static uint16_t USB_prvNextPacketSize(USB_EndPointHandleType * pxEP)
+{
+    uint16_t usPacketLength;
+
+    /* Multi packet transfer */
+    if (pxEP->Transfer.Progress > pxEP->MaxPacketSize)
+    {
+        pxEP->Transfer.Progress -= pxEP->MaxPacketSize;
+        usPacketLength = pxEP->MaxPacketSize;
+    }
+    else
+    {
+        usPacketLength = pxEP->Transfer.Progress;
+        pxEP->Transfer.Progress = 0;
+    }
+
+    return usPacketLength;
 }
 
 /* Handle OUT EP transfer */
-static void usb_epReceive(USB_HandleType * husb, USB_EndPointHandleType * ep, uint16_t Length)
+static void USB_prvReceivePacket(USB_HandleType * pxUSB, USB_EndPointHandleType * pxEP)
 {
-    /* Multi packet transfer */
-    if (Length > ep->MaxPacketSize)
-    {
-        ep->Transfer.length = Length - ep->MaxPacketSize;
-        Length = usb_epConvertRxCount(ep->MaxPacketSize);
-    }
-    else
-    {
-        ep->Transfer.length = 0;
-        Length = usb_epConvertRxCount(Length);
-    }
+    uint16_t usPacketLength = USB_prvConvertRxCount(USB_prvNextPacketSize(pxEP));
 
     /* Double buffering */
-    if ((ep->DoubleBuffer == ENABLE) && ((USB->EP[ep->RegId].w & USB_EP_DTOG_RX) != 0))
+    if (USB_EP_DOUBLE_BUFFERED(pxEP) && ((USB->EPR[pxEP->RegId].w & USB_EP_DTOG_RX) == 0))
     {
         /* Set endpoint buffer 0 count */
-        USB_EP_BDT[ep->RegId].TX_COUNT = Length;
+        USB_EP_BDT[pxEP->RegId].TX_COUNT = usPacketLength;
     }
     else
     {
         /*Set RX buffer count */
-        USB_EP_BDT[ep->RegId].RX_COUNT = Length;
+        USB_EP_BDT[pxEP->RegId].RX_COUNT = usPacketLength;
     }
 
-    USB_EP_SET_STATUS(ep->RegId, RX, VALID);
+    USB_EP_SET_STATUS(pxEP->RegId, RX, VALID);
 }
 
 /* Handle IN EP transfer */
-static void usb_epTransmit(USB_HandleType * husb, USB_EndPointHandleType * ep, uint16_t Length)
+static void USB_prvTransmitPacket(USB_HandleType * pxUSB, USB_EndPointHandleType * pxEP)
 {
-    uint16_t pmaAddress = husb->BdtSize + ep->PacketAddress;
+    uint16_t usPmaAddress = USB_EP_BDT[pxEP->RegId].TX_ADDR;
+    uint16_t usPacketLength = USB_prvNextPacketSize(pxEP);
 
-    /* Multi packet transfer */
-    if (Length > ep->MaxPacketSize)
+    if (!USB_EP_DOUBLE_BUFFERED(pxEP))
     {
-        ep->Transfer.length = Length - ep->MaxPacketSize;
-        Length = ep->MaxPacketSize;
-    }
-    else
-    {
-        ep->Transfer.length = 0;
-    }
+        USB_EP_BDT[pxEP->RegId].TX_COUNT = usPacketLength;
 
-    /* configure and validate Tx endpoint */
-    if (ep->DoubleBuffer == DISABLE)
-    {
-        usb_writePMA(ep->Transfer.buffer, pmaAddress, Length);
-        USB_EP_BDT[ep->RegId].TX_COUNT = Length;
+        /* Write the data to the packet memory */
+        USB_prvWritePMA(pxEP->Transfer.Data, usPmaAddress, usPacketLength);
+
+        /* Validate Tx endpoint */
+        USB_EP_SET_STATUS(pxEP->RegId, TX, VALID);
     }
-    else
+    else /* Double buffered endpoint */
     {
-        /* Write the data to the USB endpoint */
-        if ((USB->EP[ep->RegId].w & USB_EP_DTOG_TX) != 0)
+        /* Use buffer 1 when DTOG == 1 */
+        if ((USB->EPR[pxEP->RegId].w & USB_EP_DTOG_TX) != 0)
         {
-            USB_EP_BDT[ep->RegId].RX_COUNT = Length;
-            pmaAddress += ep->MaxPacketSize;
+            USB_EP_BDT[pxEP->RegId].RX_COUNT = usPacketLength;
+            usPmaAddress = USB_EP_BDT[pxEP->RegId].RX_ADDR;
         }
         else
         {
-            USB_EP_BDT[ep->RegId].TX_COUNT = Length;
+            USB_EP_BDT[pxEP->RegId].TX_COUNT = usPacketLength;
         }
-        usb_writePMA(ep->Transfer.buffer, pmaAddress, Length);
 
-        /* Switch the transmission buffer by toggling SW_BUF flag */
-        USB_TOGGLE(ep->RegId, DTOG_RX);
+        /* Write the data to the packet memory */
+        USB_prvWritePMA(pxEP->Transfer.Data, usPmaAddress, usPacketLength);
+
+        /* Toggle SW_BUF flag to clear NAK status (DTOG == SW_BUF) */
+        if (USB->EPR[pxEP->RegId].b.DTOG_TX == USB->EPR[pxEP->RegId].b.DTOG_RX)
+        {
+            USB_TOGGLE(pxEP->RegId, DTOG_RX);
+        }
     }
+}
 
-    USB_EP_SET_STATUS(ep->RegId, TX, VALID);
+/* Opens EP0 bidirectional dedicated control endpoint */
+static void USB_prvCtrlEpOpen(USB_HandleType * pxUSB)
+{
+    /* Configure EP0 type; address */
+    USB->EPR[0].w = (USB->EPR[0].w & USB_EP_T_MASK)
+            | USB_EP_CONTROL;
+
+    USB->EPR[0].w = (USB->EPR[0].w & USB_EPREG_MASK)
+            | USB_EP_CTR_RX | USB_EP_CTR_TX | 0;
+
+    /* IN direction */
+    {
+        /*Set the endpoint Transmit buffer address */
+        USB_EP_BDT[0].TX_COUNT = 0;
+
+        USB_TOGGLE_CLEAR(0, DTOG_TX);
+
+        /* Configure NAK status for the Endpoint */
+        USB_EP_SET_STATUS(0, TX, NAK);
+    }
+    /* OUT direction */
+    {
+        /* Set the endpoint Receive buffer address and counter */
+        USB_EP_BDT[0].RX_COUNT = USB_prvConvertRxCount(pxUSB->EP.OUT[0].MaxPacketSize);
+
+        USB_TOGGLE_CLEAR(0, DTOG_RX);
+
+        /* Configure VALID status for the Endpoint */
+        USB_EP_SET_STATUS(0, RX, VALID);
+    }
 }
 
 /** @defgroup USB_Exported_Functions USB Exported Functions
@@ -250,27 +271,20 @@ static void usb_epTransmit(USB_HandleType * husb, USB_EndPointHandleType * ep, u
 
 /**
  * @brief Initializes the USB peripheral using the setup configuration
- * @param husb: pointer to the USB handle structure
- * @param Config: USB setup configuration
- * @return ERROR if input is incorrect, OK if success
+ * @param pxUSB: pointer to the USB handle structure
+ * @param pxConfig: USB setup configuration
  */
-XPD_ReturnType XPD_USB_Init(USB_HandleType * husb, const USB_InitType * Config)
+void USB_vInit(USB_HandleType * pxUSB, const USB_InitType * pxConfig)
 {
-    uint32_t i;
-
     /* Enable peripheral clock */
-    XPD_RCC_ClockEnable(RCC_POS_USB);
+    RCC_vClockEnable(RCC_POS_USB);
 
-    /* Init endpoints structures (USB FS has 8 endpoints) */
-    for (i = 0; i < USB_ENDPOINT_COUNT; i++)
-    {
-        /* Control type until ep is activated */
-        husb->EP.IN[i].Type            = husb->EP.OUT[i].Type            = USB_EP_TYPE_CONTROL;
-        husb->EP.IN[i].MaxPacketSize   = husb->EP.OUT[i].MaxPacketSize   = 0;
-        husb->EP.IN[i].Stalled         = husb->EP.OUT[i].Stalled         = FALSE;
-        husb->EP.IN[i].RegId           = husb->EP.OUT[i].RegId           = 0;
-        husb->EP.IN[i].DoubleBuffer    = husb->EP.OUT[i].DoubleBuffer    = DISABLE;
-    }
+    /* Initialize handle variables */
+    pxUSB->EP.OUT[0].MaxPacketSize =
+    pxUSB->EP.IN [0].MaxPacketSize = USBD_EP0_MAX_PACKET_SIZE;
+    pxUSB->EP.OUT[0].Type =
+    pxUSB->EP.IN [0].Type = USB_EP_TYPE_CONTROL;
+    pxUSB->LinkState = USB_LINK_STATE_OFF;
 
     /* Initialize peripheral device */
     /* FRES = 1 */
@@ -283,733 +297,573 @@ XPD_ReturnType XPD_USB_Init(USB_HandleType * husb, const USB_InitType * Config)
     USB->ISTR.w = 0;
 
     /* Set Btable Address */
-    USB->BTABLE = 0;
-
-    /* Reserve place for EP0 descriptor and packets */
-    husb->BdtSize = sizeof(USB_BufferDescriptor_TypeDef);
-    husb->EP.OUT[0].PacketAddress = 0;
-    husb->EP.IN [0].PacketAddress = USB_PMA_ALLOCATION(USB_MAX_PACKET_SIZE);
-    husb->PmaOffset = USB_PMA_ALLOCATION(2 * USB_MAX_PACKET_SIZE);
-
-    /*Set interrupt mask */
-    i = USB_CNTR_CTRM | USB_CNTR_WKUPM | USB_CNTR_SUSPM | USB_CNTR_RESETM;
-
-    if (Config->SOF == ENABLE)
-    {
-        i |= USB_CNTR_SOFM;
-    }
+    USB->BTABLE = USB_BTABLE_VALUE;
 
 #ifdef USB_LPMCSR_LMPEN
     /* Set Link Power Management feature (L1 sleep mode support) */
-    if (Config->LinkPowerMgmt == ENABLE)
+    if (pxConfig->LPM != DISABLE)
     {
         SET_BIT(USB->LPMCSR.w, USB_LPMCSR_LMPEN | USB_LPMCSR_LPMACK);
-        i |= USB_CNTR_L1REQM;
     }
     else
     {
         CLEAR_BIT(USB->LPMCSR.w, USB_LPMCSR_LMPEN | USB_LPMCSR_LPMACK);
     }
 #endif
-    husb->DeviceAddress = 0;
-    husb->LowPowerMode  = Config->LowPowerMode;
 
     /* Initialize dependencies (pins, IRQ lines) */
-    XPD_SAFE_CALLBACK(husb->Callbacks.DepInit, husb);
-
-    /* Apply interrupts selection */
-    USB->CNTR.w = i;
-
-    return XPD_OK;
+    XPD_SAFE_CALLBACK(pxUSB->Callbacks.DepInit, pxUSB);
 }
 
 /**
  * @brief Restores the USB peripheral to its default inactive state
- * @param husb: pointer to the USB handle structure
- * @return ERROR if input is incorrect, OK if success
+ * @param pxUSB: pointer to the USB handle structure
  */
-XPD_ReturnType XPD_USB_Deinit(USB_HandleType * husb)
+void USB_vDeinit(USB_HandleType * pxUSB)
 {
     /* Stop device if not done so far */
-    XPD_USB_Stop(husb);
+    USB_vStop_IT(pxUSB);
 
-    /* disable all interrupts and force USB reset */
-    USB->CNTR.w = USB_CNTR_FRES;
-
-    /* clear interrupt status register */
-    USB->ISTR.w = 0;
-
-    /* switch-off device */
-    USB_REG_BIT(husb,CNTR,PDWN) = 1;
+    /* Switch-off device */
+    USB->CNTR.w = USB_CNTR_FRES | USB_CNTR_PDWN;
 
     /* Deinitialize dependencies */
-    XPD_SAFE_CALLBACK(husb->Callbacks.DepDeinit, husb);
+    XPD_SAFE_CALLBACK(pxUSB->Callbacks.DepDeinit, pxUSB);
 
     /* Peripheral clock disabled */
-    XPD_RCC_ClockDisable(RCC_POS_USB);
-
-    return XPD_OK;
+    RCC_vClockDisable(RCC_POS_USB);
 }
 
 /**
- * @brief Starts the USB device operation
- * @param husb: pointer to the USB handle structure
+ * @brief Starts the USB device operation with necessary interrupts.
+ * @param pxUSB: pointer to the USB handle structure
  */
-void XPD_USB_Start(USB_HandleType * husb)
+void USB_vStart_IT(USB_HandleType * pxUSB)
 {
+    /*Set interrupt mask */
+    uint32_t ulCNTR = USB_CNTR_CTRM | USB_CNTR_WKUPM | USB_CNTR_SUSPM | USB_CNTR_RESETM;
+#ifdef USB_LPMCSR_LMPEN
+    /* Set Link Power Management feature (L1 sleep mode support) */
+    if (USB_REG_BIT(pxUSB, LPMCSR, LMPEN) != 0)
+    {
+        ulCNTR |= USB_CNTR_L1REQM;
+    }
+#endif
+    /* Apply interrupts selection */
+    USB->CNTR.w |= ulCNTR;
+
     /* Activate DP line pull up */
 #ifdef USB_BCDR_DPPU
-    USB_REG_BIT(husb,BCDR, DPPU) = 1;
+    USB_REG_BIT(pxUSB,BCDR, DPPU) = 1;
 #else
-    XPD_SAFE_CALLBACK(husb->Callbacks.ConnectionStateCtrl, ENABLE);
+    XPD_SAFE_CALLBACK(pxUSB->Callbacks.ConnectCtrl, ENABLE);
 #endif
-    /* Set Link State to connected */
-    husb->LinkState = USB_LPM_L0;
 }
 
 /**
- * @brief Disconnects the device from the USB host
- * @param husb: pointer to the USB handle structure
+ * @brief Disconnects the device from the USB host and disables all interrupts.
+ * @param pxUSB: pointer to the USB handle structure
  */
-void XPD_USB_Stop(USB_HandleType * husb)
+void USB_vStop_IT(USB_HandleType * pxUSB)
 {
+    /* Disable all interrupts */
+    CLEAR_BIT(USB->CNTR.w, 0xFF80);
+
+    /* Clear interrupt status register */
+    USB->ISTR.w = 0;
+
     /* Deactivate DP line pull up */
 #ifdef USB_BCDR_DPPU
-    USB_REG_BIT(husb,BCDR, DPPU) = 0;
+    USB_REG_BIT(pxUSB,BCDR, DPPU) = 0;
 #else
-    XPD_SAFE_CALLBACK(husb->Callbacks.ConnectionStateCtrl, DISABLE);
+    XPD_SAFE_CALLBACK(pxUSB->Callbacks.ConnectCtrl, DISABLE);
 #endif
-    /* Set Link State to disconnected */
-    husb->LinkState = USB_LPM_L3;
+    pxUSB->LinkState = USB_LINK_STATE_OFF;
 }
 
 /**
- * @brief Sets the USB device address
- * @param husb: pointer to the USB handle structure
+ * @brief Sets the USB device address.
+ * @param pxUSB: pointer to the USB handle structure
  * @param Address: new device address
  */
-void XPD_USB_SetAddress(USB_HandleType * husb, uint8_t Address)
+void USB_vSetAddress(USB_HandleType * pxUSB, uint8_t ucAddress)
 {
-    if (Address == 0)
-    {
-        /* set device address and enable function */
-        USB->DADDR.w = USB_DADDR_EF;
-    }
-    else
-    {
-        /* USB Address will be applied in IRQHandler */
-        husb->DeviceAddress = Address;
-    }
+    USB->DADDR.w = USB_DADDR_EF | ucAddress;
 }
 
 /**
- * @brief Configure peripheral RAM allocation for endpoints (except default EP0) after device initialization
- *        and before starting the USB operation.
- * @param husb: pointer to the USB handle structure
- * @param EpAddress: endpoint number
- * @param BufferSize: size of buffer to be allocated in peripheral RAM
- *        This value is limited to FS_MAX_PACKET_SIZE = 64 for Control and Interrupt endpoints
- *        Bulk endpoints can be configured to double-buffered by doubling the configured buffer size
- *        Isochronous endpoints are mandatory double-buffered, therefore it shall be set to between 65 and 128
+ * @brief Opens an endpoint.
+ * @param pxUSB: pointer to the USB handle structure
+ * @param ucEpAddress: endpoint address
+ * @param eType: endpoint type
+ * @param usMaxPacketSize: endpoint maximum data packet size
  */
-void XPD_USB_EP_BufferInit(USB_HandleType * husb, uint8_t EpAddress, uint16_t BufferSize)
+void USB_vEpOpen(
+        USB_HandleType *    pxUSB,
+        uint8_t             ucEpAddress,
+        USB_EndPointType    eType,
+        uint16_t            usMaxPacketSize)
 {
-    USB_EndPointHandleType * ep = USB_GET_EP_AT(husb, EpAddress);
+    USB_EndPointHandleType * pxEP = USB_GET_EP_AT(pxUSB, ucEpAddress);
+    uint8_t ucEpNum = ucEpAddress & 0xF;
 
-    /* EP0 is managed internally */
-    if (EpAddress > 0)
-    {
-        /* Buffer size must align to 16 bit */
-        BufferSize += BufferSize & 1;
+    pxEP->MaxPacketSize = usMaxPacketSize;
+    pxEP->Type          = eType;
 
-        /* Double buffering is mandatory for isochronous endpoints,
-         * optional for bulk, unavailable for others */
-        ep->DoubleBuffer  = (BufferSize > USB_MAX_PACKET_SIZE) ? ENABLE : DISABLE;
-        ep->PacketAddress = husb->PmaOffset;
+    /* Configure EP type */
+    USB->EPR[pxEP->RegId].w = (USB->EPR[pxEP->RegId].w & USB_EP_T_MASK)
+            | usb_ausEpTypeRemap[pxEP->Type];
 
-        husb->PmaOffset += USB_PMA_ALLOCATION(BufferSize);
-
-        /* Incrementing of BufferDescriptorTable size is done on a worst case basis
-         * If an EPnR can manage both an IN and OUT endpoint, this offset can decrease */
-        husb->BdtSize += sizeof(USB_BufferDescriptor_TypeDef);
-    }
-}
-
-/**
- * @brief Opens an endpoint
- * @param husb: pointer to the USB handle structure
- * @param EpAddress: endpoint number
- * @param Type: endpoint type
- * @param MaxPacketSize: endpoint maximum data packet size
- */
-void XPD_USB_EP_Open(USB_HandleType * husb, uint8_t EpAddress, USB_EndPointType Type, uint16_t MaxPacketSize)
-{
-    USB_EndPointHandleType * ep = USB_GET_EP_AT(husb, EpAddress);
-    uint16_t pmaAddress = husb->BdtSize + ep->PacketAddress;
-
-    ep->MaxPacketSize = MaxPacketSize;
-    ep->Type          = Type;
-
-    /* Skip EP0, it is mandatory and has been configured at init */
-    if (EpAddress > 0)
-    {
-        USB_EndPointHandleType * pair = (EP_IS_IN(husb,ep) ?
-                &husb->EP.OUT[EpAddress] : &husb->EP.IN[EpAddress]);
-
-        /* Ensuring that double buffering is not enabled for control or interrupt EPs */
-        if ((ep->Type == USB_EP_CONTROL) || (ep->Type == USB_EP_INTERRUPT))
-        {
-            ep->DoubleBuffer = DISABLE;
-        }
-
-        /* If IN-OUT endpoints with the same address and type are both single buffer,
-         * one EPnR can manage both */
-        if (  (ep->DoubleBuffer == DISABLE) && (pair->Type == ep->Type) &&
-            (pair->DoubleBuffer == DISABLE) && (pair->RegId > 0))
-        {
-            ep->RegId = pair->RegId;
-        }
-        else
-        {
-            uint8_t id;
-
-            /* Find a disabled (free) EP register */
-            for (id = 1; id < USB_ENDPOINT_COUNT; id++)
-            {
-                if ((USB->EP[id].w & (USB_EPTX_STAT | USB_EPRX_STAT)) == 0)
-                {
-                    /* Save EPnR ID */
-                    ep->RegId = id;
-                    break;
-                }
-            }
-            /* If the control reaches here, the Endpoint allocation failed!
-             * USBD library does not have any handling mechanism for this problem,
-             * therefore it is ignored on XPD level as well */
-        }
-    }
-
-    /* Configure EP */
-    USB->EP[ep->RegId].w = (USB->EP[ep->RegId].w & USB_EP_T_MASK)
-            | usb_epTypeRemap[ep->Type];
-
-    USB->EP[ep->RegId].w = (USB->EP[ep->RegId].w & USB_EPREG_MASK)
-            | USB_EP_CTR_RX | USB_EP_CTR_TX | EpAddress;
+    /* Configure EP address */
+    USB->EPR[pxEP->RegId].w = (USB->EPR[pxEP->RegId].w & USB_EPREG_MASK)
+            | USB_EP_CTR_RX | USB_EP_CTR_TX | ucEpNum;
 
     /* Double buffer */
-    if (ep->DoubleBuffer == ENABLE)
+    if (USB_EP_DOUBLE_BUFFERED(pxEP))
     {
         /* Set the endpoint as double buffered */
-        USB->EP[ep->RegId].w = (USB->EP[ep->RegId].w & USB_EPREG_MASK)
+        USB->EPR[pxEP->RegId].w = (USB->EPR[pxEP->RegId].w & USB_EPREG_MASK)
             | USB_EP_CTR_RX | USB_EP_CTR_TX | USB_EP_KIND;
 
         /* Clear the data toggle bits for the endpoint IN/OUT */
-        USB_TOGGLE_CLEAR(ep->RegId, DTOG_RX);
-        USB_TOGGLE_CLEAR(ep->RegId, DTOG_TX);
+        USB_TOGGLE_CLEAR(pxEP->RegId, DTOG_RX);
+        USB_TOGGLE_CLEAR(pxEP->RegId, DTOG_TX);
 
-        if (EP_IS_IN(husb,ep))
+        if (ucEpAddress > 0x7F)
         {
-            /* Set buffer address for double buffered mode */
-            USB_EP_BDT[ep->RegId].RX_ADDR  = pmaAddress + ep->MaxPacketSize;
-            USB_EP_BDT[ep->RegId].RX_COUNT = 0;
+            /* Initially no sent data */
+            USB_EP_BDT[pxEP->RegId].TX_COUNT =
+            USB_EP_BDT[pxEP->RegId].RX_COUNT = 0;
 
-            /* Set SW_BUF flag */
-            USB_TOGGLE(ep->RegId, DTOG_RX);
-
+            /* DTOG == SW_BUF == 0 result in NAK */
+            USB_EP_SET_STATUS(pxEP->RegId, TX, VALID);
             /* Disable unused direction */
-            USB_EP_SET_STATUS(ep->RegId, RX, DIS);
+            USB_EP_SET_STATUS(pxEP->RegId, RX, DIS);
         }
         else
         {
             /* Set buffer address for double buffered mode */
-            USB_EP_BDT[ep->RegId].TX_ADDR  = pmaAddress + ep->MaxPacketSize;
+            USB_EP_BDT[pxEP->RegId].TX_COUNT =
+            USB_EP_BDT[pxEP->RegId].RX_COUNT = USB_prvConvertRxCount(pxEP->MaxPacketSize);
 
             /* Set SW_BUF flag */
-            USB_TOGGLE(ep->RegId, DTOG_TX);
+            USB_TOGGLE(pxEP->RegId, DTOG_TX);
 
+            /* Configure VALID status for the Endpoint */
+            USB_EP_SET_STATUS(pxEP->RegId, RX, VALID);
             /* Disable unused direction */
-            USB_EP_SET_STATUS(ep->RegId, TX, DIS);
+            USB_EP_SET_STATUS(pxEP->RegId, TX, DIS);
         }
     }
-
-    if (EP_IS_IN(husb,ep))
+    else if (ucEpAddress > 0x7F)
     {
         /*Set the endpoint Transmit buffer address */
-        USB_EP_BDT[ep->RegId].TX_ADDR  = pmaAddress;
-        USB_EP_BDT[ep->RegId].TX_COUNT = 0;
+        USB_EP_BDT[pxEP->RegId].TX_COUNT = 0;
 
-        USB_TOGGLE_CLEAR(ep->RegId, DTOG_TX);
+        USB_TOGGLE_CLEAR(pxEP->RegId, DTOG_TX);
 
         /* Configure NAK status for the Endpoint */
-        USB_EP_SET_STATUS(ep->RegId, TX, NAK);
+        USB_EP_SET_STATUS(pxEP->RegId, TX, NAK);
     }
     else
     {
         /* Set the endpoint Receive buffer address and counter */
-        USB_EP_BDT[ep->RegId].RX_ADDR  = pmaAddress;
-        USB_EP_BDT[ep->RegId].RX_COUNT = usb_epConvertRxCount(MaxPacketSize);
+        USB_EP_BDT[pxEP->RegId].RX_COUNT = USB_prvConvertRxCount(pxEP->MaxPacketSize);
 
-        USB_TOGGLE_CLEAR(ep->RegId, DTOG_RX);
+        USB_TOGGLE_CLEAR(pxEP->RegId, DTOG_RX);
 
         /* Configure VALID status for the Endpoint */
-        USB_EP_SET_STATUS(ep->RegId, RX, VALID);
+        USB_EP_SET_STATUS(pxEP->RegId, RX, VALID);
     }
 }
 
 /**
- * @brief Closes an active endpoint
- * @param husb: pointer to the USB handle structure
- * @param EpAddress: endpoint number
+ * @brief Closes an active endpoint (EP0 shall not be closed).
+ * @param pxUSB: pointer to the USB handle structure
+ * @param ucEpAddress: endpoint address
  */
-void XPD_USB_EP_Close(USB_HandleType * husb, uint8_t EpAddress)
+void USB_vEpClose(USB_HandleType * pxUSB, uint8_t ucEpAddress)
 {
-    USB_EndPointHandleType * ep = USB_GET_EP_AT(husb, EpAddress);
+    USB_EndPointHandleType * pxEP = USB_GET_EP_AT(pxUSB, ucEpAddress);
 
-    /* Only previously opened EPs shall be closed */
-    if ((EpAddress == 0) || (ep->RegId > 0))
+    if (ucEpAddress > 0x7F)
     {
-        if (EP_IS_IN(husb,ep))
+        /* Configure DISABLE status for the Endpoint*/
+        USB_TOGGLE_CLEAR(pxEP->RegId, DTOG_TX);
+        USB_EP_SET_STATUS(pxEP->RegId, TX, DIS);
+
+        if (USB_EP_DOUBLE_BUFFERED(pxEP))
         {
-            /* Configure DISABLE status for the Endpoint*/
-            USB_TOGGLE_CLEAR(ep->RegId, DTOG_TX);
-            USB_EP_SET_STATUS(ep->RegId, TX, DIS);
-
-            if (ep->DoubleBuffer == ENABLE)
-            {
-                /* Disable other half of EPnR as well */
-                USB_TOGGLE_CLEAR(ep->RegId, DTOG_RX);
-                USB_TOGGLE(ep->RegId, DTOG_RX);
-                USB_EP_SET_STATUS(ep->RegId, RX, DIS);
-            }
+            /* Disable other half of EPnR as well */
+            USB_TOGGLE_CLEAR(pxEP->RegId, DTOG_RX);
+            USB_TOGGLE(pxEP->RegId, DTOG_RX);
+            USB_EP_SET_STATUS(pxEP->RegId, RX, DIS);
         }
-        else
+    }
+    else
+    {
+        /* Configure DISABLE status for the Endpoint*/
+        USB_TOGGLE_CLEAR(pxEP->RegId, DTOG_RX);
+        USB_EP_SET_STATUS(pxEP->RegId, RX, DIS);
+
+        if (USB_EP_DOUBLE_BUFFERED(pxEP))
         {
-            /* Configure DISABLE status for the Endpoint*/
-            USB_TOGGLE_CLEAR(ep->RegId, DTOG_RX);
-            USB_EP_SET_STATUS(ep->RegId, RX, DIS);
-
-            if (ep->DoubleBuffer == ENABLE)
-            {
-                /* Disable other half of EPnR as well */
-                USB_TOGGLE_CLEAR(ep->RegId, DTOG_TX);
-                USB_TOGGLE(ep->RegId, DTOG_TX);
-                USB_EP_SET_STATUS(ep->RegId, TX, DIS);
-            }
+            /* Disable other half of EPnR as well */
+            USB_TOGGLE_CLEAR(pxEP->RegId, DTOG_TX);
+            USB_TOGGLE(pxEP->RegId, DTOG_TX);
+            USB_EP_SET_STATUS(pxEP->RegId, TX, DIS);
         }
-
-        /* Reset EPnR binding */
-        ep->RegId = 0;
     }
 }
 
 /**
- * @brief Initiates data reception on the OUT endpoint
- * @param husb: pointer to the USB handle structure
- * @param EpAddress: endpoint number
- * @param Data: pointer to the data buffer
- * @param Length: amount of data bytes to transfer
+ * @brief Set a STALL condition on an endpoint (not supported for Isochronous).
+ * @param pxUSB: pointer to the USB handle structure
+ * @param ucEpAddress: endpoint address
  */
-void XPD_USB_EP_Receive(USB_HandleType * husb, uint8_t EpAddress, uint8_t * Data, uint16_t Length)
+void USB_vEpSetStall(USB_HandleType * pxUSB, uint8_t ucEpAddress)
 {
-    USB_EndPointHandleType * ep = &husb->EP.OUT[EpAddress];
+    USB_EndPointHandleType * pxEP = USB_GET_EP_AT(pxUSB, ucEpAddress);
+
+    if (ucEpAddress > 0x7F)
+    {
+        USB_EP_SET_STATUS(pxEP->RegId, TX, STALL);
+    }
+    else
+    {
+        USB_EP_SET_STATUS(pxEP->RegId, RX, STALL);
+    }
+}
+
+/**
+ * @brief Clear a STALL condition on an endpoint.
+ * @param pxUSB: pointer to the USB handle structure
+ * @param ucEpAddress: endpoint address
+ */
+void USB_vEpClearStall(USB_HandleType * pxUSB, uint8_t ucEpAddress)
+{
+    USB_EndPointHandleType * pxEP = USB_GET_EP_AT(pxUSB, ucEpAddress);
+
+    if (ucEpAddress > 0x7F)
+    {
+        USB_TOGGLE_CLEAR(pxEP->RegId, DTOG_TX);
+        USB_EP_SET_STATUS(pxEP->RegId, TX, VALID);
+    }
+    else
+    {
+        USB_TOGGLE_CLEAR(pxEP->RegId, DTOG_RX);
+        USB_EP_SET_STATUS(pxEP->RegId, RX, VALID);
+    }
+}
+
+/**
+ * @brief Initiates data transmission on the IN endpoint.
+ * @param pxUSB: pointer to the USB handle structure
+ * @param ucEpAddress: endpoint address
+ * @param pucData: pointer to the data buffer
+ * @param usLength: amount of data bytes to transfer
+ */
+void USB_vEpSend(
+        USB_HandleType *    pxUSB,
+        uint8_t             ucEpAddress,
+        const uint8_t *     pucData,
+        uint16_t            usLength)
+{
+    USB_EndPointHandleType * pxEP = &pxUSB->EP.IN[ucEpAddress & 0xF];
+
+    /* setup the transfer */
+    pxEP->Transfer.Data       = (uint8_t*)pucData;
+    pxEP->Transfer.Progress   = usLength;
+    pxEP->Transfer.Length     = usLength;
+
+    USB_prvTransmitPacket(pxUSB, pxEP);
+}
+
+/**
+ * @brief Initiates data reception on the OUT endpoint.
+ * @param pxUSB: pointer to the USB handle structure
+ * @param ucEpAddress: endpoint address
+ * @param pucData: pointer to the data buffer
+ * @param usLength: amount of data bytes to transfer
+ */
+void USB_vEpReceive(
+        USB_HandleType *    pxUSB,
+        uint8_t             ucEpAddress,
+        uint8_t *           pucData,
+        uint16_t            usLength)
+{
+    USB_EndPointHandleType * pxEP = &pxUSB->EP.OUT[ucEpAddress];
 
     /* setup transfer */
-    ep->Transfer.buffer = Data;
-    ep->Transfer.size   = 0;
+    pxEP->Transfer.Data       = pucData;
+    pxEP->Transfer.Progress   = usLength;
+    pxEP->Transfer.Length     = 0;
 
-    usb_epReceive(husb, ep, Length);
+    USB_prvReceivePacket(pxUSB, pxEP);
 }
 
 /**
- * @brief  Returns the OUT endpoint's received data size
- * @param  husb: pointer to the USB handle structure
- * @param  EpAddress: endpoint number
- * @return The number of received bytes
+ * @brief Activates remote wake-up signaling.
+ * @param pxUSB: pointer to the USB handle structure
  */
-uint16_t XPD_USB_EP_GetRxCount(USB_HandleType * husb, uint8_t EpAddress)
+void USB_vSetRemoteWakeup(USB_HandleType * pxUSB)
 {
-    return husb->EP.OUT[EpAddress].Transfer.size;
-}
-
-/**
- * @brief Initiates data transmission on the IN endpoint
- * @param husb: pointer to the USB handle structure
- * @param EpAddress: endpoint number
- * @param Data: pointer to the data buffer
- * @param Length: amount of data bytes to transfer
- */
-void XPD_USB_EP_Transmit(USB_HandleType * husb, uint8_t EpAddress, uint8_t * Data, uint16_t Length)
-{
-    USB_EndPointHandleType * ep = &husb->EP.IN[EpAddress & 0x7F];
-
-    /* setup and start the transfer */
-    ep->Transfer.buffer = Data;
-    ep->Transfer.size   = 0;
-
-    usb_epTransmit(husb, ep, Length);
-}
-
-/**
- * @brief Set a STALL condition on an endpoint (not supported for Isochronous)
- * @param husb: pointer to the USB handle structure
- * @param EpAddress: endpoint number
- */
-void XPD_USB_EP_SetStall(USB_HandleType * husb, uint8_t EpAddress)
-{
-    USB_EndPointHandleType * ep = USB_GET_EP_AT(husb, EpAddress);
-
-    if (EpAddress == 0)
+#ifdef USB_CNTR_L1RESUME
+    if (pxUSB->LinkState == USB_LINK_STATE_SLEEP)
     {
-        /* For control EP0 set both directions */
-        USB_EP_SET_STATUS(ep->RegId, RX_TX, STALL);
+        /* Send LPM L1 Resume signal - Cleared by hardware */
+        USB_REG_BIT(pxUSB,CNTR,L1RESUME) = 1;
     }
     else
+#endif
+    if (pxUSB->LinkState == USB_LINK_STATE_SUSPEND)
     {
-        if (EP_IS_IN(husb,ep))
-        {
-            USB_EP_SET_STATUS(ep->RegId, TX, STALL);
-        }
-        else
-        {
-            USB_EP_SET_STATUS(ep->RegId, RX, STALL);
-        }
+        /* Activate Resume signal
+         * Wait 1 - 15 ms before disabling */
+        USB_REG_BIT(pxUSB,CNTR,RESUME) = 1;
     }
-    ep->Stalled = TRUE;
 }
 
 /**
- * @brief Clear a STALL condition on an endpoint
- * @param husb: pointer to the USB handle structure
- * @param EpAddress: endpoint number
+ * @brief Deactivates remote wake-up signaling.
+ * @param pxUSB: pointer to the USB handle structure
  */
-void XPD_USB_EP_ClearStall(USB_HandleType * husb, uint8_t EpAddress)
+void USB_vClearRemoteWakeup(USB_HandleType * pxUSB)
 {
-    USB_EndPointHandleType * ep = USB_GET_EP_AT(husb, EpAddress);
-
-    if (EP_IS_IN(husb,ep))
-    {
-        USB_TOGGLE_CLEAR(ep->RegId, DTOG_TX);
-        USB_EP_SET_STATUS(ep->RegId, TX, VALID);
-    }
-    else
-    {
-        USB_TOGGLE_CLEAR(ep->RegId, DTOG_RX);
-        USB_EP_SET_STATUS(ep->RegId, RX, VALID);
-    }
-    ep->Stalled = FALSE;
+    /* Deactivate Resume signal after 1 - 15 ms */
+    USB_REG_BIT(pxUSB,CNTR,RESUME) = 0;
 }
 
 /**
- * @brief USB interrupt handler that provides event-driven peripheral management
+ * @brief USB interrupt handler that provides event-driven peripheral management.
  *        and handle callbacks.
- * @param husb: pointer to the USB handle structure
+ * @param pxUSB: pointer to the USB handle structure
  */
-void XPD_USB_IRQHandler(USB_HandleType * husb)
+void USB_vIRQHandler(USB_HandleType * pxUSB)
 {
-    uint32_t istr;
+    uint16_t usISTR;
 
     /* loop while Endpoint interrupts are present */
-    for (istr = USB->ISTR.w; (istr & USB_ISTR_CTR) != 0; istr = USB->ISTR.w)
+    for (usISTR = USB->ISTR.w; (usISTR & USB_ISTR_CTR) != 0; usISTR = USB->ISTR.w)
     {
         /* Read highest priority endpoint number */
-        uint8_t  epId  = (uint8_t)(istr & USB_ISTR_EP_ID);
-        uint16_t epReg = USB->EP[epId].w, count;
-        USB_EndPointHandleType * ep;
+        uint16_t usEpId  = usISTR & USB_ISTR_EP_ID;
+        uint16_t usEpReg = USB->EPR[usEpId].w;
+        uint8_t  ucEpNum = usEpReg & USB_EPADDR_FIELD;
+        uint16_t usDataCount;
 
-        /* EP0 Control endpoint interrupt - handled in accordance with
-         * ST USBD Core library (single packet transfers only) */
-        if (epId == 0)
+        /* OUT data received */
+        if ((usEpReg & USB_EP_CTR_RX) != 0)
         {
-            /* DIR bit indicates IN data */
-            if ((istr & USB_ISTR_DIR) == 0)
+            USB_EndPointHandleType *pxEP = &pxUSB->EP.OUT[ucEpNum];
+
+            /* Get SETUP Packet (EP0 only) */
+            if ((usEpReg & USB_EP_SETUP) != 0)
             {
-                ep = &husb->EP.IN[0];
+                uint8_t* pSetup = (uint8_t*)&pxUSB->Setup;
 
-                /* Clear TX complete flag */
-                USB_CLEAR_EP_FLAG(0, CTR_TX);
+                /* Clear RX complete flag */
+                USB_EP_FLAG_CLEAR(0, CTR_RX);
 
-                ep->Transfer.size = USB_EP_BDT[0].TX_COUNT & 0x3FF;
-                ep->Transfer.buffer += ep->Transfer.size;
+                USB_prvReadPMA(pSetup, USB_EP_BDT[usEpId].RX_ADDR,
+                        sizeof(pxUSB->Setup));
 
-                /* IN packet successfully sent */
-                XPD_SAFE_CALLBACK(husb->Callbacks.DataInStage, husb->User, 0x80,
-                        ep->Transfer.buffer);
-
-                /* Set device address if new valid has been received */
-                if ((husb->DeviceAddress > 0) && (ep->Transfer.length == 0))
-                {
-                    USB->DADDR.w = USB_DADDR_EF | husb->DeviceAddress;
-                    husb->DeviceAddress = 0;
-                }
+                /* Process SETUP Packet */
+                USB_vSetupCallback(pxUSB);
             }
             else
             {
-                /* DIR bit indicates SETUP or OUT data */
-                ep = &husb->EP.OUT[0];
-
-                ep->Transfer.size = USB_EP_BDT[0].RX_COUNT & 0x3FF;
-
-                /* Get SETUP Packet */
-                if ((epReg & USB_EP_SETUP) != 0)
-                {
-                    usb_readPMA((uint8_t*) husb->Setup, (husb->BdtSize + ep->PacketAddress),
-                            ep->Transfer.size);
-
-                    /* Clear RX complete flag */
-                    USB_CLEAR_EP_FLAG(0, CTR_RX);
-
-                    /* Process SETUP Packet */
-                    XPD_SAFE_CALLBACK(husb->Callbacks.SetupStage,
-                            husb->User, (uint8_t *)husb->Setup);
-                }
-
-                /* Get Control Data OUT Packet */
-                else if ((epReg & USB_EP_CTR_RX) != 0)
-                {
-                    /* Clear RX complete flag */
-                    USB_CLEAR_EP_FLAG(0, CTR_RX);
-
-                    /* Read only if not Zero Length Packet data is expected */
-                    if (ep->Transfer.size > 0)
-                    {
-                        usb_readPMA(ep->Transfer.buffer, (husb->BdtSize + ep->PacketAddress),
-                                ep->Transfer.size);
-                        ep->Transfer.buffer += ep->Transfer.size;
-                    }
-
-                    /* Process Control Data OUT Packet */
-                    XPD_SAFE_CALLBACK(husb->Callbacks.DataOutStage,
-                            husb->User, 0, ep->Transfer.buffer);
-
-                    /* Keep EP0 in receiving state */
-                    USB_EP_BDT[0].RX_COUNT = usb_epConvertRxCount(ep->MaxPacketSize);
-                    USB_EP_SET_STATUS(0, RX, VALID);
-                }
-            }
-        }
-        /* EPx Class specific endpoints interrupt processing */
-        else
-        {
-            uint8_t EpAddress = epReg & USB_EPADDR_FIELD;
-
-            /* OUT data received */
-            if ((epReg & USB_EP_CTR_RX) != 0)
-            {
-                uint16_t pmaAddress;
-                ep = &husb->EP.OUT[EpAddress];
-                pmaAddress = husb->BdtSize + ep->PacketAddress;
+                /* Get Data packet */
+                uint16_t usPmaAddress = USB_EP_BDT[usEpId].RX_ADDR;
+                usDataCount = USB_EP_BDT[usEpId].RX_COUNT & 0x3FF;
 
                 /* Clear RX complete flag */
-                USB_CLEAR_EP_FLAG(epId, CTR_RX);
+                USB_EP_FLAG_CLEAR(usEpId, CTR_RX);
 
                 /* Double buffering */
-                if ((ep->DoubleBuffer == ENABLE) && ((epReg & USB_EP_DTOG_RX) != 0))
+                if (USB_EP_DOUBLE_BUFFERED(pxEP))
                 {
-                    /* read from endpoint 0 buffer */
-                    count       = USB_EP_BDT[epId].TX_COUNT & 0x3FF;
-                    pmaAddress += ep->MaxPacketSize;
-                }
-                else
-                {
-                    /* read from endpoint 1 (Rx) buffer */
-                    count       = USB_EP_BDT[epId].RX_COUNT & 0x3FF;
-                }
+                    if ((usEpReg & USB_EP_DTOG_RX) != 0)
+                    {
+                        /* read from endpoint buffer 0 */
+                        usPmaAddress = USB_EP_BDT[usEpId].TX_ADDR;
+                        usDataCount  = USB_EP_BDT[usEpId].TX_COUNT & 0x3FF;
+                    }
 
-                usb_readPMA(ep->Transfer.buffer, pmaAddress, count);
-
-                /* Switch the reception buffer by toggling SW_BUF flag */
-                if (ep->DoubleBuffer == ENABLE)
-                {
-                    USB_TOGGLE(epId, DTOG_TX);
+                    /* Switch the reception buffer by toggling SW_BUF flag */
+                    USB_TOGGLE(usEpId, DTOG_TX);
                 }
 
-                ep->Transfer.size   += count;
-                ep->Transfer.buffer += count;
+                USB_prvReadPMA(pxEP->Transfer.Data, usPmaAddress, usDataCount);
+
+                pxEP->Transfer.Length += usDataCount;
+                pxEP->Transfer.Data += usDataCount;
 
                 /* If the last packet of the data, transfer is complete
-                 * TODO 64 byte single message is not handled */
-                if ((ep->Transfer.length == 0) || (count < ep->MaxPacketSize))
+                 * TODO if Length % MaxPacketSize == 0 the transfer will hang without ZLP */
+                if ((pxEP->Transfer.Progress == 0) ||
+                    (usDataCount < pxEP->MaxPacketSize))
                 {
                     /* Reception finished */
-                    XPD_SAFE_CALLBACK(husb->Callbacks.DataOutStage,
-                            husb->User, EpAddress, ep->Transfer.buffer);
+                    USB_vDataOutCallback(pxUSB, pxEP);
+
+                    if (ucEpNum == 0)
+                    {
+                        /* Keep EP0 ready to receive next setup */
+                        USB_EP_BDT[0].RX_COUNT =
+                                USB_prvConvertRxCount(pxEP->MaxPacketSize);
+                        USB_EP_SET_STATUS(0, RX, VALID);
+                    }
                 }
                 else
                 {
                     /* Continue data reception */
-                    usb_epReceive(husb, ep, ep->Transfer.length);
+                    USB_prvReceivePacket(pxUSB, pxEP);
                 }
             }
+        }
 
-            /* IN data sent */
-            if ((epReg & USB_EP_CTR_TX) != 0)
+        /* IN data sent */
+        if ((usEpReg & USB_EP_CTR_TX) != 0)
+        {
+            USB_EndPointHandleType *pxEP = &pxUSB->EP.IN[ucEpNum];
+
+            /* Clear TX complete flag */
+            USB_EP_FLAG_CLEAR(usEpId, CTR_TX);
+
+            /* Double buffering */
+            if ((USB_EP_DOUBLE_BUFFERED(pxEP)) && ((usEpReg & USB_EP_DTOG_TX) == 0))
             {
-                __IO USB_PacketAddressType* pCountReg;
-                ep = &husb->EP.IN[EpAddress];
+                /* written from endpoint 1 buffer */
+                usDataCount = USB_EP_BDT[usEpId].RX_COUNT & 0x3FF;
+            }
+            else
+            {
+                /* written from endpoint 0 (Tx) buffer */
+                usDataCount = USB_EP_BDT[usEpId].TX_COUNT & 0x3FF;
+            }
+            pxEP->Transfer.Data += usDataCount;
 
-                /* Clear TX complete flag */
-                USB_CLEAR_EP_FLAG(epId, CTR_TX);
-
-                /* Double buffering */
-                if ((ep->DoubleBuffer == ENABLE) && ((epReg & USB_EP_DTOG_TX) == 0))
-                {
-                    /* written from endpoint 1 buffer */
-                    pCountReg = &USB_EP_BDT[epId].RX_COUNT;
-                }
-                else
-                {
-                    /* written from endpoint 0 (Tx) buffer */
-                    pCountReg = &USB_EP_BDT[epId].TX_COUNT;
-                }
-                count = (*pCountReg) & 0x3FF;
-
-                /* Clear register to avoid initial repeated data sending */
-                (*pCountReg) = 0;
-
-                ep->Transfer.size   += count;
-                ep->Transfer.buffer += count;
-
-                /* If the last packet of the data */
-                if (ep->Transfer.length == 0)
-                {
-                    /* Transmission complete */
-                    XPD_SAFE_CALLBACK(husb->Callbacks.DataInStage,
-                            husb->User, 0x80 | EpAddress, ep->Transfer.buffer);
-                }
-                else
-                {
-                    /* Continue data transmission */
-                    usb_epTransmit(husb, ep, ep->Transfer.length);
-                }
+            /* If the last packet of the data */
+            if (pxEP->Transfer.Progress == 0)
+            {
+                /* Transmission complete */
+                USB_vDataInCallback(pxUSB, pxEP);
+            }
+            else
+            {
+                /* Continue data transmission */
+                USB_prvTransmitPacket(pxUSB, pxEP);
             }
         }
     }
 
     /* Handle device reset */
-    if ((istr & USB_ISTR_RESET) != 0)
+    if ((usISTR & USB_ISTR_RESET) != 0)
     {
-        XPD_USB_ClearFlag(husb, RESET);
-        XPD_SAFE_CALLBACK(husb->Callbacks.Reset, husb->User);
+        USB_FLAG_CLEAR(pxUSB, RESET);
 
-        /* reset device address, enable addressing */
-        USB->DADDR.w = USB_DADDR_EF;
+        pxUSB->LinkState = USB_LINK_STATE_ACTIVE;
+
+        /* Allocate endpoint memory */
+        USB_vAllocateEPs(pxUSB);
+
+        /* Open EP0 */
+        USB_prvCtrlEpOpen(pxUSB);
+
+        /* Notify device handler */
+        USB_vResetCallback(pxUSB, USB_SPEED_FULL);
+
+        /* Set default address (0) */
+        USB_vSetAddress(pxUSB, 0);
     }
 
     /* Handle wakeup signal */
-    if ((istr & USB_ISTR_WKUP) != 0)
+    if ((usISTR & USB_ISTR_WKUP) != 0)
     {
-        /* Release low-power mode in the macrocell */
-        CLEAR_BIT(USB->CNTR.w, USB_CNTR_FSUSP | USB_CNTR_LPMODE);
+        /* Release low-power mode, clear any ongoing Remote Wakeup signaling */
+        CLEAR_BIT(USB->CNTR.w, USB_CNTR_FSUSP | USB_CNTR_LPMODE | USB_CNTR_RESUME);
 
-        XPD_USB_ClearFlag(husb, WKUP);
+        USB_FLAG_CLEAR(pxUSB, WKUP);
 
-        XPD_SAFE_CALLBACK(husb->Callbacks.Resume, husb->User);
+        XPD_SAFE_CALLBACK(pxUSB->Callbacks.Resume, pxUSB);
 
         /* LPM state is changed after Resume callback
          * -> possible to determine exited suspend level */
-        husb->LinkState = USB_LPM_L0;
+        pxUSB->LinkState = USB_LINK_STATE_ACTIVE;
     }
 
 #ifdef USB_ISTR_L1REQ
     /* Handle L1 suspend request */
-    if ((istr & USB_ISTR_L1REQ) != 0)
+    if ((usISTR & USB_ISTR_L1REQ) != 0)
     {
         /* Force suspend and low-power mode before going to L1 state */
         SET_BIT(USB->CNTR.w, USB_CNTR_FSUSP | USB_CNTR_LPMODE);
 
-        XPD_USB_ClearFlag(husb, L1REQ);
+        USB_FLAG_CLEAR(pxUSB, L1REQ);
 
         /* Set the target Link State */
-        husb->LinkState = USB_LPM_L1;
-        XPD_SAFE_CALLBACK(husb->Callbacks.Suspend, husb->User);
+        pxUSB->LinkState = USB_LINK_STATE_SLEEP;
+        XPD_SAFE_CALLBACK(pxUSB->Callbacks.Suspend, pxUSB);
     }
 #endif
 
     /* Handle suspend request */
-    if ((istr & USB_ISTR_SUSP) != 0)
+    if ((usISTR & USB_ISTR_SUSP) != 0)
     {
         /* Force low-power mode in the macrocell */
         SET_BIT(USB->CNTR.w, USB_CNTR_FSUSP | USB_CNTR_LPMODE);
 
-        XPD_USB_ClearFlag(husb, SUSP);
+        USB_FLAG_CLEAR(pxUSB, SUSP);
 
-        if (XPD_USB_GetFlag(husb, WKUP) == 0)
+        if (USB_FLAG_STATUS(pxUSB, WKUP) == 0)
         {
             /* Set the target Link State */
-            husb->LinkState = USB_LPM_L2;
-            XPD_SAFE_CALLBACK(husb->Callbacks.Suspend, husb->User);
+            pxUSB->LinkState = USB_LINK_STATE_SUSPEND;
+            XPD_SAFE_CALLBACK(pxUSB->Callbacks.Suspend, pxUSB);
         }
     }
 
-    /* Handle 1ms periodic Start Of Frame packet */
-    if ((istr & USB_ISTR_SOF) != 0)
+    /* Handle Start Of Frame signal (if enabled) */
+    if ((USB_REG_BIT(pxUSB,CNTR,SOFM) != 0) && ((usISTR & USB_ISTR_SOF) != 0))
     {
-        XPD_USB_ClearFlag(husb, SOF);
-        XPD_SAFE_CALLBACK(husb->Callbacks.SOF, husb->User);
+        USB_FLAG_CLEAR(pxUSB, SOF);
+        XPD_SAFE_CALLBACK(pxUSB->Callbacks.SOF, pxUSB);
     }
 }
 
-/**
- * @brief Activates remote wake-up signaling
- * @param husb: pointer to the USB handle structure
- */
-void XPD_USB_ActivateRemoteWakeup(USB_HandleType * husb)
-{
-#ifdef USB_CNTR_L1RESUME
-    if (husb->LinkState == USB_LPM_L1)
-    {
-        USB_REG_BIT(husb,CNTR,L1RESUME) = 1;
-    }
-    else
-#endif
-    {
-        USB_REG_BIT(husb,CNTR,RESUME) = 1;
-    }
-}
-
-/**
- * @brief Deactivates remote wake-up signaling
- * @param husb: pointer to the USB handle structure
- */
-void XPD_USB_DeactivateRemoteWakeup(USB_HandleType * husb)
-{
-#ifdef USB_CNTR_L1RESUME
-    CLEAR_BIT(USB->CNTR.w, USB_CNTR_L1RESUME | USB_CNTR_RESUME);
-#else
-    USB_REG_BIT(husb,CNTR,RESUME) = 0;
-#endif
-}
-
-#ifdef USB_BCDR_BCDEN
 /**
  * @brief Executes Battery Charger Detection algorithm.
  * @note  This function shall be executed before the USB peripheral is connected
  *        (started) with DP pull-up.
- * @param husb: pointer to the USB handle structure
+ * @param pxUSB: pointer to the USB handle structure
  * @return The determined upstream port type
  */
-USB_ChargerType XPD_USB_ChargerDetect(USB_HandleType * husb)
+USB_ChargerType USB_eChargerDetect(USB_HandleType * pxUSB)
 {
+#ifndef USB_BCDR_BCDEN
+    USB_ChargerType eDetection = USB_BCD_NOT_SUPPORTED;
+#else
     /* USB power is always available before the data lines are contacted */
-    USB_ChargerType detection = USB_BCD_NO_DATA_CONTACT;
+    USB_ChargerType eDetection = USB_BCD_NO_DATA_CONTACT;
 
     /* Enable Battery Charger Detection */
     SET_BIT(USB->BCDR.w, USB_BCDR_BCDEN | USB_BCDR_DCDEN);
     {
-        uint32_t timeout = 1000; /* Adjust depending on the speed of plugging in the device */
+        uint32_t ulTimeout = 1000; /* Adjust depending on the speed of plugging in the device */
 
         /* Data Contact Detect: determines contact of data lines to the bus powering entity */
-        if (XPD_OK == XPD_WaitForDiff((void*)&USB->BCDR.w, USB_BCDR_DCDET, 0, &timeout))
+        if (XPD_OK == XPD_eWaitForDiff((void*)&USB->BCDR.w, USB_BCDR_DCDET, 0, &ulTimeout))
         {
             /* Bus electric stabilization */
-            XPD_Delay_ms(300);
+            XPD_vDelay_ms(300);
 
             /* Primary Detection:
              * distinguishes between a Standard Downstream Port and Charging Ports */
             USB->BCDR.w = (USB->BCDR.w & ~USB_BCDR_DCDEN) | USB_BCDR_PDEN;
 
             /* Bus electric stabilization */
-            XPD_Delay_ms(300);
+            XPD_vDelay_ms(300);
 
             /* Check the results of PD */
             switch (USB->BCDR.w & (USB_BCDR_PS2DET | USB_BCDR_PDET))
@@ -1017,7 +871,7 @@ USB_ChargerType XPD_USB_ChargerDetect(USB_HandleType * husb)
                 case USB_BCDR_PS2DET:
                     /* D- is externally pulled high during Primary Detection
                      * PS2 port or proprietary charger */
-                    detection = USB_BCD_PS2_PROPRIETARY_PORT;
+                    eDetection = USB_BCD_PS2_PROPRIETARY_PORT;
                     break;
 
                 case USB_BCDR_PDET:
@@ -1026,37 +880,147 @@ USB_ChargerType XPD_USB_ChargerDetect(USB_HandleType * husb)
                     USB->BCDR.w = (USB->BCDR.w & ~USB_BCDR_PDEN) | USB_BCDR_SDEN;
 
                     /* Bus electric stabilization */
-                    XPD_Delay_ms(300);
+                    XPD_vDelay_ms(300);
 
-                    if (USB_REG_BIT(husb,BCDR,SDET) != 0)
+                    if (USB_REG_BIT(pxUSB,BCDR,SDET) != 0)
                     {
                         /* Dedicated Downstream Port DCP */
-                        detection = USB_BCD_DEDICATED_CHARGING_PORT;
+                        eDetection = USB_BCD_DEDICATED_CHARGING_PORT;
                     }
                     else
                     {
                         /* Charging Downstream Port CDP */
-                        detection = USB_BCD_CHARGING_DOWNSTREAM_PORT;
+                        eDetection = USB_BCD_CHARGING_DOWNSTREAM_PORT;
                     }
                     break;
 
                 default:
                     /* No downstream side support for PD
                      * Standard Downstream Port SDP */
-                    detection = USB_BCD_STANDARD_DOWNSTREAM_PORT;
+                    eDetection = USB_BCD_STANDARD_DOWNSTREAM_PORT;
                     break;
             }
         }
     }
     /* Disable Battery Charger Detection */
     CLEAR_BIT(USB->BCDR.w, USB_BCDR_BCDEN | USB_BCDR_DCDEN | USB_BCDR_PDEN | USB_BCDR_SDEN);
-
-    return detection;
-}
 #endif
+    return eDetection;
+}
+
+/**
+ * @brief Configure EPnR assignment and packet memory allocation for all endpoints
+ *        based on the handle's Endpoint setup.
+ * @param pxUSB: pointer to the USB handle structure
+ */
+__weak void USB_vAllocateEPs(USB_HandleType * pxUSB)
+{
+    XPD_ReturnType eResult = XPD_ERROR;
+    USB_EndPointHandleType *pxEP, *pxEP2;
+    uint32_t ulEpNum;
+    uint16_t usPmaTail;
+    uint8_t  ucRegId = 0;
+
+    /* Init endpoints structures */
+    for (ulEpNum = 0; ulEpNum < USBD_MAX_EP_COUNT; ulEpNum++)
+    {
+        pxEP = &pxUSB->EP.OUT[ulEpNum];
+        pxEP2 = &pxUSB->EP.IN[ulEpNum];
+
+        /* Only consider used EPs */
+        if (pxEP->MaxPacketSize > 0)
+        {
+            pxEP->RegId = ucRegId++;
+
+            if (pxEP2->MaxPacketSize > 0)
+            {
+                /* If IN-OUT endpoints with the same address and type
+                 * are both single buffer, one EPnR can manage both */
+                if (!USB_EP_DOUBLE_BUFFERED(pxEP) &&
+                    !USB_EP_DOUBLE_BUFFERED(pxEP2) &&
+                    (pxEP->Type == pxEP2->Type))
+                {
+                    pxEP2->RegId = pxEP->RegId;
+                }
+                else
+                {
+                    pxEP2->RegId = ucRegId++;
+                }
+            }
+        }
+        else if (pxEP2->MaxPacketSize > 0)
+        {
+            pxEP2->RegId = ucRegId++;
+        }
+    }
+
+    /* Ensure that endpoints can be fitted in EP regs */
+    if (ucRegId < USBD_MAX_EP_COUNT)
+    {
+        /* Reserve place for BTABLE */
+        usPmaTail = ucRegId * sizeof(USB_BufferDescriptorType);
+
+        /* Allocate packet memory for all endpoints (unused ones' MPS = 0) */
+        for (ulEpNum = 0; ulEpNum < USBD_MAX_EP_COUNT; ulEpNum++)
+        {
+            pxEP = &pxUSB->EP.IN[ulEpNum];
+            if (pxEP->MaxPacketSize > 0)
+            {
+                /* The PMA allocation must be 16 bit aligned */
+                uint16_t usMPS = (pxEP->MaxPacketSize + 1) & (~1);
+
+                /* Set TX_ADDR or RX_ADDR depending on direction */
+                USB_EP_BDT[pxEP->RegId].TX_ADDR = usPmaTail;
+                usPmaTail += usMPS;
+
+                /* Allocate double buffer */
+                if (USB_EP_DOUBLE_BUFFERED(pxEP))
+                {
+                    /* Set RX_ADDR or TX_ADDR as well */
+                    USB_EP_BDT[pxEP->RegId].RX_ADDR = usPmaTail;
+                    usPmaTail += usMPS;
+                }
+            }
+
+            pxEP = &pxUSB->EP.OUT[ulEpNum];
+            if (pxEP->MaxPacketSize > 0)
+            {
+                /* The PMA allocation must be 16 bit aligned */
+                uint16_t usMPS = (pxEP->MaxPacketSize + 1) & (~1);
+
+                /* Set TX_ADDR or RX_ADDR depending on direction */
+                USB_EP_BDT[pxEP->RegId].RX_ADDR = usPmaTail;
+                usPmaTail += usMPS;
+
+                /* Allocate double buffer */
+                if (USB_EP_DOUBLE_BUFFERED(pxEP))
+                {
+                    /* Set RX_ADDR or TX_ADDR as well */
+                    USB_EP_BDT[pxEP->RegId].TX_ADDR = usPmaTail;
+                    usPmaTail += usMPS;
+                }
+            }
+        }
+
+#ifdef USB_LPMCSR_LMPEN
+        /* TODO: usPmaTail shall not exceed 1024 (or 768 if CAN is enabled) */
+#else
+        /* TODO: usPmaTail shall not exceed 512 */
+#endif
+        eResult = XPD_OK;
+    }
+    else
+    {
+        /* If the EP needs were more than what can be provided
+         * by the peripheral, return error */
+        eResult = XPD_ERROR;
+    }
+
+    (void) eResult;
+}
 
 /** @} */
 
 /** @} */
 
-#endif /* USE_XPD_USB */
+#endif /* defined(USB) */

@@ -1,0 +1,49 @@
+/**
+  ******************************************************************************
+  * @file    xpd_config.h
+  * @author  Benedek Kupper
+  * @version 0.2
+  * @date    2018-01-28
+  * @brief   STM32 eXtensible Peripheral Drivers configuration template
+  *
+  * Copyright (c) 2018 Benedek Kupper
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
+  *
+  *     http://www.apache.org/licenses/LICENSE-2.0
+  *
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
+#ifndef __XPD_CONFIG_H_
+#define __XPD_CONFIG_H_
+
+/* TODO step 1: specify device header */
+#include <stm32l476xx.h>
+
+/* TODO step 2: enable desired used XPD modules error handling */
+#define __XPD_ADC_ERROR_DETECT
+#define __XPD_CAN_ERROR_DETECT
+#define __XPD_DMA_ERROR_DETECT
+#define __XPD_SPI_ERROR_DETECT
+#define __XPD_TIM_ERROR_DETECT
+#define __XPD_USART_ERROR_DETECT
+
+/* TODO step 3: specify power supplies */
+#define VDD_VALUE                   3300 /* Value of VDD in mV */
+#define VDDA_VALUE                  3300 /* Value of VDD Analog in mV */
+
+/* TODO step 4: specify oscillator parameters */
+#define HSE_VALUE_Hz 80000000
+#define LSE_VALUE_Hz 32768
+
+/* TODO step 5: specify vector table location */
+/* #define VECT_TAB_SRAM
+#define VECT_TAB_OFFSET  0x0  *//* Vector Table base offset field. This value must be a multiple of 0x200. */
+
+#endif /* __XPD_CONFIG_H_ */

@@ -2,31 +2,39 @@
   ******************************************************************************
   * @file    xpd_gpio.h
   * @author  Benedek Kupper
-  * @version V0.2
-  * @date    2017-04-10
+  * @version 0.3
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers General Purpose I/O Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
 #ifndef __XPD_GPIO_H_
 #define __XPD_GPIO_H_
 
-#include "xpd_common.h"
-#include "xpd_config.h"
-#include "xpd_exti.h"
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+#include <xpd_common.h>
+#include <xpd_exti.h>
+
+/** @addtogroup GPIO_Alternate_function_map
+ * @{ */
+#define GPIO_ADC_AF ((uint8_t)0x10) /*!< Use this macro with ANALOG mode to set the ASC bit (connect to ADC) */
+/** @} */
 
 /** @defgroup GPIO
  * @{ */
@@ -78,60 +86,54 @@ typedef struct
 
 /** @} */
 
-#define GPIO_PORT_OFFSET(GPIOX) \
-    (((uint32_t)(GPIOX) - (uint32_t)GPIOA_BASE) >> 10)
-
-/** @addtogroup GPIO_Alternate_function_map
- * @{ */
-#define GPIO_ADC_AF ((uint8_t)0x10) /*!< Use this macro with ANALOG mode to set the ASC bit (connect to ADC) */
-/** @} */
+#define GPIO_xPinCallbacks          EXTI_xPinCallbacks
 
 /** @addtogroup GPIO_Exported_Functions
  * @{ */
 
 /** @addtogroup GPIO_Exported_Functions_Port
  * @{ */
-void            XPD_GPIO_InitPort   (GPIO_TypeDef * GPIOx, const GPIO_InitType * Config);
+void            GPIO_vInitPort      (GPIO_TypeDef * pxGPIO, const GPIO_InitType * pxConfig);
 /** @} */
 
 /** @addtogroup GPIO_Exported_Functions_Pin
  * @{ */
-void            XPD_GPIO_InitPin    (GPIO_TypeDef * GPIOx, uint8_t Pin, const GPIO_InitType * Config);
-void            XPD_GPIO_DeinitPin  (GPIO_TypeDef * GPIOx, uint8_t Pin);
-void            XPD_GPIO_LockPin    (GPIO_TypeDef * GPIOx, uint8_t Pin);
+void            GPIO_vInitPin       (GPIO_TypeDef * pxGPIO, uint8_t ucPin, const GPIO_InitType * pxConfig);
+void            GPIO_vDeinitPin     (GPIO_TypeDef * pxGPIO, uint8_t ucPin);
+void            GPIO_vLockPin       (GPIO_TypeDef * pxGPIO, uint8_t ucPin);
 /** @} */
 
 /** @addtogroup GPIO_Exported_Functions_Port
  * @{ */
 /**
  * @brief Reads the input state of the GPIO port.
- * @param GPIOx: pointer to the GPIO peripheral
+ * @param pxGPIO: pointer to the GPIO peripheral
  * @return The input state of the port
  */
-__STATIC_INLINE uint16_t XPD_GPIO_ReadPort(GPIO_TypeDef * GPIOx)
+__STATIC_INLINE uint16_t GPIO_usReadPort(GPIO_TypeDef * pxGPIO)
 {
-    return GPIOx->IDR;
+    return pxGPIO->IDR;
 }
 
 /**
  * @brief Writes the outputs of the GPIO port.
- * @param GPIOx: pointer to the GPIO peripheral
+ * @param pxGPIO: pointer to the GPIO peripheral
  * @param Value: the new output state of the port
  */
-__STATIC_INLINE void XPD_GPIO_WritePort(GPIO_TypeDef * GPIOx, uint16_t Value)
+__STATIC_INLINE void GPIO_vWritePort(GPIO_TypeDef * pxGPIO, uint16_t Value)
 {
-    GPIOx->ODR = Value;
+    pxGPIO->ODR = Value;
 }
 
 /**
  * @brief Sets and resets the selected output pins of the GPIO port.
- * @param GPIOx: pointer to the GPIO peripheral
+ * @param pxGPIO: pointer to the GPIO peripheral
  * @param SetBits: the bit positions specify which outputs to set
  * @param ResetBits: the bit positions specify which outputs to reset
  */
-__STATIC_INLINE void XPD_GPIO_SetResetPort(GPIO_TypeDef * GPIOx, uint16_t SetBits, uint16_t ResetBits)
+__STATIC_INLINE void GPIO_vSetResetPort(GPIO_TypeDef * pxGPIO, uint16_t SetBits, uint16_t ResetBits)
 {
-    GPIOx->BSRR = SetBits | (ResetBits << 16);
+    pxGPIO->BSRR = SetBits | (ResetBits << 16);
 }
 
 /** @} */
@@ -141,52 +143,52 @@ __STATIC_INLINE void XPD_GPIO_SetResetPort(GPIO_TypeDef * GPIOx, uint16_t SetBit
 
 /**
  * @brief Sets the output pin to the selected value.
- * @param GPIOx: pointer to the GPIO peripheral
- * @param Pin: selected pin of the port [0 .. 15]
- * @param Value: the new output value
+ * @param pxGPIO: pointer to the GPIO peripheral
+ * @param ucPin: selected pin of the port [0 .. 15]
+ * @param eValue: the new output value
  */
-__STATIC_INLINE void XPD_GPIO_WritePin(GPIO_TypeDef * GPIOx, uint8_t Pin, uint8_t Value)
+__STATIC_INLINE void GPIO_vWritePin(GPIO_TypeDef * pxGPIO, uint8_t ucPin, FlagStatus eValue)
 {
 #ifdef GPIO_BB
-    GPIO_BB(GPIOx)->ODR[Pin] = Value;
+    GPIO_BB(pxGPIO)->ODR[ucPin] = eValue;
 #else
-    if (Value == 0)
+    if (eValue == 0)
     {
-        GPIOx->BSRR = 0x10000 << (uint32_t)Pin;
+        pxGPIO->BSRR = 0x10000 << ucPin;
     }
     else
     {
-        GPIOx->BSRR = 1 << (uint32_t)Pin;
+        pxGPIO->BSRR = 1 << ucPin;
     }
 #endif
 }
 
 /**
  * @brief Reads the selected input pin.
- * @param GPIOx: pointer to the GPIO peripheral
- * @param Pin: selected pin of the port [0 .. 15]
+ * @param pxGPIO: pointer to the GPIO peripheral
+ * @param ucPin: selected pin of the port [0 .. 15]
  * @return The value of the pin
  */
-__STATIC_INLINE uint8_t XPD_GPIO_ReadPin(GPIO_TypeDef * GPIOx, uint8_t Pin)
+__STATIC_INLINE FlagStatus GPIO_eReadPin(GPIO_TypeDef * pxGPIO, uint8_t ucPin)
 {
 #ifdef GPIO_BB
-    return GPIO_BB(GPIOx)->IDR[Pin];
+    return GPIO_BB(pxGPIO)->IDR[ucPin];
 #else
-    return (GPIOx->IDR >> (uint32_t)Pin) & 1;
+    return (pxGPIO->IDR >> ucPin) & 1;
 #endif
 }
 
 /**
  * @brief Toggles the selected output pin.
- * @param GPIOx: pointer to the GPIO peripheral
- * @param Pin: selected pin of the port [0 .. 15]
+ * @param pxGPIO: pointer to the GPIO peripheral
+ * @param ucPin: selected pin of the port [0 .. 15]
  */
-__STATIC_INLINE void XPD_GPIO_TogglePin(GPIO_TypeDef * GPIOx, uint8_t Pin)
+__STATIC_INLINE void GPIO_vTogglePin(GPIO_TypeDef * pxGPIO, uint8_t ucPin)
 {
 #ifdef GPIO_BB
-    GPIO_BB(GPIOx)->ODR[Pin]++;
+    GPIO_BB(pxGPIO)->ODR[ucPin]++;
 #else
-    GPIOx->ODR ^= 1 << (uint32_t)Pin;
+    pxGPIO->ODR ^= 1 << ucPin;
 #endif
 }
 
@@ -195,5 +197,13 @@ __STATIC_INLINE void XPD_GPIO_TogglePin(GPIO_TypeDef * GPIOx, uint8_t Pin)
 /** @} */
 
 /** @} */
+
+#define XPD_GPIO_API
+#include <xpd_syscfg.h>
+#undef XPD_GPIO_API
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __XPD_GPIO_H_ */

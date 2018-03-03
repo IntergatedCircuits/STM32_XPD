@@ -2,56 +2,58 @@
   ******************************************************************************
   * @file    xpd_gpio.c
   * @author  Benedek Kupper
-  * @version V0.2
-  * @date    2017-04-10
+  * @version 0.3
+  * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers General Purpose I/O Module
   *
-  *  This file is part of STM32_XPD.
+  * Copyright (c) 2018 Benedek Kupper
   *
-  *  STM32_XPD is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
   *
-  *  STM32_XPD is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *     http://www.apache.org/licenses/LICENSE-2.0
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with STM32_XPD.  If not, see <http://www.gnu.org/licenses/>.
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
   */
-#include "xpd_gpio.h"
-#include "xpd_rcc.h"
+#include <xpd_gpio.h>
+#include <xpd_rcc.h>
+
+#define GPIO_PORT_OFFSET(GPIOX) \
+    (((uint32_t)(GPIOX) - (uint32_t)GPIOA_BASE) >> 10)
 
 #ifdef PWR_CR3_APC
 static struct {
     __IO uint32_t PUCR;
     __IO uint32_t PDCR;
-} * const pwr_pullConfig = &PWR->PUCRA;
+} * const pwr_pxPullConfig = (void*)&PWR->PUCRA;
 
 #ifdef PWR_BB
 static struct {
     __IO uint32_t PUC[32];
     __IO uint32_t PDC[32];
-} * const pwr_pullPinConfig = PERIPH_BB(&PWR->PUCRA);
+} * const pwr_pxPullPinConfig = (void*)PERIPH_BB(&PWR->PUCRA);
 #endif
 #endif
 
 /** @defgroup GPIO
  * @{ */
 
-static void gpio_clockEnable(GPIO_TypeDef * GPIOx)
+static void GPIO_prvClockEnable(GPIO_TypeDef * pxGPIO)
 {
 #if defined(GPIOH) && (RCC_POS_GPIOH < RCC_POS_GPIOA)
-    if (GPIOx == GPIOH)
+    if (pxGPIO == GPIOH)
     {
-        XPD_RCC_ClockEnable(RCC_POS_GPIOH);
+        RCC_vClockEnable(RCC_POS_GPIOH);
     }
     else
 #endif
     {
-        XPD_RCC_ClockEnable(RCC_POS_GPIOA + GPIO_PORT_OFFSET(GPIOx));
+        RCC_vClockEnable(RCC_POS_GPIOA + GPIO_PORT_OFFSET(pxGPIO));
     }
 }
 
@@ -65,123 +67,123 @@ static void gpio_clockEnable(GPIO_TypeDef * GPIOx)
 
 /**
  * @brief Initializes the GPIO port based on setup structure.
- * @param GPIOx: pointer to the GPIO peripheral
- * @param Config: pointer to the setup parameters
+ * @param pxGPIO: pointer to the GPIO peripheral
+ * @param pxConfig: pointer to the setup parameters
  */
-void XPD_GPIO_InitPort(GPIO_TypeDef * GPIOx, const GPIO_InitType * Config)
+void GPIO_vInitPort(GPIO_TypeDef * pxGPIO, const GPIO_InitType * pxConfig)
 {
-    uint32_t temp;
-    uint32_t reg;
+    uint32_t ulTmp;
+    uint32_t ulAFR;
 
     /* enable GPIO clock */
-    gpio_clockEnable(GPIOx);
+    GPIO_prvClockEnable(pxGPIO);
 
 #ifdef PWR_CR3_APC
-    switch (Config->PowerDownPull)
+    switch (pxConfig->PowerDownPull)
     {
         case GPIO_PULL_UP:
-            pwr_pullConfig[GPIO_PORT_OFFSET(GPIOx)].PUCR = 0xFFFF;
-            pwr_pullConfig[GPIO_PORT_OFFSET(GPIOx)].PDCR = 0;
+            pwr_pxPullConfig[GPIO_PORT_OFFSET(pxGPIO)].PUCR = 0xFFFF;
+            pwr_pxPullConfig[GPIO_PORT_OFFSET(pxGPIO)].PDCR = 0;
             break;
         case GPIO_PULL_DOWN:
-            pwr_pullConfig[GPIO_PORT_OFFSET(GPIOx)].PUCR = 0;
-            pwr_pullConfig[GPIO_PORT_OFFSET(GPIOx)].PDCR = 0xFFFF;
+            pwr_pxPullConfig[GPIO_PORT_OFFSET(pxGPIO)].PUCR = 0;
+            pwr_pxPullConfig[GPIO_PORT_OFFSET(pxGPIO)].PDCR = 0xFFFF;
             break;
         case GPIO_PULL_FLOAT:
         default:
-            pwr_pullConfig[GPIO_PORT_OFFSET(GPIOx)].PUCR = 0;
-            pwr_pullConfig[GPIO_PORT_OFFSET(GPIOx)].PDCR = 0;
+            pwr_pxPullConfig[GPIO_PORT_OFFSET(pxGPIO)].PUCR = 0;
+            pwr_pxPullConfig[GPIO_PORT_OFFSET(pxGPIO)].PDCR = 0;
             break;
     }
 #endif
 
     /* alternate function mapping */
-    if ((Config->Mode == GPIO_MODE_ALTERNATE) && (Config->AlternateMap != 0))
+    if ((pxConfig->Mode == GPIO_MODE_ALTERNATE) && (pxConfig->AlternateMap != 0))
     {
-        for (temp = Config->AlternateMap; temp != 0; temp <<= 4)
+        for (ulTmp = pxConfig->AlternateMap; ulTmp != 0; ulTmp <<= 4)
         {
-            reg |= temp;
+            ulAFR |= ulTmp;
         }
-        GPIOx->AFR[0] = reg;
-        GPIOx->AFR[1] = reg;
+        pxGPIO->AFR[0] = ulAFR;
+        pxGPIO->AFR[1] = ulAFR;
     }
     else
     {
-        GPIOx->AFR[0] = 0;
-        GPIOx->AFR[1] = 0;
+        pxGPIO->AFR[0] = 0;
+        pxGPIO->AFR[1] = 0;
     }
 
     /* IO direction setup */
-    switch (Config->Mode)
+    switch (pxConfig->Mode)
     {
         case GPIO_MODE_OUTPUT:
-            GPIOx->MODER = 0x55555555;
+            pxGPIO->MODER.w = 0x55555555;
             break;
         case GPIO_MODE_ALTERNATE:
-            GPIOx->MODER = 0xAAAAAAAA;
+            pxGPIO->MODER.w = 0xAAAAAAAA;
             break;
         case GPIO_MODE_ANALOG:
-            GPIOx->MODER = 0xFFFFFFFF;
+            pxGPIO->MODER.w = 0xFFFFFFFF;
             break;
         case GPIO_MODE_INPUT:
         case GPIO_MODE_EXTI:
         default:
-            GPIOx->MODER = 0;
+            pxGPIO->MODER.w = 0;
             break;
     }
 
 #ifdef GPIO_ASCR_ASC0
     /* Set the ADC connection bit if GPIO_ADC_AF is selected */
-    if (Config->AlternateMap == GPIO_ADC_AF)
+    if (pxConfig->AlternateMap == GPIO_ADC_AF)
     {
-        GPIOx->ASCR = 0xFFFF;
+        pxGPIO->ASCR = 0xFFFF;
     }
     else
     {
-        GPIOx->ASCR = 0x0000;
+        pxGPIO->ASCR = 0x0000;
     }
 #endif
 
     /* output stage configuration */
-    if ((Config->Mode == GPIO_MODE_OUTPUT) || (Config->Mode == GPIO_MODE_ALTERNATE))
+    if ((pxConfig->Mode == GPIO_MODE_OUTPUT) || (pxConfig->Mode == GPIO_MODE_ALTERNATE))
     {
         /* speed */
-        switch (Config->Output.Speed)
+        switch (pxConfig->Output.Speed)
         {
             case MEDIUM:
-                GPIOx->OSPEEDR = 0x55555555;
+                pxGPIO->OSPEEDR.w = 0x55555555;
                 break;
             case HIGH:
-                GPIOx->OSPEEDR = 0xAAAAAAAA;
+                pxGPIO->OSPEEDR.w = 0xAAAAAAAA;
                 break;
             case VERY_HIGH:
-                GPIOx->OSPEEDR = 0xFFFFFFFF;
+                pxGPIO->OSPEEDR.w = 0xFFFFFFFF;
                 break;
             case LOW:
             default:
-                GPIOx->OSPEEDR = 0;
+                pxGPIO->OSPEEDR.w = 0;
                 break;
         }
 
         /* type */
-        if (Config->Output.Type == GPIO_OUTPUT_OPENDRAIN)
-            GPIOx->OTYPER = 0xFFFF;
+        if (pxConfig->Output.Type == GPIO_OUTPUT_OPENDRAIN)
+            pxGPIO->OTYPER = 0xFFFF;
         else
-            GPIOx->OTYPER = 0;
+            pxGPIO->OTYPER = 0;
     }
 
     /* pull */
-    switch (Config->Pull)
+    switch (pxConfig->Pull)
     {
         case GPIO_PULL_UP:
-            GPIOx->PUPDR = 0x55555555;
+            pxGPIO->PUPDR.w = 0x55555555;
             break;
         case GPIO_PULL_DOWN:
-            GPIOx->PUPDR = 0xAAAAAAAA;
+            pxGPIO->PUPDR.w = 0xAAAAAAAA;
             break;
         case GPIO_PULL_FLOAT:
         default:
-            GPIOx->PUPDR = 0;
+            pxGPIO->PUPDR.w = 0;
             break;
     }
 
@@ -197,132 +199,132 @@ void XPD_GPIO_InitPort(GPIO_TypeDef * GPIOx, const GPIO_InitType * Config)
 
 /**
  * @brief Initializes the GPIO pin based on setup structure.
- * @param GPIOx: pointer to the GPIO peripheral
- * @param Pin: selected pin of the port [0 .. 15]
- * @param Config: pointer to the setup parameters
+ * @param pxGPIO: pointer to the GPIO peripheral
+ * @param ucPin: selected pin of the port [0 .. 15]
+ * @param pxConfig: pointer to the setup parameters
  */
-void XPD_GPIO_InitPin(GPIO_TypeDef * GPIOx, uint8_t Pin, const GPIO_InitType * Config)
+void GPIO_vInitPin(GPIO_TypeDef * pxGPIO, uint8_t ucPin, const GPIO_InitType * pxConfig)
 {
-    uint32_t temp;
-    uint32_t shifter;
-
-    (uint32_t) Pin;
+    uint8_t uc2BitPos = ucPin * 2;;
 
     /* enable GPIO clock */
-    gpio_clockEnable(GPIOx);
+    GPIO_prvClockEnable(pxGPIO);
 
 #ifdef PWR_CR3_APC
     /* configure pull direction in power down */
 #ifdef PWR_BB
-    pwr_pullPinConfig[GPIO_PORT_OFFSET(GPIOx)].PUC[Pin] = Config->PowerDownPull;
-    pwr_pullPinConfig[GPIO_PORT_OFFSET(GPIOx)].PDC[Pin] = Config->PowerDownPull >> 1;
+    pwr_pxPullPinConfig[GPIO_PORT_OFFSET(pxGPIO)].PUC[ucPin] = pxConfig->PowerDownPull;
+    pwr_pxPullPinConfig[GPIO_PORT_OFFSET(pxGPIO)].PDC[ucPin] = pxConfig->PowerDownPull >> 1;
 #else
-    MODIFY_REG(pwr_pullConfig[GPIO_PORT_OFFSET(GPIOx)].PUCR, 1 << Pin, (uin32_t)Config->PowerDownPull << Pin);
-    MODIFY_REG(pwr_pullConfig[GPIO_PORT_OFFSET(GPIOx)].PDCR, 1 << Pin, ((uin32_t)Config->PowerDownPull >> 1) << Pin);
+    MODIFY_REG(pwr_pxPullConfig[GPIO_PORT_OFFSET(pxGPIO)].PUCR, 1  << ucPin,
+                               (uin32_t)pxConfig->PowerDownPull  << ucPin);
+    MODIFY_REG(pwr_pxPullConfig[GPIO_PORT_OFFSET(pxGPIO)].PDCR, 1  << ucPin,
+                         ((uin32_t)pxConfig->PowerDownPull >> 1) << ucPin);
 #endif
 #endif
 
     /* alternate mapping */
-    if (Config->Mode == GPIO_MODE_ALTERNATE)
+    if (pxConfig->Mode == GPIO_MODE_ALTERNATE)
     {
-        shifter = (Pin & 0x7) * 4;
+        uint8_t ucAFPos = (ucPin & 0x7) << 2;
 
-        MODIFY_REG(GPIOx->AFR[Pin >> 3], (uint32_t)0xF << shifter, (uint32_t)(Config->AlternateMap) << shifter);
+        MODIFY_REG(pxGPIO->AFR[ucPin >> 3], 0xF << ucAFPos,
+                         pxConfig->AlternateMap << ucAFPos);
     }
 
     /* IO mode */
-    shifter = Pin * 2;
-
-    MODIFY_REG(GPIOx->MODER, 0x0003 << shifter, Config->Mode << shifter);
+    MODIFY_REG(pxGPIO->MODER.w, 3 << uc2BitPos,
+                   pxConfig->Mode << uc2BitPos);
 
 #ifdef GPIO_ASCR_ASC0
     /* Set the ADC connection bit if GPIO_ADC_AF is selected */
-    MODIFY_REG(GPIOx->ASCR, 0x0001 << Pin, (uint32_t)(Config->AlternateMap >> 4) << Pin);
+    MODIFY_REG(pxGPIO->ASCR, 1 << ucPin, (pxConfig->AlternateMap >> 4) << ucPin);
 #endif
 
     /* output stage configuration */
-    if (    (Config->Mode == GPIO_MODE_OUTPUT)
-         || (Config->Mode == GPIO_MODE_ALTERNATE))
+    if (    (pxConfig->Mode == GPIO_MODE_OUTPUT)
+         || (pxConfig->Mode == GPIO_MODE_ALTERNATE))
     {
         /* speed */
-        MODIFY_REG(GPIOx->OSPEEDR, 0x0003 << shifter, Config->Output.Speed << shifter);
+        MODIFY_REG(pxGPIO->OSPEEDR.w, 3 << uc2BitPos,
+                 pxConfig->Output.Speed << uc2BitPos);
 
         /* type */
-        MODIFY_REG(GPIOx->OTYPER, 0x0001 << Pin, Config->Output.Type << Pin);
+        MODIFY_REG(pxGPIO->OTYPER, 1 << ucPin,
+               pxConfig->Output.Type << ucPin);
     }
 
     /* Activate the Pull-up or Pull down resistor for the current IO */
-    MODIFY_REG(GPIOx->PUPDR, 0x0003 << shifter, Config->Pull << shifter);
+    MODIFY_REG(pxGPIO->PUPDR.w, 3 << uc2BitPos,
+                   pxConfig->Pull << uc2BitPos);
 
     /* EXTI configuration */
-    if (Config->Mode == GPIO_MODE_EXTI)
+    if (pxConfig->Mode == GPIO_MODE_EXTI)
     {
         /* set EXTI source */
-        shifter = (Pin & 0x03) * 4;
-        MODIFY_REG(SYSCFG->EXTICR[Pin >> 2], ((uint32_t) 0x0F) << shifter, GPIO_PORT_OFFSET(GPIOx) << shifter);
+        uint8_t ucPortPos = (ucPin & 0x03) << 2;
+
+        MODIFY_REG(SYSCFG->EXTICR[ucPin >> 2], 0xF << ucPortPos,
+                          GPIO_PORT_OFFSET(pxGPIO) << ucPortPos);
 
         /* hand over EXTI configuration */
-        XPD_EXTI_Init(Pin, &Config->ExtI);
+        EXTI_vInit(ucPin, &pxConfig->ExtI);
     }
 }
 
 /**
  * @brief Restores the GPIO pin to the default settings.
- * @param GPIOx: pointer to the GPIO peripheral
- * @param Pin: selected pin of the port [0 .. 15]
+ * @param pxGPIO: pointer to the GPIO peripheral
+ * @param ucPin: selected pin of the port [0 .. 15]
  */
-void XPD_GPIO_DeinitPin(GPIO_TypeDef * GPIOx, uint8_t Pin)
+void GPIO_vDeinitPin(GPIO_TypeDef * pxGPIO, uint8_t ucPin)
 {
-    (uint32_t)Pin;
-
 #ifdef PWR_CR3_APC
     /* configure pull direction in power down */
 #ifdef PWR_BB
-    pwr_pullPinConfig[GPIO_PORT_OFFSET(GPIOx)].PUC[Pin] = 0;
-    pwr_pullPinConfig[GPIO_PORT_OFFSET(GPIOx)].PDC[Pin] = 0;
+    pwr_pxPullPinConfig[GPIO_PORT_OFFSET(pxGPIO)].PUC[ucPin] = 0;
+    pwr_pxPullPinConfig[GPIO_PORT_OFFSET(pxGPIO)].PDC[ucPin] = 0;
 #else
-    CLEAR_BIT(pwr_pullConfig[GPIO_PORT_OFFSET(GPIOx)].PUCR, 1 << Pin);
-    CLEAR_BIT(pwr_pullConfig[GPIO_PORT_OFFSET(GPIOx)].PDCR, 1 << Pin);
+    CLEAR_BIT(pwr_pxPullConfig[GPIO_PORT_OFFSET(pxGPIO)].PUCR, 1 << ucPin);
+    CLEAR_BIT(pwr_pxPullConfig[GPIO_PORT_OFFSET(pxGPIO)].PDCR, 1 << ucPin);
 #endif
 #endif
 
     /* GPIO Mode Configuration */
     /* Configure IO Direction in Input Floating Mode */
-    CLEAR_BIT(GPIOx->MODER, (0x0003 << (Pin * 2)));
+    CLEAR_BIT(pxGPIO->MODER.w, (3 << (ucPin * 2)));
 
     /* Deactivate the Pull-up and Pull-down resistor for the current IO */
-    CLEAR_BIT(GPIOx->PUPDR, (0x0003 << (Pin * 2)));
+    CLEAR_BIT(pxGPIO->PUPDR.w, (3 << (ucPin * 2)));
 
     /* Configure the External Interrupt or event for the current IO */
-    CLEAR_BIT(SYSCFG->EXTICR[Pin >> 2], ((uint32_t) 0x0F) << (4 * (Pin & 0x03)));
+    CLEAR_BIT(SYSCFG->EXTICR[ucPin >> 2], ((uint32_t)0xF) << (4 * (ucPin & 3)));
 
-    XPD_EXTI_Deinit(Pin);
+    EXTI_vDeinit(ucPin);
 }
 
 /**
  * @brief Locks the pin's configuration until the next device reset
- * @param GPIOx: pointer to the GPIO peripheral
- * @param Pin: selected pin of the port [0 .. 15]
+ * @param pxGPIO: pointer to the GPIO peripheral
+ * @param ucPin: selected pin of the port [0 .. 15]
  */
-void XPD_GPIO_LockPin(GPIO_TypeDef * GPIOx, uint8_t Pin)
+void GPIO_vLockPin(GPIO_TypeDef * pxGPIO, uint8_t ucPin)
 {
-    uint32_t pinmask = 1 << (uint32_t)Pin;
-    uint32_t temp = GPIO_LCKR_LCKK | pinmask;
+    uint32_t ulPinMask = 1 << (uint32_t)ucPin;
+    uint32_t ulPinLock = GPIO_LCKR_LCKK | ulPinMask;
 
-    if ((GPIOx->LCKR.w & pinmask) == 0)
+    if ((pxGPIO->LCKR.w & ulPinMask) == 0)
     {
         /* Apply lock key write sequence */
         /* LCKK='1' + LCK[x] */
-        GPIOx->LCKR.w = temp;
+        pxGPIO->LCKR.w = ulPinLock;
         /* LCKK='0' + LCK[x] */
-        GPIOx->LCKR.w = pinmask;
+        pxGPIO->LCKR.w = ulPinMask;
         /* LCKK='1' + LCK[x] */
-        GPIOx->LCKR.w = temp;
+        pxGPIO->LCKR.w = ulPinLock;
 
         /* read register */
-        temp = GPIOx->LCKR.w;
-
-        (void)temp;
+        (void) pxGPIO->LCKR.w;
     }
 }
 
