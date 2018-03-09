@@ -882,11 +882,11 @@ typedef struct {
             __IO uint32_t IWDG_SW : 1;                      /*!< IWDG SW */
             __IO uint32_t nRST_STOP : 1;                    /*!< nRST_STOP */
             __IO uint32_t nRST_STDBY : 1;                   /*!< nRST_STDBY */
-                 uint32_t __RESERVED1 : 1;
+                 uint32_t nBOOT0 : 1;                       /*!< nBOOT0 */
             __IO uint32_t nBOOT1 : 1;                       /*!< nBOOT1 */
             __IO uint32_t VDDA_MONITOR : 1;                 /*!< VDDA power supply supervisor */
             __IO uint32_t RAM_PARITY_CHECK : 1;             /*!< RAM parity check */
-                 uint32_t __RESERVED2 : 1;
+                 uint32_t BOOT_SEL : 1;                     /*!< BOOT_SEL */
             __IO uint32_t DATA0 : 8;                        /*!< Data0 */
             __IO uint32_t DATA1 : 8;                        /*!< Data1 */
         } b;
