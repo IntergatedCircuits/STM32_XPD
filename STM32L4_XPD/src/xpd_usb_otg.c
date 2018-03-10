@@ -139,16 +139,16 @@ __STATIC_INLINE void USB_prvConnectCtrl(USB_HandleType * pxUSB, FunctionalState 
 }
 
 /* Flush an IN FIFO */
-__STATIC_INLINE void USB_prvFlushTxFifo(USB_OTG_TypeDef * USBx, uint8_t FifoNumber)
+__STATIC_INLINE void USB_prvFlushTxFifo(USB_HandleType * pxUSB, uint8_t FifoNumber)
 {
-    USBx->GRSTCTL.w = USB_OTG_GRSTCTL_TXFFLSH |
+    pxUSB->Inst->GRSTCTL.w = USB_OTG_GRSTCTL_TXFFLSH |
             ((uint32_t)FifoNumber << USB_OTG_GRSTCTL_TXFNUM_Pos);
 }
 
 /* Flush global OUT FIFO */
-__STATIC_INLINE void USB_prvFlushRxFifo(USB_OTG_TypeDef * USBx)
+__STATIC_INLINE void USB_prvFlushRxFifo(USB_HandleType * pxUSB)
 {
-    USBx->GRSTCTL.w = USB_OTG_GRSTCTL_RXFFLSH;
+    pxUSB->Inst->GRSTCTL.w = USB_OTG_GRSTCTL_RXFFLSH;
 }
 
 /* Push packet data to IN FIFO */
@@ -484,8 +484,8 @@ void USB_vDevInit(USB_HandleType * pxUSB, const USB_InitType * pxConfig)
         }
 
         /* Flush the FIFOs */
-        USB_prvFlushTxFifo(pxUSB->Inst, USB_ALL_TX_FIFOS);
-        USB_prvFlushRxFifo(pxUSB->Inst);
+        USB_prvFlushTxFifo(pxUSB, USB_ALL_TX_FIFOS);
+        USB_prvFlushRxFifo(pxUSB);
 
         /* Init endpoints */
         for (i = USB_ENDPOINT_COUNT(pxUSB); i > 0; i--)
@@ -656,8 +656,8 @@ void USB_vDevStop_IT(USB_HandleType * pxUSB)
     pxUSB->Inst->DAINTMSK.w = 0;
 
     /* Flush the FIFOs */
-    USB_prvFlushRxFifo(pxUSB->Inst);
-    USB_prvFlushTxFifo(pxUSB->Inst, USB_ALL_TX_FIFOS);
+    USB_prvFlushRxFifo(pxUSB);
+    USB_prvFlushTxFifo(pxUSB, USB_ALL_TX_FIFOS);
 
     /* Virtual disconnect */
     USB_prvConnectCtrl(pxUSB, DISABLE);
@@ -797,11 +797,11 @@ void USB_vEpFlush(USB_HandleType * pxUSB, uint8_t ucEpAddress)
 {
     if (ucEpAddress > 0x7F)
     {
-        USB_prvFlushTxFifo(pxUSB->Inst, ucEpAddress & 0xF);
+        USB_prvFlushTxFifo(pxUSB, ucEpAddress & 0xF);
     }
     else
     {
-        USB_prvFlushRxFifo(pxUSB->Inst);
+        USB_prvFlushRxFifo(pxUSB);
     }
 }
 
@@ -1115,7 +1115,7 @@ void USB_vDevIRQHandler(USB_HandleType * pxUSB)
 
             /* Stop any ongoing Remote Wakeup signaling and EP0 transfers */
             USB_REG_BIT(pxUSB,DCTL,RWUSIG) = 0;
-            USB_prvFlushTxFifo(pxUSB->Inst, 0);
+            USB_prvFlushTxFifo(pxUSB, 0);
 
             /* Clear EP interrupt flags */
             for (i = USB_ENDPOINT_COUNT(pxUSB); i > 0; i--)
