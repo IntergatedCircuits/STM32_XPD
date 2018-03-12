@@ -123,21 +123,26 @@ uint32_t XPD_RTC_ulClockFreq_Hz(void)
     /* Get the current RTC source */
     eSrcClk = RCC->BDCR.b.RTCSEL;
 
+#ifdef LSE_VALUE_Hz
     /* Check if LSE is ready and if RTC clock selection is LSE */
     if ((eSrcClk == RTC_CLOCKSOURCE_LSE) && (RCC_REG_BIT(BDCR,LSERDY) != 0))
     {
         return LSE_VALUE_Hz;
     }
+    else
+#endif
     /* Check if LSI is ready and if RTC clock selection is LSI */
-    else if ((eSrcClk == RTC_CLOCKSOURCE_LSI) && (RCC_REG_BIT(CSR,LSIRDY) != 0))
+    if ((eSrcClk == RTC_CLOCKSOURCE_LSI) && (RCC_REG_BIT(CSR,LSIRDY) != 0))
     {
         return LSI_VALUE_Hz;
     }
+#ifdef HSE_VALUE_Hz
     /* Check if HSE is ready  and if RTC clock selection is HSE / x */
     else if ((eSrcClk == RTC_CLOCKSOURCE_HSE) && (RCC_REG_BIT(CR,HSERDY) != 0))
     {
         return HSE_VALUE_Hz / RCC->CFGR.b.RTCPRE;
     }
+#endif
     /* Clock not enabled for RTC */
     else
     {

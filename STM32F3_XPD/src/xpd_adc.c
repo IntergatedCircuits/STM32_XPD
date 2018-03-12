@@ -104,7 +104,7 @@ static void ADC_prvClockDisable(ADC_HandleType * pxADC)
 
     if (adc_aucUsers[ucIndex] == 0)
     {
-        RCC_vClockDisable(RCC_POS_ADC12 + index);
+        RCC_vClockDisable(RCC_POS_ADC12 + ucIndex);
     }
 }
 #else
