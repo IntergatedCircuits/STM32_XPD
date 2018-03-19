@@ -80,7 +80,7 @@ typedef enum
  *            @arg SOF:     Start of frame
  */
 #define         USB_IT_ENABLE( HANDLE, IT_NAME)         \
-    (USB_REG_BIT(HANDLE,GINTMSK,IT_NAME) = 1)
+    (SET_BIT((HANDLE)->Inst->GINTMSK.w, USB_OTG_GINTMSK_##IT_NAME))
 
 /**
  * @brief  Disable the specified USB interrupt.
@@ -91,7 +91,7 @@ typedef enum
  *            @arg SOF:     Start of frame
  */
 #define         USB_IT_DISABLE( HANDLE, IT_NAME)        \
-    (USB_REG_BIT(HANDLE,GINTMSK,IT_NAME) = 1)
+    (CLEAR_BIT((HANDLE)->Inst->GINTMSK.w, USB_OTG_GINTMSK_##IT_NAME))
 
 /**
  * @brief  Get the specified USB flag.

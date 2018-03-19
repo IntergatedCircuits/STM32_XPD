@@ -89,7 +89,7 @@ typedef struct {
 
 #define USB_OTG_DMA_SUPPORT         (defined(USB_OTG_GAHBCFG_DMAEN) && 1)
 
-#if (USB_OTG_DMA_SUPPORT == 1)
+#if (USB_OTG_DMA_SUPPORT != 0)
 #define USB_DMA_CONFIG(HANDLE)      USB_REG_BIT((HANDLE),GAHBCFG,DMAEN)
 #else
 #define USB_DMA_CONFIG(HANDLE)      0
@@ -224,6 +224,119 @@ static void USB_prvTransmitPacket(USB_HandleType * pxUSB, uint8_t ucEpNum)
     }
 }
 
+/* Internal handling of EP transmission */
+static void USB_prvEpSend(USB_HandleType * pxUSB, uint8_t ucEpNum)
+{
+    USB_EndPointHandleType * pxEP = &pxUSB->EP.IN[ucEpNum];
+    USB_OTG_GenEndpointType * pxDEP = USB_IEPR(pxUSB, ucEpNum);
+
+    if (pxEP->Transfer.Progress == 0)
+    {
+        /* 1 transfer with 0 length */
+        pxDEP->DxEPTSIZ.w = 1 << USB_OTG_DIEPTSIZ_PKTCNT_Pos;
+    }
+    /* EP0 has limited transfer size */
+    else if ((ucEpNum == 0) && (pxEP->Transfer.Progress > 0x7F))
+    {
+        uint16_t usXferSize = pxEP->Transfer.Progress;
+        if (usXferSize > pxEP->MaxPacketSize)
+        {
+            usXferSize = pxEP->MaxPacketSize;
+        }
+        pxDEP->DxEPTSIZ.b.PKTCNT = 1;
+        pxDEP->DxEPTSIZ.b.XFRSIZ = usXferSize;
+    }
+    else
+    {
+        uint16_t usPktCnt = (pxEP->Transfer.Progress + pxEP->MaxPacketSize - 1)
+                / pxEP->MaxPacketSize;
+        pxDEP->DxEPTSIZ.b.PKTCNT = usPktCnt;
+        pxDEP->DxEPTSIZ.b.XFRSIZ = pxEP->Transfer.Progress;
+
+        if (pxEP->Type == USB_EP_TYPE_ISOCHRONOUS)
+        {
+            pxDEP->DxEPTSIZ.b.MULCNT = 1;
+
+            /* If LSB of SOF frame number is one */
+            if ((pxUSB->Inst->DSTS.w & (1 << USB_OTG_DSTS_FNSOF_Pos)) == 0)
+            {
+                /* Set ODD frame */
+                pxDEP->DxEPCTL.b.SODDFRM = 1;
+            }
+            else
+            {
+                /* Set DATA0 PID */
+                pxDEP->DxEPCTL.b.SD0PID_SEVNFRM = 1;
+            }
+        }
+    }
+
+#if (USB_OTG_DMA_SUPPORT != 0)
+    if (USB_DMA_CONFIG(pxUSB) != 0)
+    {
+        /* Set DMA start address */
+        pxDEP->DxEPDMA = (uint32_t)pxEP->Transfer.Data;
+    }
+#endif
+    /* EP enable */
+    SET_BIT(pxDEP->DxEPCTL.w, USB_OTG_DIEPCTL_CNAK | USB_OTG_DIEPCTL_EPENA);
+
+    if ((pxEP->Transfer.Progress > 0) &&
+        (USB_DMA_CONFIG(pxUSB) == 0))
+    {
+        /* Push the nonzero packet to FIFO */
+        USB_prvTransmitPacket(pxUSB, ucEpNum);
+    }
+}
+
+/* Internal handling of EP reception */
+static void USB_prvEpReceive(USB_HandleType * pxUSB, uint8_t ucEpNum)
+{
+    USB_EndPointHandleType * pxEP = &pxUSB->EP.OUT[ucEpNum];
+    USB_OTG_GenEndpointType * pxDEP = USB_OEPR(pxUSB, ucEpNum);
+
+    /* Zero Length Packet or EP0 with limited transfer size */
+    if ((pxEP->Transfer.Progress == 0) || (ucEpNum == 0))
+    {
+        pxDEP->DxEPTSIZ.b.PKTCNT = 1;
+        pxDEP->DxEPTSIZ.b.XFRSIZ = pxEP->MaxPacketSize;
+    }
+    else
+    {
+        uint16_t usPktCnt = (pxEP->Transfer.Progress + pxEP->MaxPacketSize - 1)
+                / pxEP->MaxPacketSize;
+        pxDEP->DxEPTSIZ.b.PKTCNT = usPktCnt;
+        pxDEP->DxEPTSIZ.b.XFRSIZ = pxEP->MaxPacketSize * usPktCnt;
+    }
+
+#if (USB_OTG_DMA_SUPPORT != 0)
+    if (USB_DMA_CONFIG(pxUSB) != 0)
+    {
+        /* Set DMA start address */
+        pxDEP->DxEPDMA = (uint32_t)pxEP->Transfer.Data;
+    }
+#endif
+
+    /* Set DATA PID parity */
+    if (pxEP->Type == USB_EP_TYPE_ISOCHRONOUS)
+    {
+        /* If LSB of SOF frame number is one */
+        if ((pxUSB->Inst->DSTS.w & (1 << USB_OTG_DSTS_FNSOF_Pos)) == 0)
+        {
+            /* Set ODD frame */
+            pxDEP->DxEPCTL.b.SODDFRM = 1;
+        }
+        else
+        {
+            /* Set DATA0 PID */
+            pxDEP->DxEPCTL.b.SD0PID_SEVNFRM = 1;
+        }
+    }
+
+    /* EP transfer request */
+    SET_BIT(pxDEP->DxEPCTL.w, USB_OTG_DOEPCTL_CNAK | USB_OTG_DOEPCTL_EPENA);
+}
+
 /* Set up EP0 to receive control data */
 static void USB_prvPrepareSetup(USB_HandleType * pxUSB)
 {
@@ -233,7 +346,7 @@ static void USB_prvPrepareSetup(USB_HandleType * pxUSB)
         | ((3 * 8) << USB_OTG_DOEPTSIZ_XFRSIZ_Pos)
         | ( 3      << USB_OTG_DOEPTSIZ_STUPCNT_Pos);
 
-#if (USB_OTG_DMA_SUPPORT == 1)
+#if (USB_OTG_DMA_SUPPORT != 0)
     if (USB_DMA_CONFIG(pxUSB) != 0)
     {
         pxUSB->Inst->OEP[0].DOEPDMA   = (uint32_t)&pxUSB->Setup;
@@ -433,7 +546,7 @@ void USB_vDevInit(USB_HandleType * pxUSB, const USB_InitType * pxConfig)
     /* Initialize selected PHY */
     USB_prvPhyInit(pxUSB, pxConfig->PHY);
 
-#if (USB_OTG_DMA_SUPPORT == 1)
+#if (USB_OTG_DMA_SUPPORT != 0)
     /* Set dedicated DMA */
     if (pxConfig->DMA != DISABLE)
     {
@@ -521,7 +634,7 @@ void USB_vDevInit(USB_HandleType * pxUSB, const USB_InitType * pxConfig)
         }
         USB_REG_BIT(pxUSB,DIEPMSK,TXFURM) = 0;
 
-#if (USB_OTG_DMA_SUPPORT == 1)
+#if (USB_OTG_DMA_SUPPORT != 0)
         if (USB_DMA_CONFIG(pxUSB) != 0)
         {
             /*Set threshold parameters */
@@ -594,13 +707,11 @@ void USB_vDevStart_IT(USB_HandleType * pxUSB)
                 USB_OTG_GINTMSK_OEPINT   | USB_OTG_GINTMSK_WUIM   |
                 USB_OTG_GINTMSK_RXFLVLM;
 
-#if (USB_OTG_DMA_SUPPORT == 1)
     /* When DMA is used, Rx data isn't read by IRQHandler */
     if (USB_DMA_CONFIG(pxUSB) != 0)
     {
         CLEAR_BIT(ulGINTMSK, USB_OTG_GINTMSK_RXFLVLM);
     }
-#endif
 #ifdef USB_OTG_GLPMCFG_LPMEN
     /* Set Link Power Management feature (L1 sleep mode support) */
     if (USB_REG_BIT(pxUSB,GLPMCFG,LPMEN) != DISABLE)
@@ -819,55 +930,13 @@ void USB_vEpReceive(
         uint16_t            usLength)
 {
     USB_EndPointHandleType * pxEP = &pxUSB->EP.OUT[ucEpAddress];
-    USB_OTG_GenEndpointType * pxDEP = USB_OEPR(pxUSB, ucEpAddress);
 
     /* setup transfer */
     pxEP->Transfer.Data       = pucData;
     pxEP->Transfer.Progress   = usLength;
     pxEP->Transfer.Length     = 0;
 
-    /* Zero Length Packet */
-    if (usLength == 0)
-    {
-        pxDEP->DxEPTSIZ.b.PKTCNT = 1;
-        pxDEP->DxEPTSIZ.b.XFRSIZ = pxEP->MaxPacketSize;
-    }
-    else
-    {
-        /* Program the transfer size and packet count as follows:
-         * packet count  = N
-         * transfer size = N * maxpacket */
-        uint16_t usPktCnt = (usLength + pxEP->MaxPacketSize - 1) / pxEP->MaxPacketSize;
-        pxDEP->DxEPTSIZ.b.PKTCNT = usPktCnt;
-        pxDEP->DxEPTSIZ.b.XFRSIZ = pxEP->MaxPacketSize * usPktCnt;
-    }
-
-#if (USB_OTG_DMA_SUPPORT == 1)
-    if (USB_DMA_CONFIG(pxUSB) != 0)
-    {
-        /* Set DMA start address */
-        pxDEP->DxEPDMA = (uint32_t)pucData;
-    }
-#endif
-
-    /* Set DATA PID parity */
-    if (pxEP->Type == USB_EP_TYPE_ISOCHRONOUS)
-    {
-        /* If LSB of SOF frame number is one */
-        if ((pxUSB->Inst->DSTS.w & (1 << USB_OTG_DSTS_FNSOF_Pos)) == 0)
-        {
-            /* Set ODD frame */
-            pxDEP->DxEPCTL.b.SODDFRM = 1;
-        }
-        else
-        {
-            /* Set DATA0 PID */
-            pxDEP->DxEPCTL.b.SD0PID_SEVNFRM = 1;
-        }
-    }
-
-    /* EP transfer request */
-    SET_BIT(pxDEP->DxEPCTL.w, USB_OTG_DOEPCTL_CNAK | USB_OTG_DOEPCTL_EPENA);
+    USB_prvEpReceive(pxUSB, ucEpAddress);
 }
 
 /**
@@ -885,65 +954,13 @@ void USB_vEpSend(
 {
     uint8_t ucEpNum = ucEpAddress & 0xF;
     USB_EndPointHandleType * pxEP = &pxUSB->EP.IN[ucEpNum];
-    USB_OTG_GenEndpointType * pxDEP = USB_IEPR(pxUSB, ucEpAddress);
 
     /* setup and start the transfer */
     pxEP->Transfer.Data       = (uint8_t*)pucData;
     pxEP->Transfer.Progress   = usLength;
     pxEP->Transfer.Length     = usLength;
 
-    if (usLength == 0)
-    {
-        /* 1 transfer with 0 length */
-        pxDEP->DxEPTSIZ.w = 1 << USB_OTG_DIEPTSIZ_PKTCNT_Pos;
-    }
-    else
-    {
-        /* Program the transfer size and packet count
-         * as follows: transfersize =
-         * N * maxpacket + short_packet packet count =
-         * N + (short_packet exist ? 1 : 0) */
-        uint16_t usPktCnt = (usLength + pxEP->MaxPacketSize - 1) / pxEP->MaxPacketSize;
-        pxDEP->DxEPTSIZ.b.PKTCNT = usPktCnt;
-        pxDEP->DxEPTSIZ.b.XFRSIZ = usLength;
-
-        if (pxEP->Type == USB_EP_TYPE_ISOCHRONOUS)
-        {
-            pxDEP->DxEPTSIZ.b.MULCNT = 1;
-
-            /* If LSB of SOF frame number is one */
-            if ((pxUSB->Inst->DSTS.w & (1 << USB_OTG_DSTS_FNSOF_Pos)) == 0)
-            {
-                /* Set ODD frame */
-                pxDEP->DxEPCTL.b.SODDFRM = 1;
-            }
-            else
-            {
-                /* Set DATA0 PID */
-                pxDEP->DxEPCTL.b.SD0PID_SEVNFRM = 1;
-            }
-        }
-    }
-
-#if (USB_OTG_DMA_SUPPORT == 1)
-    if (USB_DMA_CONFIG(pxUSB) != 0)
-    {
-        /* Set DMA start address */
-        pxDEP->DxEPDMA = (uint32_t)pucData;
-    }
-#endif
-    /* EP enable */
-    SET_BIT(pxDEP->DxEPCTL.w, USB_OTG_DIEPCTL_CNAK | USB_OTG_DIEPCTL_EPENA);
-
-    if ((usLength > 0)
-#if (USB_OTG_DMA_SUPPORT == 1)
-         && (USB_DMA_CONFIG(pxUSB) == 0)
-#endif
-        )
-    {
-        /* Push the nonzero packet to FIFO */
-        USB_prvTransmitPacket(pxUSB, ucEpNum);
-    }
+    USB_prvEpSend(pxUSB, ucEpNum);
 }
 
 /**
@@ -963,7 +980,8 @@ void USB_vDevIRQHandler(USB_HandleType * pxUSB)
             uint32_t ulGRXSTSP = pxUSB->Inst->GRXSTSP.w;
             uint32_t ulDataCount = (ulGRXSTSP & USB_OTG_GRXSTSP_BCNT_Msk)
                                              >> USB_OTG_GRXSTSP_BCNT_Pos;
-            USB_EndPointHandleType * pxEP = &pxUSB->EP.OUT[ulGRXSTSP & USB_OTG_GRXSTSP_EPNUM];
+            uint8_t  ucEpNum = ulGRXSTSP & USB_OTG_GRXSTSP_EPNUM;
+            USB_EndPointHandleType * pxEP = &pxUSB->EP.OUT[ucEpNum];
 
             switch (ulGRXSTSP & USB_OTG_GRXSTSP_PKTSTS_Msk)
             {
@@ -976,7 +994,8 @@ void USB_vDevIRQHandler(USB_HandleType * pxUSB)
 
                 case STS_SETUP_UPDT:
                     /* Setup packet received */
-                    USB_prvReadFifo(pxUSB, (uint8_t *)&pxUSB->Setup, sizeof(pxUSB->Setup));
+                    USB_prvReadFifo(pxUSB, (uint8_t *)&pxUSB->Setup,
+                            sizeof(pxUSB->Setup));
                     break;
 
                 default:
@@ -1017,28 +1036,32 @@ void USB_vDevIRQHandler(USB_HandleType * pxUSB)
                         /* Clear IT flag */
                         pxDEP->DxEPINT.w = USB_OTG_DOEPINT_XFRC;
 
-#if (USB_OTG_DMA_SUPPORT == 1)
                         if (USB_DMA_CONFIG(pxUSB) != 0)
                         {
                             pxEP->Transfer.Length = pxEP->MaxPacketSize
                                                   - pxDEP->DxEPTSIZ.b.XFRSIZ;
                             pxEP->Transfer.Data  += pxEP->MaxPacketSize;
                         }
-#endif
 
-                        /* Reception finished */
-                        USB_vDataOutCallback(pxUSB, pxEP);
-
-#if (USB_OTG_DMA_SUPPORT == 1)
-                        if (USB_DMA_CONFIG(pxUSB) != 0)
+                        /* EP0 packetization requires software handling */
+                        if ((ucEpNum == 0) &&
+                            (pxEP->Transfer.Progress > pxEP->Transfer.Length))
                         {
-                            if ((ucEpNum == 0) && (pxEP->Transfer.Length == 0))
-                            {
-                                /* this is ZLP, so prepare EP0 for next setup */
-                                USB_prvPrepareSetup(pxUSB);
-                            }
+                            USB_prvEpReceive(pxUSB, 0);
                         }
-#endif
+                        else
+                        {
+                            /* Reception finished */
+                            USB_vDataOutCallback(pxUSB, pxEP);
+                        }
+
+                        if ((USB_DMA_CONFIG(pxUSB) != 0) &&
+                            (ucEpNum == 0) &&
+                            (pxEP->Transfer.Length == 0))
+                        {
+                            /* this is ZLP, so prepare EP0 for next setup */
+                            USB_prvPrepareSetup(pxUSB);
+                        }
                     }
                 }
             }
@@ -1079,25 +1102,31 @@ void USB_vDevIRQHandler(USB_HandleType * pxUSB)
                         /* Clear IT flag */
                         pxDEP->DxEPINT.w = USB_OTG_DIEPINT_XFRC;
 
-#if (USB_OTG_DMA_SUPPORT == 1)
                         if (USB_DMA_CONFIG(pxUSB) != 0)
                         {
                             pxEP->Transfer.Data     += pxEP->MaxPacketSize;
                             pxEP->Transfer.Progress -= pxEP->MaxPacketSize;
                         }
-#endif
 
-                        /* Transmission complete */
-                        USB_vDataInCallback(pxUSB, pxEP);
+                        /* EP0 packetization requires software handling */
+                        if ((ucEpNum == 0) &&
+                            (pxEP->Transfer.Progress > 0))
+                        {
+                            USB_prvEpSend(pxUSB, 0);
+                        }
+                        else
+                        {
+                            /* Transmission complete */
+                            USB_vDataInCallback(pxUSB, pxEP);
+                        }
 
-#if (USB_OTG_DMA_SUPPORT == 1)
                         if ((USB_DMA_CONFIG(pxUSB) != 0) &&
-                            ((ucEpNum == 0) && (pxEP->Transfer.Length == 0)))
+                            (ucEpNum == 0) &&
+                            (pxEP->Transfer.Length == 0))
                         {
                             /* this is ZLP, so prepare EP0 for next setup */
                             USB_prvPrepareSetup(pxUSB);
                         }
-#endif
                     }
                 }
             }
