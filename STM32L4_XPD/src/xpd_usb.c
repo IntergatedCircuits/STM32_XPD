@@ -547,7 +547,7 @@ void USB_vEpClearStall(USB_HandleType * pxUSB, uint8_t ucEpAddress)
     if (ucEpAddress > 0x7F)
     {
         USB_TOGGLE_CLEAR(pxEP->RegId, DTOG_TX);
-        USB_EP_SET_STATUS(pxEP->RegId, TX, VALID);
+        USB_EP_SET_STATUS(pxEP->RegId, TX, NAK);
     }
     else
     {
