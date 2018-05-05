@@ -73,7 +73,7 @@ static void GPIO_prvClockEnable(GPIO_TypeDef * pxGPIO)
 void GPIO_vInitPort(GPIO_TypeDef * pxGPIO, const GPIO_InitType * pxConfig)
 {
     uint32_t ulTmp;
-    uint32_t ulAFR;
+    uint32_t ulAFR = 0;
 
     /* enable GPIO clock */
     GPIO_prvClockEnable(pxGPIO);
