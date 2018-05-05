@@ -724,8 +724,13 @@ void USB_vDevStart_IT(USB_HandleType * pxUSB)
     pxUSB->Inst->GINTMSK.w = ulGINTMSK;
 
     /* Also configure device endpoint interrupts */
-    pxUSB->Inst->DIEPMSK.w = USB_OTG_DIEPMSK_XFRCM;
-    pxUSB->Inst->DOEPMSK.w = USB_OTG_DOEPMSK_XFRCM | USB_OTG_DOEPMSK_STUPM;
+    pxUSB->Inst->DIEPMSK.w = USB_OTG_DIEPMSK_XFRCM
+            | USB_OTG_DIEPMSK_TOM | USB_OTG_DIEPMSK_EPDM;
+    pxUSB->Inst->DOEPMSK.w = USB_OTG_DOEPMSK_XFRCM | USB_OTG_DOEPMSK_STUPM
+#ifdef USB_OTG_DOEPMSK_OTEPSPRM
+            | USB_OTG_DOEPMSK_OTEPSPRM
+#endif
+            | USB_OTG_DOEPMSK_EPDM;
 
     USB_prvConnectCtrl(pxUSB, ENABLE);
 
@@ -1063,6 +1068,13 @@ void USB_vDevIRQHandler(USB_HandleType * pxUSB)
                             USB_prvPrepareSetup(pxUSB);
                         }
                     }
+
+                    /* Clear irrelevant flags */
+                    pxDEP->DxEPINT.w =
+#ifdef USB_OTG_DOEPINT_OTEPSPR
+                            USB_OTG_DOEPINT_OTEPSPR |
+#endif
+                            USB_OTG_DOEPINT_OTEPDIS;
                 }
             }
         }
@@ -1128,6 +1140,10 @@ void USB_vDevIRQHandler(USB_HandleType * pxUSB)
                             USB_prvPrepareSetup(pxUSB);
                         }
                     }
+
+                    /* Clear irrelevant flags */
+                    pxDEP->DxEPINT.w = USB_OTG_DIEPINT_TOC | USB_OTG_DIEPINT_ITTXFE
+                            | USB_OTG_DIEPINT_INEPNE | USB_OTG_DIEPINT_EPDISD;
                 }
             }
         }
