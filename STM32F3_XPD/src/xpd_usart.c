@@ -169,7 +169,7 @@ static void USART_prvWaitIdle(USART_HandleType * pxUSART)
 
 static void USART_prvPreinit(USART_HandleType * pxUSART, uint8_t ucDataSize, USART_ParityType eParity)
 {
-    uint8_t ucFrameSize = ucDataSize + (eParity != USART_PARITY_NONE) ? 1 : 0;
+    uint8_t ucFrameSize = ucDataSize + ((eParity != USART_PARITY_NONE) ? 1 : 0);
 
     /* enable clock */
     RCC_vClockEnable(pxUSART->CtrlPos);
