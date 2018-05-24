@@ -46,16 +46,16 @@
 /* The size of a single programming operation */
 #if defined(FLASH_CR_PSIZE)
 /* is configurable, adjust based on VDD voltage level */
-#if   (VDD_VALUE > 2700)
+#if   (VDD_VALUE_mV > 2700)
 #define FLASH_PSIZE_CONFIG()    (FLASH->CR.b.PSIZE = 2)
 #define FLASH_MEMSTREAM_SIZE    (sizeof(uint32_t))
-#elif (VDD_VALUE > 2100)
+#elif (VDD_VALUE_mV > 2100)
 #define FLASH_PSIZE_CONFIG()    (FLASH->CR.b.PSIZE = 1)
 #define FLASH_MEMSTREAM_SIZE    (sizeof(uint16_t))
 #else
 #define FLASH_PSIZE_CONFIG()    (FLASH->CR.b.PSIZE = 0)
 #define FLASH_MEMSTREAM_SIZE    (sizeof(uint8_t))
-#endif /* VDD_VALUE */
+#endif /* VDD_VALUE_mV */
 #else
 #define FLASH_PSIZE_CONFIG()    ((void)0)
 #define FLASH_MEMSTREAM_SIZE    (sizeof(uint16_t))

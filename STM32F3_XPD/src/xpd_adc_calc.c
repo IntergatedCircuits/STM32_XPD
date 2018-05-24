@@ -27,10 +27,10 @@
  * @defgroup ADC_Calculations_Exported_Functions ADC Calculations Exported Functions
  * @{ */
 
-static int32_t lVDDA_mV = (int32_t)VDDA_VALUE;
+static int32_t lVDDA_mV = (int32_t)VDDA_VALUE_mV;
 
 #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
-static float   fVDDA_V  = ((float)VDDA_VALUE) / 1000.0;
+static float   fVDDA_V  = ((float)VDDA_VALUE_mV) / 1000.0;
 
 /**
  * @brief Returns the VDDA value in voltage.
