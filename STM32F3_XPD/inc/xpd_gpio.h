@@ -188,7 +188,9 @@ __STATIC_INLINE void GPIO_vTogglePin(GPIO_TypeDef * pxGPIO, uint8_t ucPin)
 #ifdef GPIO_BB
     GPIO_BB(pxGPIO)->ODR[ucPin]++;
 #else
-    pxGPIO->ODR ^= 1 << ucPin;
+    if (((pxGPIO->ODR >> ucPin) & 1) != 0)
+    {   ucPin += 16; }
+    pxGPIO->BSRR = 1 << ucPin;
 #endif
 }
 
