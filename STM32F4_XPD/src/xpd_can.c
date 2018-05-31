@@ -404,6 +404,9 @@ void CAN_vIRQHandlerSCE(CAN_HandleType * pxCAN)
     if (    ((pxCAN->Inst->IER.w & (CAN_IER_BOFIE | CAN_IER_EPVIE | CAN_IER_EWGIE | CAN_IER_LECIE)) != 0)
          && ((pxCAN->Inst->ESR.w & (CAN_ESR_LEC | CAN_ESR_BOFF | CAN_ESR_EPVF | CAN_ESR_EWGF)) != 0))
     {
+        /* Clear error interrupt flag */
+        CAN_FLAG_CLEAR(pxCAN, ERRI);
+
         /* call error callback function if interrupt is not by state change */
         XPD_SAFE_CALLBACK(pxCAN->Callbacks.Error, pxCAN);
     }
