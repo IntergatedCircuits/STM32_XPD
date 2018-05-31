@@ -23,6 +23,10 @@
 
 #include <xpd_adc_calc.h>
 
+#ifndef VDDA_VALUE_mV
+#define VDDA_VALUE_mV       (VDD_VALUE_mV)
+#endif
+
 /** @ingroup ADC_Calculations
  * @defgroup ADC_Calculations_Exported_Functions ADC Calculations Exported Functions
  * @{ */
