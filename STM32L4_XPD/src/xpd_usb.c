@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
- * @file    xpd_usb.c
- * @author  Benedek Kupper
+  * @file    xpd_usb.c
+  * @author  Benedek Kupper
   * @version 0.3
   * @date    2018-01-28
   * @brief   STM32 eXtensible Peripheral Drivers Universal Serial Bus Module
@@ -19,7 +19,7 @@
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
- */
+  */
 #include <xpd_usb.h>
 #include <xpd_rcc.h>
 #include <xpd_utils.h>
