@@ -429,12 +429,12 @@ void USB_vEpOpen(
         USB_TOGGLE_CLEAR(pxEP->RegId, DTOG_RX);
         USB_TOGGLE_CLEAR(pxEP->RegId, DTOG_TX);
 
+        /* Initially no data */
+        USB_EP_BDT[pxEP->RegId].TX_COUNT =
+        USB_EP_BDT[pxEP->RegId].RX_COUNT = 0;
+
         if (ucEpAddress > 0x7F)
         {
-            /* Initially no sent data */
-            USB_EP_BDT[pxEP->RegId].TX_COUNT =
-            USB_EP_BDT[pxEP->RegId].RX_COUNT = 0;
-
             /* DTOG == SW_BUF == 0 result in NAK */
             USB_EP_SET_STATUS(pxEP->RegId, TX, VALID);
             /* Disable unused direction */
@@ -442,10 +442,6 @@ void USB_vEpOpen(
         }
         else
         {
-            /* Set buffer address for double buffered mode */
-            USB_EP_BDT[pxEP->RegId].TX_COUNT =
-            USB_EP_BDT[pxEP->RegId].RX_COUNT = USB_prvConvertRxCount(pxEP->MaxPacketSize);
-
             /* Set SW_BUF flag */
             USB_TOGGLE(pxEP->RegId, DTOG_TX);
 
@@ -455,25 +451,16 @@ void USB_vEpOpen(
             USB_EP_SET_STATUS(pxEP->RegId, TX, DIS);
         }
     }
+    /* Configure NAK status for the Endpoint */
     else if (ucEpAddress > 0x7F)
     {
-        /*Set the endpoint Transmit buffer address */
-        USB_EP_BDT[pxEP->RegId].TX_COUNT = 0;
-
         USB_TOGGLE_CLEAR(pxEP->RegId, DTOG_TX);
-
-        /* Configure NAK status for the Endpoint */
         USB_EP_SET_STATUS(pxEP->RegId, TX, NAK);
     }
     else
     {
-        /* Set the endpoint Receive buffer address and counter */
-        USB_EP_BDT[pxEP->RegId].RX_COUNT = USB_prvConvertRxCount(pxEP->MaxPacketSize);
-
         USB_TOGGLE_CLEAR(pxEP->RegId, DTOG_RX);
-
-        /* Configure VALID status for the Endpoint */
-        USB_EP_SET_STATUS(pxEP->RegId, RX, VALID);
+        USB_EP_SET_STATUS(pxEP->RegId, RX, NAK);
     }
 }
 
