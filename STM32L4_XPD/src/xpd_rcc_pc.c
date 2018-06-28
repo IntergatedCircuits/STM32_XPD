@@ -472,7 +472,7 @@ uint32_t USART_ulClockFreq_Hz(USART_HandleType * pxUSART)
 
 /** @} */
 
-#if defined(USB)
+#if defined(USB) || defined(USB_OTG_FS)
 
 /** @ingroup USB_Clock_Source
  * @defgroup USB_Clock_Source_Exported_Functions USB Clock Source Exported Functions
@@ -488,18 +488,18 @@ void USB_vClockConfig(USB_ClockSourceType eClockSource)
 
     switch (eClockSource)
     {
-    case USB_CLOCKSOURCE_PLL:
-        /* Enable PLL Q output */
-        RCC_REG_BIT(PLLCFGR, PLLQEN) = 1;
-        break;
+        case USB_CLOCKSOURCE_PLL:
+            /* Enable PLL Q output */
+            RCC_REG_BIT(PLLCFGR, PLLQEN) = 1;
+            break;
 
-    case USB_CLOCKSOURCE_PLLSAI1:
-        /* Enable PLLSAI1 Q output */
-        RCC_REG_BIT(PLLSAI1CFGR, PLLSAI1QEN) = 1;
-        break;
+        case USB_CLOCKSOURCE_PLLSAI1:
+            /* Enable PLLSAI1 Q output */
+            RCC_REG_BIT(PLLSAI1CFGR, PLLSAI1QEN) = 1;
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 }
 
