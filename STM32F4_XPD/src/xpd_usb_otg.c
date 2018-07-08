@@ -212,7 +212,7 @@ static void USB_prvTransmitPacket(USB_HandleType * pxUSB, uint8_t ucEpNum)
         pxEP->Transfer.Data += usPacketLength;
     }
 
-    if (pxEP->Transfer.Progress == 0)
+    if ((pxEP->Transfer.Progress == 0) || (ucEpNum == 0))
     {
         /* Disable Tx FIFO interrupts when all data is written */
         CLEAR_BIT(pxUSB->Inst->DIEPEMPMSK, ulEpFlag);
@@ -236,15 +236,10 @@ static void USB_prvEpSend(USB_HandleType * pxUSB, uint8_t ucEpNum)
         pxDEP->DxEPTSIZ.w = 1 << USB_OTG_DIEPTSIZ_PKTCNT_Pos;
     }
     /* EP0 has limited transfer size */
-    else if ((ucEpNum == 0) && (pxEP->Transfer.Progress > 0x7F))
+    else if ((ucEpNum == 0) && (pxEP->Transfer.Progress > pxEP->MaxPacketSize))
     {
-        uint16_t usXferSize = pxEP->Transfer.Progress;
-        if (usXferSize > pxEP->MaxPacketSize)
-        {
-            usXferSize = pxEP->MaxPacketSize;
-        }
         pxDEP->DxEPTSIZ.b.PKTCNT = 1;
-        pxDEP->DxEPTSIZ.b.XFRSIZ = usXferSize;
+        pxDEP->DxEPTSIZ.b.XFRSIZ = pxEP->MaxPacketSize;
     }
     else
     {
@@ -1058,14 +1053,14 @@ void USB_vDevIRQHandler(USB_HandleType * pxUSB)
                         {
                             /* Reception finished */
                             USB_vDataOutCallback(pxUSB, pxEP);
-                        }
 
-                        if ((USB_DMA_CONFIG(pxUSB) != 0) &&
-                            (ucEpNum == 0) &&
-                            (pxEP->Transfer.Length == 0))
-                        {
-                            /* this is ZLP, so prepare EP0 for next setup */
-                            USB_prvPrepareSetup(pxUSB);
+                            if ((USB_DMA_CONFIG(pxUSB) != 0) &&
+                                (ucEpNum == 0) &&
+                                (pxEP->Transfer.Length == 0))
+                            {
+                                /* this is ZLP, so prepare EP0 for next setup */
+                                USB_prvPrepareSetup(pxUSB);
+                            }
                         }
                     }
 
@@ -1105,7 +1100,6 @@ void USB_vDevIRQHandler(USB_HandleType * pxUSB)
                     {
                         USB_prvTransmitPacket(pxUSB, ucEpNum);
                     }
-
                     /* Transfer completed */
                     if ((ulEpFlags & USB_OTG_DIEPINT_XFRC) != 0)
                     {
@@ -1130,14 +1124,14 @@ void USB_vDevIRQHandler(USB_HandleType * pxUSB)
                         {
                             /* Transmission complete */
                             USB_vDataInCallback(pxUSB, pxEP);
-                        }
 
-                        if ((USB_DMA_CONFIG(pxUSB) != 0) &&
-                            (ucEpNum == 0) &&
-                            (pxEP->Transfer.Length == 0))
-                        {
-                            /* this is ZLP, so prepare EP0 for next setup */
-                            USB_prvPrepareSetup(pxUSB);
+                            if ((USB_DMA_CONFIG(pxUSB) != 0) &&
+                                (ucEpNum == 0) &&
+                                (pxEP->Transfer.Length == 0))
+                            {
+                                /* this is ZLP, so prepare EP0 for next setup */
+                                USB_prvPrepareSetup(pxUSB);
+                            }
                         }
                     }
 
