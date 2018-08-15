@@ -96,6 +96,7 @@ static void ADC_prvClockDisable(ADC_HandleType * pxADC)
         RCC_vClockDisable(RCC_POS_ADC + ucIndex);
     }
 }
+
 #else
 #define ADC_prvClockEnable(HANDLE)    (RCC_vClockEnable(RCC_POS_ADC))
 #define ADC_prvClockDisable(HANDLE)   (RCC_vClockDisable(RCC_POS_ADC))
@@ -105,16 +106,18 @@ static void ADC_prvClockDisable(ADC_HandleType * pxADC)
 __STATIC_INLINE uint32_t ADC_prvGetMultiCfgr(ADC_HandleType * pxADC, uint32_t ulDual)
 {
     uint32_t ulCFGR;
+#if (ADC_COUNT > 1)
     /* Get relevant register CFGR in ADC instance of ADC master or slave
      * in function of multimode state (for devices with multimode available). */
-    if (    (ulDual == ADC_MULTIMODE_SINGE)
-         || (IS_ADC_MULTIMODE_MASTER_INSTANCE(pxADC->Inst)))
-    {
-        ulCFGR = pxADC->Inst->CFGR.w;
-    }
-    else
+    if (    (ulDual != ADC_MULTIMODE_SINGE)
+         && (!IS_ADC_MULTIMODE_MASTER_INSTANCE(pxADC->Inst)))
     {
         ulCFGR = ADC_PAIR(pxADC)->CFGR.w;
+    }
+    else
+#endif
+    {
+        ulCFGR = pxADC->Inst->CFGR.w;
     }
     return ulCFGR;
 }
@@ -239,7 +242,7 @@ static void ADC_prvInitInternalChannel(ADC_HandleType * pxADC, uint8_t ucChannel
     if (((ulChBit != 0) && ((ADC_COMMON(pxADC)->CCR.w & ulChBit) == 0))
         /* Software is allowed to change common parameters only when all ADCs
          * of the common group are disabled */
-        &&  (ADC_REG_BIT(pxADC, CR, ADEN) == 0)
+         && (ADC_REG_BIT(pxADC, CR, ADEN) == 0)
 #if (ADC_COUNT > 1)
          && (ADC_PAIR(pxADC)->CR.b.ADEN == 0)
 #endif
@@ -712,10 +715,12 @@ void ADC_vStart(ADC_HandleType * pxADC)
         /* clear regular group conversion flag and overrun flag */
         SET_BIT(pxADC->Inst->ISR.w, ADC_ISR_EOC | ADC_ISR_EOS | ADC_ISR_OVR);
 
+#if (ADC_COUNT > 1)
         /* if ADC is either not in multimode, or the multimode master,
          * enable software conversion of regular channels */
         if (    (ADC_COMMON(pxADC)->CCR.b.DUAL == ADC_MULTIMODE_SINGE)
              || (IS_ADC_MULTIMODE_MASTER_INSTANCE(pxADC->Inst)))
+#endif
         {
             ADC_REG_BIT(pxADC, CR, ADSTART) = 1;
         }
@@ -756,13 +761,13 @@ XPD_ReturnType ADC_ePollStatus(
 {
     XPD_ReturnType eResult = XPD_OK;
 
-    if ((eOperation == ADC_OPERATION_CONVERSION)
-            && ((pxADC->EndFlagSelection & ADC_IER_EOSIE) != 0))
+    if (    (eOperation == ADC_OPERATION_CONVERSION)
+         && ((pxADC->EndFlagSelection & ADC_IER_EOSIE) != 0))
     {
         eOperation = ADC_ISR_EOS;
     }
-    else if ((eOperation == ADC_OPERATION_INJCONVERSION)
-            && ((pxADC->EndFlagSelection & ADC_IER_JEOSIE) != 0))
+    else if (    (eOperation == ADC_OPERATION_INJCONVERSION)
+              && ((pxADC->EndFlagSelection & ADC_IER_JEOSIE) != 0))
     {
         eOperation = ADC_ISR_JEOS;
     }
@@ -771,15 +776,17 @@ XPD_ReturnType ADC_ePollStatus(
      * and EOC is raised on end of single conversion */
     if (eOperation == ADC_OPERATION_CONVERSION)
     {
+#if (ADC_COUNT > 1)
         /* If multimode used, check common DMA config, otherwise dedicated DMA config */
-        if (ADC_COMMON_REG_BIT(pxADC, CCR, DUAL) == 0)
+        if (ADC_COMMON_REG_BIT(pxADC, CCR, DUAL) != 0)
         {
-            if (ADC_REG_BIT(pxADC, CFGR, DMAEN) == 1)
+            if (ADC_COMMON_REG_BIT(pxADC, CCR, MDMA) == 1)
             { eResult = XPD_ERROR; }
         }
         else
+#endif
         {
-            if (ADC_COMMON_REG_BIT(pxADC, CCR, MDMA) == 1)
+            if (ADC_REG_BIT(pxADC, CFGR, DMAEN) == 1)
             { eResult = XPD_ERROR; }
         }
     }
@@ -841,7 +848,11 @@ void ADC_vIRQHandler(ADC_HandleType * pxADC)
 {
     uint32_t ulISR = pxADC->Inst->ISR.w;
     uint32_t ulIER = pxADC->Inst->IER.w;
+#if (ADC_COUNT > 1)
     uint32_t ulDual = ADC_COMMON(pxADC)->CCR.b.DUAL;
+#else
+    uint32_t ulDual = 0;
+#endif
 
     /* End of conversion flag for regular channels */
     if (    ((ulISR & (ADC_ISR_EOC | ADC_ISR_EOS)) != 0)
@@ -883,16 +894,18 @@ void ADC_vIRQHandler(ADC_HandleType * pxADC)
             /* End of sequence */
             if ((ulISR & ADC_ISR_JEOS) != 0)
             {
-                if (    (ulDual == ADC_MULTIMODE_SINGE)
-                     || (ulDual == ADC_MULTIMODE_DUAL_REGSIMULT)
-                     || (ulDual == ADC_MULTIMODE_DUAL_INTERLEAVED)
-                     || (IS_ADC_MULTIMODE_MASTER_INSTANCE(pxADC->Inst)))
-                {
-                    ulCFGR = pxADC->Inst->CFGR.w;
-                }
-                else
+#if (ADC_COUNT > 1)
+                if (!(    (ulDual == ADC_MULTIMODE_SINGE)
+                       || (ulDual == ADC_MULTIMODE_DUAL_REGSIMULT)
+                       || (ulDual == ADC_MULTIMODE_DUAL_INTERLEAVED)
+                       || (IS_ADC_MULTIMODE_MASTER_INSTANCE(pxADC->Inst))))
                 {
                     ulCFGR = ADC_PAIR(pxADC)->CFGR.w;
+                }
+                else
+#endif
+                {
+                    ulCFGR = pxADC->Inst->CFGR.w;
                 }
 
                 if ((ulCFGR & ADC_CFGR_JQM) == 0)
@@ -991,8 +1004,10 @@ XPD_ReturnType ADC_eStart_DMA(ADC_HandleType * pxADC, void * pvAddress)
 {
     XPD_ReturnType eResult = XPD_ERROR;
 
+#if (ADC_COUNT > 1)
     /* If multimode is used, multimode function shall be used */
     if (ADC_COMMON(pxADC)->CCR.b.DUAL == ADC_MULTIMODE_SINGE)
+#endif
     {
         /* Set up DMA for transfer */
         eResult = DMA_eStart_IT(pxADC->DMA.Conversion,
@@ -1225,7 +1240,7 @@ void ADC_vInjectedChannelConfig(
  */
 void ADC_vInjectedStart(ADC_HandleType * pxADC)
 {
-    uint32_t ulDual = ADC_COMMON(pxADC)->CCR.b.DUAL;
+    uint32_t ulDual;
 
     /* Check if ADC peripheral is disabled in order to enable it and wait during
      Tstab time the ADC's stabilization */
@@ -1242,6 +1257,8 @@ void ADC_vInjectedStart(ADC_HandleType * pxADC)
     /* clear injected group conversion flag */
     SET_BIT(pxADC->Inst->ISR.w, ADC_ISR_JEOC | ADC_ISR_JEOS | ADC_ISR_JQOVF);
 
+#if (ADC_COUNT > 1)
+    ulDual = ADC_COMMON(pxADC)->CCR.b.DUAL;
     /* if no external trigger present and ADC is either not in multimode,
      * or the multimode master, enable software conversion of injected channels */
     if ((pxADC->Inst->CFGR.b.JAUTO == 0) &&
@@ -1249,6 +1266,7 @@ void ADC_vInjectedStart(ADC_HandleType * pxADC)
          || (ulDual == ADC_MULTIMODE_DUAL_REGSIMULT)
          || (ulDual == ADC_MULTIMODE_DUAL_INTERLEAVED)
          || (IS_ADC_MULTIMODE_MASTER_INSTANCE(pxADC->Inst))))
+#endif
     {
         ADC_REG_BIT(pxADC,CR,JADSTART) = 1;
     }
@@ -1306,7 +1324,7 @@ void ADC_vInjectedStop_IT(ADC_HandleType * pxADC)
 
 /** @} */
 
-#ifdef ADC123_COMMON
+#if (ADC_COUNT > 1)
 /** @addtogroup ADC_MultiMode
  * @{ */
 

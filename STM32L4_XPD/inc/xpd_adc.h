@@ -515,7 +515,7 @@ __STATIC_INLINE uint16_t ADC_usInjectedValue(ADC_HandleType * pxADC, uint8_t ucI
 
 /** @} */
 
-#ifdef ADC123_COMMON
+#if (ADC_COUNT > 1)
 /** @defgroup ADC_MultiMode Multi ADC Mode Conversions
  * @{ */
 
