@@ -87,7 +87,7 @@ typedef struct {
          uint32_t __RESERVED2;
 } USB_OTG_GenEndpointType;
 
-#define USB_OTG_DMA_SUPPORT         (defined(USB_OTG_GAHBCFG_DMAEN) && 1)
+#define USB_OTG_DMA_SUPPORT         (defined(USB_OTG_HS) && 1)
 
 #if (USB_OTG_DMA_SUPPORT != 0)
 #define USB_DMA_CONFIG(HANDLE)      USB_REG_BIT((HANDLE),GAHBCFG,DMAEN)
@@ -1401,11 +1401,12 @@ USB_SpeedType USB_eDevSpeed(USB_HandleType * pxUSB)
     else
 #endif
     {
-        eSpeed = USB_SPEED_LOW;
+        eSpeed = USB_SPEED_FULL;
     }
     return eSpeed;
 }
 
+#ifdef USB_OTG_HS
 /* Limit the preconfigured MaxPacketSize of endpoints
  * according to the FS limit of their type */
 static void USB_prvLimitEpMPS_FS(USB_EndPointHandleType * pxEP)
@@ -1422,6 +1423,7 @@ static void USB_prvLimitEpMPS_FS(USB_EndPointHandleType * pxEP)
             break;
     }
 }
+#endif
 
 /**
  * @brief Configure peripheral FIFO allocation for endpoints
@@ -1437,6 +1439,7 @@ __weak void USB_vAllocateEPs(USB_HandleType * pxUSB)
     uint32_t ulFifoLimit = USB_TOTAL_FIFO_SIZE(pxUSB);
     uint32_t ulMPS;
 
+#ifdef USB_OTG_HS
     if (USB_eDevSpeed(pxUSB) == USB_SPEED_FULL)
     {
         /* Full-Speed endpoint sizes should be limited first */
@@ -1446,6 +1449,7 @@ __weak void USB_vAllocateEPs(USB_HandleType * pxUSB)
             USB_prvLimitEpMPS_FS(&pxUSB->EP.OUT[ucEpNum]);
         }
     }
+#endif
 
     /* Configure the global Receive FIFO as the largest requested OUT EP size */
     for (ucEpNum = 0; ucEpNum < ucEpCount; ucEpNum++)
