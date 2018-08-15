@@ -4905,7 +4905,7 @@ typedef struct {
     __IO uint32_t BTABLE[16];                               /*!< Buffer Table address register,          Address offset: 0x50 */
          uint32_t __RESERVED5[16];
     struct {
-        __IO uint32_t LMPEN;                                /*!< LPM support enable  */
+        __IO uint32_t LPMEN;                                /*!< LPM support enable  */
         __IO uint32_t LPMACK;                               /*!< LPM Token acknowledge enable*/
              uint32_t __RESERVED0;
         __IO uint32_t REMWAKE;                              /*!< bRemoteWake value received with last ACKed LPM Token */
@@ -17969,7 +17969,7 @@ typedef struct {
 #define USB_LPMCSR_BESL                      ((uint16_t)0x00F0U)               /*!< BESL value received with last ACKed LPM Token  */ 
 #define USB_LPMCSR_REMWAKE                   ((uint16_t)0x0008U)               /*!< bRemoteWake value received with last ACKed LPM Token */ 
 #define USB_LPMCSR_LPMACK                    ((uint16_t)0x0002U)               /*!< LPM Token acknowledge enable*/
-#define USB_LPMCSR_LMPEN                     ((uint16_t)0x0001U)               /*!< LPM support enable  */
+#define USB_LPMCSR_LPMEN                     ((uint16_t)0x0001U)               /*!< LPM support enable  */
 
 /********************  FNR Frame Number Register bit definitions   ************/
 #define USB_FNR_RXDP                         ((uint16_t)0x8000U)               /*!< status of D+ data line */

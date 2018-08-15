@@ -5963,7 +5963,7 @@ typedef struct {
          uint16_t __RESERVED5;
     union {
         struct {
-            __IO uint16_t LMPEN : 1;                        /*!< LPM support enable  */
+            __IO uint16_t LPMEN : 1;                        /*!< LPM support enable  */
             __IO uint16_t LPMACK : 1;                       /*!< LPM Token acknowledge enable*/
                  uint16_t __RESERVED0 : 1;
             __IO uint16_t REMWAKE : 1;                      /*!< bRemoteWake value received with last ACKed LPM Token */
@@ -19187,7 +19187,7 @@ typedef struct {
 #define USB_BCDR_DPPU                            ((uint16_t)0x8000U)           /*!< DP Pull-up Enable */
 
 /*******************  Bit definition for LPMCSR register  *********************/
-#define USB_LPMCSR_LMPEN                         ((uint16_t)0x0001U)           /*!< LPM support enable  */
+#define USB_LPMCSR_LPMEN                         ((uint16_t)0x0001U)           /*!< LPM support enable  */
 #define USB_LPMCSR_LPMACK                        ((uint16_t)0x0002U)           /*!< LPM Token acknowledge enable*/
 #define USB_LPMCSR_REMWAKE                       ((uint16_t)0x0008U)           /*!< bRemoteWake value received with last ACKed LPM Token */
 #define USB_LPMCSR_BESL                          ((uint16_t)0x00F0U)           /*!< BESL value received with last ACKed LPM Token  */

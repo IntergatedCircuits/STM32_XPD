@@ -74,7 +74,7 @@ typedef struct
 #if defined(USB_OTG_HS)
     USB_PHYType     PHY;    /*!< USB PHYsical layer selection */
 #endif
-#if defined(USB_OTG_GLPMCFG_LPMEN) || defined(USB_LPMCSR_LMPEN)
+#if defined(USB_OTG_GLPMCFG_LPMEN) || defined(USB_LPMCSR_LPMEN)
     FunctionalState LPM;    /*!< Link Power Management L1 sleep mode support */
 #endif
 #if defined(USB_OTG_GAHBCFG_DMAEN)

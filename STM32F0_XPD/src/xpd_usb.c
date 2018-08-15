@@ -30,7 +30,7 @@
  * @{ */
 
 /* The packet buffer memory SRAM access scheme differs in earlier versions */
-#ifdef USB_LPMCSR_LMPEN
+#ifdef USB_LPMCSR_LPMEN
 typedef struct {
          uint16_t TX_ADDR;
     __IO uint16_t TX_COUNT;
@@ -299,15 +299,15 @@ void USB_vInit(USB_HandleType * pxUSB, const USB_InitType * pxConfig)
     /* Set Btable Address */
     USB->BTABLE = USB_BTABLE_VALUE;
 
-#ifdef USB_LPMCSR_LMPEN
+#ifdef USB_LPMCSR_LPMEN
     /* Set Link Power Management feature (L1 sleep mode support) */
     if (pxConfig->LPM != DISABLE)
     {
-        SET_BIT(USB->LPMCSR.w, USB_LPMCSR_LMPEN | USB_LPMCSR_LPMACK);
+        SET_BIT(USB->LPMCSR.w, USB_LPMCSR_LPMEN | USB_LPMCSR_LPMACK);
     }
     else
     {
-        CLEAR_BIT(USB->LPMCSR.w, USB_LPMCSR_LMPEN | USB_LPMCSR_LPMACK);
+        CLEAR_BIT(USB->LPMCSR.w, USB_LPMCSR_LPMEN | USB_LPMCSR_LPMACK);
     }
 #endif
 
@@ -342,9 +342,9 @@ void USB_vStart_IT(USB_HandleType * pxUSB)
 {
     /*Set interrupt mask */
     uint32_t ulCNTR = USB_CNTR_CTRM | USB_CNTR_WKUPM | USB_CNTR_SUSPM | USB_CNTR_RESETM;
-#ifdef USB_LPMCSR_LMPEN
+#ifdef USB_LPMCSR_LPMEN
     /* Set Link Power Management feature (L1 sleep mode support) */
-    if (USB_REG_BIT(pxUSB, LPMCSR, LMPEN) != 0)
+    if (USB_REG_BIT(pxUSB, LPMCSR, LPMEN) != 0)
     {
         ulCNTR |= USB_CNTR_L1REQM;
     }
@@ -989,7 +989,7 @@ __weak void USB_vAllocateEPs(USB_HandleType * pxUSB)
             }
         }
 
-#ifdef USB_LPMCSR_LMPEN
+#ifdef USB_LPMCSR_LPMEN
         /* TODO: usPmaTail shall not exceed 1024 (or 768 if CAN is enabled) */
 #else
         /* TODO: usPmaTail shall not exceed 512 */
