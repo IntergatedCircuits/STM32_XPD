@@ -79,8 +79,11 @@ void ADC_vClockConfig(ADC_ClockSourceType eClockSource, ClockDividerType eClockD
 
     /* Peripheral configuration can only be applied when ADC is in OFF state */
     if (   ((ADC1->CR.w & (ADC_CR_ADSTART | ADC_CR_ADEN)) == 0)
+#ifdef ADC123_COMMON
         && ((ADC2->CR.w & (ADC_CR_ADSTART | ADC_CR_ADEN)) == 0)
-        && ((ADC3->CR.w & (ADC_CR_ADSTART | ADC_CR_ADEN)) == 0))
+        && ((ADC3->CR.w & (ADC_CR_ADSTART | ADC_CR_ADEN)) == 0)
+#endif
+        )
     {
         /* In case of synchronous clock, the divider is set in CKMODE */
         if (eClockSource < ADC_CLOCKSOURCE_PLLSAI1)
