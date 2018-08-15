@@ -1381,7 +1381,7 @@ typedef struct {
   \brief  Structure type to access the Trace Port Interface Register (TPI).
  */
 typedef struct {
-    __IO uint32_t SSPSR;                                    /*!< Offset: 0x000 (R/ )  Supported Parallel Port Size Register */
+    __I  uint32_t SSPSR;                                    /*!< Offset: 0x000 (R/ )  Supported Parallel Port Size Register */
     __IO uint32_t CSPSR;                                    /*!< Offset: 0x004 (R/W)  Current Parallel Port Size Register */
          uint32_t __RESERVED0[2];
     __IO uint32_t ACPR;                                     /*!< Offset: 0x010 (R/W)  Asynchronous Clock Prescaler Register */
@@ -1466,8 +1466,8 @@ typedef struct {
     } FIFO1;                                                /*!< Offset: 0xEFC (R/ )  Integration ITM Data */
     union {
         struct {
-            __IO uint32_t Mode : 1;                         /*!< TPI ITCTRL: Mode Mask */
-                 uint32_t __RESERVED0 : 31;
+            __IO uint32_t Mode : 2;                         /*!< TPI ITCTRL: Mode Mask */
+                 uint32_t __RESERVED0 : 30;
         } b;
         __IO uint32_t w;
     } ITCTRL;                                               /*!< Offset: 0xF00 (R/W)  Integration Mode Control */
@@ -1489,8 +1489,8 @@ typedef struct {
     } DEVID;                                                /*!< Offset: 0xFC8 (R/ )  TPIU_DEVID */
     union {
         struct {
-            __I  uint32_t SubType : 4;                      /*!< TPI DEVTYPE: SubType Mask */
             __I  uint32_t MajorType : 4;                    /*!< TPI DEVTYPE: MajorType Mask */
+            __I  uint32_t SubType : 4;                      /*!< TPI DEVTYPE: SubType Mask */
                  uint32_t __RESERVED0 : 24;
         } b;
         __I  uint32_t w;
@@ -1498,11 +1498,8 @@ typedef struct {
 } TPI_Type;
 
 /* TPI Asynchronous Clock Prescaler Register Definitions */
-#define TPI_ACPR_PRESCALER_Pos              0U                                         /*!< @Deprecated TPI ACPR: PRESCALER Position */
-#define TPI_ACPR_PRESCALER_Msk             (0x1FFFUL /*<< TPI_ACPR_PRESCALER_Pos*/)    /*!< @Deprecated TPI ACPR: PRESCALER Mask */
-
-#define TPI_ACPR_SWOSCALER_Pos              0U                                         /*!< TPI ACPR: SWOSCALER Position */
-#define TPI_ACPR_SWOSCALER_Msk             (0xFFFFUL /*<< TPI_ACPR_SWOSCALER_Pos*/)    /*!< TPI ACPR: SWOSCALER Mask */
+#define TPI_ACPR_PRESCALER_Pos              0U                                         /*!< TPI ACPR: PRESCALER Position */
+#define TPI_ACPR_PRESCALER_Msk             (0x1FFFUL /*<< TPI_ACPR_PRESCALER_Pos*/)    /*!< TPI ACPR: PRESCALER Mask */
 
 /* TPI Selected Pin Protocol Register Definitions */
 #define TPI_SPPR_TXMODE_Pos                 0U                                         /*!< TPI SPPR: TXMODE Position */
@@ -1586,7 +1583,7 @@ typedef struct {
 
 /* TPI Integration Mode Control Register Definitions */
 #define TPI_ITCTRL_Mode_Pos                 0U                                         /*!< TPI ITCTRL: Mode Position */
-#define TPI_ITCTRL_Mode_Msk                (0x1UL /*<< TPI_ITCTRL_Mode_Pos*/)          /*!< TPI ITCTRL: Mode Mask */
+#define TPI_ITCTRL_Mode_Msk                (0x3UL /*<< TPI_ITCTRL_Mode_Pos*/)          /*!< TPI ITCTRL: Mode Mask */
 
 /* TPI DEVID Register Definitions */
 #define TPI_DEVID_NRZVALID_Pos             11U                                         /*!< TPI DEVID: NRZVALID Position */
@@ -1608,11 +1605,11 @@ typedef struct {
 #define TPI_DEVID_NrTraceInput_Msk         (0x1FUL /*<< TPI_DEVID_NrTraceInput_Pos*/)  /*!< TPI DEVID: NrTraceInput Mask */
 
 /* TPI DEVTYPE Register Definitions */
-#define TPI_DEVTYPE_MajorType_Pos           4U                                         /*!< TPI DEVTYPE: MajorType Position */
-#define TPI_DEVTYPE_MajorType_Msk          (0xFUL << TPI_DEVTYPE_MajorType_Pos)        /*!< TPI DEVTYPE: MajorType Mask */
-
-#define TPI_DEVTYPE_SubType_Pos             0U                                         /*!< TPI DEVTYPE: SubType Position */
+#define TPI_DEVTYPE_SubType_Pos             4U                                         /*!< TPI DEVTYPE: SubType Position */
 #define TPI_DEVTYPE_SubType_Msk            (0xFUL /*<< TPI_DEVTYPE_SubType_Pos*/)      /*!< TPI DEVTYPE: SubType Mask */
+
+#define TPI_DEVTYPE_MajorType_Pos           0U                                         /*!< TPI DEVTYPE: MajorType Position */
+#define TPI_DEVTYPE_MajorType_Msk          (0xFUL << TPI_DEVTYPE_MajorType_Pos)        /*!< TPI DEVTYPE: MajorType Mask */
 
 /*@}*/ /* end of group CMSIS_TPI */
 
@@ -2208,6 +2205,14 @@ typedef struct {
 #define NVIC_USER_IRQ_OFFSET          16
 
 
+/* The following EXC_RETURN values are saved the LR on exception entry */
+#define EXC_RETURN_HANDLER         (0xFFFFFFF1UL)     /* return to Handler mode, uses MSP after return                               */
+#define EXC_RETURN_THREAD_MSP      (0xFFFFFFF9UL)     /* return to Thread mode, uses MSP after return                                */
+#define EXC_RETURN_THREAD_PSP      (0xFFFFFFFDUL)     /* return to Thread mode, uses PSP after return                                */
+#define EXC_RETURN_HANDLER_FPU     (0xFFFFFFE1UL)     /* return to Handler mode, uses MSP after return, restore floating-point state */
+#define EXC_RETURN_THREAD_MSP_FPU  (0xFFFFFFE9UL)     /* return to Thread mode, uses MSP after return, restore floating-point state  */
+#define EXC_RETURN_THREAD_PSP_FPU  (0xFFFFFFEDUL)     /* return to Thread mode, uses PSP after return, restore floating-point state  */
+
 
 /**
   \brief   Set Priority Grouping
@@ -2492,7 +2497,7 @@ __STATIC_INLINE uint32_t __NVIC_GetVector(IRQn_Type IRQn)
   \brief   System Reset
   \details Initiates a system reset request to reset the MCU.
  */
-__STATIC_INLINE void __NVIC_SystemReset(void)
+__NO_RETURN __STATIC_INLINE void __NVIC_SystemReset(void)
 {
   __DSB();                                                          /* Ensure all outstanding memory accesses included
                                                                        buffered write are completed before reset */
