@@ -181,7 +181,7 @@ XPD_ReturnType RCC_eMSI_Config(const RCC_MSI_InitType * pxConfig)
 
             /* Configure the source of time base
              * considering new system clocks settings */
-            XPD_vInitTimer();
+            XPD_vInitTimer(SystemCoreClock);
             eResult = XPD_OK;
         }
     }
@@ -834,7 +834,7 @@ XPD_ReturnType RCC_eHCLK_Config(
 
     /* Configure the source of time base
      * considering new system clocks settings*/
-    XPD_vInitTimer();
+    XPD_vInitTimer(SystemCoreClock);
 
     return eResult;
 }

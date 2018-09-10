@@ -29,21 +29,17 @@ extern uint32_t SystemCoreClock;
 /** @addtogroup XPD_Utils
  * @{ */
 
-/** @defgroup XPD_Exported_Functions XPD Exported Functions
+/** @defgroup XPD_Private_Functions XPD Private Functions
  * @{ */
-
-/** @defgroup XPD_Exported_Functions_Timer XPD Timer Handling Functions
- *  @brief    XPD Utilities millisecond timer handling functions
- * @{
- */
 
 /**
  * @brief Millisecond timer initializer utility.
+ * @param ulCoreFreq_Hz: the new core frequency in Hz
  */
-__weak void XPD_vInitTimer(void)
+static void prvInitTimer(uint32_t ulCoreFreq_Hz)
 {
     /* Enable SysTick and configure 1ms tick */
-    (void)SysTick_eInit(SYSTICK_CLOCKSOURCE_HCLK, SystemCoreClock / 1000);
+    (void)SysTick_eInit(SYSTICK_CLOCKSOURCE_HCLK, ulCoreFreq_Hz / 1000);
     SysTick_vStart();
 }
 
@@ -53,7 +49,7 @@ __weak void XPD_vInitTimer(void)
  *        The time of the preempted waiters do not elapse.
  * @param ulMilliseconds: the desired delay in ms
  */
-__weak void XPD_vDelay_ms(uint32_t ulMilliseconds)
+static void prvDelay_ms(uint32_t ulMilliseconds)
 {
     /* Initially clear flag */
     (void) SysTick->CTRL.b.COUNTFLAG;
@@ -61,19 +57,6 @@ __weak void XPD_vDelay_ms(uint32_t ulMilliseconds)
     {
         /* COUNTFLAG returns 1 if timer counted to 0 since the last flag read */
         ulMilliseconds -= SysTick->CTRL.b.COUNTFLAG;
-    }
-}
-
-/**
- * @brief Inserts code delay of the specified time in microseconds.
- * @param ulMicroseconds: the desired delay in us
- */
-__weak void XPD_vDelay_us(uint32_t ulMicroseconds)
-{
-    ulMicroseconds *= SystemCoreClock / 1000000;
-    while (ulMicroseconds != 0)
-    {
-        ulMicroseconds--;
     }
 }
 
@@ -87,7 +70,7 @@ __weak void XPD_vDelay_us(uint32_t ulMicroseconds)
  * @param pulTimeout: pointer to the timeout in ms
  * @return TIMEOUT if timed out, or OK if ulMatch occurred within the deadline
  */
-__weak XPD_ReturnType XPD_eWaitForMatch(
+static XPD_ReturnType prvWaitForMatch(
         volatile uint32_t * pulVarAddress,
         uint32_t            ulBitSelector,
         uint32_t            ulMatch,
@@ -121,7 +104,7 @@ __weak XPD_ReturnType XPD_eWaitForMatch(
  * @param pulTimeout: pointer to the timeout in ms
  * @return TIMEOUT if timed out, or OK if ulMatch occurred within the deadline
  */
-__weak XPD_ReturnType XPD_eWaitForDiff(
+static XPD_ReturnType prvWaitForDiff(
         volatile uint32_t * pulVarAddress,
         uint32_t            ulBitSelector,
         uint32_t            ulMatch,
@@ -143,6 +126,63 @@ __weak XPD_ReturnType XPD_eWaitForDiff(
         *pulTimeout -= SysTick->CTRL.b.COUNTFLAG;
     }
     return eResult;
+}
+
+/** @} */
+
+static const XPD_TimeServiceType xpd_xTimeService = {
+        .Init           = prvInitTimer,
+        .Block_ms       = prvDelay_ms,
+        .MatchBlock_ms  = prvWaitForMatch,
+        .DiffBlock_ms   = prvWaitForDiff,
+
+}, *xpd_pxTimeService   = &xpd_xTimeService;
+
+/** @defgroup XPD_Exported_Functions XPD Exported Functions
+ * @{ */
+
+/** @defgroup XPD_Exported_Functions_Timer XPD Timer Handling Functions
+ *  @brief    XPD Utilities time service functions
+ * @{
+ */
+
+/**
+ * @brief  Returns the currently used time service.
+ * @return Reference of the current time service
+ */
+const XPD_TimeServiceType* XPD_pxTimeService(void)
+{
+    return xpd_pxTimeService;
+}
+
+/**
+ * @brief Sets the new system time service.
+ * @param pxTimeService: reference to the time service implementation
+ */
+void XPD_vSetTimeService(const XPD_TimeServiceType* pxTimeService)
+{
+    xpd_pxTimeService = pxTimeService;
+}
+
+/**
+ * @brief Resets the system time service to the XPD default.
+ */
+void XPD_vResetTimeService(void)
+{
+    xpd_pxTimeService = &xpd_xTimeService;
+}
+
+/**
+ * @brief Inserts code delay of the specified time in microseconds.
+ * @param ulMicroseconds: the desired delay in us
+ */
+__weak void XPD_vDelay_us(uint32_t ulMicroseconds)
+{
+    ulMicroseconds *= SystemCoreClock / 1000000;
+    while (ulMicroseconds != 0)
+    {
+        ulMicroseconds--;
+    }
 }
 
 /** @} */
@@ -217,7 +257,7 @@ void XPD_vWriteFromStream(uint32_t * pulReg, DataStreamType * pxStream)
 void XPD_vInit(void)
 {
     /* Configure systick timer */
-    XPD_vInitTimer();
+    XPD_vInitTimer(SystemCoreClock);
 
     /* Enable clock for PWR */
     RCC_vClockEnable(RCC_POS_PWR);

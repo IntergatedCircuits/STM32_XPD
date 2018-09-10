@@ -631,7 +631,7 @@ XPD_ReturnType RCC_eHCLK_Config(
     SystemCoreClock = RCC_ulOscFreq_Hz(eSYSCLK_Source) >> rcc_aucAHBPrescTable[ulClkDiv];
 
     /* Configure the source of time base considering new system clocks settings*/
-    XPD_vInitTimer();
+    XPD_vInitTimer(SystemCoreClock);
 
     return eResult;
 }

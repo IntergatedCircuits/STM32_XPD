@@ -33,6 +33,34 @@ extern "C"
 /** @defgroup XPD_Utils XPD Utilities
  * @{ */
 
+/** @defgroup XPD_Exported_Types XPD Exported Types
+ * @{ */
+
+/** @brief Time service functions structure */
+typedef struct
+{
+    void            (*Init)         (uint32_t ulCoreFreq_Hz);
+    /*!< Prepares the time service for operation */
+
+    void            (*Block_ms)     (uint32_t ulBlocktime_ms);
+    /*!< Blocks the thread for the specified time */
+
+    XPD_ReturnType  (*MatchBlock_ms)(volatile uint32_t* pulVarAddress,
+                                     uint32_t ulBitSelector,
+                                     uint32_t ulMatch,
+                                     uint32_t * pulTimeout);
+    /*!< Blocks until the masked value read from address matches the input ulMatch, or until times out. */
+
+    XPD_ReturnType  (*DiffBlock_ms) (volatile uint32_t* pulVarAddress,
+                                     uint32_t ulBitSelector,
+                                     uint32_t ulMatch,
+                                     uint32_t * pulTimeout);
+    /*!< Blocks until the masked value read from address differs from the input ulMatch, or until times out. */
+
+}XPD_TimeServiceType;
+
+/** @} */
+
 /** @defgroup XPD_Exported_Macros XPD Exported Macros
  * @{ */
 
@@ -41,7 +69,7 @@ extern "C"
  * @brief Enters a critical section by disabling interrupts.
  * @param HANDLE: pointer to the requester handle
  */
-#define XPD_ENTER_CRITICAL(HANDLE)
+#define         XPD_ENTER_CRITICAL(HANDLE)
 #endif
 
 #ifndef XPD_EXIT_CRITICAL
@@ -49,7 +77,7 @@ extern "C"
  * @brief Leaves a critical section by enabling interrupts.
  * @param HANDLE: pointer to the requester handle
  */
-#define XPD_EXIT_CRITICAL(HANDLE)
+#define         XPD_EXIT_CRITICAL(HANDLE)
 #endif
 
 /** @} */
@@ -59,13 +87,66 @@ extern "C"
 
 /** @addtogroup XPD_Exported_Functions_Timer
  * @{ */
-void            XPD_vInitTimer          (void);
-void            XPD_vDelay_ms           (uint32_t ulMilliseconds);
+const XPD_TimeServiceType* XPD_pxTimeService(void);
+void            XPD_vSetTimeService     (const XPD_TimeServiceType* pxTimeService);
+void            XPD_vResetTimeService   (void);
+
 void            XPD_vDelay_us           (uint32_t ulMicroseconds);
-XPD_ReturnType  XPD_eWaitForMatch       (volatile uint32_t * pulVarAddress, uint32_t ulBitSelector,
-                                         uint32_t            ulMatch,       uint32_t * pulTimeout);
-XPD_ReturnType  XPD_eWaitForDiff        (volatile uint32_t * pulVarAddress, uint32_t ulBitSelector,
-                                         uint32_t            ulMatch,       uint32_t * pulTimeout);
+
+/**
+ * @brief Initialize the timer of the XPD time service.
+ * @param ulCoreFreq_Hz: the new core frequency in Hz
+ */
+__STATIC_INLINE void XPD_vInitTimer(uint32_t ulCoreFreq_Hz)
+{
+    XPD_pxTimeService()->Init(ulCoreFreq_Hz);
+}
+
+/**
+ * @brief Insert a delay of a specified time in the execution.
+ * @param ulBlocktime_ms: the amount of delay in ms
+ */
+__STATIC_INLINE void XPD_vDelay_ms(uint32_t ulBlocktime_ms)
+{
+    XPD_pxTimeService()->Block_ms(ulBlocktime_ms);
+}
+
+/**
+ * @brief Waits until the masked value at address matches the input, or until timeout.
+ * @param pulVarAddress: the word address that needs to be monitored
+ * @param ulBitSelector: a bit mask that selects which bits should be considered
+ * @param ulMatch: the expected value to wait for
+ * @param pulTimeout: pointer to the timeout in ms
+ * @return TIMEOUT if timed out, or OK if ulMatch occurred within the deadline
+ */
+__STATIC_INLINE XPD_ReturnType XPD_eWaitForMatch(
+        volatile uint32_t * pulVarAddress,
+        uint32_t            ulBitSelector,
+        uint32_t            ulMatch,
+        uint32_t *          pulTimeout)
+{
+    return XPD_pxTimeService()->MatchBlock_ms(pulVarAddress, ulBitSelector,
+            ulMatch, pulTimeout);
+}
+
+/**
+ * @brief Waits until the masked value at address differs from the input, or until timeout.
+ * @param pulVarAddress: the word address that needs to be monitored
+ * @param ulBitSelector: a bit mask that selects which bits should be considered
+ * @param ulMatch: the expected value to wait for
+ * @param pulTimeout: pointer to the timeout in ms
+ * @return TIMEOUT if timed out, or OK if ulMatch occurred within the deadline
+ */
+__STATIC_INLINE XPD_ReturnType XPD_eWaitForDiff(
+        volatile uint32_t * pulVarAddress,
+        uint32_t            ulBitSelector,
+        uint32_t            ulMatch,
+        uint32_t *          pulTimeout)
+{
+    return XPD_pxTimeService()->DiffBlock_ms(pulVarAddress, ulBitSelector,
+            ulMatch, pulTimeout);
+}
+
 /** @} */
 
 /** @addtogroup XPD_Exported_Functions_Stream
