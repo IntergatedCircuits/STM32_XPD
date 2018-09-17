@@ -145,10 +145,12 @@ static XPD_ReturnType CAN_prvFrameTransmit(CAN_HandleType * pxCAN, CAN_FrameType
         {
             ucOffset = 21;
         }
-        pxCAN->Inst->sTxMailBox[pxFrame->Index].TIR.w = ((pxFrame->Id.Value << ucOffset) | (uint32_t)pxFrame->Id.Type);
+        pxCAN->Inst->sTxMailBox[pxFrame->Index].TIR.w =
+                ((pxFrame->Id.Value << ucOffset) | (uint32_t)pxFrame->Id.Type);
 
         /* set up the DLC */
-        pxCAN->Inst->sTxMailBox[pxFrame->Index].TDTR.b.DLC = (uint32_t) pxFrame->DLC;
+        pxCAN->Inst->sTxMailBox[pxFrame->Index].TDTR.w =
+                ((uint32_t)pxFrame->DLC << CAN_TDT0R_DLC_Pos) & CAN_TDT0R_DLC_Msk;
 
         /* set up the data field */
         pxCAN->Inst->sTxMailBox[pxFrame->Index].TDLR.w = pxFrame->Data.Word[0];
