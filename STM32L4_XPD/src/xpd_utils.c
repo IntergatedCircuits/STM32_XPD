@@ -165,11 +165,12 @@ void XPD_vSetTimeService(const XPD_TimeServiceType* pxTimeService)
 }
 
 /**
- * @brief Resets the system time service to the XPD default.
+ * @brief Resets the system time service to the XPD default and initializes it.
  */
 void XPD_vResetTimeService(void)
 {
     xpd_pxTimeService = &xpd_xTimeService;
+    prvInitTimer(SystemCoreClock);
 }
 
 /**
