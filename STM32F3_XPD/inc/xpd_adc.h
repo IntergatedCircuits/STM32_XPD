@@ -203,6 +203,7 @@ typedef struct
     struct {
         DMA_HandleType * Conversion;                /*!< DMA handle for update transfer */
     }DMA;                                           /*   DMA handle references */
+    void * Trigger;                                 /*!< Conversion trigger's peripheral handle */
     uint32_t OffsetUsage;                           /*!< [Internal] Bitflag for offset using channel numbers */
     uint8_t InjectedConfig;                         /*!< [Internal] The injected group settings */
     uint8_t ConversionCount;                        /*!< ADC number of regular conversions */

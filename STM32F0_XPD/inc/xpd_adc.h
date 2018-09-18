@@ -159,6 +159,7 @@ typedef struct
     struct {
         DMA_HandleType * Conversion;                /*!< DMA handle for update transfer */
     }DMA;                                           /*   DMA handle references */
+    void * Trigger;                                 /*!< Conversion trigger's peripheral handle */
     uint8_t ConversionCount;                        /*!< ADC number of regular conversions */
     uint8_t EndFlagSelection;                       /*!< [Internal] Stores the EOC configuration */
 #if defined(__XPD_ADC_ERROR_DETECT) || defined(__XPD_DMA_ERROR_DETECT)

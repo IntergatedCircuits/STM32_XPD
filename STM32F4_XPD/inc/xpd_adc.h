@@ -191,6 +191,7 @@ typedef struct
     struct {
         DMA_HandleType * Conversion;                /*!< DMA handle for update transfer */
     }DMA;                                           /*   DMA handle references */
+    void * Trigger;                                 /*!< Conversion trigger's peripheral handle */
     RCC_PositionType CtrlPos;                       /*!< Relative position for reset and clock control */
     volatile uint8_t ActiveConversions;             /*!< ADC number of current regular conversion rank */
 #if defined(__XPD_ADC_ERROR_DETECT) || defined(__XPD_DMA_ERROR_DETECT)
