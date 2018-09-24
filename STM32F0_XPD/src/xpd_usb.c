@@ -947,8 +947,14 @@ __weak void USB_vAllocateEPs(USB_HandleType * pxUSB)
         /* Reserve place for BTABLE */
         usPmaTail = ucRegId * sizeof(USB_BufferDescriptorType);
 
+        /* EP0 is half-duplex, IN and OUT can share the memory */
+        pxEP = &pxUSB->EP.IN[0];
+        USB_EP_BDT[pxEP->RegId].TX_ADDR = usPmaTail;
+        USB_EP_BDT[pxEP->RegId].RX_ADDR = usPmaTail;
+        usPmaTail += (pxEP->MaxPacketSize + 1) & (~1);
+
         /* Allocate packet memory for all endpoints (unused ones' MPS = 0) */
-        for (ulEpNum = 0; ulEpNum < USBD_MAX_EP_COUNT; ulEpNum++)
+        for (ulEpNum = 1; ulEpNum < USBD_MAX_EP_COUNT; ulEpNum++)
         {
             pxEP = &pxUSB->EP.IN[ulEpNum];
             if (pxEP->MaxPacketSize > 0)
