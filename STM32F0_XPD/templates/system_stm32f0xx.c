@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    system_stm32f0xx.c
   * @author  Benedek Kupper
-  * @version 0.2
-  * @date    2018-01-28
+  * @version 0.3
+  * @date    2018-09-28
   * @brief   STM32 eXtensible Peripheral Drivers template
   *
   * Copyright (c) 2018 Benedek Kupper
@@ -22,10 +22,14 @@
   */
 #include <xpd_flash.h>
 #include <xpd_rcc.h>
+#include <xpd_syscfg.h>
 #include <xpd_utils.h>
 
 /** @brief Global variable used to store the actual system clock frequency [Hz] */
 uint32_t SystemCoreClock;
+
+/** @brief Interrupt vector table in startup_<device>.s */
+extern const uint32_t g_pfnVectors[];
 
 /**
  * @brief  Setup the microcontroller system.
@@ -44,6 +48,9 @@ void SystemInit(void)
 
     /* initialize XPD services */
     XPD_vInit();
+
+    /* TODO Redirect to interrupt vector table position */
+    SYSTEM_MEMORY_REMAP(FLASH);
 
     /* TODO Configure system memory options */
     FLASH_vPrefetchBuffer(ENABLE);

@@ -37,8 +37,4 @@
 /* #define HSE_VALUE_Hz 80000000
  * #define LSE_VALUE_Hz 32768 */
 
-/* TODO step 5: specify vector table location */
-/* #define VECT_TAB_SRAM
-#define VECT_TAB_OFFSET  0x0  *//* Vector Table base offset field. This value must be a multiple of 0x200. */
-
 #endif /* __XPD_CONFIG_H_ */

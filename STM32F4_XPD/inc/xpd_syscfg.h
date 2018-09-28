@@ -23,10 +23,28 @@
 #ifndef SYSCFG_REG_BIT
 
 #ifdef SYSCFG_BB
-#define SYSCFG_REG_BIT(_REG_NAME_, _BIT_NAME_) (SYSCFG_BB->_REG_NAME_._BIT_NAME_)
+#define         SYSCFG_REG_BIT(REG_NAME, BIT_NAME)          \
+    (SYSCFG_BB->REG_NAME.BIT_NAME)
 #else
-#define SYSCFG_REG_BIT(_REG_NAME_, _BIT_NAME_) (SYSCFG->_REG_NAME_.b._BIT_NAME_)
+#define         SYSCFG_REG_BIT(REG_NAME, BIT_NAME)          \
+    (SYSCFG->REG_NAME.b.BIT_NAME)
 #endif /* SYSCFG_BB */
+
+#define __MEM_RMP_FLASH         0
+#define __MEM_RMP_ROM           1
+#define __MEM_RMP_SRAM          3
+#define __MEM_RMP_FMC           2
+#define __MEM_RMP_FSMC          __MEM_RMP_FMC
+/**
+ * @brief Maps the selected memory also starting from 0 address
+ * @param MEMORY: The system memory to map
+ *          @arg FLASH  Main flash
+ *          @arg ROM    System memory
+ *          @arg SRAM   Embedded SRAM
+ *          @arg FMC    F(S)MC Bank1 (NOR/PSRAM 1 and 2)
+ */
+#define         SYSTEM_MEMORY_REMAP(MEMORY)                 \
+    (SYSCFG->MEMRMP.b.MEM_MODE = __MEM_RMP_##MEMORY)
 
 #endif /* SYSCFG_REG_BIT */
 
