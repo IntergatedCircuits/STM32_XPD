@@ -145,6 +145,8 @@ extern void     USB_vDataOutCallback    (USB_HandleType *pxUSB,
 
 /** @} */
 
+#endif /* defined(USB) || defined(USB_OTG_FS) */
+
 #ifdef __cplusplus
 }
 #endif
