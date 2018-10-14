@@ -759,7 +759,8 @@ XPD_ReturnType CAN_eFilterConfig(
         /* If the current filter is not configured, it has a yet unprocessed type */
         if (aucMatchIndexes[ucBase] == FMI_INVALID)
         {
-            uint8_t fbankIndex, fbankPos = 255;
+            uint8_t fbankIndex; /* Ignore "may be used uninitialized" warning */
+            uint8_t fbankPos = 255;
             uint8_t currentType, currentSize, type;
             union {
                 uint16_t u16[4];
@@ -873,7 +874,8 @@ XPD_ReturnType CAN_eFilterConfig(
                         ucCurrentFMI += currentSize;
 
                         /* Set the configured bank in the peripheral */
-                        CANx->sFilterRegister[fbankIndex] = FilterBank.filterReg;
+                        CANx->sFilterRegister[fbankIndex].FR1 = FilterBank.u32[0];
+                        CANx->sFilterRegister[fbankIndex].FR2 = FilterBank.u32[1];
                     }
                     /* Unused filters after the current one are set to
                      * the copies of the current to avoid receiving unwanted frames */
@@ -905,7 +907,8 @@ XPD_ReturnType CAN_eFilterConfig(
                 ucCurrentFMI += currentSize;
 
                 /* Set the configured bank in the peripheral */
-                CANx->sFilterRegister[fbankIndex] = FilterBank.filterReg;
+                CANx->sFilterRegister[fbankIndex].FR1 = FilterBank.u32[0];
+                CANx->sFilterRegister[fbankIndex].FR2 = FilterBank.u32[1];
             }
         }
     }
