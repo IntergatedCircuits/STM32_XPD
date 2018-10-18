@@ -34,6 +34,8 @@ extern "C"
 /** @defgroup USB
  * @{ */
 
+#define USBD_EP0_MAX_PACKET_SIZE  64
+
 #if   defined(USB)
 #define USBD_MAX_EP_COUNT         8 /* Theoretical maximum */
 #elif defined(USB_OTG_HS)
