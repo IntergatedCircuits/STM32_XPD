@@ -1435,9 +1435,10 @@ __weak void USB_vAllocateEPs(USB_HandleType * pxUSB)
     XPD_ReturnType eResult = XPD_OK;
     uint8_t ucEpNum;
     uint8_t ucEpCount = USB_ENDPOINT_COUNT(pxUSB);
-    uint32_t ulFifoSize = 0;
+    uint32_t ulMinFifoSizeVal = 16;
+    uint32_t ulFifoSize = ulMinFifoSizeVal * sizeof(uint32_t);
+    uint32_t ulFifoOffset;
     uint32_t ulFifoLimit = USB_TOTAL_FIFO_SIZE(pxUSB);
-    uint32_t ulMPS;
 
 #ifdef USB_OTG_HS
     if (USB_eDevSpeed(pxUSB) == USB_SPEED_FULL)
@@ -1451,46 +1452,52 @@ __weak void USB_vAllocateEPs(USB_HandleType * pxUSB)
     }
 #endif
 
-    /* Configure the global Receive FIFO as the largest requested OUT EP size */
+    /* Configure the global Receive FIFO based on the largest requested OUT EP size */
     for (ucEpNum = 0; ucEpNum < ucEpCount; ucEpNum++)
     {
         if (pxUSB->EP.OUT[ucEpNum].MaxPacketSize > ulFifoSize)
         {
-            /* Fifo sizes should be word aligned */
-            ulFifoSize = (pxUSB->EP.OUT[ucEpNum].MaxPacketSize + 3) & (~3);
+            ulFifoSize = pxUSB->EP.OUT[ucEpNum].MaxPacketSize;
         }
     }
 
-    /* Global RX FIFO */
-    pxUSB->Inst->GRXFSIZ = ulFifoSize;
+    /* FIFO sizes are in words */
+    ulFifoSize = (ulFifoSize + 3) >> 2;
 
-    /* Fifo sizes should be word aligned */
-    ulMPS = (pxUSB->EP.IN[0].MaxPacketSize + 3) & (~3);
+    /* Global RX FIFO according to RM0431: */
+    ulFifoOffset = 10           /* to receive SETUP packets on the control endpoint */
+            + (ulFifoSize + 1)  /* each packet gets status info as well */
+            + (ucEpCount * 2)   /* transfer complete status is also stored with the last packet */
+            + 1;                /* for Global OUT NAK */
+    pxUSB->Inst->GRXFSIZ = ulFifoOffset;
 
     /* EP0 TX FIFO */
-    pxUSB->Inst->DIEPTXF0_HNPTXFSIZ.w =
-            (ulMPS      << USB_OTG_DIEPTXF_INEPTXFD_Pos) |
-            (ulFifoSize << USB_OTG_DIEPTXF_INEPTXSA_Pos);
+    ulFifoSize = (pxUSB->EP.IN[0].MaxPacketSize + 3) >> 2;
+    if (ulFifoSize < ulMinFifoSizeVal)
+    {   ulFifoSize = ulMinFifoSizeVal; }
 
-    /* Increase offset with the FIFO size */
-    ulFifoSize += pxUSB->EP.IN[0].MaxPacketSize;
+    pxUSB->Inst->DIEPTXF0_HNPTXFSIZ.w =
+            (ulFifoSize   << USB_OTG_DIEPTXF_INEPTXFD_Pos) |
+            (ulFifoOffset << USB_OTG_DIEPTXF_INEPTXSA_Pos);
 
     for (ucEpNum = 1; ucEpNum < ucEpCount; ucEpNum++)
     {
-        /* Fifo sizes should be word aligned */
-        ulMPS = (pxUSB->EP.IN[ucEpNum].MaxPacketSize + 3) & (~3);
+        /* Increase offset with the FIFO size */
+        ulFifoOffset += ulFifoSize;
+
+        /* FIFO sizes are in words */
+        ulFifoSize = (pxUSB->EP.IN[ucEpNum].MaxPacketSize + 3) >> 2;
+        if (ulFifoSize < ulMinFifoSizeVal)
+        {   ulFifoSize = ulMinFifoSizeVal; }
 
         /* EPx TX FIFOs */
         pxUSB->Inst->DIEPTXF[ucEpNum - 1].w =
-                (ulMPS      << USB_OTG_DIEPTXF_INEPTXFD_Pos) |
-                (ulFifoSize << USB_OTG_DIEPTXF_INEPTXSA_Pos);
-
-        /* Increase offset with the current FIFO size */
-        ulFifoSize += pxUSB->EP.IN[ucEpNum].MaxPacketSize;
+                (ulFifoSize   << USB_OTG_DIEPTXF_INEPTXFD_Pos) |
+                (ulFifoOffset << USB_OTG_DIEPTXF_INEPTXSA_Pos);
     }
 
     /* Total FIFO use shouldn't exceed available size */
-    if (ulFifoLimit < ulFifoSize)
+    if (ulFifoLimit < (ulFifoOffset + ulFifoSize))
     {
         eResult = XPD_ERROR;
     }
