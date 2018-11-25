@@ -167,6 +167,7 @@ void            USB_vStart_IT           (USB_HandleType * pxUSB);
 void            USB_vStop_IT            (USB_HandleType * pxUSB);
 
 void            USB_vSetAddress         (USB_HandleType * pxUSB, uint8_t ucAddress);
+void            USB_vCtrlEpOpen         (USB_HandleType * pxUSB);
 
 void            USB_vEpOpen             (USB_HandleType * pxUSB, uint8_t ucEpAddress,
                                          USB_EndPointType eType, uint16_t usMaxPacketSize);

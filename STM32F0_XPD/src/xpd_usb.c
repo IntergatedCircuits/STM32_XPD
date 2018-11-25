@@ -392,6 +392,19 @@ void USB_vSetAddress(USB_HandleType * pxUSB, uint8_t ucAddress)
 }
 
 /**
+ * @brief Sets endpoint buffers and opens the default control endpoint.
+ * @param pxUSB: pointer to the USB handle structure
+ */
+void USB_vCtrlEpOpen(USB_HandleType * pxUSB)
+{
+    /* Allocate packet memory for all used endpoints based on MPS */
+    USB_vAllocateEPs(pxUSB);
+
+    /* Open EP0 */
+    USB_prvCtrlEpOpen(pxUSB);
+}
+
+/**
  * @brief Opens an endpoint.
  * @param pxUSB: pointer to the USB handle structure
  * @param ucEpAddress: endpoint address
@@ -750,19 +763,15 @@ void USB_vIRQHandler(USB_HandleType * pxUSB)
     {
         USB_FLAG_CLEAR(pxUSB, RESET);
 
+        /* Clear any ongoing Remote Wakeup signaling */
+        CLEAR_BIT(USB->CNTR.w, USB_CNTR_RESUME);
         pxUSB->LinkState = USB_LINK_STATE_ACTIVE;
-
-        /* Allocate endpoint memory */
-        USB_vAllocateEPs(pxUSB);
-
-        /* Open EP0 */
-        USB_prvCtrlEpOpen(pxUSB);
-
-        /* Notify device handler */
-        USB_vResetCallback(pxUSB, USB_SPEED_FULL);
 
         /* Set default address (0) */
         USB_vSetAddress(pxUSB, 0);
+
+        /* Notify device handler */
+        USB_vResetCallback(pxUSB, USB_SPEED_FULL);
     }
 
     /* Handle wakeup signal */
@@ -1000,7 +1009,9 @@ __weak void USB_vAllocateEPs(USB_HandleType * pxUSB)
 #else
         /* TODO: usPmaTail shall not exceed 512 */
 #endif
-        eResult = XPD_OK;
+        {
+            eResult = XPD_OK;
+        }
     }
     else
     {
