@@ -151,6 +151,19 @@ __STATIC_INLINE void USB_prvFlushRxFifo(USB_HandleType * pxUSB)
     pxUSB->Inst->GRSTCTL.w = USB_OTG_GRSTCTL_RXFFLSH;
 }
 
+/* Clears all endpoint interrupt request flags */
+static void USB_prvClearEpInts(USB_HandleType * pxUSB)
+{
+    uint8_t ucEpNum;
+    uint8_t ucEpCount = USB_ENDPOINT_COUNT(pxUSB);
+
+    for (ucEpNum = 0; ucEpNum < ucEpCount; ucEpNum++)
+    {
+        pxUSB->Inst->IEP[ucEpNum].DIEPINT.w = 0xFF;
+        pxUSB->Inst->OEP[ucEpNum].DOEPINT.w = 0xFF;
+    }
+}
+
 /* Push packet data to IN FIFO */
 static void USB_prvWriteFifo(USB_HandleType * pxUSB,
         uint8_t ucFIFOx, uint8_t * pucData, uint16_t usLength)
@@ -229,6 +242,7 @@ static void USB_prvEpSend(USB_HandleType * pxUSB, uint8_t ucEpNum)
 {
     USB_EndPointHandleType * pxEP = &pxUSB->EP.IN[ucEpNum];
     USB_OTG_GenEndpointType * pxDEP = USB_IEPR(pxUSB, ucEpNum);
+    uint16_t usTransferSize = pxEP->Transfer.Progress;
 
     if (pxEP->Transfer.Progress == 0)
     {
@@ -239,7 +253,7 @@ static void USB_prvEpSend(USB_HandleType * pxUSB, uint8_t ucEpNum)
     else if ((ucEpNum == 0) && (pxEP->Transfer.Progress > pxEP->MaxPacketSize))
     {
         pxDEP->DxEPTSIZ.b.PKTCNT = 1;
-        pxDEP->DxEPTSIZ.b.XFRSIZ = pxEP->MaxPacketSize;
+        pxDEP->DxEPTSIZ.b.XFRSIZ = usTransferSize = pxEP->MaxPacketSize;
     }
     else
     {
@@ -271,6 +285,8 @@ static void USB_prvEpSend(USB_HandleType * pxUSB, uint8_t ucEpNum)
     {
         /* Set DMA start address */
         pxDEP->DxEPDMA = (uint32_t)pxEP->Transfer.Data;
+        pxEP->Transfer.Data += usTransferSize;
+        pxEP->Transfer.Progress -= usTransferSize;
     }
 #endif
     /* EP enable */
@@ -301,7 +317,7 @@ static void USB_prvEpReceive(USB_HandleType * pxUSB, uint8_t ucEpNum)
         uint16_t usPktCnt = (pxEP->Transfer.Progress + pxEP->MaxPacketSize - 1)
                 / pxEP->MaxPacketSize;
         pxDEP->DxEPTSIZ.b.PKTCNT = usPktCnt;
-        pxDEP->DxEPTSIZ.b.XFRSIZ = pxEP->MaxPacketSize * usPktCnt;
+        pxDEP->DxEPTSIZ.b.XFRSIZ = pxEP->Transfer.Progress;
     }
 
 #if (USB_OTG_DMA_SUPPORT != 0)
@@ -350,11 +366,148 @@ static void USB_prvPrepareSetup(USB_HandleType * pxUSB)
 #endif
 }
 
+/* Handle events of a given IN endpoint */
+static void USB_prvInEpEventHandler(USB_HandleType * pxUSB, uint8_t ucEpNum)
+{
+    USB_OTG_GenEndpointType * pxDEP = USB_IEPR(pxUSB, ucEpNum);
+
+    /* TXFE enable bit is extracted from common register */
+    uint32_t ulEpTXFE = ((pxUSB->Inst->DIEPEMPMSK >> ucEpNum)
+            << USB_OTG_DIEPINT_TXFE_Pos) & USB_OTG_DIEPINT_TXFE;
+
+    uint32_t ulEpFlags = pxDEP->DxEPINT.w &
+            (pxUSB->Inst->DIEPMSK.w | ulEpTXFE);
+
+    /* Clear irrelevant flags */
+    pxDEP->DxEPINT.w = USB_OTG_DIEPINT_TOC | USB_OTG_DIEPINT_ITTXFE
+            | USB_OTG_DIEPINT_INEPNE | USB_OTG_DIEPINT_EPDISD;
+
+    /* Fill empty Tx FIFO with available data */
+    if ((ulEpFlags & USB_OTG_DIEPINT_TXFE) != 0)
+    {
+        USB_prvTransmitPacket(pxUSB, ucEpNum);
+    }
+    /* Transfer completed */
+    if ((ulEpFlags & USB_OTG_DIEPINT_XFRC) != 0)
+    {
+        USB_EndPointHandleType * pxEP = &pxUSB->EP.IN[ucEpNum];
+
+        /* Clear IT flag */
+        pxDEP->DxEPINT.w = USB_OTG_DIEPINT_XFRC;
+
+        if (ucEpNum > 0)
+        {
+            /* Transmission complete */
+            USB_vDataInCallback(pxUSB, pxEP);
+        }
+        else /* EP0 packetization requires software handling */
+        {
+            if (pxEP->Transfer.Progress == 0)
+            {
+                /* Transmission complete */
+                USB_vDataInCallback(pxUSB, pxEP);
+
+                if ((USB_DMA_CONFIG(pxUSB) != 0) &&
+                    (pxEP->Transfer.Length == 0))
+                {
+                    /* this is ZLP, so prepare EP0 for next setup */
+                    USB_prvPrepareSetup(pxUSB);
+                }
+            }
+            else
+            {
+                /* Transfer next packet */
+                USB_prvEpSend(pxUSB, 0);
+            }
+        }
+    }
+}
+
+/* Handle events of a given OUT endpoint */
+static void USB_prvOutEpEventHandler(USB_HandleType * pxUSB, uint8_t ucEpNum)
+{
+    USB_OTG_GenEndpointType * pxDEP = USB_OEPR(pxUSB, ucEpNum);
+    uint32_t ulEpFlags = pxDEP->DxEPINT.w & pxUSB->Inst->DOEPMSK.w;
+
+    /* Clear irrelevant flags */
+    pxDEP->DxEPINT.w =
+#ifdef USB_OTG_DOEPINT_OTEPSPR
+            USB_OTG_DOEPINT_OTEPSPR |
+#endif
+            USB_OTG_DOEPINT_OTEPDIS;
+
+    /* Setup stage complete */
+    if ((ulEpFlags & USB_OTG_DOEPINT_STUP) != 0)
+    {
+        /* Clear IT flag */
+        pxDEP->DxEPINT.w = USB_OTG_DOEPINT_STUP;
+
+        /* Process SETUP Packet */
+        USB_vSetupCallback(pxUSB);
+    }
+    /* Transfer completed */
+    else if ((ulEpFlags & USB_OTG_DOEPINT_XFRC) != 0)
+    {
+        USB_EndPointHandleType * pxEP = &pxUSB->EP.OUT[ucEpNum];
+
+        /* Clear IT flag */
+        pxDEP->DxEPINT.w = USB_OTG_DOEPINT_XFRC;
+
+        if (ucEpNum > 0)
+        {
+            if (USB_DMA_CONFIG(pxUSB) != 0)
+            {
+                /* XFRSIZ holds the unfilled byte count
+                 * after the transfer is complete */
+                uint16_t usTransferSize =
+                        pxEP->Transfer.Progress - pxDEP->DxEPTSIZ.b.XFRSIZ;
+                pxEP->Transfer.Length = usTransferSize;
+                pxEP->Transfer.Data += usTransferSize;
+            }
+
+            /* Reception finished */
+            USB_vDataOutCallback(pxUSB, pxEP);
+        }
+        else /* EP0 packetization requires software handling */
+        {
+            if (USB_DMA_CONFIG(pxUSB) != 0)
+            {
+                /* XFRSIZ holds the unfilled byte count
+                 * after the transfer is complete;
+                 * EP0 transfers are limited to MPS */
+                uint16_t usTransferSize =
+                        pxEP->MaxPacketSize - pxDEP->DxEPTSIZ.b.XFRSIZ;
+                pxEP->Transfer.Length += usTransferSize;
+                pxEP->Transfer.Data += usTransferSize;
+
+                if (pxEP->Transfer.Length == 0)
+                {
+                    /* this is ZLP, so prepare EP0 for next setup */
+                    USB_prvPrepareSetup(pxUSB);
+                }
+            }
+
+            if (pxEP->Transfer.Progress == pxEP->Transfer.Length)
+            {
+                /* Reception finished */
+                USB_vDataOutCallback(pxUSB, pxEP);
+            }
+            else
+            {
+                /* Transfer next packet */
+                USB_prvEpReceive(pxUSB, 0);
+            }
+        }
+    }
+}
+
 /* Opens EP0 bidirectional dedicated control endpoint. */
 static void USB_prvCtrlEpOpen(USB_HandleType * pxUSB)
 {
-    /* Activate Endpoint */
-    SET_BIT(pxUSB->Inst->DAINTMSK.w, 0x10001);
+    /* Activate Endpoint 0 interrupts */
+    SET_BIT(pxUSB->Inst->DAINTMSK.w,
+            (1 << (0 + USB_OTG_DAINTMSK_IEPM_Pos)) |
+            (1 << (0 + USB_OTG_DAINTMSK_OEPM_Pos)));
 
     /* Check if currently inactive */
     if (pxUSB->Inst->IEP[0].DIEPCTL.b.USBAEP == 0)
@@ -373,6 +526,9 @@ static void USB_prvCtrlEpOpen(USB_HandleType * pxUSB)
         pxUSB->Inst->OEP[0].DOEPCTL.b.SD0PID_SEVNFRM = 1;
         pxUSB->Inst->OEP[0].DOEPCTL.b.USBAEP = 1;
     }
+
+    /* prepare receive SETUP packet */
+    USB_prvPrepareSetup(pxUSB);
 }
 
 #if defined(USB_HS_PHYC) && defined(HSE_VALUE_Hz)
@@ -551,7 +707,8 @@ void USB_vDevInit(USB_HandleType * pxUSB, const USB_InitType * pxConfig)
 #endif
 
     {
-        uint8_t i;
+        uint8_t ucEpNum;
+        uint8_t ucEpCount = USB_ENDPOINT_COUNT(pxUSB);
 
         /* Set Device Mode */
         MODIFY_REG(pxUSB->Inst->GUSBCFG.w,
@@ -596,36 +753,10 @@ void USB_vDevInit(USB_HandleType * pxUSB, const USB_InitType * pxConfig)
         USB_prvFlushRxFifo(pxUSB);
 
         /* Init endpoints */
-        for (i = USB_ENDPOINT_COUNT(pxUSB); i > 0; i--)
+        for (ucEpNum = 0; ucEpNum < ucEpCount; ucEpNum++)
         {
-            /* Tx FIFO initialization */
-            pxUSB->Inst->DIEPTXF[i].w = 0;
-
-            /* input endpoints */
-            if (pxUSB->Inst->IEP[i].DIEPCTL.b.EPENA != 0)
-            {
-                pxUSB->Inst->IEP[i].DIEPCTL.w = USB_OTG_DIEPCTL_EPDIS | USB_OTG_DIEPCTL_SNAK;
-            }
-            else
-            {
-                pxUSB->Inst->IEP[i].DIEPCTL.w = 0;
-            }
-
-            pxUSB->Inst->IEP[i].DIEPTSIZ.w = 0;
-            pxUSB->Inst->IEP[i].DIEPINT.w  = 0xFF;
-
-            /* output endpoints */
-            if (pxUSB->Inst->OEP[i].DOEPCTL.b.EPENA != 0)
-            {
-                pxUSB->Inst->OEP[i].DOEPCTL.w = (USB_OTG_DOEPCTL_EPDIS | USB_OTG_DOEPCTL_SNAK);
-            }
-            else
-            {
-                pxUSB->Inst->OEP[i].DOEPCTL.w = 0;
-            }
-
-            pxUSB->Inst->OEP[i].DOEPTSIZ.w = 0;
-            pxUSB->Inst->OEP[i].DOEPINT.w  = 0xFF;
+            USB_vEpClose(pxUSB, ucEpNum);
+            USB_vEpClose(pxUSB, 0x80 | ucEpNum);
         }
         USB_REG_BIT(pxUSB,DIEPMSK,TXFURM) = 0;
 
@@ -689,12 +820,9 @@ void USB_vDevStart_IT(USB_HandleType * pxUSB)
 {
     uint32_t ulGINTMSK;
 
-    /* Clear any pending interrupts */
-    pxUSB->Inst->GINTSTS.w  = 0xBFFFFFFF;
-
-    pxUSB->Inst->DIEPMSK.w  = 0;
-    pxUSB->Inst->DOEPMSK.w  = 0;
-    pxUSB->Inst->DAINTMSK.w = 0;
+    /* Clear any pending interrupts except SRQ */
+    pxUSB->Inst->GINTSTS.w  = ~USB_OTG_GINTSTS_SRQINT;
+    USB_prvClearEpInts(pxUSB);
 
     /* Enable interrupts matching to the Device mode ONLY */
     ulGINTMSK = USB_OTG_GINTMSK_USBSUSPM | USB_OTG_GINTMSK_USBRST |
@@ -726,6 +854,7 @@ void USB_vDevStart_IT(USB_HandleType * pxUSB)
             | USB_OTG_DOEPMSK_OTEPSPRM
 #endif
             | USB_OTG_DOEPMSK_EPDM;
+    pxUSB->Inst->DAINTMSK.w = 0;
 
     USB_prvConnectCtrl(pxUSB, ENABLE);
 
@@ -739,19 +868,12 @@ void USB_vDevStart_IT(USB_HandleType * pxUSB)
  */
 void USB_vDevStop_IT(USB_HandleType * pxUSB)
 {
-    uint8_t i;
-
     /* Disable global interrupts */
     USB_REG_BIT(pxUSB,GAHBCFG,GINT) = 0;
 
-    /* Clear Pending interrupts */
-    pxUSB->Inst->GINTSTS.w  = 0xBFFFFFFF;
-
-    for (i = USB_ENDPOINT_COUNT(pxUSB); i > 0; i--)
-    {
-        pxUSB->Inst->IEP[i].DIEPINT.w = 0xFF;
-        pxUSB->Inst->OEP[i].DOEPINT.w = 0xFF;
-    }
+    /* Clear any pending interrupts except SRQ */
+    pxUSB->Inst->GINTSTS.w  = ~USB_OTG_GINTSTS_SRQINT;
+    USB_prvClearEpInts(pxUSB);
 
     /* Clear interrupt masks */
     CLEAR_BIT(pxUSB->Inst->GINTMSK.w,
@@ -788,6 +910,19 @@ void USB_vSetAddress(USB_HandleType * pxUSB, uint8_t ucAddress)
 }
 
 /**
+ * @brief Sets endpoint buffers and opens the default control endpoint.
+ * @param pxUSB: pointer to the USB handle structure
+ */
+void USB_vCtrlEpOpen(USB_HandleType * pxUSB)
+{
+    /* Allocate FIFO space for all used endpoints based on MPS */
+    USB_vAllocateEPs(pxUSB);
+
+    /* Open EP0 */
+    USB_prvCtrlEpOpen(pxUSB);
+}
+
+/**
  * @brief Opens an endpoint.
  * @param pxUSB: pointer to the USB handle structure
  * @param ucEpAddress: endpoint address
@@ -810,11 +945,13 @@ void USB_vEpOpen(
     /* Activate Endpoint interrupts */
     if (ucEpAddress > 0x7F)
     {
-        SET_BIT(pxUSB->Inst->DAINTMSK.w, 1 << ucEpNum);
+        SET_BIT(pxUSB->Inst->DAINTMSK.w,
+                1 << (ucEpNum + USB_OTG_DAINTMSK_IEPM_Pos));
     }
     else
     {
-        SET_BIT(pxUSB->Inst->DAINTMSK.w, 1 << (ucEpNum + 16));
+        SET_BIT(pxUSB->Inst->DAINTMSK.w,
+                1 << (ucEpNum + USB_OTG_DAINTMSK_OEPM_Pos));
     }
 
     /* Check if currently inactive */
@@ -845,18 +982,32 @@ void USB_vEpClose(USB_HandleType * pxUSB, uint8_t ucEpAddress)
     if (ucEpAddress > 0x7F)
     {
         /* Disable endpoint interrupts */
-        CLEAR_BIT(pxUSB->Inst->DEACHMSK  , 1 << ucEpNum);
-        CLEAR_BIT(pxUSB->Inst->DAINTMSK.w, 1 << ucEpNum);
+        CLEAR_BIT(pxUSB->Inst->DEACHMSK,
+                1 << (ucEpNum + USB_OTG_DEACHINTMSK_IEP1INTM_Pos - 1));
+        CLEAR_BIT(pxUSB->Inst->DAINTMSK.w,
+                1 << (ucEpNum + USB_OTG_DAINTMSK_IEPM_Pos));
     }
     else
     {
         /* Disable endpoint interrupts */
-        CLEAR_BIT(pxUSB->Inst->DEACHMSK  , 1 << (ucEpNum + 16));
-        CLEAR_BIT(pxUSB->Inst->DAINTMSK.w, 1 << (ucEpNum + 16));
+        CLEAR_BIT(pxUSB->Inst->DEACHMSK,
+                1 << (ucEpNum + USB_OTG_DEACHINTMSK_OEP1INTM_Pos - 1));
+        CLEAR_BIT(pxUSB->Inst->DAINTMSK.w,
+                1 << (ucEpNum + USB_OTG_DAINTMSK_OEPM_Pos));
     }
 
-    /* Clear EP enable bit */
-    pxDEP->DxEPCTL.b.USBAEP = 0;
+    /* If a transfer is ongoing, interrupt with NACK */
+    if (pxDEP->DxEPCTL.b.EPENA != 0)
+    {
+        pxDEP->DxEPCTL.w = USB_OTG_DOEPCTL_EPDIS | USB_OTG_DOEPCTL_SNAK;
+    }
+    else
+    {
+        pxDEP->DxEPCTL.w = 0;
+    }
+
+    pxDEP->DxEPTSIZ.w = 0;
+    pxDEP->DxEPINT.w  = 0xFF;
 }
 
 /**
@@ -974,22 +1125,31 @@ void USB_vDevIRQHandler(USB_HandleType * pxUSB)
 
     if (ulGINT != 0)
     {
+        union {
+            struct {
+                uint16_t IEPINT;
+                uint16_t OEPINT;
+            }b;
+            uint32_t w;
+        }xDAINT = { .w = pxUSB->Inst->DAINT.w & pxUSB->Inst->DAINTMSK.w };
+
         /* Rx FIFO level reached */
         if ((ulGINT & USB_OTG_GINTSTS_RXFLVL) != 0)
         {
-            uint32_t ulGRXSTSP = pxUSB->Inst->GRXSTSP.w;
-            uint32_t ulDataCount = (ulGRXSTSP & USB_OTG_GRXSTSP_BCNT_Msk)
-                                             >> USB_OTG_GRXSTSP_BCNT_Pos;
-            uint8_t  ucEpNum = ulGRXSTSP & USB_OTG_GRXSTSP_EPNUM;
+            uint32_t ulGRXSTSP  = pxUSB->Inst->GRXSTSP.w;
+            uint16_t usDataCount= (ulGRXSTSP & USB_OTG_GRXSTSP_BCNT_Msk)
+                                            >> USB_OTG_GRXSTSP_BCNT_Pos;
+            uint8_t  ucEpNum    = (ulGRXSTSP & USB_OTG_GRXSTSP_EPNUM_Msk)
+                                            >> USB_OTG_GRXSTSP_EPNUM_Pos;
             USB_EndPointHandleType * pxEP = &pxUSB->EP.OUT[ucEpNum];
 
             switch (ulGRXSTSP & USB_OTG_GRXSTSP_PKTSTS_Msk)
             {
                 case STS_DATA_UPDT:
                     /* Data packet received */
-                    USB_prvReadFifo(pxUSB, pxEP->Transfer.Data, ulDataCount);
-                    pxEP->Transfer.Length += ulDataCount;
-                    pxEP->Transfer.Data += ulDataCount;
+                    USB_prvReadFifo(pxUSB, pxEP->Transfer.Data, usDataCount);
+                    pxEP->Transfer.Length += usDataCount;
+                    pxEP->Transfer.Data += usDataCount;
                     break;
 
                 case STS_SETUP_UPDT:
@@ -1006,70 +1166,14 @@ void USB_vDevIRQHandler(USB_HandleType * pxUSB)
         /* OUT endpoint interrupts */
         if ((ulGINT & USB_OTG_GINTSTS_OEPINT) != 0)
         {
-            /* Read in the device interrupt bits */
-            uint32_t ulOEPs = (pxUSB->Inst->DAINT.w & pxUSB->Inst->DAINTMSK.w) >> 16;
             uint8_t ucEpNum;
 
             /* Handle individual endpoint interrupts */
-            for (ucEpNum = 0; ulOEPs != 0; ucEpNum++, ulOEPs >>= 1)
+            for (ucEpNum = 0; xDAINT.b.OEPINT != 0; ucEpNum++, xDAINT.b.OEPINT >>= 1)
             {
-                if ((ulOEPs & 1) != 0)
+                if ((xDAINT.b.OEPINT & 1) != 0)
                 {
-                    USB_OTG_GenEndpointType * pxDEP = USB_OEPR(pxUSB, ucEpNum);
-
-                    uint32_t ulEpFlags = pxDEP->DxEPINT.w & pxUSB->Inst->DOEPMSK.w;
-
-                    /* Setup stage complete */
-                    if ((ulEpFlags & USB_OTG_DOEPINT_STUP) != 0)
-                    {
-                        /* Clear IT flag */
-                        pxDEP->DxEPINT.w = USB_OTG_DOEPINT_STUP;
-
-                        /* Process SETUP Packet */
-                        USB_vSetupCallback(pxUSB);
-                    }
-                    /* Transfer completed */
-                    else if ((ulEpFlags & USB_OTG_DOEPINT_XFRC) != 0)
-                    {
-                        USB_EndPointHandleType * pxEP = &pxUSB->EP.OUT[ucEpNum];
-
-                        /* Clear IT flag */
-                        pxDEP->DxEPINT.w = USB_OTG_DOEPINT_XFRC;
-
-                        if (USB_DMA_CONFIG(pxUSB) != 0)
-                        {
-                            pxEP->Transfer.Length = pxEP->MaxPacketSize
-                                                  - pxDEP->DxEPTSIZ.b.XFRSIZ;
-                            pxEP->Transfer.Data  += pxEP->MaxPacketSize;
-                        }
-
-                        /* EP0 packetization requires software handling */
-                        if ((ucEpNum == 0) &&
-                            (pxEP->Transfer.Progress > pxEP->Transfer.Length))
-                        {
-                            USB_prvEpReceive(pxUSB, 0);
-                        }
-                        else
-                        {
-                            /* Reception finished */
-                            USB_vDataOutCallback(pxUSB, pxEP);
-
-                            if ((USB_DMA_CONFIG(pxUSB) != 0) &&
-                                (ucEpNum == 0) &&
-                                (pxEP->Transfer.Length == 0))
-                            {
-                                /* this is ZLP, so prepare EP0 for next setup */
-                                USB_prvPrepareSetup(pxUSB);
-                            }
-                        }
-                    }
-
-                    /* Clear irrelevant flags */
-                    pxDEP->DxEPINT.w =
-#ifdef USB_OTG_DOEPINT_OTEPSPR
-                            USB_OTG_DOEPINT_OTEPSPR |
-#endif
-                            USB_OTG_DOEPINT_OTEPDIS;
+                    USB_prvOutEpEventHandler(pxUSB, ucEpNum);
                 }
             }
         }
@@ -1077,67 +1181,14 @@ void USB_vDevIRQHandler(USB_HandleType * pxUSB)
         /* IN endpoint interrupts */
         if ((ulGINT & USB_OTG_GINTSTS_IEPINT) != 0)
         {
-            /* Read in the device interrupt bits */
-            uint32_t ulIEPs = (pxUSB->Inst->DAINT.w & pxUSB->Inst->DAINTMSK.w) & 0xFFFF;
             uint8_t ucEpNum;
 
             /* Handle individual endpoint interrupts */
-            for (ucEpNum = 0; ulIEPs != 0; ucEpNum++, ulIEPs >>= 1)
+            for (ucEpNum = 0; xDAINT.b.IEPINT != 0; ucEpNum++, xDAINT.b.IEPINT >>= 1)
             {
-                if ((ulIEPs & 1) != 0)
+                if ((xDAINT.b.IEPINT & 1) != 0)
                 {
-                    USB_OTG_GenEndpointType * pxDEP = USB_IEPR(pxUSB, ucEpNum);
-
-                    /* TXFE enable bit is extracted from common register */
-                    uint32_t ulEpTXFE = ((pxUSB->Inst->DIEPEMPMSK >> ucEpNum)
-                            << USB_OTG_DIEPINT_TXFE_Pos) & USB_OTG_DIEPINT_TXFE;
-
-                    uint32_t ulEpFlags = pxDEP->DxEPINT.w &
-                            (pxUSB->Inst->DIEPMSK.w | ulEpTXFE);
-
-                    /* Fill empty Tx FIFO with available data */
-                    if ((ulEpFlags & USB_OTG_DIEPINT_TXFE) != 0)
-                    {
-                        USB_prvTransmitPacket(pxUSB, ucEpNum);
-                    }
-                    /* Transfer completed */
-                    if ((ulEpFlags & USB_OTG_DIEPINT_XFRC) != 0)
-                    {
-                        USB_EndPointHandleType * pxEP = &pxUSB->EP.IN[ucEpNum];
-
-                        /* Clear IT flag */
-                        pxDEP->DxEPINT.w = USB_OTG_DIEPINT_XFRC;
-
-                        if (USB_DMA_CONFIG(pxUSB) != 0)
-                        {
-                            pxEP->Transfer.Data     += pxEP->MaxPacketSize;
-                            pxEP->Transfer.Progress -= pxEP->MaxPacketSize;
-                        }
-
-                        /* EP0 packetization requires software handling */
-                        if ((ucEpNum == 0) &&
-                            (pxEP->Transfer.Progress > 0))
-                        {
-                            USB_prvEpSend(pxUSB, 0);
-                        }
-                        else
-                        {
-                            /* Transmission complete */
-                            USB_vDataInCallback(pxUSB, pxEP);
-
-                            if ((USB_DMA_CONFIG(pxUSB) != 0) &&
-                                (ucEpNum == 0) &&
-                                (pxEP->Transfer.Length == 0))
-                            {
-                                /* this is ZLP, so prepare EP0 for next setup */
-                                USB_prvPrepareSetup(pxUSB);
-                            }
-                        }
-                    }
-
-                    /* Clear irrelevant flags */
-                    pxDEP->DxEPINT.w = USB_OTG_DIEPINT_TOC | USB_OTG_DIEPINT_ITTXFE
-                            | USB_OTG_DIEPINT_INEPNE | USB_OTG_DIEPINT_EPDISD;
+                    USB_prvInEpEventHandler(pxUSB, ucEpNum);
                 }
             }
         }
@@ -1145,8 +1196,6 @@ void USB_vDevIRQHandler(USB_HandleType * pxUSB)
         /* Handle Reset Interrupt */
         if ((ulGINT & USB_OTG_GINTSTS_USBRST) != 0)
         {
-            uint8_t i;
-
             /* Clear IT flag */
             USB_FLAG_CLEAR(pxUSB, USBRST);
 
@@ -1157,11 +1206,7 @@ void USB_vDevIRQHandler(USB_HandleType * pxUSB)
             USB_prvFlushTxFifo(pxUSB, 0);
 
             /* Clear EP interrupt flags */
-            for (i = USB_ENDPOINT_COUNT(pxUSB); i > 0; i--)
-            {
-                pxUSB->Inst->IEP[i].DIEPINT.w = 0xFF;
-                pxUSB->Inst->OEP[i].DOEPINT.w = 0xFF;
-            }
+            USB_prvClearEpInts(pxUSB);
 
             /* Set default address (0) */
             USB_vSetAddress(pxUSB, 0);
@@ -1202,18 +1247,6 @@ void USB_vDevIRQHandler(USB_HandleType * pxUSB)
 
             /* Notify device handler */
             USB_vResetCallback(pxUSB, eSpeed);
-
-            /* Allocate endpoint FIFO */
-            USB_vAllocateEPs(pxUSB);
-
-            /* Open EP0 */
-            USB_prvCtrlEpOpen(pxUSB);
-
-            /* prepare EP0 to receive SETUP packet */
-            USB_prvPrepareSetup(pxUSB);
-
-            /* Enable EP0 interrupts */
-            pxUSB->Inst->DAINTMSK.w |= 0x10001;
         }
 
         /* Handle Resume Interrupt */
@@ -1406,25 +1439,6 @@ USB_SpeedType USB_eDevSpeed(USB_HandleType * pxUSB)
     return eSpeed;
 }
 
-#ifdef USB_OTG_HS
-/* Limit the preconfigured MaxPacketSize of endpoints
- * according to the FS limit of their type */
-static void USB_prvLimitEpMPS_FS(USB_EndPointHandleType * pxEP)
-{
-    switch (pxEP->Type)
-    {
-        case USB_EP_TYPE_ISOCHRONOUS:
-            if (pxEP->MaxPacketSize > USB_EP_ISOC_FS_MPS)
-            {   pxEP->MaxPacketSize = USB_EP_ISOC_FS_MPS; }
-            break;
-        default: /* Other types have equal FS MPS limits */
-            if (pxEP->MaxPacketSize > USB_EP_CTRL_FS_MPS)
-            {   pxEP->MaxPacketSize = USB_EP_CTRL_FS_MPS; }
-            break;
-    }
-}
-#endif
-
 /**
  * @brief Configure peripheral FIFO allocation for endpoints
  *        after device initialization and before starting the USB operation.
@@ -1439,18 +1453,6 @@ __weak void USB_vAllocateEPs(USB_HandleType * pxUSB)
     uint32_t ulFifoSize = ulMinFifoSizeVal * sizeof(uint32_t);
     uint32_t ulFifoOffset;
     uint32_t ulFifoLimit = USB_TOTAL_FIFO_SIZE(pxUSB);
-
-#ifdef USB_OTG_HS
-    if (USB_eDevSpeed(pxUSB) == USB_SPEED_FULL)
-    {
-        /* Full-Speed endpoint sizes should be limited first */
-        for (ucEpNum = 0; ucEpNum < ucEpCount; ucEpNum++)
-        {
-            USB_prvLimitEpMPS_FS(&pxUSB->EP.IN [ucEpNum]);
-            USB_prvLimitEpMPS_FS(&pxUSB->EP.OUT[ucEpNum]);
-        }
-    }
-#endif
 
     /* Configure the global Receive FIFO based on the largest requested OUT EP size */
     for (ucEpNum = 0; ucEpNum < ucEpCount; ucEpNum++)
@@ -1502,7 +1504,7 @@ __weak void USB_vAllocateEPs(USB_HandleType * pxUSB)
         eResult = XPD_ERROR;
     }
 
-    (void)eResult;
+    (void) eResult;
 }
 
 /** @} */
