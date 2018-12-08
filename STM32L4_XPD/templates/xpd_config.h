@@ -27,23 +27,14 @@
 #include <stm32l476xx.h>
 
 /* TODO step 2: enable desired used XPD modules error handling */
-#define __XPD_ADC_ERROR_DETECT
-#define __XPD_CAN_ERROR_DETECT
-#define __XPD_DMA_ERROR_DETECT
-#define __XPD_SPI_ERROR_DETECT
-#define __XPD_TIM_ERROR_DETECT
-#define __XPD_USART_ERROR_DETECT
+/* #define __XPD_DMA_ERROR_DETECT */
 
 /* TODO step 3: specify power supplies */
-#define VDD_VALUE_mV                   3300 /* Value of VDD in mV */
-#define VDDA_VALUE_mV                  3300 /* Value of VDD Analog in mV */
+#define VDD_VALUE_mV                   3000 /* Value of VDD in mV */
+#define VDDA_VALUE_mV                  3000 /* Value of VDD Analog in mV */
 
 /* TODO step 4: specify oscillator parameters */
-#define HSE_VALUE_Hz 80000000
-#define LSE_VALUE_Hz 32768
-
-/* TODO step 5: specify vector table location */
-/* #define VECT_TAB_SRAM
-#define VECT_TAB_OFFSET  0x0  *//* Vector Table base offset field. This value must be a multiple of 0x200. */
+/* #define HSE_VALUE_Hz 80000000
+ * #define LSE_VALUE_Hz 32768 */
 
 #endif /* __XPD_CONFIG_H_ */
