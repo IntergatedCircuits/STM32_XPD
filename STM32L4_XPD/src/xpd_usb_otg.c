@@ -748,10 +748,6 @@ void USB_vDevInit(USB_HandleType * pxUSB, const USB_InitType * pxConfig)
             pxUSB->Inst->DCFG.b.DSPD = 3;
         }
 
-        /* Flush the FIFOs */
-        USB_prvFlushTxFifo(pxUSB, USB_ALL_TX_FIFOS);
-        USB_prvFlushRxFifo(pxUSB);
-
         /* Init endpoints */
         for (ucEpNum = 0; ucEpNum < ucEpCount; ucEpNum++)
         {
@@ -986,6 +982,9 @@ void USB_vEpClose(USB_HandleType * pxUSB, uint8_t ucEpAddress)
                 1 << (ucEpNum + USB_OTG_DEACHINTMSK_IEP1INTM_Pos - 1));
         CLEAR_BIT(pxUSB->Inst->DAINTMSK.w,
                 1 << (ucEpNum + USB_OTG_DAINTMSK_IEPM_Pos));
+
+        /* Flush dedicated FIFO */
+        USB_prvFlushTxFifo(pxUSB, ucEpNum);
     }
     else
     {
@@ -1203,6 +1202,7 @@ void USB_vDevIRQHandler(USB_HandleType * pxUSB)
 
             /* Stop any ongoing Remote Wakeup signaling and EP0 transfers */
             USB_REG_BIT(pxUSB,DCTL,RWUSIG) = 0;
+            USB_prvFlushRxFifo(pxUSB);
             USB_prvFlushTxFifo(pxUSB, 0);
 
             /* Clear EP interrupt flags */
