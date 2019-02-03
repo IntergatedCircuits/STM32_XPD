@@ -25701,6 +25701,12 @@ typedef struct
   * @}
   */
 
+/****************************** USB Exported Constants ************************/
+#define USB_OTG_FS_HOST_MAX_CHANNEL_NBR                12U
+#define USB_OTG_FS_MAX_IN_ENDPOINTS                    6U    /* Including EP0 */
+#define USB_OTG_FS_MAX_OUT_ENDPOINTS                   6U    /* Including EP0 */
+#define USB_OTG_FS_TOTAL_FIFO_SIZE                     1280U /* in Bytes */
+
 /******************************************************************************/
 /*  For a painless codes migration between the STM32L4xx device product       */
 /*  lines, the aliases defined below are put in place to overcome the         */
