@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    xpd_gpio.h
   * @author  Benedek Kupper
-  * @version 0.3
-  * @date    2018-01-28
+  * @version 0.4
+  * @date    2019-02-13
   * @brief   STM32 eXtensible Peripheral Drivers General Purpose I/O Module
   *
   * Copyright (c) 2018 Benedek Kupper
@@ -50,7 +50,7 @@ typedef enum
     GPIO_MODE_ALTERNATE = 2,   /*!< Alternate function mapped mode */
     GPIO_MODE_ANALOG    = 3,   /*!< Analog mode */
     GPIO_MODE_EXTI      = 0x10 /*!< Input mode with external interrupt/event generation */
-} GPIO_ModeType;
+}GPIO_ModeType;
 
 /** @brief GPIO output stage types */
 typedef enum
@@ -66,6 +66,44 @@ typedef enum
     GPIO_PULL_UP    = 1, /*!< High idle state (pull-up) */
     GPIO_PULL_DOWN  = 2  /*!< Low idle state (pull-down) */
 }GPIO_PullType;
+
+/** @brief GPIO pins */
+typedef enum
+{
+#ifdef GPIOA
+    PA0, PA1, PA2, PA3, PA4, PA5, PA6, PA7, PA8, PA9, PA10, PA11, PA12, PA13, PA14, PA15,
+#endif
+#ifdef GPIOB
+    PB0, PB1, PB2, PB3, PB4, PB5, PB6, PB7, PB8, PB9, PB10, PB11, PB12, PB13, PB14, PB15,
+#endif
+#ifdef GPIOC
+    PC0, PC1, PC2, PC3, PC4, PC5, PC6, PC7, PC8, PC9, PC10, PC11, PC12, PC13, PC14, PC15,
+#endif
+#ifdef GPIOD
+    PD0, PD1, PD2, PD3, PD4, PD5, PD6, PD7, PD8, PD9, PD10, PD11, PD12, PD13, PD14, PD15,
+#endif
+#ifdef GPIOE
+    PE0, PE1, PE2, PE3, PE4, PE5, PE6, PE7, PE8, PE9, PE10, PE11, PE12, PE13, PE14, PE15,
+#endif
+#ifdef GPIOF
+    PF0, PF1, PF2, PF3, PF4, PF5, PF6, PF7, PF8, PF9, PF10, PF11, PF12, PF13, PF14, PF15,
+#endif
+#ifdef GPIOG
+    PG0, PG1, PG2, PG3, PG4, PG5, PG6, PG7, PG8, PG9, PG10, PG11, PG12, PG13, PG14, PG15,
+#endif
+#ifdef GPIOH
+    PH0, PH1, PH2, PH3, PH4, PH5, PH6, PH7, PH8, PH9, PH10, PH11, PH12, PH13, PH14, PH15,
+#endif
+#ifdef GPIOI
+    PI0, PI1, PI2, PI3, PI4, PI5, PI6, PI7, PI8, PI9, PI10, PI11, PI12, PI13, PI14, PI15,
+#endif
+#ifdef GPIOJ
+    PJ0, PJ1, PJ2, PJ3, PJ4, PJ5, PJ6, PJ7, PJ8, PJ9, PJ10, PJ11, PJ12, PJ13, PJ14, PJ15,
+#endif
+#ifdef GPIOK
+    PK0, PK1, PK2, PK3, PK4, PK5, PK6, PK7, PK8, PK9, PK10, PK11, PK12, PK13, PK14, PK15,
+#endif
+}GPIO_PinType;
 
 /** @brief GPIO setup structure */
 typedef struct
@@ -88,6 +126,12 @@ typedef struct
 
 #define GPIO_xPinCallbacks          EXTI_xPinCallbacks
 
+#define __GPIO_PIN_BITS             4
+#define __GPIO_PIN_MASK             ((1 << __GPIO_PIN_BITS) - 1)
+
+#define __GPIO_PORT_FROM_PIN(PIN)   \
+    ((GPIO_TypeDef*)(GPIOA_BASE + (((uint32_t)(PIN) & (~__GPIO_PIN_MASK)) << (10 - __GPIO_PIN_BITS))))
+
 /** @addtogroup GPIO_Exported_Functions
  * @{ */
 
@@ -98,9 +142,9 @@ void            GPIO_vInitPort      (GPIO_TypeDef * pxGPIO, const GPIO_InitType 
 
 /** @addtogroup GPIO_Exported_Functions_Pin
  * @{ */
-void            GPIO_vInitPin       (GPIO_TypeDef * pxGPIO, uint8_t ucPin, const GPIO_InitType * pxConfig);
-void            GPIO_vDeinitPin     (GPIO_TypeDef * pxGPIO, uint8_t ucPin);
-void            GPIO_vLockPin       (GPIO_TypeDef * pxGPIO, uint8_t ucPin);
+void            GPIO_vInitPin       (GPIO_PinType ePin, const GPIO_InitType * pxConfig);
+void            GPIO_vDeinitPin     (GPIO_PinType ePin);
+void            GPIO_vLockPin       (GPIO_PinType ePin);
 /** @} */
 
 /** @addtogroup GPIO_Exported_Functions_Port
@@ -143,12 +187,13 @@ __STATIC_INLINE void GPIO_vSetResetPort(GPIO_TypeDef * pxGPIO, uint16_t SetBits,
 
 /**
  * @brief Sets the output pin to the selected value.
- * @param pxGPIO: pointer to the GPIO peripheral
- * @param ucPin: selected pin of the port [0 .. 15]
+ * @param ePin: selected pin
  * @param eValue: the new output value
  */
-__STATIC_INLINE void GPIO_vWritePin(GPIO_TypeDef * pxGPIO, uint8_t ucPin, FlagStatus eValue)
+__STATIC_INLINE void GPIO_vWritePin(GPIO_PinType ePin, FlagStatus eValue)
 {
+    GPIO_TypeDef *pxGPIO = __GPIO_PORT_FROM_PIN(ePin);
+    uint8_t ucPin = ePin & __GPIO_PIN_MASK;
 #ifdef GPIO_BB
     GPIO_BB(pxGPIO)->ODR[ucPin] = eValue;
 #else
@@ -165,12 +210,13 @@ __STATIC_INLINE void GPIO_vWritePin(GPIO_TypeDef * pxGPIO, uint8_t ucPin, FlagSt
 
 /**
  * @brief Reads the selected input pin.
- * @param pxGPIO: pointer to the GPIO peripheral
- * @param ucPin: selected pin of the port [0 .. 15]
+ * @param ePin: selected pin
  * @return The value of the pin
  */
-__STATIC_INLINE FlagStatus GPIO_eReadPin(GPIO_TypeDef * pxGPIO, uint8_t ucPin)
+__STATIC_INLINE FlagStatus GPIO_eReadPin(GPIO_PinType ePin)
 {
+    GPIO_TypeDef *pxGPIO = __GPIO_PORT_FROM_PIN(ePin);
+    uint8_t ucPin = ePin & __GPIO_PIN_MASK;
 #ifdef GPIO_BB
     return GPIO_BB(pxGPIO)->IDR[ucPin];
 #else
@@ -180,11 +226,12 @@ __STATIC_INLINE FlagStatus GPIO_eReadPin(GPIO_TypeDef * pxGPIO, uint8_t ucPin)
 
 /**
  * @brief Toggles the selected output pin.
- * @param pxGPIO: pointer to the GPIO peripheral
- * @param ucPin: selected pin of the port [0 .. 15]
+ * @param ePin: selected pin
  */
-__STATIC_INLINE void GPIO_vTogglePin(GPIO_TypeDef * pxGPIO, uint8_t ucPin)
+__STATIC_INLINE void GPIO_vTogglePin(GPIO_PinType ePin)
 {
+    GPIO_TypeDef *pxGPIO = __GPIO_PORT_FROM_PIN(ePin);
+    uint8_t ucPin = ePin & __GPIO_PIN_MASK;
 #ifdef GPIO_BB
     GPIO_BB(pxGPIO)->ODR[ucPin]++;
 #else

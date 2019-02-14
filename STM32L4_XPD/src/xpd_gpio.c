@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    xpd_gpio.c
   * @author  Benedek Kupper
-  * @version 0.3
-  * @date    2018-01-28
+  * @version 0.4
+  * @date    2019-02-13
   * @brief   STM32 eXtensible Peripheral Drivers General Purpose I/O Module
   *
   * Copyright (c) 2018 Benedek Kupper
@@ -199,12 +199,13 @@ void GPIO_vInitPort(GPIO_TypeDef * pxGPIO, const GPIO_InitType * pxConfig)
 
 /**
  * @brief Initializes the GPIO pin based on setup structure.
- * @param pxGPIO: pointer to the GPIO peripheral
- * @param ucPin: selected pin of the port [0 .. 15]
+ * @param ePin: selected pin
  * @param pxConfig: pointer to the setup parameters
  */
-void GPIO_vInitPin(GPIO_TypeDef * pxGPIO, uint8_t ucPin, const GPIO_InitType * pxConfig)
+void GPIO_vInitPin(GPIO_PinType ePin, const GPIO_InitType * pxConfig)
 {
+    GPIO_TypeDef *pxGPIO = __GPIO_PORT_FROM_PIN(ePin);
+    uint8_t ucPin = ePin & __GPIO_PIN_MASK;
     uint8_t uc2BitPos = ucPin * 2;;
 
     /* enable GPIO clock */
@@ -213,12 +214,12 @@ void GPIO_vInitPin(GPIO_TypeDef * pxGPIO, uint8_t ucPin, const GPIO_InitType * p
 #ifdef PWR_CR3_APC
     /* configure pull direction in power down */
 #ifdef PWR_BB
-    pwr_pxPullPinConfig[GPIO_PORT_OFFSET(pxGPIO)].PUC[ucPin] = pxConfig->PowerDownPull;
-    pwr_pxPullPinConfig[GPIO_PORT_OFFSET(pxGPIO)].PDC[ucPin] = pxConfig->PowerDownPull >> 1;
+    pwr_pxPullPinConfig[ePin >> __GPIO_PIN_BITS].PUC[ucPin] = pxConfig->PowerDownPull;
+    pwr_pxPullPinConfig[ePin >> __GPIO_PIN_BITS].PDC[ucPin] = pxConfig->PowerDownPull >> 1;
 #else
-    MODIFY_REG(pwr_pxPullConfig[GPIO_PORT_OFFSET(pxGPIO)].PUCR, 1  << ucPin,
+    MODIFY_REG(pwr_pxPullConfig[ePin >> __GPIO_PIN_BITS].PUCR, 1 << ucPin,
                                (uin32_t)pxConfig->PowerDownPull  << ucPin);
-    MODIFY_REG(pwr_pxPullConfig[GPIO_PORT_OFFSET(pxGPIO)].PDCR, 1  << ucPin,
+    MODIFY_REG(pwr_pxPullConfig[ePin >> __GPIO_PIN_BITS].PDCR, 1 << ucPin,
                          ((uin32_t)pxConfig->PowerDownPull >> 1) << ucPin);
 #endif
 #endif
@@ -265,7 +266,7 @@ void GPIO_vInitPin(GPIO_TypeDef * pxGPIO, uint8_t ucPin, const GPIO_InitType * p
         uint8_t ucPortPos = (ucPin & 0x03) << 2;
 
         MODIFY_REG(SYSCFG->EXTICR[ucPin >> 2], 0xF << ucPortPos,
-                          GPIO_PORT_OFFSET(pxGPIO) << ucPortPos);
+                         (ePin >> __GPIO_PIN_BITS) << ucPortPos);
 
         /* hand over EXTI configuration */
         EXTI_vInit(ucPin, &pxConfig->ExtI);
@@ -274,19 +275,20 @@ void GPIO_vInitPin(GPIO_TypeDef * pxGPIO, uint8_t ucPin, const GPIO_InitType * p
 
 /**
  * @brief Restores the GPIO pin to the default settings.
- * @param pxGPIO: pointer to the GPIO peripheral
- * @param ucPin: selected pin of the port [0 .. 15]
+ * @param ePin: selected pin
  */
-void GPIO_vDeinitPin(GPIO_TypeDef * pxGPIO, uint8_t ucPin)
+void GPIO_vDeinitPin(GPIO_PinType ePin)
 {
+    GPIO_TypeDef *pxGPIO = __GPIO_PORT_FROM_PIN(ePin);
+    uint8_t ucPin = ePin & __GPIO_PIN_MASK;
 #ifdef PWR_CR3_APC
     /* configure pull direction in power down */
 #ifdef PWR_BB
-    pwr_pxPullPinConfig[GPIO_PORT_OFFSET(pxGPIO)].PUC[ucPin] = 0;
-    pwr_pxPullPinConfig[GPIO_PORT_OFFSET(pxGPIO)].PDC[ucPin] = 0;
+    pwr_pxPullPinConfig[ePin >> __GPIO_PIN_BITS].PUC[ucPin] = 0;
+    pwr_pxPullPinConfig[ePin >> __GPIO_PIN_BITS].PDC[ucPin] = 0;
 #else
-    CLEAR_BIT(pwr_pxPullConfig[GPIO_PORT_OFFSET(pxGPIO)].PUCR, 1 << ucPin);
-    CLEAR_BIT(pwr_pxPullConfig[GPIO_PORT_OFFSET(pxGPIO)].PDCR, 1 << ucPin);
+    CLEAR_BIT(pwr_pxPullConfig[ePin >> __GPIO_PIN_BITS].PUCR, 1 << ucPin);
+    CLEAR_BIT(pwr_pxPullConfig[ePin >> __GPIO_PIN_BITS].PDCR, 1 << ucPin);
 #endif
 #endif
 
@@ -305,11 +307,12 @@ void GPIO_vDeinitPin(GPIO_TypeDef * pxGPIO, uint8_t ucPin)
 
 /**
  * @brief Locks the pin's configuration until the next device reset
- * @param pxGPIO: pointer to the GPIO peripheral
- * @param ucPin: selected pin of the port [0 .. 15]
+ * @param ePin: selected pin
  */
-void GPIO_vLockPin(GPIO_TypeDef * pxGPIO, uint8_t ucPin)
+void GPIO_vLockPin(GPIO_PinType ePin)
 {
+    GPIO_TypeDef *pxGPIO = __GPIO_PORT_FROM_PIN(ePin);
+    uint8_t ucPin = ePin & __GPIO_PIN_MASK;
     uint32_t ulPinMask = 1 << (uint32_t)ucPin;
     uint32_t ulPinLock = GPIO_LCKR_LCKK | ulPinMask;
 

@@ -42,7 +42,6 @@ extern "C"
 /** @defgroup MCO_Exported_Types MCO Exported Types
  * @{ */
 
-
 /** @brief RCC master clock output 1 clock source types */
 typedef enum
 {
@@ -74,8 +73,8 @@ typedef enum
 
 /** @} */
 
-#define MCO1_GPIO_PIN           GPIOA, 8
-#define LSCO_GPIO_PIN           GPIOA, 2
+#define MCO1_GPIO_PIN           PA8
+#define LSCO_GPIO_PIN           PA2
 
 /** @defgroup MCO_Exported_Functions MCO Exported Functions
  *  @brief    RCC microcontroller clock outputs

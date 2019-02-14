@@ -62,7 +62,7 @@ typedef enum
 
 /** @} */
 
-#define MCO1_GPIO_PIN           GPIOA, 8
+#define MCO1_GPIO_PIN           PA8
 
 /** @defgroup MCO_Exported_Functions MCO Exported Functions
  *  @brief    RCC microcontroller clock outputs
