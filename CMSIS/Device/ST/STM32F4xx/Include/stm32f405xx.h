@@ -2135,16 +2135,7 @@ typedef struct {
     } CR2;                                                  /*!< I2C Control register 2,     Address offset: 0x04 */
     union {
         struct {
-            __IO uint32_t ADD0 : 1;                         /*!<Bit 0 */
-            __IO uint32_t ADD1 : 1;                         /*!<Bit 1 */
-            __IO uint32_t ADD2 : 1;                         /*!<Bit 2 */
-            __IO uint32_t ADD3 : 1;                         /*!<Bit 3 */
-            __IO uint32_t ADD4 : 1;                         /*!<Bit 4 */
-            __IO uint32_t ADD5 : 1;                         /*!<Bit 5 */
-            __IO uint32_t ADD6 : 1;                         /*!<Bit 6 */
-            __IO uint32_t ADD7 : 1;                         /*!<Bit 7 */
-            __IO uint32_t ADD8 : 1;                         /*!<Bit 8 */
-            __IO uint32_t ADD9 : 1;                         /*!<Bit 9 */
+            __IO uint32_t ADD1 : 10;                        /*!< Interface own address 1 */
                  uint32_t __RESERVED0 : 5;
             __IO uint32_t ADDMODE : 1;                      /*!<Addressing Mode (Slave mode) */
                  uint32_t __RESERVED1 : 16;
@@ -2154,7 +2145,7 @@ typedef struct {
     union {
         struct {
             __IO uint32_t ENDUAL : 1;                       /*!<Dual addressing mode enable */
-            __IO uint32_t ADD2 : 7;                         /*!<Interface address           */
+            __IO uint32_t ADD2 : 7;                         /*!< Interface own address 2 */
                  uint32_t __RESERVED0 : 24;
         } b;
         __IO uint32_t w;
@@ -2248,23 +2239,14 @@ typedef struct {
              uint32_t __RESERVED1[19];
     } CR2;                                                  /*!< I2C Control register 2,     Address offset: 0x04 */
     struct {
-        __IO uint32_t ADD0;                                 /*!<Bit 0 */
-        __IO uint32_t ADD1;                                 /*!<Bit 1 */
-        __IO uint32_t ADD2;                                 /*!<Bit 2 */
-        __IO uint32_t ADD3;                                 /*!<Bit 3 */
-        __IO uint32_t ADD4;                                 /*!<Bit 4 */
-        __IO uint32_t ADD5;                                 /*!<Bit 5 */
-        __IO uint32_t ADD6;                                 /*!<Bit 6 */
-        __IO uint32_t ADD7;                                 /*!<Bit 7 */
-        __IO uint32_t ADD8;                                 /*!<Bit 8 */
-        __IO uint32_t ADD9;                                 /*!<Bit 9 */
+        __IO uint32_t ADD1[10];                             /*!< Interface own address 1 */
              uint32_t __RESERVED0[5];
         __IO uint32_t ADDMODE;                              /*!<Addressing Mode (Slave mode) */
              uint32_t __RESERVED1[16];
     } OAR1;                                                 /*!< I2C Own address register 1, Address offset: 0x08 */
     struct {
         __IO uint32_t ENDUAL;                               /*!<Dual addressing mode enable */
-        __IO uint32_t ADD2[7];                              /*!<Interface address           */
+        __IO uint32_t ADD2[7];                              /*!< Interface own address 2 */
              uint32_t __RESERVED0[24];
     } OAR2;                                                 /*!< I2C Own address register 2, Address offset: 0x0C */
     __IO uint32_t DR[32];                                   /*!< I2C Data register,          Address offset: 0x10 */
@@ -13845,39 +13827,9 @@ typedef struct {
 #define I2C_CR2_LAST              I2C_CR2_LAST_Msk                             /*!<DMA Last Transfer       */
 
 /*******************  Bit definition for I2C_OAR1 register  *******************/
-#define I2C_OAR1_ADD1_7           0x000000FEU                                  /*!<Interface Address */
-#define I2C_OAR1_ADD8_9           0x00000300U                                  /*!<Interface Address */
-
-#define I2C_OAR1_ADD0_Pos         (0U)                                         
-#define I2C_OAR1_ADD0_Msk         (0x1U << I2C_OAR1_ADD0_Pos)                  /*!< 0x00000001 */
-#define I2C_OAR1_ADD0             I2C_OAR1_ADD0_Msk                            /*!<Bit 0 */
-#define I2C_OAR1_ADD1_Pos         (1U)                                         
-#define I2C_OAR1_ADD1_Msk         (0x1U << I2C_OAR1_ADD1_Pos)                  /*!< 0x00000002 */
-#define I2C_OAR1_ADD1             I2C_OAR1_ADD1_Msk                            /*!<Bit 1 */
-#define I2C_OAR1_ADD2_Pos         (2U)                                         
-#define I2C_OAR1_ADD2_Msk         (0x1U << I2C_OAR1_ADD2_Pos)                  /*!< 0x00000004 */
-#define I2C_OAR1_ADD2             I2C_OAR1_ADD2_Msk                            /*!<Bit 2 */
-#define I2C_OAR1_ADD3_Pos         (3U)                                         
-#define I2C_OAR1_ADD3_Msk         (0x1U << I2C_OAR1_ADD3_Pos)                  /*!< 0x00000008 */
-#define I2C_OAR1_ADD3             I2C_OAR1_ADD3_Msk                            /*!<Bit 3 */
-#define I2C_OAR1_ADD4_Pos         (4U)                                         
-#define I2C_OAR1_ADD4_Msk         (0x1U << I2C_OAR1_ADD4_Pos)                  /*!< 0x00000010 */
-#define I2C_OAR1_ADD4             I2C_OAR1_ADD4_Msk                            /*!<Bit 4 */
-#define I2C_OAR1_ADD5_Pos         (5U)                                         
-#define I2C_OAR1_ADD5_Msk         (0x1U << I2C_OAR1_ADD5_Pos)                  /*!< 0x00000020 */
-#define I2C_OAR1_ADD5             I2C_OAR1_ADD5_Msk                            /*!<Bit 5 */
-#define I2C_OAR1_ADD6_Pos         (6U)                                         
-#define I2C_OAR1_ADD6_Msk         (0x1U << I2C_OAR1_ADD6_Pos)                  /*!< 0x00000040 */
-#define I2C_OAR1_ADD6             I2C_OAR1_ADD6_Msk                            /*!<Bit 6 */
-#define I2C_OAR1_ADD7_Pos         (7U)                                         
-#define I2C_OAR1_ADD7_Msk         (0x1U << I2C_OAR1_ADD7_Pos)                  /*!< 0x00000080 */
-#define I2C_OAR1_ADD7             I2C_OAR1_ADD7_Msk                            /*!<Bit 7 */
-#define I2C_OAR1_ADD8_Pos         (8U)                                         
-#define I2C_OAR1_ADD8_Msk         (0x1U << I2C_OAR1_ADD8_Pos)                  /*!< 0x00000100 */
-#define I2C_OAR1_ADD8             I2C_OAR1_ADD8_Msk                            /*!<Bit 8 */
-#define I2C_OAR1_ADD9_Pos         (9U)                                         
-#define I2C_OAR1_ADD9_Msk         (0x1U << I2C_OAR1_ADD9_Pos)                  /*!< 0x00000200 */
-#define I2C_OAR1_ADD9             I2C_OAR1_ADD9_Msk                            /*!<Bit 9 */
+#define I2C_OAR1_ADD1_Pos         (0U)
+#define I2C_OAR1_ADD1_Msk         (0x3FFU << I2C_OAR1_ADD1_Pos)                /*!< 0x000003FF */
+#define I2C_OAR1_ADD1             I2C_OAR1_ADD1_Msk                            /*!< Interface own address 1 */
 
 #define I2C_OAR1_ADDMODE_Pos      (15U)                                        
 #define I2C_OAR1_ADDMODE_Msk      (0x1U << I2C_OAR1_ADDMODE_Pos)               /*!< 0x00008000 */
@@ -13889,7 +13841,7 @@ typedef struct {
 #define I2C_OAR2_ENDUAL           I2C_OAR2_ENDUAL_Msk                          /*!<Dual addressing mode enable */
 #define I2C_OAR2_ADD2_Pos         (1U)                                         
 #define I2C_OAR2_ADD2_Msk         (0x7FU << I2C_OAR2_ADD2_Pos)                 /*!< 0x000000FE */
-#define I2C_OAR2_ADD2             I2C_OAR2_ADD2_Msk                            /*!<Interface address           */
+#define I2C_OAR2_ADD2             I2C_OAR2_ADD2_Msk                            /*!< Interface own address 2 */
 
 /********************  Bit definition for I2C_DR register  ********************/
 #define I2C_DR_DR_Pos             (0U)                                         
