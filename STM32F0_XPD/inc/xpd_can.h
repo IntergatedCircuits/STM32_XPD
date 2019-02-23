@@ -63,14 +63,14 @@ typedef struct
     CAN_TimingConfigType Timing;
     union {
         struct {
-            CAN_ModeType    Mode : 2; /*!< CAN test mode selection */
-            FunctionalState TXFP : 1; /*!< Transmit FIFO Priority on request age instead of ID priority */
-            FunctionalState RFLM : 1; /*!< Receive FIFO Locked Mode keeps older messages in full FIFO */
-            FunctionalState NART : 1; /*!< Non Automatic ReTransmission */
-            FunctionalState AWUM : 1; /*!< Automatic Wake-Up on message detection */
-            FunctionalState ABOM : 1; /*!< Automatic Bus-Off Recovery */
-            FunctionalState TTCM : 1; /*!< Time-Triggered Communication Mode */
-        }Settings;
+        CAN_ModeType    Mode : 2; /*!< CAN test mode selection */
+        FunctionalState TXFP : 1; /*!< Transmit FIFO Priority on request age instead of ID priority */
+        FunctionalState RFLM : 1; /*!< Receive FIFO Locked Mode keeps older messages in full FIFO */
+        FunctionalState NART : 1; /*!< Non Automatic ReTransmission */
+        FunctionalState AWUM : 1; /*!< Automatic Wake-Up on message detection */
+        FunctionalState ABOM : 1; /*!< Automatic Bus-Off Recovery */
+        FunctionalState TTCM : 1; /*!< Time-Triggered Communication Mode */
+        };
         uint8_t wSettings;            /*!< Set to 0 for default features */
     };
 }CAN_InitType;
