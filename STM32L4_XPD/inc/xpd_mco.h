@@ -105,14 +105,7 @@ __STATIC_INLINE void MCO_vInit(
 
         RCC->CFGR.b.MCOSEL = eMCOSource;
 #ifdef RCC_CFGR_MCOPRE
-        if (eMCODiv == CLK_DIV1)
-        {
-            RCC->CFGR.b.MCOPRE = CLK_DIV1;
-        }
-        else
-        {
-            RCC->CFGR.b.MCOPRE = 4 | (eMCODiv - 1);
-        }
+        RCC->CFGR.b.MCOPRE = eMCODiv;
 #endif
     }
 }

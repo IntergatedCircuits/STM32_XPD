@@ -81,12 +81,12 @@ typedef enum
  * @brief Configures a master clock output
  * @param ucMCOx: the number of the MCO
  * @param eMCOSource: clock source of the MCO
- * @param eMCODiv: the clock division to be applied for the MCO
+ * @param ucMCODiv: the clock division to be applied for the MCO [1 .. 5]
  */
 __STATIC_INLINE void MCO_vInit(
         uint8_t                 ucMCOx,
         MCO1_ClockSourceType    eMCOSource,
-        ClockDividerType        eMCODiv)
+        uint8_t                 ucMCODiv)
 {
     static const GPIO_InitType xMCOPinCfg = {
         .Mode = GPIO_MODE_ALTERNATE,
@@ -101,13 +101,13 @@ __STATIC_INLINE void MCO_vInit(
         GPIO_vInitPin(MCO2_GPIO_PIN, &xMCOPinCfg);
 
         RCC->CFGR.b.MCO2    = eMCOSource;
-        if (eMCODiv == CLK_DIV1)
+        if (ucMCODiv > 1)
         {
-            RCC->CFGR.b.MCO2PRE = CLK_DIV1;
+            RCC->CFGR.b.MCO2PRE = 4 | (ucMCODiv - 1);
         }
         else
         {
-            RCC->CFGR.b.MCO2PRE = 4 | (eMCODiv - 1);
+            RCC->CFGR.b.MCO2PRE = 0;
         }
 
 #ifdef RCC_CFGR_MCO2EN
@@ -119,13 +119,13 @@ __STATIC_INLINE void MCO_vInit(
         GPIO_vInitPin(MCO1_GPIO_PIN, &xMCOPinCfg);
 
         RCC->CFGR.b.MCO1    = eMCOSource;
-        if (eMCODiv == CLK_DIV1)
+        if (ucMCODiv > 1)
         {
-            RCC->CFGR.b.MCO1PRE = CLK_DIV1;
+            RCC->CFGR.b.MCO1PRE = 4 | (ucMCODiv - 1);
         }
         else
         {
-            RCC->CFGR.b.MCO1PRE = 4 | (eMCODiv - 1);
+            RCC->CFGR.b.MCO1PRE = 0;
         }
 
 #ifdef RCC_CFGR_MCO1EN
