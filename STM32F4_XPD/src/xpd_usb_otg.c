@@ -168,24 +168,34 @@ static void USB_prvClearEpInts(USB_HandleType * pxUSB)
 static void USB_prvWriteFifo(USB_HandleType * pxUSB,
         uint8_t ucFIFOx, uint8_t * pucData, uint16_t usLength)
 {
-    uint16_t usWordCount = (usLength + 3) / 4;
+    uint16_t usWordCount;
 
-    for (; usWordCount > 0; usWordCount--, pucData += 4)
+    /* Disable interrupts while FIFO is being accessed */
+    USB_REG_BIT(pxUSB, GAHBCFG, GINT) = 0;
+
+    for (usWordCount = (usLength + 3) / 4; usWordCount > 0; usWordCount--, pucData += 4)
     {
         pxUSB->Inst->DFIFO[ucFIFOx].DR = *((__packed uint32_t *) pucData);
     }
+
+    USB_REG_BIT(pxUSB, GAHBCFG, GINT) = 1;
 }
 
 /* Pop packet data from OUT FIFO */
 static void USB_prvReadFifo(USB_HandleType * pxUSB,
         uint8_t * pucData, uint16_t usLength)
 {
-    uint16_t usWordCount = (usLength + 3) / 4;
+    uint16_t usWordCount;
 
-    for (; usWordCount > 0; usWordCount--, pucData += 4)
+    /* Disable interrupts while FIFO is being accessed */
+    USB_REG_BIT(pxUSB, GAHBCFG, GINT) = 0;
+
+    for (usWordCount = (usLength + 3) / 4; usWordCount > 0; usWordCount--, pucData += 4)
     {
         *(__packed uint32_t *) pucData = pxUSB->Inst->DFIFO[0].DR;
     }
+
+    USB_REG_BIT(pxUSB, GAHBCFG, GINT) = 1;
 }
 
 /* Determines the next packet size based on the transfer progress and the EP MPS */
@@ -689,7 +699,7 @@ void USB_vDevInit(USB_HandleType * pxUSB, const USB_InitType * pxConfig)
     pxUSB->LinkState = USB_LINK_STATE_OFF;
 
     /* Disable interrupts */
-    USB_REG_BIT(pxUSB,GAHBCFG,GINT) = 0;
+    USB_REG_BIT(pxUSB, GAHBCFG, GINT) = 0;
 
     /* Initialize dependencies (pins, IRQ lines) */
     XPD_SAFE_CALLBACK(pxUSB->Callbacks.DepInit, pxUSB);
@@ -855,7 +865,7 @@ void USB_vDevStart_IT(USB_HandleType * pxUSB)
     USB_prvConnectCtrl(pxUSB, ENABLE);
 
     /* Enable global interrupts */
-    USB_REG_BIT(pxUSB,GAHBCFG,GINT) = 1;
+    USB_REG_BIT(pxUSB, GAHBCFG, GINT) = 1;
 }
 
 /**
@@ -865,7 +875,7 @@ void USB_vDevStart_IT(USB_HandleType * pxUSB)
 void USB_vDevStop_IT(USB_HandleType * pxUSB)
 {
     /* Disable global interrupts */
-    USB_REG_BIT(pxUSB,GAHBCFG,GINT) = 0;
+    USB_REG_BIT(pxUSB, GAHBCFG, GINT) = 0;
 
     /* Clear any pending interrupts except SRQ */
     pxUSB->Inst->GINTSTS.w  = ~USB_OTG_GINTSTS_SRQINT;
