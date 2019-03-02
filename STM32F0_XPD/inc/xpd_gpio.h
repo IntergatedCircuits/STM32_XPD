@@ -124,8 +124,6 @@ typedef struct
 
 /** @} */
 
-#define GPIO_xPinCallbacks          EXTI_xPinCallbacks
-
 #define __GPIO_PIN_BITS             4
 #define __GPIO_PIN_MASK             ((1 << __GPIO_PIN_BITS) - 1)
 
@@ -239,6 +237,16 @@ __STATIC_INLINE void GPIO_vTogglePin(GPIO_PinType ePin)
     {   ucPin += 16; }
     pxGPIO->BSRR = 1 << ucPin;
 #endif
+}
+
+/**
+ * @brief Returns the reference to the pin's EXTI callback variable.
+ * @param ePin: selected pin
+ * @return Reference of the pin's EXTI callback
+ */
+__STATIC_INLINE XPD_ValueCallbackType * GPIO_pxPinCallback(GPIO_PinType ePin)
+{
+    return &EXTI_xPinCallbacks[ePin & __GPIO_PIN_MASK];
 }
 
 /** @} */
