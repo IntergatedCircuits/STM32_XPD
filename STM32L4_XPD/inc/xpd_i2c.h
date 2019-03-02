@@ -128,30 +128,30 @@ typedef struct
 /** @brief I2C Handle structure */
 typedef struct
 {
-    I2C_TypeDef * Inst;                      /*!< The address of the peripheral instance used by the handle */
+    I2C_TypeDef * Inst;                         /*!< The address of the peripheral instance used by the handle */
 #ifdef I2C_BB
-    I2C_BitBand_TypeDef * Inst_BB;           /*!< The address of the peripheral instance in the bit-band region */
+    I2C_BitBand_TypeDef * Inst_BB;              /*!< The address of the peripheral instance in the bit-band region */
 #endif
     struct {
-        XPD_HandleCallbackType DepInit;      /*!< Callback to initialize module dependencies (GPIOs, IRQs, DMAs) */
-        XPD_HandleCallbackType DepDeinit;    /*!< Callback to restore module dependencies (GPIOs, IRQs, DMAs) */
-        XPD_HandleCallbackType MasterComplete;     /*!< Data stream transmission successful callback */
-        XPD_HandleCallbackType SlaveAddressed;      /*!< Data stream reception successful callback */
-        XPD_HandleCallbackType SlaveComplete;      /*!< Data stream reception successful callback */
-        XPD_HandleCallbackType Error;        /*!< Error callbacks */
-    }Callbacks;                              /*   Handle Callbacks */
+        XPD_HandleCallbackType DepInit;         /*!< Callback to initialize module dependencies (GPIOs, IRQs, DMAs) */
+        XPD_HandleCallbackType DepDeinit;       /*!< Callback to restore module dependencies (GPIOs, IRQs, DMAs) */
+        XPD_HandleCallbackType MasterComplete;  /*!< Data stream transmission successful callback */
+        XPD_HandleCallbackType SlaveAddressed;  /*!< Data stream reception successful callback */
+        XPD_HandleCallbackType SlaveComplete;   /*!< Data stream reception successful callback */
+        XPD_HandleCallbackType Error;           /*!< Error callbacks */
+    }Callbacks;                                 /*   Handle Callbacks */
     struct {
-        DMA_HandleType * Transmit;           /*!< DMA handle for data transmission */
-        DMA_HandleType * Receive;            /*!< DMA handle for data reception */
-    }DMA;                                    /*   DMA handle references */
-    XPD_HandleCallbackType IRQHandler;       /*!< Contextual interrupt request handler reference */
+        DMA_HandleType * Transmit;              /*!< DMA handle for data transmission */
+        DMA_HandleType * Receive;               /*!< DMA handle for data reception */
+    }DMA;                                       /*   DMA handle references */
+    XPD_HandleCallbackType IRQHandler;          /*!< Contextual interrupt request handler reference */
     struct {
-        I2C_TransferType * Master;           /*!< Current master mode transfer */
-        I2C_TransferType * Slave;            /*!< Current slave mode transfer */
-    }Transfers;                              /*   Current transfer references */
-    DataStreamType Stream;                   /*!< Data transfer management */
-    RCC_PositionType CtrlPos;                /*!< Relative position for reset and clock control */
-    volatile I2C_ErrorType Errors;           /*!< Transfer errors */
+        const I2C_TransferType * pMaster;       /*!< Current master mode transfer */
+        I2C_TransferType Slave;                 /*!< Slave mode transfer */
+    }Transfers;                                 /*   Current transfer references */
+    DataStreamType Stream;                      /*!< Data transfer management */
+    RCC_PositionType CtrlPos;                   /*!< Relative position for reset and clock control */
+    volatile I2C_ErrorType Errors;              /*!< Transfer errors */
 }I2C_HandleType;
 
 /** @} */
@@ -290,20 +290,47 @@ typedef struct
 
 /** @} */
 
-/** @addtogroup I2C_Exported_Functions
+/** @addtogroup I2C_Common_Exported_Functions
  * @{ */
+void            I2C_vInit                   (I2C_HandleType * pxI2C, const I2C_InitType * pxConfig);
+void            I2C_vDeinit                 (I2C_HandleType * pxI2C);
 
-void            I2C_vInit               (I2C_HandleType * pxI2C, const I2C_InitType * pxConfig);
-void            I2C_vDeinit             (I2C_HandleType * pxI2C);
-XPD_ReturnType  I2C_eGetStatus          (I2C_HandleType * pxI2C);
-XPD_ReturnType  I2C_ePollStatus         (I2C_HandleType * pxI2C, uint32_t ulTimeout);
+XPD_ReturnType  I2C_eGetStatus              (I2C_HandleType * pxI2C);
+XPD_ReturnType  I2C_ePollStatus             (I2C_HandleType * pxI2C, uint32_t ulTimeout);
 
-XPD_ReturnType  I2C_eMasterTransfer     (I2C_HandleType * pxI2C, const I2C_TransferType * pxTransfer,
-                                         uint32_t ulTimeout);
-void            I2C_vMasterTransfer_IT  (I2C_HandleType * pxI2C, const I2C_TransferType * pxTransfer);
+uint16_t        I2C_usGetRejectedLength     (I2C_HandleType * pxI2C);
 
-void            I2C_vIRQHandler_EV      (I2C_HandleType * pxI2C);
-void            I2C_vIRQHandler_ER      (I2C_HandleType * pxI2C);
+void            I2C_vIRQHandler_EV          (I2C_HandleType * pxI2C);
+void            I2C_vIRQHandler_ER          (I2C_HandleType * pxI2C);
+/** @} */
+
+/** @addtogroup I2C_Master_Exported_Functions
+ * @{ */
+XPD_ReturnType  I2C_eMasterTransfer         (I2C_HandleType * pxI2C, const I2C_TransferType * pxTransfer,
+                                             uint32_t ulTimeout);
+void            I2C_vMasterTransfer_IT      (I2C_HandleType * pxI2C, const I2C_TransferType * pxTransfer);
+/** @} */
+
+/** @addtogroup I2C_Slave_Exported_Functions
+ * @{ */
+XPD_ReturnType  I2C_eSlaveListen            (I2C_HandleType * pxI2C, uint8_t ucCmdSize,
+                                             uint32_t ulTimeout);
+void            I2C_vSlaveListen_IT         (I2C_HandleType * pxI2C, uint8_t ucCmdSize);
+void            I2C_vSlaveSuspend_IT        (I2C_HandleType * pxI2C);
+
+XPD_ReturnType  I2C_eSlaveTransferData      (I2C_HandleType * pxI2C, uint32_t ulTimeout);
+void            I2C_vSlaveTransferData_IT   (I2C_HandleType * pxI2C);
+
+/**
+ * @brief Returns the slave transfer info reference, which specifies the current I2C transfer request,
+ *        and where the application has to configure the data used for the transfer.
+ * @param pxI2C: pointer to the I2C handle structure
+ * @return The slave transfer info reference
+ */
+__STATIC_INLINE I2C_TransferType * I2C_pxSlaveTransferInfo(I2C_HandleType * pxI2C)
+{
+    return &pxI2C->Transfers.Slave;
+}
 
 /** @} */
 
