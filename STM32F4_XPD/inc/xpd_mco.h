@@ -80,7 +80,8 @@ typedef enum
 /**
  * @brief Configures a master clock output
  * @param ucMCOx: the number of the MCO
- * @param eMCOSource: clock source of the MCO
+ * @param eMCOSource: clock source of the MCO, either @ref MCO1_ClockSourceType
+          or @ref MCO2_ClockSourceType depending on the used MCO
  * @param ucMCODiv: the clock division to be applied for the MCO [1 .. 5]
  */
 __STATIC_INLINE void MCO_vInit(

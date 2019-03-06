@@ -71,12 +71,10 @@ typedef enum
 
 /**
  * @brief Configures a master clock output
- * @param ucMCOx: the number of the MCO
  * @param eMCOSource: clock source of the MCO
  * @param eMCODiv: the clock division to be applied for the MCO
  */
 __STATIC_INLINE void MCO_vInit(
-        uint8_t                 ucMCOx,
         MCO1_ClockSourceType    eMCOSource,
         ClockDividerType        eMCODiv)
 {
@@ -103,9 +101,8 @@ __STATIC_INLINE void MCO_vInit(
 
 /**
  * @brief Disables a master clock output
- * @param ucMCOx: the number of the MCO
  */
-__STATIC_INLINE void MCO_vDeinit(uint8_t ucMCOx)
+__STATIC_INLINE void MCO_vDeinit(void)
 {
         GPIO_vDeinitPin(MCO1_GPIO_PIN);
 }
