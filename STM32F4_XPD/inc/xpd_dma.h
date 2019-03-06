@@ -58,8 +58,8 @@ typedef enum
 {
     DMA_MODE_NORMAL    = 0, /*!< Normal DMA transfer */
     DMA_MODE_CIRCULAR  = 1, /*!< Circular DMA transfer */
-    DMA_MODE_PERIPH_FC = 2, /*!< DMA transfer with peripheral flow control (completion is indicated by peripheral) */
-    DMA_MODE_DBUFFER   = 5  /*!< Double-buffered DMA transfer (which is inherently circular) */
+    DMA_MODE_PERIPH_FC = 4, /*!< DMA transfer with peripheral flow control (completion is indicated by peripheral) */
+    DMA_MODE_DBUFFER   = 3, /*!< Double-buffered DMA transfer (which is inherently circular) */
 }DMA_ModeType;
 
 /** @brief DMA FIFO burst mode types */
@@ -88,26 +88,30 @@ typedef enum
 }DMA_OperationType;
 
 /** @brief DMA channel setup structure */
-typedef struct
+typedef union
 {
-    uint8_t           Channel;           /*!< Channel selection for the DMA stream [0 .. 7] */
-    DMA_DirectionType Direction;         /*!< DMA stream direction */
-    DMA_ModeType      Mode;              /*!< DMA operating mode */
-    LevelType         Priority;          /*!< DMA bus arbitration priority level */
     struct {
-        FunctionalState   Increment;     /*!< The address is incremented after each transfer */
-        DMA_AlignmentType DataAlignment; /*!< The data width */
-        DMA_BurstType     Burst;         /*!< The burst size */
-    }Memory;                             /*  Memory side configuration */
-    struct {
-        FunctionalState   Increment;     /*!< The address is incremented after each transfer */
-        DMA_AlignmentType DataAlignment; /*!< The data width */
-        DMA_BurstType     Burst;         /*!< The burst size */
-    }Peripheral;                         /*   Peripheral side configuration */
-    struct {
-        FunctionalState Mode;            /*!< FIFO mode is used */
-        uint8_t         Threshold;       /*!< The number of quarters to fill before transfer [1 .. 4] */
-    }FIFO;                               /*   FIFO configuration */
+    uint32_t : 3;
+    DMA_ModeType      Mode : 3;            /*!< DMA operating mode */
+    DMA_DirectionType Direction : 2;       /*!< DMA channel direction */
+    uint32_t : 1;
+    FunctionalState   PeriphInc : 1;       /*!< The peripheral address is incremented after each transfer */
+    FunctionalState   MemoryInc : 1;       /*!< The memory is incremented after each transfer */
+    DMA_AlignmentType PeriphDataAlign : 2; /*!< The peripheral data width */
+    DMA_AlignmentType MemoryDataAlign : 2; /*!< The memory data width */
+    FunctionalState   PeriphWordInc : 1;   /*!< When enabled with @ref DMA_InitType::PeriphInc,
+                                                the peripheral address is incremented by 32 bits
+                                                (instead of what's dictated by @ref DMA_InitType::PeriphDataAlign) */
+    LevelType         Priority : 2;        /*!< DMA bus arbitration priority level */
+    uint32_t : 3;
+    DMA_BurstType     PeriphBurst : 2;     /*!< The peripheral burst size (forced to 0 when FIFO isn't used) */
+    DMA_BurstType     MemoryBurst : 2;     /*!< The memory burst size (forced to 0 when FIFO isn't used) */
+    uint32_t          Channel : 3;         /*!< Channel selection for the DMA stream [0 .. 7] */
+    uint32_t : 1;
+    uint32_t          FifoThreshold : 3;   /*!< The number of FIFO quarters to fill before transfer [1 .. 4]
+                                                (set to 0 to disable the FIFO) */
+    };
+    uint32_t w;
 }DMA_InitType;
 
 /** @brief DMA stream handle structure */
@@ -143,7 +147,7 @@ typedef struct
  * @param HANDLE: specifies the peripheral handle.
  * @param INSTANCE: specifies the DMA peripheral instance.
  */
-#define         DMA_INST2HANDLE(HANDLE,INSTANCE)            \
+#define         DMA_INST2HANDLE(HANDLE, INSTANCE)           \
     ((HANDLE)->Inst    = (INSTANCE),                        \
      (HANDLE)->Inst_BB = DMA_Stream_BB(INSTANCE))
 
@@ -162,7 +166,7 @@ typedef struct
  * @param HANDLE: specifies the peripheral handle.
  * @param INSTANCE: specifies the DMA peripheral instance.
  */
-#define         DMA_INST2HANDLE(HANDLE,INSTANCE)            \
+#define         DMA_INST2HANDLE(HANDLE, INSTANCE)           \
     ((HANDLE)->Inst    = (INSTANCE))
 
 /**
@@ -187,7 +191,7 @@ typedef struct
  *            @arg DME:     Direct Mode Error Interrupt
  *            @arg FE:      FIFO Error Interrupt
  */
-#define         DMA_IT_ENABLE( HANDLE,  IT_NAME)            \
+#define         DMA_IT_ENABLE(HANDLE, IT_NAME)              \
     __XPD_DMA_ITConfig_##IT_NAME(HANDLE, 1)
 
 /**
@@ -201,7 +205,7 @@ typedef struct
  *            @arg DME:     Direct Mode Error Interrupt
  *            @arg FE:      FIFO Error Interrupt
  */
-#define         DMA_IT_DISABLE(HANDLE,   IT_NAME)           \
+#define         DMA_IT_DISABLE(HANDLE, IT_NAME)             \
     __XPD_DMA_ITConfig_##IT_NAME(HANDLE, 0)
 
 /**
@@ -215,7 +219,7 @@ typedef struct
  *            @arg DME:     Direct Mode Error
  *            @arg FE:      FIFO Error
  */
-#define         DMA_FLAG_STATUS(  HANDLE, FLAG_NAME)        \
+#define         DMA_FLAG_STATUS(HANDLE, FLAG_NAME)          \
     (((HANDLE)->Base->LISR.w >> (DMA_LISR_##FLAG_NAME##IF0_Pos \
             + (uint32_t)((HANDLE)->StreamOffset))) & 1)
 

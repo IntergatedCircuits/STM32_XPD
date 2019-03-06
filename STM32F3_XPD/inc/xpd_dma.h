@@ -40,8 +40,8 @@ extern "C"
 typedef enum
 {
     DMA_PERIPH2MEMORY = 0, /*!< Data is transferred from peripheral to memory */
-    DMA_MEMORY2PERIPH = 1, /*!< Data is transferred from memory to peripheral */
-    DMA_MEMORY2MEMORY = 2  /*!< Data is transferred from memory to memory */
+    DMA_MEMORY2PERIPH = 2, /*!< Data is transferred from memory to peripheral */
+    DMA_MEMORY2MEMORY = 1, /*!< Data is transferred from memory to memory */
 }DMA_DirectionType;
 
 /** @brief DMA data alignment types */
@@ -74,19 +74,20 @@ typedef enum
 }DMA_OperationType;
 
 /** @brief DMA channel setup structure */
-typedef struct
+typedef union
 {
-    DMA_DirectionType Direction;         /*!< DMA channel direction */
-    DMA_ModeType      Mode;              /*!< DMA operating mode */
-    LevelType         Priority;          /*!< DMA bus arbitration priority level */
     struct {
-        FunctionalState   Increment;     /*!< The address is incremented after each transfer */
-        DMA_AlignmentType DataAlignment; /*!< The data width */
-    }Memory;                             /*  Memory side configuration */
-    struct {
-        FunctionalState   Increment;     /*!< The address is incremented after each transfer */
-        DMA_AlignmentType DataAlignment; /*!< The data width */
-    }Peripheral;                         /*   Peripheral side configuration */
+    uint16_t : 3;
+    DMA_DirectionType Direction : 2;       /*!< DMA channel direction */
+    DMA_ModeType      Mode : 1;            /*!< DMA operating mode */
+    FunctionalState   PeriphInc : 1;       /*!< The peripheral address is incremented after each transfer */
+    FunctionalState   MemoryInc : 1;       /*!< The memory is incremented after each transfer */
+    DMA_AlignmentType PeriphDataAlign : 2; /*!< The peripheral data width */
+    DMA_AlignmentType MemoryDataAlign : 2; /*!< The memory data width */
+    LevelType         Priority : 2;        /*!< DMA bus arbitration priority level */
+    uint16_t : 2;
+    };
+    uint16_t w;
 }DMA_InitType;
 
 /** @brief DMA channel handle structure */
@@ -122,7 +123,7 @@ typedef struct
  * @param HANDLE: specifies the peripheral handle.
  * @param INSTANCE: specifies the DMA peripheral instance.
  */
-#define         DMA_INST2HANDLE(HANDLE,INSTANCE)            \
+#define         DMA_INST2HANDLE(HANDLE, INSTANCE)           \
     ((HANDLE)->Inst    = (INSTANCE),                        \
      (HANDLE)->Inst_BB = DMA_Channel_BB(INSTANCE))
 
@@ -141,7 +142,7 @@ typedef struct
  * @param HANDLE: specifies the peripheral handle.
  * @param INSTANCE: specifies the DMA peripheral instance.
  */
-#define         DMA_INST2HANDLE(HANDLE,INSTANCE)            \
+#define         DMA_INST2HANDLE(HANDLE, INSTANCE)           \
     ((HANDLE)->Inst    = (INSTANCE))
 
 /**
@@ -164,7 +165,7 @@ typedef struct
  *            @arg HT:      Half Transfer Complete Interrupt
  *            @arg TE:      Transfer Error Interrupt
  */
-#define         DMA_IT_ENABLE( HANDLE,  IT_NAME)            \
+#define         DMA_IT_ENABLE(HANDLE, IT_NAME)              \
     (DMA_REG_BIT((HANDLE), CCR, IT_NAME##IE) = 1)
 
 /**
@@ -176,7 +177,7 @@ typedef struct
  *            @arg HT:      Half Transfer Complete Interrupt
  *            @arg TE:      Transfer Error Interrupt
  */
-#define         DMA_IT_DISABLE(HANDLE,   IT_NAME)           \
+#define         DMA_IT_DISABLE(HANDLE, IT_NAME)             \
         (DMA_REG_BIT((HANDLE), CCR, IT_NAME##IE) = 0)
 
 /**
@@ -188,7 +189,7 @@ typedef struct
  *            @arg HT:      Half Transfer Complete
  *            @arg TE:      Transfer Error
  */
-#define         DMA_FLAG_STATUS(  HANDLE, FLAG_NAME)        \
+#define         DMA_FLAG_STATUS(HANDLE, FLAG_NAME)          \
     (((HANDLE)->Base->ISR.w >> (DMA_ISR_##FLAG_NAME##IF1_Pos\
                 + (uint32_t)((HANDLE)->ChannelOffset))) & 1)
 

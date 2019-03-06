@@ -102,20 +102,21 @@ __STATIC_INLINE void DMA_prvCalcBase(DMA_HandleType * pxDMA)
  */
 void DMA_vInit(DMA_HandleType * pxDMA, const DMA_InitType * pxConfig)
 {
+    uint32_t ulCCR;
+
     /* enable DMA clock */
     DMA_prvClockEnable(pxDMA);
 
-    pxDMA->Inst->CCR.b.PL         = pxConfig->Priority;
-    DMA_REG_BIT(pxDMA,CCR,DIR)    = pxConfig->Direction;
-    DMA_REG_BIT(pxDMA,CCR,CIRC)   = pxConfig->Mode;
-    DMA_REG_BIT(pxDMA,CCR,MEM2MEM)= pxConfig->Direction >> 1;
+    ulCCR = pxConfig->w & (DMA_CCR_DIR | DMA_CCR_CIRC | DMA_CCR_MINC | DMA_CCR_MSIZE
+                        | DMA_CCR_PINC | DMA_CCR_PSIZE | DMA_CCR_PL);
 
-    DMA_REG_BIT(pxDMA,CCR,PINC)   = pxConfig->Peripheral.Increment;
-    pxDMA->Inst->CCR.b.PSIZE      = pxConfig->Peripheral.DataAlignment;
+    /* Set the misplaced bits separately */
+    if (pxConfig->Direction == DMA_MEMORY2MEMORY)
+    {
+        ulCCR |= DMA_CCR_MEM2MEM;
+    }
 
-    DMA_REG_BIT(pxDMA,CCR,MINC)   = pxConfig->Memory.Increment;
-    pxDMA->Inst->CCR.b.MSIZE      = pxConfig->Memory.DataAlignment;
-
+    pxDMA->Inst->CCR.w = ulCCR;
     pxDMA->Inst->CNDTR = 0;
     pxDMA->Inst->CPAR  = 0;
 

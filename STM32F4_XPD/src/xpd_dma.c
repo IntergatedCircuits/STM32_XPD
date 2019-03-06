@@ -102,41 +102,38 @@ __STATIC_INLINE void DMA_prvCalcBase(DMA_HandleType * pxDMA)
  */
 void DMA_vInit(DMA_HandleType * pxDMA, const DMA_InitType * pxConfig)
 {
+    uint32_t ulCR;
+
     /* enable DMA clock */
     DMA_prvClockEnable(pxDMA);
 
-    DMA_REG_BIT(pxDMA,CR,CT) = 0;
+    /* The memory and peripheral burst are forced to 0 when the FIFO is disabled */
+    ulCR = pxConfig->w & (DMA_SxCR_PFCTRL | DMA_SxCR_DIR | DMA_SxCR_MINC | DMA_SxCR_MSIZE
+            | DMA_SxCR_PINC | DMA_SxCR_PSIZE| DMA_SxCR_PINCOS | DMA_SxCR_PL
+            | DMA_SxCR_PBURST | DMA_SxCR_MBURST | DMA_SxCR_CHSEL);
 
-    pxDMA->Inst->CR.b.CHSEL      = pxConfig->Channel;
-    pxDMA->Inst->CR.b.PL         = pxConfig->Priority;
-    pxDMA->Inst->CR.b.DIR        = pxConfig->Direction;
-    DMA_REG_BIT(pxDMA,CR,CIRC)   = pxConfig->Mode;
-    DMA_REG_BIT(pxDMA,CR,PFCTRL) = pxConfig->Mode >> 1;
-    DMA_REG_BIT(pxDMA,CR,DBM)    = pxConfig->Mode >> 2;
-
-    DMA_REG_BIT(pxDMA,CR,PINC)   = pxConfig->Peripheral.Increment;
-    pxDMA->Inst->CR.b.PSIZE      = pxConfig->Peripheral.DataAlignment;
-
-    DMA_REG_BIT(pxDMA,CR,MINC)   = pxConfig->Memory.Increment;
-    pxDMA->Inst->CR.b.MSIZE      = pxConfig->Memory.DataAlignment;
-
-    /* the memory burst and peripheral burst are not used when the FIFO is disabled */
-    if (pxConfig->FIFO.Mode == ENABLE)
+    /* Set the misplaced bits separately */
+    if (pxConfig->Mode == DMA_MODE_CIRCULAR)
     {
-        /* set memory burst and peripheral burst */
-        pxDMA->Inst->CR.b.MBURST = pxConfig->Memory.Burst;
-        pxDMA->Inst->CR.b.PBURST = pxConfig->Peripheral.Burst;
+        ulCR |= DMA_SxCR_CIRC;
+    }
+    else if (pxConfig->Mode == DMA_MODE_DBUFFER)
+    {
+        ulCR |= DMA_SxCR_DBM | DMA_SxCR_CIRC;
+    }
+    else {}
 
-        pxDMA->Inst->FCR.b.FTH   = pxConfig->FIFO.Threshold;
+    pxDMA->Inst->CR.w = ulCR;
+
+    /* FIFO configuration */
+    if (pxConfig->FifoThreshold > 0)
+    {
+        pxDMA->Inst->FCR.w = DMA_SxFCR_DMDIS | ((pxConfig->FifoThreshold - 1) << DMA_SxFCR_FTH_Pos);
     }
     else
     {
-        pxDMA->Inst->CR.b.MBURST = 0;
-        pxDMA->Inst->CR.b.PBURST = 0;
-
-        pxDMA->Inst->FCR.b.FTH   = 0;
+        pxDMA->Inst->FCR.w = 0;
     }
-    DMA_REG_BIT(pxDMA,FCR,DMDIS) = pxConfig->FIFO.Mode;
 
     pxDMA->Inst->NDTR = 0;
     pxDMA->Inst->PAR = 0;
@@ -155,12 +152,10 @@ void DMA_vDeinit(DMA_HandleType * pxDMA)
 
     /* configuration reset */
     pxDMA->Inst->CR.w = 0;
+    pxDMA->Inst->FCR.w = 0;
 
     pxDMA->Inst->NDTR = 0;
     pxDMA->Inst->PAR = 0;
-
-    /* FIFO control reset */
-    pxDMA->Inst->FCR.w = 0x00000021;
 
     /* Clear all interrupt flags */
     pxDMA->Base->LIFCR.w = (DMA_LIFCR_CFEIF0 | DMA_LIFCR_CDMEIF0 |
