@@ -94,13 +94,13 @@
     (RCC_ulClockFreq_Hz(PCLK1))
 
 /* Filter types */
-#define FILTER_SIZE_FLAG_Pos    2
-#define FILTER_SIZE_FLAG        4
-#define FILTER_MODE_FLAG_Pos    1
-#define FILTER_MODE_FLAG        2
+#define FILTER_SIZE_FLAG_Pos    1
+#define FILTER_SIZE_FLAG        2
+#define FILTER_MODE_FLAG_Pos    0
+#define FILTER_MODE_FLAG        1
 #define FMI_INVALID             0xFF
 
-static const uint8_t can_aucFilterTypeSpace[] = {2, 4, 1, 2};
+static const uint8_t can_aucFilterTypeSpace[] = {2, 1, 4, 2};
 
 /** @defgroup CAN_Private_Functions CAN Private Functions
  * @{ */
@@ -138,12 +138,16 @@ static XPD_ReturnType CAN_prvFrameTransmit(CAN_HandleType * pxCAN, CAN_FrameType
 
     if (eResult == XPD_OK)
     {
-        uint8_t ucOffset = 3;
+        uint8_t ucOffset;
 
         /* set up the Id */
         if ((pxFrame->Id.Type & CAN_IDTYPE_EXT_DATA) == CAN_IDTYPE_STD_DATA)
         {
-            ucOffset = 21;
+            ucOffset = CAN_TI0R_STID_Pos;
+        }
+        else
+        {
+            ucOffset = CAN_TI0R_EXID_Pos;
         }
         pxCAN->Inst->sTxMailBox[pxFrame->Index].TIR.w =
                 ((pxFrame->Id.Value << ucOffset) | (uint32_t)pxFrame->Id.Type);
@@ -179,17 +183,17 @@ static void CAN_prvFrameReceive(CAN_HandleType * pxCAN, uint8_t ucFIFONumber)
 
     if ((pxCAN->RxFrame[ucFIFONumber]->Id.Type & CAN_IDTYPE_EXT_DATA) == CAN_IDTYPE_STD_DATA)
     {
-        pxCAN->RxFrame[ucFIFONumber]->Id.Value = ulRIR >> 21;
+        pxCAN->RxFrame[ucFIFONumber]->Id.Value = ulRIR >> CAN_RI0R_STID_Pos;
     }
     else
     {
-        pxCAN->RxFrame[ucFIFONumber]->Id.Value = ulRIR >> 3;
+        pxCAN->RxFrame[ucFIFONumber]->Id.Value = ulRIR >> CAN_RI0R_EXID_Pos;
     }
 
     /* Get the DLC */
-    pxCAN->RxFrame[ucFIFONumber]->DLC = ulRDTR & 0xF;
+    pxCAN->RxFrame[ucFIFONumber]->DLC = ulRDTR & CAN_RDT0R_DLC;
     /* Get the FMI */
-    pxCAN->RxFrame[ucFIFONumber]->Index = ulRDTR >> 4;
+    pxCAN->RxFrame[ucFIFONumber]->Index = (ulRDTR & CAN_RDT0R_FMI) >> CAN_RDT0R_FMI_Pos;
 
     /* Get the data field */
     pxCAN->RxFrame[ucFIFONumber]->Data.Word[0] =
@@ -242,7 +246,8 @@ XPD_ReturnType CAN_eBitrateConfig(uint32_t ulBitrate, CAN_TimingConfigType * pxT
     uint32_t ulTQs = 25;
     uint32_t ulPres;
 
-    do{
+    do
+    {
         ulPres = ulOvers / ulTQs;
 
         /* Division without remainder? */
@@ -262,8 +267,8 @@ XPD_ReturnType CAN_eBitrateConfig(uint32_t ulBitrate, CAN_TimingConfigType * pxT
             break;
         }
         ulTQs--;
-
-    }while (ulTQs >= 4);
+    }
+    while (ulTQs >= 4);
 
     return eResult;
 }
@@ -723,7 +728,7 @@ XPD_ReturnType CAN_eFilterConfig(
         uint8_t                 ucFilterCount)
 {
     XPD_ReturnType eResult = XPD_OK;
-    uint8_t i, ucBase, ucFBDemand = 0, ucCurrentFMI = 0;
+    uint8_t ucFilterIndex, ucBase, ucFBDemand = 0, ucCurrentFMI = 0;
     CAN_TypeDef * CANx = CAN_MASTER(pxCAN);
 #ifdef CAN_BB
     CAN_BitBand_TypeDef * CANx_BB = CAN_BB(CANx);
@@ -749,9 +754,9 @@ XPD_ReturnType CAN_eFilterConfig(
     CLEAR_BIT(CANx->FA1R, ulMask << ucFBOffset);
 
     /* Initially set invalid value to FMI, to indicate missing configuration */
-    for (i = 0; i < ucFilterCount; i++)
+    for (ucFilterIndex = 0; ucFilterIndex < ucFilterCount; ucFilterIndex++)
     {
-        aucMatchIndexes[i] = FMI_INVALID;
+        aucMatchIndexes[ucFilterIndex] = FMI_INVALID;
     }
 
     for (ucBase = 0; ucBase < ucFilterCount; ucBase++)
@@ -759,30 +764,55 @@ XPD_ReturnType CAN_eFilterConfig(
         /* If the current filter is not configured, it has a yet unprocessed type */
         if (aucMatchIndexes[ucBase] == FMI_INVALID)
         {
-            uint8_t fbankIndex; /* Ignore "may be used uninitialized" warning */
-            uint8_t fbankPos = 255;
-            uint8_t currentType, currentSize, type;
+            uint8_t ucFBIndex; /* Ignore "may be used uninitialized" warning */
+            uint8_t ucFBPos = 255;
+            uint8_t ucFilterSize;
             union {
-                uint16_t u16[4];
-                uint32_t u32[2];
-                CAN_FilterRegister_TypeDef filterReg;
-            }FilterBank;
+                struct {
+                uint8_t Mode : 1; /* Set for match, clear for mask mode */
+                uint8_t Size : 1; /* Set when the pattern is extended */
+                uint8_t FIFO : 1;
+                uint8_t : 5;
+                };
+                uint8_t w;
+            }xSelectedType = { .w = 0 }, xCurrentType;
+            union {
+                union {
+                    struct {
+                    uint16_t : 3;
+                    uint16_t IDE : 1;
+                    uint16_t RTR : 1;
+                    uint16_t StdId : 11;
+                    };
+                    uint16_t w;
+                }u16[4];
+                union {
+                    struct {
+                    uint32_t : 1;
+                    uint32_t RTR : 1;
+                    uint32_t IDE : 1;
+                    uint32_t ExtId : 29;
+                    };
+                    uint32_t w;
+                }u32[2];
+            }xFilterBank;
 
-            currentType = axFilters[ucBase].FIFO
-                       | (axFilters[ucBase].Mode         & CAN_FILTER_MATCH)
-                       | (axFilters[ucBase].Pattern.Type & CAN_IDTYPE_EXT_DATA);
-            currentSize = can_aucFilterTypeSpace[currentType >> 1];
-            type = currentType;
-            i = ucBase;
+            xSelectedType.Mode = axFilters[ucBase].Mode;
+            xSelectedType.Size = axFilters[ucBase].Pattern.Type >> (CAN_RI0R_IDE_Pos - FILTER_SIZE_FLAG_Pos);
+            xSelectedType.FIFO = axFilters[ucBase].FIFO;
+            ucFilterSize = can_aucFilterTypeSpace[xSelectedType.w & (FILTER_MODE_FLAG | FILTER_SIZE_FLAG)];
+            xCurrentType.w = xSelectedType.w;
+            ucFilterIndex = ucBase;
 
-            do {
-                /* If the type of the currently indexed filter matches the base */
-                if (type == currentType)
+            do
+            {
+                /* If the xCurrentType of the currently indexed filter matches the base */
+                if (xCurrentType.w == xSelectedType.w)
                 {
                     /* If the current filter bank is full, set up another one */
-                    if (fbankPos >= currentSize)
+                    if (ucFBPos >= ucFilterSize)
                     {
-                        fbankIndex = ucFBDemand + ucFBOffset;
+                        ucFBIndex = ucFBDemand + ucFBOffset;
 
                         /* Check against overrun of used filter banks */
                         if ((ucFBDemand + 1) > ucFBCount)
@@ -795,120 +825,116 @@ XPD_ReturnType CAN_eFilterConfig(
                         /* Configure new filter bank type */
 #ifdef CAN_BB
                         /* Setting filter FIFO assignment */
-                        CANx_BB->FFA1R[fbankIndex] = axFilters[i].FIFO;
+                        CANx_BB->FFA1R[ucFBIndex] = axFilters[ucFilterIndex].FIFO;
 
                         /* Setting filter mode */
-                        CANx_BB->FM1R[fbankIndex]  = type >> FILTER_MODE_FLAG_Pos;
+                        CANx_BB->FM1R[ucFBIndex] = xCurrentType.Mode;
 
                         /* Setting filter scale */
-                        CANx_BB->FS1R[fbankIndex]  = type >> FILTER_SIZE_FLAG_Pos;
+                        CANx_BB->FS1R[ucFBIndex] = xCurrentType.Size;
 #else
-                        uint32_t fbIndexMask = 1 << fbankIndex;
+                        uint32_t ulFBIMask = 1 << ucFBIndex;
 
                         /* Setting filter FIFO assignment */
-                        if (axFilters[i].FIFO == 0)
-                        {   CLEAR_BIT(CANx->FFA1R, fbIndexMask); }
+                        if (axFilters[ucFilterIndex].FIFO == 0)
+                        {   CLEAR_BIT(CANx->FFA1R, ulFBIMask); }
                         else
-                        {   SET_BIT(CANx->FFA1R, fbIndexMask); }
+                        {   SET_BIT(CANx->FFA1R, ulFBIMask); }
 
                         /* Setting filter mode */
-                        if ((type & FILTER_MODE_FLAG) == 0)
-                        {   CLEAR_BIT(CANx->FM1R, fbIndexMask); }
+                        if (xCurrentType.Mode == 0)
+                        {   CLEAR_BIT(CANx->FM1R, ulFBIMask); }
                         else
-                        {   SET_BIT(CANx->FM1R, fbIndexMask); }
+                        {   SET_BIT(CANx->FM1R, ulFBIMask); }
 
                         /* Setting filter scale */
-                        if ((type & FILTER_SIZE_FLAG) == 0)
-                        {   CLEAR_BIT(CANx->FS1R, fbIndexMask); }
+                        if (xCurrentType.Size == 0)
+                        {   CLEAR_BIT(CANx->FS1R, ulFBIMask); }
                         else
-                        {   SET_BIT(CANx->FS1R, fbIndexMask); }
+                        {   SET_BIT(CANx->FS1R, ulFBIMask); }
 #endif /* CAN_BB */
 
-                        fbankPos = 0;
+                        ucFBPos = 0;
                         ucFBDemand++;
                     }
 
                     /* Set the identifier pattern depending on the filter scale */
-                    if ((currentType & FILTER_SIZE_FLAG) == 0)
+                    if (xCurrentType.Size == 0)
                     {
-                        FilterBank.u16[fbankPos] = (axFilters[i].Pattern.Value << 5)
-                                                 | (axFilters[i].Pattern.Type  << 2);
+                        xFilterBank.u16[ucFBPos].w = axFilters[ucFilterIndex].Pattern.Value << 5;
+
+                        /* IDE and RTR bit order is reverse in this layout */
+                        xFilterBank.u16[ucFBPos].IDE =
+                                axFilters[ucFilterIndex].Pattern.Type >> CAN_RI0R_IDE_Pos;
+                        xFilterBank.u16[ucFBPos].RTR =
+                                axFilters[ucFilterIndex].Pattern.Type >> CAN_RI0R_RTR_Pos;
 
                         /* Set the masking bits */
-                        if ((currentType & FILTER_MODE_FLAG) == 0)
+                        if (xCurrentType.Mode == 0)
                         {
-                            FilterBank.u16[fbankPos + 1] = (axFilters[i].Mask << 5);
-
-                            /* If mask does not pass any type, set the type bits */
-                            if (axFilters[i].Mode == CAN_FILTER_MASK)
-                            {
-                                FilterBank.u16[fbankPos + 1] |= CAN_IDTYPE_EXT_RTR << 2;
-                            }
+                            xFilterBank.u16[ucFBPos + 1].w = (axFilters[ucFilterIndex].Mask << 5)
+                                                           | (axFilters[ucFilterIndex].Mode << 2);
                         }
                     }
                     else
                     {
-                        FilterBank.u32[fbankPos] = (axFilters[i].Pattern.Value << 3)
-                                                 | (axFilters[i].Pattern.Type);
+                        xFilterBank.u32[ucFBPos].w = (axFilters[ucFilterIndex].Pattern.Value << CAN_RI0R_EXID_Pos)
+                                                   | (axFilters[ucFilterIndex].Pattern.Type);
 
                         /* Set the masking bits */
-                        if ((currentType & FILTER_MODE_FLAG) == 0)
+                        if (xCurrentType.Mode == 0)
                         {
                             /* Filter bank size fixes the mask field location */
-                            FilterBank.u32[1] = (axFilters[i].Mask << 3);
-
-                            /* If mask does not pass any type, set the type bits */
-                            if (axFilters[i].Mode == CAN_FILTER_MASK)
-                            {
-                                FilterBank.u32[1] |= CAN_IDTYPE_EXT_RTR;
-                            }
+                            xFilterBank.u16[1].w = (axFilters[ucFilterIndex].Mask << CAN_RI0R_EXID_Pos)
+                                                  | axFilters[ucFilterIndex].Mode;
                         }
                     }
 
                     /* Set the current filter's FMI */
-                    aucMatchIndexes[i] = ucCurrentFMI + fbankPos;
+                    aucMatchIndexes[ucFilterIndex] = ucCurrentFMI + ucFBPos;
 
                     /* If the last element of the bank */
-                    if ((fbankPos + 1) >= currentSize)
+                    if ((ucFBPos + 1) >= ucFilterSize)
                     {
-                        ucCurrentFMI += currentSize;
+                        ucCurrentFMI += ucFilterSize;
 
                         /* Set the configured bank in the peripheral */
-                        CANx->sFilterRegister[fbankIndex].FR1 = FilterBank.u32[0];
-                        CANx->sFilterRegister[fbankIndex].FR2 = FilterBank.u32[1];
+                        CANx->sFilterRegister[ucFBIndex].FR1 = xFilterBank.u32[0].w;
+                        CANx->sFilterRegister[ucFBIndex].FR2 = xFilterBank.u32[1].w;
                     }
                     /* Unused filters after the current one are set to
                      * the copies of the current to avoid receiving unwanted frames */
-                    else if (currentSize == 2)
+                    else if (ucFilterSize == 2)
                     {
-                        FilterBank.u32[1] = FilterBank.u32[0];
+                        xFilterBank.u32[1].w = xFilterBank.u32[0].w;
                     }
-                    else if (fbankPos == 0)
+                    else if (ucFBPos == 0)
                     {
-                        FilterBank.u16[1] = FilterBank.u16[0];
-                        FilterBank.u32[1] = FilterBank.u32[0];
+                        xFilterBank.u16[1].w = xFilterBank.u16[0].w;
+                        xFilterBank.u32[1].w = xFilterBank.u32[0].w;
                     }
                     else {}
 
-                    fbankPos++;
+                    ucFBPos++;
                 }
 
                 /* Advance to the next filter */
-                i++;
-                type = axFilters[i].FIFO
-                    | (axFilters[i].Mode         & CAN_FILTER_MATCH)
-                    | (axFilters[i].Pattern.Type & CAN_IDTYPE_EXT_DATA);
+                ucFilterIndex++;
 
-            } while (i < ucFilterCount);
+                xCurrentType.Mode = axFilters[ucBase].Mode;
+                xCurrentType.Size = axFilters[ucBase].Pattern.Type >> (CAN_RI0R_IDE_Pos - FILTER_SIZE_FLAG_Pos);
+                xCurrentType.FIFO = axFilters[ucBase].FIFO;
+            }
+            while (ucFilterIndex < ucFilterCount);
 
             /* If the last bank was not filled completely */
-            if (fbankPos < currentSize)
+            if (ucFBPos < ucFilterSize)
             {
-                ucCurrentFMI += currentSize;
+                ucCurrentFMI += ucFilterSize;
 
                 /* Set the configured bank in the peripheral */
-                CANx->sFilterRegister[fbankIndex].FR1 = FilterBank.u32[0];
-                CANx->sFilterRegister[fbankIndex].FR2 = FilterBank.u32[1];
+                CANx->sFilterRegister[ucFBIndex].FR1 = xFilterBank.u32[0].w;
+                CANx->sFilterRegister[ucFBIndex].FR2 = xFilterBank.u32[1].w;
             }
         }
     }

@@ -62,16 +62,16 @@ typedef struct
 {
     CAN_TimingConfigType Timing;
     union {
-        struct {
-        CAN_ModeType    Mode : 2; /*!< CAN test mode selection */
-        FunctionalState TXFP : 1; /*!< Transmit FIFO Priority on request age instead of ID priority */
-        FunctionalState RFLM : 1; /*!< Receive FIFO Locked Mode keeps older messages in full FIFO */
-        FunctionalState NART : 1; /*!< Non Automatic ReTransmission */
-        FunctionalState AWUM : 1; /*!< Automatic Wake-Up on message detection */
-        FunctionalState ABOM : 1; /*!< Automatic Bus-Off Recovery */
-        FunctionalState TTCM : 1; /*!< Time-Triggered Communication Mode */
-        };
-        uint8_t wSettings;            /*!< Set to 0 for default features */
+    struct {
+    CAN_ModeType    Mode : 2;             /*!< CAN test mode selection */
+    FunctionalState TxFifoMode : 1;       /*!< Transmit mailboxes are sent in FIFO instead of ID priority order */
+    FunctionalState RxFifoLocked : 1;     /*!< Receive FIFO Locked Mode keeps older messages in full FIFO */
+    FunctionalState NoAutoRetransmit : 1; /*!< Non Automatic ReTransmission */
+    FunctionalState AutoWakeup : 1;       /*!< Automatic Wake-Up on message detection */
+    FunctionalState AutoBusRecovery : 1;  /*!< Automatic Bus-Off Recovery */
+    FunctionalState TTCAN : 1;            /*!< Time-Triggered Communication Mode */
+    };
+    uint8_t wSettings;            /*!< Set to 0 for default features */
     };
 }CAN_InitType;
 
@@ -124,11 +124,11 @@ typedef enum
 /** @brief CAN Filter types */
 typedef enum
 {
-    CAN_FILTER_MATCH        = 0x02, /*!< Filter accepts messages with identical Identifier */
-    CAN_FILTER_MASK         = 0x00, /*!< Filter accepts messages with identical Identifier type
+    CAN_FILTER_MATCH        = 0x01, /*!< Filter accepts messages with identical frame type and Identifier */
+    CAN_FILTER_MASK         = 0x06, /*!< Filter accepts messages with identical frame type
                                          and matching Identifier field values on the mask-selected bits */
-    CAN_FILTER_MASK_ANYTYPE = 0x80, /*!< Filter accepts messages with matching Identifier field
-                                         values on the mask-selected bits */
+    CAN_FILTER_MASK_ANYTYPE = 0x00, /*!< Filter accepts messages with matching Identifier field
+                                         values on the mask-selected bits, of all frame types */
 }CAN_FilterModeType;
 
 /** @brief CAN Filter structure */
