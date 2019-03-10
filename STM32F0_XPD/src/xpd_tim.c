@@ -118,15 +118,12 @@ static void TIM_prvInit(TIM_HandleType * pxTIM, const TIM_InitType * pxConfig)
     RCC_vClockEnable(pxTIM->CtrlPos);
     RCC_vReset(pxTIM->CtrlPos);
 
-    TIM_REG_BIT(pxTIM, CR1, DIR)    = pxConfig->Mode;
-    TIM_REG_BIT(pxTIM, CR1, ARPE)   = pxConfig->Preload;
-    TIM_REG_BIT(pxTIM, CR1, OPM)    = pxConfig->OnePulse;
-    pxTIM->Inst->CR1.b.CMS          = pxConfig->Mode >> 1;
-    pxTIM->Inst->CR1.b.CKD          = pxConfig->ClockDivision;
+    pxTIM->Inst->CR1.w = pxConfig->wSettings & (TIM_CR1_UDIS | TIM_CR1_URS | TIM_CR1_OPM
+            | TIM_CR1_DIR | TIM_CR1_CMS | TIM_CR1_CKD | TIM_CR1_UIFREMAP);
 
-    pxTIM->Inst->PSC                = (uint32_t)(pxConfig->Prescaler - 1);
-    pxTIM->Inst->ARR                = (uint32_t)(pxConfig->Period - 1);
-    pxTIM->Inst->RCR                = pxConfig->RepetitionCounter;
+    pxTIM->Inst->PSC = (uint32_t)(pxConfig->Prescaler - 1);
+    pxTIM->Inst->ARR = (uint32_t)(pxConfig->Period - 1);
+    pxTIM->Inst->RCR = pxConfig->RepetitionCounter;
 }
 
 /** @} */
@@ -438,7 +435,7 @@ void TIM_vCounterStop_IT(TIM_HandleType * pxTIM)
 void TIM_vIRQHandler_UP(TIM_HandleType * pxTIM)
 {
     /* TIM update event */
-    if (TIM_FLAG_STATUS(pxTIM, U) != 0)
+    if ((pxTIM->Inst->SR.w & pxTIM->Inst->DIER.w & TIM_SR_UIF) != 0)
     {
         /* Clear interrupt flag */
         TIM_FLAG_CLEAR(pxTIM, U);
@@ -464,13 +461,14 @@ void TIM_vIRQHandler_UP(TIM_HandleType * pxTIM)
 void TIM_vIRQHandler_CC(TIM_HandleType * pxTIM)
 {
     TIM_ChannelType eChannel = TIM_CH1;
-    uint32_t ulFlags = pxTIM->Inst->SR.w
-            & (TIM_SR_CC1IF | TIM_SR_CC2IF | TIM_SR_CC3IF | TIM_SR_CC4IF);
+    uint32_t ulFlags = (pxTIM->Inst->SR.w & pxTIM->Inst->DIER.w
+            & (TIM_SR_CC1IF | TIM_SR_CC2IF | TIM_SR_CC3IF | TIM_SR_CC4IF))
+                >> TIM_SR_CC1IF_Pos;
 
     /* Iterate through active channel flags */
     while (ulFlags > 0)
     {
-        if ((ulFlags & (1 << TIM_SR_CC1IF_Pos)) != 0)
+        if ((ulFlags & 1) != 0)
         {
             /* Clear interrupt flag */
             TIM_vChannelClearFlag(pxTIM, eChannel);
@@ -497,34 +495,73 @@ void TIM_vIRQHandler_CC(TIM_HandleType * pxTIM)
  * @{ */
 
 /**
- * @brief Sets up a selected Break feature using the input configuration.
+ * @brief Sets up the output drive configuration of the timer.
  * @param pxTIM: pointer to the TIM handle structure
- * @param ucBreakLine: the Break line to configure (1 or 2)
- * @param pxConfig: pointer to TIM Break setup configuration
+ * @param pxConfig: pointer to TIM break setup configuration
  */
-void TIM_vBreakConfig(
-        TIM_HandleType *            pxTIM,
-        uint8_t                     ucBreakLine,
-        const TIM_BreakInitType *   pxConfig)
+void TIM_vDriveConfig(TIM_HandleType * pxTIM, const TIM_DriveInitType * pxConfig)
 {
+    uint32_t ulBDTR = pxConfig->w;
+
+    /* Break polarity bits are interpreted in reverse */
+#ifdef TIM_BDTR_BK2P
+    ulBDTR ^= TIM_BDTR_BKP | TIM_BDTR_BK2P;
+#else
+    ulBDTR ^= TIM_BDTR_BKP;
+#endif
+
+    MODIFY_REG(pxTIM->Inst->BDTR.w, TIM_BDTR_DTG | TIM_BDTR_OSSI | TIM_BDTR_OSSR
+            | TIM_BDTR_AOE | TIM_BDTR_BKE | TIM_BDTR_BKP
+#ifdef TIM_BDTR_BKF
+            | TIM_BDTR_BKF
+#endif
 #ifdef TIM_BDTR_BK2E
-    if (ucBreakLine > 1)
+            | TIM_BDTR_BK2E | TIM_BDTR_BK2P | TIM_BDTR_BK2F
+#endif
+            , ulBDTR);
+}
+
+/**
+ * @brief Calculates dead time register value from dead time in timer counts.
+ * @param pxTIM: pointer to the TIM handle structure
+ * @param ulDeadtimeCounts: the dead time value in timer counts
+ * @return The dead time in register configuration format
+ */
+uint8_t TIM_ucCalcDeadtime(TIM_HandleType * pxTIM, uint32_t ulDeadtimeCounts)
+{
+    uint8_t ucDeadtime;
+
+    /* Divide by clock division */
+    ulDeadtimeCounts >>= pxTIM->Inst->CR1.b.CKD;
+
+    /* Revert the configuration characteristic */
+    if (ulDeadtimeCounts < 128)
     {
-        /* break2 configuration */
-        TIM_REG_BIT(pxTIM, BDTR, BK2E) = pxConfig->State;
-        TIM_REG_BIT(pxTIM, BDTR, BK2P) = 1 - pxConfig->Polarity;
-        pxTIM->Inst->BDTR.b.BK2F       = pxConfig->Filter;
+        /* dead counts = DTG */
+        ucDeadtime = ulDeadtimeCounts;
+    }
+    else if (ulDeadtimeCounts < 256)
+    {
+        /* dead counts =(64+DTG[5:0])*2 */
+        ucDeadtime = 0x80 | ((ulDeadtimeCounts / 2) - 64);
+    }
+    else if (ulDeadtimeCounts < 512)
+    {
+        /* dead counts =(32+DTG[4:0])*8 */
+        ucDeadtime = 0xC0 | ((ulDeadtimeCounts / 8) - 32);
+    }
+    else if (ulDeadtimeCounts < 1008)
+    {
+        /* dead counts =(32+DTG[4:0])*16 */
+        ucDeadtime = 0xE0 | ((ulDeadtimeCounts / 16) - 32);
     }
     else
-#endif
     {
-        /* break configuration */
-        TIM_REG_BIT(pxTIM, BDTR, BKE)  = pxConfig->State;
-        TIM_REG_BIT(pxTIM, BDTR, BKP)  = 1 - pxConfig->Polarity;
-#ifdef TIM_BDTR_BKF
-        pxTIM->Inst->BDTR.b.BKF        = pxConfig->Filter;
-#endif
+        /* saturation */
+        ucDeadtime = 255;
     }
+
+    return ucDeadtime;
 }
 
 /**
@@ -534,55 +571,13 @@ void TIM_vBreakConfig(
 void TIM_vIRQHandler_BRK(TIM_HandleType * pxTIM)
 {
     /* TIM Break input event */
-    if (TIM_FLAG_STATUS(pxTIM, B) != 0)
+    if ((pxTIM->Inst->SR.w & pxTIM->Inst->DIER.w & TIM_SR_BIF) != 0)
     {
         /* Clear interrupt flag */
         TIM_FLAG_CLEAR(pxTIM, B);
 
         XPD_SAFE_CALLBACK(pxTIM->Callbacks.Break, pxTIM);
     }
-}
-
-/**
- * @brief Sets up the output drive configuration of the timer.
- * @param pxTIM: pointer to the TIM handle structure
- * @param pxConfig: pointer to TIM break setup configuration
- */
-void TIM_vDriveConfig(TIM_HandleType * pxTIM, const TIM_DriveInitType * pxConfig)
-{
-    uint8_t ucDeadtime;
-
-    /* Revert the configuration characteristic */
-    if (pxConfig->DeadCounts < 128)
-    {
-        /* dead counts = DTG */
-        ucDeadtime = pxConfig->DeadCounts;
-    }
-    else if (pxConfig->DeadCounts < 256)
-    {
-        /* dead counts =(64+DTG[5:0])*2 */
-        ucDeadtime = 0x80 | ((pxConfig->DeadCounts / 2) - 64);
-    }
-    else if (pxConfig->DeadCounts < 512)
-    {
-        /* dead counts =(32+DTG[4:0])*8 */
-        ucDeadtime = 0xC0 | ((pxConfig->DeadCounts / 8) - 32);
-    }
-    else if (pxConfig->DeadCounts < 1008)
-    {
-        /* dead counts =(32+DTG[4:0])*16 */
-        ucDeadtime = 0xE0 | ((pxConfig->DeadCounts / 16) - 32);
-    }
-    else
-    {
-        /* saturation */
-        ucDeadtime = 255;
-    }
-
-    pxTIM->Inst->BDTR.b.DTG        = ucDeadtime;
-    TIM_REG_BIT(pxTIM, BDTR, AOE)  = pxConfig->AutomaticOutput;
-    TIM_REG_BIT(pxTIM, BDTR, OSSI) = pxConfig->IdleOffState;
-    TIM_REG_BIT(pxTIM, BDTR, OSSR) = pxConfig->RunOffState;
 }
 
 /**
@@ -668,7 +663,7 @@ void TIM_vCommutationConfig(TIM_HandleType * pxTIM, TIM_CommutationSourceType eC
 void TIM_vIRQHandler_COM(TIM_HandleType * pxTIM)
 {
     /* TIM commutation event */
-    if (TIM_FLAG_STATUS(pxTIM, COM) != 0)
+    if ((pxTIM->Inst->SR.w & pxTIM->Inst->DIER.w & TIM_SR_COMIF) != 0)
     {
         /* clear interrupt flag */
         TIM_FLAG_CLEAR(pxTIM, COM);
@@ -713,58 +708,17 @@ void TIM_vMasterConfig(TIM_HandleType * pxTIM, const TIM_MasterConfigType * pxCo
  */
 void TIM_vSlaveConfig(TIM_HandleType * pxTIM, const TIM_SlaveConfigType * pxConfig)
 {
-    /* Set the mandatory configuration elements */
-    MODIFY_REG(pxTIM->Inst->SMCR.w,
-            TIM_SMCR_ECE | TIM_SMCR_ETPS | TIM_SMCR_TS | TIM_SMCR_SMS,
-            pxConfig->SlaveMode | pxConfig->SlaveTrigger);
+    uint32_t ulSmcr = pxConfig->w;
+    uint32_t ulSmcrMask = TIM_SMCR_SMS | TIM_SMCR_TS | TIM_SMCR_ETF
+            | TIM_SMCR_ETPS | TIM_SMCR_ECE | TIM_SMCR_ETP;
 
-    /* Configure the trigger prescaler, filter, and polarity (where applicable) */
-    switch (pxConfig->SlaveTrigger)
+#ifdef TIM_SMCR_SMS_3
+    if (pxConfig->SlaveMode == TIM_SLAVEMODE_RESET_TRIGGER)
     {
-        case TIM_TRGI_TI1:
-        case TIM_TRGI_TI1_ED:
-        {
-            /* Set the input polarity, disable channel */
-            CLEAR_BIT(pxTIM->Inst->CCER.w, 0xF);
-
-            if (pxConfig->Polarity == ACTIVE_LOW)
-            {
-                TIM_REG_BIT(pxTIM,CCER,CC1P) = 1;
-            }
-
-            /* Set the filter */
-            pxTIM->Inst->CCMR1.IC.C1F = pxConfig->Filter;
-            break;
-        }
-
-        case TIM_TRGI_TI2:
-        {
-            /* Set the input polarity, disable channel */
-            CLEAR_BIT(pxTIM->Inst->CCER.w, 0xF0);
-
-            if (pxConfig->Polarity == ACTIVE_LOW)
-            {
-                TIM_REG_BIT(pxTIM,CCER,CC2P) = 1;
-            }
-
-            /* Set the filter */
-            pxTIM->Inst->CCMR1.IC.C2F = pxConfig->Filter;
-            break;
-        }
-
-        case TIM_TRGI_ETR_MODE1:
-        case TIM_TRGI_ETR_MODE2:
-        {
-            /* Configure the external trigger settings */
-            pxTIM->Inst->SMCR.b.ETF  = pxConfig->Filter;
-            pxTIM->Inst->SMCR.b.ETPS = pxConfig->Prescaler;
-            pxTIM->Inst->SMCR.b.ETP  = pxConfig->Polarity;
-            break;
-        }
-
-        default:
-            break;
+        ulSmcr |= TIM_SMCR_SMS_3;
     }
+#endif
+    MODIFY_REG(pxTIM->Inst->SMCR.w, ulSmcrMask, ulSmcr);
 }
 
 /**
@@ -774,7 +728,7 @@ void TIM_vSlaveConfig(TIM_HandleType * pxTIM, const TIM_SlaveConfigType * pxConf
 void TIM_vIRQHandler_TRG(TIM_HandleType * pxTIM)
 {
     /* TIM Trigger detection event */
-    if (TIM_FLAG_STATUS(pxTIM, T) != 0)
+    if ((pxTIM->Inst->SR.w & pxTIM->Inst->DIER.w & TIM_SR_TIF) != 0)
     {
         /* clear interrupt flag */
         TIM_FLAG_CLEAR(pxTIM, T);
