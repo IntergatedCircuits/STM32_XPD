@@ -37,10 +37,14 @@ extern "C"
  * @{ */
 
 /** @brief EXTI setup structure */
-typedef struct
+typedef union
 {
-    EdgeType        Edge;       /*!< The selected edges trigger a reaction */
-    ReactionType    Reaction;   /*!< Type of generated reaction for the detected edge */
+    struct {
+    ReactionType Reaction : 2;  /*!< Type of generated reaction for the detected edge */
+    EdgeType     Edge : 2;      /*!< The selected edges trigger a reaction */
+    uint8_t : 4;
+    };
+    uint8_t w;
 }EXTI_InitType;
 
 /** @} */
@@ -57,6 +61,8 @@ extern XPD_ValueCallbackType EXTI_xPinCallbacks[16];
  * @{ */
 void            EXTI_vInit           (uint8_t ucLine, const EXTI_InitType * pxConfig);
 void            EXTI_vDeinit         (uint8_t ucLine);
+
+const EXTI_InitType * EXTI_pxDefaultConfig(void);
 
 /**
  * @brief Gets the pending flag for the line.

@@ -72,8 +72,7 @@ typedef enum
  */
 __STATIC_INLINE void PVD_vInit(PWR_PVDLevelType eLevel, ReactionType eReaction)
 {
-    EXTI_InitType xExti;
-    xExti.Edge     = EDGE_RISING;
+    EXTI_InitType xExti = { .Edge = EDGE_RISING };
     xExti.Reaction = eReaction;
 
     /* Set PLS bits according to PVDLevel value */

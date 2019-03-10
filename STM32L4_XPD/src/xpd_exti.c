@@ -23,13 +23,15 @@
 
 #include <xpd_exti.h>
 
+/** @addtogroup EXTI
+ * @{ */
+
 XPD_ValueCallbackType EXTI_xPinCallbacks[16] = {
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 };
 
-/** @addtogroup EXTI
- * @{ */
+static const EXTI_InitType exti_xDefConfig = { .Reaction = REACTION_IT, .Edge = EDGE_RISING };
 
 /** @defgroup EXTI_Exported_Functions EXTI Exported Functions
  * @{ */
@@ -48,25 +50,25 @@ void EXTI_vInit(uint8_t ucLine, const EXTI_InitType * pxConfig)
 #ifdef EXTI_BB
     if (ucLine < 32)
     {
-        EXTI_BB->IMR1[ucLine] = pxConfig->Reaction;
+        EXTI_BB->IMR1[ucLine] = pxConfig->w;
 
-        EXTI_BB->EMR1[ucLine] = pxConfig->Reaction >> 1;
+        EXTI_BB->EMR1[ucLine] = pxConfig->w >> 1;
 
-        EXTI_BB->RTSR1[ucLine] = pxConfig->Edge;
+        EXTI_BB->RTSR1[ucLine] = pxConfig->w >> 2;
 
-        EXTI_BB->FTSR1[ucLine] = pxConfig->Edge >> 1;
+        EXTI_BB->FTSR1[ucLine] = pxConfig->w >> 3;
     }
     else
     {
         ucLine -= 32;
 
-        EXTI_BB->IMR2[ucLine] = pxConfig->Reaction;
+        EXTI_BB->IMR2[ucLine] = pxConfig->w;
 
-        EXTI_BB->EMR2[ucLine] = pxConfig->Reaction >> 1;
+        EXTI_BB->EMR2[ucLine] = pxConfig->w >> 1;
 
-        EXTI_BB->RTSR2[ucLine] = pxConfig->Edge;
+        EXTI_BB->RTSR2[ucLine] = pxConfig->w >> 2;
 
-        EXTI_BB->FTSR2[ucLine] = pxConfig->Edge >> 1;
+        EXTI_BB->FTSR2[ucLine] = pxConfig->w >> 3;
     }
 #else
     if (ucLine < 32)
@@ -211,6 +213,15 @@ void EXTI_vDeinit(uint8_t ucLine)
         CLEAR_BIT(EXTI->FTSR2, ulLineBit);
     }
 #endif
+}
+
+/**
+ * @brief Gets the default EXTI configuration (trigger interrupt on rising edge).
+ * @return Reference to the default EXTI configuration value
+ */
+const EXTI_InitType * EXTI_pxDefaultConfig(void)
+{
+    return &exti_xDefConfig;
 }
 
 /** @} */
