@@ -184,42 +184,25 @@ static uint8_t ADC_prvCommonChannelConfig(
  */
 void ADC_vInit(ADC_HandleType * pxADC, const ADC_InitType * pxConfig)
 {
+    uint32_t ulCR1, ulCR1Mask;
+
     /* Enable clock */
     RCC_vClockEnable(pxADC->CtrlPos);
 
-    /* Apply configuration */
-    ADC_REG_BIT(pxADC,CR1,SCAN)  = pxConfig->ScanMode;
-    ADC_REG_BIT(pxADC,CR2,ALIGN) = pxConfig->LeftAlignment;
-    ADC_REG_BIT(pxADC,CR2,CONT)  = pxConfig->ContinuousMode;
-    ADC_REG_BIT(pxADC,CR2,EOCS)  = pxConfig->EndFlagSelection;
-    ADC_REG_BIT(pxADC,CR2,DDS)   = pxConfig->ContinuousDMARequests;
+    ulCR1Mask = ADC_CR1_SCAN | ADC_CR1_DISCEN | ADC_CR1_DISCNUM | ADC_CR1_RES;
 
-    pxADC->Inst->CR1.b.RES       = pxConfig->Resolution;
+    /* The bit config of CR1 is stored with an offset */
+    ulCR1 = (pxConfig->w >> 6) & ~(ADC_CR1_DISCEN | ADC_CR1_JDISCEN | ADC_CR1_DISCNUM);
 
-    /* External trigger configuration */
-    if(pxConfig->Trigger.Source == ADC_TRIGGER_SOFTWARE)
-    {
-        /* reset the external trigger */
-        CLEAR_BIT(pxADC->Inst->CR2.w, ADC_CR2_EXTSEL | ADC_CR2_EXTEN);
-    }
-    else
-    {
-        /* select external trigger and polarity to start conversion */
-        pxADC->Inst->CR2.b.EXTSEL = pxConfig->Trigger.Source;
-        pxADC->Inst->CR2.b.EXTEN  = pxConfig->Trigger.Edge;
-    }
-
-    /* Discontinuous mode configuration */
     if (pxConfig->DiscontinuousCount != 0)
     {
-        ADC_REG_BIT(pxADC,CR1,DISCEN) = 1;
+        ulCR1 |= ADC_CR1_DISCEN | ((pxConfig->DiscontinuousCount - 1) << ADC_CR1_DISCNUM_Pos);
+    }
 
-        pxADC->Inst->CR1.b.DISCNUM = pxConfig->DiscontinuousCount - 1;
-    }
-    else
-    {
-        CLEAR_BIT(pxADC->Inst->CR1.w, ADC_CR1_DISCEN | ADC_CR1_DISCNUM);
-    }
+    MODIFY_REG(pxADC->Inst->CR1.w, ulCR1Mask, ulCR1);
+    MODIFY_REG(pxADC->Inst->CR2.w, ADC_CR2_ALIGN | ADC_CR2_CONT | ADC_CR2_DDS |
+            ADC_CR2_EOCS | ADC_CR2_EXTEN | ADC_CR2_EXTSEL,
+            pxConfig->w);
 
     /* dependencies initialization */
     XPD_SAFE_CALLBACK(pxADC->Callbacks.DepInit, pxADC);
@@ -632,24 +615,18 @@ ADC_WatchdogType ADC_eWatchdogStatus(ADC_HandleType * pxADC)
  */
 void ADC_vInjectedInit(ADC_HandleType * pxADC, const ADC_InjectedInitType * pxConfig)
 {
-    /* Only one of these shall be enabled at a time */
-    ADC_REG_BIT(pxADC, CR1, JAUTO)   = pxConfig->AutoInjection;
-    ADC_REG_BIT(pxADC, CR1, JDISCEN) = pxConfig->DiscontinuousMode;
+    uint32_t ulCRx;
 
-    /* If the trigger is software, or the injected channel is converted
-     * automatically after regular */
-    if (   (pxConfig->Trigger.InjSource == ADC_INJTRIGGER_SOFTWARE)
-        || (pxConfig->AutoInjection == ENABLE))
+    ulCRx = pxConfig->w << 8;
+
+    /* Cannot use both auto-injected mode and discontinuous mode simultaneously */
+    if (pxConfig->AutoInjection != 0)
     {
-        /* Reset the external trigger */
-        CLEAR_BIT(pxADC->Inst->CR2.w, ADC_CR2_JEXTSEL | ADC_CR2_JEXTEN);
+        CLEAR_BIT(ulCRx, ADC_CR1_JDISCEN);
     }
-    else
-    {
-        /* External trigger config */
-        pxADC->Inst->CR2.b.JEXTSEL = pxConfig->Trigger.InjSource;
-        pxADC->Inst->CR2.b.JEXTEN  = pxConfig->Trigger.Edge;
-    }
+
+    MODIFY_REG(pxADC->Inst->CR1.w, ADC_CR1_JAUTO | ADC_CR1_JDISCEN, ulCRx);
+    MODIFY_REG(pxADC->Inst->CR1.w, ADC_CR2_JEXTEN | ADC_CR2_JEXTSEL, ulCRx);
 }
 
 /**

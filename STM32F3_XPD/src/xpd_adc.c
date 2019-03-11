@@ -112,20 +112,28 @@ static void ADC_prvClockDisable(ADC_HandleType * pxADC)
 #define ADC_prvClockDisable(HANDLE)   (RCC_vClockDisable(RCC_POS_ADC1))
 #endif
 
+#if defined(__XPD_ADC_ERROR_DETECT) || defined(__XPD_DMA_ERROR_DETECT)
+#define ADC_RESET_ERRORS(HANDLE)    ((HANDLE)->Errors = ADC_ERROR_NONE)
+#else
+#define ADC_RESET_ERRORS(HANDLE)    ((void)(HANDLE))
+#endif
+
 /* Returns the ADC pair's relevant CFGR register value */
 __STATIC_INLINE uint32_t ADC_prvGetMultiCfgr(ADC_HandleType * pxADC, uint32_t ulDual)
 {
     uint32_t ulCFGR;
+#if (ADC_COUNT > 1)
     /* Get relevant register CFGR in ADC instance of ADC master or slave
      * in function of multimode state (for devices with multimode available). */
-    if (    (ulDual == ADC_MULTIMODE_SINGE)
-         || (IS_ADC_MULTIMODE_MASTER_INSTANCE(pxADC->Inst)))
-    {
-        ulCFGR = pxADC->Inst->CFGR.w;
-    }
-    else
+    if (    (ulDual != ADC_MULTIMODE_SINGE)
+         && (!IS_ADC_MULTIMODE_MASTER_INSTANCE(pxADC->Inst)))
     {
         ulCFGR = ADC_PAIR(pxADC)->CFGR.w;
+    }
+    else
+#endif
+    {
+        ulCFGR = pxADC->Inst->CFGR.w;
     }
     return ulCFGR;
 }
@@ -230,7 +238,7 @@ static void ADC_prvInitInternalChannel(ADC_HandleType * pxADC, uint8_t ucChannel
     if (((ulChBit != 0) && ((ADC_COMMON(pxADC)->CCR.w & ulChBit) == 0))
         /* Software is allowed to change common parameters only when all ADCs
          * of the common group are disabled */
-        &&  (ADC_REG_BIT(pxADC, CR, ADEN) == 0)
+         && (ADC_REG_BIT(pxADC, CR, ADEN) == 0)
 #if (ADC_COUNT > 1)
          && (ADC_PAIR(pxADC)->CR.b.ADEN == 0)
 #endif
@@ -499,43 +507,29 @@ void ADC_vInit(ADC_HandleType * pxADC, const ADC_InitType * pxConfig)
     /* ADC regular conversion stopped */
     if (ADC_REG_BIT(pxADC, CR, ADSTART) == 0)
     {
-        ADC_REG_BIT(pxADC, CFGR, CONT)  = pxConfig->ContinuousMode;
-        ADC_REG_BIT(pxADC, CFGR, ALIGN) = pxConfig->LeftAlignment;
-        pxADC->Inst->CFGR.b.RES         = pxConfig->Resolution;
+        uint32_t ulCfgr, ulCfgrMask;
 
-        /* external trigger configuration */
-        if(pxConfig->Trigger.Source == ADC_TRIGGER_SOFTWARE)
-        {
-            /* reset the external trigger */
-            CLEAR_BIT(pxADC->Inst->CFGR.w, ADC_CFGR_EXTSEL | ADC_CFGR_EXTEN);
-        }
-        else
-        {
-            /* select external trigger and polarity to start conversion */
-            pxADC->Inst->CFGR.b.EXTSEL = pxConfig->Trigger.Source;
-            pxADC->Inst->CFGR.b.EXTEN  = pxConfig->Trigger.Edge;
-        }
+        ulCfgrMask = ADC_CFGR_CONT | ADC_CFGR_ALIGN | ADC_CFGR_RES |
+                ADC_CFGR_EXTEN | ADC_CFGR_EXTSEL | ADC_CFGR_DISCEN | ADC_CFGR_DISCNUM;
+
+        ulCfgr = pxConfig->w & ~(ADC_CFGR_DISCEN | ADC_CFGR_DISCNUM);
 
         /* Enable discontinuous mode only if continuous mode is disabled */
         if ((pxConfig->DiscontinuousCount != 0) && (pxConfig->ContinuousMode == DISABLE))
         {
-            ADC_REG_BIT(pxADC, CFGR, DISCEN) = 1;
-            pxADC->Inst->CFGR.b.DISCNUM = pxConfig->DiscontinuousCount - 1;
-        }
-        else
-        {
-            CLEAR_BIT(pxADC->Inst->CFGR.w, ADC_CFGR_DISCEN | ADC_CFGR_DISCNUM);
+            ulCfgr |= ADC_CFGR_DISCEN | ((pxConfig->DiscontinuousCount - 1) << ADC_CFGR_DISCNUM_Pos);
         }
 
         /* No injected or regular conversion ongoing */
         if ((pxADC->Inst->CR.w & ADC_STARTCTRL) == 0)
         {
-            ADC_REG_BIT(pxADC, CFGR, AUTDLY) = pxConfig->LPAutoWait;
-            ADC_REG_BIT(pxADC, CFGR, DMACFG) = pxConfig->ContinuousDMARequests;
+            ulCfgrMask |= ADC_CFGR_AUTDLY | ADC_CFGR_DMACFG;
         }
 
+        MODIFY_REG(pxADC->Inst->CFGR.w, ulCfgrMask, ulCfgr);
+
         /* Set conversion count as flag when scan mode is selected */
-        pxADC->ConversionCount = pxConfig->ScanMode & 1;
+        pxADC->ConversionCount = pxConfig->ScanMode;
     }
 
     /* dependencies initialization */
@@ -600,7 +594,6 @@ void ADC_vChannelConfig(
     if (ADC_REG_BIT(pxADC, CR, ADSTART) == 0)
     {
         uint8_t i, ucAWD1Chs = 0;
-        uint32_t aulWatchdogMasks[4] = {0, 0, 0, 0};
         uint32_t ulSeqOffset = ADC_SQR1_SQ1_Pos;
         __IO uint32_t *pulSQR = &pxADC->Inst->SQR1.w;
 
@@ -690,17 +683,17 @@ void ADC_vStart(ADC_HandleType * pxADC)
         /* clear regular group conversion flag and overrun flag */
         SET_BIT(pxADC->Inst->ISR.w, ADC_ISR_EOC | ADC_ISR_EOS | ADC_ISR_OVR);
 
+#if (ADC_COUNT > 1)
         /* if ADC is either not in multimode, or the multimode master,
          * enable software conversion of regular channels */
         if (    (ADC_COMMON(pxADC)->CCR.b.DUAL == ADC_MULTIMODE_SINGE)
              || (IS_ADC_MULTIMODE_MASTER_INSTANCE(pxADC->Inst)))
+#endif
         {
             ADC_REG_BIT(pxADC, CR, ADSTART) = 1;
         }
 
-#if defined(__XPD_ADC_ERROR_DETECT) || defined(__XPD_DMA_ERROR_DETECT)
-        pxADC->Errors = ADC_ERROR_NONE;
-#endif
+        ADC_RESET_ERRORS(pxADC);
     }
 }
 
@@ -734,13 +727,13 @@ XPD_ReturnType ADC_ePollStatus(
 {
     XPD_ReturnType eResult = XPD_OK;
 
-    if ((eOperation == ADC_OPERATION_CONVERSION)
-            && ((pxADC->EndFlagSelection & ADC_IER_EOSIE) != 0))
+    if (    (eOperation == ADC_OPERATION_CONVERSION)
+         && ((pxADC->EndFlagSelection & ADC_IER_EOSIE) != 0))
     {
         eOperation = ADC_ISR_EOS;
     }
-    else if ((eOperation == ADC_OPERATION_INJCONVERSION)
-            && ((pxADC->EndFlagSelection & ADC_IER_JEOSIE) != 0))
+    else if (    (eOperation == ADC_OPERATION_INJCONVERSION)
+              && ((pxADC->EndFlagSelection & ADC_IER_JEOSIE) != 0))
     {
         eOperation = ADC_ISR_JEOS;
     }
@@ -749,15 +742,17 @@ XPD_ReturnType ADC_ePollStatus(
      * and EOC is raised on end of single conversion */
     if (eOperation == ADC_OPERATION_CONVERSION)
     {
+#if (ADC_COUNT > 1)
         /* If multimode used, check common DMA config, otherwise dedicated DMA config */
-        if (ADC_COMMON_REG_BIT(pxADC, CCR, DUAL) == 0)
+        if (ADC_COMMON_REG_BIT(pxADC, CCR, DUAL) != 0)
         {
-            if (ADC_REG_BIT(pxADC, CFGR, DMAEN) == 1)
+            if (ADC_COMMON_REG_BIT(pxADC, CCR, MDMA) == 1)
             { eResult = XPD_ERROR; }
         }
         else
+#endif
         {
-            if (ADC_COMMON_REG_BIT(pxADC, CCR, MDMA) == 1)
+            if (ADC_REG_BIT(pxADC, CFGR, DMAEN) == 1)
             { eResult = XPD_ERROR; }
         }
     }
@@ -819,7 +814,11 @@ void ADC_vIRQHandler(ADC_HandleType * pxADC)
 {
     uint32_t ulISR = pxADC->Inst->ISR.w;
     uint32_t ulIER = pxADC->Inst->IER.w;
+#if (ADC_COUNT > 1)
     uint32_t ulDual = ADC_COMMON(pxADC)->CCR.b.DUAL;
+#else
+    uint32_t ulDual = 0;
+#endif
 
     /* End of conversion flag for regular channels */
     if (    ((ulISR & (ADC_ISR_EOC | ADC_ISR_EOS)) != 0)
@@ -861,16 +860,18 @@ void ADC_vIRQHandler(ADC_HandleType * pxADC)
             /* End of sequence */
             if ((ulISR & ADC_ISR_JEOS) != 0)
             {
-                if (    (ulDual == ADC_MULTIMODE_SINGE)
-                     || (ulDual == ADC_MULTIMODE_DUAL_REGSIMULT)
-                     || (ulDual == ADC_MULTIMODE_DUAL_INTERLEAVED)
-                     || (IS_ADC_MULTIMODE_MASTER_INSTANCE(pxADC->Inst)))
-                {
-                    ulCFGR = pxADC->Inst->CFGR.w;
-                }
-                else
+#if (ADC_COUNT > 1)
+                if (!(    (ulDual == ADC_MULTIMODE_SINGE)
+                       || (ulDual == ADC_MULTIMODE_DUAL_REGSIMULT)
+                       || (ulDual == ADC_MULTIMODE_DUAL_INTERLEAVED)
+                       || (IS_ADC_MULTIMODE_MASTER_INSTANCE(pxADC->Inst))))
                 {
                     ulCFGR = ADC_PAIR(pxADC)->CFGR.w;
+                }
+                else
+#endif
+                {
+                    ulCFGR = pxADC->Inst->CFGR.w;
                 }
 
                 if ((ulCFGR & ADC_CFGR_JQM) == 0)
@@ -969,8 +970,10 @@ XPD_ReturnType ADC_eStart_DMA(ADC_HandleType * pxADC, void * pvAddress)
 {
     XPD_ReturnType eResult = XPD_ERROR;
 
+#if (ADC_COUNT > 1)
     /* If multimode is used, multimode function shall be used */
     if (ADC_COMMON(pxADC)->CCR.b.DUAL == ADC_MULTIMODE_SINGE)
+#endif
     {
         /* Set up DMA for transfer */
         eResult = DMA_eStart_IT(pxADC->DMA.Conversion,
@@ -1096,11 +1099,11 @@ ADC_WatchdogType ADC_eWatchdogStatus(ADC_HandleType * pxADC)
 void ADC_vInjectedInit(ADC_HandleType * pxADC, const ADC_InjectedInitType * pxConfig)
 {
     /* Save trigger configuration into context queue */
-    if (pxConfig->Trigger.InjSource != ADC_INJTRIGGER_SOFTWARE)
+    if (pxConfig->TriggerEdge != EDGE_NONE)
     {
         pxADC->InjectedConfig =
-                (pxConfig->Trigger.InjSource << ADC_JSQR_JEXTSEL_Pos) |
-                (pxConfig->Trigger.Edge      << ADC_JSQR_JEXTEN_Pos);
+                (pxConfig->TriggerSource << ADC_JSQR_JEXTSEL_Pos) |
+                (pxConfig->TriggerEdge   << ADC_JSQR_JEXTEN_Pos);
     }
     else
     {
@@ -1110,18 +1113,28 @@ void ADC_vInjectedInit(ADC_HandleType * pxADC, const ADC_InjectedInitType * pxCo
     /* Set configuration that is restricted to no ongoing injected conversions */
     if (ADC_REG_BIT(pxADC, CR, JADSTART) == 0)
     {
-        pxADC->Inst->CFGR.b.JQM     = pxConfig->ContextQueue;
-        pxADC->Inst->CFGR.b.JDISCEN = pxConfig->DiscontinuousMode & (!pxConfig->AutoInjection);
+        uint32_t ulCfgr, ulCfgrMask;
+
+        ulCfgrMask = ADC_CFGR_JQM | ADC_CFGR_JDISCEN;
+
+        /* Config only affects bits in the high halfword */
+        ulCfgr = pxConfig->w << 16;
+
+        /* Cannot use both auto-injected mode and discontinuous mode simultaneously */
+        if (pxConfig->AutoInjection != 0)
+        {
+            CLEAR_BIT(ulCfgr, ADC_CFGR_JDISCEN);
+        }
 
         /* Set configuration that is restricted to no ongoing conversions */
         if ((pxADC->Inst->CR.w & ADC_STARTCTRL) == 0)
         {
             /* Auto-injection is triggered by end of regular group conversion,
              * external triggers are not allowed */
-            {
-                pxADC->Inst->CFGR.b.JAUTO = pxConfig->AutoInjection;
-            }
+            ulCfgrMask |= ADC_CFGR_JAUTO;
         }
+
+        MODIFY_REG(pxADC->Inst->CFGR.w, ulCfgrMask, ulCfgr);
     }
 }
 
@@ -1196,7 +1209,7 @@ void ADC_vInjectedChannelConfig(
  */
 void ADC_vInjectedStart(ADC_HandleType * pxADC)
 {
-    uint32_t ulDual = ADC_COMMON(pxADC)->CCR.b.DUAL;
+    uint32_t ulDual;
 
     /* Check if ADC peripheral is disabled in order to enable it and wait during
      Tstab time the ADC's stabilization */
@@ -1213,6 +1226,8 @@ void ADC_vInjectedStart(ADC_HandleType * pxADC)
     /* clear injected group conversion flag */
     SET_BIT(pxADC->Inst->ISR.w, ADC_ISR_JEOC | ADC_ISR_JEOS | ADC_ISR_JQOVF);
 
+#if (ADC_COUNT > 1)
+    ulDual = ADC_COMMON(pxADC)->CCR.b.DUAL;
     /* if no external trigger present and ADC is either not in multimode,
      * or the multimode master, enable software conversion of injected channels */
     if ((pxADC->Inst->CFGR.b.JAUTO == 0) &&
@@ -1220,6 +1235,7 @@ void ADC_vInjectedStart(ADC_HandleType * pxADC)
          || (ulDual == ADC_MULTIMODE_DUAL_REGSIMULT)
          || (ulDual == ADC_MULTIMODE_DUAL_INTERLEAVED)
          || (IS_ADC_MULTIMODE_MASTER_INSTANCE(pxADC->Inst))))
+#endif
     {
         ADC_REG_BIT(pxADC,CR,JADSTART) = 1;
     }
@@ -1277,7 +1293,7 @@ void ADC_vInjectedStop_IT(ADC_HandleType * pxADC)
 
 /** @} */
 
-#ifdef ADC12_COMMON
+#if (ADC_COUNT > 1)
 /** @addtogroup ADC_MultiMode
  * @{ */
 

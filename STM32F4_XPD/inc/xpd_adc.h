@@ -116,7 +116,6 @@ typedef enum
     ADC_TRIGGER_TIM8_CC1  = 13, /*!< TIM8 Channel 1 */
     ADC_TRIGGER_TIM8_TRGO = 14, /*!< TIM8 Trigger Out */
     ADC_TRIGGER_EXTI11    = 15, /*!< EXTI Line 11 */
-    ADC_TRIGGER_SOFTWARE  = 16  /*!< Implicit trigger by software on start call */
 }ADC_TriggerSourceType;
 
 /** @brief ADC End of Conversion flag mode */
@@ -140,18 +139,25 @@ typedef enum
 /** @brief ADC setup structure */
 typedef struct
 {
-    ADC_ResolutionType  Resolution;            /*!< A/D conversion resolution */
-    FunctionalState     LeftAlignment;         /*!< ENABLE to left-align converted data, otherwise DISABLE */
-    FunctionalState     ContinuousMode;        /*!< Continuous or single mode */
-    FunctionalState     ContinuousDMARequests; /*!< Continuous DMA requests, or only for a single EOC flag */
-    FunctionalState     ScanMode;              /*!< Scan mode converts all configured channels in sequence */
-    uint8_t             DiscontinuousCount;    /*!< If not 0, a subgroup of channels is converted
-                                                    on each trigger in loop [0..8] */
-    ADC_EOCSelectType   EndFlagSelection;      /*!< Specifies when the EOC flag is set and the conversions stop */
+    union {
     struct {
-        ADC_TriggerSourceType Source;          /*!< Source of the conversion trigger */
-        EdgeType              Edge;            /*!< Trigger edges that initiate conversion */
-    }Trigger;
+    uint32_t : 1;
+    FunctionalState       ContinuousMode : 1;       /*!< Continuous or single mode */
+    uint32_t : 7;
+    FunctionalState       ContinuousDMARequests : 1;/*!< Continuous DMA requests, or only for a single EOC flag */
+    ADC_EOCSelectType     EndFlagSelection : 1;     /*!< Specifies when the EOC flag is set and the conversions stop */
+    FunctionalState       LeftAlignment : 1;        /*!< ENABLE to left-align converted data, otherwise DISABLE */
+    uint32_t : 1;
+    FunctionalState       ScanMode : 1;             /*!< Scan mode converts all configured channels in sequence */
+    uint32_t              DiscontinuousCount : 4;   /*!< If not 0, a subgroup of channels is converted
+                                                         on each trigger in loop [0..8] */
+    uint32_t : 6;
+    ADC_TriggerSourceType TriggerSource : 4;        /*!< Source of the conversion trigger */
+    EdgeType              TriggerEdge : 2;          /*!< Trigger edges that initiate conversion */
+    ADC_ResolutionType    Resolution : 2;           /*!< A/D conversion resolution */
+    };
+    uint32_t w;
+    };
 }ADC_InitType;
 
 /** @brief ADC analog watchdog selection */
@@ -424,20 +430,26 @@ typedef enum
     ADC_INJTRIGGER_TIM8_CC3  = 13, /*!< TIM8 Channel 3 */
     ADC_INJTRIGGER_TIM8_CC4  = 14, /*!< TIM8 Channel 4 */
     ADC_INJTRIGGER_EXTI15    = 15, /*!< EXTI Line 15 */
-    ADC_INJTRIGGER_SOFTWARE  = 16  /*!< Implicit trigger by software on start call */
 }ADC_InjTriggerSourceType;
 
 /** @brief ADC injected channel setup structure */
 typedef struct
 {
-    FunctionalState    AutoInjection;       /*!< Automatic injected conversion after regular group
-                                                 @note External triggers must be disabled */
-    FunctionalState    DiscontinuousMode;   /*!< Sets discontinuous mode
-                                                 @note Cannot be used with auto injection */
+    union {
     struct {
-        ADC_InjTriggerSourceType InjSource; /*!< Source of the conversion trigger */
-        EdgeType                 Edge;      /*!< Trigger edges that initiate conversion */
-    }Trigger;
+    uint16_t : 2;
+    FunctionalState          AutoInjection : 1;     /*!< Automatic injected conversion after regular group
+                                                         @note External triggers must be disabled */
+    uint16_t : 1;
+    FunctionalState          DiscontinuousMode : 1; /*!< Sets discontinuous mode
+                                                         @note Cannot be used with auto injection */
+    uint16_t : 3;
+    ADC_InjTriggerSourceType TriggerSource : 4;     /*!< Source of the conversion trigger */
+    EdgeType                 TriggerEdge : 2;       /*!< Trigger edges that initiate conversion */
+    uint16_t : 2;
+    };
+    uint16_t w;
+    };
 }ADC_InjectedInitType;
 
 /** @} */

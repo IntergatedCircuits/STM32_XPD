@@ -94,7 +94,6 @@ typedef enum
     ADC_TRIGGER_TIM6_TRGO  = 13, /*!< TIM6 Trigger Out */
     ADC_TRIGGER_TIM15_TRGO = 14, /*!< TIM15 Trigger Out */
     ADC_TRIGGER_TIM3_CC4   = 15, /*!< TIM3 Channel 4 */
-    ADC_TRIGGER_SOFTWARE   = 16  /*!< Implicit trigger by software on start call */
 }ADC_TriggerSourceType;
 
 /** @brief ADC End of Conversion flag mode */
@@ -118,47 +117,60 @@ typedef enum
 /** @brief ADC oversampling ratio options */
 typedef enum
 {
-    ADC_OVERSAMPLING_RATIO_2   = 0, /*!< Oversampling x2 */
-    ADC_OVERSAMPLING_RATIO_4   = 1, /*!< Oversampling x4 */
-    ADC_OVERSAMPLING_RATIO_8   = 2, /*!< Oversampling x8 */
-    ADC_OVERSAMPLING_RATIO_16  = 3, /*!< Oversampling x16 */
-    ADC_OVERSAMPLING_RATIO_32  = 4, /*!< Oversampling x32 */
-    ADC_OVERSAMPLING_RATIO_64  = 5, /*!< Oversampling x64 */
-    ADC_OVERSAMPLING_RATIO_128 = 6, /*!< Oversampling x128 */
-    ADC_OVERSAMPLING_RATIO_256 = 7, /*!< Oversampling x256 */
-}ADC_OversamplingRatioType;
+    ADC_OS_RATIO_2   = 0, /*!< Oversampling x2 */
+    ADC_OS_RATIO_4   = 1, /*!< Oversampling x4 */
+    ADC_OS_RATIO_8   = 2, /*!< Oversampling x8 */
+    ADC_OS_RATIO_16  = 3, /*!< Oversampling x16 */
+    ADC_OS_RATIO_32  = 4, /*!< Oversampling x32 */
+    ADC_OS_RATIO_64  = 5, /*!< Oversampling x64 */
+    ADC_OS_RATIO_128 = 6, /*!< Oversampling x128 */
+    ADC_OS_RATIO_256 = 7, /*!< Oversampling x256 */
+}ADC_OSRatioType;
 
 /** @brief ADC oversampling setup structure */
-typedef struct
-{
-    FunctionalState           State;             /*!< Oversampling feature activation */
-    ADC_OversamplingRatioType Ratio;             /*!< Oversampling ratio (number of samples collected) */
-    uint8_t                   RightShift;        /*!< Right shifting by a number of bits before providing the data [0..8] */
-    FunctionalState           DiscontinuousMode; /*!< Enable to use triggered oversampling mode */
-    FunctionalState           RestartOnInject;   /*!< Regular oversampling restarted after an injected conversion,
+typedef union {
+    struct {
+    FunctionalState State : 1;             /*!< Oversampling feature activation */
+    uint16_t : 1;
+    ADC_OSRatioType Ratio : 3;             /*!< Oversampling ratio (number of samples collected) */
+    uint16_t        RightShift : 4;        /*!< Right shifting by a number of bits before providing the data [0..8] */
+    FunctionalState DiscontinuousMode : 1; /*!< Enable to use triggered oversampling mode */
+    FunctionalState RestartOnInject : 1;   /*!< Regular oversampling restarted after an injected conversion,
                                                       otherwise the accumulator is intact. */
+    uint16_t : 5;
+    };
+    uint16_t w;
 }ADC_OversamplingType;
 
 /** @brief ADC setup structure */
 typedef struct
 {
-    ADC_ResolutionType    Resolution;            /*!< A/D conversion resolution */
-    FunctionalState       LeftAlignment;         /*!< ENABLE to left-align converted data, otherwise DISABLE */
-    FunctionalState       ContinuousMode;        /*!< Continuous or single mode */
-    FunctionalState       ContinuousDMARequests; /*!< Continuous DMA requests, or only for a single EOC flag */
-    FunctionalState       ScanMode;              /*!< Scan mode converts all configured channels in sequence */
-    uint8_t               DiscontinuousCount;    /*!< If not 0, a subgroup of channels is converted
-                                                    on each trigger in loop [0..8] */
-    ADC_EOCSelectType     EndFlagSelection;      /*!< Specifies when the EOC flag is set and the conversions stop */
-    FunctionalState       LPAutoWait;            /*!< When enabled, new conversion starts only after the user has handled the current conversion. */
+    union {
     struct {
-        ADC_TriggerSourceType Source;            /*!< Source of the conversion trigger */
-        EdgeType              Edge;              /*!< Trigger edges that initiate conversion */
-    }Trigger;
-    ADC_OversamplingType Oversampling;           /*!< Oversampling configuration (applied for regular conversion group) */
+    uint32_t : 1;
+    FunctionalState       ContinuousDMARequests : 1;/*!< Continuous DMA requests, or only for a single EOC flag */
 #ifdef ADC_CFGR_DFSDMCFG
-    FunctionalState     DirectToDFSDM;           /*!< ADC conversion data can be sent directly to DFSDM */
+    FunctionalState       DirectToDFSDM : 1;        /*!< ADC conversion data can be sent directly to DFSDM */
+#else
+    uint32_t : 1;
 #endif
+    ADC_ResolutionType    Resolution : 2;           /*!< A/D conversion resolution */
+    FunctionalState       LeftAlignment : 1;        /*!< ENABLE to left-align converted data, otherwise DISABLE */
+    ADC_TriggerSourceType TriggerSource : 4;        /*!< Source of the conversion trigger */
+    EdgeType              TriggerEdge : 2;          /*!< Trigger edges that initiate conversion */
+    FunctionalState       Overrun : 1;              /*!< Enables overwriting the data register with the latest conversion */
+    FunctionalState       ContinuousMode : 1;       /*!< Continuous or single mode */
+    FunctionalState       LPAutoWait : 1;           /*!< When enabled, new conversion starts only after the user has handled the current conversion. */
+    uint32_t : 1;
+    uint32_t              DiscontinuousCount : 4;   /*!< If not 0, a subgroup of channels is converted
+                                                         on each trigger in loop [0..8] */
+    uint32_t : 10;
+    ADC_EOCSelectType     EndFlagSelection : 1;     /*!< Specifies when the EOC flag is set and the conversions stop */
+    FunctionalState       ScanMode : 1;             /*!< Scan mode converts all configured channels in sequence */
+    };
+    uint32_t w;
+    };
+    ADC_OversamplingType  Oversampling;             /*!< Oversampling configuration for regular group */
 }ADC_InitType;
 
 /** @brief ADC analog watchdog selection */
@@ -464,21 +476,25 @@ typedef enum
     ADC_INJTRIGGER_TIM3_CC1   = 13, /*!< TIM3 Channel 1 */
     ADC_INJTRIGGER_TIM6_TRGO  = 14, /*!< TIM6 Trigger Out */
     ADC_INJTRIGGER_TIM15_TRGO = 15, /*!< TIM15 Trigger Out */
-    ADC_INJTRIGGER_SOFTWARE   = 16  /*!< Implicit trigger by software on start call */
 }ADC_InjTriggerSourceType;
 
 /** @brief ADC injected channel setup structure */
 typedef struct
 {
-    FunctionalState      AutoInjection;     /*!< Automatic injected conversion after regular group
-                                                 @note External triggers must be disabled */
-    FunctionalState      DiscontinuousMode; /*!< Sets discontinuous mode
-                                                 @note Cannot be used with auto injection */
+    union {
     struct {
-        ADC_InjTriggerSourceType InjSource; /*!< Source of the conversion trigger */
-        EdgeType                 Edge;      /*!< Trigger edges that initiate conversion */
-    }Trigger;
-    FunctionalState      ContextQueue;      /*!< Context queue feature */
+    ADC_InjTriggerSourceType TriggerSource : 4;     /*!< Source of the conversion trigger */
+    FunctionalState          DiscontinuousMode : 1; /*!< Sets discontinuous mode
+                                                         @note Cannot be used with auto injection */
+    FunctionalState          ContextQueue : 1;      /*!< Context queue feature */
+    EdgeType                 TriggerEdge : 2;       /*!< Trigger edges that initiate conversion */
+    uint16_t : 1;
+    FunctionalState          AutoInjection : 1;     /*!< Automatic injected conversion after regular group
+                                                         @note External triggers must be disabled */
+    uint16_t : 6;
+    };
+    uint16_t w;
+    };
     ADC_OversamplingType Oversampling;      /*!< Oversampling configuration for injected group */
 }ADC_InjectedInitType;
 

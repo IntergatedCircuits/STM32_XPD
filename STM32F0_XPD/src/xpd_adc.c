@@ -43,6 +43,12 @@
 #define ADC_ENDFLAG_SEQUENCE    (ADC_IER_EOSIE)
 #define ADC_ENDFLAG_CONVERSION  (ADC_IER_EOCIE)
 
+#if defined(__XPD_ADC_ERROR_DETECT) || defined(__XPD_DMA_ERROR_DETECT)
+#define ADC_RESET_ERRORS(HANDLE)    ((HANDLE)->Errors = ADC_ERROR_NONE)
+#else
+#define ADC_RESET_ERRORS(HANDLE)    ((void)(HANDLE))
+#endif
+
 static void ADC_prvDmaConversionRedirect(void *pxDMA)
 {
     ADC_HandleType* pxADC = (ADC_HandleType*) ((DMA_HandleType*) pxDMA)->Owner;
@@ -152,8 +158,7 @@ static void ADC_prvStopConversion(ADC_HandleType * pxADC, uint32_t ulConvFlag)
     }
 }
 
-/** @ingroup ADC_Core
- * @defgroup ADC_Core_Exported_Functions ADC Core Exported Functions
+/** @addtogroup ADC_Core_Exported_Functions
  * @{ */
 
 /**
@@ -180,40 +185,21 @@ void ADC_vInit(ADC_HandleType * pxADC, const ADC_InitType * pxConfig)
      * correctly completed and if there is no conversion ongoing on regular group */
     if (ADC_REG_BIT(pxADC, CR, ADSTART) == 0)
     {
-        /* Configuration of ADC */
-        if (ADC_REG_BIT(pxADC, CR, ADEN) == 0)
-        {
-            pxADC->Inst->CFGR1.b.RES       = pxConfig->Resolution;
-        }
-        ADC_REG_BIT(pxADC, CFGR1, CONT)    = pxConfig->ContinuousMode;
-        ADC_REG_BIT(pxADC, CFGR1, ALIGN)   = pxConfig->LeftAlignment;
-        ADC_REG_BIT(pxADC, CFGR1, SCANDIR) = pxConfig->ScanDirection;
-        ADC_REG_BIT(pxADC, CFGR1, AUTOFF)  = pxConfig->LPAutoPowerOff;
-        ADC_REG_BIT(pxADC, CFGR1, WAIT)    = pxConfig->LPAutoWait;
-        ADC_REG_BIT(pxADC, CFGR1, DMACFG)  = pxConfig->ContinuousDMARequests;
+        uint32_t ulCfgr, ulCfgrMask;
 
-        /* external trigger configuration */
-        if (pxConfig->Trigger.Source == ADC_TRIGGER_SOFTWARE)
-        {
-            /* reset the external trigger */
-            CLEAR_BIT(pxADC->Inst->CFGR1.w, ADC_CFGR1_EXTSEL | ADC_CFGR1_EXTEN);
-        }
-        else
-        {
-            /* select external trigger and polarity to start conversion */
-            pxADC->Inst->CFGR1.b.EXTSEL = pxConfig->Trigger.Source;
-            pxADC->Inst->CFGR1.b.EXTEN  = pxConfig->Trigger.Edge;
-        }
+        ulCfgr = pxConfig->w;
+
+        ulCfgrMask = ADC_CFGR1_CONT | ADC_CFGR1_ALIGN | ADC_CFGR1_RES |
+                ADC_CFGR1_EXTEN | ADC_CFGR1_EXTSEL | ADC_CFGR1_DISCEN |
+                ADC_CFGR1_WAIT | ADC_CFGR1_AUTOFF | ADC_CFGR1_DMACFG | ADC_CFGR1_SCANDIR;
 
         /* Enable discontinuous mode only if continuous mode is disabled */
-        if ((pxConfig->DiscontinuousCount != 0) && (pxConfig->ContinuousMode == DISABLE))
+        if (pxConfig->ContinuousMode == DISABLE)
         {
-            ADC_REG_BIT(pxADC, CFGR1, DISCEN) = 1;
+            ulCfgr &= ~ADC_CFGR1_DISCEN;
         }
-        else
-        {
-            ADC_REG_BIT(pxADC, CFGR1, DISCEN) = 0;
-        }
+
+        MODIFY_REG(pxADC->Inst->CFGR1.w, ulCfgrMask, ulCfgr);
     }
 
     /* dependencies initialization */

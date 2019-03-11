@@ -79,7 +79,6 @@ typedef enum
     ADC_TRIGGER_TIM2_TRGO  = 2,  /*!< TIM2 Trigger Out */
     ADC_TRIGGER_TIM3_TRGO  = 3,  /*!< TIM3 Trigger Out */
     ADC_TRIGGER_TIM15_TRGO = 4,  /*!< TIM15 Trigger Out */
-    ADC_TRIGGER_SOFTWARE   = 8   /*!< Implicit trigger by software on start call */
 }ADC_TriggerSourceType;
 
 /** @brief ADC End of Conversion flag mode */
@@ -107,21 +106,27 @@ typedef enum
 /** @brief ADC setup structure */
 typedef struct
 {
-    ADC_ResolutionType    Resolution;            /*!< A/D conversion resolution */
-    FunctionalState       LeftAlignment;         /*!< ENABLE to left-align converted data, otherwise DISABLE */
-    FunctionalState       ContinuousMode;        /*!< Continuous or single mode */
-    FunctionalState       ContinuousDMARequests; /*!< Continuous DMA requests, or only for a single EOC flag */
-    ADC_ScanDirectionType ScanDirection;         /*!< Defines if channels are converted from channels 0 through 18 or in reverse order */
-    uint8_t               DiscontinuousCount;    /*!< If 1, a single channel is converted on each trigger in the sequence */
-    ADC_EOCSelectType     EndFlagSelection;      /*!< Specifies when the EOC flag is set and the conversions stop */
-    FunctionalState       LPAutoWait;            /*!< When enabled, new conversion starts only after the user has handled the current conversion. */
-    FunctionalState       LPAutoPowerOff;        /*!< When enabled, the ADC automatically powers-off after a conversion
-                                                    and automatically starts up when a new conversion is triggered.
-                                                    @note: This feature also turns off the ADC dedicated 14 MHz RC oscillator (HSI14) */
+    union {
     struct {
-        ADC_TriggerSourceType Source;            /*!< Source of the conversion trigger */
-        EdgeType              Edge;              /*!< Trigger edges that initiate conversion */
-    }Trigger;
+    uint32_t : 1;
+    FunctionalState       ContinuousDMARequests : 1;/*!< Continuous DMA requests, or only for a single EOC flag */
+    ADC_ScanDirectionType ScanDirection : 2;        /*!< Defines if channels are converted from channels 0 through 18 or in reverse order */
+    ADC_ResolutionType    Resolution : 2;           /*!< A/D conversion resolution */
+    FunctionalState       LeftAlignment : 1;        /*!< ENABLE to left-align converted data, otherwise DISABLE */
+    ADC_TriggerSourceType TriggerSource : 4;        /*!< Source of the conversion trigger */
+    EdgeType              TriggerEdge : 2;          /*!< Trigger edges that initiate conversion */
+    FunctionalState       Overrun : 1;              /*!< Enables overwriting the data register with the latest conversion */
+    FunctionalState       ContinuousMode : 1;       /*!< Continuous or single mode */
+    FunctionalState       LPAutoWait : 1;           /*!< When enabled, new conversion starts only after the user has handled the current conversion. */
+    FunctionalState       LPAutoPowerOff : 1;       /*!< When enabled, the ADC automatically powers-off after a conversion
+                                                         and automatically starts up when a new conversion is triggered.
+                                                         @note: This feature also turns off the ADC dedicated 14 MHz RC oscillator (HSI14) */
+    uint32_t              DiscontinuousCount : 1;   /*!< If 1, a single channel is converted on each trigger in the sequence */
+    uint32_t : 14;
+    ADC_EOCSelectType     EndFlagSelection : 1;     /*!< Specifies when the EOC flag is set and the conversions stop */
+    };
+    uint32_t w;
+    };
 }ADC_InitType;
 
 /** @brief ADC analog watchdog selection */
