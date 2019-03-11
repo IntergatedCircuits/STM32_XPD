@@ -41,8 +41,8 @@ extern "C"
 /** @brief I2C addressing modes */
 typedef enum
 {
-    I2C_ADDRESS_7BIT    = I2C_OAR1_OA1EN,                   /*!< Normal 7 bit addressing */
-    I2C_ADDRESS_10BIT   = I2C_OAR1_OA1EN | I2C_OAR1_OA1MODE,/*!< 10 bit addressing mode */
+    I2C_ADDRESS_7BIT    = 0, /*!< Normal 7 bit addressing */
+    I2C_ADDRESS_10BIT   = 1, /*!< 10 bit addressing mode */
 }I2C_AddressModeType;
 
 /** @brief I2C error types */
@@ -96,11 +96,22 @@ typedef struct
 /** @brief I2C setup structure */
 typedef struct
 {
-    uint32_t BusFreq_Hz;                /*!< Desired I2C bus frequency [Hz] */
-    I2C_AddressModeType AddressingMode; /*!< Global addressing mode */
-    FunctionalState GeneralCall;        /*!< [Slave] Acknowledge and handle a General Call (address=00h) */
-    FunctionalState NoStretch;          /*!< [Slave] Do not stretch SCL low when waiting for software
-                                             to control the transfer */
+    uint32_t BusFreq_Hz;                    /*!< Desired I2C bus frequency [Hz] */
+    union {
+    struct {
+    uint16_t : 4;
+    uint16_t : 1;
+    I2C_AddressModeType AddressingMode : 1; /*!< Global addressing mode */
+    uint16_t : 2;
+    FunctionalState SlaveByteControl : 1;   /*!< [Slave] byte control - disable by default */
+    FunctionalState NoStretch : 1;          /*!< [Slave] Do not stretch SCL low when waiting for software
+                                                 to control the transfer */
+    uint16_t : 1;
+    FunctionalState GeneralCall : 1;        /*!< [Slave] Acknowledge and handle a General Call (address=00h) */
+    uint16_t : 4;
+    };
+    uint16_t wCfg;                  /* [Internal] */
+    };
     union {
         struct {
         uint16_t : 1;

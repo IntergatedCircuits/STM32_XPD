@@ -506,8 +506,9 @@ void I2C_vInit(I2C_HandleType * pxI2C, const I2C_InitType * pxConfig)
     I2C_prvSetTiming(pxI2C, pxConfig->BusFreq_Hz);
 
     /* Slave configuration */
-    I2C_REG_BIT(pxI2C, CR1, GCEN) = pxConfig->GeneralCall;
-    I2C_REG_BIT(pxI2C, CR1, NOSTRETCH) = pxConfig->NoStretch;
+    MODIFY_REG(pxI2C->Inst->CR1.w,
+            I2C_CR1_GCEN | I2C_CR1_SBC | I2C_CR1_NOSTRETCH,
+            pxConfig->wCfg << 8);
 
     /* Set Address 1 */
     if (pxConfig->OwnAddress1.wValue == 0)
@@ -516,7 +517,8 @@ void I2C_vInit(I2C_HandleType * pxI2C, const I2C_InitType * pxConfig)
     }
     else
     {
-        pxI2C->Inst->OAR1.w = pxConfig->AddressingMode | pxConfig->OwnAddress1.wValue;
+        pxI2C->Inst->OAR1.w = I2C_OAR1_OA1EN | pxConfig->OwnAddress1.wValue |
+                (pxConfig->AddressingMode << I2C_OAR1_OA1MODE_Pos);
     }
 
     if (pxConfig->AddressingMode == I2C_ADDRESS_10BIT)
