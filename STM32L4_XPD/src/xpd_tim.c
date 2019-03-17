@@ -119,7 +119,10 @@ static void TIM_prvInit(TIM_HandleType * pxTIM, const TIM_InitType * pxConfig)
     RCC_vReset(pxTIM->CtrlPos);
 
     pxTIM->Inst->CR1.w = pxConfig->wSettings & (TIM_CR1_UDIS | TIM_CR1_URS | TIM_CR1_OPM
-            | TIM_CR1_DIR | TIM_CR1_CMS | TIM_CR1_CKD | TIM_CR1_UIFREMAP);
+#ifdef TIM_CR1_UIFREMAP
+            | TIM_CR1_UIFREMAP
+#endif
+            | TIM_CR1_DIR | TIM_CR1_CMS | TIM_CR1_CKD);
 
     pxTIM->Inst->PSC = (uint32_t)(pxConfig->Prescaler - 1);
     pxTIM->Inst->ARR = (uint32_t)(pxConfig->Period - 1);

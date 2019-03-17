@@ -82,7 +82,11 @@ typedef struct
     FunctionalState  Preload : 1;       /*!< Reload (Period) is preloaded and only applied after an update (ARPE) */
     ClockDividerType ClockDivision : 2; /*!< Division factor for deadtime and sampling clock.
                                              Permitted values: @arg CLK_DIV1 @arg CLK_DIV2 @arg CLK_DIV4 */
+#ifdef TIM_CR1_UIFREMAP
     FunctionalState  UpdateFlagRemap :1;/*!< When set, UIF status bit is copied to CNT register's MSb */
+#else
+    uint16_t : 1;
+#endif
     uint16_t : 5;
     };
     uint16_t wSettings; /* Internal use only */
