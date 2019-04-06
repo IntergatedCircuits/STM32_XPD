@@ -29,6 +29,7 @@ extern "C"
 #endif
 
 #include <stdint.h>
+#include <stddef.h>
 
 /** @defgroup Common
  * @{ */
@@ -186,6 +187,11 @@ typedef void ( *XPD_HandleCallbackType )    ( void * Handle );
     ((REG) = (((REG) & (~(CLEARMASK))) | ((SETMASK) & (CLEARMASK))))
 
 #define POSITION_VAL(VAL)     (__CLZ(__RBIT(VAL)))
+
+#define ARRAY_SIZE(arr)       (sizeof(arr) / sizeof((arr)[0]))
+
+#define container_of(ptr, type, member) \
+    ((type *)((char *)(ptr) - offsetof(type,member)))
 
 #if  defined ( __GNUC__ )
 #ifndef __weak
