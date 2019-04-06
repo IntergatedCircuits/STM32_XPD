@@ -40,6 +40,7 @@ typedef enum
 
 #ifdef __XPD_I2C_ERROR_DETECT
 #define I2C_ERR_ITS                 (I2C_CR1_ERRIE)
+#define I2C_MASTER_CMD_ITS          (I2C_CR1_TXIE | I2C_CR1_TCIE | I2C_CR1_ERRIE)
 #define I2C_MASTER_RX_ITS           (I2C_CR1_RXIE | I2C_CR1_TCIE | I2C_CR1_STOPIE | I2C_CR1_ERRIE)
 #define I2C_MASTER_TX_ITS           (I2C_CR1_TXIE | I2C_CR1_TCIE | I2C_CR1_STOPIE | I2C_CR1_ERRIE)
 #define I2C_SLAVE_LISTEN_ITS        (I2C_CR1_ADDRIE | I2C_CR1_ERRIE)
@@ -47,6 +48,7 @@ typedef enum
 #define I2C_SLAVE_TX_ITS            (I2C_CR1_TXIE | I2C_CR1_STOPIE | I2C_CR1_ERRIE)
 #else
 #define I2C_ERR_ITS                 (0)
+#define I2C_MASTER_CMD_ITS          (I2C_CR1_TXIE | I2C_CR1_TCIE)
 #define I2C_MASTER_RX_ITS           (I2C_CR1_RXIE | I2C_CR1_TCIE | I2C_CR1_STOPIE)
 #define I2C_MASTER_TX_ITS           (I2C_CR1_TXIE | I2C_CR1_TCIE | I2C_CR1_STOPIE)
 #define I2C_SLAVE_LISTEN_ITS        (I2C_CR1_ADDRIE)
@@ -167,62 +169,8 @@ static void I2C_prvSlaveWaitStop(I2C_HandleType * pxI2C, uint32_t * pulTimeout)
     }
 }
 
-/* Slave mode listen (+cmd) stage EV signals interrupt handler */
-static void I2C_prvSlaveListenIRQHandler(I2C_HandleType * pxI2C)
-{
-    /* Interrupt enable and status bits are at the same position */
-    uint32_t ulCR1 = pxI2C->Inst->CR1.w;
-    uint32_t ulISR = pxI2C->Inst->ISR.w;
-    uint32_t ulIT = ulCR1 & ulISR;
-
-    /* Receive register not empty */
-    if ((ulIT & I2C_ISR_RXNE) != 0)
-    {
-        /* Read data from RXDR */
-        *(uint8_t*)pxI2C->Stream.buffer++ = pxI2C->Inst->RXDR;
-        pxI2C->Stream.size--;
-
-        /* When the expected length is received, NACK the rest */
-        if (pxI2C->Stream.size == 0)
-        {
-            I2C_REG_BIT(pxI2C, CR2, NACK) = 1;
-            pxI2C->Inst->CR1.w = ulCR1 & ~I2C_CR1_RXIE;
-        }
-    }
-    /* Slave address match */
-    else if ((ulIT & I2C_ISR_ADDR) != 0)
-    {
-        if ((pxI2C->Transfers.Slave.CmdSize > 0) && ((ulCR1 & I2C_CR1_STOPIE) == 0))
-        {
-            /* Clear ADDR flag to start data transfer */
-            I2C_FLAG_CLEAR(pxI2C, ADDR);
-
-            /* Save stream info */
-            pxI2C->Stream.buffer = &pxI2C->Transfers.Slave.Cmd;
-            pxI2C->Stream.size   = pxI2C->Transfers.Slave.CmdSize;
-
-            pxI2C->Inst->CR1.w = ulCR1 | I2C_SLAVE_RX_ITS;
-        }
-        else
-        {
-            I2C_prvGetTransferInfo(pxI2C);
-
-            XPD_SAFE_CALLBACK(pxI2C->Callbacks.SlaveAddressed, pxI2C);
-        }
-    }
-
-    /* STOP is unexpected here, restart listening */
-    if ((ulIT & I2C_ISR_STOPF) != 0)
-    {
-        I2C_FLAG_CLEAR(pxI2C, STOP);
-
-        /* Disable interrupts as transfer is over */
-        pxI2C->Inst->CR1.w = ulCR1 & ~I2C_SLAVE_RX_ITS;
-    }
-}
-
-/* Slave mode data stage EV signals interrupt handler */
-static void I2C_prvSlaveDataIRQHandler(I2C_HandleType * pxI2C)
+/* Slave mode EV signals interrupt handler */
+static void I2C_prvSlaveIRQHandler(I2C_HandleType * pxI2C)
 {
     /* Interrupt enable and status bits are at the same position */
     uint32_t ulCR1 = pxI2C->Inst->CR1.w;
@@ -256,7 +204,27 @@ static void I2C_prvSlaveDataIRQHandler(I2C_HandleType * pxI2C)
             pxI2C->Inst->CR1.w = ulCR1 & ~I2C_CR1_RXIE;
         }
     }
-    /* Slave address match should only happen after a STOP */
+    /* Slave address match */
+    else if ((ulIT & I2C_ISR_ADDR) != 0)
+    {
+        if ((pxI2C->Transfers.Slave.CmdSize > 0) && ((ulCR1 & I2C_CR1_STOPIE) == 0))
+        {
+            /* Clear ADDR flag to start data transfer */
+            I2C_FLAG_CLEAR(pxI2C, ADDR);
+
+            /* Save stream info */
+            pxI2C->Stream.buffer = &pxI2C->Transfers.Slave.Cmd;
+            pxI2C->Stream.size   = pxI2C->Transfers.Slave.CmdSize;
+
+            pxI2C->Inst->CR1.w = ulCR1 | I2C_SLAVE_RX_ITS;
+        }
+        else
+        {
+            I2C_prvGetTransferInfo(pxI2C);
+
+            XPD_SAFE_CALLBACK(pxI2C->Callbacks.SlaveAddressed, pxI2C);
+        }
+    }
 
     /* STOP */
     if ((ulIT & I2C_ISR_STOPF) != 0)
@@ -267,8 +235,6 @@ static void I2C_prvSlaveDataIRQHandler(I2C_HandleType * pxI2C)
 
         /* Disable interrupts as transfer is over */
         pxI2C->Inst->CR1.w = ulCR1 & ~(I2C_SLAVE_TX_ITS | I2C_SLAVE_RX_ITS);
-
-        pxI2C->IRQHandler = (XPD_HandleCallbackType)I2C_prvSlaveListenIRQHandler;
 
         XPD_SAFE_CALLBACK(pxI2C->Callbacks.SlaveComplete, pxI2C);
     }
@@ -439,11 +405,8 @@ static void I2C_prvMasterIRQHandler(I2C_HandleType * pxI2C)
         /* Move on from CMD to DATA stage */
         I2C_prvMasterSetDataStage(pxI2C);
 
-        /* Change direction if necessary */
-        if (pxI2C->Transfers.pMaster->Direction == I2C_DIRECTION_READ)
-        {
-            pxI2C->Inst->CR1.w = ulCR1 ^ (I2C_CR1_RXIE | I2C_CR1_TXIE);
-        }
+        /* Change to data stage transfer direction and method */
+        pxI2C->Inst->CR1.w = (ulCR1 & ~(I2C_MASTER_CMD_ITS)) | pxI2C->DataCtrlBits;
     }
     /* Transfer reload complete */
     else if (((ulISR & I2C_ISR_TCR) != 0) && ((ulCR1 & I2C_CR1_TCIE) != 0))
@@ -465,7 +428,7 @@ static void I2C_prvMasterIRQHandler(I2C_HandleType * pxI2C)
         if ((ulCR1 & I2C_CR1_ADDRIE) != 0)
         {
             /* Switch to slave IRQHandler if address is listened to */
-            pxI2C->IRQHandler = (XPD_HandleCallbackType)I2C_prvSlaveListenIRQHandler;
+            pxI2C->IRQHandler = (XPD_HandleCallbackType)I2C_prvSlaveIRQHandler;
         }
 
         /* Check if NACK error triggered it */
@@ -507,7 +470,7 @@ void I2C_vInit(I2C_HandleType * pxI2C, const I2C_InitType * pxConfig)
 
     /* Slave configuration */
     MODIFY_REG(pxI2C->Inst->CR1.w,
-            I2C_CR1_GCEN | I2C_CR1_SBC | I2C_CR1_NOSTRETCH,
+            I2C_CR1_GCEN | I2C_CR1_NOSTRETCH,
             pxConfig->wCfg << 8);
 
     /* Set Address 1 */
@@ -718,25 +681,31 @@ XPD_ReturnType I2C_eMasterTransfer(I2C_HandleType * pxI2C, const I2C_TransferTyp
  */
 void I2C_vMasterTransfer_IT(I2C_HandleType * pxI2C, const I2C_TransferType * pxTransfer)
 {
-    uint32_t ulITs = I2C_MASTER_TX_ITS;
+    uint32_t ulITs;
     I2C_RESET_ERRORS(pxI2C);
 
     /* Initialize: set transfer, slave address */
     pxI2C->Transfers.pMaster = pxTransfer;
     pxI2C->Inst->CR2.b.SADD = pxTransfer->SlaveAddress_10bit;
 
+    if (pxTransfer->Direction == I2C_DIRECTION_READ)
+    {
+        ulITs = I2C_MASTER_RX_ITS;
+    }
+    else
+    {
+        ulITs = I2C_MASTER_TX_ITS;
+    }
+
     if (pxTransfer->CmdSize > 0)
     {
         I2C_prvMasterSetCmdStage(pxI2C);
+        pxI2C->DataCtrlBits = ulITs;
+        ulITs = I2C_MASTER_CMD_ITS;
     }
     else
     {
         I2C_prvMasterSetDataStage(pxI2C);
-
-        if (pxTransfer->Direction == I2C_DIRECTION_READ)
-        {
-            ulITs = I2C_MASTER_RX_ITS;
-        }
     }
 
     /* Enable related interrupts */
@@ -864,7 +833,7 @@ XPD_ReturnType I2C_eSlaveTransferData(I2C_HandleType * pxI2C, uint32_t ulTimeout
 void I2C_vSlaveListen_IT(I2C_HandleType * pxI2C, uint8_t ucCmdSize)
 {
     pxI2C->Transfers.Slave.CmdSize = ucCmdSize;
-    pxI2C->IRQHandler = (XPD_HandleCallbackType)I2C_prvSlaveListenIRQHandler;
+    pxI2C->IRQHandler = (XPD_HandleCallbackType)I2C_prvSlaveIRQHandler;
     I2C_IT_ENABLE(pxI2C, ADDR);
 }
 
@@ -891,7 +860,7 @@ void I2C_vSlaveTransferData_IT(I2C_HandleType * pxI2C)
     pxI2C->Stream.size   = pxI2C->Transfers.Slave.Length;
     pxI2C->Stream.length = 0;
 
-    pxI2C->IRQHandler = (XPD_HandleCallbackType)I2C_prvSlaveDataIRQHandler;
+    pxI2C->IRQHandler = (XPD_HandleCallbackType)I2C_prvSlaveIRQHandler;
 
     /* Enable direction-specific interrupts */
     if (pxI2C->Transfers.Slave.Direction == I2C_DIRECTION_WRITE)

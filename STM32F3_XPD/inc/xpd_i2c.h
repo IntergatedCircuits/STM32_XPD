@@ -102,8 +102,7 @@ typedef struct
     uint16_t : 4;
     uint16_t : 1;
     I2C_AddressModeType AddressingMode : 1; /*!< Global addressing mode */
-    uint16_t : 2;
-    FunctionalState SlaveByteControl : 1;   /*!< [Slave] byte control - disable by default */
+    uint16_t : 3;
     FunctionalState NoStretch : 1;          /*!< [Slave] Do not stretch SCL low when waiting for software
                                                  to control the transfer */
     uint16_t : 1;
@@ -161,6 +160,7 @@ typedef struct
         I2C_TransferType Slave;                 /*!< Slave mode transfer */
     }Transfers;                                 /*   Current transfer references */
     DataStreamType Stream;                      /*!< Data transfer management */
+    uint16_t DataCtrlBits;                      /*!< Data stage control bits to use */
     RCC_PositionType CtrlPos;                   /*!< Relative position for reset and clock control */
     volatile I2C_ErrorType Errors;              /*!< Transfer errors */
 }I2C_HandleType;
