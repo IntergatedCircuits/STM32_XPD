@@ -206,7 +206,7 @@ void GPIO_vInitPin(GPIO_PinType ePin, const GPIO_InitType * pxConfig)
 {
     GPIO_TypeDef *pxGPIO = __GPIO_PORT_FROM_PIN(ePin);
     uint8_t ucPin = ePin & __GPIO_PIN_MASK;
-    uint8_t uc2BitPos = ucPin * 2;;
+    uint8_t uc2BitPos = ucPin * 2;
 
     /* enable GPIO clock */
     GPIO_prvClockEnable(pxGPIO);
