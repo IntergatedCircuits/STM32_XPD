@@ -417,7 +417,7 @@ XPD_ReturnType SPI_eSend(
         uint32_t            ulTimeout)
 {
     XPD_ReturnType eResult;
-    boolean_t eDuplex = TRUE;
+    bool eDuplex = true;
 
     /* save stream info */
     pxSPI->TxStream.buffer = pvTxData;
@@ -428,7 +428,7 @@ XPD_ReturnType SPI_eSend(
     if (SPI_REG_BIT(pxSPI, CR1, BIDIMODE) != 0)
     {
         SPI_REG_BIT(pxSPI, CR1, BIDIOE) = 1;
-        eDuplex = FALSE;
+        eDuplex = false;
     }
 
 #ifdef __XPD_SPI_ERROR_DETECT

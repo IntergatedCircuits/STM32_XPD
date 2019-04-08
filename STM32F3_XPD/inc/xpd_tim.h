@@ -482,9 +482,9 @@ __STATIC_INLINE void TIM_vCounterStop(TIM_HandleType * pxTIM)
 /**
  * @brief Returns the current status of the TIM counter.
  * @param pxTIM: pointer to the TIM handle structure
- * @return TRUE if the counter is running, FALSE if stopped
+ * @return true if the counter is running, false if stopped
  */
-__STATIC_INLINE boolean_t TIM_bCounterIsRunning(TIM_HandleType * pxTIM)
+__STATIC_INLINE bool TIM_bCounterIsRunning(TIM_HandleType * pxTIM)
 {
     return TIM_REG_BIT(pxTIM,CR1,CEN);
 }

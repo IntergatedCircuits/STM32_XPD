@@ -655,7 +655,7 @@ __STATIC_INLINE uint32_t ADC_ulMultiModeValues(ADC_HandleType * pxADC)
 
 /** @addtogroup ADC_Calibration_Exported_Functions
  * @{ */
-XPD_ReturnType  ADC_eCalibrate          (ADC_HandleType * pxADC, boolean_t eDifferential);
+XPD_ReturnType  ADC_eCalibrate          (ADC_HandleType * pxADC, bool eDifferential);
 /** @} */
 
 /** @} */

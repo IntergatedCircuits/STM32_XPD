@@ -230,7 +230,7 @@ void            DMA_vIRQHandler     (DMA_HandleType * pxDMA);
  * @brief  Provides the circular mode of DMA stream.
  * @param  HANDLE: specifies the DMA Handle.
  */
-__STATIC_INLINE boolean_t DMA_eCircularMode(DMA_HandleType * pxDMA)
+__STATIC_INLINE bool DMA_eCircularMode(DMA_HandleType * pxDMA)
 {
     return DMA_REG_BIT(pxDMA, CCR, CIRC);
 }

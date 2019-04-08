@@ -29,6 +29,7 @@ extern "C"
 #endif
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <stddef.h>
 
 /** @defgroup Common
@@ -36,9 +37,6 @@ extern "C"
 
 /** @defgroup Common_Exported_Types Common Exported Types
  * @{ */
-
-/** @brief Boolean type */
-typedef uint8_t boolean_t;
 
 /** @brief Flag status type */
 typedef enum
@@ -126,6 +124,13 @@ typedef struct
     uint16_t size;   /*!< Size of a data element */
 }DataStreamType;
 
+/** @brief Variant type */
+typedef union
+{
+    uint32_t val;
+    void *   ptr;
+}VariantType;
+
 /**
  * @brief Function pointer type for binary control function reference
  * @param NewState: the state to set
@@ -153,17 +158,6 @@ typedef void ( *XPD_HandleCallbackType )    ( void * Handle );
 
 /** @defgroup Common_Exported_Macros Common Exported Macros
  * @{ */
-
-#ifndef NULL
-#define NULL      ((void *)0)
-#endif
-
-#ifndef FALSE
-#define FALSE     0
-#endif
-#ifndef TRUE
-#define TRUE      (!FALSE)
-#endif
 
 /**
  * @brief  Safe function pointer caller that checks it against NULL and calls it with parameters.

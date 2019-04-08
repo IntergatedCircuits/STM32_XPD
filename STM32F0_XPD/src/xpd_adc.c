@@ -69,11 +69,11 @@ static void ADC_prvDmaErrorRedirect(void *pxDMA)
 #endif
 
 /* Enables the peripheral */
-static boolean_t ADC_prvEnableInst(ADC_TypeDef * ADCx)
+static bool ADC_prvEnableInst(ADC_TypeDef * ADCx)
 {
     /* Requirements:
      * ADCAL, ADSTP, JADSTP, ADSTART, JADSTART, ADDIS, ADEN = 0 */
-    boolean_t eSuccess = (0 == (ADCx->CR.w & (ADC_CR_ADEN | ADC_STARTCTRL
+    bool eSuccess = (0 == (ADCx->CR.w & (ADC_CR_ADEN | ADC_STARTCTRL
             | ADC_STOPCTRL | ADC_CR_ADCAL | ADC_CR_ADDIS)));
     if (eSuccess)
     {
@@ -609,7 +609,7 @@ ADC_WatchdogType ADC_eWatchdogStatus(ADC_HandleType * pxADC)
  * @param eDifferential: unused
  * @return Result of the operation
  */
-XPD_ReturnType ADC_eCalibrate(ADC_HandleType * pxADC, boolean_t eDifferential)
+XPD_ReturnType ADC_eCalibrate(ADC_HandleType * pxADC, bool eDifferential)
 {
     XPD_ReturnType eResult = XPD_ERROR;
 

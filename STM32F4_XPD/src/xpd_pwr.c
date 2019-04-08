@@ -286,7 +286,7 @@ XPD_ReturnType PWR_eVoltageScaleConfig(PWR_RegVoltScaleType eScaling)
 #endif
     {
 #ifdef PWR_CR_VOS_1
-        boolean_t bPllOn = RCC_REG_BIT(CR,PLLRDY);
+        bool bPllOn = RCC_REG_BIT(CR,PLLRDY);
 
         if (bPllOn)
         {

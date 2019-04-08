@@ -359,7 +359,7 @@ __STATIC_INLINE uint16_t ADC_usGetValue(ADC_HandleType * pxADC)
 
 /** @addtogroup ADC_Calibration_Exported_Functions
  * @{ */
-XPD_ReturnType  ADC_eCalibrate          (ADC_HandleType * pxADC, boolean_t eDifferential);
+XPD_ReturnType  ADC_eCalibrate          (ADC_HandleType * pxADC, bool eDifferential);
 /** @} */
 
 /** @} */
