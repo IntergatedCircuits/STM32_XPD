@@ -198,26 +198,6 @@ static void USB_prvReadFifo(USB_HandleType * pxUSB,
     USB_REG_BIT(pxUSB, GAHBCFG, GINT) = 1;
 }
 
-/* Determines the next packet size based on the transfer progress and the EP MPS */
-static uint16_t USB_prvNextPacketSize(USB_EndPointHandleType * pxEP)
-{
-    uint16_t usPacketLength;
-
-    /* Multi packet transfer */
-    if (pxEP->Transfer.Progress > pxEP->MaxPacketSize)
-    {
-        pxEP->Transfer.Progress -= pxEP->MaxPacketSize;
-        usPacketLength = pxEP->MaxPacketSize;
-    }
-    else
-    {
-        usPacketLength = pxEP->Transfer.Progress;
-        pxEP->Transfer.Progress = 0;
-    }
-
-    return usPacketLength;
-}
-
 /* Handle IN EP transfer */
 static void USB_prvTransmitPacket(USB_HandleType * pxUSB, uint8_t ucEpNum)
 {
@@ -228,14 +208,29 @@ static void USB_prvTransmitPacket(USB_HandleType * pxUSB, uint8_t ucEpNum)
     /* If there is enough space in the FIFO for a packet, fill immediately */
     if (ulFifoSpace >= (uint32_t)pxEP->MaxPacketSize)
     {
-        uint16_t usPacketLength = USB_prvNextPacketSize(pxEP);
+        uint16_t usPacketLength;
+
+        /* Multi packet transfer */
+        if (pxEP->Transfer.Progress > pxEP->MaxPacketSize)
+        {
+            usPacketLength = pxEP->MaxPacketSize;
+        }
+        else
+        {
+            usPacketLength = pxEP->Transfer.Progress;
+        }
 
         /* Write a packet to the FIFO */
         USB_prvWriteFifo(pxUSB, ucEpNum, pxEP->Transfer.Data, usPacketLength);
         pxEP->Transfer.Data += usPacketLength;
+        pxEP->Transfer.Progress -= usPacketLength;
     }
 
-    if ((pxEP->Transfer.Progress == 0) || (ucEpNum == 0))
+    if (ucEpNum == 0)
+    {
+        /* Interrupt isn't used */
+    }
+    else if (pxEP->Transfer.Progress == 0)
     {
         /* Disable Tx FIFO interrupts when all data is written */
         CLEAR_BIT(pxUSB->Inst->DIEPEMPMSK, ulEpFlag);
@@ -463,50 +458,32 @@ static void USB_prvOutEpEventHandler(USB_HandleType * pxUSB, uint8_t ucEpNum)
         /* Clear IT flag */
         pxDEP->DxEPINT.w = USB_OTG_DOEPINT_XFRC;
 
-        if (ucEpNum > 0)
+        if (USB_DMA_CONFIG(pxUSB) != 0)
         {
-            if (USB_DMA_CONFIG(pxUSB) != 0)
-            {
-                /* XFRSIZ holds the unfilled byte count
-                 * after the transfer is complete */
-                uint16_t usTransferSize =
-                        pxEP->Transfer.Progress - pxDEP->DxEPTSIZ.b.XFRSIZ;
-                pxEP->Transfer.Length = usTransferSize;
-                pxEP->Transfer.Data += usTransferSize;
-            }
+            /* XFRSIZ holds the unfilled byte count
+             * after the transfer is complete;
+             * EP0 transfers are limited to MPS */
+            uint16_t usTransferSize =
+                    pxEP->MaxPacketSize - pxDEP->DxEPTSIZ.b.XFRSIZ;
+            pxEP->Transfer.Length += usTransferSize;
+            pxEP->Transfer.Data += usTransferSize;
 
+            if ((ucEpNum + pxEP->Transfer.Length) == 0)
+            {
+                /* this is ZLP, so prepare EP0 for next setup */
+                USB_prvPrepareSetup(pxUSB);
+            }
+        }
+
+        if ((ucEpNum > 0) || (pxEP->Transfer.Progress == pxEP->Transfer.Length))
+        {
             /* Reception finished */
             USB_vDataOutCallback(pxUSB, pxEP);
         }
-        else /* EP0 packetization requires software handling */
+        else
         {
-            if (USB_DMA_CONFIG(pxUSB) != 0)
-            {
-                /* XFRSIZ holds the unfilled byte count
-                 * after the transfer is complete;
-                 * EP0 transfers are limited to MPS */
-                uint16_t usTransferSize =
-                        pxEP->MaxPacketSize - pxDEP->DxEPTSIZ.b.XFRSIZ;
-                pxEP->Transfer.Length += usTransferSize;
-                pxEP->Transfer.Data += usTransferSize;
-
-                if (pxEP->Transfer.Length == 0)
-                {
-                    /* this is ZLP, so prepare EP0 for next setup */
-                    USB_prvPrepareSetup(pxUSB);
-                }
-            }
-
-            if (pxEP->Transfer.Progress == pxEP->Transfer.Length)
-            {
-                /* Reception finished */
-                USB_vDataOutCallback(pxUSB, pxEP);
-            }
-            else
-            {
-                /* Transfer next packet */
-                USB_prvEpReceive(pxUSB, 0);
-            }
+            /* EP0 packetization requires software handling */
+            USB_prvEpReceive(pxUSB, 0);
         }
     }
 }
