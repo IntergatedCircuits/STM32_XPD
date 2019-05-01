@@ -29,13 +29,13 @@
 
 #define DMA_ABORT_TIMEOUT   1000
 
-#define DMA_BASE(CHANNEL)            ((DMA_TypeDef*)((uint32_t)(CHANNEL) & (~(uint32_t)0xFF)))
 #ifdef DMA2
-#define DMA_BASE_OFFSET(CHANNEL)     (((uint32_t)(CHANNEL) < (uint32_t)DMA2) ? 0 : 1)
+#define DMA_BASE_OFFSET(CHANNEL)    (((uint32_t)(CHANNEL) < (uint32_t)DMA2) ? 0 : 1)
 #else
-#define DMA_BASE_OFFSET(CHANNEL)     0
+#define DMA_BASE_OFFSET(CHANNEL)    0
 #endif
-#define DMA_CHANNEL_NUMBER(CHANNEL)   ((((uint32_t)(CHANNEL) & 0xFF) - 8) / 20)
+#define DMAR_BASE(HANDLE)           \
+    ((DMA_Request_TypeDef*)((uint32_t)((HANDLE)->Base) + (DMA1_CSELR_BASE - DMA1_BASE)))
 
 static uint8_t dma_aucUsers[] = {
         0,
@@ -53,14 +53,14 @@ static void DMA_prvClockEnable(DMA_HandleType * pxDMA)
         RCC_vClockEnable(RCC_POS_DMA1 + ulBO);
     }
 
-    SET_BIT(dma_aucUsers[ulBO], 1 << DMA_CHANNEL_NUMBER(pxDMA->Inst));
+    SET_BIT(dma_aucUsers[ulBO], 1 << (pxDMA->ChannelOffset / 4));
 }
 
 static void DMA_prvClockDisable(DMA_HandleType * pxDMA)
 {
     uint32_t ulBO = DMA_BASE_OFFSET(pxDMA->Inst);
 
-    CLEAR_BIT(dma_aucUsers[ulBO], 1 << DMA_CHANNEL_NUMBER(pxDMA->Inst));
+    CLEAR_BIT(dma_aucUsers[ulBO], 1 << (pxDMA->ChannelOffset / 4));
 
     if (dma_aucUsers[ulBO] == 0)
     {
@@ -68,28 +68,16 @@ static void DMA_prvClockDisable(DMA_HandleType * pxDMA)
     }
 }
 
-/*
- * @brief Enables the DMA stream.
- * @param pxDMA: pointer to the DMA stream handle structure
- */
+/* Enables the DMA stream */
 __STATIC_INLINE void DMA_prvEnable(DMA_HandleType * pxDMA)
 {
     DMA_REG_BIT(pxDMA, CCR, EN) = 1;
 }
 
-/*
- * @brief Disables the DMA stream.
- * @param pxDMA: pointer to the DMA stream handle structure
- */
+/* Disables the DMA stream */
 __STATIC_INLINE void DMA_prvDisable(DMA_HandleType * pxDMA)
 {
     DMA_REG_BIT(pxDMA, CCR, EN) = 0;
-}
-
-__STATIC_INLINE void DMA_prvCalcBase(DMA_HandleType * pxDMA)
-{
-    pxDMA->Base = DMA_BASE(pxDMA->Inst);
-    pxDMA->ChannelOffset = DMA_CHANNEL_NUMBER(pxDMA->Inst) * 4;
 }
 
 /** @defgroup DMA_Exported_Functions DMA Exported Functions
@@ -120,8 +108,17 @@ void DMA_vInit(DMA_HandleType * pxDMA, const DMA_InitType * pxConfig)
     pxDMA->Inst->CNDTR = 0;
     pxDMA->Inst->CPAR  = 0;
 
-    /* calculate DMA steam Base Address */
-    DMA_prvCalcBase(pxDMA);
+#ifdef DMA1_CSELR
+    if (pxConfig->Direction != DMA_MEMORY2MEMORY)
+    {
+        DMA_Request_TypeDef* pxDMAR = DMAR_BASE(pxDMA);
+        uint8_t ucCselShift = pxDMA->ChannelOffset & 0x1C;
+
+        /* Program the request selector */
+        MODIFY_REG(pxDMAR->CSELR.w, DMA_CSELR_C1S << ucCselShift,
+                pxConfig->ChannelSelect << ucCselShift);
+    }
+#endif
 }
 
 /**

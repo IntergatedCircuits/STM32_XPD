@@ -74,8 +74,9 @@ typedef enum
 }DMA_OperationType;
 
 /** @brief DMA channel setup structure */
-typedef union
+typedef struct
 {
+    union {
     struct {
     uint16_t : 3;
     DMA_DirectionType Direction : 2;       /*!< DMA channel direction */
@@ -88,6 +89,10 @@ typedef union
     uint16_t : 2;
     };
     uint16_t w;
+    };
+#ifdef DMA1_CSELR
+    uint8_t ChannelSelect;                 /*!< Channel selection for the DMA stream [0 .. 7] */
+#endif
 }DMA_InitType;
 
 /** @brief DMA channel handle structure */
@@ -117,6 +122,12 @@ typedef struct
 /** @defgroup DMA_Exported_Macros DMA Exported Macros
  * @{ */
 
+#define         DMA_BASE(CHANNEL)                           \
+    ((DMA_TypeDef*)((uint32_t)(CHANNEL) & (~(uint32_t)0xFF)))
+
+#define         DMA_CHANNEL_NR(CHANNEL)                     \
+    ((((uint32_t)(CHANNEL) & 0xFF) - 8) / 20)
+
 #ifdef DMA_Channel_BB
 /**
  * @brief DMA Instance to handle binder macro
@@ -124,8 +135,10 @@ typedef struct
  * @param INSTANCE: specifies the DMA peripheral instance.
  */
 #define         DMA_INST2HANDLE(HANDLE, INSTANCE)           \
-    ((HANDLE)->Inst    = (INSTANCE),                        \
-     (HANDLE)->Inst_BB = DMA_Channel_BB(INSTANCE))
+    ((HANDLE)->Inst          = (INSTANCE),                  \
+     (HANDLE)->Inst_BB       = DMA_Channel_BB(INSTANCE),    \
+     (HANDLE)->Base          = DMA_BASE(INSTANCE),          \
+     (HANDLE)->ChannelOffset = DMA_CHANNEL_NR(INSTANCE) * 4)
 
 /**
  * @brief DMA register bit accessing macro
@@ -143,7 +156,9 @@ typedef struct
  * @param INSTANCE: specifies the DMA peripheral instance.
  */
 #define         DMA_INST2HANDLE(HANDLE, INSTANCE)           \
-    ((HANDLE)->Inst    = (INSTANCE))
+    ((HANDLE)->Inst          = (INSTANCE),                  \
+     (HANDLE)->Base          = DMA_BASE(INSTANCE),          \
+     (HANDLE)->ChannelOffset = DMA_CHANNEL_NR(INSTANCE) * 4)
 
 /**
  * @brief DMA register bit accessing macro

@@ -74,8 +74,9 @@ typedef enum
 }DMA_OperationType;
 
 /** @brief DMA channel setup structure */
-typedef union
+typedef struct
 {
+    union {
     struct {
     uint16_t : 3;
     DMA_DirectionType Direction : 2;       /*!< DMA channel direction */
@@ -88,6 +89,10 @@ typedef union
     uint16_t : 2;
     };
     uint16_t w;
+    };
+#ifdef DMA1_CSELR
+    uint8_t ChannelSelect;                 /*!< Channel selection for the DMA stream [0 .. 7] */
+#endif
 }DMA_InitType;
 
 /** @brief DMA channel handle structure */
@@ -117,6 +122,12 @@ typedef struct
 /** @defgroup DMA_Exported_Macros DMA Exported Macros
  * @{ */
 
+#define         DMA_BASE(CHANNEL)                           \
+    ((DMA_TypeDef*)((uint32_t)(CHANNEL) & (~(uint32_t)0xFF)))
+
+#define         DMA_CHANNEL_NR(CHANNEL)                     \
+    ((((uint32_t)(CHANNEL) & 0xFF) - 8) / 20)
+
 #ifdef DMA_Channel_BB
 /**
  * @brief DMA Instance to handle binder macro
@@ -124,8 +135,10 @@ typedef struct
  * @param INSTANCE: specifies the DMA peripheral instance.
  */
 #define         DMA_INST2HANDLE(HANDLE, INSTANCE)           \
-    ((HANDLE)->Inst    = (INSTANCE),                        \
-     (HANDLE)->Inst_BB = DMA_Channel_BB(INSTANCE))
+    ((HANDLE)->Inst          = (INSTANCE),                  \
+     (HANDLE)->Inst_BB       = DMA_Channel_BB(INSTANCE),    \
+     (HANDLE)->Base          = DMA_BASE(INSTANCE),          \
+     (HANDLE)->ChannelOffset = DMA_CHANNEL_NR(INSTANCE) * 4)
 
 /**
  * @brief DMA register bit accessing macro
@@ -143,7 +156,9 @@ typedef struct
  * @param INSTANCE: specifies the DMA peripheral instance.
  */
 #define         DMA_INST2HANDLE(HANDLE, INSTANCE)           \
-    ((HANDLE)->Inst    = (INSTANCE))
+    ((HANDLE)->Inst          = (INSTANCE),                  \
+     (HANDLE)->Base          = DMA_BASE(INSTANCE),          \
+     (HANDLE)->ChannelOffset = DMA_CHANNEL_NR(INSTANCE) * 4)
 
 /**
  * @brief DMA register bit accessing macro
@@ -205,38 +220,6 @@ typedef struct
 #define         DMA_FLAG_CLEAR(HANDLE, FLAG_NAME)           \
     ((HANDLE)->Base->IFCR.w = (DMA_IFCR_C##FLAG_NAME##IF1   \
                 << (uint32_t)((HANDLE)->ChannelOffset)))
-
-#ifdef DMA_CSELR_C1S
-
-/* Additional defines for complete macro functionality */
-#define DMA1_CSELR_CH1_DEFAULT      0U
-#define DMA1_CSELR_CH2_DEFAULT      0U
-#define DMA1_CSELR_CH3_DEFAULT      0U
-#define DMA1_CSELR_CH4_DEFAULT      0U
-#define DMA1_CSELR_CH5_DEFAULT      0U
-#define DMA1_CSELR_CH6_DEFAULT      0U
-#define DMA1_CSELR_CH7_DEFAULT      0U
-#define DMA2_CSELR_CH1_DEFAULT      0U
-#define DMA2_CSELR_CH2_DEFAULT      0U
-#define DMA2_CSELR_CH3_DEFAULT      0U
-#define DMA2_CSELR_CH4_DEFAULT      0U
-#define DMA2_CSELR_CH5_DEFAULT      0U
-#define DMA2_CSELR_CH6_DEFAULT      0U
-#define DMA2_CSELR_CH7_DEFAULT      0U
-
-/**
- * @brief  Sets the DMA remapping for the given channel.
- * @param  BASE: specifies the name of the DMA base.
- *         This parameter can be one of the following values:
- *            @arg DMA1
- *            @arg DMA2 (if available)
- * @param  CHANNEL: specifies the channel number to remap [1..7].
- * @param  SELECTION: specify the remap target selection. Using DEFAULT resets the remapping.
- */
-#define DMA_CHANNEL_REMAP(BASE, CHANNEL, SELECTION)         \
-    (MODIFY_REG(BASE->CSELR.w, 0xF << (((CHANNEL) - 1) * 4),\
-     BASE##_CSELR_CH##CHANNEL##_##SELECTION))
-#endif /* DMA_CSELR_C1S */
 
 /** @} */
 

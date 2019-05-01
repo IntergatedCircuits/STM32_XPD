@@ -106,7 +106,7 @@ typedef union
     uint32_t : 3;
     DMA_BurstType     PeriphBurst : 2;     /*!< The peripheral burst size (forced to 0 when FIFO isn't used) */
     DMA_BurstType     MemoryBurst : 2;     /*!< The memory burst size (forced to 0 when FIFO isn't used) */
-    uint32_t          Channel : 3;         /*!< Channel selection for the DMA stream [0 .. 7] */
+    uint32_t          ChannelSelect : 3;   /*!< Channel selection for the DMA stream [0 .. 7] */
     uint32_t : 1;
     uint32_t          FifoThreshold : 3;   /*!< The number of FIFO quarters to fill before transfer [1 .. 4]
                                                 (set to 0 to disable the FIFO) */
@@ -141,6 +141,14 @@ typedef struct
 /** @defgroup DMA_Exported_Macros DMA Exported Macros
  * @{ */
 
+#define         DMA_BASE(STREAM)                            \
+    ((((uint32_t)(STREAM) & 0xFF) < 0x70) ?                 \
+    (void*)( (uint32_t)(STREAM) & (~(uint32_t)0x3FF)) :     \
+    (void*)(((uint32_t)(STREAM) & (~(uint32_t)0x3FF)) + 4))
+
+#define         DMA_STREAM_NR(STREAM)                       \
+    ((((uint32_t)(STREAM) & 0xFF) - 16) / 24)
+
 #ifdef DMA_Stream_BB
 /**
  * @brief DMA Instance to handle binder macro
@@ -149,7 +157,11 @@ typedef struct
  */
 #define         DMA_INST2HANDLE(HANDLE, INSTANCE)           \
     ((HANDLE)->Inst    = (INSTANCE),                        \
-     (HANDLE)->Inst_BB = DMA_Stream_BB(INSTANCE))
+     (HANDLE)->Inst_BB = DMA_Stream_BB(INSTANCE),           \
+     (HANDLE)->Base         = DMA_BASE(INSTANCE),           \
+     (HANDLE)->StreamOffset =                               \
+        ((DMA_STREAM_NR(INSTANCE) & 2) * 8) +               \
+        ((DMA_STREAM_NR(INSTANCE) & 1) * 6))
 
 /**
  * @brief DMA register bit accessing macro
@@ -167,7 +179,11 @@ typedef struct
  * @param INSTANCE: specifies the DMA peripheral instance.
  */
 #define         DMA_INST2HANDLE(HANDLE, INSTANCE)           \
-    ((HANDLE)->Inst    = (INSTANCE))
+    ((HANDLE)->Inst         = (INSTANCE),                   \
+     (HANDLE)->Base         = DMA_BASE(INSTANCE),           \
+     (HANDLE)->StreamOffset =                               \
+        ((DMA_STREAM_NR(INSTANCE) & 2) * 8) +               \
+        ((DMA_STREAM_NR(INSTANCE) & 1) * 6))
 
 /**
  * @brief DMA register bit accessing macro

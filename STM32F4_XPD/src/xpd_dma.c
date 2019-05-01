@@ -29,11 +29,7 @@
 
 #define DMA_ABORT_TIMEOUT   1000
 
-#define DMA_BASE(STREAM)            ((((uint32_t)(STREAM) & 0xFF) < 0x70) ?     \
-                        (void*)( (uint32_t)(STREAM) & (~(uint32_t)0x3FF)) :     \
-                        (void*)(((uint32_t)(STREAM) & (~(uint32_t)0x3FF)) + 4))
 #define DMA_BASE_OFFSET(STREAM)     (((uint32_t)(STREAM) < (uint32_t)DMA2) ? 0 : 1)
-#define DMA_STREAM_NUMBER(STREAM)   ((((uint32_t)(STREAM) & 0xFF) - 16) / 24)
 
 static uint8_t dma_aucUsers[] = {
         0,
@@ -51,14 +47,14 @@ static void DMA_prvClockEnable(DMA_HandleType * pxDMA)
         RCC_vClockEnable(RCC_POS_DMA1 + ulBO);
     }
 
-    SET_BIT(dma_aucUsers[ulBO], 1 << DMA_STREAM_NUMBER(pxDMA->Inst));
+    SET_BIT(dma_aucUsers[ulBO], 1 << DMA_STREAM_NR(pxDMA->Inst));
 }
 
 static void DMA_prvClockDisable(DMA_HandleType * pxDMA)
 {
     uint32_t ulBO = DMA_BASE_OFFSET(pxDMA->Inst);
 
-    CLEAR_BIT(dma_aucUsers[ulBO], 1 << DMA_STREAM_NUMBER(pxDMA->Inst));
+    CLEAR_BIT(dma_aucUsers[ulBO], 1 << DMA_STREAM_NR(pxDMA->Inst));
 
     if (dma_aucUsers[ulBO] == 0)
     {
@@ -66,30 +62,16 @@ static void DMA_prvClockDisable(DMA_HandleType * pxDMA)
     }
 }
 
-/*
- * @brief Enables the DMA stream.
- * @param pxDMA: pointer to the DMA stream handle structure
- */
+/* Enables the DMA stream */
 __STATIC_INLINE void DMA_prvEnable(DMA_HandleType * pxDMA)
 {
     DMA_REG_BIT(pxDMA, CR, EN) = 1;
 }
 
-/*
- * @brief Disables the DMA stream.
- * @param pxDMA: pointer to the DMA stream handle structure
- */
+/* Disables the DMA stream */
 __STATIC_INLINE void DMA_prvDisable(DMA_HandleType * pxDMA)
 {
     DMA_REG_BIT(pxDMA, CR, EN) = 0;
-}
-
-__STATIC_INLINE void DMA_prvCalcBase(DMA_HandleType * pxDMA)
-{
-    uint8_t ucStream = DMA_STREAM_NUMBER(pxDMA->Inst);
-
-    pxDMA->Base = DMA_BASE(pxDMA->Inst);
-    pxDMA->StreamOffset = ((ucStream & 2) * 8) + ((ucStream & 1) * 6);
 }
 
 /** @defgroup DMA_Exported_Functions DMA Exported Functions
@@ -137,9 +119,6 @@ void DMA_vInit(DMA_HandleType * pxDMA, const DMA_InitType * pxConfig)
 
     pxDMA->Inst->NDTR = 0;
     pxDMA->Inst->PAR = 0;
-
-    /* calculate DMA steam Base Address */
-    DMA_prvCalcBase(pxDMA);
 }
 
 /**
