@@ -71,8 +71,12 @@ typedef struct
     struct {
     uint16_t SlaveAddress_10bit : 10; /*!< The slave's address stored in 10 bits (7 bit addresses are left shifted by one) */
     I2C_DirectionType Direction : 1;  /*!< The transfer direction (from the master's point of view) */
+#ifdef __XPD_I2C_LONG_CMD
+    uint16_t : 5;
+#else
     uint16_t CmdSize : 2;             /*!< The size of the optional slave command */
     uint16_t : 3;
+#endif
     };
     struct {
     uint16_t : 1;
@@ -86,8 +90,14 @@ typedef struct
     };
     uint16_t wHeader;   /* [Internal] */
     };
+#ifdef __XPD_I2C_LONG_CMD
+    uint16_t CmdSize;   /*!< The size of the optional slave command */
+    uint8_t *pCmd;      /*!< The command that is sent to the slave for servicing.
+                             The command stage is only performed when @ref I2C_TransferType::CmdSize is set. */
+#else
     uint16_t Cmd;       /*!< The command that is sent to the slave for servicing.
                              The command stage is only performed when @ref I2C_TransferType::CmdSize is set. */
+#endif
     uint8_t *Data;      /*!< Source/target buffer for the transferred data, depending on
                              the current role in the transfer and @ref I2C_TransferType::Direction */
     uint16_t Length;    /*!< The desired length of the data transfer */
@@ -145,9 +155,9 @@ typedef struct
     struct {
         XPD_HandleCallbackType DepInit;         /*!< Callback to initialize module dependencies (GPIOs, IRQs, DMAs) */
         XPD_HandleCallbackType DepDeinit;       /*!< Callback to restore module dependencies (GPIOs, IRQs, DMAs) */
-        XPD_HandleCallbackType MasterComplete;  /*!< Data stream transmission successful callback */
-        XPD_HandleCallbackType SlaveAddressed;  /*!< Data stream reception successful callback */
-        XPD_HandleCallbackType SlaveComplete;   /*!< Data stream reception successful callback */
+        XPD_HandleCallbackType MasterComplete;  /*!< Master transfer complete callback */
+        XPD_HandleCallbackType SlaveAddressed;  /*!< Slave address match callback */
+        XPD_HandleCallbackType SlaveComplete;   /*!< Slave transfer complete callback */
         XPD_HandleCallbackType Error;           /*!< Error callbacks */
     }Callbacks;                                 /*   Handle Callbacks */
     struct {
@@ -210,6 +220,17 @@ typedef struct
     ((HANDLE)->Inst->REG_NAME.b.BIT_NAME)
 
 #endif /* I2C_BB */
+
+/* Most I2C use-cases only need support for 1 / 2 byte long
+ * command / register address, so keep it optimized while
+ * permitting extended use with compiler flag */
+#ifdef __XPD_I2C_LONG_CMD
+#define         I2C_TRANSFER_CMD(TRANSFER)                      \
+    ((uint8_t*)((TRANSFER)->pCmd))
+#else
+#define         I2C_TRANSFER_CMD(TRANSFER)                      \
+    ((uint8_t*)&((TRANSFER)->Cmd))
+#endif
 
 #ifndef I2C_ISR_NACK
 #define I2C_ISR_NACK            I2C_ISR_NACKF
@@ -313,6 +334,8 @@ uint16_t        I2C_usGetRejectedLength     (I2C_HandleType * pxI2C);
 
 void            I2C_vIRQHandler_EV          (I2C_HandleType * pxI2C);
 void            I2C_vIRQHandler_ER          (I2C_HandleType * pxI2C);
+
+void            I2C_vStop_DMA               (I2C_HandleType * pxI2C);
 /** @} */
 
 /** @addtogroup I2C_Master_Exported_Functions
@@ -320,6 +343,7 @@ void            I2C_vIRQHandler_ER          (I2C_HandleType * pxI2C);
 XPD_ReturnType  I2C_eMasterTransfer         (I2C_HandleType * pxI2C, const I2C_TransferType * pxTransfer,
                                              uint32_t ulTimeout);
 void            I2C_vMasterTransfer_IT      (I2C_HandleType * pxI2C, const I2C_TransferType * pxTransfer);
+XPD_ReturnType  I2C_eMasterTransfer_DMA     (I2C_HandleType * pxI2C, const I2C_TransferType * pxTransfer);
 /** @} */
 
 /** @addtogroup I2C_Slave_Exported_Functions
@@ -331,6 +355,7 @@ void            I2C_vSlaveSuspend_IT        (I2C_HandleType * pxI2C);
 
 XPD_ReturnType  I2C_eSlaveTransferData      (I2C_HandleType * pxI2C, uint32_t ulTimeout);
 void            I2C_vSlaveTransferData_IT   (I2C_HandleType * pxI2C);
+XPD_ReturnType  I2C_eSlaveTransferData_DMA  (I2C_HandleType * pxI2C);
 
 /**
  * @brief Returns the slave transfer info reference, which specifies the current I2C transfer request,

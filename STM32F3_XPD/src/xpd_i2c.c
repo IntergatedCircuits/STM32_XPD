@@ -43,17 +43,25 @@ typedef enum
 #define I2C_MASTER_CMD_ITS          (I2C_CR1_TXIE | I2C_CR1_TCIE | I2C_CR1_ERRIE)
 #define I2C_MASTER_RX_ITS           (I2C_CR1_RXIE | I2C_CR1_TCIE | I2C_CR1_STOPIE | I2C_CR1_ERRIE)
 #define I2C_MASTER_TX_ITS           (I2C_CR1_TXIE | I2C_CR1_TCIE | I2C_CR1_STOPIE | I2C_CR1_ERRIE)
+#define I2C_MASTER_RX_DMA           (I2C_CR1_RXDMAEN | I2C_CR1_STOPIE | I2C_CR1_ERRIE)
+#define I2C_MASTER_TX_DMA           (I2C_CR1_TXDMAEN | I2C_CR1_STOPIE | I2C_CR1_ERRIE)
 #define I2C_SLAVE_LISTEN_ITS        (I2C_CR1_ADDRIE | I2C_CR1_ERRIE)
 #define I2C_SLAVE_RX_ITS            (I2C_CR1_RXIE | I2C_CR1_STOPIE | I2C_CR1_ERRIE)
 #define I2C_SLAVE_TX_ITS            (I2C_CR1_TXIE | I2C_CR1_STOPIE | I2C_CR1_ERRIE)
+#define I2C_SLAVE_RX_DMA            (I2C_CR1_RXDMAEN | I2C_CR1_STOPIE | I2C_CR1_ERRIE)
+#define I2C_SLAVE_TX_DMA            (I2C_CR1_TXDMAEN | I2C_CR1_STOPIE | I2C_CR1_ERRIE)
 #else
 #define I2C_ERR_ITS                 (0)
 #define I2C_MASTER_CMD_ITS          (I2C_CR1_TXIE | I2C_CR1_TCIE)
 #define I2C_MASTER_RX_ITS           (I2C_CR1_RXIE | I2C_CR1_TCIE | I2C_CR1_STOPIE)
 #define I2C_MASTER_TX_ITS           (I2C_CR1_TXIE | I2C_CR1_TCIE | I2C_CR1_STOPIE)
+#define I2C_MASTER_RX_DMA           (I2C_CR1_RXDMAEN | I2C_CR1_STOPIE)
+#define I2C_MASTER_TX_DMA           (I2C_CR1_TXDMAEN | I2C_CR1_STOPIE)
 #define I2C_SLAVE_LISTEN_ITS        (I2C_CR1_ADDRIE)
 #define I2C_SLAVE_RX_ITS            (I2C_CR1_RXIE | I2C_CR1_STOPIE)
 #define I2C_SLAVE_TX_ITS            (I2C_CR1_TXIE | I2C_CR1_STOPIE)
+#define I2C_SLAVE_RX_DMA            (I2C_CR1_RXDMAEN | I2C_CR1_STOPIE)
+#define I2C_SLAVE_TX_DMA            (I2C_CR1_TXDMAEN | I2C_CR1_STOPIE)
 #endif
 
 #define I2C_NBYTES_MASK             (I2C_CR2_NBYTES_Msk >> I2C_CR2_NBYTES_Pos)
@@ -139,6 +147,44 @@ static void I2C_prvFlushTx(I2C_HandleType* pxI2C)
     }
 }
 
+/* Stops ongoing DMA request and transfer */
+static void I2C_prvStopDMA(I2C_HandleType* pxI2C)
+{
+    uint32_t ulCR1 = pxI2C->Inst->CR1.w;
+
+    /* Check if DMA requests are still active */
+    if ((ulCR1 & (I2C_CR1_TXDMAEN | I2C_CR1_RXDMAEN)) != 0)
+    {
+        DMA_HandleType *pxDMA;
+        uint16_t usLenCorr = 0;
+
+        pxI2C->Inst->CR1.w = ulCR1 & ~(I2C_CR1_TXDMAEN | I2C_CR1_RXDMAEN);
+
+        /* Only one DMA can be active at a time */
+        if ((ulCR1 & I2C_CR1_TXDMAEN) != 0)
+        {
+            /* If TXIS isn't set, there's a byte data loaded
+             * in TXDR that isn't sent */
+            usLenCorr = 1 - I2C_REG_BIT(pxI2C, ISR, TXIS);
+            pxDMA = pxI2C->DMA.Transmit;
+        }
+        else
+        {
+            pxDMA = pxI2C->DMA.Receive;
+        }
+
+        /* Set stream data:
+         * size now holds the configured length of the DMA transfer
+         * since the transfer is stopped without completion,
+         * we have to subtract the remaining amount */
+        pxI2C->Stream.buffer += pxI2C->Stream.size;
+        pxI2C->Stream.size = usLenCorr + DMA_usGetStatus(pxDMA);
+        pxI2C->Stream.buffer -= pxI2C->Stream.size;
+
+        DMA_vStop_IT(pxDMA);
+    }
+}
+
 /* Reads the transfer info (direction and slave address) to the slave transfer context */
 static void I2C_prvGetTransferInfo(I2C_HandleType * pxI2C)
 {
@@ -207,13 +253,15 @@ static void I2C_prvSlaveIRQHandler(I2C_HandleType * pxI2C)
     /* Slave address match */
     else if ((ulIT & I2C_ISR_ADDR) != 0)
     {
+        I2C_prvStopDMA(pxI2C);
+
         if ((pxI2C->Transfers.Slave.CmdSize > 0) && ((ulCR1 & I2C_CR1_STOPIE) == 0))
         {
             /* Clear ADDR flag to start data transfer */
             I2C_FLAG_CLEAR(pxI2C, ADDR);
 
             /* Save stream info */
-            pxI2C->Stream.buffer = &pxI2C->Transfers.Slave.Cmd;
+            pxI2C->Stream.buffer = I2C_TRANSFER_CMD(&pxI2C->Transfers.Slave);
             pxI2C->Stream.size   = pxI2C->Transfers.Slave.CmdSize;
 
             pxI2C->Inst->CR1.w = ulCR1 | I2C_SLAVE_RX_ITS;
@@ -235,6 +283,8 @@ static void I2C_prvSlaveIRQHandler(I2C_HandleType * pxI2C)
 
         /* Disable interrupts as transfer is over */
         pxI2C->Inst->CR1.w = ulCR1 & ~(I2C_SLAVE_TX_ITS | I2C_SLAVE_RX_ITS);
+
+        I2C_prvStopDMA(pxI2C);
 
         XPD_SAFE_CALLBACK(pxI2C->Callbacks.SlaveComplete, pxI2C);
     }
@@ -354,7 +404,7 @@ static XPD_ReturnType I2C_prvReadStream(I2C_HandleType* pxI2C, uint32_t ulEndFla
 static void I2C_prvMasterSetCmdStage(I2C_HandleType * pxI2C)
 {
     /* Set stream context to command */
-    pxI2C->Stream.buffer = (void*)&pxI2C->Transfers.pMaster->Cmd;
+    pxI2C->Stream.buffer = I2C_TRANSFER_CMD(pxI2C->Transfers.pMaster);
     I2C_prvSetTransfer(pxI2C, I2C_START_WRITE, pxI2C->Transfers.pMaster->CmdSize);
 }
 
@@ -402,11 +452,11 @@ static void I2C_prvMasterIRQHandler(I2C_HandleType * pxI2C)
     /* Transfer complete */
     else if ((ulIT & I2C_ISR_TC) != 0)
     {
-        /* Move on from CMD to DATA stage */
-        I2C_prvMasterSetDataStage(pxI2C);
-
         /* Change to data stage transfer direction and method */
         pxI2C->Inst->CR1.w = (ulCR1 & ~(I2C_MASTER_CMD_ITS)) | pxI2C->DataCtrlBits;
+
+        /* Move on from CMD to DATA stage */
+        I2C_prvMasterSetDataStage(pxI2C);
     }
     /* Transfer reload complete */
     else if (((ulISR & I2C_ISR_TCR) != 0) && ((ulCR1 & I2C_CR1_TCIE) != 0))
@@ -424,6 +474,8 @@ static void I2C_prvMasterIRQHandler(I2C_HandleType * pxI2C)
 
         /* Disable interrupts as transfer is over */
         pxI2C->Inst->CR1.w = ulCR1 & ~(I2C_MASTER_TX_ITS | I2C_MASTER_RX_ITS);
+
+        I2C_prvStopDMA(pxI2C);
 
         if ((ulCR1 & I2C_CR1_ADDRIE) != 0)
         {
@@ -448,6 +500,119 @@ static void I2C_prvMasterIRQHandler(I2C_HandleType * pxI2C)
             XPD_SAFE_CALLBACK(pxI2C->Callbacks.MasterComplete, pxI2C);
         }
     }
+}
+
+static void I2C_prvDmaTransmitRedirect(void * pxDMA)
+{
+    I2C_HandleType * pxI2C = (I2C_HandleType*) ((DMA_HandleType*) pxDMA)->Owner;
+
+    pxI2C->Stream.buffer += pxI2C->Stream.size;
+
+    /* If transfer is segmented master */
+    if (((pxI2C->Inst->CR2.w & (I2C_CR2_RELOAD | I2C_CR2_AUTOEND)) != 0) &&
+        (pxI2C->Stream.length > 0))
+    {
+        /* Request next NBYTES data transfer */
+        I2C_prvSetTransfer(pxI2C, I2C_AUTOSTOP, pxI2C->Stream.length);
+
+        (void) DMA_eStart_IT(pxDMA, (void*)&pxI2C->Inst->TXDR,
+                pxI2C->Stream.buffer, pxI2C->Stream.size);
+    }
+    else
+    {
+        /* All bytes are transferred */
+        pxI2C->Stream.size = 0;
+        I2C_REG_BIT(pxI2C, CR1, TXDMAEN) = 0;
+    }
+}
+
+static void I2C_prvDmaReceiveRedirect(void * pxDMA)
+{
+    I2C_HandleType * pxI2C = (I2C_HandleType*) ((DMA_HandleType*) pxDMA)->Owner;
+
+    pxI2C->Stream.buffer += pxI2C->Stream.size;
+
+    /* If transfer is segmented master */
+    if (((pxI2C->Inst->CR2.w & (I2C_CR2_RELOAD | I2C_CR2_AUTOEND)) != 0) &&
+        (pxI2C->Stream.length > 0))
+    {
+        /* Request next NBYTES data transfer */
+        I2C_prvSetTransfer(pxI2C, I2C_AUTOSTOP, pxI2C->Stream.length);
+
+        (void) DMA_eStart_IT(pxDMA, (void*)&pxI2C->Inst->RXDR,
+                pxI2C->Stream.buffer, pxI2C->Stream.size);
+    }
+    else
+    {
+        /* All bytes are transferred */
+        pxI2C->Stream.size = 0;
+        I2C_REG_BIT(pxI2C, CR1, RXDMAEN) = 0;
+    }
+}
+
+#ifdef __XPD_DMA_ERROR_DETECT
+static void I2C_prvDmaErrorRedirect(void * pxDMA)
+{
+    I2C_HandleType * pxI2C = (I2C_HandleType*) ((DMA_HandleType*) pxDMA)->Owner;
+
+    /* Update error code */
+    pxI2C->Errors |= I2C_ERROR_DMA;
+
+    /* stop DMA and abort transfer */
+    I2C_vStop_DMA(pxI2C);
+
+    XPD_SAFE_CALLBACK(pxI2C->Callbacks.Error, pxI2C);
+}
+#endif
+
+static XPD_ReturnType I2C_prvTransmitDMA(I2C_HandleType * pxI2C, uint8_t * pucData, uint16_t usLength)
+{
+    XPD_ReturnType eResult;
+
+    /* Set up DMA for transfer */
+    eResult = DMA_eStart_IT(pxI2C->DMA.Transmit, (void*)&pxI2C->Inst->TXDR,
+            pucData, usLength);
+
+    if (eResult == XPD_OK)
+    {
+        I2C_RESET_ERRORS(pxI2C);
+
+        /* Set the callback owner */
+        pxI2C->DMA.Transmit->Owner = pxI2C;
+
+        /* Set the DMA transfer callbacks */
+        pxI2C->DMA.Transmit->Callbacks.Complete = I2C_prvDmaTransmitRedirect;
+#ifdef __XPD_DMA_ERROR_DETECT
+        pxI2C->DMA.Transmit->Callbacks.Error    = I2C_prvDmaErrorRedirect;
+#endif
+    }
+
+    return eResult;
+}
+
+static XPD_ReturnType I2C_prvReceiveDMA(I2C_HandleType * pxI2C, uint8_t * pucData, uint16_t usLength)
+{
+    XPD_ReturnType eResult;
+
+    /* Set up DMA for transfer */
+    eResult = DMA_eStart_IT(pxI2C->DMA.Receive, (void*)&pxI2C->Inst->RXDR,
+            pucData, usLength);
+
+    if (eResult == XPD_OK)
+    {
+        I2C_RESET_ERRORS(pxI2C);
+
+        /* Set the callback owner */
+        pxI2C->DMA.Receive->Owner = pxI2C;
+
+        /* Set the DMA transfer callbacks */
+        pxI2C->DMA.Receive->Callbacks.Complete = I2C_prvDmaReceiveRedirect;
+#ifdef __XPD_DMA_ERROR_DETECT
+        pxI2C->DMA.Receive->Callbacks.Error    = I2C_prvDmaErrorRedirect;
+#endif
+    }
+
+    return eResult;
 }
 
 /** @defgroup I2C_Common_Exported_Functions I2C Common Exported Functions
@@ -604,6 +769,18 @@ void I2C_vIRQHandler_ER(I2C_HandleType * pxI2C)
     }
 }
 
+/**
+ * @brief Stops the ongoing DMA-managed I2C transfer.
+ * @param pxI2C: pointer to the I2C handle structure
+ */
+void I2C_vStop_DMA(I2C_HandleType *pxI2C)
+{
+    I2C_prvStopDMA(pxI2C);
+
+    /* Generate STOP in master mode, NACK in slave mode */
+    SET_BIT(pxI2C->Inst->CR2.w, I2C_CR2_STOP | I2C_CR2_NACK);
+}
+
 /** @} */
 
 /** @defgroup I2C_Master_Exported_Functions I2C Master Exported Functions
@@ -713,6 +890,59 @@ void I2C_vMasterTransfer_IT(I2C_HandleType * pxI2C, const I2C_TransferType * pxT
     pxI2C->Inst->CR1.w |= ulITs;
 }
 
+/**
+ * @brief Performs an I2C transfer as master using the EV interrupt stack and DMA for data stage transfer.
+ * @param pxI2C: pointer to the I2C handle structure
+ * @param pxTransfer: transfer context reference (its Direction field determines the data transfer's direction)
+ * @return BUSY if DMA is in use, OK if transfer is started
+ */
+XPD_ReturnType I2C_eMasterTransfer_DMA(I2C_HandleType * pxI2C, const I2C_TransferType * pxTransfer)
+{
+    XPD_ReturnType eResult;
+    uint32_t ulITs;
+    uint32_t usLength = pxTransfer->Length;
+
+    /* I2C master can only request NBYTES bytes during a transfer */
+    if (usLength > I2C_NBYTES_MASK)
+    {   usLength = I2C_NBYTES_MASK; }
+
+    /* Set up DMA for transfer */
+    if (pxTransfer->Direction == I2C_DIRECTION_WRITE)
+    {
+        eResult = I2C_prvTransmitDMA(pxI2C, pxTransfer->Data, usLength);
+        pxI2C->DataCtrlBits = I2C_MASTER_TX_DMA;
+    }
+    else
+    {
+        eResult = I2C_prvReceiveDMA(pxI2C, pxTransfer->Data, usLength);
+        pxI2C->DataCtrlBits = I2C_MASTER_RX_DMA;
+    }
+
+    if (eResult == XPD_OK)
+    {
+        /* Initialize: set transfer, slave address */
+        pxI2C->Transfers.pMaster = pxTransfer;
+        pxI2C->Inst->CR2.b.SADD = pxTransfer->SlaveAddress_10bit;
+
+        if (pxTransfer->CmdSize > 0)
+        {
+            ulITs = I2C_MASTER_TX_ITS;
+            I2C_prvMasterSetCmdStage(pxI2C);
+        }
+        else
+        {
+            ulITs = pxI2C->DataCtrlBits;
+            I2C_prvMasterSetDataStage(pxI2C);
+        }
+
+        /* Enable related interrupts */
+        pxI2C->IRQHandler = (XPD_HandleCallbackType)I2C_prvMasterIRQHandler;
+        SET_BIT(pxI2C->Inst->CR1.w, ulITs);
+    }
+
+    return eResult;
+}
+
 /** @} */
 
 /** @defgroup I2C_Slave_Exported_Functions I2C Slave Exported Functions
@@ -746,7 +976,7 @@ XPD_ReturnType I2C_eSlaveListen(I2C_HandleType * pxI2C, uint8_t ucCmdSize, uint3
         else
         {
             /* Save stream info */
-            pxI2C->Stream.buffer = &pxI2C->Transfers.Slave.Cmd;
+            pxI2C->Stream.buffer = I2C_TRANSFER_CMD(&pxI2C->Transfers.Slave);
             pxI2C->Stream.size   = pxI2C->Transfers.Slave.CmdSize;
 
             /* Clear ADDR flag to start data transfer */
@@ -874,6 +1104,48 @@ void I2C_vSlaveTransferData_IT(I2C_HandleType * pxI2C)
 
     /* Clear ADDR flag to start data transfer */
     I2C_FLAG_CLEAR(pxI2C, ADDR);
+}
+
+/**
+ * @brief Once addressed, performs the slave data transfer based on the values set
+ *        in the listen stage and by the application in @ref I2C_pxSlaveTransferInfo
+ *        using DMA for data transfer.
+ * @param pxI2C: pointer to the I2C handle structure
+ * @return BUSY if DMA is in use, OK if transfer is started
+ */
+XPD_ReturnType I2C_eSlaveTransferData_DMA(I2C_HandleType * pxI2C)
+{
+    XPD_ReturnType eResult;
+
+    /* Set up DMA for transfer */
+    if (pxI2C->Transfers.Slave.Direction == I2C_DIRECTION_WRITE)
+    {
+        eResult = I2C_prvReceiveDMA(pxI2C,
+                pxI2C->Transfers.Slave.Data, pxI2C->Transfers.Slave.Length);
+        pxI2C->DataCtrlBits = I2C_SLAVE_RX_DMA;
+    }
+    else
+    {
+        eResult = I2C_prvTransmitDMA(pxI2C,
+                pxI2C->Transfers.Slave.Data, pxI2C->Transfers.Slave.Length);
+        pxI2C->DataCtrlBits = I2C_SLAVE_TX_DMA;
+    }
+
+    if (eResult == XPD_OK)
+    {
+        /* Set stream context to data */
+        pxI2C->Stream.buffer = pxI2C->Transfers.Slave.Data;
+        pxI2C->Stream.size   = pxI2C->Transfers.Slave.Length;
+        pxI2C->Stream.length = 0;
+
+        pxI2C->IRQHandler = (XPD_HandleCallbackType)I2C_prvSlaveIRQHandler;
+        SET_BIT(pxI2C->Inst->CR1.w, pxI2C->DataCtrlBits);
+
+        /* Clear ADDR flag to start data transfer */
+        I2C_FLAG_CLEAR(pxI2C, ADDR);
+    }
+
+    return eResult;
 }
 
 /** @} */
