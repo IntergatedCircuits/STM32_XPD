@@ -1453,8 +1453,8 @@ __weak void USB_vAllocateEPs(USB_HandleType * pxUSB)
     /* FIFO sizes are in words */
     ulFifoSize = (ulFifoSize + 3) >> 2;
 
-    /* Global RX FIFO according to RM0431: */
-    ulFifoOffset = 10           /* to receive SETUP packets on the control endpoint */
+    /* Global RX FIFO according to trial and error, thanks to defective documentation */
+    ulFifoOffset = 11           /* to receive SETUP packets on the control endpoint */
             + (ulFifoSize + 1)  /* each packet gets status info as well */
             + (ucEpCount * 2)   /* transfer complete status is also stored with the last packet */
             + 1;                /* for Global OUT NAK */
