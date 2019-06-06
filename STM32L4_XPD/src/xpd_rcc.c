@@ -123,7 +123,7 @@ void RCC_vReset(RCC_PositionType ePeriphPos)
     pulRST[ePeriphPos] = 1;
     pulRST[ePeriphPos] = 0;
 #else
-    __IO uint32_t *pulRSTR = &RCC->AHB1RSTR.w;
+    __IO uint32_t *pulRSTR = &RCC->AHB1RSTR.w + PPOS.regIndex;
     SET_BIT  (*pulRSTR, 1 << PPOS.bitIndex);
     CLEAR_BIT(*pulRSTR, 1 << PPOS.bitIndex);
 #endif

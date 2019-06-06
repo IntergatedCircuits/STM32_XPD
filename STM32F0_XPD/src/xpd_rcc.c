@@ -96,7 +96,7 @@ void RCC_vReset(RCC_PositionType ePeriphPos)
     pulRST[ePeriphPos] = 1;
     pulRST[ePeriphPos] = 0;
 #else
-    __IO uint32_t *pulRSTR = &RCC->AHBRSTR.w;
+    __IO uint32_t *pulRSTR = &RCC->AHBRSTR.w + PPOS.regIndex;
 
     if ((ePeriphPos & (~0x1F)) != RCC_POS_AHB)
     {
