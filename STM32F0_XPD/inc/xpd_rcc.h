@@ -129,9 +129,9 @@ typedef uint16_t RCC_PositionType;
 
 /** @addtogroup RCC_Peripheral_Control_Exported_Functions
  * @{ */
-void            RCC_vClockEnable        (RCC_PositionType PeriphPos);
-void            RCC_vClockDisable       (RCC_PositionType PeriphPos);
-void            RCC_vReset              (RCC_PositionType PeriphPos);
+void            RCC_vClockEnable        (RCC_PositionType ePeriphPos);
+void            RCC_vClockDisable       (RCC_PositionType ePeriphPos);
+void            RCC_vReset              (RCC_PositionType ePeriphPos);
 /** @} */
 
 /** @} */
