@@ -152,7 +152,7 @@ typedef union
     struct {
         uint32_t Value;         /*!< Channel initial value */
         union {
-        struct {
+        PACKED(struct) {
         uint32_t : 2;
 #if (TIM_CCMR1_OC1M > 0xFFFF)
         TIM_OutputModeType  Mode : 15;       /*!< Output channel mode */
@@ -167,7 +167,7 @@ typedef union
         FlagStatus          IdleState : 1;   /*!< Output channel idle state */
         FlagStatus          InvIdleState : 1;/*!< Complementary output channel idle state */
         uint32_t : 6;
-        }__packed;
+        };
             uint32_t w; /* Internal use only */
         };
         TIM_ChannelType Number; /*!< Channel number */
@@ -175,14 +175,14 @@ typedef union
     struct {
         uint32_t Value;         /*!< Channel initial value */
         union {
-        struct {
+        PACKED(struct) {
         TIM_InputSourceType Source : 2;      /*!< Specifies the input source */
         ClockDividerType    Prescaler : 2;   /*!< Specifies the input capture prescaler [DIV1..DIV8] */
         uint32_t            Filter : 4;      /*!< Specifies the input capture filter. [0..15] */
         uint32_t : 9;
         TIM_InputEdgeType   EdgePolarity : 2;/*!< Specifies the active edge(s) of the input signal */
         uint32_t : 13;
-        }__packed;
+        };
             uint8_t b[4]; /* Internal use only */
         };
         TIM_ChannelType Number; /*!< Channel number */

@@ -218,6 +218,14 @@ typedef void ( *XPD_HandleCallbackType )    ( void * Handle );
 #endif /* __ALIGN_BEGIN */
 #endif /* __GNUC__ */
 
+#ifndef PACKED
+#if defined (__ICCARM__)
+#define PACKED(X) __packed X
+#else
+#define PACKED(X) X __packed
+#endif
+#endif
+
 #include <xpd_config.h>
 
 #ifdef __cplusplus
