@@ -60,7 +60,7 @@ typedef enum
     SPI_NSS_HARD_INPUT  = 0,                                    /*!< NSS is slave chip select or puts master in slave mode */
     SPI_NSS_HARD_OUTPUT = SPI_CR2_SSOE,                         /*!< Single master node, NSS is disconnected from the pin */
 #ifdef SPI_CR2_NSSP
-    SPI_NSS_HARD_OUTPUT_PULSED = (SPI_CR2_SSOE | SPI_CR2_NSSP), /*!< Single master node, NSS is disconnected from the pin */
+    SPI_NSS_HARD_OUTPUT_PULSED = (SPI_CR2_SSOE | SPI_CR2_NSSP), /*!< Single master node, NSS is pulsed after every data word */
 #endif
 }SPI_NSSType;
 
