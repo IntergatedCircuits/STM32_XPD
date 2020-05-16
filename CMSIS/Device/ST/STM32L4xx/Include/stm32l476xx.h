@@ -25601,7 +25601,7 @@ typedef struct
 #define DEVICE_FLASH_SIZE_kB (*((const uint16_t *)FLASHSIZE_BASE))
 
 /** @brief System Memory Start Address */
-#define SYSTEM_MEMORY_ADDR   ((void *)0x1FFF00000U)
+#define SYSTEM_MEMORY_ADDR   ((void *)0x1FFF0000U)
 
 /**
   * @}
