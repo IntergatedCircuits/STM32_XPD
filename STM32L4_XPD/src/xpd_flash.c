@@ -87,7 +87,7 @@ static void FLASH_prvWriteDWord(uint32_t * pulAddr, DataStreamType * pxStream)
     pxStream->buffer += sizeof(uint32_t);
     *pulAddr = *((uint32_t*)pxStream->buffer);
     pxStream->buffer += sizeof(uint32_t);
-    pxStream->length -= 2;
+    pxStream->length--;
 }
 
 /* Fast programming: if HCLK > 8MHz, in FLASH_FAST_PROGRAM_SIZE alignment */
