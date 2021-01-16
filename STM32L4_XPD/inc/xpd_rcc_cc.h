@@ -99,9 +99,11 @@ typedef struct
                      Permitted values: 2, 4, 6, 8 */
     uint8_t  Q; /*!< Division factor for CLK48 input.
                      Permitted values: 2, 4, 6, 8 */
+#ifdef RCC_PLLCFGR_PLLPEN
     uint8_t  P; /*!< PLL division factor for  SAI clocks.
                      @arg for advanced devices: [2 .. 31]
                      @arg otherwise: 7, 17 */
+#endif
     FunctionalState  State;  /*!< PLL state */
     RCC_OscType      Source; /*!< PLL input source selection. Permitted values:
                                   @arg @ref RCC_OscType::HSI

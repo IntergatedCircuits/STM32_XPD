@@ -31,12 +31,18 @@
 /** @addtogroup RCC_Core_Clocks RCC Core
  * @{ */
 
+#ifdef RCC_PLLCFGR_PLLPEN
+#define PLL_CFGR_PLLxEN (RCC_PLLCFGR_PLLPEN | RCC_PLLCFGR_PLLQEN | RCC_PLLCFGR_PLLREN)
 #ifdef RCC_PLLP_DIV_2_31_SUPPORT
 #define RCC_SET_PLLP_CFG(PLL_NAME,VALUE)     \
     (RCC->PLL_NAME##CFGR.b.PLL_NAME##PDIV = (VALUE))
 #else
 #define RCC_SET_PLLP_CFG(PLL_NAME,VALUE)     \
     (RCC_REG_BIT(PLL_NAME##CFGR,PLL_NAME##P) = ((VALUE) == 7) ? 0 : 1)
+#endif
+#else
+#define PLL_CFGR_PLLxEN (RCC_PLLCFGR_PLLQEN | RCC_PLLCFGR_PLLREN)
+#define RCC_SET_PLLP_CFG(PLL_NAME,VALUE)
 #endif
 
 static const uint8_t rcc_aucMsiTable[] =
@@ -486,8 +492,7 @@ XPD_ReturnType RCC_ePLL_Config(const RCC_PLL_InitType * pxConfig)
             {
                 RCC->PLLCFGR.b.PLLSRC = 0;
             }
-            CLEAR_BIT(RCC->PLLCFGR.w,
-                RCC_PLLCFGR_PLLPEN | RCC_PLLCFGR_PLLQEN | RCC_PLLCFGR_PLLREN);
+            CLEAR_BIT(RCC->PLLCFGR.w, PLL_CFGR_PLLxEN);
 
             /* Wait until PLL is ready */
             eResult = XPD_eWaitForMatch(&RCC->CR.w,

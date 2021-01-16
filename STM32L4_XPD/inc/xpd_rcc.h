@@ -127,6 +127,7 @@ typedef uint16_t RCC_PositionType;
 #define RCC_POS_OSPI2           (RCC_POS_AHB3  +  9)
 #define RCC_POS_OSPIM           (RCC_POS_AHB2  + 20)
 #define RCC_POS_OTG_FS          (RCC_POS_AHB2  + 12)
+#define RCC_POS_PKA             (RCC_POS_AHB2  + 15)
 #define RCC_POS_PWR             (RCC_POS_APB11 + 28)
 #define RCC_POS_QSPI            (RCC_POS_AHB3  +  8)
 #define RCC_POS_RNG             (RCC_POS_AHB2  + 18)
@@ -138,6 +139,7 @@ typedef uint16_t RCC_PositionType;
 #else
 #define RCC_POS_SDMMC1          (RCC_POS_AHB2  + 22)
 #endif
+#define RCC_POS_SDMMC2          (RCC_POS_AHB2  + 23)
 #define RCC_POS_SPI1            (RCC_POS_APB2  + 12)
 #define RCC_POS_SPI2            (RCC_POS_APB11 + 14)
 #define RCC_POS_SPI3            (RCC_POS_APB11 + 15)
