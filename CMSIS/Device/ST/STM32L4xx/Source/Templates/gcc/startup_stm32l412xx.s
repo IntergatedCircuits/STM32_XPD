@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * @file      startup_stm32l432xx.s
+  * @file      startup_stm32l412xx.s
   * @author    MCD Application Team
-  * @brief     STM32L432xx devices vector table for GCC toolchain.
+  * @brief     STM32L412xx devices vector table for GCC toolchain.
   *            This module performs:
   *                - Set the initial SP
   *                - Set the initial PC == Reset_Handler,
@@ -15,7 +15,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics.
+  * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics.
   * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under Apache License, Version 2.0,
@@ -163,11 +163,11 @@ g_pfnVectors:
 	.word	DMA1_Channel5_IRQHandler
 	.word	DMA1_Channel6_IRQHandler
 	.word	DMA1_Channel7_IRQHandler
-	.word	ADC1_IRQHandler
-	.word	CAN1_TX_IRQHandler
-	.word	CAN1_RX0_IRQHandler
-	.word	CAN1_RX1_IRQHandler
-	.word	CAN1_SCE_IRQHandler
+	.word	ADC1_2_IRQHandler
+	.word	0
+	.word	0
+	.word	0
+	.word	0
 	.word	EXTI9_5_IRQHandler
 	.word	TIM1_BRK_TIM15_IRQHandler
 	.word	TIM1_UP_TIM16_IRQHandler
@@ -178,13 +178,13 @@ g_pfnVectors:
 	.word	0
 	.word	I2C1_EV_IRQHandler
 	.word	I2C1_ER_IRQHandler
-	.word	0
-	.word	0
+	.word	I2C2_EV_IRQHandler
+	.word	I2C2_ER_IRQHandler
 	.word	SPI1_IRQHandler
-	.word	0
+	.word	SPI2_IRQHandler
 	.word	USART1_IRQHandler
 	.word	USART2_IRQHandler
-	.word	0
+	.word	USART3_IRQHandler
 	.word	EXTI15_10_IRQHandler
 	.word	RTC_Alarm_IRQHandler
 	.word	0
@@ -196,11 +196,11 @@ g_pfnVectors:
 	.word	0
 	.word	0
 	.word	0
-	.word	SPI3_IRQHandler
 	.word	0
 	.word	0
-	.word	TIM6_DAC_IRQHandler
-	.word	TIM7_IRQHandler
+	.word	0
+	.word	TIM6_IRQHandler
+	.word	0
 	.word	DMA2_Channel1_IRQHandler
 	.word	DMA2_Channel2_IRQHandler
 	.word	DMA2_Channel3_IRQHandler
@@ -219,9 +219,9 @@ g_pfnVectors:
 	.word	QUADSPI_IRQHandler
 	.word	I2C3_EV_IRQHandler
 	.word	I2C3_ER_IRQHandler
-	.word	SAI1_IRQHandler
 	.word	0
-	.word	SWPMI1_IRQHandler
+	.word	0
+	.word	0
 	.word	TSC_IRQHandler
 	.word	0
 	.word	0
@@ -319,20 +319,8 @@ g_pfnVectors:
 	.weak	DMA1_Channel7_IRQHandler
 	.thumb_set DMA1_Channel7_IRQHandler,Default_Handler
 
-	.weak	ADC1_IRQHandler
-	.thumb_set ADC1_IRQHandler,Default_Handler
-
-	.weak	CAN1_TX_IRQHandler
-	.thumb_set CAN1_TX_IRQHandler,Default_Handler
-
-	.weak	CAN1_RX0_IRQHandler
-	.thumb_set CAN1_RX0_IRQHandler,Default_Handler
-
-	.weak	CAN1_RX1_IRQHandler
-	.thumb_set CAN1_RX1_IRQHandler,Default_Handler
-
-	.weak	CAN1_SCE_IRQHandler
-	.thumb_set CAN1_SCE_IRQHandler,Default_Handler
+	.weak	ADC1_2_IRQHandler
+	.thumb_set ADC1_2_IRQHandler,Default_Handler
 
 	.weak	EXTI9_5_IRQHandler
 	.thumb_set EXTI9_5_IRQHandler,Default_Handler
@@ -358,8 +346,17 @@ g_pfnVectors:
 	.weak	I2C1_ER_IRQHandler
 	.thumb_set I2C1_ER_IRQHandler,Default_Handler
 
+	.weak	I2C2_EV_IRQHandler
+	.thumb_set I2C2_EV_IRQHandler,Default_Handler
+
+	.weak	I2C2_ER_IRQHandler
+	.thumb_set I2C2_ER_IRQHandler,Default_Handler
+
 	.weak	SPI1_IRQHandler
 	.thumb_set SPI1_IRQHandler,Default_Handler
+
+	.weak	SPI2_IRQHandler
+	.thumb_set SPI2_IRQHandler,Default_Handler
 
 	.weak	USART1_IRQHandler
 	.thumb_set USART1_IRQHandler,Default_Handler
@@ -367,20 +364,17 @@ g_pfnVectors:
 	.weak	USART2_IRQHandler
 	.thumb_set USART2_IRQHandler,Default_Handler
 
+	.weak	USART3_IRQHandler
+	.thumb_set USART3_IRQHandler,Default_Handler
+
 	.weak	EXTI15_10_IRQHandler
 	.thumb_set EXTI15_10_IRQHandler,Default_Handler
 
 	.weak	RTC_Alarm_IRQHandler
 	.thumb_set RTC_Alarm_IRQHandler,Default_Handler
 
-	.weak	SPI3_IRQHandler
-	.thumb_set SPI3_IRQHandler,Default_Handler
-
-	.weak	TIM6_DAC_IRQHandler
-	.thumb_set TIM6_DAC_IRQHandler,Default_Handler
-
-	.weak	TIM7_IRQHandler
-	.thumb_set TIM7_IRQHandler,Default_Handler
+	.weak	TIM6_IRQHandler
+	.thumb_set TIM6_IRQHandler,Default_Handler
 
 	.weak	DMA2_Channel1_IRQHandler
 	.thumb_set DMA2_Channel1_IRQHandler,Default_Handler
@@ -425,13 +419,7 @@ g_pfnVectors:
 	.thumb_set I2C3_EV_IRQHandler,Default_Handler	
 	
 	.weak	I2C3_ER_IRQHandler
-	.thumb_set I2C3_ER_IRQHandler,Default_Handler	
-	
-	.weak	SAI1_IRQHandler
-	.thumb_set SAI1_IRQHandler,Default_Handler
-	
-	.weak	SWPMI1_IRQHandler
-	.thumb_set SWPMI1_IRQHandler,Default_Handler
+	.thumb_set I2C3_ER_IRQHandler,Default_Handler
 	
 	.weak	TSC_IRQHandler
 	.thumb_set TSC_IRQHandler,Default_Handler
